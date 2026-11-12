@@ -1561,17 +1561,7 @@ function draw() {
 function placeStamp(c, r, t, ox = 0, oy = 0) {
   const m = curMap(), w = tileW(t), h = tileH(t), pw = brushRotation % 2 ? h : w, ph = brushRotation % 2 ? w : h;
   if (c >= COLS || r >= ROWS || c + pw <= 0 || r + ph <= 0) { setStatus('放不下：整張圖都在地圖外', '#ff8f8f'); return; }   // 允許超出邊緣（大圖純外觀），只要有一格落在地圖內就能放
-  // 只移除「同一圖層」上跟新圖重疊超過一半的圖（不同層可疊放；靠得很近、只碰到一點邊的保留）
-  const nx = c * CELL + ox, ny = r * CELL + oy, nw = pw * CELL, nh = ph * CELL;
-  m.stamps = m.stamps.filter(s => {
-    if ((s.layer || 'top') !== activeLayer) return true;
-    const st = tileById(s.id) || {}, sx = s.c * CELL + (s.ox || 0), sy = s.r * CELL + (s.oy || 0), sw = stampW(s, st) * CELL, sh = stampH(s, st) * CELL;
-    const ow = Math.min(nx + nw, sx + sw) - Math.max(nx, sx), oh = Math.min(ny + nh, sy + sh) - Math.max(ny, sy);
-    if (ow <= 0 || oh <= 0) return true;
-    return ow * oh <= Math.min(nw * nh, sw * sh) / 2;
-  });
-  // 1×1 小圖翻轉後改用 stamp 儲存，先移除同格同層的普通小圖。
-    if (w === 1 && h === 1) delete m.layers[activeLayer][c + ',' + r];
+  // 新的圖直接疊上去，底下（同一圖層）原本的圖都留著；不要的請用橡皮擦一張一張擦（由上往下）
   const st = { id: t.id, c, r, layer: activeLayer };
   if (ox) st.ox = ox;
   if (oy) st.oy = oy;
@@ -1586,6 +1576,9 @@ function placeStamp(c, r, t, ox = 0, oy = 0) {
     st.baseDepth = brushFlip.fy ? ph - defaultDepth : defaultDepth;
     st.baseSolid = rotateBaseCells(clone(t.baseSolid || []), w, h, brushRotation).map(([dc, dr]) => [brushFlip.fx ? pw - 1 - dc : dc, brushFlip.fy ? ph - 1 - dr : dr]);
   }
+  // 拖曳時同一個位置會一直觸發：一模一樣的圖已經在這裡，就不要重複疊
+  const same = s => ['id', 'c', 'r', 'layer', 'ox', 'oy', 'fx', 'fy', 'rot', 'scale', 'angle'].every(k => (s[k] || (k === 'layer' ? 'top' : 0)) === (st[k] || (k === 'layer' ? 'top' : 0)));
+  if (m.stamps.some(same)) return;
   m.stamps.push(st);
   checkResult = null; saveMaps(); draw();
 }
@@ -1683,8 +1676,10 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (isBig(t)) { if (isDown) placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 大圖：只在按下時放一張
     if (brushFlip.fx || brushFlip.fy || brushRotation || brushScale !== 100 || brushAngle) { placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 轉向小圖：以 1×1 stamp 保存方向
     if (isObjectLayer(activeLayer) && (pos.ox || pos.oy)) { placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 物件圖層的小圖：沒對齊格線就存成可微調的物件
-    // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
-    m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
+    // 這格這層已經有別的圖：新的圖改成疊在上面的物件，底下原本的圖留著（地板圖層照舊直接換掉，免得整片地板疊好幾層）
+    const had = m.layers[activeLayer][key];
+    if (had === brush.tile) return;   // 同一張圖已經在這裡
+    if (had && activeLayer !== 'floor') { placeStamp(c, r, t, 0, 0); return; }
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
   } else if (brush.mode === 'solid' && solidSize > 1) {
     // 🧱 2×2／3×3 筆刷：滑鼠那格是左上角，一次畫（或擦）整塊；按下的那格本來沒紅格＝畫，有紅格＝擦，拖曳時照同一個動作
@@ -2544,19 +2539,33 @@ const isPlantTile = t => /plant/i.test(String(t.id || '') + ' ' + String(t.file 
 const isChairTile = t => /chair|stool|bench|sofa|couch|seat/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /椅|沙發|凳/.test(String(t.name || ''));
 // 燈：名稱有「燈」，或 id／檔名是燈（只寫 light 不算，因為樓梯、海報、牆面的檔名也可能有 light，意思是淺色或月光）
 const isLampTile = t => /lamp|lantern|lightbox|(search|camping[ _-]|electric[_-]|elevator[_-]|ceiling[_-]|traffic[_-])light/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /燈/.test(String(t.name || ''));
+// 戰鬥地圖裡可以互動的道具：素材面板一律放「互動與道具」（照遊戲認這些道具的規則）
+//  ・販賣機（js/shop.js）：id 或檔名有 vending
+//  ・扭蛋機（data/costumes.js 的 GACHA.machineTiles）、夾娃娃機（data/claw-machine.js 的 CLAW_MACHINE.tiles）：遊戲也認「名稱有扭蛋機／夾娃娃機」的素材
+//  ・置物櫃（js/storage-cabinet.js 的 STORAGE_CABINETS）、置物箱（js/storage-lockers.js）
+//  ・物資箱（js/camp-supply.js 的 CAMP_SUPPLY.box、boxSkins：一般版和池核版）
+//  ・彈藥箱（js/flare.js 的 AMMO_CRATE：能打開的；AMMO_REFILL：打開的、補子彈）、裝備箱（js/backpack.js 的 ARMOR_CHEST：ammo-crate02），含池核版；遊戲也照圖檔認，這裡一樣照圖檔。開過後的空箱不能互動，不算
+//  （id 開頭是 tile_interactive_ 的素材照原本的規則：沒被分進植栽、椅子、燈、收納的也會放「互動與道具」）
+//  遊戲新增可以互動的道具時，把素材 id 加進 INTERACTIVE_PROP_IDS（或照上面的規則取名）
+const INTERACTIVE_PROP_IDS = new Set(['tile_street_capsule_toy_machines', 'tile_street_claw_machine', 'tile_prop_shelf_locker_unit_02', 'tile_interactive_storage_locker', 'tile_interactive_storage_locker_open',
+  'tile_field_ammo_crate', 'tile_poolcore_ammo_crate', 'tile_field_ammo_crate_open', 'tile_mvotgy7w', 'tile_mvma4ws7', 'tile_mvotwe6t',
+  'tile_field_supply_box', 'tile_mvot2yuu']);
+const INTERACTIVE_PROP_FILES = /\/(ammo-crate|Poolcore_ammo-crate|ammo-crate-open(-02)?|Poolcore_ammo-crate-open|ammo-crate02|Poolcore_ammo_crate02)\.png$/i;   // 彈藥箱、裝備箱的圖檔（用「加入磚塊」重加一次同一張圖也認得）
+const isInteractivePropTile = t => INTERACTIVE_PROP_IDS.has(t.id) || INTERACTIVE_PROP_FILES.test(String(t.file || '').replace(/\\/g, '/'))
+  || /vending/.test(String(t.id || '')) || String(t.file || '').toLowerCase().includes('vending-machine') || /扭蛋機|夾娃娃機/.test(String(t.name || ''));
 // 池核的素材不分進椅子、燈，一律留在「池核」
 const isPoolcoreTile = t => { const f = String(t.file || '').replace(/\\/g, '/').toLowerCase(); return String(t.id || '').startsWith('tile_poolcore_') || f.includes('/池核/') || f.includes('/poolcore/'); };
 function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_forestblue_') || String(t.file || '').includes('/森林藍/')) return 'forestblue';   // 森林（藍）：images/森林藍 整個資料夾
   if (String(t.id || '').startsWith('tile_forest_') || String(t.file || '').includes('/森林/')) return 'forest';   // 森林：整個資料夾都放這一類（不管檔名）
   if (String(t.id || '').startsWith('tile_delin_') || String(t.file || '').includes('/德林小屋/')) return 'delin';   // 德林小屋：整個資料夾都放這一類（椅子也不分去「椅子」）
+  if (isInteractivePropTile(t)) return 'interactive';   // 戰鬥地圖裡可以互動的道具：先分走，不留在收納、街道等類別
   if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
   if (isPlantTile(t)) return 'plant';
   if (isChairTile(t) && !isPoolcoreTile(t)) return 'chair';
   if (isLampTile(t) && !isPoolcoreTile(t)) return 'lamp';
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
-  if (/vending/.test(String(t.id || '')) || file.includes('vending-machine')) return 'interactive';   // 販賣機（紅、綠、紫）：可以互動（js/shop.js）
   if (t.systemColor) return 'color';
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
   if (String(t.id || '').startsWith('tile_poolcore_') || file.includes('/池核/') || file.includes('/poolcore/')) return 'poolcore';
@@ -3317,10 +3326,10 @@ function refreshSelPanel() {
   }
   refreshBaseCollisionPanel();
 }
+// 移到別的圖層：目標圖層鎖著也可以移過去（鎖定只擋貼圖、擦除、選取，不擋「把東西放進去」）；
+// 移進鎖住圖層的物件會繼續選著，所以可以接著再用上移／下移或圖層選單換到別層
 function moveSelectionToLayer(newLayerId) {
   if (!selections.length || !newLayerId) return;
-  if (isLockedLayer(newLayerId)) { setStatus('「' + layerName(newLayerId) + '」已鎖定，不能把物件移過去（先按 🔒 解鎖）', '#ffd24a'); refreshSelPanel(); return; }
-  if (dropLockedSelections('搬移')) return;
   pushUndo(); const m = curMap();
   selections = selections.map(sel => {
     if (sel.type === 'stamp') { const s = m.stamps[sel.index]; if (s) s.layer = newLayerId; return sel; }
@@ -3329,7 +3338,7 @@ function moveSelectionToLayer(newLayerId) {
   });
   selection = selections[selections.length - 1];
   saveMaps(); draw(); refreshSelPanel();
-  setStatus('已把 ' + selections.length + ' 個物件移到「' + layerName(newLayerId) + '」', '#7ee0c0');
+  setStatus('已把 ' + selections.length + ' 個物件移到「' + layerName(newLayerId) + '」' + (isLockedLayer(newLayerId) ? '（這個圖層鎖著：取消選取後要先按 🔒 解鎖才選得回來）' : ''), '#7ee0c0');
 }
 function moveSelBy(d) { const cur = selLayerId(); if (cur == null) { setStatus('不同圖層的多選物件請用圖層選單移動', '#ffd24a'); return; } let i = LAYERS.findIndex(l => l.id === cur); i = Math.max(0, Math.min(LAYERS.length - 1, i + d)); moveSelectionToLayer(LAYERS[i].id); }
 function deleteSelection() {

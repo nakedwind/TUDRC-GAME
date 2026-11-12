@@ -12676,9 +12676,7 @@ const BATTLE_MAPS = [
       "ground2": {},
       "object": {},
       "top": {},
-      "ground4": {
-        "10,31": "tile_mvpj60hi"
-      },
+      "ground4": {},
       "object6": {},
       "object5": {},
       "object8": {},
@@ -12686,1412 +12684,1454 @@ const BATTLE_MAPS = [
       "object11": {},
       "object12": {},
       "object13": {},
-      "object14": {}
+      "object14": {},
+      "object7": {},
+      "object10": {},
+      "object15": {},
+      "object16": {},
+      "object17": {}
     },
     "stamps": [
       {
         "id": "tile_mvofs5nu",
-        "c": 2,
+        "c": 3,
         "r": 41,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 19,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 22,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 30,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 36,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 39,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 42,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 45,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 48,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 48,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 31,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 34,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 37,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 25,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 28,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 18,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 21,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 24,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 30,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 27,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 30,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 30,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 15,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 18,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 21,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 24,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 30,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 33,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 13,
         "r": 30,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 17,
         "r": 33,
         "layer": "ground4",
         "ox": 32
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 33,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 16,
-        "r": 36,
-        "layer": "ground4",
-        "ox": 32
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 18,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 21,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 24,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 30,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 33,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 36,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 0,
-        "r": 39,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 0,
-        "r": 42,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 0,
-        "r": 45,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 0,
-        "r": 48,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 3,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 3,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 3,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 3,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 6,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 9,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 6,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 9,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 6,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 9,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 6,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 9,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 12,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 12,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 12,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 12,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 15,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 15,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 18,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 18,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 21,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 21,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 24,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 24,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 30,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 33,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 36,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 30,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 33,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 36,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 36,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 15,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 18,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 21,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 24,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 30,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 33,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 33,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 30,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 24,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 21,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 18,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 15,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 18,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 21,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 24,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 18,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 21,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 24,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 27,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 27,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 33,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 33,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 18,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 18,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 18,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 18,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 21,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 21,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 21,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 24,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 24,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 24,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 27,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 27,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 27,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 33,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 33,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 33,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 21,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 24,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 27,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 33,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 39,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_mvocpp0c",
         "c": 4,
         "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 17,
+        "r": 36,
+        "layer": "ground4",
+        "ox": 32
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 39,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 42,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 45,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 48,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 33,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 33,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 33,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 33,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 33,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 33,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 33,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 36,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 45,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 42,
+        "r": 48,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 5,
+        "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 6,
+        "c": 7,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 8,
+        "c": 9,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 0,
+        "c": 1,
+        "r": 36,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": -1,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 12,
+        "c": 13,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 10,
+        "c": 11,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoe808h",
-        "c": 1,
+        "c": 2,
         "r": 39,
         "layer": "object6",
         "baseSolid": [
@@ -14205,7 +14245,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_camp_bed",
-        "c": 9,
+        "c": 10,
         "r": 44,
         "layer": "object6",
         "oy": 10,
@@ -14213,7 +14253,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_camp_bed",
-        "c": 7,
+        "c": 8,
         "r": 44,
         "layer": "object6",
         "oy": 10,
@@ -14221,7 +14261,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvot2yuu",
-        "c": 6,
+        "c": 7,
         "r": 41,
         "layer": "object6",
         "ox": 30,
@@ -14229,14 +14269,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvotgy7w",
-        "c": 8,
+        "c": 9,
         "r": 41,
         "layer": "object6",
         "oy": 30
       },
       {
         "id": "tile_mvotwe6t",
-        "c": 9,
+        "c": 10,
         "r": 41,
         "layer": "object6",
         "ox": 22,
@@ -14244,113 +14284,73 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 22,
+        "c": 23,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 16,
+        "c": 17,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 18,
+        "c": 19,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 20,
+        "c": 21,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 14,
+        "c": 15,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvobex5o",
-        "c": 21,
+        "c": 22,
         "r": 38,
-        "layer": "object6",
+        "layer": "object10",
         "sortDepth": 1.5
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 13,
+        "c": 14,
         "r": 35,
         "layer": "object6",
         "ox": 30,
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 2,
+        "c": 3,
         "r": 36,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 1,
+        "c": 2,
         "r": 35,
         "layer": "object6",
         "ox": 20,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvxf5so7",
-        "c": 14,
-        "r": 5,
-        "layer": "object11",
-        "ox": 20,
-        "sortDepth": 7.5
-      },
-      {
-        "id": "tile_mvxgf9gt",
-        "c": 27,
-        "r": 4,
-        "layer": "object11",
-        "ox": 20,
         "oy": 30
       },
       {
-        "id": "tile_mvxgf9gt",
-        "c": 13,
-        "r": 4,
-        "layer": "object11",
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 13,
-        "r": 6,
-        "layer": "object11",
-        "ox": 20,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 27,
-        "r": 6,
-        "layer": "object11",
-        "ox": 20,
-        "oy": 24
-      },
-      {
         "id": "tile_mvxf5so7",
-        "c": 14,
-        "r": 7,
+        "c": 16,
+        "r": 8,
         "layer": "object11",
         "ox": 20,
         "oy": 30,
@@ -14358,124 +14358,89 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvxgf9gt",
-        "c": 27,
-        "r": 7,
-        "layer": "object11",
-        "ox": 20,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvxgf9gt",
-        "c": 13,
-        "r": 7,
+        "c": 15,
+        "r": 8,
         "layer": "object11",
         "ox": 20,
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
-        "r": 9,
+        "c": 15,
+        "r": 10,
         "layer": "object11",
         "ox": 20,
         "oy": 4
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
-        "r": 11,
+        "c": 15,
+        "r": 12,
         "layer": "object11",
         "oy": 4,
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
-        "r": 13,
+        "c": 15,
+        "r": 14,
         "layer": "object11",
         "oy": 4,
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
-        "r": 15,
+        "c": 15,
+        "r": 16,
         "layer": "object11",
         "oy": 4,
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 27,
-        "r": 9,
-        "layer": "object11",
-        "oy": 14,
-        "ox": 20
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 27,
+        "c": 30,
         "r": 11,
         "layer": "object11",
         "oy": 14,
-        "ox": 20
-      },
-      {
-        "id": "tile_mvxgf9gt",
-        "c": 14,
-        "r": 15,
-        "layer": "object11",
-        "ox": 30,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 14,
-        "r": 17,
-        "layer": "object11",
-        "ox": 30,
-        "oy": 24
+        "ox": -1.333333
       },
       {
         "id": "tile_mvodgug9",
-        "c": 32,
-        "r": 28,
+        "c": 36,
+        "r": 31,
         "layer": "object",
-        "oy": 20,
-        "ox": 20
+        "oy": 10,
+        "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 28,
+        "r": 31,
         "layer": "object",
-        "oy": 20,
-        "ox": 20
+        "oy": 10,
+        "ox": 10
       },
       {
         "id": "tile_mvxf5so7",
-        "c": 36,
-        "r": 9,
-        "layer": "object11",
-        "sortDepth": 7.25
-      },
-      {
-        "id": "tile_mvxgf9gt",
-        "c": 35,
-        "r": 8,
-        "layer": "object11",
-        "oy": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 35,
-        "r": 10,
-        "layer": "object11",
-        "oy": 24
+        "c": 52,
+        "r": 23,
+        "layer": "object13",
+        "sortDepth": 7.25,
+        "oy": 30,
+        "ox": 30
       },
       {
         "id": "tile_mvxf5so7",
-        "c": 1,
+        "c": 38,
+        "r": 23,
+        "layer": "object13",
+        "sortDepth": 7.25,
+        "oy": 30,
+        "ox": 31.333333
+      },
+      {
+        "id": "tile_mvxf5so7",
+        "c": 2,
         "r": 10,
         "layer": "object5",
         "sortDepth": 7.25,
@@ -14484,7 +14449,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 17,
+        "c": 18,
         "r": 28,
         "layer": "object",
         "oy": 20,
@@ -14493,7 +14458,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 19,
+        "c": 20,
         "r": 28,
         "layer": "object",
         "oy": 20,
@@ -14502,7 +14467,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvodgug9",
-        "c": 23,
+        "c": 24,
         "r": 28,
         "layer": "object",
         "oy": 20,
@@ -14510,7 +14475,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 21,
+        "c": 22,
         "r": 28,
         "layer": "object",
         "oy": 20,
@@ -14518,7 +14483,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 27,
+        "c": 28,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -14526,14 +14491,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 16,
+        "c": 17,
         "r": 27,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 24,
+        "c": 25,
         "r": 27,
         "layer": "object",
         "ox": 30,
@@ -14541,43 +14506,76 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 16,
+        "c": 17,
         "r": 35,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 16,
+        "c": 17,
         "r": 33,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 16,
+        "c": 17,
         "r": 31,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 16,
+        "c": 17,
         "r": 29,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 24,
+        "c": 25,
         "r": 29,
         "layer": "object",
         "ox": 30,
         "oy": 30
       },
       {
+        "id": "tile_mwdkb1l7",
+        "c": 19,
+        "r": 33,
+        "layer": "object",
+        "oy": 6.666667,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 20,
+        "r": 33,
+        "layer": "object",
+        "oy": 6.666667,
+        "ox": 8,
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 35,
+        "layer": "object",
+        "ox": 32,
+        "oy": 8
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 35,
+        "layer": "object",
+        "ox": 32,
+        "oy": 8
+      },
+      {
         "id": "tile_mvp8n5zs",
-        "c": 9,
+        "c": 10,
         "r": 37,
         "layer": "top",
         "oy": 20,
@@ -14585,7 +14583,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvp8nxz4",
-        "c": 9,
+        "c": 10,
         "r": 37,
         "layer": "top",
         "oy": 20,
@@ -14594,56 +14592,56 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvph1jix",
-        "c": 9,
+        "c": 10,
         "r": 47,
         "layer": "object8",
         "ox": 20
       },
       {
         "id": "tile_mvph1tds",
-        "c": 13,
+        "c": 14,
         "r": 47,
         "layer": "object8",
         "ox": 12
       },
       {
         "id": "tile_mvph1odn",
-        "c": 11,
+        "c": 12,
         "r": 47,
         "layer": "object8",
         "ox": 20
       },
       {
         "id": "tile_mvph143o",
-        "c": 9,
+        "c": 10,
         "r": 49,
         "layer": "object8",
         "ox": 20
       },
       {
         "id": "tile_mvph19b4",
-        "c": 11,
+        "c": 12,
         "r": 49,
         "layer": "object8",
         "ox": 20
       },
       {
         "id": "tile_mvph1e62",
-        "c": 13,
+        "c": 14,
         "r": 49,
         "layer": "object8",
         "ox": 12
       },
       {
         "id": "tile_mvpj1fdy",
-        "c": 9,
+        "c": 10,
         "r": 47,
         "layer": "object8",
         "ox": 20
       },
       {
         "id": "tile_mvpj53ld",
-        "c": 11,
+        "c": 12,
         "r": 47,
         "layer": "object8",
         "ox": 20,
@@ -14651,27 +14649,30 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvpj60hi",
-        "c": 12,
+        "c": 13,
         "r": 47,
         "layer": "object8",
         "ox": 20
       },
       {
         "id": "tile_poolcore_life_ring_blue",
-        "c": 13,
-        "r": 48,
-        "layer": "object8"
+        "c": 51,
+        "r": 28,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 10
       },
       {
         "id": "tile_poolcore_life_ring_red",
-        "c": 14,
-        "r": 47,
-        "layer": "object8",
-        "oy": 20
+        "c": 52,
+        "r": 27,
+        "layer": "object15",
+        "oy": 30,
+        "ox": 20
       },
       {
         "id": "tile_mvquvyy8",
-        "c": 9,
+        "c": 10,
         "r": 47,
         "layer": "object8",
         "ox": 20,
@@ -14679,42 +14680,26 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvqv5agz",
-        "c": 10,
-        "r": 48,
-        "layer": "object8",
-        "ox": 30,
-        "oy": 10
+        "c": 32,
+        "r": 32,
+        "layer": "object16",
+        "oy": 20
       },
       {
         "id": "tile_mvqyrysf",
-        "c": 11,
-        "r": 48,
-        "layer": "object8",
-        "ox": 30,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr11rba",
-        "c": 15,
-        "r": 47,
-        "layer": "object8",
-        "ox": 20
+        "c": 55,
+        "r": 35,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20
       },
       {
         "id": "tile_mvr11zmd",
-        "c": 17,
-        "r": 47,
-        "layer": "object8",
-        "ox": 10
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 17,
-        "r": 32,
-        "layer": "object",
-        "oy": 10,
-        "ox": 30,
-        "sortDepth": 0
+        "c": 39,
+        "r": 27,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 22.666667
       },
       {
         "id": "tile_mvr32pqo",
@@ -14722,12 +14707,21 @@ const BATTLE_MAPS = [
         "r": 32,
         "layer": "object",
         "oy": 10,
+        "ox": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 19,
+        "r": 32,
+        "layer": "object",
+        "oy": 10,
         "ox": 6,
         "sortDepth": 0
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 17,
+        "c": 18,
         "r": 33,
         "layer": "object",
         "ox": 16,
@@ -14735,16 +14729,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 22,
+        "c": 23,
         "r": 33,
         "layer": "object",
-        "ox": 6,
+        "ox": 2,
         "oy": 6,
         "sortDepth": 0
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 20,
+        "c": 21,
         "r": 32,
         "layer": "object",
         "oy": 10,
@@ -14753,7 +14747,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 20,
+        "c": 21,
         "r": 34,
         "layer": "object",
         "oy": 30,
@@ -14762,16 +14756,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 22,
+        "c": 23,
         "r": 32,
         "layer": "object",
         "oy": 10,
         "sortDepth": 0,
-        "ox": 10
+        "ox": 6
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 18,
+        "c": 19,
         "r": 34,
         "layer": "object",
         "oy": 30,
@@ -14779,7 +14773,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 17,
+        "c": 18,
         "r": 34,
         "layer": "object",
         "ox": 20,
@@ -14788,7 +14782,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 20,
+        "c": 21,
         "r": 34,
         "layer": "object",
         "oy": 30,
@@ -14796,7 +14790,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 18,
+        "c": 19,
         "r": 31,
         "layer": "object",
         "ox": 20,
@@ -14805,16 +14799,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 22,
+        "c": 23,
         "r": 34,
         "layer": "object",
         "oy": 30,
         "sortDepth": 0,
-        "ox": 10
+        "ox": 6
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 17,
+        "c": 18,
         "r": 32,
         "layer": "object",
         "ox": 20,
@@ -14823,21 +14817,49 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_life_ring_blue",
-        "c": 22,
+        "c": 23,
         "r": 30,
-        "layer": "object",
+        "layer": "object16",
         "oy": 30
       },
       {
         "id": "tile_poolcore_life_ring_red",
-        "c": 20,
+        "c": 21,
         "r": 30,
-        "layer": "object",
+        "layer": "object16",
         "ox": 30
       },
       {
         "id": "tile_mvph1jix",
-        "c": 20,
+        "c": 21,
+        "r": 43,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 56,
+        "r": 38,
+        "layer": "object7",
+        "ox": 16,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 58,
+        "r": 37,
+        "layer": "object7",
+        "ox": 13.333333,
+        "sortDepth": 0,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 23,
         "r": 43,
         "layer": "object6",
         "oy": 30,
@@ -14846,16 +14868,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvph1tds",
-        "c": 22,
-        "r": 43,
-        "layer": "object6",
-        "oy": 30,
-        "ox": 6,
-        "sortDepth": 0
+        "c": 58,
+        "r": 37,
+        "layer": "object7",
+        "ox": 16,
+        "sortDepth": 0,
+        "oy": 10
       },
       {
         "id": "tile_mvph143o",
-        "c": 20,
+        "c": 21,
         "r": 45,
         "layer": "object6",
         "oy": 30,
@@ -14864,7 +14886,25 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvph1e62",
-        "c": 22,
+        "c": 58,
+        "r": 39,
+        "layer": "object7",
+        "ox": 13.333333,
+        "sortDepth": 0,
+        "fx": true
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 56,
+        "r": 40,
+        "layer": "object7",
+        "ox": 16,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 23,
         "r": 45,
         "layer": "object6",
         "oy": 30,
@@ -14872,8 +14912,41 @@ const BATTLE_MAPS = [
         "sortDepth": 0
       },
       {
+        "id": "tile_mvph1e62",
+        "c": 58,
+        "r": 39,
+        "layer": "object7",
+        "ox": 16,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 58,
+        "r": 40,
+        "layer": "object7",
+        "ox": 16,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
         "id": "tile_poolcore_pillar",
-        "c": 23,
+        "c": 24,
+        "r": 35,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 37,
+        "r": 30,
+        "layer": "object",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 37,
         "r": 35,
         "layer": "object6",
         "ox": 20,
@@ -14881,7 +14954,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 23,
+        "c": 24,
         "r": 37,
         "layer": "object6",
         "oy": 30,
@@ -14889,7 +14962,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 23,
+        "c": 24,
         "r": 39,
         "layer": "object6",
         "oy": 30,
@@ -14897,7 +14970,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 23,
+        "c": 24,
         "r": 41,
         "layer": "object6",
         "oy": 30,
@@ -14905,7 +14978,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 23,
+        "c": 24,
         "r": 43,
         "layer": "object6",
         "oy": 30,
@@ -14913,7 +14986,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 35,
+        "c": 36,
         "r": 45,
         "layer": "object6",
         "ox": 8,
@@ -14921,19 +14994,19 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 27,
+        "c": 28,
         "r": 45,
         "layer": "object6"
       },
       {
         "id": "tile_mvodgug9",
-        "c": 25,
+        "c": 26,
         "r": 45,
         "layer": "object6"
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 23,
+        "c": 24,
         "r": 44,
         "layer": "object6",
         "ox": 20,
@@ -14941,7 +15014,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 20,
+        "c": 21,
         "r": 46,
         "layer": "object6",
         "oy": 10,
@@ -14950,14 +15023,21 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 39,
+        "c": 40,
         "r": 44,
         "layer": "object6",
-        "oy": 10
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 47,
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 30,
+        "c": 31,
         "r": 38,
         "layer": "object6",
         "ox": 20,
@@ -14965,21 +15045,35 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 41,
+        "c": 42,
         "r": 44,
         "layer": "object6",
-        "oy": 10
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 49,
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 37,
+        "c": 38,
         "r": 44,
         "layer": "object6",
-        "oy": 10
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 45,
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 30,
+        "c": 31,
         "r": 44,
         "layer": "object6",
         "oy": 20,
@@ -14987,7 +15081,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 30,
+        "c": 31,
         "r": 42,
         "layer": "object6",
         "oy": 20,
@@ -14995,7 +15089,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 30,
+        "c": 31,
         "r": 40,
         "layer": "object6",
         "oy": 30,
@@ -15003,7 +15097,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 35,
+        "c": 36,
         "r": 44,
         "layer": "object6",
         "oy": 20,
@@ -15011,20 +15105,27 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 29,
+        "c": 30,
         "r": 45,
         "layer": "object6"
       },
       {
         "id": "tile_mvobzfro",
-        "c": 29,
+        "c": 30,
         "r": 46,
-        "layer": "object6",
+        "layer": "object10",
         "oy": 30
       },
       {
+        "id": "tile_mvobzfro",
+        "c": 53,
+        "r": 29,
+        "layer": "object10",
+        "oy": 8
+      },
+      {
         "id": "tile_poolcore_pillar",
-        "c": 30,
+        "c": 31,
         "r": 44,
         "layer": "object6",
         "ox": 20,
@@ -15032,857 +15133,861 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvquvyy8",
-        "c": 11,
+        "c": 12,
         "r": 37,
-        "layer": "object9",
+        "layer": "object17",
         "oy": 20
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 35,
-        "r": 43,
+        "c": 36,
+        "r": 44,
         "layer": "object6",
-        "ox": 20,
-        "oy": 30
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 62,
+        "r": 44,
+        "layer": "object6",
+        "ox": 20
       },
       {
         "id": "tile_mvr3nuyx",
-        "c": 32,
+        "c": 33,
         "r": 47,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 13,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 16,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 51,
+        "c": 52,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 51,
+        "c": 52,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 48,
+        "c": 49,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 48,
+        "c": 49,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 45,
+        "c": 46,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 45,
+        "c": 46,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 42,
+        "c": 43,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 42,
+        "c": 43,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 54,
+        "c": 55,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 54,
+        "c": 55,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 57,
+        "c": 58,
         "r": 15,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 57,
+        "c": 61,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
         "r": 12,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 61,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
         "r": 7,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 10,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 28,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 31,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 34,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 37,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 42,
+        "c": 43,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 42,
+        "c": 43,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 45,
+        "c": 46,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 48,
+        "c": 49,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 51,
+        "c": 52,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 45,
+        "c": 46,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 48,
+        "c": 49,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 51,
+        "c": 52,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 54,
+        "c": 55,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 54,
+        "c": 55,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 57,
+        "c": 58,
         "r": 6,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 57,
+        "c": 61,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
         "r": 9,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 57,
+        "c": 61,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 54,
+        "c": 61,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 51,
+        "c": 55,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 48,
+        "c": 52,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 45,
+        "c": 49,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 42,
+        "c": 46,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 43,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 40,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 37,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 30,
+        "c": 34,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
+        "c": 31,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 28,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 25,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 22,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 19,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 16,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 13,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 10,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 7,
         "r": 3,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 4,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
         "r": 4,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 1,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 21,
+        "c": 22,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 24,
+        "c": 25,
         "r": 0,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 30,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 33,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 36,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 39,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 42,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 0,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_mvxgf9gt",
         "c": 28,
-        "r": 15,
-        "layer": "object11",
-        "ox": 30,
-        "oy": 30
+        "r": 0,
+        "layer": "ground4"
       },
       {
-        "id": "tile_mvoa0cqd",
-        "c": 28,
-        "r": 17,
-        "layer": "object11",
-        "oy": 24,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvxgf9gt",
-        "c": 28,
-        "r": 18,
-        "layer": "object11",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
+        "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 20,
-        "layer": "object11",
-        "oy": 14
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 0,
+        "layer": "ground4"
       },
       {
         "id": "tile_mvxgf9gt",
-        "c": 49,
+        "c": 50,
         "r": 8,
         "layer": "object11",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 49,
+        "c": 50,
         "r": 10,
         "layer": "object11",
         "oy": 24
       },
       {
         "id": "tile_mvxgf9gt",
-        "c": 49,
+        "c": 50,
         "r": 11,
         "layer": "object11",
         "oy": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 49,
+        "c": 50,
         "r": 13,
         "layer": "object11",
         "oy": 14
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 49,
+        "c": 50,
         "r": 15,
         "layer": "object11",
         "oy": 14
       },
       {
-        "id": "tile_mvxgf9gt",
-        "c": 35,
-        "r": 11,
-        "layer": "object11",
-        "oy": 20
-      },
-      {
         "id": "tile_mvqv5agz",
-        "c": 3,
+        "c": 4,
         "r": 15,
         "layer": "object9",
         "ox": 10
       },
       {
         "id": "tile_mvr11rba",
-        "c": 15,
-        "r": 11,
+        "c": 17,
+        "r": 12,
         "layer": "object9",
         "oy": 30
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 16,
-        "r": 14,
+        "c": 18,
+        "r": 15,
         "layer": "object11",
         "ox": 20,
         "sortDepth": 0
       },
       {
         "id": "tile_mvp8n5zs",
-        "c": 7,
+        "c": 8,
         "r": 12,
         "layer": "top",
         "ox": 10
       },
       {
         "id": "tile_mvp8nxz4",
-        "c": 7,
+        "c": 8,
         "r": 12,
         "layer": "top",
         "blend": "hard-light",
@@ -15890,37 +15995,43 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvp8n5zs",
-        "c": 20,
-        "r": 9,
+        "c": 22,
+        "r": 10,
         "layer": "top",
         "ox": 20
       },
       {
         "id": "tile_mvp8nxz4",
-        "c": 20,
-        "r": 9,
+        "c": 22,
+        "r": 10,
         "layer": "top",
         "blend": "hard-light",
         "ox": 20
       },
       {
-        "id": "tile_poolcore_pillar",
-        "c": 27,
-        "r": 10,
-        "layer": "object11",
-        "ox": 20,
-        "oy": 30
-      },
-      {
         "id": "tile_mvobzfro",
-        "c": 17,
-        "r": 12,
-        "layer": "object11",
+        "c": 19,
+        "r": 13,
+        "layer": "object10",
         "oy": 10
       },
       {
+        "id": "tile_mvobzfro",
+        "c": 28,
+        "r": 14,
+        "layer": "object10",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 33,
+        "r": 15,
+        "layer": "object10"
+      },
+      {
         "id": "tile_mvr40sp8",
-        "c": 12,
+        "c": 13,
         "r": 31,
         "layer": "object5",
         "ox": 6,
@@ -15928,7 +16039,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 12,
+        "c": 13,
         "r": 26,
         "layer": "object5",
         "ox": 6,
@@ -15936,7 +16047,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 1,
+        "c": 2,
         "r": 26,
         "layer": "object5",
         "ox": 16,
@@ -15944,14 +16055,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvp8n5zs",
-        "c": 19,
+        "c": 20,
         "r": 29,
         "layer": "top",
         "oy": 30
       },
       {
         "id": "tile_mvp8nxz4",
-        "c": 18,
+        "c": 19,
         "r": 29,
         "layer": "top",
         "blend": "hard-light",
@@ -15960,7 +16071,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 9,
+        "c": 10,
         "r": 28,
         "layer": "object5",
         "ox": 10,
@@ -15968,7 +16079,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 10,
+        "c": 11,
         "r": 28,
         "layer": "object5",
         "ox": 20,
@@ -15976,7 +16087,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 1,
+        "c": 2,
         "r": 28,
         "layer": "object5",
         "ox": 20,
@@ -15984,7 +16095,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 7,
+        "c": 8,
         "r": 28,
         "layer": "object5",
         "ox": 10,
@@ -15992,7 +16103,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3nuyx",
-        "c": 3,
+        "c": 4,
         "r": 28,
         "layer": "object5",
         "ox": 10,
@@ -16000,7 +16111,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 12,
+        "c": 13,
         "r": 26,
         "layer": "object5",
         "ox": 6,
@@ -16008,7 +16119,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 12,
+        "c": 13,
         "r": 28,
         "layer": "object5",
         "ox": 10,
@@ -16017,7 +16128,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 12,
+        "c": 13,
         "r": 24,
         "layer": "object5",
         "ox": 6,
@@ -16025,7 +16136,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 12,
+        "c": 13,
         "r": 21,
         "layer": "object5",
         "ox": 6,
@@ -16033,7 +16144,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 12,
+        "c": 13,
         "r": 22,
         "layer": "object5",
         "ox": 6,
@@ -16041,7 +16152,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 1,
+        "c": 2,
         "r": 21,
         "layer": "object5",
         "ox": 16,
@@ -16049,7 +16160,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 1,
+        "c": 2,
         "r": 23,
         "layer": "object5",
         "ox": 16,
@@ -16057,7 +16168,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 1,
+        "c": 2,
         "r": 27,
         "layer": "object5",
         "ox": 16,
@@ -16065,7 +16176,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 1,
+        "c": 2,
         "r": 28,
         "layer": "object5",
         "ox": 20,
@@ -16074,14 +16185,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 2,
+        "c": 3,
         "r": 21,
         "layer": "object5",
         "oy": 10
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 3,
+        "c": 4,
         "r": 21,
         "layer": "object5",
         "ox": 10,
@@ -16089,7 +16200,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 10,
+        "c": 11,
         "r": 21,
         "layer": "object5",
         "ox": 20,
@@ -16097,7 +16208,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 9,
+        "c": 10,
         "r": 21,
         "layer": "object5",
         "ox": 10,
@@ -16105,7 +16216,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 5,
+        "c": 6,
         "r": 21,
         "layer": "object5",
         "ox": 10,
@@ -16113,7 +16224,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
-        "c": 7,
+        "c": 8,
         "r": 21,
         "layer": "object5",
         "ox": 10,
@@ -16121,7 +16232,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 12,
+        "c": 13,
         "r": 21,
         "layer": "object5",
         "ox": 10,
@@ -16130,7 +16241,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
-        "c": 1,
+        "c": 2,
         "r": 21,
         "layer": "object5",
         "ox": 20,
@@ -16139,14 +16250,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_cvs_sign_twelve",
-        "c": 2,
+        "c": 3,
         "r": 21,
         "layer": "object5",
         "ox": 14
       },
       {
         "id": "tile_cvs_back_counter",
-        "c": 4,
+        "c": 5,
         "r": 21,
         "layer": "object5",
         "fx": true,
@@ -16156,7 +16267,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_cvs_drink_cooler",
-        "c": 2,
+        "c": 3,
         "r": 21,
         "layer": "object5",
         "sortDepth": 2.5,
@@ -16165,7 +16276,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_cvs_checkout_counter_backroom",
-        "c": 4,
+        "c": 5,
         "r": 23,
         "layer": "object5",
         "oy": 20,
@@ -16174,7 +16285,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_cvs_counter_extension",
-        "c": 2,
+        "c": 3,
         "r": 24,
         "layer": "object5",
         "oy": 20,
@@ -16183,21 +16294,38 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvp8n5zs",
-        "c": 26,
+        "c": 27,
         "r": 46,
         "layer": "top",
-        "ox": 10
+        "ox": 10,
+        "circuit": 2
       },
       {
         "id": "tile_mvp8nxz4",
-        "c": 26,
+        "c": 27,
         "r": 46,
         "layer": "top",
         "blend": "hard-light"
       },
       {
+        "id": "tile_mvp8n5zs",
+        "c": 56,
+        "r": 40,
+        "layer": "top",
+        "ox": 20,
+        "circuit": 2
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 56,
+        "r": 40,
+        "layer": "top",
+        "blend": "hard-light",
+        "ox": 20
+      },
+      {
         "id": "tile_mvodgug9",
-        "c": 25,
+        "c": 26,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -16205,16 +16333,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvobex5o",
-        "c": 23,
+        "c": 24,
         "r": 30,
-        "layer": "object",
+        "layer": "object10",
         "ox": 20,
         "oy": 10,
         "sortDepth": 1.5
       },
       {
         "id": "tile_mvymwgxl",
-        "c": 22,
+        "c": 23,
         "r": 43,
         "layer": "ground2",
         "ox": 10,
@@ -16225,16 +16353,37 @@ const BATTLE_MAPS = [
         }
       },
       {
-        "id": "tile_mvyo15bc",
-        "c": 22,
+        "id": "tile_mvymwgxl",
+        "c": 56,
         "r": 37,
-        "layer": "object12",
+        "layer": "ground2",
+        "ox": 10,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "charm",
+          "qty": 1
+        }
+      },
+      {
+        "id": "tile_mvyo15bc",
+        "c": 23,
+        "r": 37,
+        "layer": "object17",
         "ox": 20,
         "oy": 30
       },
       {
+        "id": "tile_mvyo15bc",
+        "c": 59,
+        "r": 38,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30,
+        "circuit": 2
+      },
+      {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 37,
         "layer": "object6",
         "oy": 30,
@@ -16242,7 +16391,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 39,
         "layer": "object6",
         "oy": 30,
@@ -16250,7 +16399,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 41,
         "layer": "object6",
         "oy": 30,
@@ -16258,7 +16407,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 43,
         "layer": "object6",
         "oy": 30,
@@ -16266,7 +16415,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 45,
         "layer": "object6",
         "oy": 30,
@@ -16274,7 +16423,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 47,
         "layer": "object6",
         "oy": 30,
@@ -16282,7 +16431,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 49,
         "layer": "object6",
         "oy": 30,
@@ -16290,7 +16439,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 23,
         "layer": "object5",
         "oy": 20,
@@ -16298,7 +16447,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 25,
         "layer": "object5",
         "oy": 20,
@@ -16306,7 +16455,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 29,
         "layer": "object5",
         "oy": 20,
@@ -16314,7 +16463,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 27,
         "layer": "object5",
         "oy": 20,
@@ -16322,7 +16471,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 33,
         "layer": "object5",
         "oy": 20,
@@ -16330,7 +16479,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 31,
         "layer": "object5",
         "oy": 20,
@@ -16338,7 +16487,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 35,
         "layer": "object5",
         "oy": 20,
@@ -16346,15 +16495,15 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvobex5o",
-        "c": 3,
+        "c": 4,
         "r": 38,
-        "layer": "object6",
+        "layer": "object10",
         "sortDepth": 1.5,
         "ox": 30
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 19,
         "layer": "object5",
         "oy": 20,
@@ -16362,7 +16511,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 21,
         "layer": "object5",
         "oy": 20,
@@ -16370,7 +16519,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvxgf9gt",
-        "c": -1,
+        "c": 0,
         "r": 16,
         "layer": "object5",
         "ox": 30,
@@ -16378,7 +16527,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvxgf9gt",
-        "c": -1,
+        "c": 0,
         "r": 10,
         "layer": "object5",
         "ox": 30,
@@ -16386,7 +16535,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 18,
         "layer": "object5",
         "oy": 20,
@@ -16394,52 +16543,60 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 44,
+        "c": 40,
         "r": 39,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
-        "oy": 10
+        "ox": 30
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 44,
+        "c": 40,
         "r": 37,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
-        "oy": 10
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 37,
+        "r": 23,
+        "layer": "object13",
+        "ox": 19.33333300000004,
+        "oy": 20
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 44,
+        "c": 40,
         "r": 35,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
-        "oy": 10
+        "ox": 30
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 44,
+        "c": 40,
         "r": 31,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
-        "oy": 10
+        "ox": 30
       },
       {
         "id": "tile_mvr3kqob",
-        "c": 44,
+        "c": 40,
         "r": 33,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
-        "oy": 10
+        "ox": 30
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 29,
+        "c": 30,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -16447,28 +16604,35 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 25,
-        "r": 35,
+        "c": 26,
+        "r": 36,
         "layer": "object",
-        "oy": 6
+        "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 27,
-        "r": 35,
+        "c": 28,
+        "r": 36,
         "layer": "object",
-        "oy": 6
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 36,
+        "r": 36,
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 29,
-        "r": 35,
+        "c": 30,
+        "r": 36,
         "layer": "object",
-        "oy": 6
+        "oy": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 31,
+        "c": 32,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -16476,14 +16640,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 31,
-        "r": 35,
+        "c": 32,
+        "r": 36,
         "layer": "object",
-        "oy": 6
+        "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 16,
         "layer": "object5",
         "oy": 20,
@@ -16491,7 +16655,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 14,
         "layer": "object5",
         "oy": 20,
@@ -16499,7 +16663,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 10,
+        "c": 11,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -16507,7 +16671,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 12,
+        "c": 13,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -16515,7 +16679,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvodgug9",
-        "c": 14,
+        "c": 15,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -16523,7 +16687,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 9,
+        "c": 10,
         "r": 31,
         "layer": "object",
         "oy": 10,
@@ -16531,6 +16695,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvodgug9",
+        "c": 8,
+        "r": 31,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
         "c": 7,
         "r": 31,
         "layer": "object",
@@ -16538,16 +16710,8 @@ const BATTLE_MAPS = [
         "ox": 10
       },
       {
-        "id": "tile_mvocpp0c",
-        "c": 6,
-        "r": 31,
-        "layer": "object",
-        "oy": 10,
-        "ox": 10
-      },
-      {
         "id": "tile_mvoa0cqd",
-        "c": 5,
+        "c": 6,
         "r": 34,
         "layer": "object",
         "oy": 30,
@@ -16555,15 +16719,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 22,
-        "r": 18,
-        "layer": "object14",
-        "oy": 36,
-        "ox": 10
-      },
-      {
-        "id": "tile_mvodgug9",
-        "c": 20,
+        "c": 23,
         "r": 18,
         "layer": "object14",
         "oy": 36,
@@ -16571,15 +16727,15 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 18,
-        "r": 18,
-        "layer": "object14",
-        "oy": 36,
-        "ox": 10
+        "c": 34,
+        "r": 13,
+        "layer": "object11",
+        "oy": 6,
+        "ox": 20
       },
       {
-        "id": "tile_mvocpp0c",
-        "c": 16,
+        "id": "tile_mvodgug9",
+        "c": 21,
         "r": 18,
         "layer": "object14",
         "oy": 36,
@@ -16587,71 +16743,111 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvodgug9",
-        "c": 16,
+        "c": 32,
+        "r": 13,
+        "layer": "object11",
+        "oy": 6,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 19,
+        "r": 18,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 30,
+        "r": 13,
+        "layer": "object11",
+        "oy": 6,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 17,
+        "r": 18,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 17,
         "r": 24,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 18,
+        "c": 19,
         "r": 24,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 20,
+        "c": 21,
+        "r": 24,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 31,
+        "r": 19,
+        "layer": "object14",
+        "ox": 10,
+        "oy": -4
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 23,
         "r": 24,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 22,
+        "c": 33,
+        "r": 19,
+        "layer": "object14",
+        "ox": 10,
+        "oy": -4
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 25,
         "r": 24,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 24,
+        "c": 27,
         "r": 24,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 26,
+        "c": 29,
         "r": 24,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 28,
-        "r": 24,
-        "layer": "object14",
-        "ox": 10
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 14,
-        "r": 18,
-        "layer": "object14",
-        "oy": 36,
-        "ox": 36.66666699999996
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 14,
+        "c": 15,
         "r": 24,
         "layer": "object14",
         "ox": 36.66666699999996
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 13,
+        "c": 14,
         "r": 23,
         "layer": "object14",
         "ox": 30,
@@ -16659,7 +16855,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
+        "c": 14,
         "r": 25,
         "layer": "object14",
         "oy": 14,
@@ -16667,7 +16863,15 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
+        "c": 37,
+        "r": 25,
+        "layer": "object13",
+        "oy": 34,
+        "ox": 19.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 14,
         "r": 28,
         "layer": "object14",
         "oy": 4,
@@ -16675,7 +16879,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
+        "c": 14,
         "r": 29,
         "layer": "object14",
         "oy": 24,
@@ -16683,7 +16887,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 24,
+        "c": 25,
         "r": 18,
         "layer": "object14",
         "ox": 10,
@@ -16691,7 +16895,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 26,
+        "c": 27,
         "r": 18,
         "layer": "object14",
         "oy": 36,
@@ -16699,7 +16903,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 28,
+        "c": 29,
         "r": 18,
         "layer": "object14",
         "oy": 36,
@@ -16707,7 +16911,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 5,
+        "c": 6,
         "r": 32,
         "layer": "object",
         "oy": 30,
@@ -16715,7 +16919,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvzbgmzf",
-        "c": 5,
+        "c": 6,
         "r": 31,
         "layer": "object",
         "oy": 24,
@@ -16723,7 +16927,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvzbolt4",
-        "c": 24,
+        "c": 25,
         "r": 30,
         "layer": "object",
         "ox": 30,
@@ -16731,7 +16935,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 1,
+        "c": 2,
         "r": 25,
         "layer": "object5",
         "ox": 16,
@@ -16739,7 +16943,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvzbvnsy",
-        "c": 15,
+        "c": 16,
         "r": 30,
         "layer": "object11",
         "rot": 0,
@@ -16748,7 +16952,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvzc5x73",
-        "c": 13,
+        "c": 14,
         "r": 30,
         "layer": "object",
         "ox": 10,
@@ -16756,110 +16960,190 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvzc5x73",
-        "c": 5,
+        "c": 16,
+        "r": 35,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 21.33333300000004
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 6,
         "r": 35,
         "layer": "object6",
         "oy": 21.333333
       },
       {
         "id": "tile_mw47qirk",
-        "c": 4,
+        "c": 5,
         "r": -1,
         "layer": "object12",
         "oy": 10,
         "ox": 10
       },
       {
-        "id": "tile_mw49f97t",
-        "c": 19,
-        "r": 15,
-        "layer": "object12",
-        "ox": 10,
-        "oy": 30
+        "id": "tile_mw4d9qnu",
+        "c": 49,
+        "r": 40,
+        "layer": "object15",
+        "ox": 10
       },
       {
         "id": "tile_mw4d9qnu",
-        "c": 34,
-        "r": 26,
-        "layer": "object12",
-        "ox": 20,
-        "oy": 10
-      },
-      {
-        "id": "tile_mw4d9qnu",
-        "c": 15,
-        "r": 44,
-        "layer": "object12",
-        "oy": 20
-      },
-      {
-        "id": "tile_poolcore_floor_gradient",
-        "c": 17,
-        "r": 41,
-        "layer": "object12",
-        "ox": 10,
-        "oy": 30
-      },
-      {
-        "id": "tile_poolcore_floor_gradient",
-        "c": 18,
-        "r": 41,
-        "layer": "object12",
-        "ox": 10,
-        "oy": 30
+        "c": 51,
+        "r": 38,
+        "layer": "object15",
+        "ox": 20
       },
       {
         "id": "tile_mwdka8vr",
         "c": 36,
-        "r": 27,
+        "r": 22,
         "layer": "object12",
-        "ox": 10,
-        "oy": 10
+        "ox": 30
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 52,
+        "r": 35,
+        "layer": "object13",
+        "ox": 32.666667,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 50,
+        "r": 35,
+        "layer": "object13",
+        "oy": 39.333333,
+        "ox": 1.333333
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 55,
+        "r": 35,
+        "layer": "object13",
+        "ox": 24,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 56,
+        "r": 38,
+        "layer": "object13",
+        "ox": 12,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 53,
+        "r": 38,
+        "layer": "object13",
+        "ox": 8.666667,
+        "oy": 18
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 50,
+        "r": 38,
+        "layer": "object13",
+        "oy": 18,
+        "ox": 1.333333
       },
       {
         "id": "tile_mwdkb1l7",
-        "c": 46,
-        "r": 33,
+        "c": 47,
+        "r": 32,
         "layer": "object13",
-        "oy": 9.333333000000039,
-        "ox": 36.66666699999996
+        "oy": 39.33333300000004,
+        "ox": 16.66666699999996
       },
       {
         "id": "tile_mwdkcaac",
         "c": 49,
-        "r": 33,
+        "r": 32,
         "layer": "object13",
-        "ox": 20.66666699999996,
-        "oy": 9.333333000000039
+        "oy": 39.333333,
+        "ox": 40.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 53,
+        "r": 32,
+        "layer": "object13",
+        "ox": 8,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 32,
+        "layer": "object13",
+        "oy": 39.333333,
+        "ox": 22.666667
       },
       {
         "id": "tile_mwdkcn5r",
-        "c": 52,
-        "r": 33,
+        "c": 58,
+        "r": 32,
         "layer": "object13",
-        "ox": 14.666666999999961,
-        "oy": 9.333333000000039
+        "ox": 26.666667,
+        "oy": 39.333333
       },
       {
         "id": "tile_mwdklejx",
-        "c": 49,
+        "c": 53,
         "r": 40,
         "layer": "object13",
-        "ox": 21.333333,
-        "oy": 18.666667
+        "ox": 8.666667,
+        "oy": 8.666667
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 50,
+        "r": 40,
+        "layer": "object13",
+        "oy": 8.666667,
+        "ox": 1.333333
       },
       {
         "id": "tile_mwdkcymx",
-        "c": 51,
+        "c": 58,
+        "r": 35,
+        "layer": "object13",
+        "fx": true,
+        "oy": 39.333333,
+        "ox": 11.333333
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 58,
+        "r": 37,
+        "layer": "object13",
+        "fx": true,
+        "oy": 44,
+        "ox": 11.333333
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 56,
+        "r": 40,
+        "layer": "object13",
+        "ox": 16.666667,
+        "oy": 8.666667
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 58,
         "r": 40,
         "layer": "object13",
         "fx": true,
-        "oy": 18.666667,
-        "ox": 39.333333
+        "oy": 8.666667,
+        "ox": 11.333333
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": -1,
+        "c": 0,
         "r": 12,
         "layer": "object5",
         "oy": 20,
@@ -16867,15 +17151,39 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 13,
+        "c": 14,
         "r": 27,
         "layer": "object14",
         "oy": 4,
         "ox": 30
       },
       {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 27,
+        "layer": "object13",
+        "oy": 34,
+        "ox": 19.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 29,
+        "layer": "object13",
+        "oy": 34,
+        "ox": 19.33333300000004
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 15,
+        "r": 18,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 36.66666699999996
+      },
+      {
         "id": "tile_poolcore_pillar",
-        "c": 29,
+        "c": 30,
         "r": 23,
         "layer": "object14",
         "ox": 29.33333300000004,
@@ -16883,259 +17191,443 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 13,
+        "c": 14,
         "r": 18,
         "layer": "object14",
         "ox": 30,
         "oy": 15.333333000000039
       },
       {
-        "id": "tile_mvr32pqo",
-        "c": 44,
-        "r": 43,
-        "layer": "object13",
-        "sortDepth": 0,
-        "ox": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 46,
-        "r": 43,
-        "layer": "object13",
-        "sortDepth": 0,
-        "ox": 20
-      },
-      {
-        "id": "tile_mvr2fi62",
-        "c": 44,
-        "r": 43,
-        "layer": "object13",
-        "sortDepth": 0
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 48,
-        "r": 43,
-        "layer": "object13",
-        "sortDepth": 0,
-        "ox": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 54,
-        "r": 43,
-        "layer": "object13",
-        "sortDepth": 0,
-        "ox": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 52,
-        "r": 43,
-        "layer": "object13",
-        "sortDepth": 0,
-        "ox": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 50,
-        "r": 43,
-        "layer": "object13",
-        "sortDepth": 0,
-        "ox": 20
-      },
-      {
-        "id": "tile_mwdlevxi",
-        "c": 54,
-        "r": 36,
-        "layer": "object13",
-        "oy": 30
-      },
-      {
-        "id": "tile_mwdkcymx",
-        "c": 46,
-        "r": 36,
-        "layer": "object13",
-        "oy": 9.333333000000039,
-        "ox": 36.66666699999996
-      },
-      {
-        "id": "tile_mwdkcymx",
-        "c": 46,
-        "r": 38,
-        "layer": "object13",
-        "oy": 27.333333,
-        "ox": 36.666667
-      },
-      {
-        "id": "tile_mwdkcymx",
-        "c": 46,
-        "r": 40,
-        "layer": "object13",
-        "oy": 18.666667,
-        "ox": 36.666667
+        "id": "tile_poolcore_pillar",
+        "c": 33,
+        "r": 18,
+        "layer": "object14",
+        "oy": 15.333333000000039,
+        "ox": 28.66666699999996
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 58,
-        "r": 39,
+        "c": 35,
+        "r": 12,
+        "layer": "object11",
+        "oy": 25.333333,
+        "ox": 38
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 40,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 40,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 47,
+        "r": 35,
+        "layer": "object13",
+        "oy": 39.33333300000004,
+        "ox": 16.66666699999996
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 47,
+        "r": 38,
+        "layer": "object13",
+        "oy": 17.33333300000004,
+        "ox": 16.66666699999996
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 47,
+        "r": 40,
+        "layer": "object13",
+        "oy": 8.666666999999961,
+        "ox": 16.66666699999996
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 62,
+        "r": 29,
         "layer": "object13",
         "ox": 20,
         "oy": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 58,
+        "c": 62,
         "r": 43,
         "layer": "object13",
-        "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 58,
+        "c": 62,
         "r": 41,
         "layer": "object13",
-        "ox": 20,
-        "oy": 20
+        "oy": 20,
+        "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 58,
-        "r": 44,
+        "c": 62,
+        "r": 31,
         "layer": "object13",
-        "ox": 20,
-        "oy": 10
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 33,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 35,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 37,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 39,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 27,
+        "c": 28,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 29,
-        "r": 51,
-        "layer": "object6"
-      },
-      {
-        "id": "tile_mvodgug9",
-        "c": 1,
-        "r": 51,
-        "layer": "object6",
-        "ox": 10
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 3,
-        "r": 51,
-        "layer": "object6",
-        "ox": 10
-      },
-      {
-        "id": "tile_mvoddiqi",
-        "c": 5,
-        "r": 51,
-        "layer": "object6",
-        "ox": 10
-      },
-      {
-        "id": "tile_mvodgug9",
-        "c": 7,
-        "r": 51,
-        "layer": "object6",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 21,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 24,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 27,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
         "c": 30,
         "r": 51,
-        "layer": "ground4"
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 2,
+        "r": 51,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 4,
+        "r": 51,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 6,
+        "r": 51,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 8,
+        "r": 51,
+        "layer": "object6",
+        "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 33,
+        "c": 22,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 36,
+        "c": 25,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 28,
+        "r": 51,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 51,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 51,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 51,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
         "r": -2,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 0,
+        "c": 1,
         "r": 51,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 3,
+        "c": 4,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 6,
+        "c": 7,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 9,
+        "c": 10,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 12,
+        "c": 13,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 15,
+        "c": 16,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 18,
+        "c": 19,
         "r": 51,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 39,
+        "c": 40,
         "r": 51,
         "layer": "ground4"
       },
@@ -17146,152 +17638,120 @@ const BATTLE_MAPS = [
         "layer": "ground4"
       },
       {
-        "id": "tile_poolcore_floor_l",
-        "c": 45,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 48,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 51,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 54,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 57,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
         "id": "tile_mvocpp0c",
-        "c": 9,
+        "c": 10,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 11,
+        "c": 12,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 13,
+        "c": 14,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 17,
+        "c": 18,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 15,
+        "c": 16,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 19,
+        "c": 20,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
-        "c": 25,
+        "c": 26,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 21,
+        "c": 22,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 23,
+        "c": 24,
         "r": 51,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 33,
+        "c": 34,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 31,
+        "c": 32,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 35,
+        "c": 36,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_mvodgug9",
-        "c": 37,
+        "c": 38,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 39,
+        "c": 40,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 41,
+        "c": 42,
         "r": 51,
         "layer": "object6"
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 42,
-        "r": 43,
+        "c": 43,
+        "r": 44,
         "layer": "object6",
-        "ox": 20,
-        "oy": 30
+        "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 42,
-        "r": 45,
+        "c": 43,
+        "r": 46,
         "layer": "object6",
-        "ox": 20,
-        "oy": 30
+        "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 42,
+        "c": 43,
         "r": 47,
         "layer": "object6",
         "ox": 20,
@@ -17299,7 +17759,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 42,
+        "c": 43,
         "r": 48,
         "layer": "object6",
         "ox": 20,
@@ -17307,7 +17767,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvoa0cqd",
-        "c": 42,
+        "c": 43,
         "r": 50,
         "layer": "object6",
         "ox": 20,
@@ -17315,55 +17775,49 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvodgug9",
-        "c": 43,
-        "r": 51,
-        "layer": "object6"
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 45,
-        "r": 51,
-        "layer": "object6"
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 47,
-        "r": 51,
-        "layer": "object6"
-      },
-      {
-        "id": "tile_mvoddiqi",
-        "c": 49,
-        "r": 51,
-        "layer": "object6"
-      },
-      {
-        "id": "tile_mvocpp0c",
         "c": 51,
-        "r": 51,
-        "layer": "object6"
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
       },
       {
         "id": "tile_mvocpp0c",
         "c": 53,
-        "r": 51,
-        "layer": "object6"
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 55,
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 55,
-        "r": 51,
-        "layer": "object6"
-      },
-      {
-        "id": "tile_mvodgug9",
         "c": 57,
-        "r": 51,
-        "layer": "object6"
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 59,
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 61,
+        "r": 44,
+        "layer": "object6",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 23,
+        "c": 24,
         "r": 50,
         "layer": "object6",
         "ox": 20,
@@ -17371,15 +17825,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 35,
-        "r": 50,
-        "layer": "object6",
-        "ox": 20,
-        "oy": 20
-      },
-      {
-        "id": "tile_poolcore_pillar",
-        "c": -1,
+        "c": 0,
         "r": 50,
         "layer": "object6",
         "ox": 30,
@@ -17387,11 +17833,115 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 58,
+        "c": 43,
         "r": 50,
         "layer": "object6",
         "ox": 20,
         "oy": 20
+      },
+      {
+        "id": "tile_mvnn2p1x",
+        "c": 42,
+        "r": 46,
+        "layer": "object17",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 40,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 36,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 38,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 34,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 32,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
+        "r": 42,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
+        "r": 32,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 37,
+        "r": 48,
+        "layer": "object17",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mw49f97t",
+        "c": 28,
+        "r": 47,
+        "layer": "object17",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 38,
+        "r": 47,
+        "layer": "object17",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 30,
+        "r": 9,
+        "layer": "object11",
+        "oy": 18
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 29,
+        "r": 12,
+        "layer": "object11",
+        "oy": 25.33333300000004,
+        "ox": 38.66666699999996
       }
     ],
     "solid": [],
@@ -17417,17 +17967,26 @@ const BATTLE_MAPS = [
     "npcs": false,
     "portals": [
       {
-        "c": 17,
-        "r": 13,
+        "c": 33,
+        "r": 16,
         "to": "map_mv1bzur4",
         "at": [
-          29,
-          48
+          53,
+          30
+        ]
+      },
+      {
+        "c": 30,
+        "r": 48,
+        "to": "map_mv1bzur4",
+        "at": [
+          22,
+          39
         ]
       }
     ],
-    "cols": 65,
-    "rows": 60,
+    "cols": 66,
+    "rows": 56,
     "spawnZone": [],
     "layerOrder": [
       {
@@ -17443,20 +18002,36 @@ const BATTLE_MAPS = [
         "name": "淋浴走廊"
       },
       {
+        "id": "object13",
+        "name": "池畔平台"
+      },
+      {
+        "id": "object15",
+        "name": "池畔平台_物件"
+      },
+      {
         "id": "object",
         "name": "後走廊"
+      },
+      {
+        "id": "object16",
+        "name": "後走廊_物件"
+      },
+      {
+        "id": "object7",
+        "name": "救生員台"
       },
       {
         "id": "object6",
         "name": "基地"
       },
       {
-        "id": "object11",
-        "name": "牆壁、柱子3"
+        "id": "object17",
+        "name": "基地_物件"
       },
       {
-        "id": "object13",
-        "name": "池畔平台"
+        "id": "object11",
+        "name": "淋浴間"
       },
       {
         "id": "object8",
@@ -17477,6 +18052,10 @@ const BATTLE_MAPS = [
       {
         "id": "object12",
         "name": "測試用"
+      },
+      {
+        "id": "object10",
+        "name": "門"
       }
     ],
     "hiddenPickups": []

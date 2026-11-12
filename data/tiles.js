@@ -6730,8 +6730,8 @@ const SHARED_TILES = [
     "name": "Poolcore_Traffic_cone",
     "role": "floor",
     "file": "images/Poolcore/Poolcore_Traffic_cone.png",
-    "w": 2,
-    "h": 2
+    "w": 1,
+    "h": 1
   },
   {
     "id": "tile_mwdkb1l7",
