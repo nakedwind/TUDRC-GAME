@@ -507,7 +507,7 @@ function ensureTutMarksEl() {
 }
 const TUT_BOX_KINDS = ['supply', 'armor', 'refill'];
 function tutBoxDone(kind) {
-  if (kind === 'armor') return typeof equipState !== 'undefined' && (NEWBIE_START.gear || []).every(id => Object.values(equipState.equipped).includes(id));   // 頭盔穿上了
+  if (kind === 'armor') return typeof equipState !== 'undefined' && (NEWBIE_START.gear || []).every(id => isEquipped(id));   // 頭盔穿上了
   return !!tutorialState.boxes[kind];
 }
 // 按 Space 打開箱子：記下來（物資箱另外看 campSupplyOpen）

@@ -967,7 +967,8 @@ function collectMapOccluders(ctx, out) {
     if (v && (it.kind === 'stamp' ? !stampInDrawRect(it.stamp)   // 在畫面範圍外：這一幀不畫
       : (it.x1 + OX <= v.x0 || it.x0 + OX >= v.x1 || it.y1 + OY <= v.y0 || it.y0 + OY >= v.y1))) continue;
     if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
-    out.push({ y: it.y, draw: () => withPartClip(ctx, it, () => {
+    const y = typeof mrtMapItemSortY === 'function' ? mrtMapItemSortY(it, it.y) : it.y;   // 跟捷運列車底邊對齊的物件：整個排在車殼前面（js/mrt-train.js）
+    out.push({ y, draw: () => withPartClip(ctx, it, () => {
       drawOccluderItem(ctx, it);
       for (const od of it.overdraw || []) drawOverdrawPatch(ctx, it, od);   // 上層圖在重疊處補畫回來
     }) });
@@ -1020,8 +1021,10 @@ function drawOverdrawPatch(ctx, it, od) {
   }
   ctx.drawImage(od.patch, OX + cx, OY + cy);
 }
-function drawElevators(ctx) {
+// only：只畫這一台（劇情播放器要把每台電梯各自跟角色排前後，js/story-scene.js）；沒給＝全部都畫
+function drawElevators(ctx, only) {
   for (const stamp of elevatorStamps()) {   // 只翻電梯（快取），不用每幀掃全部物件
+    if (only && stamp !== only) continue;
     if ((stamp === openElevatorStamp || elevatorOpenAnim?.stamp === stamp) && elevatorOpenImage.complete && elevatorOpenImage.naturalWidth) {
       const x = OX + stamp.c * CELL + (stamp.ox || 0), y = OY + stamp.r * CELL + (stamp.oy || 0);
       ctx.drawImage(elevatorOpenImage, x, y, mapTileW(mapTileById(stamp.id)) * CELL, mapTileH(mapTileById(stamp.id)) * CELL);

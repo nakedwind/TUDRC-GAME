@@ -523,12 +523,13 @@ function renderSquadArmorPanel() {
   box.classList.remove('with-who');
   box.innerHTML = `<h3>${spec.name || armorWho}${spec.guide ? '嚮導' : '哨兵'}裝備</h3><div class="equip-doll sq-doll"><img class="doll-art sprite" data-member="${armorWho}" src="${memberPortraitPath(spec)}" alt="${spec.name || ''}"><div class="doll-slots">${slots}</div></div>`;
 }
-// 右邊：背包裡的隊員裝備
+// 右邊：背包裡的隊員裝備（新版裝備一件一格，角落寫這一件的等級；舊版寫數量）
+const sqItemLv = g => typeof squadGearLv === 'function' ? squadGearLv(g.sgear.id) : 0;
 function renderSquadArmorGrid(items) {
   const name = (TYPES[armorWho]?.name || armorWho) + (TYPES[armorWho]?.guide ? '嚮導' : '哨兵');
   let html = `<p class="bag-weapon-hint bag-gear-group">隊員裝備 <small>點一下再按「穿上」，或直接拖到左邊${name}的格子</small></p>`;
-  html += items.map(g => `<button type="button" class="bag-cell squadgear${g.id === backpackSel ? ' sel' : ''}" data-bag-item="${g.id}" draggable="true" data-drag-sgear="${g.sgear.id}" aria-label="${g.name} ×${g.count}" aria-pressed="${g.id === backpackSel}">
-      <img src="${g.image}" alt=""><b>${g.count}</b><span class="bag-cell-name">${g.name}</span></button>`).join('');
+  html += items.map(g => `<button type="button" class="bag-cell squadgear${sqItemLv(g) ? equipTier(sqItemLv(g)) : ''}${g.id === backpackSel ? ' sel' : ''}" data-bag-item="${g.id}" draggable="true" data-drag-sgear="${g.sgear.id}" aria-label="${g.name}${sqItemLv(g) ? ' Lv' + sqItemLv(g) : ' ×' + g.count}" aria-pressed="${g.id === backpackSel}">
+      <img src="${g.image}" alt=""><b>${sqItemLv(g) ? 'Lv' + sqItemLv(g) : g.count}</b><span class="bag-cell-name">${g.name}</span></button>`).join('');
   if (!items.length) html += '<p class="bag-weapon-hint">背包裡沒有隊員裝備 <small>可以找諾亞的開發工坊製作</small></p>';
   backpackGrid.classList.add('no-anim');
   backpackGrid.innerHTML = html;

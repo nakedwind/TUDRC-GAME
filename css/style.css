@@ -2536,6 +2536,8 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-tile-icon img { width: calc(100% * var(--ws-img-scale, 1)); height: calc(100% * var(--ws-img-scale, 1)); object-fit: contain; image-rendering: pixelated; translate: var(--ws-img-x, 0px) var(--ws-img-y, 0px); }   /* 開發工坊編輯器的「圖片大小／位移」照樣有效 */
 .ws-tile-icon i { font-style: normal; font-size: calc(34px * var(--ws-img-scale, 1)); }
 .ws-tile b { max-width: 100%; font-size: 13px; line-height: 1.3; text-align: center; word-break: keep-all; overflow-wrap: anywhere; }
+/* 新版裝備的升級頁：這一件穿在誰身上（左上角小標；在背包裡的不寫） */
+.ws-tile u { position: absolute; top: 6px; left: 6px; max-width: 55%; padding: 0 6px; border-radius: 99px; background: rgba(120,200,255,.9); color: #06202f; font-size: 10px; font-weight: 800; text-decoration: none; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ws-tile em { position: absolute; top: 6px; right: 6px; padding: 0 6px; border-radius: 99px; background: #ffd479; color: #3b2304; font-size: 10px; font-weight: 800; font-style: normal; line-height: 16px; }
 .ws-tile.unowned .ws-tile-icon { opacity: .75; }            /* 還沒開發 */
 .ws-tile.build.unowned { filter: brightness(.35); }   /* 還沒開發的建築：整個格子（圖、字、框）壓黑 65%（亮度剩 35%）（遊戲和開發工坊編輯器的預覽共用） */

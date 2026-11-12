@@ -905,7 +905,7 @@ function previewInfo(key) {
   const cash = mi < 0 ? 0 : workshopMoney(key, mi, effCost(key, mi), cfg);
   let makeBtn = '';   // 新版裝備：研發過了多一顆「製作一件」、標籤加「誰能穿」（跟遊戲一樣，js/gear-v2.js）
   if (GEAR_V2_ED && !w) {
-    tags += '<span class="bag-tag">' + GEAR_WHO_NAME[gearV2WhoNow(key)] + '</span>' + (lv ? '<span class="bag-tag">持有 1 件</span>' : '');
+    tags += '<span class="bag-tag">' + GEAR_WHO_NAME[gearV2WhoNow(key)] + '</span>' + (lv ? '<span class="bag-tag">' + (pvTab === 'up' ? '背包裡' : '持有 1 件') + '</span>' : '');   // 升級裝備頁：一件一格，寫這一件在哪（跟遊戲一樣）
     if (makeOnly) { const mk = gearV2MakeNow(key); makeBtn = workshopPriceBtn(workshopInfoBtnStyle(key, '<button type="button" class="ws-btn" data-ws="mk:' + esc(key) + '">製作一件 ' + cost(mk.shards) + '</button>', cfg), mk.money, false); }   // 寬高字級跟「開發」按鈕一樣（跟遊戲一樣）
   }
   const about = v.ownedDesc || v.desc || '';   // 說明只有一段（跟遊戲一樣）

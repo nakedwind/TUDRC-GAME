@@ -406,6 +406,20 @@ function mrtTrainSortables(list) {
     list.push({ y: tr.bottom + MRT_TRAIN.doorSortDy, draw: () => drawMrtTrain(ctx, tr, 'frontDoor') });
   }
 }
+// 地圖上擺的物件（例如月台邊的閘門讀卡機、圍欄）底部剛好落在列車底邊附近時：
+// 車殼排在底邊往下 frontSortDy、車門那幾欄排在底邊往下 doorSortDy，物件夾在兩者中間就會「車門處在前面、其他地方被車殼蓋住」，看起來破圖。
+// 這種物件一律排到整個車殼前面（js/maploader.js 的 collectMapOccluders 會問這裡）。
+function mrtMapItemSortY(it, y) {
+  if (!G || !G.mrtTrains || it.part || y >= FLOOR2_SORT - 60000) return y;   // 2 樓的東西、上下拆開的柱子不管
+  for (const tr of G.mrtTrains) {
+    if (tr.state === 'away') continue;
+    const lo = tr.bottom + Math.min(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy), hi = tr.bottom + Math.max(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy);
+    if (y < lo || y > hi) continue;
+    if (OX + it.x1 <= tr.clipL || OX + it.x0 >= tr.clipR || OY + it.y0 >= tr.bottom) continue;   // 不在軌道範圍、或整個在列車下面
+    return hi + 0.5;
+  }
+  return y;
+}
 // 門開的程度 0～1 → 先快後慢滑開（關門時倒過來）
 const mrtDoorEase = k => 1 - Math.pow(1 - Math.max(0, Math.min(1, k)), 2);
 function drawMrtTrain(ctx, tr, part) {

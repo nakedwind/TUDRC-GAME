@@ -39,7 +39,7 @@ const monsterSpec = id => (typeof MONSTERS_DEFAULT !== 'undefined' ? MONSTERS_DE
 const SPRITES = [...new Set([...Object.values(typeof CHARACTERS !== 'undefined' ? CHARACTERS : {}).flatMap(c => c.sprite ? [c.sprite, c.sprite.replace(/_[A-Z]$/, '_A')] : []), 'mob_A', 'mob_B'])].sort();
 document.body.append(h('datalist', { id: 'spriteList' }, SPRITES.map(s => h('option', { value: s }))));
 // 每頁的音效：js/sfx.js 的音效名字（音效編輯器裡看得到全部）；選單先列劇情常用的
-const STORY_SFX = [['storyDoor', '自動門開關'], ['door', '關門'], ['backroomDoor', '後室開門'], ['elevator', '電梯'], ['ironGateSlide', '鐵門滑動'], ['stairsDown', '腳步聲（樓梯）'],
+const STORY_SFX = [['storyDoor', '自動門開關'], ['door', '關門'], ['storyDoorSlam', '用力關門（關門＋敲打）'], ['backroomDoor', '後室開門'], ['elevator', '電梯'], ['ironGateSlide', '鐵門滑動'], ['stairsDown', '腳步聲（樓梯）'],
   ['soothe', '疏導'], ['itemPickup', '撿東西'], ['knock2', '敲打'], ['glassBreak3', '玻璃破掉'], ['midBoom', '中爆炸'], ['storyPunch', '出拳'], ['storySandbagBreak', '沙包破掉'], ['storyPartyPopper', '拉炮'], ['storyPartyHorn', '生日吹笛']];
 document.body.append(h('datalist', { id: 'sfxList' }, STORY_SFX.map(([v, t]) => h('option', { value: v }, t))));
 function testSfx(name, gain) {   // 編輯器沒有載入音效引擎：照 js/sfx.js 的檔名直接播
@@ -713,13 +713,13 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'show', 'trail', 'holdAt', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
-const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.pop && '🎉', b.blow && '🎺', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
+const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.show && '✨', b.trail && '👣', b.holdAt && '⏳', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.pop && '🎉', b.blow && '🎺', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
   b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.bubble && '💭', b.tug && '✊', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
-  b.bgmLevel && '🔉', 'confetti' in b && '🎊', b.banner && '🅰', b.caption && '🎬', 'meter' in b && '📊', 'records' in b && '📋', 'filter' in b && '🎞', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
+  b.bgmLevel && '🔉', 'confetti' in b && '🎊', b.banner && '🅰', b.caption && '🎬', 'meter' in b && '📊', 'records' in b && '📋', 'filter' in b && '🎞', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number(b.shake) > 0 && '📳', b.elevator && '🛗', 'follow' in b && '🎯', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
   s.beats.forEach((b, i) => {
@@ -734,18 +734,18 @@ function renderBeats() {
 }
 // 每頁的演出：只列出這頁有用到的；要加新的從「＋ 加演出」選單挑（照類別分好，順序也是畫面上列出來的順序）
 const ACT_MENU = [
-  ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['speed', '速度']]],
+  ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['show', '出現'], ['trail', '跟在後面'], ['holdAt', '等他走到才能翻頁'], ['speed', '速度']]],
   ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['pop', '拉炮'], ['blow', '吹生日吹笛'], ['emote', '情緒符號'], ['bubble', '泡泡框'], ['tug', '扯呆毛'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
   ['怪物', [['monsterMove', '怪物走位'], ['monsterPose', '怪物姿勢'], ['monsterWander', '繞著人走'], ['swallow', '吞人'], ['preyKick', '嘴裡的人抽一下'], ['spit', '吐出來'], ['thunder', '巨雷']]],
-  ['畫面', [['camera', '換鏡頭'], ['screen', '黑幕'], ['card', '介紹卡'], ['door', '自動門'], ['heal', '治療光'], ['confetti', '彩帶飄落'], ['banner', '中間壓大字'], ['caption', '過場字卡（同一時間）'], ['meter', '數值條（負荷率）'], ['records', '紀錄表'], ['filter', '回想濾鏡']]],
-  ['聲音', [['sfx', '音效'], ['bgm', '音樂'], ['bgmLevel', '音樂音量'], ['hush', '槍聲']]],
+  ['畫面', [['camera', '換鏡頭'], ['follow', '鏡頭跟著人'], ['screen', '黑幕'], ['shake', '鏡頭晃一下'], ['card', '介紹卡'], ['door', '自動門'], ['elevator', '電梯門'], ['heal', '治療光'], ['confetti', '彩帶飄落'], ['banner', '中間壓大字'], ['caption', '過場字卡（同一時間）'], ['meter', '數值條（負荷率）'], ['records', '紀錄表'], ['filter', '回想濾鏡']]],
+  ['聲音', [['sfx', '音效'], ['exitSfx', '離場音效（走進門那一刻）'],['bgm', '音樂'], ['bgmLevel', '音樂音量'], ['hush', '槍聲']]],
   ['對話框', [['portrait', '頭像情緒']]],
   ['流程', [['label', '分支名字'], ['choices', '選項'], ['end', '自動結束']]],
 ];
 // 新增時的預設值（走位類要先在地圖上點位置，見 PICK_ACTS）
-const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, speed: 60, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger', bubble: '……', tug: '',
+const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, show: true, trail: '', speed: 60, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger', bubble: '……', tug: '',
   monsterPose: 'smile', preyKick: true, spit: true };
-const PICK_ACTS = { move: '走到哪', exit: '走到哪後消失', place: '瞬移到哪', monsterMove: '走到哪' };
+const PICK_ACTS = { holdAt: '走到哪才能翻頁', move: '走到哪', exit: '走到哪後消失', place: '瞬移到哪', monsterMove: '走到哪' };
 // 這頁有沒有這個演出（大部分看欄位在不在；頭像情緒、分支是好幾個欄位合成一列）
 function beatHas(b, key) {
   if (ACTOR_ACTS.includes(key) || MONSTER_ACTS.includes(key)) return !!b[key] && Object.keys(b[key]).length > 0;
@@ -795,6 +795,12 @@ function beatBody(s, b, i) {
     exit: () => many('exit', '離場', id => [h('span', { class: 'row' }, h('small', {}, '終點'), xy(b.exit, id, actorName(id) + '在第 ' + (i + 1) + ' 頁走到哪後消失'), h('small', {}, '走到後淡出')), ...viaRows(id, 'exit')]),
     place: () => many('place', '瞬移', id => h('span', { class: 'row' }, xy(b.place, id, actorName(id) + '在第 ' + (i + 1) + ' 頁瞬移到哪'), h('small', {}, '直接換位置（黑幕時用）'))),
     hide: () => many('hide', '消失', () => h('small', {}, '這頁一開始就不見')),
+    // 跟在後面：先用自己的速度追上去，追到身後就配合對方的速度一路跟著（邊走邊講話用）；選「不跟了」或對方離場就停下來
+    trail: () => many('trail', '跟在後面', id => h('span', { class: 'row' }, '跟著', choose(b.trail, id, [['', '（不跟了）'], ...actorOptions().filter(o => o[0] !== id)]), h('small', {}, '先追上去，再配合對方的速度跟在身後；對方走進門就停下來'))),
+    // 等他走到才能翻頁：這個人走到（經過）這個位置之前，這一頁不能翻（邊走邊講話時，讓下一頁的演出等人走到定點才開始）
+    holdAt: () => many('holdAt', '等他走到', id => h('span', { class: 'row' }, xy(b.holdAt, id, actorName(id) + '走到哪，第 ' + (i + 1) + ' 頁才能翻頁'), h('small', {}, '走到（經過）這裡之前這頁不能翻；他沒在走路就不等'))),
+    // 出現：先隱藏的人在原地淡入出現（坐在椅子上的照樣坐著；用走位／瞬移讓人出現的話會變成站著）
+    show: () => many('show', '出現', () => h('small', {}, '先隱藏的人在這頁原地淡入出現（坐著的照樣坐著）')),
     speed: () => many('speed', '速度', id => h('span', { class: 'row' }, num(b.speed, id, { min: 1, step: 1 }), h('small', {}, '像素／秒（之後都用這個速度）'))),
     face: () => many('face', '轉向', id => choose(b.face, id, faceOptions.filter(o => o[0] !== id))),
     eyes: () => many('eyes', '眼睛', id => choose(b.eyes, id, [['open', '睜開'], ['closed', '閉上']])),
@@ -857,6 +863,10 @@ function beatBody(s, b, i) {
       h('small', { style: 'flex-basis:100%' }, '黑底蓋住整個畫面，翻到下一頁就淡出；這頁沒台詞時不會跳出對話框；下一頁換鏡頭會直接切過去')),
     filter: () => one('回想濾鏡', ['filter'], choose(b, 'filter', [['memory', '泛黃回想（四邊亮邊）'], ['', '收掉']]), h('small', {}, '慢慢淡入淡出，一直留到收掉；對話框不受影響')),
     door: () => one('自動門', ['door'], choose(b, 'door', [['open', '打開'], ['close', '關上']])),
+    // 電梯門：離現在鏡頭最近的那台電梯，跟遊戲裡一樣的開關門動畫
+    elevator: () => one('電梯門', ['elevator'], choose(b, 'elevator', [['open', '打開'], ['close', '關上']]), h('small', {}, '離現在鏡頭最近的那台電梯')),
+    // 鏡頭跟著人：鏡頭一路跟著這個人走（遠近照目前的鏡頭）；之後再「換鏡頭」就不跟了
+    follow: () => one('鏡頭跟著人', ['follow'], choose(b, 'follow', [['', '（不跟了）'], ...actorOptions()]), h('small', {}, '一路跟著走；之後再「換鏡頭」就不跟了')),
     confetti: () => {
       const hd = { v: b.confetti ? 'on' : 'off' };
       one('彩帶', ['confetti'], choose(hd, 'v', [['on', '天上開始飄彩帶'], ['off', '停止（已經在飄的會飄完）']], { parse: v => { b.confetti = v === 'on'; return v; } }));
@@ -872,6 +882,10 @@ function beatBody(s, b, i) {
       one('治療光', ['heal'], choose(hd, 'v', [['start', '開始'], ['stop', '停止']], { parse: v => { b.heal = v === 'start' ? healPair(s) : false; return v; } }),
         b.heal && h('span', { class: 'row' }, choose(b.heal, 'from', actorOptions()), '替', choose(b.heal, 'to', actorOptions()), '治療（光點）'));
     },
+    // 鏡頭晃一下：關門「砰」、撞到東西的那一下；數字＝晃多大（像素）
+    // 離場音效：這頁「離場」的人真的走到、開始消失的那一刻才播（例如關門聲）；人還在路上就翻頁也不會先響
+    exitSfx: () => one('離場音效', ['exitSfx'], txt(b, 'exitSfx', { list: 'sfxList', placeholder: '例如 door', style: 'width:150px' }), h('small', {}, '這頁離場的人走進門那一刻才播')),
+    shake: () => one('鏡頭晃一下', ['shake'], num(b, 'shake', { min: 1, step: 1 }), h('small', {}, '晃多大（像素；關門大約 4、爆炸大約 8）')),
     sfx: () => one('音效', ['sfx', 'sfxVolume'], txt(b, 'sfx', { list: 'sfxList', placeholder: '翻到這頁時播', style: 'width:150px' }),
       '音量', num(b, 'sfxVolume', { min: 0, step: .1, optional: true, placeholder: '1' }), h('button', { type: 'button', class: 'small', onclick: () => testSfx(b.sfx, b.sfxVolume) }, '▶ 試聽')),
     bgm: () => {
@@ -949,9 +963,9 @@ function addActMenu(s, b, i) {
     if (ACTOR_ACTS.includes(key)) { const id = s.actors.find(a => !(b[key] && a.id in b[key])).id; (b[key] = b[key] || {})[id] = key === 'tug' ? (s.actors.find(a => a.id !== id)?.id || '') : ACT_DEFAULT[key]; }   // 扯呆毛：先給另一個人當扯的人
     else if (MONSTER_ACTS.includes(key)) { const id = s.monsters.find(m => !(b[key] && m.id in b[key])).id; (b[key] = b[key] || {})[id] = key in ACT_DEFAULT ? ACT_DEFAULT[key] : s.actors[0]?.id || ''; }
     else ({
-      thunder: () => { b.thunder = true; }, camera: () => { b.camera = beatCamera(i); }, screen: () => { b.screen = 'black'; },
-      card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, confetti: () => { b.confetti = true; }, banner: () => { b.banner = ''; }, caption: () => { b.caption = ['同一時間', '']; }, meter: () => { b.meter = { label: '負荷率', value: 50, line: 80 }; }, records: () => { b.records = { title: '', rows: [] }; }, filter: () => { b.filter = 'memory'; }, heal: () => { b.heal = healPair(s); },
-      sfx: () => { b.sfx = ''; }, bgm: () => { b.bgm = 'music/'; }, bgmLevel: () => { b.bgmLevel = { vol: .3, secs: 1 }; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; },
+      thunder: () => { b.thunder = true; }, camera: () => { b.camera = beatCamera(i); }, screen: () => { b.screen = 'black'; }, shake: () => { b.shake = 4; },
+      card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, elevator: () => { b.elevator = 'open'; }, follow: () => { b.follow = s.actors[0]?.id || ''; }, confetti: () => { b.confetti = true; }, banner: () => { b.banner = ''; }, caption: () => { b.caption = ['同一時間', '']; }, meter: () => { b.meter = { label: '負荷率', value: 50, line: 80 }; }, records: () => { b.records = { title: '', rows: [] }; }, filter: () => { b.filter = 'memory'; }, heal: () => { b.heal = healPair(s); },
+      sfx: () => { b.sfx = ''; }, exitSfx: () => { b.exitSfx = 'door'; }, bgm: () => { b.bgm = 'music/'; }, bgmLevel: () => { b.bgmLevel = { vol: .3, secs: 1 }; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; },
       label: () => { b.label = ''; }, choices: () => { b.choices = [{ text: '' }]; }, end: () => { b.end = 2; },
     })[key]();
     commit();

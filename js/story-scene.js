@@ -186,6 +186,69 @@ const StoryScene = (() => {
     ctx.drawImage(img, cut, by, bx + bw - cut, bh, x + (cut + k * (bx + bw - cut)) * sx, y + by * sy, (bx + bw - cut) * sx, bh * sy);   // 右片往右滑
     ctx.restore();
   }
+  // ---- 電梯門（每頁 elevator: 'open' 打開／'close' 關上）：離現在鏡頭最近的那台電梯，用跟遊戲一樣的開關門動畫 ----
+  const LIFT_TIME = .55;
+  function storyElevator(mode) {
+    if (typeof isElevatorStamp !== 'function') return;
+    const list = (MAP.stamps || []).filter(isElevatorStamp); if (!list.length) return;
+    const p = state.cfg.cameras?.[state.cameraKey] || state.camera, far = s => Math.hypot(s.c + 1.5 - p[0], s.r + 1.5 - p[1]);
+    const stamp = list.reduce((a, b) => far(b) < far(a) ? b : a), open = mode === 'open';
+    elevatorOpenAnim = elevatorCloseAnim = null; state.lift = null;
+    if (state.skipping || open === (openElevatorStamp === stamp)) { openElevatorStamp = open ? stamp : openElevatorStamp === stamp ? null : openElevatorStamp; return; }   // 快轉、或本來就是這個狀態：直接到位
+    const anim = { stamp, started: performance.now(), duration: LIFT_TIME * 1000 };
+    if (open) elevatorOpenAnim = anim; else elevatorCloseAnim = anim;   // 關門動畫期間電梯還算開著，關完才換回關門的圖
+    state.lift = { stamp, open, t: LIFT_TIME };
+    if (typeof SFX !== 'undefined') SFX.play('elevator', .8, 'storyElevator');
+  }
+  function tickLift(dt) {
+    const L = state.lift; if (!L || (L.t -= dt) > 0) return;
+    elevatorOpenAnim = elevatorCloseAnim = null; openElevatorStamp = L.open ? L.stamp : null; state.lift = null;
+  }
+  // ---- 跟在後面（每頁 trail: { 跟的人: 被跟的人 }，空白＝不跟了）----
+  // 先用自己的速度追上去，追到對方身後就配合對方的速度一路跟著（邊走邊講話用）；對方離場（走進門）或不跟了，就停在原地
+  // gap＝跟在身後多遠、side＝往下錯開多少（像素，才不會兩個人疊在一起）、near＝離這麼近就算追上了
+  const TRAIL = { gap: 44, side: 16, near: 8 };
+  const trailSpot = (a, L) => [L.x + ((L.dir === 'left' ? 1 : L.dir === 'right' ? -1 : a.x >= L.x ? 1 : -1) * TRAIL.gap), L.y + TRAIL.side];
+  function stopTrail(a) {
+    const L = actor(a.trail);
+    a.trail = ''; a.moving = false; if (a.trailSpeed != null) a.speed = a.trailSpeed; a.trailSpeed = null;
+    if (L) a.dir = L.x < a.x ? 'left' : 'right';
+  }
+  function tickTrail(a, dt) {
+    const L = actor(a.trail);
+    if (!L || L.hidden || L.fading) { stopTrail(a); return; }
+    if (a.trailSpeed == null) a.trailSpeed = a.speed || 26;
+    const [tx, ty] = trailSpot(a, L), dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy), walking = !!L.target;
+    a.speed = d > TRAIL.near || !walking ? a.trailSpeed : Math.min(a.trailSpeed, L.speed || 26);   // 追上之後配合對方的速度
+    const step = dt * a.speed;
+    a.target = null; a.path = [];
+    if (d <= step) { a.x = tx; a.y = ty; a.moving = walking; a.dir = walking ? L.dir : L.x < a.x ? 'left' : 'right'; }
+    else { a.x += dx / d * step; a.y += dy / d * step; a.moving = true; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
+  }
+  // ---- 等人走到才能翻頁（每頁 holdAt: { 角色id: [欄, 列] }）----
+  // 這個人走到（經過）這個位置之前，這一頁不能翻：邊走邊講話時，讓下一頁的演出等人走到定點才開始，玩家點再快也不會對不上
+  // 那個人沒在走路、已經離場，就不等了（不會卡住）；near＝離多近算走到（格）
+  const HOLD_NEAR = .6;
+  const EXIT_SFX_LEAD = .25;   // 離場音效提早幾秒響：人走進門、開始消失的前一刻就播，聲音和消失才會像同時
+  function holdBusy() {
+    const h = state.cfg.beats[state.index]?.holdAt; if (!h || state.skipping) return false;
+    const done = state.held || (state.held = {});
+    let busy = false;
+    for (const [id, p] of Object.entries(h)) {
+      if (done[id]) continue;
+      const a = actor(id);
+      if (!a || a.hidden || (!a.target && !a.trail) || Math.hypot(a.x / CELL - p[0], a.y / CELL - p[1]) <= HOLD_NEAR) done[id] = true; else busy = true;
+    }
+    return busy;
+  }
+  // ---- 鏡頭跟著人（每頁 follow: 角色id，空白＝不跟了）：鏡頭一路跟著這個人走，遠近照目前的鏡頭；之後再「換鏡頭」就不跟了 ----
+  // 那個人離場（走進門）之後，鏡頭停在最後的位置
+  const FOLLOW_UP = .3;   // 鏡頭中心比腳底高多少格（對準身體）
+  function cameraTarget() {
+    const base = state.cfg.cameras?.[state.cameraKey] || state.camera, a = state.follow && actor(state.follow);
+    if (!state.follow) return base;
+    return a && !a.hidden ? [a.x / CELL, a.y / CELL - FOLLOW_UP, base[2]] : [state.camera[0], state.camera[1], base[2]];
+  }
   // 大喊（每頁 shout: { 角色id: true }）：台詞出現的那一刻，那個人頓一下、對話框跟著震一下
   // 驚訝小跳（每頁 hop: { 角色id: true }）：同一個時機往上輕輕跳一下，對話框不震
   const SHOUT_TIME = .4, HOP_TIME = .32;
@@ -626,6 +689,7 @@ const StoryScene = (() => {
   function prepare() {
     ensureUI(); clearInput();
     const cfg = config();
+    if (typeof openElevatorStamp !== 'undefined') { openElevatorStamp = null; elevatorOpenAnim = elevatorCloseAnim = null; }   // 重播：上一輪打開的電梯先關好
     if (Number.isFinite(cfg.zoom) && cfg.zoom > 0) VIEW_SCALE = cfg.zoom;
     G = { story: true, phase: 'ready', running: false, over: false, player: null,
       towers: [], npcs: [], enemies: [], obstacles: [], cores: [], effects: [], acidPools: [],
@@ -707,6 +771,8 @@ const StoryScene = (() => {
         if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; a.swA = a.swV = 0;
         if (a.leak) { a.leak.t += 3; a.leak.pile = Math.max(a.leak.pile, 60); a.leak.grains = []; if (a.leak.pileX == null) a.leak.pileX = bagPoint(a, bagGeom(a), a.bag.spout)[0] + 3; }   // 快轉經過漏沙：沙堆直接堆好
       }
+      for (const a of state.actors) if (a.trail) { const L = actor(a.trail); if (L) { [a.x, a.y] = trailSpot(a, L); a.hidden = false; a.alpha = 1; if (L.hidden) stopTrail(a); } }   // 跟在後面的人：直接站到對方身後（對方已經離場就停在那裡）
+      if (state.lift) { state.lift.t = 0; tickLift(0); }
       for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
       if (state.door) { if (state.door.auto) state.door.target = someoneAtDoor(state.door) ? 1 : 0; state.door.open = state.door.target; }
       if (state.screen) state.screen.t = state.screen.dur;
@@ -716,8 +782,8 @@ const StoryScene = (() => {
     for (let i = from; i < to; i++) { setBeat(i); settle(); }
     state.skipping = false;
     if ('skipBgm' in state && !state.waitingForSound) { if (state.skipBgm) startBgm(state.skipBgm); else stopBgm(0); delete state.skipBgm; }   // 快轉經過換音樂的頁
-    const p = state.cfg.cameras?.[state.cameraKey];
-    state.camera = p ? [p[0], p[1]] : state.camera; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom);
+    const p = state.cfg.cameras?.[state.cameraKey], ft = state.follow && cameraTarget();
+    state.camera = ft ? [ft[0], ft[1]] : p ? [p[0], p[1]] : state.camera; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom);
   }
   // 按「跳過劇情」時，後面還有沒選的選項：直接快轉到選項那頁讓玩家選（選完再跳過就真的結束）
   function skipToChoice() {
@@ -740,7 +806,7 @@ const StoryScene = (() => {
     return Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front';
   }
   function setBeat(index) {
-    state.index = index; state.beatTime = 0; state.chars = 0;
+    state.index = index; state.beatTime = 0; state.chars = 0; state.held = null; state.holding = false;
     const beat = state.cfg.beats[index];
     state.shown = false; showBox(false);
     el('dialogueProgress').textContent = (index + 1) + ' / ' + state.cfg.beats.length;
@@ -750,7 +816,7 @@ const StoryScene = (() => {
     state.beatWait = index === 0 ? Math.max(beat.wait || 0, state.openingBlack + state.openingFade) : (beat.wait || 0);
     state.nextAt = state.time + state.beatWait;
     if (beat.camera) {
-      state.cameraKey = beat.camera;
+      state.cameraKey = beat.camera; state.follow = null;   // 換鏡頭：不再跟著人
       // 畫面已經全黑時換鏡頭：直接切過去（不然亮回來時還看得到鏡頭慢慢滑到別的房間）
       const p = state.cfg.cameras?.[beat.camera];
       if (p && ((state.screen && screenDark() >= .99) || state.captionOn)) { state.camera = [p[0], p[1]]; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom); }   // 過場字卡蓋著（全黑）時也一樣
@@ -761,6 +827,7 @@ const StoryScene = (() => {
       state.screen = { from, to: beat.screen === 'black' ? 1 : 0, t: 0, dur: Math.max(.1, Number(beat.screenFade) || 2), free: !!beat.screenFree };
     }
     if (state.door && (beat.door === 'open' || beat.door === 'close')) state.door.target = beat.door === 'open' ? 1 : 0;
+    if (beat.elevator === 'open' || beat.elevator === 'close') storyElevator(beat.elevator);
     // sfx：翻到這頁時播一個音效（js/sfx.js 的名字，例如 storyDoor 自動門）；sfxVolume＝音量倍率；快轉（storyFrom）時不播
     // bgm：這頁換音樂（先把現在的收掉，bgmDelay 秒後播新的；空白＝只停掉）
     if ('bgm' in beat) {
@@ -773,6 +840,10 @@ const StoryScene = (() => {
     if (beat.sfx && typeof SFX !== 'undefined' && !state.skipping) SFX.play(beat.sfx, Number(beat.sfxVolume) > 0 ? Number(beat.sfxVolume) : 1, beat.sfx + ':story-beat');
     const show = a => { if (a.hidden) { a.hidden = false; a.alpha = 0; } a.fading = false; };   // 先隱藏的人：淡入出現
     for (const id of Object.keys(beat.hide || {})) { const a = actor(id); if (a) { a.hidden = true; a.target = null; a.path = []; a.exiting = a.fading = false; } }
+    // 出現（每頁 show: { 角色id: true }）：先隱藏的人在原地淡入出現；坐著的照樣坐著（走位／瞬移會讓人站起來，這個不會）
+    for (const [id, v] of Object.entries(beat.show || {})) { const a = actor(id); if (v && a) show(a); }
+    // 鏡頭晃一下（每頁 shake: 晃多大，像素）：關門「砰」的那一下用；快轉時不晃
+    if (Number(beat.shake) > 0 && !state.skipping) state.shake = Math.max(state.shake, Number(beat.shake));
     for (const [id, p] of Object.entries(beat.place || {})) {   // 瞬間移到某處（黑幕轉場時用）
       const a = actor(id); if (!a) continue;
       a.hidden = false; a.alpha = 1; a.fading = a.exiting = false; a.target = null; a.path = []; a.x = p[0] * CELL; a.y = p[1] * CELL; a.sitting = null;
@@ -813,8 +884,19 @@ const StoryScene = (() => {
     if ('records' in beat) setRecords(beat.records);
     if ('filter' in beat) setFilter(beat.filter);
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
+    for (const id of [...Object.keys(beat.move || {}), ...Object.keys(beat.exit || {}), ...Object.keys(beat.place || {})]) { const a = actor(id); if (a?.trail && !(beat.trail && id in beat.trail)) stopTrail(a); }   // 自己走位／離場／瞬移：不再跟著別人
     for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p, beat.via?.[id]); }
-    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
+    // exitSfx（離場音效）：這頁離場的人真的走到、開始淡出的那一刻才播（例如關門聲）——人還在路上就翻頁也不會先響
+    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; a.exitSfx = beat.exitSfx || ''; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
+    for (const [id, who] of Object.entries(beat.trail || {})) {   // 跟在後面：先隱藏的人會淡入出現；空白＝不跟了，停在原地
+      const a = actor(id); if (!a) continue;
+      if (a.trail) stopTrail(a);
+      if (who && actor(who)) { show(a); rise(a); a.exiting = false; a.target = null; a.path = []; a.trail = who; }
+    }
+    if ('follow' in beat) {
+      state.follow = beat.follow || null;
+      if (state.follow && state.captionOn) { const t = cameraTarget(); state.camera = [t[0], t[1]]; }   // 過場字卡蓋著（全黑）：直接切過去
+    }
     for (const [id, d] of Object.entries(beat.face || {})) {   // 方向，或看向某個地點／某個人
       const a = actor(id); if (!a) continue;
       const point = state.cfg.points?.[d], other = !point && actor(d);
@@ -852,6 +934,7 @@ const StoryScene = (() => {
   function next() {
     if (!state?.playing || state.ending || state.time < state.nextAt || screenBusy()) return;   // 黑幕還在變：等它變完才能翻頁
     const beat = state.cfg.beats[state.index], length = Array.from(beat.text).length;
+    if (state.chars >= length && holdBusy()) return;   // 等人走到定點（holdAt）：字都出來了也先不能翻頁
     state.nextAt = state.time + .18;
     if (typeof sfx === 'function') sfx('blip');
     if (state.chars < length) { state.chars = length; renderText(); return; }
@@ -891,7 +974,8 @@ const StoryScene = (() => {
     if (!typing && beat.choices?.length && !state.choosing && el('storyChoices').hidden) showChoices();
     if (el('dialogueText').textContent !== text) el('dialogueText').textContent = text;
     el('dialogueText').classList.toggle('typing', typing);
-    setDialogueNextLabel(typing ? '快速顯示' : state.index === state.cfg.beats.length - 1 ? '結束' : '下一句');
+    state.holding = !typing && holdBusy();
+    setDialogueNextLabel(typing ? '快速顯示' : state.holding ? '……' : state.index === state.cfg.beats.length - 1 ? '結束' : '下一句');   // 等人走到定點時按鈕顯示「……」
   }
   function positionCamera() {
     const vw = viewW(), vh = viewH(), mw = COLS * CELL, mh = ROWS * CELL;
@@ -1072,10 +1156,12 @@ const StoryScene = (() => {
         a.anim += dt; a.emoteT = (a.emoteT || 0) + dt;
         if (a.role === 'shooter') tickShooter(a, dt);
         if (a.role === 'medic') { if (!a.target) a.pause -= dt; tickMedic(a); }
+        if (a.trail) { tickTrail(a, dt); continue; }   // 跟在別人後面：位置由 tickTrail 決定
         if (!a.target) continue;
         const dx = a.target[0] - a.x, dy = a.target[1] - a.y, d = Math.hypot(dx, dy), step = dt * (a.speed || 26);
         a.moving = d > step;
-        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) { if (a.exiting) a.fading = true; else a.dir = arriveFace(a) || a.dir; } }   // 離場（exit）的人走到後維持走路的方向淡出，不轉身
+        if (a.exiting && a.exitSfx && !a.path?.length && d <= (a.speed || 26) * EXIT_SFX_LEAD) { if (typeof SFX !== 'undefined') SFX.play(a.exitSfx, 1, a.exitSfx + ':story-exit'); a.exitSfx = ''; }   // 離場音效：最後一小段路、快到門口時播
+        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) { if (a.exiting) { a.fading = true; if (a.exitSfx && typeof SFX !== 'undefined') SFX.play(a.exitSfx, 1, a.exitSfx + ':story-exit'); a.exitSfx = ''; } else a.dir = arriveFace(a) || a.dir; } }   // 離場（exit）的人走到後維持走路的方向淡出，不轉身
         else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
       }
       for (const a of state.actors) {
@@ -1093,6 +1179,8 @@ const StoryScene = (() => {
         else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
       }
       if (state.door) tickDoor(state.door, dt);
+      tickLift(dt);
+      if (state.holding && !holdBusy()) renderText();   // 人走到了：按鈕換回「下一句」
       if (state.meter && state.meter.t < state.meter.dur) { state.meter.t += dt; drawMeter(); }   // 數值條的數字慢慢跳
       tickParty(dt);
       for (const e of state.monsters) tickMonster(e, dt);
@@ -1109,7 +1197,7 @@ const StoryScene = (() => {
       if (boom && (state.boomT -= dt) <= 0) { state.boomT = rnd(boom.min ?? 7, Math.max(boom.min ?? 7, boom.max ?? 16)); distantBoom(boom); }
       state.shake = Math.max(0, state.shake - dt * 10);
       if (state.rumble && (state.rumble.t += dt) >= state.rumble.dur) state.rumble = null;
-      const target = state.cfg.cameras?.[state.cameraKey] || state.camera, k = 1 - Math.exp(-dt * 1.5);
+      const target = cameraTarget(), k = 1 - Math.exp(-dt * (state.follow ? 3 : 1.5));   // 跟著人的時候鏡頭跟緊一點
       const zoomTo = camZoom(target, state.baseZoom) * (1 + CHARGE.zoom * chargeLevel());   // 集氣時鏡頭慢慢推近
       const aim = keepChargerInView(target, zoomTo);
       state.camera = [0, 1].map(i => state.camera[i] + (aim[i] - state.camera[i]) * k);
@@ -1467,6 +1555,8 @@ const StoryScene = (() => {
     if (typeof drawScorchMarks === 'function') drawScorchMarks(ctx);   // 雷擊焦痕
     drawDoor();   // 自動門畫在地面這層：從門裡走出來、走進去的人都在門前面
     const sortables = []; collectMapOccluders(ctx, sortables);
+    // 電梯（關著／開著／開關門動畫，js/maploader.js）：排在它後面那面牆的前面、站在電梯門口的人後面
+    if (typeof drawElevators === 'function') for (const s of elevatorStamps()) sortables.push({ y: (s.r + mapTileH(mapTileById(s.id))) * CELL + (s.oy || 0) + 8, draw: () => drawElevators(ctx, s) });
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
     const drawFried = e => {   // 被雷劈：焦黑；倒下時以腳底為軸往後轉 90 度，躺在地上
       const k = Math.max(0, Math.min(1, (e.friedT - THUNDER.fry) / THUNDER.fall)), fy = e.y + 13;

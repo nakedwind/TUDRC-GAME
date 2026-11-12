@@ -105,7 +105,7 @@ function bagWorkshopTextEntries() {   // [背包的物品 id, 開發工坊的 ke
   if (typeof EQUIPMENT !== 'undefined') for (const d of EQUIPMENT) out.push(['gear:' + d.id, d.id, d]);
   return out;
 }
-const bagWorkshopKey = itemId => { const e = bagWorkshopTextEntries().find(x => x[0] === itemId); return e ? e[1] : null; };
+const bagWorkshopKey = itemId => { itemId = String(itemId).replace(/#\d+$/, '');   /* 新版裝備：某一件的代號（id#流水號）→ 這種裝備 */ const e = bagWorkshopTextEntries().find(x => x[0] === itemId); return e ? e[1] : null; };
 // 工坊沒改過時原本的名稱、說明
 function bagWorkshopBase(itemId, key) {
   if (key.startsWith('b:')) return itemTextOriginal.get(itemId) || {};

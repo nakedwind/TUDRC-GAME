@@ -269,7 +269,7 @@ const sqLookText = (id, f, def) => { const t = typeof SQUAD_LAYOUT !== 'undefine
 let squadShownItem = null;   // 下方「裝備說明／裝備數值」現在顯示的是哪一件：{ kind: 'gear'|'look', id }（編輯器改字用）
 function squadAvailList(type) {   // 下面「可用裝備」：選的是隊員裝備格→背包裡的隊員裝備；外觀格→能穿的服裝／配件
   const sl = squadPageState.slot;
-  if (sl.kind === 'gear') return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0 && squadGearFits(g.id, sl.id)).map(g => ({ id: g.id, ref: { kind: 'gear', id: g.id }, name: g.name, image: squadGearImage(g), n: supplyInventory.get(g.id), desc: g.desc, stat: squadGearEffect(g) }));
+  if (sl.kind === 'gear') return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0 && squadGearFits(g.id, sl.id)).map(g => ({ id: g.id, ref: { kind: 'gear', id: g.typeId || g.id }, name: g.name, image: squadGearImage(g), n: supplyInventory.get(g.id), lv: typeof squadGearLv === 'function' ? squadGearLv(g.id) : 0, desc: g.desc, stat: squadGearEffect(g) }));   // 新版裝備一件一筆：lv＝這一件的等級；typeId＝它是哪一種（編輯器改字是照種類）
   if (typeof costumeSkinsFor === 'undefined') return [];
   if (sl.id === 'skin') return costumeSkinsFor(type).map(s => ({ id: 'skin-' + s.id, wear: s.id, name: s.name, image: 'images/character/' + s.folder + '/' + s.folder.replace('_', '') + '_0000_Front.png', ref: { kind: 'look', id: s.id }, desc: sqLookText(s.id, 'desc', s.builtin ? '原本的服裝。' : '扭蛋得到的服裝' + (s.rarity ? '（' + s.rarity + '）' : '') + '。'), stat: sqLookText(s.id, 'stat', '外觀裝備，不影響數值') }));
   return COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, sl.id) && costumeCanWear(type, a.id)).map(a => ({ id: a.id, wear: a.id, name: a.name, image: a.art.front, ref: { kind: 'look', id: a.id }, desc: sqLookText(a.id, 'desc', '扭蛋得到的配件' + (a.rarity ? '（' + a.rarity + '）' : '') + '。'), stat: sqLookText(a.id, 'stat', '外觀裝備，不影響數值') }));
@@ -299,7 +299,7 @@ function squadGearHtml(actor, safe) {
   const pick = st.avail ? avail.find(a => a.id === st.avail) : null;
   const wornAt = pick && st.slot.kind === 'gear' ? squadGearWornAt(type, pick.id, st.slot.id) : -1;   // 同一件只能穿一格
   let cur = null;
-  if (st.slot.kind === 'gear') { const g = squadGearById(gear[st.slot.id]); if (g) cur = { ref: { kind: 'gear', id: g.id }, name: g.name, desc: g.desc, stat: squadGearEffect(g) }; }
+  if (st.slot.kind === 'gear') { const g = squadGearById(gear[st.slot.id]); if (g) cur = { ref: { kind: 'gear', id: g.typeId || g.id }, name: g.name, desc: g.desc, stat: squadGearEffect(g) }; }
   else { const it = squadLookItem(type, st.slot.id); if (it) cur = { ref: { kind: 'look', id: it.id }, name: it.name, desc: sqLookText(it.id, 'desc', it.builtin ? '原本的服裝。' : '外觀裝備。'), stat: sqLookText(it.id, 'stat', '外觀裝備，不影響數值') }; }
   const show = pick || cur;
   squadShownItem = show ? { ...show.ref, name: show.name, desc: show.desc || '', stat: show.stat || '' } : null;
@@ -309,7 +309,7 @@ function squadGearHtml(actor, safe) {
     '<b class="sq-title stat" data-sq="text.statTitle">' + sqT('text.statTitle', '裝備數值') + '</b>' +
     '<div class="sq-box stat" data-sq="box.stat"><p data-sq="text.stat">' + (show ? sqEsc(show.stat || '—').replace(/\n/g, '<br>') : '<span class="sq-dim">無。</span>') + '</p></div>' +
     '<b class="sq-title avail" data-sq="text.availTitle">' + sqT('text.availTitle', '可用裝備') + '</b>' +
-    '<div class="sq-avail" data-sq="panel.avail">' + (avail.length ? avail.map(a => '<button type="button" class="sq-avail-item' + (a.id === st.avail ? ' sel' : '') + '" data-avail="' + sqEsc(a.id) + '" data-sq="avail:' + sqEsc(a.id) + '" title="' + sqEsc(a.name) + '"><img data-sq="availImg:' + sqEsc(a.id) + '" src="' + sqEsc(a.image) + '" alt="">' + (a.n > 1 ? '<em>×' + a.n + '</em>' : '') + '</button>').join('')
+    '<div class="sq-avail" data-sq="panel.avail">' + (avail.length ? avail.map(a => '<button type="button" class="sq-avail-item' + (a.id === st.avail ? ' sel' : '') + '" data-avail="' + sqEsc(a.id) + '" data-sq="avail:' + sqEsc(a.id) + '" title="' + sqEsc(a.name) + '"><img data-sq="availImg:' + sqEsc(a.id) + '" src="' + sqEsc(a.image) + '" alt="">' + (a.lv ? '<em>Lv' + a.lv + '</em>' : a.n > 1 ? '<em>×' + a.n + '</em>' : '') + '</button>').join('')
       : '<p class="sq-dim">' + (st.slot.kind === 'gear' ? '背包裡沒有隊員裝備（找諾亞的開發工坊製作）' : '還沒有這個欄位的外觀裝備') + '</p>') + '</div>' +
     '<button type="button" class="sq-btn unequip" data-gear-unequip data-sq="btn.unequip"' + (cur && safe && !(st.slot.kind === 'look' && st.slot.id === 'skin' && cur.desc === '原本的服裝。') ? '' : ' disabled') + '>' + sqT('btn.unequip', '卸下裝備') + '</button>' +
     '<button type="button" class="sq-btn equip" data-gear-equip data-sq="btn.equip"' + (pick && safe && wornAt < 0 ? '' : ' disabled') + '>' + (wornAt >= 0 ? '已穿在「' + squadGearSlotName(wornAt) + '」' : sqT('btn.equip', '穿上裝備')) + '</button></section>';
@@ -613,7 +613,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
       G.running = true;
       document.querySelectorAll('#itemIntro, #pauseBadge').forEach(el => el.classList.add('hidden'));
       const editors = document.getElementById('editors'); if (editors) editors.style.display = 'none';
-      for (const g of squadGearList()) supplyInventory.set(g.id, 2);   // 每件隊員裝備放 2 件、碎片給很多、服裝都拿到（存檔被擋住了，不會留下來）
+      if (typeof gearStockAll === 'function' && GEAR_V2) gearStockAll(2); else for (const g of squadGearList()) supplyInventory.set(g.id, 2);   // 每件隊員裝備放 2 件（新版裝備：js/gear-v2.js）、碎片給很多、服裝都拿到（存檔被擋住了，不會留下來）
       training.crystals = 9999;
       if (typeof costumeState !== 'undefined' && typeof COSTUME_ACCESSORIES !== 'undefined') for (const a of COSTUME_ACCESSORIES) costumeState.owned[a.id] = costumeState.owned[a.id] || 1;
       const realClose = closeTPad, realHome = showTPadHome;
