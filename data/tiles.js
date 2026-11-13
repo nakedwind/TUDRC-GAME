@@ -4076,6 +4076,62 @@ const SHARED_TILES = [
     "h": 3
   },
   {
+    "id": "tile_mrt_room_wallx3",
+    "name": "捷運灰牆X3",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wallX3.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_room_wallx3_crack",
+    "name": "捷運灰牆X3（裂縫）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wallX3-crack.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_room_wallx3_hole",
+    "name": "捷運灰牆X3（破洞）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wallX3-hole.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_room_wallx3_breakable",
+    "name": "捷運灰牆X3（可炸開）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wallX3.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_room_wallx3_secret",
+    "name": "捷運灰牆X3（可炸開・隱藏區）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wallX3.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_room_wallx3_crack_breakable",
+    "name": "捷運灰牆X3（裂縫・可炸開）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wallX3-crack.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_room_wallx3_crack_secret",
+    "name": "捷運灰牆X3（裂縫・可炸開・隱藏區）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wallX3-crack.png",
+    "w": 3,
+    "h": 4
+  },
+  {
     "id": "tile_cvs_checkout_counter_backroom",
     "name": "後室便利商店櫃台（後室商店）",
     "role": "floor",

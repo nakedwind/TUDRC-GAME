@@ -8,6 +8,7 @@
    炸開之後才慢慢顯現（隱藏的通道／房間）。
    「後室牆面（裂縫・可炸開）」「後室牆面（裂縫・可炸開・隱藏區）」（Back-room-wall02-damage-03 的圖）：已經裂開，炸一次就開。
    另一種做法：地圖編輯器把圖層設成「🧱 隱藏區」，那些圖層上的東西在炸開最近的可炸開牆之前不畫（secretLayerAreas、secretAlpha）。
+   捷運站也有同一套：「捷運灰牆X3（可炸開／可炸開・隱藏區／裂縫・可炸開／裂縫・可炸開・隱藏區）」，3 格寬 4 格高。
    「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
    提示：隱藏區的牆、裂縫牆都要帶球球（學會密道搜索）才找得到，找到後牆上一直有白色狗腳印＋「?」的小牌子
    （drawBreakableWallHints）；沒帶球球就沒有任何提示。
@@ -18,6 +19,8 @@
 // 隱藏區版本自帶擋路格：跟一般後室牆一樣下面兩排都擋，炸開後中間那一欄打通（跟破洞牆 hole 的擋路格一樣），
 // 地圖編輯器不用另外畫擋路格；隱藏區從最上排中間那格（hideFrom）往外找
 const SECRET_WALL_OPEN = [[1, 2], [1, 1]], SECRET_WALL_SOLID = [[0, 1], [2, 1], [0, 2], [2, 2]];
+// 捷運灰牆X3（4 格高）的隱藏區版本：最上排（牆頂）以外的三排都擋，炸開後中間那一欄打通
+const MRT_SECRET_WALL_OPEN = [[1, 3], [1, 2], [1, 1]], MRT_SECRET_WALL_SOLID = [[0, 1], [2, 1], [0, 2], [2, 2], [0, 3], [2, 3]];
 const BREAKABLE_WALLS = {
   tile_bg_backroom_wall02_breakable: {
     stages: ['tile_bg_backroom_wall02_dmg_crack', 'tile_bg_backroom_wall02_hole2'],
@@ -39,6 +42,29 @@ const BREAKABLE_WALLS = {
   tile_bg_backroom_wall02_crack_secret: {      // 隱藏區版本：炸開前牆上方被圍起來的區域塗黑
     stages: ['tile_bg_backroom_wall02_hole2'],
     open: SECRET_WALL_OPEN, solid: SECRET_WALL_SOLID,
+    pad: 1,
+    hide: true, hideFrom: [1, 0], hideMax: 1500,
+  },
+  // ---- 捷運灰牆X3（images/捷運車站/mrt-room-wallX3*.png）：3 格寬、4 格高，比後室牆多一排，規則都一樣 ----
+  tile_mrt_room_wallx3_breakable: {
+    stages: ['tile_mrt_room_wallx3_crack', 'tile_mrt_room_wallx3_hole'],
+    open: [[1, 3]], solid: [[0, 3], [2, 3]],
+    pad: 1,
+  },
+  tile_mrt_room_wallx3_secret: {
+    stages: ['tile_mrt_room_wallx3_crack', 'tile_mrt_room_wallx3_hole'],
+    open: MRT_SECRET_WALL_OPEN, solid: MRT_SECRET_WALL_SOLID,
+    pad: 1,
+    hide: true, hideFrom: [1, 0], hideMax: 1500,
+  },
+  tile_mrt_room_wallx3_crack_breakable: {   // 已經裂開：炸一次就開
+    stages: ['tile_mrt_room_wallx3_hole'],
+    open: [[1, 3]], solid: [[0, 3], [2, 3]],
+    pad: 1,
+  },
+  tile_mrt_room_wallx3_crack_secret: {
+    stages: ['tile_mrt_room_wallx3_hole'],
+    open: MRT_SECRET_WALL_OPEN, solid: MRT_SECRET_WALL_SOLID,
     pad: 1,
     hide: true, hideFrom: [1, 0], hideMax: 1500,
   },

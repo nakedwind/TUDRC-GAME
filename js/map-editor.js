@@ -400,6 +400,7 @@ function loadTiles() {
   const breakableWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_breakable', 'tudrc_breakable_wall_v1');   // 後室牆面（可炸開）：js/breakable-walls.js
   const backroomCounterAdded = mergeDefaultAssetPack(t => t.id === 'tile_cvs_checkout_counter_backroom', 'tudrc_backroom_counter_v1');   // 後室商店櫃台（js/shop.js）
   const secretWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_secret', 'tudrc_secret_wall_v1');   // 後室牆面（可炸開・隱藏區）
+  const mrtWallX3Added = mergeDefaultAssetPack('tile_mrt_room_wallx3', 'tudrc_mrt_wall_x3_v1');   // 捷運灰牆X3：完整／裂縫／破洞＋可炸開、隱藏區版本（js/breakable-walls.js）
   const backgroundExtrasAdded = mergeDefaultAssetPack('tile_bg_extra_', 'tudrc_asset_background_extras_20261018');
   const researchLabAdded = mergeDefaultAssetPack('tile_research_lab_', STORAGE_RESEARCH_LAB_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
@@ -429,7 +430,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (poolBaseAdded || supplyBoxAdded || backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
+  if (poolBaseAdded || supplyBoxAdded || backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || mrtWallX3Added || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -2261,7 +2262,7 @@ function toggleSecretLayer(id = activeLayer) {
   const cur = customizeLayers(m).find(l => l.id === id); if (!cur) return;
   if (cur.secret) delete cur.secret; else cur.secret = true;
   syncLayers(); renderLayers(); saveMaps();
-  const hasWall = (m.stamps || []).some(s => /^tile_bg_backroom_wall02_(crack_)?(breakable|secret)$/.test(s.id));
+  const hasWall = (m.stamps || []).some(s => /^(tile_bg_backroom_wall02|tile_mrt_room_wallx3)_(crack_)?(breakable|secret)$/.test(s.id));
   setStatus(cur.secret
     ? '「' + cur.name + '」設成隱藏區：遊戲裡平常全黑，炸開最近的可炸開牆才出現' + (hasWall ? '' : '（這張地圖還沒有可炸開的牆，記得放一面）')
     : '「' + cur.name + '」改回一般圖層', cur.secret && !hasWall ? '#ffd24a' : '#7ee0c0');
