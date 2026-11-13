@@ -24,22 +24,26 @@ function computeRampUpper() {
   const up = dist(n => deckCells.has(n)), down = dist(n => !deckCells.has(n) && !mapWalls.has(n));
   for (const k of rampCells) if ((up.get(k) ?? Infinity) <= (down.get(k) ?? Infinity)) rampUpperCells.add(k);
 }
-function setMapFloors(deck, ramps) {
-  deckCells = new Set(deck || []); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
+// 2 樓地面上畫的紅格（地圖編輯器親手畫的碰撞格）：2 樓的人也擋（1 樓本來就擋）。
+// 只算地圖資料的紅格，不算 1 樓物件自帶的碰撞（陸橋底下的販賣機不會跑上去擋 2 樓）；炸開的牆會從 mapWalls 拿掉，所以還要 mapWalls 裡有才算
+let deckSolid = new Set();
+const deckBlocked = k => deckSolid.has(k) && mapWalls.has(k);
+function setMapFloors(deck, ramps, solid) {
+  deckCells = new Set(deck || []); deckSolid = new Set((solid || []).filter(k => deckCells.has(k))); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
 }
 function wallOnFloor(f, c, r) {
   const k = c + ',' + r;
   if (rampCells.has(k)) return mapWalls.has(k);
   if (f !== 2) return mapWalls.has(k);
-  return !deckCells.has(k);
+  return !deckCells.has(k) || deckBlocked(k);
 }
 // 站在樓層出入口上的人，走出去的格子照「走出去之後在哪一層」判斷：走到 2 樓地面不管一樓有沒有牆都走得過去，走到一般格子照一樓的牆
 let floorOnRamp = false, floorOnDeck = false;
 function wallNow(c, r) {
   const k = c + ',' + r;
   if (rampCells.has(k)) return mapWalls.has(k) || (floorCtx !== 2 && !floorOnRamp && floorOnDeck);   // 一樓的人站在 2 樓地面的格子上：不能從這邊走進手扶梯（只能從一樓那頭上去）
-  if (floorOnRamp) return deckCells.has(k) ? false : mapWalls.has(k);
-  return floorCtx === 2 ? !deckCells.has(k) : mapWalls.has(k);
+  if (floorOnRamp) return deckCells.has(k) ? deckBlocked(k) : mapWalls.has(k);
+  return floorCtx === 2 ? !deckCells.has(k) || deckBlocked(k) : mapWalls.has(k);
 }
 const isWall = (c, r) => hasFloors ? wallNow(c, r) : mapWalls.has(c + ',' + r);
 // 處理某個角色之前先呼叫：設好「他在幾樓、是不是站在樓層出入口上」（算完用 clearFloorCtx 還原）
