@@ -24,12 +24,12 @@ function computeRampUpper() {
   const up = dist(n => deckCells.has(n)), down = dist(n => !deckCells.has(n) && !mapWalls.has(n));
   for (const k of rampCells) if ((up.get(k) ?? Infinity) <= (down.get(k) ?? Infinity)) rampUpperCells.add(k);
 }
-// 2 樓地面上畫的紅格（地圖編輯器親手畫的碰撞格）：2 樓的人也擋（1 樓本來就擋）。
-// 只算地圖資料的紅格，不算 1 樓物件自帶的碰撞（陸橋底下的販賣機不會跑上去擋 2 樓）；炸開的牆會從 mapWalls 拿掉，所以還要 mapWalls 裡有才算
-let deckSolid = new Set();
-const deckBlocked = k => deckSolid.has(k) && mapWalls.has(k);
-function setMapFloors(deck, ramps, solid) {
-  deckCells = new Set(deck || []); deckSolid = new Set((solid || []).filter(k => deckCells.has(k))); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
+// 2 樓碰撞（地圖編輯器的「🚧 2樓碰撞」筆刷，存在 MAP.solid2）：只擋 2 樓的人，1 樓照常走。
+// 1 樓的紅格（MAP.solid）跟它分開，只擋 1 樓
+let floor2Solid = new Set();
+const deckBlocked = k => floor2Solid.has(k);
+function setMapFloors(deck, ramps, solid2) {
+  deckCells = new Set(deck || []); floor2Solid = new Set(solid2 || []); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
 }
 function wallOnFloor(f, c, r) {
   const k = c + ',' + r;

@@ -269,7 +269,7 @@ function initMap() {
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
-  setMapFloors(MAP.deck, MAP.ramps, MAP.solid);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
+  setMapFloors(MAP.deck, MAP.ramps, MAP.solid2);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
   // 牆格整組重建了：上一張地圖的門、捷運閘門、可炸牆、置物箱「加進去的格子」不能再拿來刪
   // （不然上一張地圖剛好在同一格有門，就會把這張地圖本來畫好的牆刪掉，人可以穿牆）
   if (typeof doorAddedWalls !== 'undefined') doorAddedWalls = new Set();

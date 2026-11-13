@@ -520,7 +520,8 @@ function fixMap(m) {
   if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   if (Array.isArray(m.deck) && m.deck.length) m.deck = [...new Set(m.deck)]; else delete m.deck;   // 🌉 2樓地面：['欄,列'…]（js/pathfinding.js）
-  if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;   // 🛗 樓層出入口：['欄,列'…]（手扶梯、樓梯：走出去就換樓層）
+  if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;
+  if (Array.isArray(m.solid2) && m.solid2.length) m.solid2 = [...new Set(m.solid2)]; else delete m.solid2;   // 🚧 2樓碰撞：['欄,列'…]，只擋 2 樓的人（js/pathfinding.js）   // 🛗 樓層出入口：['欄,列'…]（手扶梯、樓梯：走出去就換樓層）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
@@ -1413,7 +1414,7 @@ function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
   const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
-  const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []);   // 陸橋：2樓地面、樓層出入口
+  const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []), solid2Set = new Set(m.solid2 || []);   // 陸橋：2樓地面、樓層出入口
 
   ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0);   // 遊戲畫質：放大畫（座標照舊用一格 40）
   ctx.imageSmoothingEnabled = false;
@@ -1458,7 +1459,12 @@ function draw() {
       ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('👾', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
     }
-    if ((showSolid || brush.mode === 'deck' || brush.mode === 'ramp') && (deckSet.has(key) || rampSet.has(key))) {   // 🌉 2樓地面（藍）、🛗 樓層出入口（橘）
+    if ((showSolid || brush.mode === 'solid2' || brush.mode === 'deck') && solid2Set.has(key)) {   // 🚧 2樓碰撞（紫色斜線框）：只擋 2 樓
+      ctx.fillStyle = 'rgba(190,90,255,.30)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = 'rgba(220,150,255,.95)'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
+      ctx.beginPath(); ctx.moveTo(x + 6, y + CELL - 6); ctx.lineTo(x + CELL - 6, y + 6); ctx.stroke();
+    }
+    if ((showSolid || brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') && (deckSet.has(key) || rampSet.has(key))) {   // 🌉 2樓地面（藍）、🛗 樓層出入口（橘）
       const isRamp = rampSet.has(key);
       ctx.fillStyle = isRamp ? 'rgba(255,160,40,.32)' : 'rgba(70,150,255,.28)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = isRamp ? 'rgba(255,200,120,.9)' : 'rgba(140,200,255,.85)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
@@ -1496,9 +1502,9 @@ function draw() {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
-  if (brush.mode === 'deck' || brush.mode === 'ramp' || (m.deck || []).length || (m.ramps || []).length) {
+  if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2' || (m.deck || []).length || (m.ramps || []).length) {
     ctx.fillStyle = '#8fc8ff'; ctx.textAlign = 'left';
-    ctx.fillText('🌉 2樓地面 ' + (m.deck || []).length + ' 格／🛗 樓層出入口 ' + (m.ramps || []).length + ' 格' + ((m.deck || []).length && (m.ramps || []).length ? '' : '（兩種都要畫，遊戲才會有 2 樓）'), OX + 6, OY + 52);
+    ctx.fillText('🌉 2樓地面 ' + (m.deck || []).length + ' 格／🛗 樓層出入口 ' + (m.ramps || []).length + ' 格／🚧 2樓碰撞 ' + (m.solid2 || []).length + ' 格' + ((m.deck || []).length && (m.ramps || []).length ? '' : '（兩種都要畫，遊戲才會有 2 樓）'), OX + 6, OY + 52);
   }
   // 電路編號（開關、電燈右上角的紅色小圓牌，1～5，沒設定的算 1）：選起來在上方的「電路編號」設定
   for (const s of (m.stamps || [])) {
@@ -1825,8 +1831,8 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     saveMaps(); draw();
     setStatus((edgePaint.add ? '已加上' : '已拿掉') + '邊緣碰撞（這張地圖共 ' + ((m.edges || []).length) + ' 條）：按著沿格線拖曳可以連續' + (edgePaint.add ? '畫' : '擦'), '#ffb347');
     return;
-  } else if (brush.mode === 'deck' || brush.mode === 'ramp') {   // 🌉 2樓地面／🛗 樓層出入口：拖曳畫一片、再畫一次＝擦掉（兩種各自一組格子）
-    const f = brush.mode === 'deck' ? 'deck' : 'ramps', list = m[f] || (m[f] = []);
+  } else if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') {   // 🌉 2樓地面／🛗 樓層出入口／🚧 2樓碰撞：拖曳畫一片、再畫一次＝擦掉（各自一組格子）
+    const f = brush.mode === 'deck' ? 'deck' : brush.mode === 'ramp' ? 'ramps' : 'solid2', list = m[f] || (m[f] = []);
     if (isDown) deckPaintAdd = !list.includes(key);
     if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
     if (!list.length) delete m[f];
@@ -3705,13 +3711,13 @@ document.getElementById('clearSolid')?.addEventListener('click', () => {
   if (!n) { setStatus('這張地圖沒有碰撞可以刪', '#9aa4b2'); return; }
   if (!confirm('確定刪除「' + m.name + '」全部的碰撞？\n（' + (m.solid || []).length + ' 格紅格、' + (m.edges || []).length + ' 條邊緣碰撞，連同微調一起刪；基地自己的碰撞格不動。刪錯可以按 Ctrl+Z 復原）')) return;
   pushUndo();
-  m.solid = []; m.solidOffsets = {}; delete m.edges; delete m.edgeOffsets; solidNudgeCells.clear(); solidNudgeEdges.clear(); checkResult = null;
+  m.solid = []; m.solidOffsets = {}; delete m.solid2; delete m.edges; delete m.edgeOffsets; solidNudgeCells.clear(); solidNudgeEdges.clear(); checkResult = null;
   saveMaps(); draw(); setStatus('已刪除這張地圖全部的碰撞（Ctrl+Z 可以復原）', '#ffd24a');
 });
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear();
+  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.solid2; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear();
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -3839,6 +3845,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
   if (m.deck) m.deck = m.deck.map(shiftKey);
   if (m.ramps) m.ramps = m.ramps.map(shiftKey);
+  if (m.solid2) m.solid2 = m.solid2.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -3873,6 +3880,7 @@ function dropOutsideContent(m) {
   if (m.vinesFerry) { const n = m.vinesFerry.length; m.vinesFerry = m.vinesFerry.filter(f => insideKey(f.at) && insideKey(f.to)); removed += n - m.vinesFerry.length; if (!m.vinesFerry.length) delete m.vinesFerry; }
   if (m.deck) { m.deck = m.deck.filter(insideKey); if (!m.deck.length) delete m.deck; }
   if (m.ramps) { m.ramps = m.ramps.filter(insideKey); if (!m.ramps.length) delete m.ramps; }
+  if (m.solid2) { m.solid2 = m.solid2.filter(insideKey); if (!m.solid2.length) delete m.solid2; }
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
@@ -3974,6 +3982,19 @@ function generateDeckFromLayers() {
   setStatus('已整理 2 樓地面：加 ' + added + ' 格、拿掉牆裡面的 ' + removed + ' 格（原有 ' + before + ' 格，現在 ' + deck.size + ' 格；閘門、門不算牆）。不對可以 Ctrl+Z，或用 🌉 筆刷微調', '#7ee0c0');
 }
 { const gd = document.getElementById('genDeck'); if (gd) gd.addEventListener('click', generateDeckFromLayers); }
+// 🔁 把畫在 2 樓地面上的紅格（1 樓碰撞）改成 2 樓碰撞：以前用紅格當 2 樓的牆畫的地方，一鍵換過去（1 樓那幾格就不擋了）
+function convertDeckSolidTo2F() {
+  const m = curMap(), deck = new Set(m.deck || []);
+  const picks = (m.solid || []).filter(k => deck.has(k));
+  if (!picks.length) { setStatus('這張地圖沒有畫在 2 樓地面上的紅格', '#ffd24a'); return; }
+  if (!confirm('把畫在 🌉 2樓地面上的 ' + picks.length + ' 格紅格（1 樓碰撞）改成 🚧 2樓碰撞？\n\n改完：2 樓的人被擋、1 樓的人可以從底下走過去。\n（Ctrl+Z 可以復原）')) return;
+  pushUndo();
+  const set2 = new Set(m.solid2 || []); picks.forEach(k => set2.add(k));
+  m.solid2 = [...set2]; m.solid = m.solid.filter(k => !deck.has(k));
+  for (const k of picks) if (m.solidOffsets) delete m.solidOffsets[k];
+  saveMaps(); draw(); setStatus('已把 ' + picks.length + ' 格紅格改成 🚧 2樓碰撞', '#d9a6ff');
+}
+{ const cv2 = document.getElementById('deckSolidTo2F'); if (cv2) cv2.addEventListener('click', convertDeckSolidTo2F); }
 const safeField = document.getElementById('f_safe');
 if (safeField) safeField.addEventListener('change', e => {
   pushUndo(); curMap().safe = e.target.checked; saveMaps();
