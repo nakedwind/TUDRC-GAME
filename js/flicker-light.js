@@ -20,7 +20,9 @@ const FLICKER = {
   // 其他長得不一樣的燈管：檔名 → 燈管在圖片裡的位置（寬、高的比例）、燈管半長（寬的比例）、光暈圖（疊在燈上、跟著亮暗）
   // 地圖上跟燈疊在同一個位置的光暈圖物件，改由這裡畫（亮著才發光、畫在黑幕上面），不會被黑幕蓋掉
   variants: [
-    { file: /Poolcore_LED\.png$/i, tube: { fx: .5, fy: .4 }, half: .4, glow: 'images/Poolcore/Poolcore_LED_glow.png' },   // 池核的 LED 燈
+    // 池核的 LED 燈：也接電源開關（js/powered-lights.js：一進地圖就開著，按開關關掉）；
+    // 光暈圖是地圖上另外放的 Poolcore_LED_glow 物件，由 js/powered-lights.js 照編輯器的混合模式畫、跟著這裡的亮暗。noTube＝不畫燈管那條白線
+    { file: /Poolcore_LED\.png$/i, tube: { fx: .5, fy: .4 }, half: .4, noTube: true },
   ],
 };
 const flickerVariantOf = t => t && FLICKER.variants.find(v => v.file.test(String(t.file || '')) || v.file.test(String(t.name || '') + '.png'));
@@ -35,7 +37,7 @@ function flickerLights() {
   const list = [];
   // 認得日光燈的方式：素材 id、檔名、或素材名稱（在編輯器直接上傳的圖片沒有檔名，只能靠名稱認）
   const isTube = id => {
-    if (typeof isPoweredLightTile==='function'&&isPoweredLightTile(mapTileById(id)))return false;
+    if (typeof isPoweredLightTile==='function'&&isPoweredLightTile(mapTileById(id))&&!(typeof isPoolcoreLed==='function'&&isPoolcoreLed(mapTileById(id))))return false;   // 後室的電源燈只聽開關、不閃；池核 LED 會閃
     if (id === 'tile_bg_electric_light') return true;
     const t = typeof mapTileById === 'function' && mapTileById(id); if (!t) return false;
     if (flickerVariantOf(t)) return true;
@@ -43,7 +45,7 @@ function flickerLights() {
     return file.includes(FLICKER.file) || /electric-light|日光燈/i.test(String(t.name || ''));
   };
   const glowOwned = new Set();
-  const add = (left, top, fx, id) => {
+  const add = (left, top, fx, id, s = null) => {
     const t = mapTileById(id), v = flickerVariantOf(t), w = t ? mapTileW(t) * CELL : 80, h = t ? mapTileH(t) * CELL : 80;
     const x = v ? left + w * (fx ? 1 - v.tube.fx : v.tube.fx) : left + (fx ? 80 - FLICKER.tube.dx : FLICKER.tube.dx), y = v ? top + h * v.tube.fy : top + FLICKER.tube.dy;
     if (v && v.glow) for (const s of MAP.stamps || []) {   // 疊在同一個位置的光暈圖物件：這裡接手畫
@@ -51,14 +53,15 @@ function flickerLights() {
       if (gt && String(gt.file || '').endsWith(v.glow.split('/').pop()) && Math.abs(OX + s.c * CELL + (s.ox || 0) - left) < 6 && Math.abs(OY + s.r * CELL + (s.oy || 0) - top) < 6) glowOwned.add(s);
     }
     list.push({
-    x, y, half: v ? w * v.half : 19, glow: v && v.glow ? { src: v.glow, left, top, w, h, fx } : null,
+    x, y, half: v ? w * v.half : 19, glow: v && v.glow ? { src: v.glow, left, top, w, h, fx } : null, noTube: !!(v && v.noTube), stamp: s,
+    powered: typeof isPoweredLightTile === 'function' && isPoweredLightTile(t), circuit: typeof circuitOf === 'function' ? circuitOf(s) : 1,   // 接電源開關的燈（池核 LED）
     on: true, level: 1, blinkT: flickRand(FLICKER.blinkEvery), outT: flickRand(FLICKER.outEvery), sparkT: flickRand(FLICKER.sparkEvery),
     flick: null, seed: Math.random() * 10,
   });
   };
   for (const layer of Object.values(MAP.layers || {}))
     for (const [key, id] of Object.entries(layer)) if (isTube(id)) { const [c, r] = key.split(',').map(Number); add(OX + c * CELL, OY + r * CELL, false, id); }
-  for (const s of MAP.stamps || []) if (isTube(s.id)) add(OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), s.fx, s.id);
+  for (const s of MAP.stamps || []) if (isTube(s.id)) add(OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), s.fx, s.id, s);
   G.flickerLights = list; G.flickerLightsMap = MAP; G.elecArcs = []; G.flickerGlowStamps = glowOwned;
   return list;
 }
@@ -70,7 +73,12 @@ function updateFlickerLights(dt) {
   const stable = flickerStable();
   for (const L of flickerLights()) {
     if (typeof inHiddenArea === 'function' && inHiddenArea(L.x, L.y)) { L.flick = null; L.on = false; L.level = 0; continue; }   // 還沒炸開的隱藏區：不亮、不跳電、沒有嗡嗡聲
-    if (stable) { L.flick = null; L.on = true; L.level = 1; continue; }
+    if (L.powered && !mapPowerIsOn(L.circuit)) { L.flick = null; L.on = false; L.level = 0; L.powerOff = true; continue; }   // 電源關掉：不亮、不閃、沒有嗡嗡聲
+    if (L.powerOff) {   // 電源剛打開：閃幾下才亮穩
+      L.powerOff = false; L.on = false;
+      L.flick = { t: 0, steps: [[false, .12], [true, .06], [false, .14], [true, .08], [false, .1]] };
+    }
+    if (stable && !L.flick) { L.on = true; L.level = 1; continue; }
     if (L.flick) {   // 正在閃：照一串「亮／暗」的節奏走完
       L.flick.t -= dt;
       while (L.flick && L.flick.t <= 0) {
@@ -116,6 +124,8 @@ function zapSpark(L, n) {
 }
 
 // ---- 光源（js/lighting.js 的 getLights 會呼叫）：亮著時才算光 ----
+// 某個地圖物件（燈）現在的亮度 0～1（js/powered-lights.js 畫池核 LED 的光暈用）
+function flickerLevelOfStamp(s) { const L = flickerLights().find(L => L.stamp === s); return L ? L.level : 0; }
 function flickerLightSources() {
   return flickerLights().filter(L => L.on).map(L => ({ x: L.x, y: L.y + 20, visualX: L.x, visualY: L.y, r: FLICKER.radius * (.95 + .05 * L.level) }));
 }
@@ -134,7 +144,7 @@ function drawFlickerLights(ctx) {
     g.addColorStop(.6, `rgba(210,225,255,${.05 * k})`); g.addColorStop(1, 'rgba(200,220,255,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    if (!L.glow) { ctx.fillStyle = `rgba(255,255,235,${.85 * k})`; ctx.fillRect(L.x - L.half, L.y - 1.5, L.half * 2, 3); }   // 燈管本身發亮（有自己光暈圖的燈不畫：例如池核 LED，這條線會浮在燈上方變成一條白條）
+    if (!L.glow && !L.noTube) { ctx.fillStyle = `rgba(255,255,235,${.85 * k})`; ctx.fillRect(L.x - L.half, L.y - 1.5, L.half * 2, 3); }   // 燈管本身發亮（有自己光暈圖的燈不畫：例如池核 LED，這條線會浮在燈上方變成一條白條）
     if (L.glow) {   // 有自己的光暈圖（池核 LED）：亮著時疊上去，跟著閃
       const img = flickerGlowImg(L.glow.src), g = L.glow;
       if (img.complete && img.naturalWidth) { ctx.globalAlpha = k; ctx.save(); if (g.fx) { ctx.translate(g.left * 2 + g.w, 0); ctx.scale(-1, 1); } ctx.drawImage(img, g.left, g.top, g.w, g.h); ctx.restore(); ctx.globalAlpha = 1; }

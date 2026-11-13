@@ -217,8 +217,8 @@ function powerSwitchTileFor(id,on){
   const pair=powerSwitchSwap.get(id);return (on?pair.on:pair.off)||null;
 }
 function storagePropDisplayTile(id,c,r,layer,stamp=null){
-  // 池核的 LED 燈條：電源開著時畫成發光的圖（js/powered-lights.js）
-  if(typeof isPoolcoreLed==='function'&&isPoolcoreLed(mapTileById(id))){ return mapPowerIsOn(circuitOf(stamp))?poolcoreLedGlowTile():null; }
+  // 池核的 LED 燈條：燈本身一律照原圖畫；通電時疊在上面的光暈圖由 js/powered-lights.js 畫在黑幕上面
+  if(typeof isPoolcoreLed==='function'&&isPoolcoreLed(mapTileById(id)))return null;
   const kind=storagePropKindCached(id);   // 畫地圖時每一格都會問：用記起來的結果
   if(!kind)return null;
   if(kind==='power')return powerSwitchTileFor(id,mapPowerIsOn(circuitOf(stamp)));

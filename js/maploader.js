@@ -642,6 +642,7 @@ function drawMapStampPlain(ctx, s) {
   if (typeof StoryScene !== 'undefined' && StoryScene.ownsStamp(s)) return;   // 回憶劇情的自動門：由 js/story-scene.js 自己畫開關動畫
   if (typeof ballBedHidden === 'function' && ballBedHidden(s)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
   if (typeof G !== 'undefined' && G && G.flickerGlowStamps && G.flickerGlowStamps.has(s)) return;   // 疊在燈上的光暈圖（池核 LED）：由 js/flicker-light.js 畫在黑幕上面、跟著燈亮暗
+  if (typeof poweredGlowHidden === 'function' && poweredGlowHidden(s)) return;   // 跟著電源的池核 LED 光暈圖：通電時才由 js/powered-lights.js 畫在黑幕上面
   let t = mapTileById(s.id); if (!t) return;
   t = destroyedBaseDisplayTile(s, t);
   if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
