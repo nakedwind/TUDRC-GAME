@@ -756,6 +756,8 @@ function stampConnects(s) {
   const w = mapStampW(s, t), h = mapStampH(s, t); if (h < 2) return false;
   // 下半段蓋到的每一格都不能是 2 樓的地面／2 樓地板的圖：只要碰到一格，就是站在陸橋上的牆（整張算 2 樓），不拆
   const c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL, fl = floor2ArtCells().floor;
+  // 牆腳正下方那一排是 2 樓地面：這是站在 2 樓走道上的牆（牆身本來就不能走、不是 2 樓地面），整張算 2 樓，不拆
+  for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) if (deckCells.has(c + ',' + Math.ceil(r0 + h - .5))) return false;
   for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 + h / 2 - .5); r + .5 < r0 + h; r++) {
     const k = c + ',' + r; if (deckCells.has(k) || fl.has(k)) return false;
   }

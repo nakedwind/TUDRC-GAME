@@ -3951,6 +3951,8 @@ function generateDeckFromLayers() {
       let r1 = r0 + h;
       if (asWalls && h >= 2) {   // 下半段完全沒碰到 2 樓地面／2 樓地板 → 連接柱：只有上半段在 2 樓
         let touches = false;
+        // 牆腳正下方那一排是 2 樓地面：站在 2 樓走道上的牆，整張都算牆（跟遊戲 js/maploader.js 的 stampConnects 一樣）
+        for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) { const k = c + ',' + Math.ceil(r0 + h - .5); if (floorSet.has(k) || (m.deck || []).includes(k)) touches = true; }
         for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w && !touches; c++) for (let r = Math.ceil(r0 + h / 2 - .5); r + .5 < r0 + h; r++) if (floorSet.has(c + ',' + r) || (m.deck || []).includes(c + ',' + r)) { touches = true; break; }
         if (!touches) r1 = r0 + h / 2;
       }
