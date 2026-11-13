@@ -3739,6 +3739,38 @@ const SHARED_TILES = [
     "h": 3
   },
   {
+    "id": "tile_obstacle_ore_coal",
+    "name": "煤礦",
+    "role": "floor",
+    "file": "images/item-obstacle/15-ore-coal.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_obstacle_ore_tin",
+    "name": "錫礦",
+    "role": "floor",
+    "file": "images/item-obstacle/16-ore-tin.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_obstacle_ore_limestone",
+    "name": "石灰岩",
+    "role": "floor",
+    "file": "images/item-obstacle/17-ore-limestone.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_obstacle_ore_manganese",
+    "name": "錳礦",
+    "role": "floor",
+    "file": "images/item-obstacle/18-ore-manganese.png",
+    "w": 2,
+    "h": 2
+  },
+  {
     "id": "tile_interactive_storage_locker",
     "name": "置物箱（鎖住）",
     "role": "floor",

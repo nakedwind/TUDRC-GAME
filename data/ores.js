@@ -51,5 +51,89 @@ const ORE_TYPES = {
         2
       ]
     ]
+  },
+  "ore_coal": {
+    "name": "煤礦",
+    "file": "images/item-obstacle/15-ore-coal.png",
+    "crystals": 0,
+    "shards": 0,
+    "glow": 0,
+    "hp": 9999,
+    "w": 2,
+    "h": 2,
+    "solid": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ]
+  },
+  "ore_tin": {
+    "name": "錫礦",
+    "file": "images/item-obstacle/16-ore-tin.png",
+    "crystals": 0,
+    "shards": 0,
+    "glow": 0,
+    "hp": 9999,
+    "w": 3,
+    "h": 3,
+    "solid": [
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ]
+    ]
+  },
+  "ore_limestone": {
+    "name": "石灰岩",
+    "file": "images/item-obstacle/17-ore-limestone.png",
+    "crystals": 0,
+    "shards": 0,
+    "glow": 0,
+    "hp": 9999,
+    "w": 2,
+    "h": 2,
+    "solid": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ]
+  },
+  "ore_manganese": {
+    "name": "錳礦",
+    "file": "images/item-obstacle/18-ore-manganese.png",
+    "crystals": 0,
+    "shards": 0,
+    "glow": 0,
+    "hp": 9999,
+    "w": 2,
+    "h": 2,
+    "solid": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ]
   }
 };
