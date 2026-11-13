@@ -18,7 +18,8 @@ const ITEMS = [
   { id: 'anomaly-key', name: '異質鑰匙', category: 'key', image: SHARD_DIR + '異質鑰匙.png', desc: '打破異質核心時掉出來的鑰匙，摸起來冰冰涼涼的。好像能打開被異質力量封住的地方。' },
   { id: 'youyou-card', name: '好遊卡', category: 'consumable', image: SHARD_DIR + '好遊卡.png', desc: '捷運用的儲值卡，背面還貼著前主人的貼紙。在捷運閘門刷一下就能通過，刷一次用掉一張（裡面的錢只夠一趟）。' },
   { id: 'backroom-door-key', name: '後室門鑰匙', category: 'key', image: SHARD_DIR + '後室門鑰匙.png', desc: '舊舊的黃銅鑰匙。走到上鎖的後室門前按空白鍵或 E 開鎖，每次消耗 1 支。' },
-  { id: 'storage-locker-key', name: '置物櫃鑰匙', category: 'key', image: 'images/items/storage-locker-key.png', desc: '靠近鎖住的置物箱，按空白鍵或 E 開啟，每次消耗 1 支鑰匙。' },
+  { id: 'swim-ring', name: '救生圈', category: 'consumable', image: 'images/Poolcore/Poolcore_swimring.png', desc: '在池核找到的救生圈，顏色有點褪了，但還很牢固。' },   // 池核的彈藥箱開得到（地圖編輯器選彈藥箱 → 彈藥箱內容）
+  { id: 'storage-locker-key',name: '置物櫃鑰匙', category: 'key', image: 'images/items/storage-locker-key.png', desc: '靠近鎖住的置物箱，按空白鍵或 E 開啟，每次消耗 1 支鑰匙。' },
   // ---- 回憶碎片（重要物品）：集滿 MEMORY_KEYS 裡的數量就會拼成那段回憶的鑰匙 ----
   { id: 'burning-shard', name: '熾熱的碎片',   category: 'key', image: SHARD_DIR + 'burning-shard.png', noDrop: true, desc: '摸起來微微發燙。好像映著誰的身影。' },
   { id: 'pure-shard',    name: '無雜質的碎片', category: 'key', image: SHARD_DIR + 'pure-shard.png',    noDrop: true, desc: '清澈透亮，一點雜質都沒有，像某個人單純的心。' },

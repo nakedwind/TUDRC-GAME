@@ -1108,7 +1108,7 @@ function setPortalNudge(p, patch) {
 const PORTAL_LAND_LIMIT = 400;        // 落地點離出入口最多幾像素
 const PORTAL_LAND_DEFAULT = [0, 40];  // 還沒設時，從「出入口下面一格」開始調（遊戲自動找位置時也是優先站在門前）
 let portalLandMode = false;           // true＝方向鍵、點地圖改的是落地點；false＝改出入口本身
-const portalLandOf = p => Array.isArray(p.land) ? p.land : PORTAL_LAND_DEFAULT;
+const portalLandOf = p => Array.isArray(p.land) ? p.land : Array.isArray(p.at) ? [0, 0] : PORTAL_LAND_DEFAULT;   // 傳送點沒設＝原本「落地」圓圈的位置（那格中心）
 // 落地點從哪裡算起：傳送點＝送到的那格中心；其他出入口＝出入口自己的中心（含微調）
 const portalLandOrigin = p => Array.isArray(p.at) ? [OX + (p.at[0] + .5) * CELL, OY + (p.at[1] + .5) * CELL] : [OX + (p.c + .5) * CELL + (p.ox || 0), OY + (p.r + .5) * CELL + (p.oy || 0)];
 const PORTAL_LAND_HTML = '<span style="display:flex;align-items:center;gap:6px;padding-left:8px;border-left:1px solid #6a5a2c">' +
@@ -1121,11 +1121,43 @@ function setPortalLand(p, xy) {
   if (!xy) delete p.land;
   else { const cl = v => Math.max(-PORTAL_LAND_LIMIT, Math.min(PORTAL_LAND_LIMIT, Math.round(Number(v) || 0))); p.land = [cl(xy[0]), cl(xy[1])]; }
   saveMaps(); draw();
-  setStatus(p.land ? '🦶 落地點：' + (Array.isArray(p.at) ? '傳送到的那格' : '出入口') + '中心往右 ' + p.land[0] + '、往下 ' + p.land[1] + ' 像素（方向鍵移動、點地圖直接指定，Shift 一次 10；Delete 改回自動）' : '🦶 落地點改回自動（照舊站在門前的空位）', '#9fe0ff');
+  setStatus(p.land ? '🦶 落地點：' + (Array.isArray(p.at) ? '傳送到的那格' : '出入口') + '中心往右 ' + p.land[0] + '、往下 ' + p.land[1] + ' 像素（拖曳、方向鍵微調，Shift 一次 10；Delete 改回自動）' : '🦶 落地點改回自動（照舊站在門前的空位）', '#9fe0ff');
 }
 function togglePortalLandMode() {
   portalLandMode = !portalLandMode; draw();
-  setStatus(portalLandMode ? '🦶 調落地點：方向鍵移動、點地圖直接指定溫特從別處來到這個出入口時站的位置（Delete 改回自動）' : '🎯 調出入口本身：方向鍵移動、[ ] 調範圍', '#9fe0ff');
+  setStatus(portalLandMode ? '🦶 調落地點：按住落地記號拖曳，或用方向鍵移動溫特來到這裡時站的位置（Delete 改回自動）' : '🎯 調出入口本身：方向鍵移動、[ ] 調範圍', '#9fe0ff');
+}
+// 畫面上看得到的落地記號在哪：傳送點＝青色「落地」圓圈（單向，或調過落地位置）；其他出入口＝調過的 🦶（選中時連自動的淡 🦶 也算）
+function portalLandMarkerXY(m, p) {
+  const shown = Array.isArray(p.at)
+    ? Array.isArray(p.land) || !(m.portals || []).some(q => q.c === p.at[0] && q.r === p.at[1])
+    : Array.isArray(p.land) || portalNudgeTarget(m) === p;
+  if (!shown) return null;
+  const [lx, ly] = portalLandOf(p), [bx, by] = portalLandOrigin(p);
+  return [bx + lx, by + ly];
+}
+// 這一下有沒有按在某個落地記號上（後畫的優先）
+function portalLandMarkerAt(m) {
+  if (!pointerPx) return null;
+  const list = m.portals || [];
+  for (let i = list.length - 1; i >= 0; i--) {
+    const p = list[i], xy = portalLandMarkerXY(m, p); if (!xy) continue;
+    const rad = Array.isArray(p.at) ? CELL * .32 + 4 : 12;
+    if (Math.hypot(pointerPx.x - xy[0], pointerPx.y - xy[1]) <= rad) return { p, xy };
+  }
+  return null;
+}
+// 按住落地記號拖曳：dx、dy＝按下的地方離記號中心多遠（拖的時候記號不會跳到滑鼠正中間）
+let portalLandDrag = null;
+function dragPortalLandTo() {
+  const d = portalLandDrag; if (!d || !pointerPx) return;
+  const [bx, by] = portalLandOrigin(d.p), cl = v => Math.max(-PORTAL_LAND_LIMIT, Math.min(PORTAL_LAND_LIMIT, Math.round(v)));
+  d.p.land = [cl(pointerPx.x - d.dx - bx), cl(pointerPx.y - d.dy - by)]; d.moved = true;
+  draw();
+}
+function endPortalLandDrag() {
+  const d = portalLandDrag; portalLandDrag = null; if (!d) return;
+  if (d.moved) { saveMaps(); setStatus('落地位置：' + (Array.isArray(d.p.at) ? '傳送到的那格' : '出入口') + '中心往右 ' + d.p.land[0] + '、往下 ' + d.p.land[1] + ' 像素（拖曳、方向鍵微調，Shift 一次 10；Delete 改回原本位置）', '#9fe0ff'); }
 }
 // 工具列下面的數字欄：選到出入口才出現
 function syncPortalNudgePanel(m) {
@@ -1168,8 +1200,12 @@ function drawPortalNudge(m) {
     ctx.fillStyle = on ? 'rgba(255,212,121,.14)' : 'rgba(181,140,255,.07)'; ctx.strokeStyle = on ? '#ffd479' : 'rgba(181,140,255,.55)'; ctx.lineWidth = on ? 2 : 1;
     ctx.beginPath(); ctx.arc(cx, cy, p.radius || PORTAL_RADIUS_DEFAULT, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     if (on) { ctx.strokeStyle = '#ffd479'; ctx.lineWidth = 3; ctx.strokeRect(cx - CELL / 2 + 1, cy - CELL / 2 + 1, CELL - 2, CELL - 2); }
-    if (on || p.land) {   // 🦶 落地點：設過的畫實心；沒設（自動）的只在選中時畫淡淡的大概位置
-      const [lx, ly] = portalLandOf(p), [bx, by] = portalLandOrigin(p), x2 = bx + lx, y2 = by + ly;   // 傳送點：虛線從出入口拉到傳送過去的落地點
+    // 同地圖傳送點（有 at）：調的就是原本那個青色「落地」圓圈（drawMap 裡畫的），這裡只在調落地點時把它圈亮，不另外畫 🦶
+    if (Array.isArray(p.at)) {
+      if (on && portalLandMode) { const [lx, ly] = portalLandOf(p), [bx, by] = portalLandOrigin(p);
+        ctx.strokeStyle = '#ffd479'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(bx + lx, by + ly, CELL * .32 + 4, 0, Math.PI * 2); ctx.stroke(); }
+    } else if (on || p.land) {   // 其他出入口 🦶 落地點：設過的畫實心；沒設（自動）的只在選中時畫淡淡的大概位置
+      const [lx, ly] = portalLandOf(p), [bx, by] = portalLandOrigin(p), x2 = bx + lx, y2 = by + ly;
       ctx.setLineDash([4, 3]); ctx.strokeStyle = p.land ? '#9fe0ff' : 'rgba(159,224,255,.4)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = p.land ? 'rgba(159,224,255,.85)' : 'rgba(159,224,255,.3)'; ctx.beginPath(); ctx.arc(x2, y2, 10, 0, Math.PI * 2); ctx.fill();
@@ -1476,13 +1512,15 @@ function draw() {
   // 同地圖傳送點：兩格之間畫一條青色虛線（箭頭指向送到的那格）
   for (const pt of (m.portals || [])) {
     if (!isSameMapPortal(pt, m)) continue;
-    const ax = OX + (pt.c + .5) * CELL + (pt.ox || 0), ay = OY + (pt.r + .5) * CELL + (pt.oy || 0), bx = OX + (pt.at[0] + .5) * CELL, by = OY + (pt.at[1] + .5) * CELL;
+    const land = Array.isArray(pt.land) ? pt.land : [0, 0];   // 設了 🦶 落地點：箭頭、落地圓圈直接指到真正站的位置
+    const ax = OX + (pt.c + .5) * CELL + (pt.ox || 0), ay = OY + (pt.r + .5) * CELL + (pt.oy || 0), bx = OX + (pt.at[0] + .5) * CELL + land[0], by = OY + (pt.at[1] + .5) * CELL + land[1];
     ctx.strokeStyle = 'rgba(90,230,230,.8)'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
     const ang = Math.atan2(by - ay, bx - ax), hx = bx - Math.cos(ang) * CELL * .5, hy = by - Math.sin(ang) * CELL * .5;
     ctx.fillStyle = 'rgba(90,230,230,.9)'; ctx.beginPath(); ctx.moveTo(hx, hy);
     ctx.lineTo(hx - Math.cos(ang - .45) * 12, hy - Math.sin(ang - .45) * 12); ctx.lineTo(hx - Math.cos(ang + .45) * 12, hy - Math.sin(ang + .45) * 12); ctx.fill();
-    if (!m.portals.some(q => q.c === pt.at[0] && q.r === pt.at[1])) {   // 單向傳送：落地那格沒有傳送點，畫一個青色圓圈標出來
+    // 單向傳送（落地那格沒有傳送點）或微調過落地位置：畫一個青色「落地」圓圈標出來（出入口微調的「🦶 調落地點」移動的就是它）
+    if (Array.isArray(pt.land) || !m.portals.some(q => q.c === pt.at[0] && q.r === pt.at[1])) {
       ctx.strokeStyle = 'rgba(90,230,230,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(bx, by, CELL * .32, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = '#a8f4f4'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText('落地', bx, by); ctx.fillText('落地', bx, by);
@@ -1897,11 +1935,15 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     return;
   } else if (brush.mode === 'portalnudge') {   // 🎯 出入口微調：點一下選取
     if (!isDown) return;
-    const pt = portalHitAt(m, c, r), sel = portalNudgeTarget(m);
-    if (portalLandMode && sel && pointerPx && (!pt || pt === sel)) {   // 🦶 調落地點：點地圖＝把落地點放在這裡（點到別的出入口＝改選那個）
-      const [ox0, oy0] = portalLandOrigin(sel); setPortalLand(sel, [pointerPx.x - ox0, pointerPx.y - oy0]);
+    const hit = portalLandMarkerAt(m);
+    if (hit) {   // 按在「落地」記號上：直接選這個出入口、切到調落地點，按住就能拖
+      portalNudgeKey = hit.p.c + ',' + hit.p.r; portalLandMode = true;
+      portalLandDrag = { p: hit.p, dx: pointerPx.x - hit.xy[0], dy: pointerPx.y - hit.xy[1], moved: false };
+      draw(); setStatus('調落地位置：按住拖曳，或用方向鍵微調（Shift 一次 10；Delete 改回原本位置）', '#9fe0ff');
       return;
     }
+    const pt = portalHitAt(m, c, r);
+    if (pt) portalLandMode = false;   // 按在出入口本身：調的是出入口
     portalNudgeKey = pt ? pt.c + ',' + pt.r : null;
     draw();
     if (pt) portalNudgeStatus(pt); else setStatus('點一個出入口來微調', '#9aa4b2');
@@ -2085,6 +2127,7 @@ cv.addEventListener('pointermove', e => {
   const [c, r] = cellFromEvent(e); hoverCell = inGrid(c, r) ? [c, r] : null;
   if (painting) {
     if (nudgeDrag) dragNudgeTo();
+    else if (portalLandDrag) dragPortalLandTo();   // 拖曳落地記號
     else if (marquee) updateMarquee();
     else if (selectionDrag) dragSelectionTo(c, r);
     else { const key = c + ',' + r; if (key !== lastPaint) { lastPaint = key; paintCell(c, r, false); } }
@@ -2093,6 +2136,7 @@ cv.addEventListener('pointermove', e => {
 cv.addEventListener('pointerup', () => {
   painting = false;
   if (nudgeDrag) { if (nudgeDrag.moved) saveMaps(); nudgeDrag = null; }   // 碰撞微調拖曳放開：存起來
+  endPortalLandDrag();   // 落地記號拖曳放開：存起來
   if (selectionDrag && selectionDrag.moved) { saveMaps(); refreshSelPanel(); setStatus('已移動 ' + selections.length + ' 個物件', '#7ee0c0'); }
   selectionDrag = null;
   if (marquee) {   // 拉框放開：告訴使用者選到幾個，右邊面板跟著更新

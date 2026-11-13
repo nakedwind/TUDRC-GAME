@@ -12694,7 +12694,9 @@ const BATTLE_MAPS = [
       "object20": {},
       "object21": {},
       "object22": {},
-      "object23": {}
+      "object23": {},
+      "object24": {},
+      "object25": {}
     },
     "stamps": [
       {
@@ -14689,19 +14691,20 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvpj1fdy",
-        "c": 15,
-        "r": 75,
-        "layer": "object8",
-        "ox": 20,
-        "oy": 20
+        "c": 20,
+        "r": 7,
+        "layer": "object24",
+        "oy": 7.333333,
+        "angle": 10,
+        "ox": 2
       },
       {
         "id": "tile_mvpj53ld",
-        "c": 17,
-        "r": 75,
-        "layer": "object8",
+        "c": 19,
+        "r": 8,
+        "layer": "object24",
         "ox": 20,
-        "oy": 20
+        "oy": -3.333333
       },
       {
         "id": "tile_mvpj60hi",
@@ -17086,19 +17089,19 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvp8n5zs",
-        "c": 56,
+        "c": 57,
         "r": 67,
         "layer": "top",
-        "ox": 20,
+        "ox": 30,
         "circuit": 2
       },
       {
         "id": "tile_mvp8nxz4",
-        "c": 56,
+        "c": 57,
         "r": 67,
         "layer": "object19",
         "blend": "hard-light",
-        "ox": 20
+        "ox": 30
       },
       {
         "id": "tile_mvodgug9",
@@ -17133,7 +17136,7 @@ const BATTLE_MAPS = [
         "ox": 10,
         "lockerLoot": {
           "kind": "item",
-          "id": "battery",
+          "id": "eye-drops",
           "qty": 1
         }
       },
@@ -17145,7 +17148,7 @@ const BATTLE_MAPS = [
         "ox": 20,
         "lockerLoot": {
           "kind": "item",
-          "id": "battery",
+          "id": "swim-ring",
           "qty": 1
         },
         "oy": 10
@@ -17158,7 +17161,7 @@ const BATTLE_MAPS = [
         "ox": 10,
         "lockerLoot": {
           "kind": "item",
-          "id": "charm",
+          "id": "swim-ring",
           "qty": 1
         }
       },
@@ -17166,7 +17169,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvyo15bc",
         "c": 23,
         "r": 64,
-        "layer": "object17",
+        "layer": "object9",
         "ox": 20,
         "oy": 30
       },
@@ -17174,9 +17177,9 @@ const BATTLE_MAPS = [
         "id": "tile_mvyo15bc",
         "c": 59,
         "r": 65,
-        "layer": "object7",
+        "layer": "object9",
         "ox": 10,
-        "oy": 30,
+        "oy": 30.666667,
         "circuit": 2
       },
       {
@@ -17497,6 +17500,14 @@ const BATTLE_MAPS = [
         "oy": 37.333333
       },
       {
+        "id": "tile_poolcore_pillar",
+        "c": 36,
+        "r": 5,
+        "layer": "object23",
+        "ox": 6,
+        "oy": 7.33333300000001
+      },
+      {
         "id": "tile_mvoddiqi",
         "c": 3,
         "r": 21,
@@ -17685,12 +17696,68 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 15,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 35,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 37,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 25,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
         "c": 40,
         "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
         "ox": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 33,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 23,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
       },
       {
         "id": "tile_poolcore_pillar",
@@ -17711,6 +17778,30 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 11,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 31,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 21,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
         "c": 40,
         "r": 58,
         "layer": "object13",
@@ -17726,6 +17817,54 @@ const BATTLE_MAPS = [
         "sortDepth": 0,
         "rot": 3,
         "ox": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 9,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 29,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 19,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 7,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 27,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 17,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
       },
       {
         "id": "tile_mvoddiqi",
@@ -17895,10 +18034,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 30,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "oy": 20.666667,
-        "ox": 26.666667
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
       },
       {
         "id": "tile_mvocpp0c",
@@ -17975,10 +18114,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 28,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "oy": 20.666667,
-        "ox": 26.666667
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
       },
       {
         "id": "tile_mvodgug9",
@@ -18039,10 +18178,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 26,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "oy": 20.666667,
-        "ox": 26.666667
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
       },
       {
         "id": "tile_mvocpp0c",
@@ -18103,10 +18242,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 24,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "oy": 20.666667,
-        "ox": 26.666667
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
       },
       {
         "id": "tile_mvoddiqi",
@@ -18252,10 +18391,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 22,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "oy": 20.666667,
-        "ox": 26.666667
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
       },
       {
         "id": "tile_mvoddiqi",
@@ -18385,10 +18524,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 20,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "ox": 26.666667,
-        "oy": 20.666667
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
       },
       {
         "id": "tile_mvodgug9",
@@ -18534,10 +18673,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 18,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "ox": 26.666667,
-        "oy": 20.666667
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
       },
       {
         "id": "tile_poolcore_pillar",
@@ -18637,10 +18776,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 32,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "ox": 26.666667,
-        "oy": 20.666667
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
       },
       {
         "id": "tile_mvoddiqi",
@@ -18677,10 +18816,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 7,
+        "r": 5,
         "layer": "object23",
-        "oy": 20.666667,
-        "ox": 26.666667
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
       },
       {
         "id": "tile_mvocpp0c",
@@ -19086,12 +19225,30 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 41,
         "r": 69,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
         "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
       },
       {
         "id": "tile_mvr32pqo",
@@ -19104,6 +19261,15 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 41,
         "r": 59,
         "layer": "object13",
@@ -19113,6 +19279,15 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 51,
         "r": 69,
         "layer": "object13",
@@ -19122,12 +19297,30 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 43,
         "r": 69,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
         "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
       },
       {
         "id": "tile_mvr32pqo",
@@ -19140,11 +19333,29 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 43,
         "r": 59,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
         "oy": 2
       },
       {
@@ -19158,6 +19369,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
+        "c": 41,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
         "c": 40,
         "r": 59,
         "layer": "object13",
@@ -19166,6 +19385,14 @@ const BATTLE_MAPS = [
         "oy": 2
       },
       {
+        "id": "tile_mvr2fi62",
+        "c": 41,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "oy": 2
+      },
+      {
         "id": "tile_mvr32pqo",
         "c": 53,
         "r": 69,
@@ -19176,12 +19403,30 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 45,
         "r": 69,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
         "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
       },
       {
         "id": "tile_mvr32pqo",
@@ -19194,11 +19439,29 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 45,
         "r": 59,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
         "oy": 2
       },
       {
@@ -19213,10 +19476,28 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 59,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
         "r": 59,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
         "oy": 2
       },
       {
@@ -19231,10 +19512,28 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 57,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
         "r": 59,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
         "oy": 2
       },
       {
@@ -19248,12 +19547,30 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 47,
         "r": 69,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
         "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
       },
       {
         "id": "tile_mvr32pqo",
@@ -19266,11 +19583,29 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
         "c": 47,
         "r": 59,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
         "oy": 2
       },
       {
@@ -19767,9 +20102,73 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 61,
+        "r": 16,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 36,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 39,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 12.666666999999961
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 38,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 26,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
         "r": 63,
         "layer": "object13",
         "ox": 6,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 12,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 32,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 22,
+        "layer": "object25",
+        "ox": 16,
         "oy": 32.66666699999996
       },
       {
@@ -19783,6 +20182,30 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 61,
+        "r": 14,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 34,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 24,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
         "r": 61,
         "layer": "object13",
         "ox": 6,
@@ -19791,9 +20214,57 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 61,
+        "r": 10,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 30,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 20,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
         "r": 59,
         "layer": "object13",
         "ox": 6,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 8,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 28,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 61,
+        "r": 18,
+        "layer": "object25",
+        "ox": 16,
         "oy": 32.66666699999996
       },
       {
@@ -19808,11 +20279,105 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 61,
+        "r": 41,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
         "r": 59,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
         "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 49,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 49,
+        "r": 40,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 49,
+        "r": 8,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 36,
+        "layer": "object25",
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 36,
+        "layer": "object25",
+        "ox": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 36,
+        "layer": "object25",
+        "ox": 29.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 36,
+        "layer": "object25",
+        "ox": 36.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 36,
+        "layer": "object25",
+        "ox": 4
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 36,
+        "layer": "object25",
+        "ox": 16.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 36,
+        "layer": "object25",
+        "ox": 37.333333
       },
       {
         "id": "tile_mwdka8vr",
@@ -20907,6 +21472,15 @@ const BATTLE_MAPS = [
         "circuit": 2
       },
       {
+        "id": "tile_mvp8n5zs",
+        "c": 51,
+        "r": 53,
+        "layer": "top",
+        "ox": 30,
+        "oy": 10,
+        "circuit": 2
+      },
+      {
         "id": "tile_mvp8nxz4",
         "c": 3,
         "r": 75,
@@ -21646,7 +22220,8 @@ const BATTLE_MAPS = [
         "r": 13,
         "layer": "object21",
         "oy": 21.333332999999982,
-        "ox": 10
+        "ox": 10,
+        "doorMode": "picture"
       },
       {
         "id": "tile_mvobex5o",
@@ -21696,7 +22271,8 @@ const BATTLE_MAPS = [
         "c": 24,
         "r": 13,
         "layer": "object10",
-        "oy": 21.33333300000004
+        "oy": 21.33333300000004,
+        "doorMode": "picture"
       },
       {
         "id": "tile_mvobzfro",
@@ -21726,7 +22302,8 @@ const BATTLE_MAPS = [
         "r": 13,
         "layer": "object10",
         "oy": 21.33333300000004,
-        "ox": 20
+        "ox": 20,
+        "doorMode": "picture"
       },
       {
         "id": "color_mu8nxukw",
@@ -21819,6 +22396,47 @@ const BATTLE_MAPS = [
         "blend": "hard-light"
       },
       {
+        "id": "tile_mvp8nxz4",
+        "c": 51,
+        "r": 53,
+        "layer": "object19",
+        "ox": 30,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 57,
+        "r": 29,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 59,
+        "r": 29,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 57,
+        "r": 29,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": -8.666667
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 59,
+        "r": 29,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": -8.666667
+      },
+      {
         "id": "tile_mvph1jix",
         "c": 8,
         "r": 6,
@@ -21843,12 +22461,34 @@ const BATTLE_MAPS = [
         "oy": 10
       },
       {
+        "id": "tile_mvph1jix",
+        "c": 57,
+        "r": 27,
+        "layer": "object23",
+        "ox": 16.666667
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 59,
+        "r": 27,
+        "layer": "object23",
+        "ox": 16.666667
+      },
+      {
         "id": "tile_mvph143o",
         "c": 8,
         "r": 8,
         "layer": "object23",
         "ox": 20,
         "oy": 10
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 57,
+        "r": 31,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": 20
       },
       {
         "id": "tile_mvph19b4",
@@ -21867,11 +22507,37 @@ const BATTLE_MAPS = [
         "oy": 10
       },
       {
+        "id": "tile_mvph1e62",
+        "c": 59,
+        "r": 31,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": 20
+      },
+      {
         "id": "tile_mvr3nuyx",
         "c": 10,
         "r": 9,
         "layer": "object23",
         "ox": 8.666667000000018
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "c": 21,
+        "r": 9,
+        "layer": "object24",
+        "ox": 34.666667,
+        "oy": 15.333333,
+        "rot": 1
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "c": 36,
+        "r": 9,
+        "layer": "object24",
+        "ox": 20,
+        "rot": 3,
+        "oy": 25.333333
       },
       {
         "id": "tile_mvzbn4vv",
@@ -21924,10 +22590,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbolt4",
         "c": 18,
-        "r": 6,
+        "r": 5,
         "layer": "object23",
         "ox": 6,
-        "oy": 32
+        "oy": 2
       },
       {
         "id": "tile_mvymwgxl",
@@ -21938,7 +22604,7 @@ const BATTLE_MAPS = [
         "oy": 10,
         "lockerLoot": {
           "kind": "item",
-          "id": "backroom-door-key",
+          "id": "anomaly-firstaid",
           "qty": 1
         }
       },
@@ -21948,6 +22614,801 @@ const BATTLE_MAPS = [
         "r": 68,
         "layer": "object9",
         "ox": 10
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 23,
+        "r": 9,
+        "layer": "object23",
+        "ox": 30,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 34,
+        "r": 9,
+        "layer": "object23",
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 26,
+        "r": 9,
+        "layer": "object23",
+        "ox": 14,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 29,
+        "r": 9,
+        "layer": "object23",
+        "ox": 20.666667,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 32,
+        "r": 9,
+        "layer": "object23",
+        "ox": 12.666667,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 33,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 33,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 33,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 33,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 33,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 33,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 33,
+        "layer": "object25",
+        "oy": 21.33333300000004,
+        "ox": 37.33333300000004
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 31,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 31,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 31,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 31,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 31,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 31,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 31,
+        "layer": "object25",
+        "oy": 2.666667,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 28,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 28,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 28,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 28,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 28,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 28,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 28,
+        "layer": "object25",
+        "oy": 24.666667,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 26,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 26,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 26,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 26,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 26,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 26,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 26,
+        "layer": "object25",
+        "oy": 6,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 23,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 23,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 23,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 23,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 23,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 23,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 23,
+        "layer": "object25",
+        "oy": 28,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 21,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 21,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 21,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 21,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 21,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 21,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 21,
+        "layer": "object25",
+        "oy": 9.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 18,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 18,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 18,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 18,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 18,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 18,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 18,
+        "layer": "object25",
+        "oy": 31.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 16,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 16,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 16,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 16,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 16,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 16,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 16,
+        "layer": "object25",
+        "oy": 13.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 13,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 13,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 13,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 13,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 13,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 13,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 13,
+        "layer": "object25",
+        "oy": 35.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 11,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 11,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 11,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 11,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 11,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 11,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 11,
+        "layer": "object25",
+        "oy": 16.666667,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 43,
+        "r": 9,
+        "layer": "object25",
+        "ox": -2.666667,
+        "oy": -1.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 9,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": -1.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 8,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 38.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 8,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 38.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 8,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 38.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 8,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 38.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 59,
+        "r": 9,
+        "layer": "object25",
+        "oy": -1.333333,
+        "ox": -2.666667
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 43,
+        "r": 38,
+        "layer": "object25",
+        "oy": 14,
+        "ox": -2.666667
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 45,
+        "r": 38,
+        "layer": "object25",
+        "ox": 22,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 48,
+        "r": 38,
+        "layer": "object25",
+        "ox": 30,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 52,
+        "r": 38,
+        "layer": "object25",
+        "oy": 14,
+        "ox": -2.666667
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 55,
+        "r": 38,
+        "layer": "object25",
+        "oy": 14,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 56,
+        "r": 38,
+        "layer": "object25",
+        "oy": 14,
+        "ox": 28.666667
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 58,
+        "r": 38,
+        "layer": "object25",
+        "ox": 22,
+        "oy": 14,
+        "fx": true
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 58,
+        "r": 35,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 56,
+        "r": 34,
+        "layer": "object23",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 59,
+        "r": 25,
+        "layer": "object23",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 58,
+        "r": 32,
+        "layer": "object23",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 49,
+        "r": 18,
+        "layer": "object23",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 45,
+        "r": 36,
+        "layer": "object23",
+        "ox": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mwbro91n",
+        "c": 12,
+        "r": 5,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_mwbro91n",
+        "c": 59,
+        "r": 25,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_new_decor_fire_extinguisher",
+        "c": 37,
+        "r": 61,
+        "layer": "object16",
+        "oy": 10
+      },
+      {
+        "id": "tile_eoc_hydrant_red",
+        "c": 29,
+        "r": 47,
+        "layer": "object14",
+        "ox": 20,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mw49f97t",
+        "c": 56,
+        "r": 66,
+        "layer": "object7",
+        "ox": 20.666667,
+        "oy": 25.333333
       }
     ],
     "solid": [],
@@ -21979,6 +23440,10 @@ const BATTLE_MAPS = [
         "at": [
           53,
           57
+        ],
+        "land": [
+          0,
+          44
         ]
       },
       {
@@ -21988,6 +23453,10 @@ const BATTLE_MAPS = [
         "at": [
           22,
           66
+        ],
+        "land": [
+          0,
+          36
         ]
       },
       {
@@ -21997,7 +23466,12 @@ const BATTLE_MAPS = [
         "at": [
           16,
           6
-        ]
+        ],
+        "land": [
+          0,
+          45
+        ],
+        "oy": -16
       },
       {
         "c": 10,
@@ -22008,7 +23482,94 @@ const BATTLE_MAPS = [
           58
         ],
         "oy": 12,
-        "ox": -20
+        "ox": -20,
+        "land": [
+          -18,
+          52
+        ]
+      },
+      {
+        "c": 15,
+        "r": 24,
+        "to": "map_mv1bzur4",
+        "at": [
+          5,
+          15
+        ],
+        "land": [
+          -29,
+          20
+        ],
+        "oy": -17
+      },
+      {
+        "c": 10,
+        "r": 14,
+        "to": "map_mv1bzur4",
+        "at": [
+          24,
+          16
+        ],
+        "land": [
+          3,
+          -21
+        ],
+        "oy": 1
+      },
+      {
+        "c": 20,
+        "r": 15,
+        "to": "map_mv1bzur4",
+        "at": [
+          10,
+          16
+        ],
+        "land": [
+          0,
+          -17
+        ],
+        "ox": 21,
+        "oy": -37
+      },
+      {
+        "c": 24,
+        "r": 24,
+        "to": "map_mv1bzur4",
+        "at": [
+          6,
+          24
+        ],
+        "oy": -1
+      },
+      {
+        "c": 6,
+        "r": 24,
+        "to": "map_mv1bzur4",
+        "at": [
+          24,
+          24
+        ]
+      },
+      {
+        "c": 31,
+        "r": 15,
+        "to": "map_mv1bzur4",
+        "at": [
+          33,
+          35
+        ],
+        "ox": 21,
+        "oy": -34
+      },
+      {
+        "c": 28,
+        "r": 42,
+        "to": "map_mv1bzur4",
+        "at": [
+          57,
+          66
+        ],
+        "ox": 20
       }
     ],
     "cols": 66,
@@ -22020,8 +23581,16 @@ const BATTLE_MAPS = [
         "name": "池核地板"
       },
       {
+        "id": "object25",
+        "name": "淺水區"
+      },
+      {
         "id": "object23",
         "name": "抽水機"
+      },
+      {
+        "id": "object24",
+        "name": "抽水機右側水池"
       },
       {
         "id": "object22",

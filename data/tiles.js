@@ -6726,6 +6726,14 @@ const SHARED_TILES = [
     "h": 2
   },
   {
+    "id": "tile_mweumhnv",
+    "name": "dynamo-open",
+    "role": "floor",
+    "file": "images/捷運車站/dynamo-open.png",
+    "w": 2,
+    "h": 2
+  },
+  {
     "id": "tile_mwdka8vr",
     "name": "Poolcore_Traffic_cone",
     "role": "floor",

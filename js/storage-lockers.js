@@ -28,6 +28,7 @@ function storagePropKind(id){
   if(file.endsWith('/items/battery.png'))return 'battery';
   if(file.endsWith('/items/almond-water-large.png')||file.endsWith('/items/almond-water-small.png'))return 'almond';
   if(/power-switch-(on|off)\.png$/.test(file))return 'power';   // 後室的開關，和池核的 Poolcore_power-switch-on／off 都算
+  if(/\/dynamo-(open|close)\.png$/.test(file)&&DYNAMO_MAPS.includes(MAP?.id))return 'dynamo';   // 發電機（dynamo-open／dynamo-close）：只有 DYNAMO_MAPS 裡的地圖能按空白鍵開關（其他地圖只是裝飾）
   if(file.endsWith('/storage-locker-open.png'))return 'open';
   if(file.endsWith('/storage-locker-closed.png'))return 'closed';
   return null;
@@ -94,6 +95,7 @@ function storagePropPrompt(prop){
   if(prop.kind==='equipment-drop')return '拾取'+(prop.drop.item?(itemById(prop.drop.item)?.name||'道具'):(equipDef(prop.drop.id)?.name||'裝備'));
   if(isWorldPickup(prop.kind))return '拾取';
   if(prop.kind==='power')return mapPowerIsOn(circuitOf(prop.stamp))?'關閉電源':'開啟電源';
+  if(prop.kind==='dynamo')return dynamoIsOn(prop.token)?'關閉發電機':'啟動發電機';
   if(prop.open)return '查看置物箱';
   return (supplyInventory.get('storage-locker-key')||0)>0?'用鑰匙開啟置物箱':'置物箱已上鎖（需要鑰匙）';
 }
@@ -128,6 +130,10 @@ function useStoragePropNearPlayer(filter){
   if(isPickupProp(prop))return pickupStorageProp(prop);
   if(prop.kind==='power'){
     const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice(mapPowerIsOn(n)?'電源已開啟':'電源已關閉');
+  }else if(prop.kind==='dynamo'){
+    toggleDynamo(prop.token);sfx('powerOn');
+    const [on,total]=dynamoCount();
+    systemNotice(dynamoIsOn(prop.token)?'發電機已啟動（'+on+'／'+total+'）':'發電機已關閉（'+on+'／'+total+'）');
   }else if(prop.open){
     flash('置物箱已打開',prop.x,prop.top-8,'#dce6ed',1.2);
   }else if((supplyInventory.get('storage-locker-key')||0)<=0){
@@ -216,6 +222,31 @@ function powerSwitchTileFor(id,on){
   }
   const pair=powerSwitchSwap.get(id);return (on?pair.on:pair.off)||null;
 }
+// ---- 發電機（dynamo-close＝關、dynamo-open＝開）----
+// 能互動的地圖（地圖 id）：現在只有池核；其他地圖（例如 R89區-捷運站）放的發電機只是裝飾。要加地圖就把 id 加進來
+const DYNAMO_MAPS = ['map_mv1bzur4'];   // 04. 池核
+// 每一台各自開關（不分電路）。一進地圖全部是關的（地圖上放的是 open 圖也一樣當關的），玩家要自己去把它們打開；換地圖再回來會重新關掉。
+// 其他程式要知道「是不是全部打開了」：dynamoCount() 回傳 [開著幾台, 總共幾台]、dynamosAllOn()。
+let dynamoMap=null;const dynamoOnSet=new Set();   // 開著的發電機（storagePropToken）
+function dynamoState(){if(dynamoMap!==MAP){dynamoMap=MAP;dynamoOnSet.clear();}return dynamoOnSet;}
+const dynamoIsOn=token=>dynamoState().has(token);
+function toggleDynamo(token){const s=dynamoState();if(s.has(token))s.delete(token);else s.add(token);}
+function dynamoCount(){
+  if(!MAP)return [0,0];
+  const list=storagePropSpots().filter(s=>storagePropKindCached(s.id)==='dynamo');
+  const on=list.filter(s=>dynamoIsOn(storagePropToken(s.id,s.c,s.r,s.layer,s.stamp?.ox||0,s.stamp?.oy||0))).length;
+  return [on,list.length];
+}
+const dynamosAllOn=()=>{const [on,total]=dynamoCount();return total>0&&on===total;};
+// 開／關時換的圖：同一個資料夾裡的 dynamo-open.png／dynamo-close.png
+const dynamoSwap=new Map();   // 素材 id → { on, off }
+function dynamoTileFor(id,on){
+  if(!dynamoSwap.has(id)){
+    const file=String(mapTileById(id)?.file||'').replaceAll('\\','/'),find=f=>Object.values(TILE_REGISTRY).find(x=>String(x.file||'').replaceAll('\\','/')===f);
+    dynamoSwap.set(id,{on:find(file.replace(/dynamo-(open|close)\.png$/,'dynamo-open.png')),off:find(file.replace(/dynamo-(open|close)\.png$/,'dynamo-close.png'))});
+  }
+  const pair=dynamoSwap.get(id);return (on?pair.on:pair.off)||null;
+}
 function storagePropDisplayTile(id,c,r,layer,stamp=null){
   // 池核的 LED 燈條：燈本身一律照原圖畫；通電時疊在上面的光暈圖由 js/powered-lights.js 畫在黑幕上面
   if(typeof isPoolcoreLed==='function'&&isPoolcoreLed(mapTileById(id)))return null;
@@ -223,6 +254,7 @@ function storagePropDisplayTile(id,c,r,layer,stamp=null){
   if(!kind)return null;
   if(kind==='power')return powerSwitchTileFor(id,mapPowerIsOn(circuitOf(stamp)));
   const token=storagePropToken(id,c,r,layer,stamp?.ox||0,stamp?.oy||0);
+  if(kind==='dynamo')return dynamoTileFor(id,dynamoIsOn(token));
   if(isWorldPickup(kind))return false; // 實際物品藏起來，統一由小亮點顯示。
   if(kind==='closed'&&unlockedStorageLockers.has(token))return mapTileById('tile_interactive_storage_locker_open');
   return null;
