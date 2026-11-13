@@ -498,6 +498,24 @@ function seedBaseObstacle(s) {
     G.obstacles.push(o);
     return o;
 }
+// 地圖編輯器把物件放大／縮小（圖章的「大小 %」）時，擋路格也跟著變大／變小。
+// 放大的基準跟畫圖一樣是「圖片底部中央」（js/stamp-transform.js 的 applyStampTransform）：
+// 每一格擋路格照比例變大後，蓋到哪些格子的中心，那些格子就擋路；縮到一格都蓋不到時，至少留它中心所在的那格。
+// cells：[第幾欄, 第幾列]（從圖片左上角算，可能變成負的＝超出原本圖片範圍）；w、h：圖片佔幾格；k：倍率（1＝原尺寸）
+function scaleSolidCells(cells, w, h, k) {
+  if (!k || k === 1) return cells;
+  const sx = x => w / 2 + (x - w / 2) * k, sy = y => h + (y - h) * k;   // 原本的位置 → 放大後的位置（以格為單位）
+  const out = new Map();
+  for (const [dc, dr] of cells) {
+    const x0 = sx(dc), x1 = sx(dc + 1), y0 = sy(dr), y1 = sy(dr + 1);
+    let any = false;
+    for (let c = Math.floor(x0); c < Math.ceil(x1); c++) for (let r = Math.floor(y0); r < Math.ceil(y1); r++) {
+      if (c + .5 >= x0 && c + .5 < x1 && r + .5 >= y0 && r + .5 < y1) { out.set(c + ',' + r, [c, r]); any = true; }
+    }
+    if (!any) { const c = Math.floor((x0 + x1) / 2), r = Math.floor((y0 + y1) / 2); out.set(c + ',' + r, [c, r]); }
+  }
+  return [...out.values()];
+}
 function seedOtherMapObstacles() {
   // 地圖編輯器的「障礙物」素材沿用可放置建築的碰撞格與 HP。
   // 不修改原始地圖；拆毀後只在本局隱藏該圖片。
@@ -519,8 +537,9 @@ function seedOtherMapObstacles() {
       G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w, h, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0 });
       return;
     }
-    const solid = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))
-      .map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr])
+    const solid0 = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))
+      .map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr]);
+    const solid = scaleSolidCells(solid0, w, h, stamp && typeof stampScaleOf === 'function' ? stampScaleOf(stamp) : 1)
       .filter(([dc, dr]) => inGrid(c + dc, r + dr) && !G.grid[(c + dc) + ',' + (r + dr)]);
     if (!solid.length) return;
     const o = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type,
