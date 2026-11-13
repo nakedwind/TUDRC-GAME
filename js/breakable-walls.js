@@ -9,6 +9,7 @@
    「後室牆面（裂縫・可炸開）」「後室牆面（裂縫・可炸開・隱藏區）」（Back-room-wall02-damage-03 的圖）：已經裂開，炸一次就開。
    另一種做法：地圖編輯器把圖層設成「🧱 隱藏區」，那些圖層上的東西在炸開最近的可炸開牆之前不畫（secretLayerAreas、secretAlpha）。
    捷運站也有同一套：「捷運灰牆X3（可炸開／可炸開・隱藏區／裂縫・可炸開／裂縫・可炸開・隱藏區）」，3 格寬 4 格高。
+   「捷運高牆X6」也一樣（6 格寬 6 格高，炸開後中間兩欄打通）。
    「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
    提示：隱藏區的牆、裂縫牆都要帶球球（學會密道搜索）才找得到，找到後牆上一直有白色狗腳印＋「?」的小牌子
    （drawBreakableWallHints）；沒帶球球就沒有任何提示。
@@ -21,6 +22,11 @@
 const SECRET_WALL_OPEN = [[1, 2], [1, 1]], SECRET_WALL_SOLID = [[0, 1], [2, 1], [0, 2], [2, 2]];
 // 捷運灰牆X3（4 格高）的隱藏區版本：最上排（牆頂）以外的三排都擋，炸開後中間那一欄打通
 const MRT_SECRET_WALL_OPEN = [[1, 3], [1, 2], [1, 1]], MRT_SECRET_WALL_SOLID = [[0, 1], [2, 1], [0, 2], [2, 2], [0, 3], [2, 3]];
+// 捷運高牆X6（6 格寬、6 格高）：炸開後中間兩欄（第 2、3 欄）打通，破洞圖的洞也在這兩欄。
+// 一般版本：最下排左右各兩格一直擋路；隱藏區版本：最上排（牆頂）以外，左右各兩欄整面都擋
+const HIGHWALL_OPEN = [[2, 5], [3, 5]], HIGHWALL_SOLID = [[0, 5], [1, 5], [4, 5], [5, 5]];
+const HIGHWALL_SECRET_OPEN = [], HIGHWALL_SECRET_SOLID = [];
+for (let r = 5; r >= 1; r--) { HIGHWALL_SECRET_OPEN.push([2, r], [3, r]); HIGHWALL_SECRET_SOLID.push([0, r], [1, r], [4, r], [5, r]); }
 const BREAKABLE_WALLS = {
   tile_bg_backroom_wall02_breakable: {
     stages: ['tile_bg_backroom_wall02_dmg_crack', 'tile_bg_backroom_wall02_hole2'],
@@ -67,6 +73,30 @@ const BREAKABLE_WALLS = {
     open: MRT_SECRET_WALL_OPEN, solid: MRT_SECRET_WALL_SOLID,
     pad: 1,
     hide: true, hideFrom: [1, 0], hideMax: 1500,
+  },
+  // ---- 捷運高牆X6（images/捷運車站/mrt-room-highwallX6*.png）：炸第 1 次大裂縫、第 2 次破洞 ----
+  // 小裂縫、大裂縫02、全破這幾張圖可以當裝飾直接放（「裂縫」版本用的是大裂縫02 的圖，炸一次就開）
+  tile_mrt_room_highwallx6_breakable: {
+    stages: ['tile_mrt_room_highwallx6_crack_large', 'tile_mrt_room_highwallx6_hole'],
+    open: HIGHWALL_OPEN, solid: HIGHWALL_SOLID,
+    pad: 1,
+  },
+  tile_mrt_room_highwallx6_secret: {
+    stages: ['tile_mrt_room_highwallx6_crack_large', 'tile_mrt_room_highwallx6_hole'],
+    open: HIGHWALL_SECRET_OPEN, solid: HIGHWALL_SECRET_SOLID,
+    pad: 1,
+    hide: true, hideFrom: [2, 0], hideMax: 1500,
+  },
+  tile_mrt_room_highwallx6_crack_breakable: {
+    stages: ['tile_mrt_room_highwallx6_hole'],
+    open: HIGHWALL_OPEN, solid: HIGHWALL_SOLID,
+    pad: 1,
+  },
+  tile_mrt_room_highwallx6_crack_secret: {
+    stages: ['tile_mrt_room_highwallx6_hole'],
+    open: HIGHWALL_SECRET_OPEN, solid: HIGHWALL_SECRET_SOLID,
+    pad: 1,
+    hide: true, hideFrom: [2, 0], hideMax: 1500,
   },
 };
 const HIDDEN_REVEAL_SEC = .9;   // 炸開後黑幕淡出幾秒

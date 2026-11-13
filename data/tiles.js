@@ -4164,6 +4164,86 @@ const SHARED_TILES = [
     "h": 4
   },
   {
+    "id": "tile_mrt_room_highwallx6",
+    "name": "捷運高牆X6",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_crack_small",
+    "name": "捷運高牆X6（小裂縫）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6-crack-small.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_crack_large",
+    "name": "捷運高牆X6（大裂縫）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6-crack-large.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_crack_large02",
+    "name": "捷運高牆X6（大裂縫02）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6-crack-large02.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_hole",
+    "name": "捷運高牆X6（破洞）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6-hole.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_breached",
+    "name": "捷運高牆X6（全破）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6-breached.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_breakable",
+    "name": "捷運高牆X6（可炸開）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_secret",
+    "name": "捷運高牆X6（可炸開・隱藏區）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_crack_breakable",
+    "name": "捷運高牆X6（裂縫・可炸開）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6-crack-large02.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwallx6_crack_secret",
+    "name": "捷運高牆X6（裂縫・可炸開・隱藏區）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwallX6-crack-large02.png",
+    "w": 6,
+    "h": 6
+  },
+  {
     "id": "tile_cvs_checkout_counter_backroom",
     "name": "後室便利商店櫃台（後室商店）",
     "role": "floor",
