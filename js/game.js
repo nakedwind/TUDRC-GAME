@@ -724,6 +724,12 @@ function portalLockedSay(pt) {
 function portalTargetName(pt) { const i = mapIndexById(pt.to), list = mapList(); return (i >= 0 && list[i] && list[i].name) || '另一張地圖'; }
 function placePlayerNearPortal(portal) {
   if (!portal || !G.player) return;
+  // 編輯器「🎯 出入口微調」設了 🦶 落地點（portal.land＝從出入口中心往右、往下幾像素）：直接站在那裡；被擋住就從那一格往外找空位
+  if (Array.isArray(portal.land)) {
+    const [px, py] = portalXY(portal), x = px + portal.land[0], y = py + portal.land[1], [lc, lr] = cellAt(x, y);
+    if (inGrid(lc, lr) && !playerBlocked(x, y)) { G.player.x = x; G.player.y = y; return; }
+    portal = { c: lc, r: lr };
+  }
   // 門格可能是牆或門框；優先站在門前，再從近到遠找能容納角色的空位。
   const offsets = [[0, 1], [0, 0], [1, 0], [-1, 0], [0, -1]];
   for (let radius = 2; radius <= 5; radius++) {
@@ -774,7 +780,8 @@ function teleportInMap(pt) {
   requestAnimationFrame(() => {
     mapTransition.classList.add('visible');
     setTimeout(() => {
-      placePlayerNearPortal(mapPortals.find(q => q.c === tc && q.r === tr) || { c: tc, r: tr });
+      // 這個傳送點設了 🦶 落地點（從送到的那格中心算起）：站在那裡；沒設：照舊站在那格（或那格的出入口）前面
+      placePlayerNearPortal(Array.isArray(pt.land) ? { c: tc, r: tr, land: pt.land } : mapPortals.find(q => q.c === tc && q.r === tr) || { c: tc, r: tr });
       // 隊員排在溫特身邊的空格（由近到遠找，一人一格）
       const [pc, pr] = cellAt(p.x, p.y), used = new Set([pc + ',' + pr]);
       for (const t of followers) {

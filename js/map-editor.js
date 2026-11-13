@@ -742,6 +742,11 @@ window.addEventListener('keydown', e => {
   if (!inField && brush.mode === 'portalnudge' && portalNudgeTarget(curMap())) {   // 出入口微調：方向鍵移動、[ ] 調範圍、Delete 重設、Esc 取消選取
     const p = portalNudgeTarget(curMap()), step = e.shiftKey ? 10 : 1;
     if (e.key === 'Escape') { e.preventDefault(); portalNudgeKey = null; draw(); setStatus('已取消選取', '#9aa4b2'); return; }
+    if (portalLandMode) {   // 🦶 調落地點：方向鍵移動落地點、Delete 改回自動
+      if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); setPortalLand(p, null); return; }
+      const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+      if (mv) { e.preventDefault(); const cur = portalLandOf(p); setPortalLand(p, [cur[0] + mv[0], cur[1] + mv[1]]); return; }
+    }
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); setPortalNudge(p, { ox: 0, oy: 0, radius: PORTAL_RADIUS_DEFAULT }); return; }
     const move = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
     if (move) { e.preventDefault(); setPortalNudge(p, { ox: (p.ox || 0) + move[0], oy: (p.oy || 0) + move[1] }); return; }
@@ -1097,6 +1102,31 @@ function setPortalNudge(p, patch) {
   if ('radius' in patch) { const v = clamp(patch.radius || PORTAL_RADIUS_DEFAULT, 10, 300); if (v !== PORTAL_RADIUS_DEFAULT) p.radius = v; else delete p.radius; }
   saveMaps(); draw(); portalNudgeStatus(p);
 }
+// ---- 🦶 落地點：從別的出入口（別張地圖、同地圖傳送點）來到這個出入口時，溫特站的位置 ----
+//   存在 portal 的 land＝[往右, 往下]（從出入口中心算起的像素；沒設＝照舊自動找門前的空位，js/game.js 的 placePlayerNearPortal）
+//   同一張地圖的傳送點（有 at）：land 是「傳送過去站在哪」，從送到的那格（at）中心算起
+const PORTAL_LAND_LIMIT = 400;        // 落地點離出入口最多幾像素
+const PORTAL_LAND_DEFAULT = [0, 40];  // 還沒設時，從「出入口下面一格」開始調（遊戲自動找位置時也是優先站在門前）
+let portalLandMode = false;           // true＝方向鍵、點地圖改的是落地點；false＝改出入口本身
+const portalLandOf = p => Array.isArray(p.land) ? p.land : PORTAL_LAND_DEFAULT;
+// 落地點從哪裡算起：傳送點＝送到的那格中心；其他出入口＝出入口自己的中心（含微調）
+const portalLandOrigin = p => Array.isArray(p.at) ? [OX + (p.at[0] + .5) * CELL, OY + (p.at[1] + .5) * CELL] : [OX + (p.c + .5) * CELL + (p.ox || 0), OY + (p.r + .5) * CELL + (p.oy || 0)];
+const PORTAL_LAND_HTML = '<span style="display:flex;align-items:center;gap:6px;padding-left:8px;border-left:1px solid #6a5a2c">' +
+  '<button type="button" class="btn" data-pl-mode title="切換方向鍵、點地圖要調的是出入口本身，還是溫特從別處來到這裡時站的位置">🦶 調落地點</button>' +
+  '<label style="display:flex;align-items:center;gap:4px">落地 左右<input type="number" data-pl="x" min="-' + PORTAL_LAND_LIMIT + '" max="' + PORTAL_LAND_LIMIT + '" placeholder="自動" style="width:62px"></label>' +
+  '<label style="display:flex;align-items:center;gap:4px">上下<input type="number" data-pl="y" min="-' + PORTAL_LAND_LIMIT + '" max="' + PORTAL_LAND_LIMIT + '" placeholder="自動" style="width:62px"></label>' +
+  '<button type="button" class="btn" data-pl-reset title="落地點改回自動（照舊站在門前的空位）">↺ 自動</button></span>';
+function setPortalLand(p, xy) {
+  pushUndo();
+  if (!xy) delete p.land;
+  else { const cl = v => Math.max(-PORTAL_LAND_LIMIT, Math.min(PORTAL_LAND_LIMIT, Math.round(Number(v) || 0))); p.land = [cl(xy[0]), cl(xy[1])]; }
+  saveMaps(); draw();
+  setStatus(p.land ? '🦶 落地點：' + (Array.isArray(p.at) ? '傳送到的那格' : '出入口') + '中心往右 ' + p.land[0] + '、往下 ' + p.land[1] + ' 像素（方向鍵移動、點地圖直接指定，Shift 一次 10；Delete 改回自動）' : '🦶 落地點改回自動（照舊站在門前的空位）', '#9fe0ff');
+}
+function togglePortalLandMode() {
+  portalLandMode = !portalLandMode; draw();
+  setStatus(portalLandMode ? '🦶 調落地點：方向鍵移動、點地圖直接指定溫特從別處來到這個出入口時站的位置（Delete 改回自動）' : '🎯 調出入口本身：方向鍵移動、[ ] 調範圍', '#9fe0ff');
+}
 // 工具列下面的數字欄：選到出入口才出現
 function syncPortalNudgePanel(m) {
   const tool = document.querySelector('.tool[data-mode="portalnudge"]'); if (!tool) return;
@@ -1105,14 +1135,26 @@ function syncPortalNudgePanel(m) {
     box = document.createElement('div'); box.id = 'portalNudgePanel';
     box.style.cssText = 'flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;padding:6px 8px;border:1px solid #6a5a2c;border-radius:6px;background:#2a2618;font-size:12px;color:#ffe3a1';
     const num = (id, label, min, max) => '<label style="display:flex;align-items:center;gap:4px">' + label + '<input type="number" data-pn="' + id + '" min="' + min + '" max="' + max + '" style="width:62px"></label>';
-    box.innerHTML = '<b data-pn-name></b>' + num('ox', '左右', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('oy', '上下', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('radius', '範圍', 10, 300) + '<button type="button" class="btn" data-pn-reset>↺ 重設</button>';
+    box.innerHTML = '<b data-pn-name></b>' + num('ox', '左右', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('oy', '上下', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('radius', '範圍', 10, 300) + '<button type="button" class="btn" data-pn-reset>↺ 重設</button>' + PORTAL_LAND_HTML;
     tool.parentElement.appendChild(box);
+    box.addEventListener('change', e => {   // 🦶 落地點的數字欄
+      const d = e.target.dataset || {}, p = portalNudgeTarget(curMap()); if (!p || !d.pl) return;
+      const cur = portalLandOf(p); setPortalLand(p, d.pl === 'x' ? [e.target.value, cur[1]] : [cur[0], e.target.value]);
+    });
+    box.addEventListener('click', e => {
+      const p = portalNudgeTarget(curMap()); if (!p) return;
+      if (e.target.closest('[data-pl-mode]')) togglePortalLandMode();
+      else if (e.target.closest('[data-pl-reset]')) setPortalLand(p, null);
+    });
     box.addEventListener('change', e => { const f = e.target.dataset && e.target.dataset.pn, p = portalNudgeTarget(curMap()); if (f && p) setPortalNudge(p, { [f]: e.target.value }); });
     box.addEventListener('click', e => { const p = portalNudgeTarget(curMap()); if (p && e.target.closest('[data-pn-reset]')) setPortalNudge(p, { ox: 0, oy: 0, radius: PORTAL_RADIUS_DEFAULT }); });
   }
   const p = brush.mode === 'portalnudge' ? portalNudgeTarget(m) : null;
   box.hidden = !p; box.style.display = p ? 'flex' : 'none'; if (!p) return;
   box.querySelector('[data-pn-name]').textContent = '🚪 (' + p.c + ',' + p.r + ')';
+  const modeBtn = box.querySelector('[data-pl-mode]'); modeBtn.textContent = portalLandMode ? '🦶 調落地點中（再按回出入口）' : '🦶 調落地點';
+  modeBtn.style.outline = portalLandMode ? '2px solid #9fe0ff' : '';
+  box.querySelectorAll('[data-pl]').forEach(i => { if (document.activeElement !== i) i.value = p.land ? p.land[i.dataset.pl === 'x' ? 0 : 1] : ''; });
   const vals = { ox: p.ox || 0, oy: p.oy || 0, radius: p.radius || PORTAL_RADIUS_DEFAULT };
   box.querySelectorAll('[data-pn]').forEach(i => { if (document.activeElement !== i) i.value = vals[i.dataset.pn]; });
 }
@@ -1126,6 +1168,14 @@ function drawPortalNudge(m) {
     ctx.fillStyle = on ? 'rgba(255,212,121,.14)' : 'rgba(181,140,255,.07)'; ctx.strokeStyle = on ? '#ffd479' : 'rgba(181,140,255,.55)'; ctx.lineWidth = on ? 2 : 1;
     ctx.beginPath(); ctx.arc(cx, cy, p.radius || PORTAL_RADIUS_DEFAULT, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     if (on) { ctx.strokeStyle = '#ffd479'; ctx.lineWidth = 3; ctx.strokeRect(cx - CELL / 2 + 1, cy - CELL / 2 + 1, CELL - 2, CELL - 2); }
+    if (on || p.land) {   // 🦶 落地點：設過的畫實心；沒設（自動）的只在選中時畫淡淡的大概位置
+      const [lx, ly] = portalLandOf(p), [bx, by] = portalLandOrigin(p), x2 = bx + lx, y2 = by + ly;   // 傳送點：虛線從出入口拉到傳送過去的落地點
+      ctx.setLineDash([4, 3]); ctx.strokeStyle = p.land ? '#9fe0ff' : 'rgba(159,224,255,.4)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = p.land ? 'rgba(159,224,255,.85)' : 'rgba(159,224,255,.3)'; ctx.beginPath(); ctx.arc(x2, y2, 10, 0, Math.PI * 2); ctx.fill();
+      if (on && portalLandMode) { ctx.strokeStyle = '#9fe0ff'; ctx.lineWidth = 2; ctx.stroke(); }
+      ctx.font = '12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#000'; ctx.fillText('🦶', x2, y2 + 1);
+    }
     ctx.restore();
   }
 }
@@ -1847,7 +1897,11 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     return;
   } else if (brush.mode === 'portalnudge') {   // 🎯 出入口微調：點一下選取
     if (!isDown) return;
-    const pt = portalHitAt(m, c, r);
+    const pt = portalHitAt(m, c, r), sel = portalNudgeTarget(m);
+    if (portalLandMode && sel && pointerPx && (!pt || pt === sel)) {   // 🦶 調落地點：點地圖＝把落地點放在這裡（點到別的出入口＝改選那個）
+      const [ox0, oy0] = portalLandOrigin(sel); setPortalLand(sel, [pointerPx.x - ox0, pointerPx.y - oy0]);
+      return;
+    }
     portalNudgeKey = pt ? pt.c + ',' + pt.r : null;
     draw();
     if (pt) portalNudgeStatus(pt); else setStatus('點一個出入口來微調', '#9aa4b2');
