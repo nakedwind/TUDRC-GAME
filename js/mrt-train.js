@@ -178,12 +178,12 @@ function mrtTrainUpdateSolid(tr) {
   if (key) {
     const open = key === 'open', far = open && tr.bothDoors;
     const type = new Map();
-    let rMax = -Infinity;
+    let rMax = -Infinity, rMin = Infinity;
     // 超出軌道範圍（隧道裡、畫面上看不到）的車廂格子不算：不然看不到的車廂會在旁邊的手扶梯上造出看不見的牆和地板
     for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
       const cx = OX + x.c * CELL;
       if (cx < tr.clipL - 1 || cx + CELL > tr.clipR + 1) continue;
-      type.set(x.c + ',' + x.r, x.t); rMax = Math.max(rMax, x.r);
+      type.set(x.c + ',' + x.r, x.t); rMax = Math.max(rMax, x.r); rMin = Math.min(rMin, x.r);
     }
     const pass = t => t === '.' || t === 'D' || (t === 'F' && far);
     for (const [k, t] of type) {
@@ -198,8 +198,8 @@ function mrtTrainUpdateSolid(tr) {
       if (out(c - 1, r)) tr.edges.push((c - 1) + ',' + r + ',R');
       if (out(c + 1, r)) tr.edges.push(c + ',' + r + ',R');
     }
-    tr.bottomRow = rMax;
-    mrtTrainUnstick(tr, wasOff);
+    tr.bottomRow = rMax; tr.topRow = rMin;
+    mrtTrainUnstick(tr, wasOff, type);
     if (!open) mrtTrainClearSill(tr, type);   // 車門關上：站在門檻上的人推進車裡或推回月台
   }
   mrtTrainApplyEdges();
@@ -211,13 +211,19 @@ const mrtCellKey = a => cellAt(a.x, a.y).join(',');
 // 誰在列車上（站在車廂走得進去的格子裡）
 function mrtOnTrain(tr, a) { return !!(tr.solidKey && a && tr.floor && tr.floor.includes(mrtCellKey(a))); }
 // 擋路的格子變多時，站在裡面的人移開：列車剛停好（站在軌道上的人）→ 月台；門關上（站在對面通道裡的人）→ 最近的車內地板
-function mrtTrainUnstick(tr, toPlatform) {
+// 兩邊都有月台時（列車停在地圖中間）：推往比較近的那一邊。上方月台＝列車最上排再往上一格，下方月台＝列車正下方
+// 門關上時站在對面通道（F，上方的門）裡的人：離上方月台比較近就推出去，離車內走道比較近才推進車裡
+function mrtTrainUnstick(tr, toPlatform, type) {
   const walls = new Set(tr.walls), platformY = OY + (tr.bottomRow + 1.5) * CELL;
+  const topY = OY + (tr.topRow - .5) * CELL;   // 上方月台（列車上緣外面那一格的中間）
+  const free = (x, y) => { const [c, r] = cellAt(x, y); return inGrid(c, r) && !isWall(c, r); };
   const floor = tr.floor.map(k => k.split(',').map(Number));
   for (const a of mrtTrainActors()) {
     const [c, r] = cellAt(a.x, a.y);
     if (!walls.has(c + ',' + r)) continue;
-    if (toPlatform || !floor.length) a.y = platformY;
+    const upFirst = r - tr.topRow + 1 <= tr.bottomRow + 1 - r;   // 往上推出去比較近（一樣近也往上，人原本就是從上面走進來的）
+    if (toPlatform || !floor.length) a.y = upFirst && free(a.x, topY) ? topY : platformY;
+    else if (type && type.get(c + ',' + r) === 'F' && r - tr.topRow + 1 <= tr.bottomRow - r && free(a.x, topY)) a.y = topY;   // 上方車門關上：推回上方月台
     else {
       let best = floor[0], bd = Infinity;
       for (const f of floor) { const d = Math.abs(f[0] - c) * 1.5 + Math.abs(f[1] - r); if (d < bd) { bd = d; best = f; } }
