@@ -922,5 +922,247 @@ const PROP_COLLISIONS = [
         ]
       ]
     }
+  },
+  {
+    "id": "prop-cvs-checkout",
+    "name": "超商：結帳櫃台",
+    "tile": "tile_cvs_checkout_counter",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-checkout-counter.png",
+      "w": 5,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-checkout-backroom",
+    "name": "後室商店：結帳櫃台",
+    "tile": "tile_cvs_checkout_counter_backroom",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-checkout-counter.png",
+      "w": 5,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-counter-ext",
+    "name": "超商：櫃台（延伸段）",
+    "tile": "tile_cvs_counter_extension",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-counter-extension.png",
+      "w": 2,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-back-counter",
+    "name": "超商：背後櫃",
+    "tile": "tile_cvs_back_counter",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-back-counter.png",
+      "w": 6,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          5,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-snack-shelf",
+    "name": "超商：零食櫃",
+    "tile": "tile_cvs_snack_shelf",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-snack-shelf.png",
+      "w": 3,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-drink-cooler",
+    "name": "超商：飲料櫃",
+    "tile": "tile_cvs_drink_cooler",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-drink-cooler.png",
+      "w": 3,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-ice-cream",
+    "name": "超商：冰品櫃",
+    "tile": "tile_cvs_ice_cream_freezer",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-ice-cream-freezer.png",
+      "w": 3,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-famiport",
+    "name": "超商：多媒體事務機（綠）",
+    "tile": "tile_cvs_famiport",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-famiport.png",
+      "w": 1,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-cvs-ibon",
+    "name": "超商：多媒體事務機（灰）",
+    "tile": "tile_cvs_ibon_kiosk",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/convenience-store/cvs-ibon-kiosk.png",
+      "w": 1,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ]
+      ]
+    }
   }
 ];
