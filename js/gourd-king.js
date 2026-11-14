@@ -9,6 +9,8 @@
    - 戰鬥（預設的發想，數值都在下面，可以再調）：
        1. 巨型泰山壓頂：跟一般葫蘆猴同一招，但範圍、震波、高度都大很多，落點圈也更大。
        2. 天花板落石：每次大壓頂都把天花板震下石頭，地上先出現影子，影子變深就會砸下來。
+          落石不分敵我：怪物站在影子裡也會被砸（葫蘆猴王自己不會）。
+       ＋ 壓碎礦石：壓頂砸到的煤礦、錫礦、石灰岩、錳礦直接壓碎；震波範圍內的算被炸一次（ores）。
        3. 暴怒（血量剩一半）：全身發紅、變快；每次大壓頂之後會再連跳 combo.hops 下追著人壓，
           連跳完會累得陷在地上比較久（combo.tired 秒）——這是反擊的好時機。
    - 體型：一般葫蘆猴的 scale 倍（2 倍）。不會硬直、打不退、推不動（跟一般葫蘆猴一樣）。
@@ -60,7 +62,15 @@ const GOURD_KING = {
     height: 420,                 // 從多高掉下來（像素）
     radius: 30,                  // 砸到的範圍（像素）
     playerDamage: 14, sentryDamage: 18,
+    monsterDamage: 60,           // 不分敵我：砸到怪物也會扣血（葫蘆猴王自己不會被砸）
+    hitKing: false,              // true＝葫蘆猴王自己也會被落石砸到
     quick: 1,                    // 暴怒連跳的小壓頂：每下掉幾顆
+  },
+  // ---- 壓碎礦石：壓頂砸到的普通礦石 ----
+  ores: {
+    types: ['ore_coal', 'ore_tin', 'ore_limestone', 'ore_manganese'],   // 會被壓碎的礦（煤礦、錫礦、石灰岩、錳礦；data/ores.js 的 id）
+    crushPad: .6,                // 落點圈外再多幾格內的礦：直接壓碎（不管多硬）
+    shockCrack: true,            // 震波範圍內（沒被壓到）的礦：算被炸一次（照礦的硬度累積，炸夠次數才碎）
   },
   // ---- 暴怒（血量剩一半）----
   enrageAt: .5,
@@ -252,6 +262,7 @@ function gkComboTarget(e) {
 function gourdKingImpact(e, quick) {
   const B = GOURD_KING, g = e.gm;
   if (!e.eliteAwake) gkWake(e);   // 第一下（從牆裡跳出來）落地：BOSS 戰開始
+  gkCrushOres(e);
   gkDropRocks(e, quick ? B.rocks.quick : B.rocks.count);
   if (!e.gkEnraged) return;
   // 暴怒：大壓頂之後追加連跳；連跳完累得陷在地上比較久
@@ -275,6 +286,17 @@ function gkEnrage(e) {
   if (typeof gourdLaugh === 'function') gourdLaugh(e, true);
 }
 
+// ---- 壓碎礦石：落點圈裡的直接壓碎；震波範圍裡的算被炸一次（用 js/ore.js 的 breakOre／blastHitOre，碎掉的石塊、聲音都跟炸開一樣）----
+function gkCrushOres(e) {
+  const O = GOURD_KING.ores, C = gmCfg(e);
+  if (typeof breakOre !== 'function') return;
+  for (const o of [...(G.obstacles || [])]) {
+    if (!o.ore || o.hp <= 0 || !O.types.includes(o.type)) continue;
+    const c = oreCenter(o), d = Math.hypot(c.x - e.x, (c.y - e.y) / .6);   // 落點圈是扁的：上下距離放大來算
+    if (d <= C.hitRadius + O.crushPad * CELL) breakOre(o, e.x, e.y);
+    else if (O.shockCrack && d <= C.knockRadius && typeof blastHitOre === 'function') blastHitOre(o, e.x, e.y);
+  }
+}
 // ---- 天花板落石：先出現影子，影子越來越深，時間到砸下來 ----
 function gkDropRocks(e, n) {
   const R = GOURD_KING.rocks, foes = [G.player, ...(G.towers || [])].filter(a => a && a.hp > 0 && (typeof sameFloor !== 'function' || sameFloor(e, a)));
@@ -316,6 +338,14 @@ function updateGkRocks(dt) {
       t.hp = Math.max(0, t.hp - dmg); t.hitT = Math.max(t.hitT || 0, .25);
       flash('-' + Math.round(dmg), t.x, t.y - 30, '#ff8f8f');
       if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+    }
+    // 不分敵我：怪物也會被砸到（倒下的結算在 game.js 統一處理）
+    for (const m of G.enemies || []) {
+      if (m.dead || m.hp <= 0 || (m.gourdKing && !R.hitKing) || Math.hypot(m.x - k.x, m.y - k.y) > R.radius + (m.drawWidth || 40) * .25) continue;
+      if (typeof burrowUnderground === 'function' && burrowUnderground(m)) continue;   // 鑽在地底的老鼠砸不到
+      m.hp -= R.monsterDamage; m.hitT = .2; m.hitColor = '#c8b590';
+      flashDmg('-' + R.monsterDamage, m.x, m.y - 26, '#e0c890');
+      if (typeof enemyHitReact === 'function') enemyHitReact(m, k.x, k.y, true);
     }
   }
   G.gkRocks = G.gkRocks.filter(k => !k.hit || k.t < R.fall + .05);
