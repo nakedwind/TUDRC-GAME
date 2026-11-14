@@ -1002,6 +1002,11 @@ function drawStamp(s) {
   if (!s.blend && alpha === 1) drawStampRaw(s);
   else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
   if (s.still) drawStillBadge(s);
+  if (s.rush && STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(curMap())) {   // K56 以外的地圖：勾了「會暴衝撞人」的車，左上角標「暴衝」
+    const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+    ctx.save(); ctx.fillStyle = 'rgba(230,120,20,.92)'; ctx.fillRect(x, y, 30, 15);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('暴衝', x + 4, y + 8); ctx.restore();
+  }
   if (s.deck2) drawDeck2Badge(s);
   if (s.cars > 0 && s.id === 'tile_mrt_train_car_head') drawMrtExtraCars(s);
   if (s.bothDoors && MRT_TRAIN_CAR_IDS.has(s.id)) drawMrtDoorsBadge(s);
@@ -3060,13 +3065,15 @@ function selectedBlendTarget() {   // 只選一個物件時：{ s（大圖）或
 // ---- 會不會動的開關：K56 的機車／腳踏車（js/street-vehicles.js）、手扶梯（js/escalators.js）。關掉＝stamp.still，就只是一張圖 ----
 // 可以一次選好幾台一起切換；選到其他物件不受影響
 const STILL_VEHICLE_IDS = new Set(['tile_street_scooter_delivery_green', 'tile_street_scooter_delivery_pink', 'tile_street_ubike']);
-const STILL_VEHICLE_MAP = 'map_mvvdbiyx';   // 車子只有 K56 區-地下街會動（STREET_VEHICLES.maps），其他地圖不顯示開關
+const STILL_VEHICLE_MAP = 'map_mvvdbiyx';   // K56 區-地下街的車預設會動（STREET_VEHICLES.maps，取消＝stamp.still）；其他地圖預設不動，勾了才動（stamp.rush）
+const vehicleDefaultRush = m => m && m.id === STILL_VEHICLE_MAP;
+const stampMoves = (m, s) => STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(m) ? !!s.rush : !s.still;   // 這個物件現在「會動」嗎
 const isSideEscalator = id => id === 'tile_mrt_escalator_side';   // 側面（斜的）手扶梯：多一個「往上／往下」可以選（stamp.escDown）
 const isStillEscalator = id => /^tile_mrt_escalator_front/.test(id) || isSideEscalator(id);
 function selectedStillTargets() {
   const m = curMap();
   return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index])
-    .filter(s => s && (isStillEscalator(s.id) || (m.id === STILL_VEHICLE_MAP && STILL_VEHICLE_IDS.has(s.id))));
+    .filter(s => s && (isStillEscalator(s.id) || STILL_VEHICLE_IDS.has(s.id)));
 }
 function refreshStillControl() {
   let box = document.getElementById('stillControl');
@@ -3087,14 +3094,18 @@ function refreshStillControl() {
       if (dropLockedSelections('切換會不會動')) return;
       const list = selectedStillTargets(); if (!list.length) return;
       pushUndo();
-      for (const s of list) { if (e.target.checked) delete s.still; else s.still = true; }
+      const m = curMap();
+      for (const s of list) {
+        if (STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(m)) { if (e.target.checked) s.rush = true; else delete s.rush; delete s.still; }
+        else { if (e.target.checked) delete s.still; else s.still = true; }
+      }
       saveMaps(); draw(); refreshSelPanel();
       setStatus(list.length + ' 個物件已設為' + (e.target.checked ? '會動' : '不會動'), '#7ee0c0');
     });
   }
   const list = selectedStillTargets(); box.classList.toggle('hidden', !list.length);
   if (!list.length) return;
-  const toggle = document.getElementById('stillToggle'), off = list.filter(s => s.still).length;
+  const toggle = document.getElementById('stillToggle'), m = curMap(), off = list.filter(s => !stampMoves(m, s)).length;
   toggle.checked = off === 0; toggle.indeterminate = off > 0 && off < list.length;
   const sides = list.filter(s => isSideEscalator(s.id)), downToggle = document.getElementById('escDownToggle'), downN = sides.filter(s => s.escDown).length;
   document.getElementById('escDownLabel').classList.toggle('hidden', !sides.length);
