@@ -624,7 +624,8 @@ function drawMapStampImg(ctx, s, glowPass = false) {
   if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
   const secret = typeof secretAlpha === 'function' ? secretAlpha(s) : 1;   // 隱藏區圖層：炸開前不畫（js/breakable-walls.js）
   if (secret <= 0) return;
-  const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret;
+  const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret
+    * (typeof mrtGateAlpha === 'function' ? mrtGateAlpha(s) : 1);   // 月台閘門：捷運開門時變淡（js/mrt-train.js）
   if (!s.blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
   ctx.save();
   if (s.blend) ctx.globalCompositeOperation = s.blend;
