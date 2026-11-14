@@ -103,6 +103,7 @@ function updatePoolTide(dt) {
   if (deepNow !== poolDeepWas) {
     poolDeepWas = deepNow;
     if (!deepNow) { if (G.player) G.player.swimRing = false; for (const t of G.towers || []) t.swimRing = false; }
+    else poolDouseLights();   // 水漲回深水：放在深水區裡的燈熄滅、消失
     if (typeof computeFlow === 'function') computeFlow();
   }
   // 溺水：深水時，還在深水區、沒坐救生圈的隊友每秒扣血
@@ -207,4 +208,25 @@ function poolIsValve(stamp) {
   const list = typeof MAP !== 'undefined' && MAP && Array.isArray(MAP.layerOrder) ? MAP.layerOrder : [];
   const l = list.find(x => x.id === (stamp.layer || 'top'));
   return !!(l && String(l.name || '').includes('抽水閥'));
+}
+
+// ---- 水漲回深水：玩家放在深水區裡的燈（js/build.js 的 emitsLight）熄滅、消失 ----
+// 燈只能放在淺水池：深水區要等水抽乾才放得下去（深水時不能蓋，js/build.js 的放置判定），水一漲回來就被淹掉
+function poolDouseLights() {
+  if (typeof emitsLight !== 'function' || typeof removeBarrier !== 'function') return;
+  let n = 0;
+  for (const o of [...(G.obstacles || [])]) {
+    if (o.hp <= 0 || !emitsLight({ id: o.type })) continue;
+    let wet = false;
+    for (let dc = 0; dc < (o.w || 1) && !wet; dc++) for (let dr = 0; dr < (o.h || 1) && !wet; dr++) wet = poolPointInDeepZone(...center(o.c + dc, o.r + dr));
+    if (!wet) continue;
+    const [x, y] = center(o.c + ((o.w || 1) - 1) / 2, o.r + ((o.h || 1) - 1) / 2);
+    o.lastHitBy = 'eaten';   // 安全移除（不會觸發爆炸之類的效果）
+    removeBarrier(o); n++;
+    G.effects.push({ ring: true, x, y: y + 8, r: 6, r2: 40, life: .5, life0: .5, color: '#cfeeff' });
+    if (typeof pushBlackSmoke === 'function') for (let i = 0; i < 3; i++) pushBlackSmoke(x + (Math.random() - .5) * 16, y - 6);   // 冒一點煙
+    if (typeof flash === 'function') flash('熄滅了', x, y - 24, '#9fd8ff');
+    if (typeof sfxAt === 'function') sfxAt('poolLightDouse', x, y, 1, 'pool-light-douse'); else if (typeof sfx === 'function') sfx('poolLightDouse');
+  }
+  if (n) { for (const t of G.towers || []) { t.navPath = null; t.navGoal = null; t.navTimer = 0; } }
 }

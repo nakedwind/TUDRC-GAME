@@ -25,6 +25,7 @@ const POOL_BOSS = {
   flop: [1.2, 3],             // 擱淺時隔幾秒拍一下
   flopTime: .32,              // 拍一下多久
   flopLift: 14,               // 拍起來多高（像素）
+  splash: { upDrops: 26, diveDrops: 34, upUp: 160, diveUp: 330, gravity: 620 },   // 水花：出水／跳水各噴幾滴、往上噴多快、重力
   nearSpawn: 14,              // 開戰後，牠幾格內生出來的怪物
   hatchlingChance: .8,        // 有幾成是小丑魚幼體
   hatchlingId: 'clownfish_small',
@@ -55,6 +56,7 @@ function seedPoolBoss() {
 
 // ---- 每一幀（js/pool-tide.js 的 updatePoolTide 呼叫）：潛水的時候牠不在 G.enemies 裡，所以由這裡自己動 ----
 function updatePoolBoss(dt) {
+  updatePoolSplash(dt);   // 水花（BOSS 死掉後還沒落下的也照樣落完）
   const pb = poolBossState(); if (!pb || pb.done) return;
   const e = pb.e;
   if (!poolBossAlive(pb)) { pb.done = true; return; }
@@ -80,7 +82,7 @@ function updatePoolBoss(dt) {
     pb.sub = !pb.sub;
     pb.t = poolBossRand(pb.sub ? POOL_BOSS.dive : POOL_BOSS.surface);
     poolBossShow(pb, !pb.sub);
-    poolBossSplash(e);
+    poolBossSplash(e, pb.sub ? 'dive' : 'up');   // 潛下去：跳水的水花；浮上來：周圍濺起水花
   }
   poolBossSwim(pb, dt);
 }
@@ -127,9 +129,49 @@ function poolBossFlop(pb, dt) {
   e.forceFrame = art.air || null; e.slimeLift = Math.sin(Math.PI * p) * P.flopLift;
 }
 const nearbyImpactSafe = e => { if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 3, .04); };
-function poolBossSplash(e) {
-  G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 10, r2: e.drawWidth * .55, life: .5, life0: .5, color: '#bfe8ff' });
-  if (typeof sfx === 'function') sfx('fishDouse');
+// ---- 水花：浮上來（up）＝周圍往外濺開一圈；潛下去（dive）＝跳水，水柱往上噴再落下 ----
+// 音效：音效編輯器的 poolBossSplash（魚頭君的噴水攻擊）
+function poolBossSplash(e, kind = 'up') {
+  const S = POOL_BOSS.splash, w = e.drawWidth || 270, list = G.poolSplash || (G.poolSplash = []);
+  const y = e.y + 8;
+  G.effects.push({ ring: true, x: e.x, y, r: 10, r2: w * .55, life: .55, life0: .55, color: '#d6f2ff' });
+  G.effects.push({ ring: true, x: e.x, y, r: 6, r2: w * .35, life: .4, life0: .4, color: '#ffffff' });
+  const n = kind === 'dive' ? S.diveDrops : S.upDrops;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    if (kind === 'dive') {   // 跳水：往上噴的水柱，範圍窄、噴得高
+      const sp = 20 + Math.random() * 50;
+      list.push({ x: e.x + (Math.random() - .5) * w * .3, y, z: 0, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45, vz: S.diveUp * (.6 + Math.random() * .6), r: 2 + Math.random() * 3, life: 1.1, t: 0 });
+    } else {                 // 出水：從身體周圍往外濺開
+      const sp = 70 + Math.random() * 110, rr = w * (.25 + Math.random() * .2);
+      list.push({ x: e.x + Math.cos(a) * rr, y: y + Math.sin(a) * rr * .45, z: 10 + Math.random() * 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45, vz: S.upUp * (.5 + Math.random() * .7), r: 2 + Math.random() * 3, life: 1, t: 0 });
+    }
+  }
+  if (list.length > 300) list.splice(0, list.length - 300);
+  if (typeof sfxAt === 'function') sfxAt('poolBossSplash', e.x, e.y, 1, 'pool-boss-splash'); else if (typeof sfx === 'function') sfx('poolBossSplash');
+}
+function updatePoolSplash(dt) {
+  const list = G.poolSplash; if (!list || !list.length) return;
+  for (const d of list) {
+    d.t += dt; d.x += d.vx * dt; d.y += d.vy * dt;
+    d.vz -= POOL_BOSS.splash.gravity * dt; d.z += d.vz * dt;
+    if (d.z < 0 && d.vz < 0) { d.z = 0; d.t = d.life; }   // 落回水面
+  }
+  G.poolSplash = list.filter(d => d.t < d.life);
+}
+// js/render.js 畫完角色後呼叫：水滴
+function drawPoolSplash(ctx) {
+  const list = typeof G !== 'undefined' && G && G.poolSplash; if (!list || !list.length) return;
+  ctx.save();
+  for (const d of list) {
+    const k = 1 - d.t / d.life;
+    ctx.globalAlpha = .85 * Math.min(1, k * 1.6);
+    ctx.fillStyle = '#e6f7ff';
+    ctx.beginPath(); ctx.arc(d.x, d.y - d.z, d.r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha *= .5; ctx.fillStyle = '#7fc4ef';
+    ctx.beginPath(); ctx.arc(d.x + d.r * .3, d.y - d.z + d.r * .3, d.r * .6, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
 }
 
 // ---- 給其他程式用 ----

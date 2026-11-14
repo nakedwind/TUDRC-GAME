@@ -230,6 +230,8 @@ const SFX = (() => {
     poolDrip: '滴水聲.mp3',
     poolWaterDrop: '環境/水滴聲.mp3',   // 池核的環境背景音（跟滴水聲一起循環，js/map-ambient.js）
     poolPaddle: '划水聲.mp3',
+    poolBossSplash: '怪物/魚頭君/噴水攻擊.mp3',   // 池核 BOSS 浮上來、潛下去（js/pool-boss.js）
+    poolLightDouse: '怪物/魚頭君/火被澆熄.mp3',   // 池核水漲回深水：深水區裡的燈熄滅（js/pool-tide.js）
     fieldGenRadio: ['無線電雜音.mp3', '無線電.mp3'],   // 池核的力場產生器：溫特第一次走近（兩個一起播，js/field-generator.js）
     fieldGenPopper: 'party-popper.wav',                  // 池核的力場產生器：跟無線電同時播
     fieldGenHorn: 'birthday-party-horn.mp3',             // 池核的力場產生器：0.4 秒後播   // 坐救生圈在深水區划水時循環播放（js/swim-ring.js）   // 池核的環境背景音：在池核一直循環（js/map-ambient.js）
