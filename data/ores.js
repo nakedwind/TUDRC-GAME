@@ -59,6 +59,7 @@ const ORE_TYPES = {
     "shards": 0,
     "glow": 0,
     "hp": 9999,
+    "blasts": 3,
     "w": 2,
     "h": 2,
     "solid": [
@@ -79,6 +80,7 @@ const ORE_TYPES = {
     "shards": 0,
     "glow": 0,
     "hp": 9999,
+    "blasts": 3,
     "w": 3,
     "h": 3,
     "solid": [
@@ -103,6 +105,7 @@ const ORE_TYPES = {
     "shards": 0,
     "glow": 0,
     "hp": 9999,
+    "blasts": 2,
     "w": 2,
     "h": 2,
     "solid": [
@@ -123,6 +126,7 @@ const ORE_TYPES = {
     "shards": 0,
     "glow": 0,
     "hp": 9999,
+    "blasts": 4,
     "w": 2,
     "h": 2,
     "solid": [

@@ -512,6 +512,7 @@ function slowFactorAt(x, y, who, actor) {   // actor：誰在走（黏著彈的�
   if (typeof burrowMouseSlowAt === 'function') k = Math.min(k, burrowMouseSlowAt(x, y));   // 版權老鼠死後的洞（js/burrowing-mouse.js）
   if (typeof waterSlowAt === 'function') k = Math.min(k, waterSlowAt(x, y));   // 走在水裡（js/water.js：素材勾了「這是水」，速度 % 在編輯器填）
   if (typeof glueSlowAt === 'function') k = Math.min(k, glueSlowAt(x, y, actor));   // 黏著彈的黏膠（js/special-guns.js）
+  if (typeof pitSlowAt === 'function') k = Math.min(k, pitSlowAt(x, y, who, actor));   // 地上的坑洞（js/pits.js：素材勾了「這是坑洞」，速度 % 在編輯器填）
   return k;
 }
 // 這個位置是不是已經有同一種建築（不擋路的建築一格只能放一個）

@@ -54,7 +54,8 @@ function damageOil(o, amount, source) {
   o.lastHitBy = source;
   o.hp -= amount; o.hitT = HIT_DUR;
   if (o.proxy) o.proxy.hp = 1;   // 假目標的血量不會真的減少
-  flashDmg('-' + Math.round(amount), oilCenter(o).x, oilCenter(o).y - 30, '#ffb070');
+  // 連鎖引爆（別的爆炸、地雷、安柏／希奧妮波及）會打 9999 讓油桶一下就爆：這種不飄數字，免得看起來像攻擊力 9999
+  if (amount < 9999) flashDmg('-' + Math.round(amount), oilCenter(o).x, oilCenter(o).y - 30, '#ffb070');
   if (o.hp <= 0) destroyObstacleNow(o);
 }
 function destroyObstacleNow(o) {

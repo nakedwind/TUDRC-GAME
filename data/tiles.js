@@ -4612,7 +4612,11 @@ const SHARED_TILES = [
     "file": "images/破損建築/hole01.png",
     "w": 2,
     "h": 2,
-    "flat": true
+    "flat": true,
+    "pit": {
+      "ally": 20,
+      "enemy": 50
+    }
   },
   {
     "id": "tile_mvmo77lx",
@@ -4621,7 +4625,11 @@ const SHARED_TILES = [
     "file": "images/破損建築/hole02.png",
     "w": 3,
     "h": 2,
-    "flat": true
+    "flat": true,
+    "pit": {
+      "ally": 20,
+      "enemy": 50
+    }
   },
   {
     "id": "tile_mvmo7lty",

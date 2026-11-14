@@ -3,7 +3,7 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 const oreIds=new Set(Object.keys(ORE_TYPES));
 const oreObjects=Object.entries(ORE_TYPES).map(([id,spec])=>{
   const variant={file:spec.file,w:spec.w,h:spec.h,solid:clone(spec.solid)};
-  return {id,name:spec.name,cost:0,hp:spec.hp,h:clone(variant),v:clone(variant)};
+  return {id,name:spec.name,cost:0,hp:spec.hp,blasts:spec.blasts||1,h:clone(variant),v:clone(variant)};   // blasts：要炸幾次才碎
 });
 const storageBoxIds=new Set(STORAGE_BOXES.map(o=>o.id));
 const propIds=new Set((typeof PROP_COLLISIONS!=='undefined'?PROP_COLLISIONS:[]).map(o=>o.id));   // 販賣機、營地箱子、扭蛋機、夾娃娃機的自帶碰撞（data/prop-collisions.js）
@@ -13,15 +13,18 @@ const decorationIds=new Set(DECORATIONS.map(o=>o.id));
 let objects; try{const saved=(typeof DraftSync !== 'undefined' ? DraftSync.load(STORE, defaults, { label: '物件' }) : JSON.parse(localStorage.getItem(STORE) || 'null'));objects=Array.isArray(saved)?saved:clone(defaults)}catch(_){objects=clone(defaults)}
 // 補齊正式資料中的缺項，同時保留瀏覽器裡已編輯的物件。
 for(const current of defaults) if(!objects.some(o=>o.id===current.id)) objects.push(clone(current));
+// 舊暫存裡的礦物還沒有「炸幾次才碎」：用正式資料（data/ores.js）的數字補上
+for(const o of objects) if(oreIds.has(o.id)&&o.blasts==null) o.blasts=ORE_TYPES[o.id].blasts||1;
 let index=0, orient='h';
 const $=id=>document.getElementById(id), fields=['name','cost','hp','file','w','h'];
 function save(){localStorage.setItem(STORE,JSON.stringify(objects));$('status').textContent='✓ 已自動保存';setTimeout(()=>{$('status').textContent=''},900)}
 function current(){return objects[index]} function variant(){return current()[(oreIds.has(current().id)||singleIds(current().id))?'h':orient]}
 function renderList(){$('list').innerHTML='';objects.forEach((o,i)=>{const b=document.createElement('button');b.textContent=o.name;b.classList.toggle('sel',i===index);b.onclick=()=>{index=i;render()};$('list').appendChild(b)})}
-function render(){const o=current(),v=variant();$('name').value=o.name;$('cost').value=o.cost;$('cost').disabled=oreIds.has(o.id)||singleIds(o.id);$('hp').value=o.hp;$('hp').disabled=singleIds(o.id);$('file').value=v.file;$('w').value=v.w;$('h').value=v.h;document.querySelectorAll('[data-o]').forEach(b=>b.classList.toggle('sel',b.dataset.o===orient));renderList();renderGrid()}
+function render(){const o=current(),v=variant();$('name').value=o.name;$('cost').value=o.cost;$('cost').disabled=oreIds.has(o.id)||singleIds(o.id);$('hp').value=o.hp;$('hp').disabled=singleIds(o.id);$('blastsRow').style.display=oreIds.has(o.id)?'':'none';$('blasts').value=o.blasts||1;$('file').value=v.file;$('w').value=v.w;$('h').value=v.h;document.querySelectorAll('[data-o]').forEach(b=>b.classList.toggle('sel',b.dataset.o===orient));renderList();renderGrid()}
 function renderGrid(){const v=variant(),g=$('grid');g.innerHTML='';g.style.gridTemplateColumns=`repeat(${v.w},80px)`;g.style.gridTemplateRows=`repeat(${v.h},80px)`;const img=document.createElement('img');img.src=v.file;img.alt='物件圖片';g.appendChild(img);const set=new Set((v.solid||[]).map(x=>x.join(',')));for(let y=0;y<v.h;y++)for(let x=0;x<v.w;x++){const c=document.createElement('div');c.className='cell'+(set.has(x+','+y)?' solid':'');c.onclick=()=>toggle(x,y);g.appendChild(c)}}
 function toggle(x,y){const v=variant(),key=x+','+y,set=new Set((v.solid||[]).map(a=>a.join(',')));set.has(key)?set.delete(key):set.add(key);v.solid=[...set].map(k=>k.split(',').map(Number)).sort((a,b)=>a[1]-b[1]||a[0]-b[0]);save();renderGrid()}
 document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{orient=b.dataset.o;render()});
+$('blasts').onchange=()=>{const n=Math.max(1,Math.min(20,Math.round(Number($('blasts').value)||1)));current().blasts=n;save();render()};   // 礦物要炸幾次才碎
 ['name','cost','hp'].forEach(id=>$(id).onchange=()=>{current()[id]=id==='name'?$(id).value:Number($(id).value);save();render()});
 ['file','w','h'].forEach(id=>$(id).onchange=()=>{const v=variant();v[id]=id==='file'?$(id).value:Math.max(1,Number($(id).value)||1);v.solid=(v.solid||[]).filter(([x,y])=>x<v.w&&y<v.h);save();render()});
 // ---- 新增／刪除物件 ----
@@ -37,7 +40,7 @@ function source(kind='obstacles'){
   if(kind==='props')return '/* 地圖物件自帶的行走碰撞（販賣機、營地的箱子、扭蛋機、夾娃娃機）：由物件編輯器匯出。\n   tile＝地圖上放的素材 id；h.solid＝從圖片左上角算，哪幾格擋路（[第幾欄, 第幾列]）。左右、上下翻轉的物件會跟著翻。 */\nconst PROP_COLLISIONS = '+JSON.stringify(objects.filter(o=>propIds.has(o.id)),null,2)+';\n';
   if(kind==='storageBoxes')return '/* 置物箱行走碰撞：由物件編輯器匯出。 */\nconst STORAGE_BOXES = '+JSON.stringify(objects.filter(o=>storageBoxIds.has(o.id)),null,2)+';\n';
   if(kind==='ores'){
-    const data=Object.fromEntries(objects.filter(o=>oreIds.has(o.id)).map(o=>[o.id,{...ORE_TYPES[o.id],name:o.name,hp:o.hp,...o.h}]));
+    const data=Object.fromEntries(objects.filter(o=>oreIds.has(o.id)).map(o=>[o.id,{...ORE_TYPES[o.id],name:o.name,hp:o.hp,blasts:o.blasts||1,...o.h}]));
     return '/* 異質礦資料（由物件編輯器匯出） */\nconst ORE_TYPES = '+JSON.stringify(data,null,2)+';\n';
   }
   const decor=kind==='decorations',name=decor?'DECORATIONS':'OBSTACLES';
