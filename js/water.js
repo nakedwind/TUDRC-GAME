@@ -12,6 +12,7 @@ const WATER = {
   footDy: 14,        // 角色的位置（x, y）往下幾點是腳（用腳踩的地方判斷是不是在水裡）
   enemyFootDy: 10,   // 怪物的腳
   rippleColor: 'rgba(205,238,255,',   // 水面波紋的顏色（後面接透明度）
+  rippleFlat: .55,   // 波紋的扁度＝高÷寬（1＝正圓、越小越扁；原本 .22 太扁，俯視角看起來怪）
 };
 const WATER_DEFAULT = { depth: 25, speed: 70, see: 45 };   // 沒填的數字用這個
 
@@ -86,25 +87,28 @@ function drawWaded(a, kind, drawFn) {
   try { drawFn(); } finally { ctx = main; }
   // 貼回遊戲畫面：水面以上照常、水面以下半透明
   const line = Math.round(toY(info.bottom - info.height * info.w.depth)), cut = Math.max(sy, Math.min(ey, line));
+  drawWaterRipple(a, info, 'back');   // 波紋後半圈（離鏡頭遠的上半弧）：先畫，角色會蓋在它上面，才不會壓到頭
   main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.globalAlpha = 1; main.filter = 'none';
   if (cut > sy) main.drawImage(waterLayer, sx, sy, ex - sx, cut - sy, sx, sy, ex - sx, cut - sy);
   if (ey > cut && info.w.see > 0) { main.globalAlpha = info.w.see; main.drawImage(waterLayer, sx, cut, ex - sx, ey - cut, sx, cut, ex - sx, ey - cut); }
   main.restore();
-  drawWaterRipple(a, info);
+  drawWaterRipple(a, info, 'front');   // 波紋前半圈（靠鏡頭的下半弧）：最後畫，在角色前面
 }
 // 水面那一圈波紋：站著時淡淡一圈，走動時再往外擴散
-function drawWaterRipple(a, info) {
-  const y = info.bottom - info.height * info.w.depth, rx = info.width * .5, ry = Math.max(2.5, rx * .22);
+// part：'back'＝只畫上半弧（在角色後面）、'front'＝只畫下半弧（在角色前面）、沒給＝整圈
+function drawWaterRipple(a, info, part) {
+  const a0 = part === 'front' ? 0 : Math.PI, a1 = part === 'back' ? Math.PI * 2 : part === 'front' ? Math.PI : Math.PI * 3;   // canvas 角度：0～π＝下半、π～2π＝上半
+  const y = info.bottom - info.height * info.w.depth, rx = info.width * .5, ry = Math.max(2.5, rx * WATER.rippleFlat);
   const t = performance.now() / 1000;
   ctx.save();
   ctx.lineWidth = 1.2;
   ctx.strokeStyle = WATER.rippleColor + '.55)';
-  ctx.beginPath(); ctx.ellipse(a.x, y, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(a.x, y, rx, ry, 0, a0, a1); ctx.stroke();
   if (a.moving || (a.walkUntil && a.walkUntil > t)) {   // 走動中：一圈一圈往外擴散、慢慢變淡
     for (let i = 0; i < 2; i++) {
       const k = ((t * 1.6) + i * .5) % 1;
       ctx.strokeStyle = WATER.rippleColor + (.45 * (1 - k)).toFixed(3) + ')';
-      ctx.beginPath(); ctx.ellipse(a.x, y, rx * (1 + k * .9), ry * (1 + k * .9), 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(a.x, y, rx * (1 + k * .9), ry * (1 + k * .9), 0, a0, a1); ctx.stroke();
     }
   }
   ctx.restore();

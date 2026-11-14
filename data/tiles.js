@@ -6747,7 +6747,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_pool_1.png",
     "w": 3,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_mwdkcaac",
@@ -6755,7 +6756,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_pool_2.png",
     "w": 4,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_mwdkcn5r",
@@ -6763,7 +6765,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_pool_3.png",
     "w": 3,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_mwdkcymx",
@@ -6771,7 +6774,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_pool_1_dwn.png",
     "w": 3,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_mwdklejx",
@@ -6779,7 +6783,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_pool_2_dwn.png",
     "w": 4,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_mwdlevxi",
@@ -6797,5 +6802,376 @@ const SHARED_TILES = [
     "w": 1,
     "h": 1,
     "flat": true
+  },
+  {
+    "id": "tile_mwfznsi8",
+    "name": "cozy-plant-fern",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-plant-fern.png",
+    "w": 1.6,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwfznsi9",
+    "name": "office-flower-vase",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-flower-vase.png",
+    "w": 0.8,
+    "h": 0.9
+  },
+  {
+    "id": "tile_mwfznsia",
+    "name": "office-plant-hanging",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-plant-hanging.png",
+    "w": 0.9,
+    "h": 1.4
+  },
+  {
+    "id": "tile_mwfznsib",
+    "name": "office-plant-large",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-plant-large.png",
+    "w": 1.6,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwfznsic",
+    "name": "office-plant-medium",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-plant-medium.png",
+    "w": 1.025,
+    "h": 1.1
+  },
+  {
+    "id": "tile_mwfznsid",
+    "name": "office-plant-small",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-plant-small.png",
+    "w": 0.7,
+    "h": 0.8
+  },
+  {
+    "id": "tile_mwfznsie",
+    "name": "office-plant-vine",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-plant-vine.png",
+    "w": 0.9,
+    "h": 1.4
+  },
+  {
+    "id": "tile_mwg0mkxt",
+    "name": "cozy-armchair-green-left",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-armchair-green-left.png",
+    "w": 1.6,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mkxu",
+    "name": "cozy-bookshelf-narrow",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-bookshelf-narrow.png",
+    "w": 1.175,
+    "h": 1.8
+  },
+  {
+    "id": "tile_mwg0mkxv",
+    "name": "cozy-lamp-desk",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-lamp-desk.png",
+    "w": 0.7,
+    "h": 0.8
+  },
+  {
+    "id": "tile_mwg0mkxw",
+    "name": "cozy-lamp-floor-arc",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-lamp-floor-arc.png",
+    "w": 1.6,
+    "h": 2.4
+  },
+  {
+    "id": "tile_mwg0mkxx",
+    "name": "cozy-low-cabinet",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-low-cabinet.png",
+    "w": 2.4,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mkxz",
+    "name": "cozy-room-divider",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-room-divider.png",
+    "w": 1.6,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mky0",
+    "name": "cozy-rug-cream",
+    "role": "floor",
+    "file": "images/辦公室裝飾/cozy-rug-cream.png",
+    "w": 2.8,
+    "h": 1.775,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mky1",
+    "name": "office-armchair",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-armchair.png",
+    "w": 1.2,
+    "h": 1.375
+  },
+  {
+    "id": "tile_mwg0mky2",
+    "name": "office-board-chart",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-board-chart.png",
+    "w": 2.4,
+    "h": 1.525
+  },
+  {
+    "id": "tile_mwg0mky3",
+    "name": "office-bookshelf",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-bookshelf.png",
+    "w": 2.4,
+    "h": 2.4
+  },
+  {
+    "id": "tile_mwg0mky4",
+    "name": "office-coffee-counter",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-coffee-counter.png",
+    "w": 1.6,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mky5",
+    "name": "office-coffee-table",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-coffee-table.png",
+    "w": 2.4,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mky6",
+    "name": "office-cup-shelf",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-cup-shelf.png",
+    "w": 1.6,
+    "h": 0.6
+  },
+  {
+    "id": "tile_mwg0mky7",
+    "name": "office-desk",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-desk.png",
+    "w": 3.2,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mky8",
+    "name": "office-desk02",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-desk02.png",
+    "w": 2.4,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mkya",
+    "name": "office-fridge",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-fridge.png",
+    "w": 1.6,
+    "h": 2.4
+  },
+  {
+    "id": "tile_mwg0mkyb",
+    "name": "office-kitchen-sink",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-kitchen-sink.png",
+    "w": 2.4,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mkyc",
+    "name": "office-lamp-floor",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-lamp-floor.png",
+    "w": 0.65,
+    "h": 1.5
+  },
+  {
+    "id": "tile_mwg0mkyd",
+    "name": "office-lamp-wall",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-lamp-wall.png",
+    "w": 0.625,
+    "h": 0.6
+  },
+  {
+    "id": "tile_mwg0mkye",
+    "name": "office-low-shelf",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-low-shelf.png",
+    "w": 2.4,
+    "h": 1.6
+  },
+  {
+    "id": "tile_mwg0mkyk",
+    "name": "office-pouf",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-pouf.png",
+    "w": 0.8,
+    "h": 0.8
+  },
+  {
+    "id": "tile_mwg0mkyl",
+    "name": "office-round-table",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-round-table.png",
+    "w": 1.5,
+    "h": 1.3
+  },
+  {
+    "id": "tile_mwg0mkym",
+    "name": "office-stool",
+    "role": "floor",
+    "file": "images/辦公室裝飾/office-stool.png",
+    "w": 0.8,
+    "h": 0.8
+  },
+  {
+    "id": "tile_mwg0mkyn",
+    "name": "rug_central_teal_gold_112x88",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_central_teal_gold_112x88.png",
+    "w": 2.8,
+    "h": 2.2,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyo",
+    "name": "rug_desk_sage_128x56",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_desk_sage_128x56.png",
+    "w": 3.2,
+    "h": 1.4,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyp",
+    "name": "rug_discussion_red_216x136",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_discussion_red_216x136.png",
+    "w": 5.4,
+    "h": 3.4,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyq",
+    "name": "rug_lounge_ivory_160x88",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_lounge_ivory_160x88.png",
+    "w": 4,
+    "h": 2.2,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyr",
+    "name": "rug_meeting_a_sage_176x144",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_meeting_a_sage_176x144.png",
+    "w": 4.4,
+    "h": 3.6,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkys",
+    "name": "rug_meeting_b_oval_128x96",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_meeting_b_oval_128x96.png",
+    "w": 3.2,
+    "h": 2.4,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyt",
+    "name": "rug_reception_teal_160x44",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_reception_teal_160x44.png",
+    "w": 4,
+    "h": 1.1,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyu",
+    "name": "rug_tea_room_runner_96x24",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_tea_room_runner_96x24.png",
+    "w": 2.4,
+    "h": 0.6,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyv",
+    "name": "rug_work_zone_oatmeal_152x64",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_work_zone_oatmeal_152x64.png",
+    "w": 3.8,
+    "h": 1.6,
+    "flat": true
+  },
+  {
+    "id": "tile_mwg0mkyw",
+    "name": "rug_woven_round_104x72",
+    "role": "floor",
+    "file": "images/辦公室裝飾/rug_woven_round_104x72.png",
+    "w": 2.6,
+    "h": 1.8,
+    "flat": true
+  },
+  {
+    "id": "tile_mwgchw5x",
+    "name": "Poolcore_lane line",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_lane line.png",
+    "w": 3,
+    "h": 1
+  },
+  {
+    "id": "tile_mwgdh193",
+    "name": "Poolcore_wall_break",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_wall_break.png",
+    "w": 4,
+    "h": 4,
+    "flat": true
+  },
+  {
+    "id": "tile_mwgdrgpy",
+    "name": "Poolcore_mrt-exit-2",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_mrt-exit-2.png",
+    "w": 5,
+    "h": 6,
+    "flat": true
+  },
+  {
+    "id": "tile_mwggq9a4",
+    "name": "Poolcore_water",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_water.png",
+    "w": 2,
+    "h": 2,
+    "flat": true,
+    "water": {
+      "depth": 20,
+      "speed": 70,
+      "see": 45
+    }
   }
 ];
