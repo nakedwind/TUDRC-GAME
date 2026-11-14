@@ -269,7 +269,7 @@ function initMap() {
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
-  setMapFloors(MAP.deck, MAP.ramps);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
+  setMapFloors(MAP.deck, MAP.ramps, MAP.solid2);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
   // 牆格整組重建了：上一張地圖的門、捷運閘門、可炸牆、置物箱「加進去的格子」不能再拿來刪
   // （不然上一張地圖剛好在同一格有門，就會把這張地圖本來畫好的牆刪掉，人可以穿牆）
   if (typeof doorAddedWalls !== 'undefined') doorAddedWalls = new Set();
@@ -498,6 +498,24 @@ function seedBaseObstacle(s) {
     G.obstacles.push(o);
     return o;
 }
+// 地圖編輯器把物件放大／縮小（圖章的「大小 %」）時，擋路格也跟著變大／變小。
+// 放大的基準跟畫圖一樣是「圖片底部中央」（js/stamp-transform.js 的 applyStampTransform）：
+// 每一格擋路格照比例變大後，蓋到哪些格子的中心，那些格子就擋路；縮到一格都蓋不到時，至少留它中心所在的那格。
+// cells：[第幾欄, 第幾列]（從圖片左上角算，可能變成負的＝超出原本圖片範圍）；w、h：圖片佔幾格；k：倍率（1＝原尺寸）
+function scaleSolidCells(cells, w, h, k) {
+  if (!k || k === 1) return cells;
+  const sx = x => w / 2 + (x - w / 2) * k, sy = y => h + (y - h) * k;   // 原本的位置 → 放大後的位置（以格為單位）
+  const out = new Map();
+  for (const [dc, dr] of cells) {
+    const x0 = sx(dc), x1 = sx(dc + 1), y0 = sy(dr), y1 = sy(dr + 1);
+    let any = false;
+    for (let c = Math.floor(x0); c < Math.ceil(x1); c++) for (let r = Math.floor(y0); r < Math.ceil(y1); r++) {
+      if (c + .5 >= x0 && c + .5 < x1 && r + .5 >= y0 && r + .5 < y1) { out.set(c + ',' + r, [c, r]); any = true; }
+    }
+    if (!any) { const c = Math.floor((x0 + x1) / 2), r = Math.floor((y0 + y1) / 2); out.set(c + ',' + r, [c, r]); }
+  }
+  return [...out.values()];
+}
 function seedOtherMapObstacles() {
   // 地圖編輯器的「障礙物」素材沿用可放置建築的碰撞格與 HP。
   // 不修改原始地圖；拆毀後只在本局隱藏該圖片。
@@ -519,8 +537,9 @@ function seedOtherMapObstacles() {
       G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w, h, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0 });
       return;
     }
-    const solid = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))
-      .map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr])
+    const solid0 = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))
+      .map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr]);
+    const solid = scaleSolidCells(solid0, w, h, stamp && typeof stampScaleOf === 'function' ? stampScaleOf(stamp) : 1)
       .filter(([dc, dr]) => inGrid(c + dc, r + dr) && !G.grid[(c + dc) + ',' + (r + dr)]);
     if (!solid.length) return;
     const o = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type,
@@ -631,7 +650,8 @@ function drawMapStampImg(ctx, s, glowPass = false) {
   if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
   const secret = typeof secretAlpha === 'function' ? secretAlpha(s) : 1;   // 隱藏區圖層：炸開前不畫（js/breakable-walls.js）
   if (secret <= 0) return;
-  const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret;
+  const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret
+    * (typeof mrtGateAlpha === 'function' ? mrtGateAlpha(s) : 1);   // 月台閘門：捷運開門時變淡（js/mrt-train.js）
   const blend = mapStampBlend(s);
   if (!blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
   ctx.save();
@@ -764,6 +784,8 @@ function stampConnects(s) {
   const w = mapStampW(s, t), h = mapStampH(s, t); if (h < 2) return false;
   // 下半段蓋到的每一格都不能是 2 樓的地面／2 樓地板的圖：只要碰到一格，就是站在陸橋上的牆（整張算 2 樓），不拆
   const c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL, fl = floor2ArtCells().floor;
+  // 牆腳正下方那一排是 2 樓地面：這是站在 2 樓走道上的牆（牆身本來就不能走、不是 2 樓地面），整張算 2 樓，不拆
+  for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) if (deckCells.has(c + ',' + Math.ceil(r0 + h - .5))) return false;
   for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 + h / 2 - .5); r + .5 < r0 + h; r++) {
     const k = c + ',' + r; if (deckCells.has(k) || fl.has(k)) return false;
   }

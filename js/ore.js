@@ -1,5 +1,7 @@
 // ============================================================
 //  異質碎片礦物：用地圖編輯器擺在地圖上（素材在 images/item-obstacle/09～11-ore-*.png）。
+//  另有普通礦石（煤礦、錫礦、石灰岩、錳礦，15～18-ore-*.png）：一樣擋路、一樣用下面的方法打開，
+//  但 crystals＝0，不掉異質碎片、不發紫光、異質探測器也不顯示。碰撞格在物件編輯器設定（data/ores.js）。
 //  礦物很硬，徒手挖不開。能打開礦物的方法：
 //    ・地雷爆炸（油桶炸不開，但油桶爆炸可以引爆旁邊的地雷）
 //    ・瓦斯爐爆炸（威力比較小，js/oil-barrels.js）
@@ -33,7 +35,7 @@ const oreGlowImgs = {};
 function oreGlowFor(type) {
   if (oreGlowImgs[type] !== undefined) return oreGlowImgs[type];
   const spec = ORE_TYPES[type], base = spec && String(spec.file || '').split('/').pop().replace(/\.png$/i, '');
-  if (!base) return (oreGlowImgs[type] = null);
+  if (!base || !spec.glow) return (oreGlowImgs[type] = null);   // 不發光的礦（煤礦、錫礦…）：沒有發光圖
   const glow = new Image(); glow.src = `images/item-obstacle/glow/${base}-glow.png`;
   const halo = new Image(); halo.src = `images/item-obstacle/glow/${base}-halo.png`;
   return (oreGlowImgs[type] = { glow, halo });
@@ -55,6 +57,8 @@ function drawOreGlow(ctx, o, x, y, w, h) {
   if (imgs.glow.complete && imgs.glow.naturalWidth) { ctx.globalAlpha = C.strength * k; ctx.drawImage(imgs.glow, x, y, w, h); }
   ctx.restore();
 }
+// 有沒有異質結晶：煤礦、錫礦、石灰岩、錳礦是普通礦石（crystals＝0），不掉異質碎片、不發紫光、探測器也不顯示
+const oreHasCrystals = o => ((ORE_TYPES[o && o.type] || {}).crystals || 0) > 0;
 const oreByFile = file => Object.entries(ORE_TYPES).find(([, spec]) => file.endsWith(spec.file.replace('images/', ''))) || null;
 // 礦物的「中心」（瞄準、打中、亮不亮、碎片噴出的位置）：左右＝整張圖的中間；高度＝擋路那幾格（石頭底座）的中間。
 // 不用整張圖的中心：高的礦（稀有紫晶礦 2×3）上半部常常疊在牆上，中心會落在牆裡，子彈的視線、照明判定都會失敗（打不到）
@@ -102,7 +106,8 @@ function blastOres(x, y, R) {
   }
 }
 function breakOre(o, bx, by, msg) {
-  if (typeof questEvent === 'function') questEvent('breakOre');   // 支線進度（js/quests.js）
+  const crystal = oreHasCrystals(o);
+  if (crystal && typeof questEvent === 'function') questEvent('breakOre');   // 支線進度（js/quests.js）
   const spec = ORE_TYPES[o.type], c = oreCenter(o);
   o.lastHitBy = 'demolish';
   removeBarrier(o);
@@ -115,16 +120,16 @@ function breakOre(o, bx, by, msg) {
     G.oreShards.push({ x: c.x, y: c.y, z: 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7, vz: 160 + Math.random() * 120,
       value, t: 0, spin: Math.random() * 6, rare: o.type === 'ore_rare' });
   }
-  // 畫面：紫色爆光、碎石
-  G.effects.push({ ring: true, x: c.x, y: c.y, r: 6, r2: 52, life: .5, life0: .5, color: '#d69bff' });
+  // 畫面：紫色爆光、碎石（普通礦石：土黃色）
+  G.effects.push({ ring: true, x: c.x, y: c.y, r: 6, r2: 52, life: .5, life0: .5, color: crystal ? '#d69bff' : '#c8b49a' });
   for (let i = 0; i < 12; i++) {
     const a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 120;
     G.effects.push({ ember: true, spark: true, x: c.x, y: c.y - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 60,
-      r: 1.5 + Math.random() * 2, life: .5 + Math.random() * .3, life0: .8, color: '#c47dff' });
+      r: 1.5 + Math.random() * 2, life: .5 + Math.random() * .3, life0: .8, color: crystal ? '#c47dff' : '#a08a6e' });
   }
   if (typeof spawnGoo === 'function') spawnGoo(c.x, c.y - 4, '#6b6372', 8, 1.1);   // 碎石
-  if (typeof LOOT_FX_VERSION !== 'undefined' && LOOT_FX_VERSION === 2) lootV2OreBreak(c.x, c.y - 6);   // V2：水晶碎片、星光、一閃（js/loot-fx-v2.js）
-  if (typeof sfxAt === 'function') { sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break'); sfxAt('oreMine', c.x, c.y, .7, 'ore-mine'); }   // 碎掉的玻璃聲＋挖礦聲
+  if (crystal && typeof LOOT_FX_VERSION !== 'undefined' && LOOT_FX_VERSION === 2) lootV2OreBreak(c.x, c.y - 6);   // V2：水晶碎片、星光、一閃（js/loot-fx-v2.js）
+  if (typeof sfxAt === 'function') { if (crystal) sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break'); sfxAt('oreMine', c.x, c.y, .7, 'ore-mine'); }   // 碎掉的玻璃聲＋挖礦聲
 }
 
 // ---- 每幀更新（在 update 裡呼叫）：碎片噴飛、落地 ----
@@ -258,7 +263,7 @@ function strayBoltOre(t, target) {
 function oreGlowLights() {
   if (!G || !G.obstacles) return [];
   const now = performance.now() / 1000;
-  const lights = G.obstacles.filter(o => o.ore && o.hp > 0 && isLit(oreCenter(o).x, oreCenter(o).y) && !oreConcealed(o)).map(o => {   // 黑暗中不發光；還沒炸開的隱藏區也不發光
+  const lights = G.obstacles.filter(o => o.ore && o.hp > 0 && oreHasCrystals(o) && isLit(oreCenter(o).x, oreCenter(o).y) && !oreConcealed(o)).map(o => {   // 黑暗中不發光；還沒炸開的隱藏區也不發光
     const c = oreCenter(o), spec = ORE_TYPES[o.type];
     return { x: c.x, y: c.y - 6, r: 70 + spec.glow * 60, life: 1, life0: 1,
       power: spec.glow * (.8 + .2 * Math.sin(now * 2 + o.c * 1.7 + o.r)), color: [190, 110, 255] };

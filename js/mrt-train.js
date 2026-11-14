@@ -128,12 +128,78 @@ function setupMrtTrains() {
       state: 'away', t: MRT_TRAIN.firstWait, off: 0, door: 0, soundId: 'mrt-train-' + head.stamp.c + ',' + head.stamp.r,
       walls: [], edges: [], cleared: [], solidKey: '' });
   }
+  setupMrtGates();
 }
 // 接續「保留進度」、劇情看完回原地圖（mapWalls 整份換回來，js/combat-progress.js 的 reclaimAddedWalls）：照每班車記的格子湊回總表
 function restoreMrtTrains() {
   mrtTrainWalls = new Set();
-  for (const tr of (G && G.mrtTrains) || []) for (const k of tr.walls || []) mrtTrainWalls.add(k);
+  for (const tr of (G && G.mrtTrains) || []) { for (const k of tr.walls || []) mrtTrainWalls.add(k); tr.gateOpen = null; }   // 閘門：下一幀照列車現在的狀態重新開關
   mrtTrainApplyEdges();
+}
+
+// ===== 月台閘門（閘門讀卡機）：捷運停好、車門打開才可以通過 =====
+// 地圖上放在列車旁邊（左右跟列車重疊、上下離列車 2 格以內）的「閘門讀卡機」「閘門讀卡機（小）」會跟那班車連動：
+// 平常擋路；同一班車停好、車門開到可以走的時候（跟車門同一刻）打開，車門開始關就又擋住。
+// 擋的格子：閘門圖片最下面一排，加上圖片範圍內地圖編輯器畫的紅格；跟列車重疊的格子不算（那是車廂裡的走道，列車自己會管）。
+// 不靠近任何列車的閘門照原本的樣子（只看地圖編輯器畫的紅格）。
+const MRT_GATE_TILES = new Set(['tile_mrt_gate_card_readers', 'tile_mrt_gate_card_readers_small']);
+const MRT_GATE = { link: 2, openAlpha: .3 };   // link：離列車幾格內算同一班；openAlpha：打開時閘門圖剩多少不透明（之後有「打開」的圖再換掉）
+let mrtGateCells = new Set();   // 所有閘門管的格子（換地圖、重開時先還原成地圖原本的樣子）
+function setupMrtGates() {
+  const drawn = new Set((MAP && MAP.solid) || []);
+  for (const k of mrtGateCells) { if (drawn.has(k)) mapWalls.add(k); else mapWalls.delete(k); }
+  mrtGateCells = new Set();
+  for (const tr of G.mrtTrains || []) {
+    tr.gates = []; tr.gateOpen = null;
+    const trainCells = new Set();
+    for (const car of tr.cars) for (const x of mrtCarCells(car).cells) trainCells.add(x.c + ',' + x.r);
+    const rows = [...trainCells].map(k => +k.split(',')[1]), top = Math.min(...rows), bottom = Math.max(...rows);
+    // 左右範圍：列車停好時實際佔的欄（軌道範圍外、看不到的車廂不算）——停車位置旁邊的閘門才連動
+    const cols = [...trainCells].map(k => +k.split(',')[0]);
+    const cL = Math.max(Math.min(...cols), Math.round((tr.clipL - OX) / CELL)), cR = Math.min(Math.max(...cols) + 1, Math.round((tr.clipR - OX) / CELL));
+    for (const s of MAP.stamps || []) {
+      if (!MRT_GATE_TILES.has(s.id)) continue;
+      const t = mapTileById(s.id); if (!t) continue;
+      const w = mapStampW(s, t), h = mapStampH(s, t), c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+      if (c0 + w <= cL || c0 >= cR || r0 > bottom + MRT_GATE.link || r0 + h - 1 < top - MRT_GATE.link) continue;   // 不在這班車旁邊
+      const cells = [];
+      for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) {
+        const c = c0 + dc, r = r0 + dr, k = c + ',' + r;
+        if (!inGrid(c, r) || trainCells.has(k) || (dr !== h - 1 && !drawn.has(k))) continue;
+        cells.push(k); mrtGateCells.add(k);
+      }
+      if (cells.length) tr.gates.push({ stamp: s, cells, below: r0 + h - 1 > bottom });   // below：閘門在列車下面（推人時往下推）
+    }
+  }
+}
+// 每幀：車門開到可以走＝打開，其他時候關著。改了擋路格就重算尋路
+function updateMrtGates(tr) {
+  if (!tr.gates || !tr.gates.length) return;
+  const open = tr.solidKey === 'open';
+  if (open === tr.gateOpen) return;
+  const first = tr.gateOpen == null; tr.gateOpen = open;
+  for (const g of tr.gates) for (const k of g.cells) { if (open) mapWalls.delete(k); else mapWalls.add(k); }
+  if (!open && !first) {   // 關起來時站在閘門上的人：推到閘門外面（月台那一側），被擋住就推到另一邊
+    for (const a of mrtTrainActors()) {
+      const key = mrtCellKey(a);
+      const g = tr.gates.find(x => x.cells.includes(key)); if (!g) continue;
+      const [c, r] = key.split(',').map(Number);
+      const out = g.below ? r + 1 : r - 1, back = g.below ? r - 1 : r + 1;
+      const rr = !isWall(c, out) ? out : back;
+      a.y = OY + (rr + .5) * CELL; a.navPath = null; a.navGoal = null;
+    }
+  }
+  if (typeof computeFlow === 'function') computeFlow();
+  for (const a of [...G.towers, ...G.npcs, ...G.enemies]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
+}
+// 畫閘門時的不透明度（js/maploader.js 的 drawMapStampImg）：打開時跟著車門一起變淡
+function mrtGateAlpha(s) {
+  if (!s || !MRT_GATE_TILES.has(s.id) || typeof G === 'undefined' || !G || !G.mrtTrains) return 1;
+  for (const tr of G.mrtTrains) if (tr.gates && tr.gates.some(g => g.stamp === s)) {
+    const k = Math.max(0, Math.min(1, (tr.door - MRT_TRAIN.doorPassAt * .5) / (1 - MRT_TRAIN.doorPassAt * .5)));
+    return ['away', 'arrive', 'depart', 'tunnel'].includes(tr.state) ? 1 : 1 - (1 - MRT_GATE.openAlpha) * k;
+  }
+  return 1;
 }
 
 // ---- 車廂的格子圖：一列一串字（由上往下），每個字是一格：# 擋路、. 地板、D 外側門口、F 對面通道 ----
@@ -178,12 +244,12 @@ function mrtTrainUpdateSolid(tr) {
   if (key) {
     const open = key === 'open', far = open && tr.bothDoors;
     const type = new Map();
-    let rMax = -Infinity;
+    let rMax = -Infinity, rMin = Infinity;
     // 超出軌道範圍（隧道裡、畫面上看不到）的車廂格子不算：不然看不到的車廂會在旁邊的手扶梯上造出看不見的牆和地板
     for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
       const cx = OX + x.c * CELL;
       if (cx < tr.clipL - 1 || cx + CELL > tr.clipR + 1) continue;
-      type.set(x.c + ',' + x.r, x.t); rMax = Math.max(rMax, x.r);
+      type.set(x.c + ',' + x.r, x.t); rMax = Math.max(rMax, x.r); rMin = Math.min(rMin, x.r);
     }
     const pass = t => t === '.' || t === 'D' || (t === 'F' && far);
     for (const [k, t] of type) {
@@ -198,8 +264,8 @@ function mrtTrainUpdateSolid(tr) {
       if (out(c - 1, r)) tr.edges.push((c - 1) + ',' + r + ',R');
       if (out(c + 1, r)) tr.edges.push(c + ',' + r + ',R');
     }
-    tr.bottomRow = rMax;
-    mrtTrainUnstick(tr, wasOff);
+    tr.bottomRow = rMax; tr.topRow = rMin;
+    mrtTrainUnstick(tr, wasOff, type);
     if (!open) mrtTrainClearSill(tr, type);   // 車門關上：站在門檻上的人推進車裡或推回月台
   }
   mrtTrainApplyEdges();
@@ -211,13 +277,19 @@ const mrtCellKey = a => cellAt(a.x, a.y).join(',');
 // 誰在列車上（站在車廂走得進去的格子裡）
 function mrtOnTrain(tr, a) { return !!(tr.solidKey && a && tr.floor && tr.floor.includes(mrtCellKey(a))); }
 // 擋路的格子變多時，站在裡面的人移開：列車剛停好（站在軌道上的人）→ 月台；門關上（站在對面通道裡的人）→ 最近的車內地板
-function mrtTrainUnstick(tr, toPlatform) {
+// 兩邊都有月台時（列車停在地圖中間）：推往比較近的那一邊。上方月台＝列車最上排再往上一格，下方月台＝列車正下方
+// 門關上時站在對面通道（F，上方的門）裡的人：離上方月台比較近就推出去，離車內走道比較近才推進車裡
+function mrtTrainUnstick(tr, toPlatform, type) {
   const walls = new Set(tr.walls), platformY = OY + (tr.bottomRow + 1.5) * CELL;
+  const topY = OY + (tr.topRow - .5) * CELL;   // 上方月台（列車上緣外面那一格的中間）
+  const free = (x, y) => { const [c, r] = cellAt(x, y); return inGrid(c, r) && !isWall(c, r); };
   const floor = tr.floor.map(k => k.split(',').map(Number));
   for (const a of mrtTrainActors()) {
     const [c, r] = cellAt(a.x, a.y);
     if (!walls.has(c + ',' + r)) continue;
-    if (toPlatform || !floor.length) a.y = platformY;
+    const upFirst = r - tr.topRow + 1 <= tr.bottomRow + 1 - r;   // 往上推出去比較近（一樣近也往上，人原本就是從上面走進來的）
+    if (toPlatform || !floor.length) a.y = upFirst && free(a.x, topY) ? topY : platformY;
+    else if (type && type.get(c + ',' + r) === 'F' && r - tr.topRow + 1 <= tr.bottomRow - r && free(a.x, topY)) a.y = topY;   // 上方車門關上：推回上方月台
     else {
       let best = floor[0], bd = Infinity;
       for (const f of floor) { const d = Math.abs(f[0] - c) * 1.5 + Math.abs(f[1] - r); if (d < bd) { bd = d; best = f; } }
@@ -392,6 +464,7 @@ function updateMrtTrains(dt) {
     if (tr.riders && typeof addShake === 'function' && (tr.state === 'depart' || tr.state === 'arrive')) addShake(T.rideShake * .35);   // 坐在車上：輕輕晃
     if (tr.cargo) mrtTrainMoveCargo(tr);
     mrtTrainUpdateSolid(tr);
+    updateMrtGates(tr);   // 月台閘門跟著車門開關
   }
 }
 

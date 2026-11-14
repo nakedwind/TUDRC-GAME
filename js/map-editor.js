@@ -99,7 +99,7 @@ const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商�
 const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v2'; // 後補：彈藥箱（打開）；v2：圖改成 80×80（2×2 格），編輯器裡的素材大小跟著更新
 const STORAGE_AMMO_CRATE_EMPTY = 'tudrc_asset_ammo_crate_empty_v1'; // 後補：彈藥箱（空）；指定內容物的彈藥箱開過後換這張（js/flare.js）
 const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：物資箱（js/camp-supply.js）
-const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
+const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v3';              // 後補：異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3；v3：加煤礦、錫礦、石灰岩、錳礦
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
 const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v6';       // 池核磁磚素材（v3：資料夾改名 images/Poolcore、加地板大中小；v5：柱子；v6：彈藥箱、背包、行軍床）
@@ -401,6 +401,8 @@ function loadTiles() {
   const breakableWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_breakable', 'tudrc_breakable_wall_v1');   // 後室牆面（可炸開）：js/breakable-walls.js
   const backroomCounterAdded = mergeDefaultAssetPack(t => t.id === 'tile_cvs_checkout_counter_backroom', 'tudrc_backroom_counter_v1');   // 後室商店櫃台（js/shop.js）
   const secretWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_secret', 'tudrc_secret_wall_v1');   // 後室牆面（可炸開・隱藏區）
+  const mrtHighwallX6Added = mergeDefaultAssetPack('tile_mrt_room_highwallx6', 'tudrc_mrt_highwall_x6_v1');   // 捷運高牆X6：完整／裂縫／破洞／全破＋可炸開、隱藏區版本（js/breakable-walls.js）
+  const mrtWallX3Added = mergeDefaultAssetPack('tile_mrt_room_wallx3', 'tudrc_mrt_wall_x3_v1');   // 捷運灰牆X3：完整／裂縫／破洞＋可炸開、隱藏區版本（js/breakable-walls.js）
   const backgroundExtrasAdded = mergeDefaultAssetPack('tile_bg_extra_', 'tudrc_asset_background_extras_20261018');
   const researchLabAdded = mergeDefaultAssetPack('tile_research_lab_', STORAGE_RESEARCH_LAB_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
@@ -430,7 +432,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (poolBaseAdded || supplyBoxAdded || backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
+  if (poolBaseAdded || supplyBoxAdded || backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || mrtWallX3Added || mrtHighwallX6Added || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -519,7 +521,8 @@ function fixMap(m) {
   if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   if (Array.isArray(m.deck) && m.deck.length) m.deck = [...new Set(m.deck)]; else delete m.deck;   // 🌉 2樓地面：['欄,列'…]（js/pathfinding.js）
-  if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;   // 🛗 樓層出入口：['欄,列'…]（手扶梯、樓梯：走出去就換樓層）
+  if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;
+  if (Array.isArray(m.solid2) && m.solid2.length) m.solid2 = [...new Set(m.solid2)]; else delete m.solid2;   // 🚧 2樓碰撞：['欄,列'…]，只擋 2 樓的人（js/pathfinding.js）   // 🛗 樓層出入口：['欄,列'…]（手扶梯、樓梯：走出去就換樓層）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
@@ -1000,6 +1003,11 @@ function drawStamp(s) {
   if (!s.blend && alpha === 1) drawStampRaw(s);
   else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
   if (s.still) drawStillBadge(s);
+  if (s.rush && STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(curMap())) {   // K56 以外的地圖：勾了「會暴衝撞人」的車，左上角標「暴衝」
+    const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+    ctx.save(); ctx.fillStyle = 'rgba(230,120,20,.92)'; ctx.fillRect(x, y, 30, 15);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('暴衝', x + 4, y + 8); ctx.restore();
+  }
   if (s.deck2) drawDeck2Badge(s);
   if (s.cars > 0 && s.id === 'tile_mrt_train_car_head') drawMrtExtraCars(s);
   if (s.bothDoors && MRT_TRAIN_CAR_IDS.has(s.id)) drawMrtDoorsBadge(s);
@@ -1412,7 +1420,7 @@ function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
   const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
-  const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []);   // 陸橋：2樓地面、樓層出入口
+  const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []), solid2Set = new Set(m.solid2 || []);   // 陸橋：2樓地面、樓層出入口
 
   ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0);   // 遊戲畫質：放大畫（座標照舊用一格 40）
   ctx.imageSmoothingEnabled = false;
@@ -1462,7 +1470,12 @@ function draw() {
       ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('👾', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
     }
-    if ((showSolid || brush.mode === 'deck' || brush.mode === 'ramp') && (deckSet.has(key) || rampSet.has(key))) {   // 🌉 2樓地面（藍）、🛗 樓層出入口（橘）
+    if ((showSolid || brush.mode === 'solid2' || brush.mode === 'deck') && solid2Set.has(key)) {   // 🚧 2樓碰撞（紫色斜線框）：只擋 2 樓
+      ctx.fillStyle = 'rgba(190,90,255,.30)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = 'rgba(220,150,255,.95)'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
+      ctx.beginPath(); ctx.moveTo(x + 6, y + CELL - 6); ctx.lineTo(x + CELL - 6, y + 6); ctx.stroke();
+    }
+    if ((showSolid || brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') && (deckSet.has(key) || rampSet.has(key))) {   // 🌉 2樓地面（藍）、🛗 樓層出入口（橘）
       const isRamp = rampSet.has(key);
       ctx.fillStyle = isRamp ? 'rgba(255,160,40,.32)' : 'rgba(70,150,255,.28)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = isRamp ? 'rgba(255,200,120,.9)' : 'rgba(140,200,255,.85)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
@@ -1500,9 +1513,9 @@ function draw() {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
-  if (brush.mode === 'deck' || brush.mode === 'ramp' || (m.deck || []).length || (m.ramps || []).length) {
+  if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2' || (m.deck || []).length || (m.ramps || []).length) {
     ctx.fillStyle = '#8fc8ff'; ctx.textAlign = 'left';
-    ctx.fillText('🌉 2樓地面 ' + (m.deck || []).length + ' 格／🛗 樓層出入口 ' + (m.ramps || []).length + ' 格' + ((m.deck || []).length && (m.ramps || []).length ? '' : '（兩種都要畫，遊戲才會有 2 樓）'), OX + 6, OY + 52);
+    ctx.fillText('🌉 2樓地面 ' + (m.deck || []).length + ' 格／🛗 樓層出入口 ' + (m.ramps || []).length + ' 格／🚧 2樓碰撞 ' + (m.solid2 || []).length + ' 格' + ((m.deck || []).length && (m.ramps || []).length ? '' : '（兩種都要畫，遊戲才會有 2 樓）'), OX + 6, OY + 52);
   }
   // 電路編號（開關、電燈右上角的紅色小圓牌，1～5，沒設定的算 1）：選起來在上方的「電路編號」設定
   for (const s of (m.stamps || [])) {
@@ -1829,8 +1842,8 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     saveMaps(); draw();
     setStatus((edgePaint.add ? '已加上' : '已拿掉') + '邊緣碰撞（這張地圖共 ' + ((m.edges || []).length) + ' 條）：按著沿格線拖曳可以連續' + (edgePaint.add ? '畫' : '擦'), '#ffb347');
     return;
-  } else if (brush.mode === 'deck' || brush.mode === 'ramp') {   // 🌉 2樓地面／🛗 樓層出入口：拖曳畫一片、再畫一次＝擦掉（兩種各自一組格子）
-    const f = brush.mode === 'deck' ? 'deck' : 'ramps', list = m[f] || (m[f] = []);
+  } else if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') {   // 🌉 2樓地面／🛗 樓層出入口／🚧 2樓碰撞：拖曳畫一片、再畫一次＝擦掉（各自一組格子）
+    const f = brush.mode === 'deck' ? 'deck' : brush.mode === 'ramp' ? 'ramps' : 'solid2', list = m[f] || (m[f] = []);
     if (isDown) deckPaintAdd = !list.includes(key);
     if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
     if (!list.length) delete m[f];
@@ -2267,7 +2280,7 @@ function toggleSecretLayer(id = activeLayer) {
   const cur = customizeLayers(m).find(l => l.id === id); if (!cur) return;
   if (cur.secret) delete cur.secret; else cur.secret = true;
   syncLayers(); renderLayers(); saveMaps();
-  const hasWall = (m.stamps || []).some(s => /^tile_bg_backroom_wall02_(crack_)?(breakable|secret)$/.test(s.id));
+  const hasWall = (m.stamps || []).some(s => /^(tile_bg_backroom_wall02|tile_mrt_room_wallx3|tile_mrt_room_highwallx6)_(crack_)?(breakable|secret)$/.test(s.id));
   setStatus(cur.secret
     ? '「' + cur.name + '」設成隱藏區：遊戲裡平常全黑，炸開最近的可炸開牆才出現' + (hasWall ? '' : '（這張地圖還沒有可炸開的牆，記得放一面）')
     : '「' + cur.name + '」改回一般圖層', cur.secret && !hasWall ? '#ffd24a' : '#7ee0c0');
@@ -3102,13 +3115,15 @@ function selectedBlendTarget() {   // 只選一個物件時：{ s（大圖）或
 // ---- 會不會動的開關：K56 的機車／腳踏車（js/street-vehicles.js）、手扶梯（js/escalators.js）。關掉＝stamp.still，就只是一張圖 ----
 // 可以一次選好幾台一起切換；選到其他物件不受影響
 const STILL_VEHICLE_IDS = new Set(['tile_street_scooter_delivery_green', 'tile_street_scooter_delivery_pink', 'tile_street_ubike']);
-const STILL_VEHICLE_MAP = 'map_mvvdbiyx';   // 車子只有 K56 區-地下街會動（STREET_VEHICLES.maps），其他地圖不顯示開關
+const STILL_VEHICLE_MAP = 'map_mvvdbiyx';   // K56 區-地下街的車預設會動（STREET_VEHICLES.maps，取消＝stamp.still）；其他地圖預設不動，勾了才動（stamp.rush）
+const vehicleDefaultRush = m => m && m.id === STILL_VEHICLE_MAP;
+const stampMoves = (m, s) => STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(m) ? !!s.rush : !s.still;   // 這個物件現在「會動」嗎
 const isSideEscalator = id => id === 'tile_mrt_escalator_side';   // 側面（斜的）手扶梯：多一個「往上／往下」可以選（stamp.escDown）
 const isStillEscalator = id => /^tile_mrt_escalator_front/.test(id) || isSideEscalator(id);
 function selectedStillTargets() {
   const m = curMap();
   return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index])
-    .filter(s => s && (isStillEscalator(s.id) || (m.id === STILL_VEHICLE_MAP && STILL_VEHICLE_IDS.has(s.id))));
+    .filter(s => s && (isStillEscalator(s.id) || STILL_VEHICLE_IDS.has(s.id)));
 }
 function refreshStillControl() {
   let box = document.getElementById('stillControl');
@@ -3129,14 +3144,18 @@ function refreshStillControl() {
       if (dropLockedSelections('切換會不會動')) return;
       const list = selectedStillTargets(); if (!list.length) return;
       pushUndo();
-      for (const s of list) { if (e.target.checked) delete s.still; else s.still = true; }
+      const m = curMap();
+      for (const s of list) {
+        if (STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(m)) { if (e.target.checked) s.rush = true; else delete s.rush; delete s.still; }
+        else { if (e.target.checked) delete s.still; else s.still = true; }
+      }
       saveMaps(); draw(); refreshSelPanel();
       setStatus(list.length + ' 個物件已設為' + (e.target.checked ? '會動' : '不會動'), '#7ee0c0');
     });
   }
   const list = selectedStillTargets(); box.classList.toggle('hidden', !list.length);
   if (!list.length) return;
-  const toggle = document.getElementById('stillToggle'), off = list.filter(s => s.still).length;
+  const toggle = document.getElementById('stillToggle'), m = curMap(), off = list.filter(s => !stampMoves(m, s)).length;
   toggle.checked = off === 0; toggle.indeterminate = off > 0 && off < list.length;
   const sides = list.filter(s => isSideEscalator(s.id)), downToggle = document.getElementById('escDownToggle'), downN = sides.filter(s => s.escDown).length;
   document.getElementById('escDownLabel').classList.toggle('hidden', !sides.length);
@@ -3753,13 +3772,13 @@ document.getElementById('clearSolid')?.addEventListener('click', () => {
   if (!n) { setStatus('這張地圖沒有碰撞可以刪', '#9aa4b2'); return; }
   if (!confirm('確定刪除「' + m.name + '」全部的碰撞？\n（' + (m.solid || []).length + ' 格紅格、' + (m.edges || []).length + ' 條邊緣碰撞，連同微調一起刪；基地自己的碰撞格不動。刪錯可以按 Ctrl+Z 復原）')) return;
   pushUndo();
-  m.solid = []; m.solidOffsets = {}; delete m.edges; delete m.edgeOffsets; solidNudgeCells.clear(); solidNudgeEdges.clear(); checkResult = null;
+  m.solid = []; m.solidOffsets = {}; delete m.solid2; delete m.edges; delete m.edgeOffsets; solidNudgeCells.clear(); solidNudgeEdges.clear(); checkResult = null;
   saveMaps(); draw(); setStatus('已刪除這張地圖全部的碰撞（Ctrl+Z 可以復原）', '#ffd24a');
 });
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear();
+  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.solid2; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear();
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -3887,6 +3906,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
   if (m.deck) m.deck = m.deck.map(shiftKey);
   if (m.ramps) m.ramps = m.ramps.map(shiftKey);
+  if (m.solid2) m.solid2 = m.solid2.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -3921,6 +3941,7 @@ function dropOutsideContent(m) {
   if (m.vinesFerry) { const n = m.vinesFerry.length; m.vinesFerry = m.vinesFerry.filter(f => insideKey(f.at) && insideKey(f.to)); removed += n - m.vinesFerry.length; if (!m.vinesFerry.length) delete m.vinesFerry; }
   if (m.deck) { m.deck = m.deck.filter(insideKey); if (!m.deck.length) delete m.deck; }
   if (m.ramps) { m.ramps = m.ramps.filter(insideKey); if (!m.ramps.length) delete m.ramps; }
+  if (m.solid2) { m.solid2 = m.solid2.filter(insideKey); if (!m.solid2.length) delete m.solid2; }
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
@@ -3999,6 +4020,8 @@ function generateDeckFromLayers() {
       let r1 = r0 + h;
       if (asWalls && h >= 2) {   // 下半段完全沒碰到 2 樓地面／2 樓地板 → 連接柱：只有上半段在 2 樓
         let touches = false;
+        // 牆腳正下方那一排是 2 樓地面：站在 2 樓走道上的牆，整張都算牆（跟遊戲 js/maploader.js 的 stampConnects 一樣）
+        for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) { const k = c + ',' + Math.ceil(r0 + h - .5); if (floorSet.has(k) || (m.deck || []).includes(k)) touches = true; }
         for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w && !touches; c++) for (let r = Math.ceil(r0 + h / 2 - .5); r + .5 < r0 + h; r++) if (floorSet.has(c + ',' + r) || (m.deck || []).includes(c + ',' + r)) { touches = true; break; }
         if (!touches) r1 = r0 + h / 2;
       }
@@ -4020,6 +4043,19 @@ function generateDeckFromLayers() {
   setStatus('已整理 2 樓地面：加 ' + added + ' 格、拿掉牆裡面的 ' + removed + ' 格（原有 ' + before + ' 格，現在 ' + deck.size + ' 格；閘門、門不算牆）。不對可以 Ctrl+Z，或用 🌉 筆刷微調', '#7ee0c0');
 }
 { const gd = document.getElementById('genDeck'); if (gd) gd.addEventListener('click', generateDeckFromLayers); }
+// 🔁 把畫在 2 樓地面上的紅格（1 樓碰撞）改成 2 樓碰撞：以前用紅格當 2 樓的牆畫的地方，一鍵換過去（1 樓那幾格就不擋了）
+function convertDeckSolidTo2F() {
+  const m = curMap(), deck = new Set(m.deck || []);
+  const picks = (m.solid || []).filter(k => deck.has(k));
+  if (!picks.length) { setStatus('這張地圖沒有畫在 2 樓地面上的紅格', '#ffd24a'); return; }
+  if (!confirm('把畫在 🌉 2樓地面上的 ' + picks.length + ' 格紅格（1 樓碰撞）改成 🚧 2樓碰撞？\n\n改完：2 樓的人被擋、1 樓的人可以從底下走過去。\n（Ctrl+Z 可以復原）')) return;
+  pushUndo();
+  const set2 = new Set(m.solid2 || []); picks.forEach(k => set2.add(k));
+  m.solid2 = [...set2]; m.solid = m.solid.filter(k => !deck.has(k));
+  for (const k of picks) if (m.solidOffsets) delete m.solidOffsets[k];
+  saveMaps(); draw(); setStatus('已把 ' + picks.length + ' 格紅格改成 🚧 2樓碰撞', '#d9a6ff');
+}
+{ const cv2 = document.getElementById('deckSolidTo2F'); if (cv2) cv2.addEventListener('click', convertDeckSolidTo2F); }
 const safeField = document.getElementById('f_safe');
 if (safeField) safeField.addEventListener('change', e => {
   pushUndo(); curMap().safe = e.target.checked; saveMaps();

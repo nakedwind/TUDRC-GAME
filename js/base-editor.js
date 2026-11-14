@@ -88,7 +88,7 @@ const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商�
 const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v2'; // 後補：彈藥箱（打開）；v2：圖改成 80×80（2×2 格），編輯器裡的素材大小跟著更新
 const STORAGE_AMMO_CRATE_EMPTY = 'tudrc_asset_ammo_crate_empty_v1'; // 後補：彈藥箱（空）；指定內容物的彈藥箱開過後換這張（js/flare.js）
 const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：物資箱（js/camp-supply.js）
-const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
+const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v3';              // 後補：異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3；v3：加煤礦、錫礦、石灰岩、錳礦
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
 const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v6';       // 池核磁磚素材（v3：資料夾改名 images/Poolcore、加地板大中小；v5：柱子；v6：彈藥箱、背包、行軍床）
@@ -383,6 +383,8 @@ function loadTiles() {
   const breakableWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_breakable', 'tudrc_breakable_wall_v1');   // 後室牆面（可炸開）：js/breakable-walls.js
   const backroomCounterAdded = mergeDefaultAssetPack(t => t.id === 'tile_cvs_checkout_counter_backroom', 'tudrc_backroom_counter_v1');   // 後室商店櫃台（js/shop.js）
   const secretWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_secret', 'tudrc_secret_wall_v1');   // 後室牆面（可炸開・隱藏區）
+  const mrtHighwallX6Added = mergeDefaultAssetPack('tile_mrt_room_highwallx6', 'tudrc_mrt_highwall_x6_v1');   // 捷運高牆X6：完整／裂縫／破洞／全破＋可炸開、隱藏區版本（js/breakable-walls.js）
+  const mrtWallX3Added = mergeDefaultAssetPack('tile_mrt_room_wallx3', 'tudrc_mrt_wall_x3_v1');   // 捷運灰牆X3：完整／裂縫／破洞＋可炸開、隱藏區版本（js/breakable-walls.js）
   const backgroundExtrasAdded = mergeDefaultAssetPack('tile_bg_extra_', 'tudrc_asset_background_extras_20261018');
   const researchLabAdded = mergeDefaultAssetPack('tile_research_lab_', STORAGE_RESEARCH_LAB_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
@@ -412,7 +414,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (poolBaseAdded || supplyBoxAdded || backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
+  if (poolBaseAdded || supplyBoxAdded || backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || mrtWallX3Added || mrtHighwallX6Added || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;

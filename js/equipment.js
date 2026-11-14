@@ -559,7 +559,8 @@ function drawDetector(ctx) {
   const v = equipLv('detector'); if (!v || MAP_SAFE || !G || !G.player) return;
   const p = G.player, R = v.range * CELL, t = performance.now() / 1000;
   const spots = [];
-  for (const o of G.obstacles) if (o.ore && o.hp > 0) { const c = typeof oreCenter === 'function' ? oreCenter(o) : { x: OX + (o.c + .5) * CELL, y: OY + (o.r + .5) * CELL }; spots.push(c); }
+  for (const o of G.obstacles) if (o.ore && o.hp > 0 && (typeof oreHasCrystals !== 'function' || oreHasCrystals(o))) {   // 普通礦石（煤礦等）不算異質反應
+     const c = typeof oreCenter === 'function' ? oreCenter(o) : { x: OX + (o.c + .5) * CELL, y: OY + (o.r + .5) * CELL }; spots.push(c); }
   for (const c of G.cores || []) if (!c.dead && !c.hidden) spots.push({ x: c.x, y: c.y - 20 });
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   for (const s of spots) {

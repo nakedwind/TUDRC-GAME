@@ -4,12 +4,13 @@
    ・衝到牆邊、建築前面才停，路線上碰到的每個人各撞一次（敵我都撞飛、都會痛），撞到人時響喇叭／車鈴；
    ・撞上去時播撞牆動畫：車頭頂著牆、後輪翹起來，車身左右壓扁再彈回；
    ・動畫播完調頭，冷卻完可以再往回衝。玩家可以利用牠們把怪物引到路線上撞。
-   地圖編輯器選車子、取消「會暴衝撞人」（stamp.still）的那台就只是停著的圖。
+   哪台會衝：地圖編輯器選車子勾「會暴衝撞人」。K56 區-地下街預設都會衝（取消＝stamp.still）；
+   其他戰鬥地圖預設不衝，勾了才衝（stamp.rush）——原本擺著當裝飾的車不會突然動起來。基地、安全區的車都不會動。
    飛在空中的怪物、鑽在地底的老鼠撞不到；推不動的菁英怪只扣血、不會飛出去。
    （數值集中在最上面，想調整改這裡就好）
 */
 const STREET_VEHICLES = {
-  maps: ['map_mvvdbiyx'],     // 哪幾張地圖的車會動（K56區-地下街）
+  maps: ['map_mvvdbiyx'],     // 哪幾張地圖的車「預設」會動（K56區-地下街）；其他地圖要在地圖編輯器勾「會暴衝撞人」
   triggerCells: 7,            // 車頭前方幾格內有人就發動
   laneHalf: 30,               // 路線的半寬（像素）：離車身中線這麼近才算在路線上、才撞得到
   activeCells: 18,            // 離溫特幾格內的車才會動（畫面外不自己把怪撞死）
@@ -34,10 +35,11 @@ const STREET_VEHICLES = {
 // 每局開始（js/game.js 的 newGame）：把車的物件圖從地圖上藏起來，改成會動的版本
 function setupStreetVehicles() {
   G.streetVehicles = [];
-  if (!MAP || MAP_SAFE || !STREET_VEHICLES.maps.includes(MAP.id)) return;
+  if (!MAP || MAP_SAFE) return;
+  const byDefault = STREET_VEHICLES.maps.includes(MAP.id);
   for (const s of MAP.stamps || []) {
     const kind = STREET_VEHICLES.types[s.id], tile = kind && mapTileById(s.id);
-    if (!tile || s.still) continue;   // still：地圖編輯器關掉的車，留在地圖上當一般物件
+    if (!tile || (byDefault ? s.still : !s.rush)) continue;   // 沒開「會暴衝撞人」的車：留在地圖上當一般物件
     G.mapDestroyed.add(s);
     G.streetVehicles.push({
       stamp: s, tile, cfg: STREET_VEHICLES[kind], kind, state: 'idle', dir: s.fx ? -1 : 1, spd: 0, cd: Math.random() * 2, scanT: Math.random() * .25,
