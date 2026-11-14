@@ -12,7 +12,7 @@
 */
 
 const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
+let ctx = cv.getContext('2d');   // let：整層混合時暫時換成另一張畫布（withLayerGroup）
 ctx.imageSmoothingEnabled = false;   // 像素圖不要模糊
 const EDITOR_SETTINGS = Object.assign({
   editorName: '地圖編輯器',
@@ -173,6 +173,7 @@ function syncLayers() {
   if (!LAYERS.some(l => l.id === activeLayer)) activeLayer = LAYERS[0].id;
 }
 const layerName = (id) => (LAYERS.find(l => l.id === id) || {}).name || id;
+const layerBlendOf = (id) => (LAYERS.find(l => l.id === id) || {}).blend || '';   // 整層的混合模式（圖層列的「整層混合」）
 const emptyLayers = (list = DEFAULT_LAYERS) => { const o = {}; list.forEach(l => o[l.id] = {}); return o; };
 
 // ---- 內建磚塊（純圖片；牆/障礙先用色塊當佔位圖）----
@@ -1422,9 +1423,14 @@ function draw() {
   for (const l of LAYERS) {
     if (hiddenLayers.has(l.id)) continue;
     const op = layerOpacityOf(l.id);   // 這層調了透明度（只在編輯器）就整層畫淡一點
+    const paint = () => {
+      for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) { const id = m.layers[l.id][c + ',' + r]; if (id) drawTile(id, OX + c * CELL, OY + r * CELL); }
+      for (const s of m.stamps) if ((s.layer || 'top') === l.id) drawStamp(s);
+    };
+    const lb = layerBlendOf(l.id);   // 整層混合：整層當成一張圖再混合
+    if (lb) { withLayerGroup(lb, op / 100, paint); continue; }
     if (op < 100) { ctx.save(); ctx.globalAlpha = op / 100; }
-    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) { const id = m.layers[l.id][c + ',' + r]; if (id) drawTile(id, OX + c * CELL, OY + r * CELL); }
-    for (const s of m.stamps) if ((s.layer || 'top') === l.id) drawStamp(s);
+    paint();
     if (op < 100) ctx.restore();
   }
   // 效果層 + 格線（畫在圖片之上）
@@ -2429,6 +2435,42 @@ function refreshLayerListSoon() {
   clearTimeout(layerListTimer);
   layerListTimer = setTimeout(() => { if (!document.activeElement || !document.activeElement.classList.contains('layer-filter')) renderLayers(); }, 250);
 }
+// ---- 圖層混合模式：整個圖層（資料夾）裡的東西先照平常疊成一張，整張再用這個混合模式蓋到下面的圖層上（重疊處不會露出破綻）----
+// 存在地圖 layerOrder 那一層的 blend，遊戲也照著畫（js/maploader.js 的 drawMapLayerGroup）。
+// 整層混合（資料夾當成一張圖）：這層先在另一張畫布上照平常疊好（重疊的地方不會互相混合），整張再用圖層的混合模式蓋上去（跟 Photoshop 的群組一樣）
+let layerGroupCv = null;
+function withLayerGroup(blend, alpha, paint) {
+  const main = ctx, off = layerGroupCv || (layerGroupCv = document.createElement('canvas'));
+  if (off.width !== cv.width || off.height !== cv.height) { off.width = cv.width; off.height = cv.height; }
+  const g = off.getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, off.width, off.height);
+  g.setTransform(main.getTransform()); g.imageSmoothingEnabled = main.imageSmoothingEnabled;
+  ctx = g;   // drawTile／drawStamp 畫到 ctx：先暫時換成這張畫布
+  try { paint(); } finally { ctx = main; }
+  main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.globalCompositeOperation = blend; main.globalAlpha = alpha; main.drawImage(off, 0, 0); main.restore();
+}
+function layerBlendModes() { try { return BLEND_MODES; } catch (_) { return [['', '一般']]; } }   // BLEND_MODES 定義在後面：剛載入就畫圖層清單時先只放「一般」
+const layerBlendName = mode => (layerBlendModes().find(b => b[0] === (mode || '')) || [, mode])[1];
+function renderLayerBlendRow() {
+  const row = document.createElement('div'); row.className = 'layer-blend';
+  const name = layerName(activeLayer), cur = layerBlendOf(activeLayer);
+  row.title = '目前圖層「' + name + '」整層當成一張圖，用這個混合模式蓋在下面的圖層上（層裡重疊的物件不會互相混合；會存進地圖，遊戲裡也一樣）';
+  const label = document.createElement('span'); label.className = 'layer-op-label'; label.textContent = '整層混合';
+  const sel = document.createElement('select');
+  sel.innerHTML = layerBlendModes().map(([v, n]) => '<option value="' + v + '">' + n + '</option>').join('');
+  sel.value = cur;
+  sel.addEventListener('change', () => setLayerBlend(activeLayer, sel.value));
+  row.append(label, sel);
+  return row;
+}
+function setLayerBlend(id, mode) {
+  const m = curMap();
+  pushUndo();
+  const cur = customizeLayers(m).find(l => l.id === id); if (!cur) return;
+  if (mode) cur.blend = mode; else delete cur.blend;
+  syncLayers(); renderLayers(); saveMaps(); draw();
+  setStatus('「' + cur.name + '」整層混合模式：' + layerBlendName(mode) + (mode ? '（整層當成一張圖混合）' : ''), '#7ee0c0');
+}
 function renderLayers() {
   if (!layerBtnsEl) return;
   const m = curMap();
@@ -2445,6 +2487,7 @@ function renderLayers() {
     mk('🧱 隱藏區', '把目前圖層設成／取消「隱藏區」：遊戲裡這層的東西平常全黑，炸開最近的可炸開牆才出現', () => toggleSecretLayer()));
   layerBtnsEl.appendChild(tools);
   layerBtnsEl.appendChild(renderLayerOpacityRow());
+  layerBtnsEl.appendChild(renderLayerBlendRow());
   // 顯示順序反轉：上層在最上、地板在最下（不改 LAYERS 本身的疊圖 z 順序）
   [...LAYERS].reverse().forEach(l => {
     const group = document.createElement('span'); group.className = 'layer-group';
@@ -2455,6 +2498,10 @@ function renderLayers() {
     if (layerOpacityOf(l.id) < 100) {   // 調過透明度的圖層：名字旁標出百分比，免得忘記
       const tag = document.createElement('span'); tag.className = 'layer-op-tag'; tag.textContent = layerOpacityOf(l.id) + '%';
       tag.title = '這層在編輯器裡調成半透明（遊戲裡不會變）'; b.querySelector('.layer-label').after(tag);
+    }
+    if (l.blend) {   // 整層設了混合模式：名字旁標出來
+      const tag = document.createElement('span'); tag.className = 'layer-op-tag layer-blend-tag'; tag.textContent = layerBlendName(l.blend);
+      tag.title = '這個圖層整層用「' + layerBlendName(l.blend) + '」混合模式'; b.querySelector('.layer-label').after(tag);
     }
     b.title = '點一下：在這層編輯並展開物件清單；雙擊：改名';
     b.addEventListener('click', () => {
@@ -2596,6 +2643,7 @@ const PALETTE_CATEGORIES = [
   { id: 'forest', name: '森林' },
   { id: 'forestblue', name: '森林（藍）' },
   { id: 'delin', name: '德林小屋' },
+  { id: 'office', name: '辦公室' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -2630,11 +2678,12 @@ const STORAGE_TILE_IDS = new Set([
   'tile_prop_drawer_cabinet', 'tile_counseling_wall_cabinet_counter', 'tile_dorm_wardrobe_lab_coat', 'tile_dorm_cabinet_tall', 'tile_dorm_bedside_drawers', 'tile_mufv6z24',
   'tile_mvfqc6g7', 'tile_restaurant_storage_cabinet', 'tile_hospital_bedside_cabinet', 'tile_hospital_bedside_cabinet_back', 'tile_containment_equipment_cabinets', 'tile_containment_tall_cabinet',
   'tile_research_lab_sample_storage', 'tile_research_lab_specimen_cabinet',
+  'tile_mwg0mkxu', 'tile_mwg0mkxx', 'tile_mwg0mky3', 'tile_mwg0mky6', 'tile_mwg0mkye',   // 辦公室裝飾：cozy-bookshelf-narrow、cozy-low-cabinet、office-bookshelf、office-cup-shelf、office-low-shelf
 ]);
 // 植栽：盆栽、植物系列，不管原本在哪個資料夾都放這一類（id／檔名有 plant，或名稱有「盆栽」「植栽」「植物」；新的植物照這樣取名就會自動分進來）
-const isPlantTile = t => /plant/i.test(String(t.id || '') + ' ' + String(t.file || '')) || /盆栽|植栽|植物/.test(String(t.name || ''));
+const isPlantTile = t => /plant|flower/i.test(String(t.id || '') + ' ' + String(t.file || '') + ' ' + String(t.name || '')) || /盆栽|植栽|植物|花瓶|花盆/.test(String(t.name || ''));   // flower、花瓶、花盆也算植栽（不用單一個「花」字：天花板會被誤判）
 // 可以坐的東西（椅子、沙發、凳子、長椅）：id、檔名或名稱有這些字就算；放在木凳上的盆栽算植栽
-const isChairTile = t => /chair|stool|bench|sofa|couch|seat/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /椅|沙發|凳/.test(String(t.name || ''));
+const isChairTile = t => /chair|stool|bench|sofa|couch|seat|pouf/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /椅|沙發|凳/.test(String(t.name || ''));
 // 燈：名稱有「燈」，或 id／檔名是燈（只寫 light 不算，因為樓梯、海報、牆面的檔名也可能有 light，意思是淺色或月光）
 const isLampTile = t => /lamp|lantern|lightbox|(search|camping[ _-]|electric[_-]|elevator[_-]|ceiling[_-]|traffic[_-])light/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /燈/.test(String(t.name || ''));
 // 戰鬥地圖裡可以互動的道具：素材面板一律放「互動與道具」（照遊戲認這些道具的規則）
@@ -2662,6 +2711,7 @@ function tileCategory(t) {
   if (isPlantTile(t)) return 'plant';
   if (isChairTile(t) && !isPoolcoreTile(t)) return 'chair';
   if (isLampTile(t) && !isPoolcoreTile(t)) return 'lamp';
+  if (String(t.file || '').includes('/辦公室裝飾/')) return 'office';   // 辦公室裝飾：植栽、椅子、燈、收納分走之後，剩下的都放這一類
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
   if (t.systemColor) return 'color';

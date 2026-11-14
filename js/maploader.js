@@ -601,14 +601,41 @@ function destroyedBaseDisplayTile(s, t) {
 //   s.alpha＝不透明度 0～100（沒寫＝100）
 //   s.glow＝會發光：黑幕畫完之後才畫（暗處也看得到），同時當成光源照亮周圍（s.glowR＝照亮半徑 px，沒寫＝160；光一樣會被牆擋住）
 const MAP_GLOW_R = 160;
+// 整個圖層的混合模式（編輯器圖層列的「整層混合」，存在 MAP.layerOrder 那一層的 blend）：
+// 這層的東西先在另一張畫布上照平常疊好，整張再用這個混合模式蓋上去（層裡重疊的物件不會互相混合，跟 Photoshop 的群組一樣），見 drawMapLayerGroup
+function mapLayerBlend(lid) {
+  const list = MAP && Array.isArray(MAP.layerOrder) ? MAP.layerOrder : null; if (!list) return '';
+  for (const l of list) if (l.id === lid) return l.blend || '';
+  return '';
+}
+let mapBlendSuspend = false;   // 做重疊補畫的小畫布時暫時不套混合模式（補畫貼回畫面時才套，見 drawOverdrawPatch）
+const mapStampBlend = s => mapBlendSuspend ? '' : (s.blend || '');
+const mapItemBlend = it => it.kind === 'cell' ? '' : (it.stamp.blend || '');
+// 整層混合的圖層：整層一起畫（地面那一輪照圖層順序畫，在角色下面；上層照樣在角色上面）。2 樓圖層要跟人排前後，不能整層一起畫
+const mapGroupedLayer = lid => !!mapLayerBlend(lid) && !MAP_FLOOR2_LAYERS.has(lid);
+// 椅子（要坐）、據點（要打）還是照原本自己排前後，不放進整層一起畫
+const inMapLayerGroup = s => mapGroupedLayer(s.layer || 'top') && !isElevatorStamp(s) && !chairConfig(s.id) && !(mapTileById(s.id) || {}).baseHp;
+let mapGroupCv = null;
+function drawMapLayerGroup(ctx, lid) {
+  const list = mapStampGroups().grouped.get(lid) || [];
+  const off = mapGroupCv || (mapGroupCv = document.createElement('canvas'));
+  if (off.width !== ctx.canvas.width || off.height !== ctx.canvas.height) { off.width = ctx.canvas.width; off.height = ctx.canvas.height; }
+  const g = off.getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, off.width, off.height);
+  g.setTransform(ctx.getTransform()); g.imageSmoothingEnabled = ctx.imageSmoothingEnabled; g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  drawLayerCellsInView(g, lid);
+  for (const s of list) if (stampInDrawRect(s) && !(G.mapDestroyed && G.mapDestroyed.has(s))) drawMapStampImg(g, s);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = mapLayerBlend(lid); ctx.drawImage(off, 0, 0); ctx.restore();
+}
 function drawMapStampImg(ctx, s, glowPass = false) {
   if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
   const secret = typeof secretAlpha === 'function' ? secretAlpha(s) : 1;   // 隱藏區圖層：炸開前不畫（js/breakable-walls.js）
   if (secret <= 0) return;
   const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret;
-  if (!s.blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
+  const blend = mapStampBlend(s);
+  if (!blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
   ctx.save();
-  if (s.blend) ctx.globalCompositeOperation = s.blend;
+  if (blend) ctx.globalCompositeOperation = blend;
   ctx.globalAlpha *= alpha;
   drawMapStampRaw(ctx, s);
   ctx.restore();
@@ -805,13 +832,14 @@ function drawLayerCellsInView(ctx, lid) {
 // 地面、上層要畫的物件先依圖層分好（同一張地圖只分一次）：
 // 原本每一幀對每個圖層都把全部物件翻一遍（十幾層 × 上千個），大地圖光是挑物件就要 2 毫秒。
 // 跟電梯清單一樣，物件數量變了（編輯器新增、刪除）就重分；順序照 MAP.stamps，畫出來的上下關係不變。
-let mapStampGroupCache = { src: null, len: -1, ground: null, top: null };
+let mapStampGroupCache = { src: null, len: -1, ground: null, top: null, grouped: null };
 function mapStampGroups() {
   const src = MAP?.stamps || [];
   if (mapStampGroupCache.src === src && mapStampGroupCache.len === src.length) return mapStampGroupCache;
-  const ground = new Map(), top = [];
+  const ground = new Map(), top = [], grouped = new Map();
   for (const s of src) {
     if (isElevatorStamp(s)) continue;
+    if (inMapLayerGroup(s)) { const gl = s.layer || 'top'; if (!grouped.has(gl)) grouped.set(gl, []); grouped.get(gl).push(s); continue; }   // 整層混合：整層一起畫
     const lid = s.layer || 'top';
     if (lid === 'top') {
       const t = mapTileById(s.id) || {};
@@ -821,7 +849,7 @@ function mapStampGroups() {
       ground.get(lid).push(s);
     }
   }
-  return (mapStampGroupCache = { src, len: src.length, ground, top });
+  return (mapStampGroupCache = { src, len: src.length, ground, top, grouped });
 }
 // 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
 function drawMapGround(ctx) {
@@ -830,6 +858,7 @@ function drawMapGround(ctx) {
   const { ground } = mapStampGroups();
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
+    if (mapGroupedLayer(lid)) { drawMapLayerGroup(ctx, lid); continue; }   // 整層混合：整層當成一張圖
     if (!isOccLayer(lid) && !MAP_FLOOR2_LAYERS.has(lid)) drawLayerCellsInView(ctx, lid);   // 2 樓圖層的小圖改走排序（蓋在一樓的人上面）
     for (const s of ground.get(lid) || []) if (stampInDrawRect(s)) drawMapStampImg(ctx, s);
   }
@@ -838,6 +867,7 @@ function drawMapGround(ctx) {
 // 上層：'top' 圖層，永遠畫在角色上面
 function drawMapTop(ctx) {
   if (!MAP) return;
+  if (mapGroupedLayer('top')) { drawMapLayerGroup(ctx, 'top'); return; }   // 整層混合：整層當成一張圖（椅子、據點照樣跟人排前後）
   drawLayerCellsInView(ctx, 'top');
   for (const s of mapStampGroups().top) if (stampInDrawRect(s)) drawMapStampImg(ctx, s);
 }
@@ -857,6 +887,7 @@ function mapOccluders() {
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
     for (const key in layer) {
       const chair = chairConfig(layer[key]);
+      if (!chair && mapGroupedLayer(lid)) continue;   // 整層混合：整層一起畫
       if (!chair && !(MAP_FLOOR2_LAYERS.has(lid) && lid !== 'top') && (lid === 'top' || !isOccLayer(lid))) continue;
       const [c, r] = key.split(',').map(Number), id = layer[key];
       const y0 = r * CELL;
@@ -865,7 +896,7 @@ function mapOccluders() {
     }
     for (const s of (MAP.stamps || [])) {
       if (isElevatorStamp(s)) continue;
-      if ((s.layer || 'top') !== lid || !stampIsOcc(s)) continue;
+      if ((s.layer || 'top') !== lid || !stampIsOcc(s) || inMapLayerGroup(s)) continue;
       const t = mapTileById(s.id) || {};
       const chair = chairConfig(s.id);
       if (lid === 'top' && !t.baseHp && !chair && !Number.isFinite(s.sortDepth)) continue;
@@ -923,7 +954,7 @@ function mapOccluders() {
 // 只在重疊的範圍內再補畫一次。這樣只修正圖跟圖之間的上下，角色被遮擋的方式不變。
 const itemOn2F = it => it.part ? it.part === 'upper' : it.kind === 'stamp' ? stampOn2F(it.stamp) : MAP_FLOOR2_LAYERS.has(MAP_LAYER_ORDER[it.li]);
 function buildLayerOverdraw(items) {
-  const flats = (MAP.stamps || []).filter(s => !isElevatorStamp(s) && (s.layer || 'top') !== 'top' && !stampIsOcc(s)).map(s => {
+  const flats = (MAP.stamps || []).filter(s => !isElevatorStamp(s) && (s.layer || 'top') !== 'top' && !stampIsOcc(s) && !inMapLayerGroup(s)).map(s => {
     const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
     const fw = mapStampW(s, t) * CELL, fh = mapStampH(s, t) * CELL;
     return { flat: true, li: MAP_LAYER_ORDER.indexOf(s.layer || 'top'), x0, y0, x1: x0 + fw, y1: y0 + fh, vis: stampHasTransform(s) ? stampVisualBox(s, x0, y0, fw, fh) : null, kind: 'stamp', stamp: s };
@@ -1013,14 +1044,19 @@ function drawOverdrawPatch(ctx, it, od) {
     c.width = Math.max(1, Math.ceil(cw)); c.height = Math.max(1, Math.ceil(ch));
     const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
     g.save(); g.translate(-(OX + cx), -(OY + cy));
-    drawOccluderItem(g, od.a);                       // 上層圖
-    g.globalCompositeOperation = 'destination-in';
-    drawOccluderItem(g, it);                         // 只留下層圖有畫東西的地方
+    mapBlendSuspend = true;                          // 小畫布上一律正常畫（混合模式會蓋掉 destination-in）
+    try {
+      drawOccluderItem(g, od.a);                     // 上層圖
+      g.globalCompositeOperation = 'destination-in';
+      drawOccluderItem(g, it);                       // 只留下層圖有畫東西的地方
+    } finally { mapBlendSuspend = false; }
     g.restore();
     od.ready = occluderImageReady(it) && occluderImageReady(od.a);   // 圖還沒載完：下一幀再做一次
     od.sig = sig;
   }
-  ctx.drawImage(od.patch, OX + cx, OY + cy);
+  const blend = mapItemBlend(od.a);   // 上層圖有混合模式：補畫貼回畫面時照它的混合模式
+  if (blend) { ctx.save(); ctx.globalCompositeOperation = blend; ctx.drawImage(od.patch, OX + cx, OY + cy); ctx.restore(); }
+  else ctx.drawImage(od.patch, OX + cx, OY + cy);
 }
 // only：只畫這一台（劇情播放器要把每台電梯各自跟角色排前後，js/story-scene.js）；沒給＝全部都畫
 function drawElevators(ctx, only) {

@@ -3707,3 +3707,21 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-ico .pcd-app-img { display: block; width: 40px; height: 40px; }
 .pcd-start-list .pcd-app-img { width: 24px; height: 24px; }
 .pcd-ticon .pcd-app-img, .pcd-task .pcd-app-img { width: 18px; height: 18px; }
+
+/* ===== 備份／找回進度（js/save-restore.js）：跟背包同一種深色半透明面板 ===== */
+#saveRestore { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; background: rgba(4,7,11,.6); }
+#saveRestore.hidden { display: none; }
+#saveRestore .sr-card { width: min(760px, 94vw); max-height: 88vh; display: flex; flex-direction: column; border: 1px solid rgba(255,212,121,.2); border-radius: 14px; background: rgba(12,17,24,.94); color: #dfe8ef; box-shadow: 0 16px 40px rgba(0,0,0,.5); font: 13px/1.5 system-ui, "Microsoft JhengHei", sans-serif; }
+#saveRestore header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+#saveRestore header h2 { margin: 0; font-size: 16px; color: #ffe3a1; }
+#saveRestore header button { border: 0; background: none; color: #9aa6b2; font-size: 22px; cursor: pointer; }
+#saveRestore .sr-body { overflow-y: auto; padding: 4px 16px 16px; scrollbar-width: thin; }
+#saveRestore h3 { margin: 14px 0 4px; font-size: 14px; color: #9ff0c0; }
+#saveRestore h4 { margin: 12px 0 6px; font-size: 12px; color: #8fd3ff; }
+#saveRestore .sr-hint { margin: 0 0 8px; color: #8e9aa7; font-size: 12px; }
+#saveRestore .sr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px 14px; }
+#saveRestore label { display: flex; align-items: center; gap: 6px; }
+#saveRestore .sr-chk { cursor: pointer; }
+#saveRestore input[type=number], #saveRestore select { padding: 2px 4px; border: 1px solid #536b80; border-radius: 6px; background: #101923; color: #edf5ff; font: inherit; }
+#saveRestore .sr-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+#saveRestore .sr-apply { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
