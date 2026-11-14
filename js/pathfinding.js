@@ -123,7 +123,7 @@ const sameFloor = (a, b) => actorFloor(a) === actorFloor(b);
 // 只擋「跨過格線」，兩邊的格子都照常可以走（例如高台邊緣、階梯兩側）。
 // 資料：MAP.edges = ['c,r,R'（第 c 欄 r 列那格的右邊）, 'c,r,B'（那格的下邊）…]
 // 不擋子彈、視線、光，只擋走路：溫特、隊員、怪物的碰撞和尋路都認得。
-// 微調：MAP.edgeOffsets = { 'c,r,R': [dx, dy] }＝這條線整段平移幾像素（地圖編輯器「🎯 碰撞微調」，最多半格）
+// 微調：MAP.edgeOffsets = { 'c,r,R': [dx, dy] }＝這條線整段平移幾像素（地圖編輯器「🎯 碰撞微調」，最多將近一格；找路 edgeBetween 還是看原本的格線）
 const EDGE_WALL = { half: 5 };   // 薄牆的厚度一半（像素）：角色身體離線這麼近就算撞到
 let edgeSetMap = null, edgeSet = new Set(), edgeSegs = [];
 // 程式動態加的薄牆（停靠的捷運列車，js/mrt-train.js）：不存進地圖資料，換了就重建
@@ -181,6 +181,28 @@ function edgeWallCrossed(x0, y0, x1, y1, r) {
   return false;
 }
 
+// ---- 怪物也吃不可碰撞的像素微調（跟溫特一樣）----
+// wall(c, r)＝那一格是不是牆；牆格用方向鍵微調過（js/maploader.js 的 solidOffsetAt）：擋的是移過去之後的那一格大小的範圍，原本那格空出來的地方可以走
+function nudgedWallAt(x, y, wall) {
+  const [c, r] = cellAt(x, y), off = typeof solidOffsetAt === 'function' ? solidOffsetAt : () => null;
+  if (wall(c, r) && !off(c, r)) return true;                      // 沒微調過：整格都擋
+  for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
+    const cc = c + dc, rr = r + dr, o = off(cc, rr);
+    if (!o || !wall(cc, rr)) continue;
+    const x0 = OX + cc * CELL + o[0], y0 = OY + rr * CELL + o[1];
+    if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return true;
+  }
+  return false;
+}
+// 怪物尋路、流場看的「這格是不是牆」：格子中心被（微調後的）牆擋住才算。二樓沒有微調，照原本
+function enemyWallCell(c, r, f = floorCtx) {
+  if (f === 2) return wallOnFloor(2, c, r);
+  const [x, y] = center(c, r);
+  return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(1, cc, rr));
+}
+// 怪物走路的碰撞：這個點有沒有撞到（微調後的）牆
+const enemyWallPoint = (x, y) => floorCtx === 2 ? isWall(...cellAt(x, y)) : nudgedWallAt(x, y, isWall);
+
 // ---- 營地（怪物的目標格）；空的話預設為最下面一排 ----
 let campCells = new Set();
 const isCamp = (c, r) => campCells.size ? campCells.has(c + ',' + r) : (r === ROWS - 1);
@@ -193,7 +215,7 @@ function computeFlow() {
   flow2 = hasFloors ? new Array(COLS * ROWS).fill(Infinity) : [];
   const q = [];   // [樓層, c, r]：營地在一樓；二樓的人要先走到樓層出入口、下到一樓才到得了
   const arr = f => f === 2 ? flow2 : flow;
-  const seed = (c, r) => { if (inGrid(c, r) && !wallOnFloor(1, c, r) && flow[r * COLS + c] > 1) { flow[r * COLS + c] = 1; q.push([1, c, r]); } };
+  const seed = (c, r) => { if (inGrid(c, r) && !enemyWallCell(c, r, 1) && flow[r * COLS + c] > 1) { flow[r * COLS + c] = 1; q.push([1, c, r]); } };
   if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); seed(c, r); });
   else for (let c = 0; c < COLS; c++) seed(c, ROWS - 1);
   // 從 (f, c, r) 走一步到 (nc, nr) 會落在哪一層（出樓層出入口那一步才換層）
@@ -206,7 +228,8 @@ function computeFlow() {
       const pc = c + dc, pr = r + dr;
       if (!inGrid(pc, pr)) continue;
       for (const pf of hasFloors ? [1, 2] : [1]) {
-        if (wallOnFloor(pf, pc, pr) || landing(pf, pc, pr, c, r) !== f) continue;
+        if (enemyWallCell(pc, pr, pf) || landing(pf, pc, pr, c, r) !== f) continue;   // 吃不可碰撞的像素微調
+        if (pf !== 2 && typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(pc, pr)) continue;   // 深水區：怪物繞過去（js/swim-ring.js）
         if (pf !== 2 && edgeBetween(pc, pr, c, r)) continue;   // 薄牆只擋一樓
         if (pf !== 2 && deckCells.has(pc + ',' + pr) && rampCells.has(c + ',' + r) && !rampCells.has(pc + ',' + pr)) continue;   // 一樓的人不能從 2 樓地面那側走進手扶梯
         const A = arr(pf);

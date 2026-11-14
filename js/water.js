@@ -32,12 +32,12 @@ function waterIndex() {
   const order = typeof MAP_LAYER_ORDER !== 'undefined' ? MAP_LAYER_ORDER : Object.keys(MAP.layers || {});
   for (const lid of order) {   // 一格一格放的小圖
     const layer = (MAP.layers || {})[lid] || {};
-    for (const key in layer) { const spec = waterSpecOf(mapTileById(layer[key])); if (spec) cells.set(key, spec); }
+    for (const key in layer) { const spec = waterSpecOf(mapTileById(layer[key])); if (spec) cells.set(key, { ...spec, lid }); }
   }
   for (const s of MAP.stamps || []) {   // 大張的物件
     const t = mapTileById(s.id), spec = waterSpecOf(t); if (!spec) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
-    rects.push({ x0, y0, x1: x0 + mapStampW(s, t) * CELL, y1: y0 + mapStampH(s, t) * CELL, spec });
+    rects.push({ x0, y0, x1: x0 + mapStampW(s, t) * CELL, y1: y0 + mapStampH(s, t) * CELL, spec: { ...spec, lid: s.layer || 'top' } });
   }
   waterCache = { map: MAP, n, cells, rects };
   return waterCache;
@@ -45,9 +45,10 @@ function waterIndex() {
 // 這個點（腳踩的地方）有沒有水；有的話回傳水的設定
 function waterAt(x, y) {
   const w = waterIndex(); if (!w || (!w.cells.size && !w.rects.length)) return null;
+  const shown = sp => !sp || typeof poolLayerAlpha !== 'function' || poolLayerAlpha(sp.lid) >= .5;   // 池核抽水後看不到的圖層：裡面的水不算（js/pool-tide.js）
   const [c, r] = cellAt(x, y), cell = w.cells.get(c + ',' + r);
-  let best = cell || null;
-  for (const q of w.rects) if (x >= q.x0 && x < q.x1 && y >= q.y0 && y < q.y1 && (!best || q.spec.depth > best.depth)) best = q.spec;   // 疊在一起：用比較深的
+  let best = cell && shown(cell) ? cell : null;
+  for (const q of w.rects) if (x >= q.x0 && x < q.x1 && y >= q.y0 && y < q.y1 && shown(q.spec) && (!best || q.spec.depth > best.depth)) best = q.spec;   // 疊在一起：用比較深的
   return best;
 }
 // 給 js/build.js 的 slowFactorAt：在水裡走路變慢（x, y＝角色的位置）
@@ -69,7 +70,8 @@ function wadeInfo(a, kind) {
 // 畫一個角色：在水裡的話，水面上照常畫、水面下半透明，再加一圈波紋
 let waterLayer = null;   // 旁邊的空白畫布（跟遊戲畫面一樣大）
 function drawWaded(a, kind, drawFn) {
-  const info = wadeInfo(a, kind);
+  const info = a && a.swimRing ? null : wadeInfo(a, kind);   // 坐在救生圈上：整個人照常畫，不會被水遮住
+  if (a && a.swimRing && typeof drawSwimRinged === 'function') { drawSwimRinged(a, drawFn); return; }   // 坐進救生圈：腳藏起來（js/swim-ring.js）
   if (!info) { drawFn(); return; }
   const main = ctx, cvs = main.canvas, m = main.getTransform();
   if (!waterLayer) waterLayer = document.createElement('canvas');

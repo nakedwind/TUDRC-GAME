@@ -785,7 +785,7 @@ window.addEventListener('keydown', e => {
         if (next[0] === 0 && next[1] === 0) delete m.solidOffsets[k];
         else m.solidOffsets[k] = next;
       }
-      const clampEdge = v => Math.max(-EDGE_NUDGE_MAX, Math.min(EDGE_NUDGE_MAX, v));   // 邊緣碰撞最多移半格：再多就跟隔壁格線的線分不清了
+      const clampEdge = v => Math.max(-EDGE_NUDGE_MAX, Math.min(EDGE_NUDGE_MAX, v));   // 邊緣碰撞最多移將近一格（EDGE_NUDGE_MAX）
       for (const k of solidNudgeEdges) {
         const off = edgeOffsetOf(m, k), next = [clampEdge(off[0] + dx), clampEdge(off[1] + dy)];
         if (next[0] === 0 && next[1] === 0) removeEdgeOffset(m, k), solidNudgeEdges.add(k);   // 歸零就不存（但還是選著）
@@ -1244,8 +1244,8 @@ function edgeAtPx(x, y, axis = null) {
   const e = cand[0];
   return e ? { key: e.c + ',' + e.r + ',' + e.axis, axis: e.axis, c: e.c, r: e.r } : null;
 }
-// 邊緣碰撞的微調：m.edgeOffsets = { 'c,r,R': [dx, dy] }＝整條線平移幾像素（最多半格，再多就改畫在隔壁的格線上）
-const EDGE_NUDGE_MAX = 20;
+// 邊緣碰撞的微調：m.edgeOffsets = { 'c,r,R': [dx, dy] }＝整條線平移幾像素（最多將近一格）
+const EDGE_NUDGE_MAX = 39;   // 跟紅格的微調一樣。注意：怪物、隊員找路還是當成線在原本的格線上，移太遠可能有人卡在牆前（那就改畫到比較近的格線上）
 const edgeOffsetOf = (m, k) => (m.edgeOffsets && m.edgeOffsets[k]) || [0, 0];
 function removeEdgeOffset(m, k) {
   if (m.edgeOffsets) { delete m.edgeOffsets[k]; if (!Object.keys(m.edgeOffsets).length) delete m.edgeOffsets; }
@@ -1279,7 +1279,7 @@ function solidNudgeStatus(m) {
   const same = offs.every(o => o === offs[0]), nc = solidNudgeCells.size, ne = solidNudgeEdges.size;
   const what = [nc ? nc + ' 格紅格' : '', ne ? ne + ' 條邊緣碰撞' : ''].filter(Boolean).join('＋');
   return '已選 ' + what + (same ? '（目前偏移 ' + offs[0] + '）' : '（各自偏移不同，會一起移動）') +
-    '：按住選中的拖曳、或用方向鍵移動（Shift 移多一點）、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取' + (ne ? '（邊緣碰撞最多移半格）' : '');
+    '：按住選中的拖曳、或用方向鍵移動（Shift 移多一點）、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取' + (ne ? '（邊緣碰撞最多移將近一格）' : '');
 }
 // ---- 碰撞微調：按住「已選中」的紅格或邊緣碰撞線拖曳＝選中的一起移動（跟方向鍵一樣的範圍限制）----
 let nudgeDrag = null;   // { start: 按下時的滑鼠位置, cells: 每格原本的偏移, edges: 每條線原本的偏移, moved }
@@ -1425,6 +1425,7 @@ function draw() {
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
   const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
   const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []), solid2Set = new Set(m.solid2 || []);   // 陸橋：2樓地面、樓層出入口
+  const deepSet = new Set(m.deepWater || []);   // 🛟 深水區（js/swim-ring.js）
 
   ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0);   // 遊戲畫質：放大畫（座標照舊用一格 40）
   ctx.imageSmoothingEnabled = false;
@@ -1467,6 +1468,13 @@ function draw() {
       ctx.fillStyle = 'rgba(230,150,40,.26)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6); ctx.setLineDash([]);
+    }
+    if ((showSolid || brush.mode === 'deepwater') && deepSet.has(key)) {   // 🛟 深水區（深藍色斜線框）：沒坐救生圈走不進去
+      ctx.fillStyle = 'rgba(30,110,230,.30)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = 'rgba(110,190,255,.9)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 3]);
+      ctx.strokeRect(x + 2.5, y + 2.5, CELL - 5, CELL - 5); ctx.setLineDash([]);
+      ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🛟', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
     }
     if (showSolid && spawnZone.has(key)) {   // 怪物出生區與紅格共用顯示開關
       ctx.fillStyle = 'rgba(80,220,120,.22)'; ctx.fillRect(x, y, CELL, CELL);
@@ -1519,6 +1527,10 @@ function draw() {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
+  if (brush.mode === 'deepwater' || (showSolid && (m.deepWater || []).length)) {
+    ctx.fillStyle = '#8fd0ff'; ctx.textAlign = 'left';
+    ctx.fillText('🛟 深水區 ' + (m.deepWater || []).length + ' 格（坐救生圈才能進去；划水速度在「地圖設定」調）', OX + 6, OY + 70);
+  }
   if (typeof levelCountText === 'function' && ((m.deck || []).length || (m.ramps || []).length || brush.mode === 'level')) {   // 🏢 樓層統計（js/map-editor-levels.js）
     ctx.fillStyle = '#8fc8ff'; ctx.textAlign = 'left'; ctx.fillText(levelCountText(m), OX + 6, OY + 52);
   } else if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2' || (m.deck || []).length || (m.ramps || []).length) {
@@ -1528,7 +1540,7 @@ function draw() {
   // 電路編號（開關、電燈右上角的紅色小圓牌，1～5，沒設定的算 1）：選起來在上方的「電路編號」設定
   for (const s of (m.stamps || [])) {
     const t = tileById(s.id);
-    if (!s.circuit && !isCircuitTile(t)) continue;
+    if ((!s.circuit && !isCircuitTile(t)) || s.valve) continue;   // 抽水閥沒有電路編號
     const x = OX + s.c * CELL + (s.ox || 0) + stampW(s, t || {}) * CELL - 6, y = OY + s.r * CELL + (s.oy || 0) + 6;
     ctx.fillStyle = '#e8312f'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -1857,6 +1869,11 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (isDown) deckPaintAdd = !list.includes(key);
     if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
     if (!list.length) delete m[f];
+  } else if (brush.mode === 'deepwater') {   // 🛟 深水區：拖曳畫一片、再畫一次＝擦掉
+    const list = m.deepWater || (m.deepWater = []);
+    if (isDown) deckPaintAdd = !list.includes(key);
+    if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
+    if (!list.length) delete m.deepWater;
   } else if (brush.mode === 'spawn') {
     m.spawnZone = m.spawnZone || [];
     if (isDown) spawnPaintAdd = !m.spawnZone.includes(key);   // 按下的那格決定這一筆是「畫」還是「擦」
@@ -3438,8 +3455,36 @@ function refreshCircuitControl() {
       saveMaps(); refreshSelPanel(); draw(); setStatus('電路編號設為 ' + n + '：只跟同編號的開關／電燈連動', '#7ee0c0');
     });
   }
-  const picked = selectedCircuitThing(); box.classList.toggle('hidden', !picked);
+  const picked = selectedCircuitThing(); box.classList.toggle('hidden', !picked || !!picked.s?.valve);   // 抽水閥沒有電路編號
   if (picked) document.getElementById('circuitNumber').value = String(picked.s?.circuit || 1);
+  refreshValveControl();
+}
+// 電源開關勾「抽水閥」：變成池核的抽水閥（js/pool-tide.js），不再控制電燈、沒有電路編號
+const isPowerSwitchTile = t => !!t && (/power-switch-(on|off)\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || /^tile_interactive_power_switch/.test(t.id));
+function refreshValveControl() {
+  let box = document.getElementById('valveControl');
+  if (!box) {
+    box = document.createElement('label'); box.id = 'valveControl'; box.style.cursor = 'pointer';
+    box.title = '勾起來：這個開關變成抽水閥。抽水機（發電機）都打開過之後，水漲回來時按它就會把深水區抽乾（js/pool-tide.js）。抽水閥不控制電燈，也沒有電路編號';
+    const input = document.createElement('input'); input.type = 'checkbox'; input.id = 'valveCheck';
+    box.append(input, ' 抽水閥'); document.getElementById('selControls').appendChild(box);
+    input.addEventListener('change', () => {
+      const picked = selectedCircuitThing(); if (!picked || !isPowerSwitchTile(tileById(picked.id))) return;
+      if (dropLockedSelections('設定抽水閥')) return;
+      pushUndo(); let s = picked.s;
+      if (!s) {   // 鋪在圖層上的：轉成可以存設定的擺放物件
+        const [c, r] = picked.sel.key.split(',').map(Number);
+        s = { id: picked.id, c, r, layer: picked.sel.layer };
+        delete curMap().layers[picked.sel.layer][picked.sel.key]; curMap().stamps.push(s);
+        selections = [{ type: 'stamp', index: curMap().stamps.length - 1 }]; selection = selections[0];
+      }
+      if (input.checked) { s.valve = true; delete s.circuit; } else delete s.valve;
+      saveMaps(); refreshSelPanel(); draw(); setStatus(input.checked ? '這個開關是抽水閥了：水漲回來時按它把深水區抽乾（沒有電路編號）' : '改回一般電源開關', '#7ee0c0');
+    });
+  }
+  const picked = selectedCircuitThing(), ok = !!picked && isPowerSwitchTile(tileById(picked.id));
+  box.classList.toggle('hidden', !ok);
+  if (ok) document.getElementById('valveCheck').checked = !!picked.s?.valve;
 }
 // 物件名稱太長會截成「…」，好讓選取列擠得進工具那一排；
 // 但如果怎麼擠都會換到下一排（例如門、置物箱、電源開關有額外設定），就不截、直接顯示全名。
@@ -3917,6 +3962,9 @@ function loadRules() {
   if (safeField) safeField.checked = !!m.safe;
   const fogField = document.getElementById('f_fog');
   if (fogField) fogField.value = m.fog || '';
+  fillAmbientField(m);
+  const deepSpeedField = document.getElementById('f_deepWaterSpeed');
+  if (deepSpeedField) deepSpeedField.value = m.deepWaterSpeed ?? '';
   document.getElementById('f_coreCount').value = m.coreCount;
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
   renderMonsterMix();
@@ -3957,6 +4005,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.ramps) m.ramps = m.ramps.map(shiftKey);
   if (m.solid2) m.solid2 = m.solid2.map(shiftKey);
   if (m.only2) m.only2 = m.only2.map(shiftKey);
+  if (m.deepWater) m.deepWater = m.deepWater.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -3993,6 +4042,7 @@ function dropOutsideContent(m) {
   if (m.ramps) { m.ramps = m.ramps.filter(insideKey); if (!m.ramps.length) delete m.ramps; }
   if (m.solid2) { m.solid2 = m.solid2.filter(insideKey); if (!m.solid2.length) delete m.solid2; }
   if (m.only2) m.only2 = m.only2.filter(insideKey);
+  if (m.deepWater) { m.deepWater = m.deepWater.filter(insideKey); if (!m.deepWater.length) delete m.deepWater; }
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
@@ -4111,6 +4161,36 @@ const safeField = document.getElementById('f_safe');
 if (safeField) safeField.addEventListener('change', e => {
   pushUndo(); curMap().safe = e.target.checked; saveMaps();
   setStatus(e.target.checked ? '這張劇情地圖是安全場景：不生怪、不套黑幕' : '這張劇情地圖是戰鬥場景：啟用怪物與黑幕', '#8fd3ff');
+});
+// 🔊 環境背景音（js/map-ambient.js）：AMBIENT_SOUNDS 每個一個勾選框，可以勾好幾個一起播；沒設定過的地圖顯示預設（池核＝滴水聲＋水滴聲、白噪音 70%）
+function fillAmbientField(m) {
+  const box = document.getElementById('f_ambient'); if (!box) return;
+  const list = typeof AMBIENT_SOUNDS !== 'undefined' ? AMBIENT_SOUNDS : [];
+  const cur = typeof mapAmbientOf === 'function' ? mapAmbientOf(m) : [];
+  const extra = cur.filter(s => !list.some(a => a.sound === s)).map(s => ({ sound: s, name: s }));   // 清單裡沒有的（之後被拿掉的）也顯示出來，才取消得掉
+  box.innerHTML = [...list, ...extra].map(a => '<label style="margin-right:10px;cursor:pointer"><input type="checkbox" value="' + a.sound + '"' + (cur.includes(a.sound) ? ' checked' : '') + '> ' + a.name + '</label>').join('');
+  const wn = document.getElementById('f_whiteNoise');
+  if (wn) wn.value = Math.round((typeof mapWhiteNoiseOf === 'function' ? mapWhiteNoiseOf(m) : 1) * 100);
+}
+// 🛟 深水區的划水速度 %（空白＝js/swim-ring.js 的 SWIM_RING.speed）
+const deepSpeedInput = document.getElementById('f_deepWaterSpeed');
+if (deepSpeedInput) deepSpeedInput.addEventListener('change', e => {
+  const v = parseFloat(e.target.value);
+  pushUndo(); if (Number.isFinite(v) && v > 0) { curMap().deepWaterSpeed = Math.max(10, Math.min(100, Math.round(v))); e.target.value = curMap().deepWaterSpeed; } else { delete curMap().deepWaterSpeed; e.target.value = ''; }
+  saveMaps(); setStatus('深水區划水速度：' + (curMap().deepWaterSpeed ? curMap().deepWaterSpeed + '%' : '預設'), '#8fd3ff');
+});
+const ambientField = document.getElementById('f_ambient');
+if (ambientField) ambientField.addEventListener('change', () => {
+  const on = [...ambientField.querySelectorAll('input:checked')];
+  pushUndo(); curMap().ambient = on.map(i => i.value); saveMaps();   // 空陣列也存：代表「都不要播」（蓋過預設）
+  setStatus(on.length ? '這張地圖會循環播放：' + on.map(i => i.parentNode.textContent.trim()).join('、') : '這張地圖沒有環境背景音了', '#8fd3ff');
+});
+// Y 區白噪音在這張地圖的音量 %（js/ambience.js；100＝原本的音量、0＝不播）
+const whiteNoiseField = document.getElementById('f_whiteNoise');
+if (whiteNoiseField) whiteNoiseField.addEventListener('change', e => {
+  const v = parseFloat(e.target.value), n = Number.isFinite(v) ? Math.max(0, Math.min(100, Math.round(v))) : 100;
+  pushUndo(); curMap().whiteNoise = n; e.target.value = n; saveMaps();
+  setStatus('這張地圖的白噪音音量：' + n + '%', '#8fd3ff');
 });
 const fogField = document.getElementById('f_fog');
 if (fogField) fogField.addEventListener('change', e => {

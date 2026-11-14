@@ -35,6 +35,7 @@ const SITUATIONS = [
   { group: '戰鬥中', key: 'bitten', label: '在黑暗中被咬', when: '待在暗處被 Smiler 咬到、還站得住時。' },
   { group: '戰鬥中', key: 'fogThick', label: '霧變濃了', when: '森林的霧<b>變濃</b>時，站在霧裡的其中一位隊友說一句（霧會隨機變濃、變淡；變濃時隊友看不遠、命中率下降、走路變慢）。' },
   { group: '戰鬥中', key: 'guard', label: '衝去保護部隊長', when: '部隊長被怪物攻擊、他衝過去保護時（每 <b>6 秒</b>最多一次）。' },
+  { group: '戰鬥中', key: 'drown', label: '溺水', when: '池核的水漲回來時還待在深水區、沒坐救生圈，<b>每秒扣 1 HP</b>，每隔 <b>6～10 秒</b>喊一句（js/pool-tide.js）。' },
   { group: '戰鬥中・被怪物攻擊', key: 'hurt', label: '一般被打', when: '被怪物打到時<b>有時候</b>說一句（大約一半機率，說完至少隔 <b>7 秒</b>）。數值在 js/mate-hurt-talk.js 的 MATE_HURT_TALK。' },
   { group: '戰鬥中・被怪物攻擊', key: 'lowHp', label: '快沒血', when: '血量掉到 <b>3 成</b>以下時說一句；回到 5 成以上後，下次掉下去會再說。' },
   { group: '戰鬥中・被怪物攻擊', key: 'down', label: '倒下（失去戰鬥能力）', when: '血量歸零、倒下的那一刻說一句。' },
@@ -74,7 +75,7 @@ const RAGE_FIELDS = [
 ];
 // 可以收禮的角色（data/gifts.js 的 GIFT_PREFS）都有「送禮與委託」這幾格
 // 被怪物攻擊時的台詞（js/mate-hurt-talk.js）：出勤隊員都有這幾格
-const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed', 'vineGrab', 'vineLand', 'confusedAttack', 'confusedHit'];
+const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed', 'vineGrab', 'vineLand', 'confusedAttack', 'confusedHit', 'drown'];   // drown：池核溺水（js/pool-tide.js）
 const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'giftAfter', 'giftRefuse', 'requestAsk', 'requestReward'];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };

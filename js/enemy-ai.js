@@ -209,14 +209,15 @@ function enemyBarrierAt(c, r) {
 }
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
-  if (!inGrid(c, r) || isWall(c, r) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 順順宮帽也擋路（js/hangi-bao.js）
+  if (!inGrid(c, r) || enemyWallPoint(x, y) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 牆吃像素微調（js/pathfinding.js）；順順宮帽也擋路（js/hangi-bao.js）
   if (edgeWallBlocksPoint(x, y)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）
+  if (typeof deepWaterBlocksCell === 'function' && !(actor && (actor.behavior === 'moth' || (typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(actor.x, actor.y)))) && deepWaterBlocksCell(c, r)) return true;   // 深水區：地面怪物進不去，會飛的人面蝶照樣飛（js/swim-ring.js）
   if (typeof escalatorSideBlocks === 'function' && !(actor && actor.behavior === 'moth') && escalatorSideBlocks(x, y + ESCALATOR.enemyFootDy)) return true;   // 側面手扶梯的扶手、外殼（js/escalators.js）
   return !!(actor && actor.wide && !enemyWideAt(c, r) && enemyWideAt(...cellAt(actor.x, actor.y)));   // 大體型：從寬的地方擠不進一格的窄道（已經在窄道裡就可以走出來）
 }
 // ---- 大體型（怪物編輯器的「大體型」、巨型史萊姆）：只有一格寬的通道（門口、窄走廊）擠不過去 ----
 // 能走的格子＝空地，而且旁邊湊得出一塊 2×2 的空地。建築算空地（可以拆掉），牆、順順宮帽不算。
-function enemyWideOpen(c, r) { return inGrid(c, r) && !isWall(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)); }
+function enemyWideOpen(c, r) { return inGrid(c, r) && !enemyWallCell(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)); }
 function enemyWideAt(c, r) {
   if (!enemyWideOpen(c, r)) return false;
   for (const [dc, dr] of [[-1, -1], [0, -1], [-1, 0], [0, 0]])
@@ -330,7 +331,7 @@ const ENEMY_NEIGHBORS = [[0, -1], [-1, 0], [1, 0], [0, 1]];
 // 從現在的位置沿著走得到的格子往外找（繞過牆和建築），挑離威脅最遠的一格；路程越遠、死路（只有一個出口）都扣分。
 // 不直接往「威脅的反方向」跑：被逼進牆角時反方向就是牆，會一直貼著牆角原地踏步
 function enemyFleeCell(e, threats, minSteps = 3, maxSteps = 8) {
-  const open = (c, r) => inGrid(c, r) && !isWall(c, r) && !enemyBarrierAt(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)) && (!e.wide || enemyWideAt(c, r));
+  const open = (c, r) => inGrid(c, r) && !enemyWallCell(c, r) && !enemyBarrierAt(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)) && (!e.wide || enemyWideAt(c, r));
   const [ec, er] = cellAt(e.x, e.y), seen = new Set([ec + ',' + er]), queue = [[ec, er, 0]];
   let best = null, bestScore = -Infinity;
   for (let qi = 0; qi < queue.length; qi++) {
@@ -387,7 +388,7 @@ function closestObstacleCell(e, o) {
 }
 function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
   const [startC, startR] = cellAt(e.x, e.y);
-  if (!inGrid(goalC, goalR) || isWall(goalC, goalR)) return null;
+  if (!inGrid(goalC, goalR) || enemyWallCell(goalC, goalR)) return null;
   const startKey = startC + ',' + startR, goalKey = goalC + ',' + goalR;
   const queue = [[startC, startR]], cameFrom = new Map([[startKey, null]]);
   for (let qi = 0; qi < queue.length; qi++) {
@@ -395,7 +396,7 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
     if (c === goalC && r === goalR) break;
     for (const [dc, dr] of ENEMY_NEIGHBORS) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key) || edgeBetween(c, r, nc, nr)) continue;   // edgeBetween：兩格中間有薄牆就繞路
+      if (!inGrid(nc, nr) || enemyWallCell(nc, nr) || cameFrom.has(key) || edgeBetween(c, r, nc, nr)) continue;   // edgeBetween：兩格中間有薄牆就繞路
       if (enemyBarrierAt(nc, nr) && !canBreakBuildings) continue;
       if (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr)) continue;   // 繞過順順宮帽
       cameFrom.set(key, [c, r]); queue.push([nc, nr]);
@@ -437,7 +438,7 @@ function chooseDarkWanderCell(e) {
   for (let r = Math.max(0, er - 7); r <= Math.min(ROWS - 1, er + 7); r++) {
     for (let c = Math.max(0, ec - 7); c <= Math.min(COLS - 1, ec + 7); c++) {
       const distance = Math.abs(c - ec) + Math.abs(r - er);
-      if (distance < 2 || distance > 9 || isWall(c, r) || enemyBarrierAt(c, r) || cellLit(c, r) || (e.wide && !enemyWideAt(c, r))) continue;
+      if (distance < 2 || distance > 9 || enemyWallCell(c, r) || enemyBarrierAt(c, r) || cellLit(c, r) || (e.wide && !enemyWideAt(c, r))) continue;
       choices.push([c, r]);
     }
   }

@@ -177,7 +177,7 @@ function sentryRedFlash(t) {   // 回傳紅閃強度 0~1：受擊閃一下、瀕
 }
 // 腳下接地陰影：站立、走路共用；抓起／掉落時由 grabDrawWrap 畫離地陰影。
 function drawCharacterShadow(actor) {
-  if (!actor || actor.eatenBy || actor.sitting || actor.grabFall || (typeof grab !== 'undefined' && grab && grab.actor === actor)) return;
+  if (!actor || actor.eatenBy || actor.sitting || actor.grabFall || actor.swimRing || (typeof grab !== 'undefined' && grab && grab.actor === actor)) return;
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,.3)';
   ctx.beginPath();
@@ -1162,6 +1162,8 @@ function draw() {
     const mate = G.running && typeof teammateActionTarget === 'function' ? teammateActionTarget() : null;
     const pickShard = typeof shardNearPlayer === 'function' ? shardNearPlayer() : null;
     const pickProp = !pickShard && typeof pickupPropNearPlayer === 'function' ? pickupPropNearPlayer() : null;
+    if (typeof drawSwimRingHint === 'function') drawSwimRingHint();
+    if (typeof drawPoolTideBubble === 'function') drawPoolTideBubble();   // 水漲回來：溫特「一定有開關可以把這些水抽走。」（js/pool-tide.js）   // 想走進深水區：溫特頭上「好像可以拿救生圈做點什麼……」（js/swim-ring.js）
     if (mate) drawTowerPrompts(mate, mate.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
     if (G.running && typeof drawRepairPrompt === 'function' && !(typeof playerChannel !== 'undefined' && playerChannel)) drawRepairPrompt();   // 身上有工具箱、旁邊有受損的建築：「R 修理」（js/equipment.js）
     if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）

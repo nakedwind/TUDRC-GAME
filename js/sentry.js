@@ -340,6 +340,7 @@ function sentryBlocked(x, y) {
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
+    if (typeof deepWaterBlocksAlly === 'function' && deepWaterBlocksAlly(px, py)) return true;   // 深水區：沒坐救生圈的隊員不會下水，在岸邊等（js/swim-ring.js）
     if (edgeWallBlocksPoint(px, py) || edgeWallBlocksPoint(x + sx, y) || edgeWallBlocksPoint(x, y + sy)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）：角和四邊中點
   }
   return false;
@@ -510,10 +511,13 @@ function sentryFleeSpot(t, threat, maxSteps = 6) {
   return best;
 }
 function moveSentryWithPath(t, targetX, targetY, speed, dt) {
-  const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
   const dark = !!(t.summonDark || t.followDark);   // 被召喚、跟著溫特走、去撿地上的東西：可以穿過黑暗
+  if (typeof swimRingShoreGoal === 'function') {   // 想走進深水區（沒坐救生圈）：先走到最靠近的岸邊；溫特在水裡時會拿救生圈下水（js/swim-ring.js）
+    const shore = swimRingShoreGoal(t, targetX, targetY, dark); if (shore) [targetX, targetY] = shore;
+  }
+  const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
   if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r, false, dark))) {
     t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
     t.navStall = 0;
@@ -644,7 +648,14 @@ function guideCareTarget(t, spec) {
   });
   return needy.find(o => Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL || buildSentryPath(t, o.x, o.y, true) !== null) || null;   // true：走暗路也算走得到（隊員常跟著溫特在暗處）
 }
+// 坐救生圈的隊員：更新時讓深水不擋、划水變慢；更新完划上岸就收起救生圈（js/swim-ring.js）
 function updateSentry(t, dt) {
+  if (typeof swimRingWithActor !== 'function') { updateSentryMain(t, dt); return; }
+  swimRingAllyTick();
+  swimRingWithActor(t, () => updateSentryMain(t, dt));
+  swimRingAllyAfterMove(t);
+}
+function updateSentryMain(t, dt) {
   t.followDark = false;   // 這一幀要不要穿過黑暗：跟著溫特、照顧人、撿地上的東西時才打開（moveSentryWithPath 看這個）
   if (t.hp <= 0) { t.target = null; t.moving = false; if (!(t.say && t.say.hurt)) t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉（倒下時喊的那句留著，js/mate-hurt-talk.js）
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）

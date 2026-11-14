@@ -74,6 +74,7 @@ function canPlaceObstacleNow(v, c, r, lightExtra = 0) {
     const cc = c + dc, rr = r + dr;
     if (!inGrid(cc, rr)) return false;
     if (isWall(cc, rr) || isEntrance(cc, rr)) return false;
+    if (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(cc, rr)) return false;   // 深水區不能蓋（js/swim-ring.js）
     if (hasFloors && rampCells.has(cc + ',' + rr)) return false;   // 樓層出入口（手扶梯）上不能蓋
     if (G.grid[cc + ',' + rr]) return false;         // 既有建築的擋路格
     if (!cellNearLight(cc, rr, lightExtra)) return false;
@@ -105,6 +106,7 @@ function buildFail(msg, c, r, color = '#ff8f8f') {
 function placeObstacle(ob, c, r) {
   if(!ob||DISABLED_BUILD_IDS.has(ob.id))return false;
   const v = ob[buildOrient], extra = placeExtra(ob);
+  if (G.player && G.player.swimRing) return buildFail('坐在救生圈上不能蓋東西', c, r);   // js/swim-ring.js
   if (!buildInRange(v, c, r)) return buildFail('太遠了', c, r);
   if (!footprintNearLight(v, c, r, extra)) return buildFail('太黑了', c, r, '#ffd24a');
   if (!canPlaceObstacle(v, c, r, extra)) return buildFail('不能放這裡', c, r);
@@ -521,7 +523,9 @@ function slowFactorAt(x, y, who, actor) {   // actor：誰在走（黏著彈的�
     if (c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)) k = Math.min(k, o.slow[who] ?? 1);
   }
   if (typeof burrowMouseSlowAt === 'function') k = Math.min(k, burrowMouseSlowAt(x, y));   // 版權老鼠死後的洞（js/burrowing-mouse.js）
-  if (typeof waterSlowAt === 'function') k = Math.min(k, waterSlowAt(x, y));   // 走在水裡（js/water.js：素材勾了「這是水」，速度 % 在編輯器填）
+  const swim = typeof swimRingSpeedAt === 'function' ? swimRingSpeedAt(x, y) : 1;   // 坐救生圈在深水區划水：用地圖設定的划水速度（js/swim-ring.js），不再算水素材的速度
+  if (swim < 1) k = Math.min(k, swim);
+  else if (typeof waterSlowAt === 'function') k = Math.min(k, waterSlowAt(x, y));   // 走在水裡（js/water.js：素材勾了「這是水」，速度 % 在編輯器填）
   if (typeof glueSlowAt === 'function') k = Math.min(k, glueSlowAt(x, y, actor));   // 黏著彈的黏膠（js/special-guns.js）
   if (typeof pitSlowAt === 'function') k = Math.min(k, pitSlowAt(x, y, who, actor));   // 地上的坑洞（js/pits.js：素材勾了「這是坑洞」，速度 % 在編輯器填）
   return k;
