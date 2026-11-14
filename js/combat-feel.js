@@ -294,6 +294,7 @@ function onEnemyDeath(e) {
   const base = monsterImage(e.sprite || 'images/monster/Monster_Slime.png');
   const heavy = !!e.lastHitHeavy;
   (G.fxCorpses = G.fxCorpses || []).push({
+    floor: actorFloor(e),   // 死在幾樓（陸橋上的屍體才不會被橋面蓋住）
     img: tintedSprite(base, e.tint), x: e.x, y: e.y, z: e.slimeLift || 0,
     w: e.drawWidth || 42, h: e.drawHeight || 33, t: 0,
     // 重擊打死：被打飛旋轉再爆開；一般：原地閃白膨脹後爆開

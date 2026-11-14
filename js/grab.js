@@ -229,6 +229,9 @@ function dropGrabBuilding(cancel = false) {
   const problem = cancel ? 'cancel' : grabBuildingProblem(o, c, r);
   if (problem) { if (!cancel && (c !== g.from[0] || r !== g.from[1])) buildFail(problem, c, r); [c, r] = g.from; }
   o.c = c; o.r = r;
+  if (!problem && typeof buildFloorAt === 'function') {   // 放到新位置：照新位置重新算在幾樓（跟蓋建築同一套規則，js/build.js）
+    if (buildFloorAt({ w: o.w || 1, h: o.h || 1, solid: obstacleSolidCells(o) }, c, r) === 2) o.floor = 2; else delete o.floor;
+  }
   for (const [dc, dr] of obstacleSolidCells(o)) G.grid[(c + dc) + ',' + (r + dr)] = o;
   G.obstacles.push(o);
   o.spawnT = DROP.fall * .85;   // 從手上的高度掉下來：落地壓扁＋塵埃（js/build.js 的 dropAnim）

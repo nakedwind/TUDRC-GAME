@@ -34,7 +34,7 @@ function foodDeathDrop(e) {
     G.groundItems = G.groundItems || [];
     for (let i = 0; i < boss.qty; i++) {
       const a = i / boss.qty * Math.PI * 2 + Math.random() * .5, d = 16 + Math.random() * 22;
-      G.groundItems.push({ id: boss.id, qty: 1, x: e.x + Math.cos(a) * d, y: e.y + 8 + Math.sin(a) * d * .6, at: performance.now() / 1000 });
+      G.groundItems.push({ id: boss.id, qty: 1, x: e.x + Math.cos(a) * d, y: e.y + 8 + Math.sin(a) * d * .6, at: performance.now() / 1000, floor: actorFloor(e) });   // floor：掉在幾樓（陸橋上掉的才不會被橋面蓋住）
     }
     flash((boss.id === 'banana' ? '🍌 ' : '') + itemById(boss.id).name + ' ×' + boss.qty, e.x, e.y - 60, '#ffe066');
     return;
@@ -43,7 +43,7 @@ function foodDeathDrop(e) {
   if (!d || Math.random() >= d.chance || typeof itemById !== 'function' || !itemById(d.id)) return;
   const n = d.min + Math.floor(Math.random() * (d.max - d.min + 1)); if (n <= 0) return;
   G.groundItems = G.groundItems || [];
-  G.groundItems.push({ id: d.id, qty: n, x: e.x + (Math.random() - .5) * 16, y: e.y + 8, at: performance.now() / 1000 });
+  G.groundItems.push({ id: d.id, qty: n, x: e.x + (Math.random() - .5) * 16, y: e.y + 8, at: performance.now() / 1000, floor: actorFloor(e) });
 }
 
 // ---- 火烤 ----
@@ -57,13 +57,13 @@ function cookGroundFood(g) {
 }
 // 一下子的火（希奧妮的火焰、爆炸）：打到範圍內的食物直接烤熟
 function cookFoodNear(x, y, R) {
-  for (const g of G.groundItems || []) if (Math.hypot(g.x - x, g.y - y) <= R + 12) cookGroundFood(g);
+  for (const g of G.groundItems || []) if (blastHits(g) && Math.hypot(g.x - x, g.y - y) <= R + 12) cookGroundFood(g);   // blastHits：不同樓層的爆炸烤不到
 }
 function updateFoodCooking(dt) {
   if (!G.groundItems || !G.groundItems.length || typeof oilFireAt !== 'function') return;
   for (const g of G.groundItems) {
     const it = itemById(g.id); if (!it || !it.cookTo) continue;
-    if (!oilFireAt(g.x, g.y, 6)) { g.cookT = 0; continue; }
+    if (!oilFireAt(g.x, g.y, 6, g)) { g.cookT = 0; continue; }   // g：只看食物那一層的火
     if ((g.cookT = (g.cookT || 0) + dt) >= FOOD_COOK.time) cookGroundFood(g);
   }
 }

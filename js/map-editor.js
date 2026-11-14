@@ -523,7 +523,9 @@ function fixMap(m) {
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   if (Array.isArray(m.deck) && m.deck.length) m.deck = [...new Set(m.deck)]; else delete m.deck;   // 🌉 2樓地面：['欄,列'…]（js/pathfinding.js）
   if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;
-  if (Array.isArray(m.solid2) && m.solid2.length) m.solid2 = [...new Set(m.solid2)]; else delete m.solid2;   // 🚧 2樓碰撞：['欄,列'…]，只擋 2 樓的人（js/pathfinding.js）   // 🛗 樓層出入口：['欄,列'…]（手扶梯、樓梯：走出去就換樓層）
+  if (Array.isArray(m.solid2) && m.solid2.length) m.solid2 = [...new Set(m.solid2)]; else delete m.solid2;
+  if (typeof MapLevels !== 'undefined') MapLevels.normalize(m);   // 🏢 樓層資料：only2（只有 2 樓的格子）一定在 2 樓地面上、不是出入口（js/map-levels.js）
+  if (!m.levels) delete m.only2;   // 🚧 2樓碰撞：['欄,列'…]，只擋 2 樓的人（js/pathfinding.js）   // 🛗 樓層出入口：['欄,列'…]（手扶梯、樓梯：走出去就換樓層）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
@@ -1012,7 +1014,7 @@ function drawStamp(s) {
     ctx.save(); ctx.fillStyle = 'rgba(230,120,20,.92)'; ctx.fillRect(x, y, 30, 15);
     ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('暴衝', x + 4, y + 8); ctx.restore();
   }
-  if (s.deck2) drawDeck2Badge(s);
+  if (s.deck2 || s.level === 2 || s.level === 'span') drawDeck2Badge(s);   // 2 樓的圖、跨樓層的圖：左上角標一下
   if (s.cars > 0 && s.id === 'tile_mrt_train_car_head') drawMrtExtraCars(s);
   if (s.bothDoors && MRT_TRAIN_CAR_IDS.has(s.id)) drawMrtDoorsBadge(s);
   if (s.glow) {   // 發光：畫一圈淡淡的虛線，標出照亮的範圍（只在編輯器裡看得到）
@@ -1030,8 +1032,9 @@ function drawStillBadge(s) {
 // 標了「2樓」的圖（陸橋）：左上角標一下
 function drawDeck2Badge(s) {
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
-  ctx.save(); ctx.fillStyle = 'rgba(40,120,220,.9)'; ctx.fillRect(x, y, 34, 15);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('🌉2樓', x + 3, y + 8); ctx.restore();
+  const span = s.level === 'span';
+  ctx.save(); ctx.fillStyle = span ? 'rgba(150,90,220,.9)' : 'rgba(40,120,220,.9)'; ctx.fillRect(x, y, span ? 46 : 34, 15);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(span ? '↕跨樓層' : '🌉2樓', x + 3, y + 8); ctx.restore();
 }
 // 捷運車廂設成「兩側車門都開」：左上角標一下（js/mrt-train.js）
 function drawMrtDoorsBadge(s) {
@@ -1457,10 +1460,11 @@ function draw() {
   // 由下往上：每層先畫小圖、再畫「屬於這層」的大圖
   for (const l of LAYERS) {
     if (hiddenLayers.has(l.id)) continue;
+    const showCells = typeof levelLayerShown !== 'function' || levelLayerShown(l);   // 🏢 只看 1 樓／2 樓（js/map-editor-levels.js）
     const op = layerOpacityOf(l.id);   // 這層調了透明度（只在編輯器）就整層畫淡一點
     const paint = () => {
-      for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) { const id = m.layers[l.id][c + ',' + r]; if (id) drawTile(id, OX + c * CELL, OY + r * CELL); }
-      for (const s of m.stamps) if ((s.layer || 'top') === l.id) drawStamp(s);
+      if (showCells) for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) { const id = m.layers[l.id][c + ',' + r]; if (id) drawTile(id, OX + c * CELL, OY + r * CELL); }
+      for (const s of m.stamps) if ((s.layer || 'top') === l.id && (typeof levelStampShown !== 'function' || levelStampShown(s))) drawStamp(s);
     };
     const lb = layerBlendOf(l.id);   // 整層混合：整層當成一張圖再混合
     if (lb) { withLayerGroup(lb, op / 100, paint); continue; }
@@ -1513,12 +1517,13 @@ function draw() {
       ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('👾', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
     }
-    if ((showSolid || brush.mode === 'solid2' || brush.mode === 'deck') && solid2Set.has(key)) {   // 🚧 2樓碰撞（紫色斜線框）：只擋 2 樓
+    if ((showSolid || brush.mode === 'solid2' || brush.mode === 'deck' || brush.mode === 'level') && solid2Set.has(key)) {   // 🚧 2樓碰撞（紫色斜線框）：只擋 2 樓
       ctx.fillStyle = 'rgba(190,90,255,.30)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = 'rgba(220,150,255,.95)'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
       ctx.beginPath(); ctx.moveTo(x + 6, y + CELL - 6); ctx.lineTo(x + CELL - 6, y + 6); ctx.stroke();
     }
-    if ((showSolid || brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') && (deckSet.has(key) || rampSet.has(key))) {   // 🌉 2樓地面（藍）、🛗 樓層出入口（橘）
+    if (typeof drawLevelCell === 'function' && (showSolid || (typeof levelOverlayOn === 'function' && levelOverlayOn()) || brush.mode === 'level' || brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2')) { drawLevelCell(x, y, key); }   // 🏢 樓層種類：只有 2 樓（藍）、陸橋（青）、出入口（橘）（js/map-editor-levels.js）
+    else if ((showSolid || brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') && (deckSet.has(key) || rampSet.has(key))) {   // 🌉 2樓地面（藍）、🛗 樓層出入口（橘）
       const isRamp = rampSet.has(key);
       ctx.fillStyle = isRamp ? 'rgba(255,160,40,.32)' : 'rgba(70,150,255,.28)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = isRamp ? 'rgba(255,200,120,.9)' : 'rgba(140,200,255,.85)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
@@ -1560,7 +1565,9 @@ function draw() {
     ctx.fillStyle = '#8fd0ff'; ctx.textAlign = 'left';
     ctx.fillText('🛟 深水區 ' + (m.deepWater || []).length + ' 格（坐救生圈才能進去；划水速度在「地圖設定」調）', OX + 6, OY + 70);
   }
-  if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2' || (m.deck || []).length || (m.ramps || []).length) {
+  if (typeof levelCountText === 'function' && ((m.deck || []).length || (m.ramps || []).length || brush.mode === 'level')) {   // 🏢 樓層統計（js/map-editor-levels.js）
+    ctx.fillStyle = '#8fc8ff'; ctx.textAlign = 'left'; ctx.fillText(levelCountText(m), OX + 6, OY + 52);
+  } else if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2' || (m.deck || []).length || (m.ramps || []).length) {
     ctx.fillStyle = '#8fc8ff'; ctx.textAlign = 'left';
     ctx.fillText('🌉 2樓地面 ' + (m.deck || []).length + ' 格／🛗 樓層出入口 ' + (m.ramps || []).length + ' 格／🚧 2樓碰撞 ' + (m.solid2 || []).length + ' 格' + ((m.deck || []).length && (m.ramps || []).length ? '' : '（兩種都要畫，遊戲才會有 2 樓）'), OX + 6, OY + 52);
   }
@@ -1892,6 +1899,8 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     saveMaps(); draw();
     setStatus((edgePaint.add ? '已加上' : '已拿掉') + '邊緣碰撞（這張地圖共 ' + ((m.edges || []).length) + ' 條）：按著沿格線拖曳可以連續' + (edgePaint.add ? '畫' : '擦'), '#ffb347');
     return;
+  } else if (brush.mode === 'level') {   // 🏢 樓層種類：照選的種類改這格（js/map-editor-levels.js）
+    if (typeof paintLevelCell !== 'function' || !paintLevelCell(m, key, isDown)) return;
   } else if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') {   // 🌉 2樓地面／🛗 樓層出入口／🚧 2樓碰撞：拖曳畫一片、再畫一次＝擦掉（各自一組格子）
     const f = brush.mode === 'deck' ? 'deck' : brush.mode === 'ramp' ? 'ramps' : 'solid2', list = m[f] || (m[f] = []);
     if (isDown) deckPaintAdd = !list.includes(key);
@@ -3255,27 +3264,40 @@ function selectedMrtCars() {
   const m = curMap();
   return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(s => s && MRT_TRAIN_CAR_IDS.has(s.id));
 }
-// ---- 陸橋（2 樓）的圖：勾了＝這張圖在遊戲裡蓋在一樓的人上面（stamp.deck2，js/maploader.js）；站在 2 樓地面上的人畫在它上面 ----
+// ---- 選物件時的「🏢 樓層」選單：這張圖在幾樓（存在 stamp.level，規則在 js/map-levels.js，遊戲照這個畫、照這個擋路）----
+// 自動＝沒寫 level，照舊規則推算（名稱有「2樓」的圖層、或舊的「🌉 2樓的圖」勾選）；跨樓層＝從一樓立到二樓的柱子、牆（上下兩半各算一層）
 function refreshDeck2Control() {
   let box = document.getElementById('deck2Control');
   if (!box) {
     box = document.createElement('div'); box.id = 'deck2Control'; box.className = 'blend-control';
-    box.innerHTML = '<label title="勾了：這張圖是 2 樓（陸橋）的一部分，遊戲裡蓋在一樓的人上面、2 樓的人走在它上面。2 樓能不能走要另外用「🌉 2樓地面」「🛗 樓層出入口」畫格子"><input type="checkbox" id="deck2Toggle"> 🌉 2樓的圖（蓋在一樓的人上面）</label>';
+    box.innerHTML = '<label title="這張圖在幾樓。2 樓的圖蓋在一樓的人上面、2 樓的人走在它上面；跨樓層＝從一樓立到二樓的柱子、牆，下半段算 1 樓、上半段算 2 樓。2 樓能不能走要另外用「🏢 樓層種類」畫格子">🏢 樓層 '
+      + '<select id="levelStampSel"><option value="auto">自動</option><option value="1">1 樓</option><option value="2">2 樓</option><option value="span">跨樓層</option></select></label>';
     document.getElementById('selControls').appendChild(box);
-    document.getElementById('deck2Toggle').addEventListener('change', e => {
-      if (dropLockedSelections('切換 2 樓')) return;
+    document.getElementById('levelStampSel').addEventListener('change', e => {
+      if (dropLockedSelections('切換樓層')) return;
       const m = curMap(), list = selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(Boolean); if (!list.length) return;
       pushUndo();
-      for (const s of list) { if (e.target.checked) s.deck2 = true; else delete s.deck2; }
+      const v = e.target.value;
+      for (const s of list) {
+        delete s.deck2;   // 舊的「2樓的圖」勾選：改用 level
+        if (v === 'auto') delete s.level; else s.level = v === 'span' ? 'span' : Number(v);
+      }
+      if (typeof levelCache !== 'undefined') levelCache = null;
       saveMaps(); draw(); refreshSelPanel();
-      setStatus(list.length + ' 個物件已設為' + (e.target.checked ? '2 樓的圖' : '一般（1 樓）'), '#7ee0c0');
+      setStatus(list.length + ' 個物件的樓層設為「' + e.target.options[e.target.selectedIndex].text + '」', '#7ee0c0');
     });
   }
   const m = curMap(), list = selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(Boolean);
-  box.classList.toggle('hidden', !list.length);
-  if (!list.length) return;
-  const toggle = document.getElementById('deck2Toggle'), on = list.filter(s => s.deck2).length;
-  toggle.checked = on === list.length; toggle.indeterminate = on > 0 && on < list.length;
+  box.classList.toggle('hidden', !list.length || typeof MapLevels === 'undefined');
+  if (!list.length || typeof MapLevels === 'undefined') return;
+  const sel = document.getElementById('levelStampSel');
+  const vals = new Set(list.map(s => s.level == null ? 'auto' : String(s.level)));
+  sel.value = vals.size === 1 ? [...vals][0] : 'auto';
+  // 自動的：在選項上寫出目前推算成幾樓
+  const auto = list.filter(s => s.level == null);
+  const guess = auto.length ? new Set(auto.map(s => String(MapLevels.stampLevel(s, m, tileById)))) : null;
+  sel.options[0].textContent = guess && guess.size === 1 ? '自動（目前算 ' + ({ 1: '1 樓', 2: '2 樓', span: '跨樓層' }[[...guess][0]]) + '）' : '自動';
+  sel.title = vals.size > 1 ? '選了好幾個，樓層不一樣' : '';
 }
 function refreshMrtDoorsControl() {
   let box = document.getElementById('mrtDoorsControl');
@@ -4027,6 +4049,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.deck) m.deck = m.deck.map(shiftKey);
   if (m.ramps) m.ramps = m.ramps.map(shiftKey);
   if (m.solid2) m.solid2 = m.solid2.map(shiftKey);
+  if (m.only2) m.only2 = m.only2.map(shiftKey);
   if (m.deepWater) m.deepWater = m.deepWater.map(shiftKey);
   if (m.deepWaterOffsets) { const o = {}; for (const k in m.deepWaterOffsets) o[shiftKey(k)] = m.deepWaterOffsets[k]; m.deepWaterOffsets = o; }
   if (solidNudgeDeep.size) { const moved = [...solidNudgeDeep].map(shiftKey); solidNudgeDeep.clear(); moved.forEach(k => solidNudgeDeep.add(k)); }
@@ -4065,6 +4088,7 @@ function dropOutsideContent(m) {
   if (m.deck) { m.deck = m.deck.filter(insideKey); if (!m.deck.length) delete m.deck; }
   if (m.ramps) { m.ramps = m.ramps.filter(insideKey); if (!m.ramps.length) delete m.ramps; }
   if (m.solid2) { m.solid2 = m.solid2.filter(insideKey); if (!m.solid2.length) delete m.solid2; }
+  if (m.only2) m.only2 = m.only2.filter(insideKey);
   if (m.deepWater) { m.deepWater = m.deepWater.filter(insideKey); if (!m.deepWater.length) delete m.deepWater; }
   if (m.deepWaterOffsets) { for (const k in m.deepWaterOffsets) if (!insideKey(k)) delete m.deepWaterOffsets[k]; if (!Object.keys(m.deepWaterOffsets).length) delete m.deepWaterOffsets; }
   for (const k of [...solidNudgeDeep]) if (!insideKey(k)) solidNudgeDeep.delete(k);
@@ -4297,3 +4321,11 @@ loadRules();
 draw();
 if (PULL_RESTORE_APPLIED) setStatus('舊瀏覽器紀錄已備份；目前已載入 Git 地圖版本 ✓', '#7ee0c0');
 setStatus('編輯器已就緒。目前有 ' + maps.length + ' 張' + EDITOR_SETTINGS.mapLabel + '、' + palette().length + ' 塊磚塊。', '#7ee0c0');
+
+// 「⋯ 更多」選單太長時：最高只到視窗底部（留 12 像素），超過的在選單裡用滾輪捲（樣式在 css/map-editor.css 的 .tool-more-menu）
+function fitToolMoreMenu(menu) {
+  if (!menu) return;
+  menu.style.maxHeight = Math.max(160, window.innerHeight - menu.getBoundingClientRect().top - 12) + 'px';
+}
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.classList && d.classList.contains('tool-more') && d.open) fitToolMoreMenu(d.querySelector('.tool-more-menu')); }, true);
+window.addEventListener('resize', () => document.querySelectorAll('.tool-more[open] .tool-more-menu').forEach(fitToolMoreMenu));

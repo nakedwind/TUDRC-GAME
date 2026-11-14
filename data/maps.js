@@ -61218,7 +61218,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_exit_2_sealed",
         "c": 9,
         "r": 80,
-        "layer": "object"
+        "layer": "object",
+        "sortDepth": 3
       },
       {
         "id": "tile_mr4cyy36",
@@ -69837,9 +69838,6 @@ const BATTLE_MAPS = [
       "15,83",
       "14,83",
       "13,83",
-      "12,83",
-      "11,83",
-      "10,83",
       "9,83",
       "8,83",
       "7,83",
@@ -74596,7 +74594,13 @@ const BATTLE_MAPS = [
       "33,3",
       "34,3",
       "38,4",
-      "37,4"
+      "37,4",
+      "9,84",
+      "13,84",
+      "11,82",
+      "10,83",
+      "11,83",
+      "12,83"
     ],
     "breakable": [],
     "coreSpots": [
@@ -75490,6 +75494,21 @@ const BATTLE_MAPS = [
         "c": 71,
         "r": 5,
         "to": "map_mvxz356e"
+      },
+      {
+        "c": 10,
+        "r": 83,
+        "to": "map_mw2dn6re"
+      },
+      {
+        "c": 11,
+        "r": 83,
+        "to": "map_mw2dn6re"
+      },
+      {
+        "c": 12,
+        "r": 83,
+        "to": "map_mw2dn6re"
       }
     ],
     "hiddenPickups": [
@@ -75591,7 +75610,9 @@ const BATTLE_MAPS = [
       "floor": {},
       "ground": {},
       "ground2": {},
-      "ground3": {},
+      "ground3": {
+        "46,94": "tile_obstacle_ore_small"
+      },
       "object": {
         "33,72": "tile_new_decor_fire_extinguisher",
         "47,72": "tile_new_decor_fire_extinguisher"
@@ -77354,7 +77375,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_glass_railing",
         "c": 61,
         "r": 94,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -77365,18 +77387,6 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mrt_floor_tile_1f",
         "c": 59,
-        "r": 93,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 62,
-        "r": 90,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 62,
         "r": 93,
         "layer": "floor"
       },
@@ -77390,7 +77400,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_large",
         "c": 64,
         "r": 82,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mvyw7lrk",
@@ -77527,12 +77538,6 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mrt_floor_tile_1f",
         "c": 59,
-        "r": 87,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 62,
         "r": 87,
         "layer": "floor"
       },
@@ -77737,7 +77742,7 @@ const BATTLE_MAPS = [
         "c": 31,
         "r": 88,
         "layer": "object",
-        "oy": 33.333333
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mrt_glass_railing",
@@ -78061,12 +78066,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_floor_tile_1f",
-        "c": 63,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
         "c": 60,
         "r": 79,
         "layer": "floor"
@@ -78153,12 +78152,6 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_floor_tile_1f",
         "c": 18,
         "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 63,
-        "r": 76,
         "layer": "floor"
       },
       {
@@ -78396,64 +78389,46 @@ const BATTLE_MAPS = [
         "layer": "floor"
       },
       {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 26,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 23,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 49,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 49,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 46,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 46,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 43,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 43,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -78522,13 +78497,15 @@ const BATTLE_MAPS = [
         "layer": "object6",
         "ox": 30,
         "oy": 30,
-        "fx": false
+        "fx": false,
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 61,
         "r": 78,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_highwall03",
@@ -78594,74 +78571,85 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 74,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 62,
         "r": 78,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 63,
         "r": 78,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 64,
         "r": 78,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 61,
         "r": 70,
         "layer": "object6",
-        "ox": 30.666667
+        "ox": 30.666667,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 62,
         "r": 70,
         "layer": "object6",
-        "ox": 30.666667
+        "ox": 30.666667,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 63,
         "r": 70,
         "layer": "object6",
-        "ox": 30.666667
+        "ox": 30.666667,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 64,
         "r": 70,
         "layer": "object6",
-        "ox": 30.666667
+        "ox": 30.666667,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 65,
         "r": 70,
         "layer": "object6",
-        "ox": 30.666667
+        "ox": 30.666667,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 66,
         "r": 70,
         "layer": "object6",
-        "ox": 30.666667
+        "ox": 30.666667,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 67,
         "r": 70,
         "layer": "object6",
-        "ox": 30.666667
+        "ox": 30.666667,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
@@ -78669,76 +78657,87 @@ const BATTLE_MAPS = [
         "r": 70,
         "layer": "object6",
         "ox": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 68,
         "r": 70,
         "layer": "object6",
-        "ox": 30.66666699999996
+        "ox": 30.66666699999996,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 61,
         "r": 77,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 64,
         "r": 74,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 64,
         "r": 77,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 67,
         "r": 74,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 67,
         "r": 77,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 70,
         "r": 74,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 70,
         "r": 77,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 73,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 65,
         "r": 78,
         "layer": "object6",
-        "ox": -2
+        "ox": -2,
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_a02",
@@ -78753,346 +78752,390 @@ const BATTLE_MAPS = [
         "r": 70,
         "layer": "object6",
         "scale": 145,
-        "oy": 0.666667
+        "oy": 0.666667,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 74,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 74,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 71,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 71,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 68,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 68,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 65,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 65,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 62,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 62,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 77,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 77,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 80,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 80,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 70,
         "r": 80,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 67,
         "r": 80,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 83,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 83,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 70,
         "r": 83,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 67,
         "r": 83,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 64,
         "r": 83,
         "layer": "ground4",
-        "ox": 30
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 64,
-        "r": 80,
-        "layer": "floor",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 64,
         "r": 86,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 67,
         "r": 86,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 70,
         "r": 86,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 86,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 86,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 76,
         "r": 89,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 73,
         "r": 89,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 70,
         "r": 89,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 67,
         "r": 89,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_escalator_side",
         "c": 55,
         "r": 88,
         "layer": "object9",
-        "ox": 23.333333
+        "ox": 23.333333,
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 62,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 63,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 64,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 65,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 66,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 67,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 69,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 68,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 70,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 71,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 73,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 72,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 74,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 75,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 76,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 77,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 78,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 79,
         "r": 92,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 64,
         "r": 89,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
@@ -79101,43 +79144,50 @@ const BATTLE_MAPS = [
         "layer": "ground4",
         "ox": 30,
         "fx": false,
-        "rot": 2
+        "rot": 2,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 74,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 75,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 76,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 77,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 78,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 79,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
@@ -79151,7 +79201,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_pillar",
         "c": 61,
         "r": 92,
-        "layer": "object3"
+        "layer": "object10",
+        "level": 2
       },
       {
         "id": "tile_mrt_glass_railing",
@@ -79165,28 +79216,32 @@ const BATTLE_MAPS = [
         "r": 88,
         "layer": "ground4",
         "ox": 18,
-        "rot": 3
+        "rot": 3,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 65,
         "r": 81,
         "layer": "object10",
-        "ox": -2
+        "ox": -2,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 65,
         "r": 80,
         "layer": "object10",
-        "ox": -2
+        "ox": -2,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 65,
         "r": 79,
         "layer": "object10",
-        "ox": -2
+        "ox": -2,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_strip",
@@ -79195,7 +79250,8 @@ const BATTLE_MAPS = [
         "layer": "ground4",
         "rot": 1,
         "ox": 29.333333,
-        "oy": -3.333333
+        "oy": -3.333333,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_strip",
@@ -79204,7 +79260,8 @@ const BATTLE_MAPS = [
         "layer": "ground4",
         "ox": 29.333333,
         "rot": 1,
-        "oy": 34
+        "oy": 34,
+        "level": 2
       },
       {
         "id": "tile_mrt_glass_railing",
@@ -79224,31 +79281,36 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_ticket_gate",
         "c": 69,
         "r": 81,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_ticket_gate",
         "c": 72,
         "r": 81,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 66,
         "r": 81,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 75,
         "r": 81,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 78,
         "r": 79,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_escalator_side",
@@ -79256,25 +79318,29 @@ const BATTLE_MAPS = [
         "r": 74,
         "layer": "object9",
         "fx": true,
-        "ox": -6.666667
+        "ox": -6.666667,
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 17,
         "r": 79,
-        "layer": "object9"
+        "layer": "object9",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_highwall03",
         "c": 20,
         "r": 67,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_highwall03",
         "c": 21,
         "r": 67,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_highwall03",
@@ -79292,19 +79358,22 @@ const BATTLE_MAPS = [
         "id": "tile_mwayj4gp",
         "c": 14,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 15,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 16,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
@@ -79313,7 +79382,8 @@ const BATTLE_MAPS = [
         "layer": "ground4",
         "fx": false,
         "oy": 40,
-        "ox": -2
+        "ox": -2,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_strip",
@@ -79323,7 +79393,8 @@ const BATTLE_MAPS = [
         "rot": 1,
         "fx": true,
         "oy": 40,
-        "ox": -2
+        "ox": -2,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_strip",
@@ -79333,313 +79404,344 @@ const BATTLE_MAPS = [
         "rot": 1,
         "fx": true,
         "oy": 40,
-        "ox": -2
+        "ox": -2,
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_a02",
         "c": 18,
         "r": 66,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 13,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 12,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 10,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 11,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 16,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 14,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 15,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 13,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 12,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 11,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 10,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 9,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 8,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 7,
         "r": 79,
-        "layer": "object6"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 9,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 12,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 15,
-        "r": 71,
-        "layer": "floor"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 50,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 52,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 51,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 53,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 54,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 55,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 56,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 57,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 58,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 59,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 60,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 61,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 62,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 63,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 64,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 65,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 66,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 67,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 68,
         "r": 50,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 61,
         "r": 44,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 48,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 50,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 51,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 49,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 52,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 54,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 56,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 57,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 53,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 55,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 58,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 59,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 60,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -79663,91 +79765,106 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_wall",
         "c": 30,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 31,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 32,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 33,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 30,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 20,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 18,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 19,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 16,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 15,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 14,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 17,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 13,
         "r": 50,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 22,
         "r": 44,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 47,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -79787,98 +79904,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_floor_tile_1f",
-        "c": 50,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 50,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 53,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 53,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 56,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 59,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 59,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 56,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
         "c": 32,
         "r": 49,
         "layer": "floor"
       },
       {
         "id": "tile_mrt_floor_tile_1f",
-        "c": 29,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 29,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
         "c": 32,
         "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 43,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 43,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 40,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 40,
         "layer": "floor"
       },
       {
@@ -79952,19 +79985,22 @@ const BATTLE_MAPS = [
         "c": 38,
         "r": 52,
         "layer": "object6",
-        "oy": -10
+        "oy": -10,
+        "level": "span"
       },
       {
         "id": "tile_mrt_pillar_a02",
         "c": 43,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_pillar_a02",
         "c": 36,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -80018,7 +80054,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_a02",
         "c": 31,
         "r": 50,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_pillar_a02",
@@ -80066,109 +80103,127 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_wall",
         "c": 33,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 34,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 35,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 45,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 47,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 46,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 34,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 36,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 37,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 35,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 38,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 42,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 43,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 40,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 39,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 41,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 44,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 45,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -80210,7 +80265,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_a02",
         "c": 48,
         "r": 50,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mvyw7lrk",
@@ -80324,7 +80380,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_wall",
         "c": 46,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -80806,97 +80863,113 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_wall",
         "c": 21,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 22,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 23,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 24,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 25,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 26,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 27,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 28,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 29,
         "r": 51,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 23,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 24,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 25,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 26,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 27,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 28,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 29,
         "r": 45,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_bg_backroom_wall02",
@@ -81379,169 +81452,197 @@ const BATTLE_MAPS = [
         "id": "tile_mwayj4gp",
         "c": 14,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 15,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 16,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 17,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 18,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 19,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 20,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 21,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 22,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 13,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 9,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 5,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 5,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 6,
         "r": 79,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 17,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 14,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 15,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 16,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 18,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 19,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 20,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 21,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_a02",
         "c": 22,
         "r": 57,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_a02",
         "c": 22,
         "r": 66,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mvyw7lrk",
         "c": 22,
         "r": 64,
-        "layer": "object10"
+        "layer": "object10",
+        "level": 2
       },
       {
         "id": "tile_mvyw7lrk",
         "c": 22,
         "r": 62,
-        "layer": "object10"
+        "layer": "object10",
+        "level": 2
       },
       {
         "id": "tile_mvyw7lrk",
         "c": 22,
         "r": 60,
-        "layer": "object10"
+        "layer": "object10",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 5,
         "r": 58,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_eoc_door_exit_fade",
@@ -81576,54 +81677,6 @@ const BATTLE_MAPS = [
         "scale": 335
       },
       {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 26,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 23,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 43,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 40,
-        "layer": "floor"
-      },
-      {
         "id": "tile_eoc_door_exit_fade",
         "c": 46,
         "r": 59,
@@ -81647,7 +81700,8 @@ const BATTLE_MAPS = [
         "r": 70,
         "layer": "object6",
         "ox": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
@@ -81655,103 +81709,118 @@ const BATTLE_MAPS = [
         "r": 70,
         "layer": "object6",
         "ox": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 67,
         "layer": "object10",
-        "oy": 10
+        "oy": 10,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 66,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 65,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 64,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 63,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 62,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 61,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 60,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 59,
         "layer": "object10",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 73,
         "r": 58,
         "layer": "object10",
-        "oy": 37.333333
+        "oy": 37.333333,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 66,
         "r": 86,
-        "layer": "object7"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 74,
         "r": 71,
         "layer": "object9",
-        "ox": 10
+        "ox": 10,
+        "level": 2
       },
       {
         "id": "tile_field_ammo_crate",
         "c": 66,
         "r": 79,
         "layer": "object9",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_field_ammo_crate",
         "c": 74,
         "r": 63,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_interactive_power_switch_off",
@@ -81827,7 +81896,8 @@ const BATTLE_MAPS = [
         "c": 74,
         "r": 59,
         "layer": "object9",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_street_capsule_toy_machines",
@@ -81835,20 +81905,23 @@ const BATTLE_MAPS = [
         "r": 59,
         "layer": "object9",
         "ox": 30,
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 77,
         "r": 65,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_street_utility_box_painted",
         "c": 71,
         "r": 72,
         "layer": "object9",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_street_ubike",
@@ -81871,7 +81944,8 @@ const BATTLE_MAPS = [
         "c": 14,
         "r": 38,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_cvs_sign_home_mart",
@@ -81879,7 +81953,8 @@ const BATTLE_MAPS = [
         "r": 37,
         "layer": "object9",
         "oy": 10,
-        "fx": false
+        "fx": false,
+        "level": 2
       },
       {
         "id": "tile_cvs_checkout_counter_backroom",
@@ -81887,7 +81962,8 @@ const BATTLE_MAPS = [
         "r": 40,
         "layer": "object9",
         "ox": 20,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_cvs_famiport",
@@ -81895,7 +81971,8 @@ const BATTLE_MAPS = [
         "r": 37,
         "layer": "object9",
         "fx": true,
-        "oy": 30
+        "oy": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_poster_moon_lake",
@@ -81911,420 +81988,480 @@ const BATTLE_MAPS = [
         "c": 62,
         "r": 71,
         "layer": "object6",
-        "fx": false
+        "fx": false,
+        "level": "span"
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 59,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 59,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 12,
         "r": 59,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 11,
         "r": 56,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 56,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 56,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 11,
         "r": 53,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 53,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 53,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 50,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 50,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 47,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 47,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 44,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 44,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 13,
         "r": 58,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_ticket_gate",
         "c": 8,
         "r": 60,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_low_wall_blue",
         "c": 12,
         "r": 60,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_low_wall_blue",
         "c": 11,
         "r": 60,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_low_wall_blue",
         "c": 7,
         "r": 60,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_low_wall_blue",
         "c": 6,
         "r": 60,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 13,
         "r": 44,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 13,
         "r": 43,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 11,
         "r": 44,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 11,
         "r": 47,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 11,
         "r": 50,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 5,
         "r": 40,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 11,
         "r": 41,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 12,
         "r": 41,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 57,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 56,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 55,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 54,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 53,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 52,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 49,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 50,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 51,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 44,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 45,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 46,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 47,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 48,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 42,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 5,
         "r": 43,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 13,
         "r": 52,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 13,
         "r": 53,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 13,
         "r": 54,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 13,
         "r": 55,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 13,
         "r": 56,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_containment_wall_top_straight",
         "c": 13,
         "r": 57,
         "layer": "object10",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 18,
         "r": 60,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 14,
         "r": 60,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 40,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 40,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 37,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 37,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 34,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 34,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -82420,251 +82557,292 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_floor_tile",
         "c": 59,
         "r": 49,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 56,
         "r": 49,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 59,
         "r": 46,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 56,
         "r": 46,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 53,
         "r": 46,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 53,
         "r": 49,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 50,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 50,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 47,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 47,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 44,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 44,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 41,
         "r": 47,
         "layer": "ground4",
-        "oy": 0.666667
+        "oy": 0.666667,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 41,
         "r": 48,
         "layer": "ground4",
-        "oy": 30
+        "oy": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 38,
         "r": 47,
         "layer": "ground4",
-        "oy": 0.666667
+        "oy": 0.666667,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 38,
         "r": 48,
         "layer": "ground4",
-        "oy": 30
+        "oy": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 35,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 35,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 32,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 32,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 29,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 29,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 26,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 26,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 23,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 23,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 20,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 20,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 17,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 14,
         "r": 47,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 14,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 17,
         "r": 50,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 17,
         "r": 44,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 20,
         "r": 44,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 17,
         "r": 41,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 20,
         "r": 41,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 17,
         "r": 38,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 20,
         "r": 38,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 14,
         "r": 44,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 14,
         "r": 41,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 14,
         "r": 38,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_a02",
@@ -82688,510 +82866,594 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_floor_tile",
         "c": 59,
         "r": 37,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 59,
         "r": 34,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 68,
         "r": 37,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 68,
         "r": 34,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 68,
         "r": 31,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 31,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 31,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 59,
         "r": 31,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 59,
         "r": 28,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 28,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 28,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 68,
         "r": 28,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 68,
         "r": 25,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 65,
         "r": 25,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 62,
         "r": 25,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 59,
         "r": 25,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 58,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 71,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 61,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 68,
         "r": 36,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 58,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 71,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 59,
         "r": 37,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 60,
         "r": 37,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 69,
         "r": 37,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 70,
         "r": 37,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 59,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 60,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 62,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 61,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 66,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 67,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 68,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 69,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 70,
         "r": 21,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mwbro91n",
         "c": 59,
         "r": 24,
         "layer": "object9",
-        "oy": -20
+        "oy": -20,
+        "level": 2
       },
       {
         "id": "tile_mwbro91n",
         "c": 61,
         "r": 24,
         "layer": "object9",
-        "oy": -20
+        "oy": -20,
+        "level": 2
       },
       {
         "id": "tile_mwbro91n",
         "c": 69,
         "r": 24,
         "layer": "object9",
-        "oy": -20
+        "oy": -20,
+        "level": 2
       },
       {
         "id": "tile_mwbro91n",
         "c": 67,
         "r": 24,
         "layer": "object9",
-        "oy": -20
+        "oy": -20,
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 10,
         "r": 40,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 10,
         "r": 44,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 41,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 41,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 5,
         "r": 38,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 8,
         "r": 38,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 5,
         "r": 35,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 8,
         "r": 35,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 5,
         "r": 32,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 8,
         "r": 32,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_ticket_gate",
         "c": 6,
         "r": 42,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mr4cyu5g",
         "c": 9,
         "r": 41,
         "layer": "object6",
-        "oy": 3.333333
+        "oy": 3.333333,
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 10,
         "r": 29,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_pillar",
         "c": 5,
         "r": 29,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 6,
         "r": 30,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 8,
         "r": 30,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 7,
         "r": 30,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 9,
         "r": 30,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 12,
         "r": 74,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 74,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 74,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 14,
         "r": 77,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 11,
         "r": 77,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 8,
         "r": 77,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 5,
         "r": 77,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 71,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 68,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 68,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 12,
         "r": 68,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 15,
         "r": 68,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 18,
         "r": 68,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 21,
         "r": 68,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 65,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 65,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 12,
         "r": 65,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 15,
         "r": 65,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 18,
         "r": 65,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 21,
         "r": 65,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 6,
         "r": 62,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 9,
         "r": 62,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 12,
         "r": 62,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 15,
         "r": 62,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 18,
         "r": 62,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 21,
         "r": 62,
-        "layer": "ground4"
+        "layer": "ground4",
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 17,
         "r": 70,
-        "layer": "object6"
+        "layer": "object6",
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -83224,7 +83486,8 @@ const BATTLE_MAPS = [
         "c": 61,
         "r": 91,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_strip",
@@ -83232,20 +83495,23 @@ const BATTLE_MAPS = [
         "r": 91,
         "layer": "ground4",
         "ox": 23.333333,
-        "rot": 1
+        "rot": 1,
+        "level": 2
       },
       {
         "id": "tile_mwayj4gp",
         "c": 63,
         "r": 84,
-        "layer": "object6"
+        "layer": "object6",
+        "level": "span"
       },
       {
         "id": "tile_mrt_floor_tile",
         "c": 64,
         "r": 80,
         "layer": "ground4",
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -83272,32 +83538,37 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_ticket_gate",
         "c": 64,
         "r": 44,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_low_wall_blue",
         "c": 62,
         "r": 44,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_low_wall_blue",
         "c": 63,
         "r": 44,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_mrt_low_wall_blue",
         "c": 67,
         "r": 44,
-        "layer": "object9"
+        "layer": "object9",
+        "level": 2
       },
       {
         "id": "tile_street_claw_machine",
         "c": 11,
         "r": 41,
         "layer": "object9",
-        "oy": 30
+        "oy": 30,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -83306,14 +83577,16 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "oy": 20,
         "fx": true,
-        "ox": 30
+        "ox": 30,
+        "level": 2
       },
       {
         "id": "tile_street_claw_machine",
         "c": 6,
         "r": 30,
         "layer": "object9",
-        "oy": 20
+        "oy": 20,
+        "level": 2
       },
       {
         "id": "tile_street_utility_box_painted",
@@ -83543,28 +83816,24 @@ const BATTLE_MAPS = [
         "c": 68,
         "r": 77,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_dmg_floor_crack_stained",
         "c": 8,
         "r": 65,
         "layer": "ground4",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_dmg_floor_stain_seep",
         "c": 14,
         "r": 66,
         "layer": "ground4",
-        "fx": true
-      },
-      {
-        "id": "tile_mrt_room_wallx3_crack_breakable",
-        "c": 63,
-        "r": 21,
-        "layer": "object6",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -83801,20 +84070,9 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_ore_coal",
         "c": 41,
-        "r": 9,
-        "layer": "object12"
-      },
-      {
-        "id": "tile_obstacle_ore_coal",
-        "c": 37,
-        "r": 8,
-        "layer": "object12"
-      },
-      {
-        "id": "tile_obstacle_ore_tin",
-        "c": 45,
-        "r": 9,
-        "layer": "object12"
+        "r": 11,
+        "layer": "object12",
+        "ox": 20
       },
       {
         "id": "tile_obstacle_ore_limestone",
@@ -83860,7 +84118,7 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "fx": true,
         "scale": 80,
-        "ox": 30,
+        "ox": 10,
         "oy": 20
       },
       {
@@ -83870,7 +84128,7 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "oy": 10,
         "fx": true,
-        "scale": 140,
+        "scale": 135,
         "ox": 10
       },
       {
@@ -84015,7 +84273,7 @@ const BATTLE_MAPS = [
         "r": 30,
         "layer": "object3",
         "ox": 20,
-        "scale": 125,
+        "scale": 120,
         "oy": 30
       },
       {
@@ -84082,8 +84340,9 @@ const BATTLE_MAPS = [
         "r": 40,
         "layer": "object3",
         "oy": 10,
-        "scale": 135,
-        "ox": 20
+        "scale": 110,
+        "ox": 20,
+        "sortDepth": 3.5
       },
       {
         "id": "tile_mvmo77lx",
@@ -84322,7 +84581,8 @@ const BATTLE_MAPS = [
         "r": 31,
         "layer": "object9",
         "oy": 20,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -84330,7 +84590,8 @@ const BATTLE_MAPS = [
         "r": 31,
         "layer": "object9",
         "oy": 20,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -84339,7 +84600,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 30,
         "oy": 20,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_field_ammo_crate",
@@ -84348,7 +84610,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 30,
         "oy": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_field_ammo_crate",
@@ -84356,7 +84619,8 @@ const BATTLE_MAPS = [
         "r": 36,
         "layer": "object9",
         "ox": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_field_ammo_crate",
@@ -84364,7 +84628,8 @@ const BATTLE_MAPS = [
         "r": 53,
         "layer": "object9",
         "oy": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_field_ammo_crate",
@@ -84373,7 +84638,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 10,
         "oy": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_field_ammo_crate",
@@ -84381,7 +84647,8 @@ const BATTLE_MAPS = [
         "r": 113,
         "layer": "object9",
         "oy": 20,
-        "fx": true
+        "fx": true,
+        "level": "span"
       },
       {
         "id": "tile_field_ammo_crate",
@@ -84390,7 +84657,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 20,
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "level": "span"
       },
       {
         "id": "tile_field_ammo_crate",
@@ -84399,7 +84667,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 20,
         "oy": 20,
-        "fx": true
+        "fx": true,
+        "level": "span"
       },
       {
         "id": "tile_mrt_planter",
@@ -84423,7 +84692,8 @@ const BATTLE_MAPS = [
         "r": 87,
         "layer": "object9",
         "fx": true,
-        "ox": 12.666667
+        "ox": 12.666667,
+        "level": 2
       },
       {
         "id": "tile_mrt_recycling_bins",
@@ -84455,7 +84725,7 @@ const BATTLE_MAPS = [
         "c": 46,
         "r": 79,
         "layer": "object3",
-        "ox": 10,
+        "ox": 20,
         "fx": true
       },
       {
@@ -84463,15 +84733,16 @@ const BATTLE_MAPS = [
         "c": 35,
         "r": 79,
         "layer": "object3",
-        "ox": 30,
+        "ox": 20,
         "fx": true
       },
       {
         "id": "tile_mrt_waiting_seats",
-        "c": 34,
+        "c": 33,
         "r": 79,
         "layer": "object3",
-        "fx": true
+        "fx": true,
+        "ox": 20
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -84479,14 +84750,16 @@ const BATTLE_MAPS = [
         "r": 23,
         "layer": "object9",
         "fx": true,
-        "oy": 10
+        "oy": 10,
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_large",
         "c": 61,
         "r": 28,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -84494,35 +84767,40 @@ const BATTLE_MAPS = [
         "r": 33,
         "layer": "object9",
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_large",
         "c": 9,
         "r": 67,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_large",
         "c": 11,
         "r": 55,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_pillar_large",
         "c": 6,
         "r": 55,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_street_ubike",
         "c": 66,
         "r": 48,
         "layer": "object9",
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_planter",
@@ -84555,7 +84833,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 10,
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_planter",
@@ -84564,7 +84843,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 30,
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_planter",
@@ -84573,7 +84853,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 30,
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_planter",
@@ -84582,7 +84863,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 30,
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mwfznsib",
@@ -84632,7 +84914,8 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 30,
         "oy": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_recycling_bins",
@@ -84640,7 +84923,8 @@ const BATTLE_MAPS = [
         "r": 46,
         "layer": "object9",
         "oy": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_street_claw_machine",
@@ -84648,16 +84932,18 @@ const BATTLE_MAPS = [
         "r": 38,
         "layer": "object9",
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mvnn2p1x",
-        "c": 10,
+        "c": 65,
         "r": 72,
         "layer": "object9",
-        "ox": 10,
-        "oy": 30,
-        "fx": true
+        "ox": 30,
+        "oy": 20,
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_planter",
@@ -84666,23 +84952,747 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 10,
         "oy": 30,
-        "fx": true
+        "fx": true,
+        "level": 2
       },
       {
         "id": "tile_mrt_planter",
         "c": 57,
         "r": 46,
-        "layer": "object",
+        "layer": "object9",
         "oy": 30,
-        "ox": 10
+        "ox": 10,
+        "level": 2
       },
       {
         "id": "tile_mrt_waiting_seats",
         "c": 55,
         "r": 46,
-        "layer": "object",
+        "layer": "object9",
         "ox": 10,
+        "oy": 20,
+        "level": 2
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 63,
+        "r": 21,
+        "layer": "object6",
+        "level": 2
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 64,
+        "r": 21,
+        "layer": "object6",
+        "level": 2
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 65,
+        "r": 21,
+        "layer": "object6",
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 51,
+        "r": 74,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 36,
+        "r": 68,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 14,
+        "r": 73,
+        "layer": "object9",
+        "ox": 30,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 13,
+        "r": 45,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 62,
+        "r": 107,
+        "layer": "object3",
+        "ox": 20,
         "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 20,
+        "r": 107,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 20,
+        "r": 80,
+        "layer": "ground3",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 40,
+        "r": 76,
+        "layer": "ground3",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 34,
+        "r": 38,
+        "layer": "ground3",
+        "ox": 10,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 34,
+        "r": 28,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 63,
+        "r": 73,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 63,
+        "r": 23,
+        "layer": "object9",
+        "ox": 20,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 66,
+        "r": 28,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 61,
+        "r": 34,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 66,
+        "r": 46,
+        "layer": "object9",
+        "ox": 20,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 45,
+        "r": 47,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 10,
+        "r": 44,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 5,
+        "r": 51,
+        "layer": "object9",
+        "ox": 20,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 17,
+        "r": 61,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 6,
+        "r": 69,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_limestone",
+        "c": 6,
+        "r": 44,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 75,
+        "r": 72,
+        "layer": "object9",
+        "ox": 10,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 7,
+        "r": 61,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20,
+        "fx": true,
+        "level": 2
+      },
+      {
+        "id": "tile_obstacle_ore_manganese",
+        "c": 18,
+        "r": 44,
+        "layer": "object9",
+        "level": 2
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 21,
+        "r": 61,
+        "layer": "object9",
+        "level": 2
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 25,
+        "r": 73,
+        "layer": "object3",
+        "oy": 30
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 10,
+        "r": 72,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "level": 2
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 40,
+        "r": 68,
+        "layer": "object2",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 63,
+        "r": 28,
+        "layer": "ground4",
+        "ox": 10,
+        "oy": 20,
+        "level": 2
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 61,
+        "r": 38,
+        "layer": "ground4",
+        "ox": 20,
+        "oy": 10,
+        "level": 2
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 14,
+        "r": 45,
+        "layer": "ground4",
+        "ox": 20,
+        "oy": 30,
+        "level": 2
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 5,
+        "r": 34,
+        "layer": "ground4",
+        "ox": 30,
+        "oy": 30,
+        "level": 2
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 73,
+        "r": 66,
+        "layer": "ground4",
+        "ox": 30,
+        "oy": 20,
+        "level": 2
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 6,
+        "r": 72,
+        "layer": "ground4",
+        "oy": 20,
+        "level": 2
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 27,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 19,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 21,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 29,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 31,
+        "r": 103,
+        "layer": "ground3",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 48,
+        "r": 103,
+        "layer": "ground3",
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 60,
+        "r": 103,
+        "layer": "ground3",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 19,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 22,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 25,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 28,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 31,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 34,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 37,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 40,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 43,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 46,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 49,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 52,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 55,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 58,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 33,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 36,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 39,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 45,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 42,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 59,
+        "r": 26,
+        "layer": "ground4",
+        "level": 2
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 62,
+        "r": 26,
+        "layer": "ground4",
+        "level": 2
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 65,
+        "r": 26,
+        "layer": "ground4",
+        "level": 2
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 68,
+        "r": 26,
+        "layer": "ground4",
+        "level": 2
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 23,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 26,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 29,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 32,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 35,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 38,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 41,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 44,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 47,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 50,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 53,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 56,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 58,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 55,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 52,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 49,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 46,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 43,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 40,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 37,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 34,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 31,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 28,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 25,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 22,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 19,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 48,
+        "r": 88,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 31,
+        "r": 88,
+        "layer": "ground3",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_poster_moonlight",
+        "c": 11,
+        "r": 71,
+        "layer": "object6",
+        "level": 2
+      },
+      {
+        "id": "tile_street_area_map_board",
+        "c": 53,
+        "r": 72,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_street_area_map_board",
+        "c": 26,
+        "r": 44,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 18,
+        "sortDepth": 3.25,
+        "level": 2
+      },
+      {
+        "id": "tile_mrt_map_kiosk",
+        "c": 27,
+        "r": 101,
+        "layer": "object",
+        "ox": 30
+      },
+      {
+        "id": "tile_mrt_info_board_notice",
+        "c": 41,
+        "r": 45,
+        "layer": "object9",
+        "oy": 11.333333,
+        "sortDepth": 2.25,
+        "level": 2
       }
     ],
     "solid": [
@@ -84984,16 +85994,8 @@ const BATTLE_MAPS = [
       "59,96",
       "64,94",
       "64,93",
-      "64,92",
-      "64,91",
-      "64,90",
-      "64,89",
       "64,88",
       "65,88",
-      "65,89",
-      "65,90",
-      "65,91",
-      "65,92",
       "65,93",
       "65,94",
       "28,98",
@@ -87683,7 +88685,6 @@ const BATTLE_MAPS = [
       "17,84",
       "15,81",
       "16,81",
-      "17,81",
       "14,81",
       "13,81",
       "12,81",
@@ -91949,18 +92950,740 @@ const BATTLE_MAPS = [
       "38,80",
       "39,80",
       "42,80",
-      "43,80"
+      "43,80",
+      "18,80",
+      "19,80",
+      "28,103",
+      "29,103",
+      "61,79",
+      "61,78",
+      "17,79",
+      "17,80",
+      "18,74",
+      "18,77",
+      "18,78",
+      "18,79",
+      "17,81",
+      "19,79",
+      "19,78",
+      "60,78",
+      "60,79",
+      "59,79",
+      "59,78",
+      "59,80",
+      "60,80"
     ],
     "breakable": [],
     "coreSpots": [
       "46,20"
     ],
-    "spawnZone": [],
+    "spawnZone": [
+      "37,78",
+      "36,78",
+      "33,78",
+      "31,78",
+      "30,78",
+      "29,78",
+      "28,78",
+      "27,78",
+      "32,78",
+      "34,78",
+      "35,78",
+      "27,79",
+      "27,80",
+      "27,81",
+      "28,81",
+      "29,81",
+      "30,82",
+      "31,82",
+      "32,82",
+      "33,82",
+      "34,82",
+      "35,82",
+      "36,82",
+      "37,82",
+      "38,82",
+      "39,82",
+      "40,82",
+      "41,82",
+      "42,82",
+      "43,82",
+      "44,82",
+      "46,82",
+      "47,82",
+      "48,82",
+      "49,82",
+      "50,82",
+      "51,82",
+      "51,81",
+      "52,81",
+      "52,80",
+      "52,79",
+      "51,79",
+      "51,78",
+      "50,78",
+      "48,77",
+      "47,77",
+      "46,77",
+      "45,77",
+      "44,77",
+      "43,77",
+      "42,77",
+      "42,78",
+      "43,78",
+      "44,78",
+      "45,78",
+      "46,78",
+      "47,78",
+      "48,78",
+      "49,78",
+      "49,79",
+      "35,71",
+      "36,71",
+      "37,71",
+      "39,71",
+      "40,71",
+      "41,71",
+      "42,71",
+      "43,71",
+      "44,71",
+      "45,71",
+      "38,71",
+      "39,64",
+      "39,65",
+      "38,65",
+      "38,66",
+      "39,66",
+      "39,67",
+      "40,67",
+      "41,67",
+      "42,67",
+      "43,67",
+      "44,67",
+      "45,67",
+      "45,68",
+      "45,69",
+      "45,70",
+      "34,55",
+      "34,56",
+      "34,57",
+      "34,58",
+      "34,59",
+      "34,60",
+      "34,61",
+      "34,62",
+      "34,63",
+      "34,64",
+      "34,65",
+      "34,66",
+      "34,67",
+      "34,68",
+      "34,69",
+      "34,70",
+      "34,71",
+      "46,55",
+      "46,56",
+      "46,59",
+      "46,61",
+      "46,63",
+      "46,64",
+      "46,65",
+      "46,66",
+      "46,67",
+      "46,68",
+      "46,69",
+      "46,70",
+      "37,27",
+      "38,27",
+      "39,26",
+      "39,25",
+      "40,25",
+      "41,25",
+      "42,25",
+      "42,26",
+      "43,26",
+      "43,27",
+      "43,28",
+      "42,28",
+      "41,29",
+      "40,30",
+      "39,30",
+      "38,30",
+      "38,31",
+      "37,31",
+      "37,32",
+      "36,32",
+      "36,33",
+      "35,33",
+      "34,34",
+      "35,35",
+      "36,35",
+      "39,35",
+      "41,35",
+      "42,35",
+      "42,36",
+      "42,37",
+      "42,38",
+      "42,39",
+      "41,39",
+      "40,40",
+      "39,40",
+      "38,40",
+      "38,41",
+      "39,42",
+      "40,43",
+      "41,43",
+      "42,44",
+      "43,44",
+      "44,44",
+      "45,44",
+      "46,43",
+      "46,42",
+      "46,37",
+      "46,38",
+      "46,39",
+      "39,21",
+      "39,22",
+      "39,23",
+      "40,23",
+      "40,24",
+      "39,24",
+      "38,24",
+      "38,23",
+      "34,24",
+      "33,25",
+      "33,24",
+      "34,21",
+      "46,25",
+      "42,11",
+      "41,11",
+      "40,11",
+      "39,11",
+      "37,11",
+      "36,11",
+      "35,11",
+      "34,11",
+      "35,12",
+      "36,12",
+      "37,12",
+      "39,12",
+      "40,12",
+      "42,12",
+      "43,12",
+      "44,12",
+      "45,12",
+      "45,11",
+      "44,11",
+      "37,14",
+      "38,14",
+      "41,13",
+      "43,13",
+      "44,13",
+      "45,13",
+      "39,13",
+      "38,13",
+      "37,13",
+      "36,13",
+      "35,13",
+      "34,14",
+      "35,14",
+      "36,14",
+      "39,14",
+      "42,14",
+      "44,14",
+      "45,14",
+      "61,26",
+      "62,26",
+      "63,26",
+      "63,27",
+      "64,27",
+      "64,28",
+      "64,29",
+      "64,30",
+      "64,31",
+      "65,31",
+      "66,31",
+      "67,31",
+      "67,32",
+      "67,33",
+      "67,34",
+      "67,35",
+      "67,36",
+      "66,36",
+      "66,37",
+      "66,38",
+      "66,39",
+      "67,39",
+      "67,41",
+      "67,42",
+      "66,42",
+      "65,43",
+      "65,47",
+      "64,48",
+      "64,49",
+      "63,49",
+      "62,49",
+      "61,49",
+      "60,49",
+      "59,49",
+      "58,49",
+      "57,49",
+      "55,49",
+      "54,49",
+      "53,49",
+      "52,49",
+      "50,49",
+      "49,49",
+      "48,49",
+      "47,49",
+      "46,49",
+      "45,49",
+      "44,49",
+      "43,49",
+      "42,50",
+      "41,50",
+      "40,49",
+      "39,49",
+      "38,49",
+      "37,49",
+      "36,49",
+      "35,49",
+      "34,49",
+      "33,49",
+      "32,49",
+      "31,49",
+      "30,49",
+      "28,49",
+      "27,49",
+      "25,49",
+      "24,49",
+      "23,49",
+      "22,49",
+      "21,49",
+      "20,49",
+      "19,49",
+      "18,49",
+      "17,49",
+      "17,48",
+      "17,47",
+      "17,46",
+      "17,45",
+      "17,44",
+      "17,43",
+      "18,42",
+      "18,41",
+      "8,50",
+      "9,50",
+      "9,52",
+      "9,53",
+      "9,54",
+      "9,55",
+      "8,56",
+      "8,57",
+      "8,58",
+      "9,59",
+      "9,60",
+      "9,61",
+      "9,62",
+      "9,63",
+      "9,64",
+      "9,65",
+      "10,65",
+      "12,65",
+      "14,65",
+      "16,65",
+      "17,65",
+      "18,65",
+      "20,65",
+      "20,64",
+      "19,64",
+      "17,63",
+      "15,63",
+      "14,63",
+      "13,65",
+      "12,66",
+      "12,67",
+      "13,67",
+      "14,68",
+      "15,68",
+      "16,68",
+      "7,65",
+      "8,66",
+      "7,68",
+      "7,70",
+      "7,72",
+      "7,73",
+      "7,74",
+      "7,75",
+      "7,76",
+      "8,76",
+      "9,76",
+      "10,76",
+      "12,77",
+      "13,77",
+      "14,77",
+      "15,77",
+      "15,76",
+      "14,76",
+      "13,76",
+      "12,76",
+      "11,76",
+      "23,81",
+      "24,81",
+      "25,81",
+      "28,80",
+      "29,80",
+      "29,79",
+      "30,77",
+      "31,77",
+      "36,79",
+      "37,79",
+      "75,77",
+      "74,77",
+      "73,78",
+      "72,78",
+      "71,77",
+      "70,78",
+      "69,79",
+      "68,82",
+      "68,83",
+      "68,85",
+      "68,87",
+      "69,88",
+      "70,89",
+      "71,89",
+      "72,90",
+      "74,90",
+      "75,88",
+      "75,86",
+      "75,84",
+      "75,82",
+      "75,81",
+      "75,80",
+      "75,79",
+      "74,78",
+      "71,82",
+      "71,84",
+      "71,85",
+      "72,87",
+      "72,88",
+      "71,88",
+      "70,88",
+      "69,85",
+      "67,80",
+      "67,79",
+      "66,78",
+      "66,77",
+      "66,76",
+      "67,75",
+      "69,74",
+      "70,74",
+      "72,75",
+      "73,75",
+      "75,75",
+      "76,75",
+      "77,75",
+      "77,77",
+      "76,80",
+      "76,81",
+      "75,83",
+      "74,84",
+      "73,85",
+      "72,86",
+      "71,87",
+      "70,86",
+      "69,83",
+      "69,81",
+      "69,78",
+      "69,77",
+      "70,76",
+      "71,76",
+      "73,77",
+      "74,79",
+      "74,81",
+      "73,83",
+      "73,84",
+      "72,85",
+      "73,86",
+      "73,87",
+      "73,88",
+      "74,88",
+      "76,68",
+      "76,70",
+      "77,71",
+      "76,62",
+      "76,63",
+      "76,65",
+      "76,66",
+      "75,66",
+      "75,65",
+      "74,64",
+      "75,63",
+      "77,63",
+      "78,64",
+      "78,65",
+      "78,66",
+      "25,91",
+      "26,91",
+      "34,90",
+      "38,91",
+      "43,91",
+      "47,91",
+      "49,91",
+      "52,91",
+      "53,92",
+      "52,93",
+      "48,93",
+      "42,92",
+      "37,91",
+      "36,91",
+      "35,91",
+      "34,91",
+      "33,92",
+      "32,93",
+      "31,93",
+      "34,94",
+      "39,94",
+      "42,93",
+      "44,93",
+      "46,93",
+      "48,94",
+      "50,94",
+      "52,94",
+      "52,92",
+      "50,91",
+      "48,91",
+      "46,92",
+      "44,92",
+      "43,93",
+      "41,93",
+      "39,93",
+      "37,93",
+      "35,93",
+      "34,93",
+      "30,93",
+      "29,93",
+      "28,93",
+      "27,93",
+      "26,92",
+      "28,91",
+      "31,92",
+      "35,92",
+      "37,92",
+      "39,92",
+      "41,92",
+      "43,92",
+      "45,92",
+      "47,92",
+      "49,92",
+      "51,92",
+      "44,91",
+      "42,91",
+      "40,91",
+      "33,91",
+      "30,92",
+      "29,92",
+      "28,92",
+      "32,108",
+      "31,108",
+      "30,110",
+      "28,111",
+      "26,111",
+      "25,110",
+      "25,109",
+      "25,108",
+      "25,107",
+      "26,107",
+      "27,107",
+      "29,107",
+      "29,108",
+      "30,109",
+      "31,110",
+      "31,111",
+      "32,111",
+      "32,112",
+      "34,112",
+      "35,112",
+      "36,112",
+      "36,111",
+      "36,110",
+      "35,108",
+      "35,107",
+      "34,107",
+      "33,108",
+      "31,109",
+      "29,109",
+      "28,110",
+      "26,110",
+      "24,110",
+      "23,110",
+      "23,109",
+      "23,108",
+      "24,107",
+      "32,110",
+      "33,111",
+      "35,111",
+      "38,112",
+      "39,112",
+      "40,112",
+      "41,112",
+      "42,112",
+      "43,112",
+      "45,112",
+      "46,112",
+      "47,112",
+      "48,112",
+      "48,111",
+      "49,110",
+      "49,109",
+      "50,108",
+      "51,107",
+      "52,107",
+      "52,106",
+      "53,106",
+      "54,106",
+      "55,106",
+      "57,107",
+      "57,108",
+      "55,109",
+      "55,110",
+      "54,110",
+      "53,111",
+      "53,112",
+      "53,113",
+      "53,114",
+      "53,115",
+      "54,115",
+      "54,116",
+      "55,115",
+      "55,114",
+      "55,112",
+      "54,108",
+      "53,108",
+      "53,105",
+      "54,105",
+      "56,104",
+      "58,105",
+      "59,105",
+      "60,106",
+      "60,107",
+      "60,108",
+      "60,109",
+      "58,110",
+      "56,110",
+      "54,109",
+      "53,110",
+      "54,111",
+      "54,112",
+      "54,113",
+      "54,114",
+      "54,117",
+      "54,118",
+      "55,118",
+      "58,119",
+      "61,119",
+      "63,119",
+      "64,119",
+      "65,118",
+      "66,118",
+      "67,118",
+      "68,118",
+      "63,118",
+      "59,118",
+      "58,118",
+      "56,119",
+      "55,119",
+      "54,119",
+      "53,120",
+      "54,120",
+      "57,120",
+      "61,120",
+      "63,120",
+      "65,120",
+      "67,120",
+      "68,120",
+      "68,121",
+      "67,121",
+      "65,121",
+      "30,105",
+      "31,105",
+      "34,105",
+      "36,105",
+      "37,105",
+      "38,105",
+      "40,105",
+      "41,105",
+      "43,105",
+      "44,105",
+      "45,104",
+      "47,104",
+      "49,104",
+      "51,104",
+      "53,104",
+      "55,105",
+      "57,105"
+    ],
     "coreCount": 1,
     "monsterMix": [
       {
         "id": "slime",
+        "weight": 50
+      },
+      {
+        "id": "bird_head",
+        "weight": 50
+      },
+      {
+        "id": "pearl_kid",
+        "weight": 50
+      },
+      {
+        "id": "lifeform",
+        "weight": 50
+      },
+      {
+        "id": "hangi_bao",
+        "weight": 50
+      },
+      {
+        "id": "fish_head",
+        "weight": 50
+      },
+      {
+        "id": "loofah_lady",
+        "weight": 50
+      },
+      {
+        "id": "milkfish_kid",
+        "weight": 70
+      },
+      {
+        "id": "milkfish_kid_small",
+        "weight": 49
+      },
+      {
+        "id": "burrowing_mouse",
         "weight": 100
+      },
+      {
+        "id": "clownfish",
+        "weight": 50
+      },
+      {
+        "id": "clownfish_small",
+        "weight": 100
+      },
+      {
+        "id": "golden_banana_king",
+        "weight": 50
+      },
+      {
+        "id": "gourd_monkey",
+        "weight": 100
+      },
+      {
+        "id": "human_face_butterfly",
+        "weight": 70
       }
     ],
     "camp": [],
@@ -91974,7 +93697,33 @@ const BATTLE_MAPS = [
     "solidOffsets": {},
     "safe": false,
     "npcs": false,
-    "portals": [],
+    "portals": [
+      {
+        "c": 66,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 67,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 68,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 69,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 70,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      }
+    ],
     "hiddenPickups": [],
     "cols": 86,
     "rows": 124,
@@ -93393,7 +95142,8 @@ const BATTLE_MAPS = [
       "61,37",
       "68,37",
       "69,37",
-      "70,37"
+      "70,37",
+      "9,42"
     ],
     "ramps": [
       "41,52",
@@ -93756,8 +95506,1296 @@ const BATTLE_MAPS = [
       "6,62",
       "7,62",
       "11,62",
-      "12,62"
-    ]
+      "12,62",
+      "66,83",
+      "67,83",
+      "77,83",
+      "78,83",
+      "78,82",
+      "13,74",
+      "14,74",
+      "14,42",
+      "15,42",
+      "16,42",
+      "17,42",
+      "21,40",
+      "19,40",
+      "18,40",
+      "17,40",
+      "16,40",
+      "15,40",
+      "14,40",
+      "59,37",
+      "60,37",
+      "69,37",
+      "70,37",
+      "14,51",
+      "15,51",
+      "16,51",
+      "17,51",
+      "18,51",
+      "19,51",
+      "20,51",
+      "21,51",
+      "22,51",
+      "23,51",
+      "24,51",
+      "25,51",
+      "26,51",
+      "27,51",
+      "28,51",
+      "29,51",
+      "30,51",
+      "33,51",
+      "34,51",
+      "35,51",
+      "45,51",
+      "46,51",
+      "47,51",
+      "50,51",
+      "51,51",
+      "52,51",
+      "53,51",
+      "54,51",
+      "55,51",
+      "56,51",
+      "57,51",
+      "58,51",
+      "59,51",
+      "60,51",
+      "61,51",
+      "62,51",
+      "63,51",
+      "64,51",
+      "65,51",
+      "66,51",
+      "67,51",
+      "10,70",
+      "11,70",
+      "12,70",
+      "13,70",
+      "14,70",
+      "15,70",
+      "16,70",
+      "17,70"
+    ],
+    "only2": [
+      "23,48",
+      "24,48",
+      "25,48",
+      "26,48",
+      "28,48",
+      "29,48",
+      "50,48",
+      "51,48",
+      "52,48",
+      "53,48",
+      "54,48",
+      "55,48",
+      "55,49",
+      "55,50",
+      "54,51",
+      "53,51",
+      "52,51",
+      "51,51",
+      "50,51",
+      "27,51",
+      "26,51",
+      "25,51",
+      "24,51",
+      "23,51",
+      "23,50",
+      "23,49",
+      "24,49",
+      "25,49",
+      "26,49",
+      "28,49",
+      "29,49",
+      "30,49",
+      "50,49",
+      "51,49",
+      "51,50",
+      "53,50",
+      "54,50",
+      "54,49",
+      "53,49",
+      "52,49",
+      "55,51",
+      "55,52",
+      "54,52",
+      "53,52",
+      "52,52",
+      "51,52",
+      "50,52",
+      "52,50",
+      "50,50",
+      "30,50",
+      "29,50",
+      "30,48",
+      "27,48",
+      "22,50",
+      "22,51",
+      "22,52",
+      "30,52",
+      "26,52",
+      "24,52",
+      "23,52",
+      "25,52",
+      "27,52",
+      "28,50",
+      "27,49",
+      "26,50",
+      "25,50",
+      "24,50",
+      "27,50",
+      "29,51",
+      "30,51",
+      "28,52",
+      "29,52",
+      "28,51",
+      "56,52",
+      "57,52",
+      "58,52",
+      "59,52",
+      "60,52",
+      "61,52",
+      "62,52",
+      "63,52",
+      "64,52",
+      "65,52",
+      "66,52",
+      "67,52",
+      "67,51",
+      "66,51",
+      "65,51",
+      "64,51",
+      "63,51",
+      "62,51",
+      "61,51",
+      "60,51",
+      "59,51",
+      "58,51",
+      "57,51",
+      "56,51",
+      "56,50",
+      "56,49",
+      "56,48",
+      "57,48",
+      "58,48",
+      "62,48",
+      "62,49",
+      "61,49",
+      "60,49",
+      "59,49",
+      "58,49",
+      "57,49",
+      "57,50",
+      "58,50",
+      "59,50",
+      "60,50",
+      "61,50",
+      "62,50",
+      "63,50",
+      "64,50",
+      "65,50",
+      "66,50",
+      "67,50",
+      "67,49",
+      "67,48",
+      "66,48",
+      "66,47",
+      "66,46",
+      "66,45",
+      "66,44",
+      "66,43",
+      "66,42",
+      "66,41",
+      "65,41",
+      "64,42",
+      "63,42",
+      "63,43",
+      "62,43",
+      "62,44",
+      "62,45",
+      "62,46",
+      "62,47",
+      "63,49",
+      "64,49",
+      "65,49",
+      "66,49",
+      "65,48",
+      "65,47",
+      "64,47",
+      "64,46",
+      "64,45",
+      "64,44",
+      "64,43",
+      "65,42",
+      "65,43",
+      "65,46",
+      "64,48",
+      "63,48",
+      "63,47",
+      "63,46",
+      "63,45",
+      "63,44",
+      "65,44",
+      "65,45",
+      "63,40",
+      "62,37",
+      "62,38",
+      "62,39",
+      "62,40",
+      "62,41",
+      "62,42",
+      "63,41",
+      "63,38",
+      "63,37",
+      "63,36",
+      "64,38",
+      "64,39",
+      "64,40",
+      "64,41",
+      "65,40",
+      "65,39",
+      "65,38",
+      "63,39",
+      "21,41",
+      "21,42",
+      "21,43",
+      "21,44",
+      "21,45",
+      "21,46",
+      "21,47",
+      "21,48",
+      "22,48",
+      "22,49",
+      "21,52",
+      "21,51",
+      "21,50",
+      "21,49",
+      "20,51",
+      "20,52",
+      "20,50",
+      "19,50",
+      "19,48",
+      "19,47",
+      "20,47",
+      "20,46",
+      "20,45",
+      "20,44",
+      "20,43",
+      "20,42",
+      "20,41",
+      "20,48",
+      "20,49",
+      "19,49",
+      "19,46",
+      "19,45",
+      "19,44",
+      "19,43",
+      "19,42",
+      "19,41",
+      "59,48",
+      "60,48",
+      "61,48",
+      "18,41",
+      "18,42",
+      "18,43",
+      "18,44",
+      "18,45",
+      "18,46",
+      "18,47",
+      "18,48",
+      "18,49",
+      "18,50",
+      "18,51",
+      "19,52",
+      "19,51",
+      "31,52",
+      "67,42",
+      "67,43",
+      "67,44",
+      "67,45",
+      "67,46",
+      "67,47",
+      "67,41",
+      "67,40",
+      "67,39",
+      "67,38",
+      "67,37",
+      "67,36",
+      "66,36",
+      "66,37",
+      "66,38",
+      "66,39",
+      "66,40",
+      "64,36",
+      "65,36",
+      "65,37",
+      "64,37",
+      "62,36",
+      "60,36",
+      "59,36",
+      "59,35",
+      "60,35",
+      "61,36",
+      "70,36",
+      "69,36",
+      "68,36",
+      "70,35",
+      "69,35",
+      "68,35",
+      "66,35",
+      "65,35",
+      "64,35",
+      "63,35",
+      "62,35",
+      "61,35",
+      "67,35",
+      "70,34",
+      "69,34",
+      "67,34",
+      "66,34",
+      "65,34",
+      "64,34",
+      "63,34",
+      "62,34",
+      "61,34",
+      "60,34",
+      "59,34",
+      "59,33",
+      "59,32",
+      "59,31",
+      "59,30",
+      "59,29",
+      "59,28",
+      "59,27",
+      "60,27",
+      "60,26",
+      "61,26",
+      "62,26",
+      "62,27",
+      "63,28",
+      "63,29",
+      "63,30",
+      "63,31",
+      "63,32",
+      "62,32",
+      "62,33",
+      "61,33",
+      "60,33",
+      "60,32",
+      "60,29",
+      "60,28",
+      "61,27",
+      "61,28",
+      "61,29",
+      "61,30",
+      "61,31",
+      "61,32",
+      "60,31",
+      "60,30",
+      "62,28",
+      "62,29",
+      "62,30",
+      "62,31",
+      "63,33",
+      "64,33",
+      "65,33",
+      "66,33",
+      "67,33",
+      "68,33",
+      "69,33",
+      "70,33",
+      "68,34",
+      "68,32",
+      "68,31",
+      "68,30",
+      "68,29",
+      "68,28",
+      "68,27",
+      "67,27",
+      "66,27",
+      "65,28",
+      "64,28",
+      "64,29",
+      "64,30",
+      "64,31",
+      "64,32",
+      "65,32",
+      "66,32",
+      "67,32",
+      "67,31",
+      "67,30",
+      "67,29",
+      "66,28",
+      "65,29",
+      "65,31",
+      "66,31",
+      "66,30",
+      "65,30",
+      "66,29",
+      "67,28",
+      "69,31",
+      "69,32",
+      "70,32",
+      "70,31",
+      "70,30",
+      "70,29",
+      "70,28",
+      "70,27",
+      "69,27",
+      "69,28",
+      "69,29",
+      "69,30",
+      "70,26",
+      "70,25",
+      "69,25",
+      "68,25",
+      "67,25",
+      "66,25",
+      "65,25",
+      "64,25",
+      "63,25",
+      "62,25",
+      "61,25",
+      "60,25",
+      "59,25",
+      "59,26",
+      "63,27",
+      "64,27",
+      "65,27",
+      "65,26",
+      "64,26",
+      "63,26",
+      "67,26",
+      "68,26",
+      "69,26",
+      "66,26",
+      "14,43",
+      "15,43",
+      "16,43",
+      "17,43",
+      "17,41",
+      "17,40",
+      "16,40",
+      "18,40",
+      "19,40",
+      "20,40",
+      "21,40",
+      "14,40",
+      "14,41",
+      "14,42",
+      "15,42",
+      "16,42",
+      "16,41",
+      "15,40",
+      "15,41",
+      "17,44",
+      "16,44",
+      "15,44",
+      "14,44",
+      "14,45",
+      "14,46",
+      "14,47",
+      "14,48",
+      "14,49",
+      "14,50",
+      "15,50",
+      "15,49",
+      "16,49",
+      "16,48",
+      "16,47",
+      "16,46",
+      "15,45",
+      "15,46",
+      "15,47",
+      "15,48",
+      "16,45",
+      "17,45",
+      "17,46",
+      "17,47",
+      "17,48",
+      "17,49",
+      "17,50",
+      "17,51",
+      "17,52",
+      "18,52",
+      "16,52",
+      "15,52",
+      "14,52",
+      "14,51",
+      "15,51",
+      "16,50",
+      "16,51",
+      "13,48",
+      "13,49",
+      "12,45",
+      "12,44",
+      "11,44",
+      "11,45",
+      "11,46",
+      "12,46",
+      "12,47",
+      "12,48",
+      "11,48",
+      "11,47",
+      "11,49",
+      "12,49",
+      "12,50",
+      "10,49",
+      "10,48",
+      "9,48",
+      "9,49",
+      "9,50",
+      "10,51",
+      "11,51",
+      "12,51",
+      "11,50",
+      "10,50",
+      "12,52",
+      "12,53",
+      "12,55",
+      "12,56",
+      "12,57",
+      "12,54",
+      "12,58",
+      "12,59",
+      "12,60",
+      "11,60",
+      "11,61",
+      "11,62",
+      "12,62",
+      "12,61",
+      "11,52",
+      "11,53",
+      "11,54",
+      "11,55",
+      "11,56",
+      "11,57",
+      "11,58",
+      "11,59",
+      "10,59",
+      "10,58",
+      "10,57",
+      "10,56",
+      "10,55",
+      "10,54",
+      "10,53",
+      "10,52",
+      "13,62",
+      "14,62",
+      "15,62",
+      "16,62",
+      "17,62",
+      "18,62",
+      "19,62",
+      "20,62",
+      "21,62",
+      "21,63",
+      "21,64",
+      "21,65",
+      "21,66",
+      "18,69",
+      "17,69",
+      "16,69",
+      "15,69",
+      "14,69",
+      "13,69",
+      "12,69",
+      "11,69",
+      "10,69",
+      "10,68",
+      "9,68",
+      "9,69",
+      "8,69",
+      "8,70",
+      "8,71",
+      "8,72",
+      "8,73",
+      "8,74",
+      "9,74",
+      "10,74",
+      "11,74",
+      "12,74",
+      "13,74",
+      "14,74",
+      "15,74",
+      "15,75",
+      "16,75",
+      "17,74",
+      "16,74",
+      "16,76",
+      "16,77",
+      "17,77",
+      "17,78",
+      "6,73",
+      "6,74",
+      "6,75",
+      "6,76",
+      "6,77",
+      "6,78",
+      "6,79",
+      "6,80",
+      "7,80",
+      "8,80",
+      "9,80",
+      "10,80",
+      "11,80",
+      "12,80",
+      "13,80",
+      "14,80",
+      "15,80",
+      "16,80",
+      "17,80",
+      "17,79",
+      "16,79",
+      "16,78",
+      "15,79",
+      "14,79",
+      "13,79",
+      "12,79",
+      "11,79",
+      "10,79",
+      "9,79",
+      "8,79",
+      "7,78",
+      "7,77",
+      "7,76",
+      "7,75",
+      "7,74",
+      "7,73",
+      "8,75",
+      "8,76",
+      "9,75",
+      "10,75",
+      "11,75",
+      "12,75",
+      "13,75",
+      "14,75",
+      "9,76",
+      "14,76",
+      "15,76",
+      "13,76",
+      "10,76",
+      "11,76",
+      "12,76",
+      "15,77",
+      "14,77",
+      "13,77",
+      "12,77",
+      "11,77",
+      "10,77",
+      "9,77",
+      "8,77",
+      "7,79",
+      "11,78",
+      "12,78",
+      "15,78",
+      "14,78",
+      "13,78",
+      "10,78",
+      "9,78",
+      "8,78",
+      "7,72",
+      "6,72",
+      "6,71",
+      "6,70",
+      "6,69",
+      "6,68",
+      "6,67",
+      "6,66",
+      "6,65",
+      "7,64",
+      "7,63",
+      "6,63",
+      "6,62",
+      "6,64",
+      "7,67",
+      "7,68",
+      "7,66",
+      "8,65",
+      "8,64",
+      "8,63",
+      "7,62",
+      "8,62",
+      "9,62",
+      "10,62",
+      "10,63",
+      "9,63",
+      "9,64",
+      "7,65",
+      "7,69",
+      "7,71",
+      "7,70",
+      "8,68",
+      "8,67",
+      "8,66",
+      "9,65",
+      "10,64",
+      "11,63",
+      "12,63",
+      "13,63",
+      "14,63",
+      "15,63",
+      "16,63",
+      "17,63",
+      "18,63",
+      "19,63",
+      "20,63",
+      "20,64",
+      "20,65",
+      "20,66",
+      "18,68",
+      "17,68",
+      "16,68",
+      "15,68",
+      "14,68",
+      "13,68",
+      "12,68",
+      "11,68",
+      "10,67",
+      "9,67",
+      "9,66",
+      "10,65",
+      "11,64",
+      "12,64",
+      "13,64",
+      "14,64",
+      "15,64",
+      "16,64",
+      "17,64",
+      "18,64",
+      "18,65",
+      "19,65",
+      "19,64",
+      "19,66",
+      "18,67",
+      "17,67",
+      "16,67",
+      "15,67",
+      "14,67",
+      "13,67",
+      "12,67",
+      "11,67",
+      "10,66",
+      "11,65",
+      "12,65",
+      "13,65",
+      "14,65",
+      "15,65",
+      "16,65",
+      "17,65",
+      "17,66",
+      "16,66",
+      "15,66",
+      "14,66",
+      "13,66",
+      "12,66",
+      "11,66",
+      "9,71",
+      "10,71",
+      "11,71",
+      "12,71",
+      "14,71",
+      "15,71",
+      "16,71",
+      "17,71",
+      "17,70",
+      "16,70",
+      "15,70",
+      "14,70",
+      "13,70",
+      "12,70",
+      "11,70",
+      "10,70",
+      "9,70",
+      "13,71",
+      "9,59",
+      "9,60",
+      "10,60",
+      "10,61",
+      "9,61",
+      "8,61",
+      "7,61",
+      "6,61",
+      "6,60",
+      "6,59",
+      "7,59",
+      "7,60",
+      "8,60",
+      "8,59",
+      "8,58",
+      "7,58",
+      "6,58",
+      "6,57",
+      "6,56",
+      "6,55",
+      "6,54",
+      "5,53",
+      "5,52",
+      "5,51",
+      "5,50",
+      "6,49",
+      "6,48",
+      "6,47",
+      "6,46",
+      "7,46",
+      "7,45",
+      "7,44",
+      "6,44",
+      "6,45",
+      "6,50",
+      "6,51",
+      "6,52",
+      "6,53",
+      "7,54",
+      "7,55",
+      "7,56",
+      "7,57",
+      "8,57",
+      "9,55",
+      "9,54",
+      "9,53",
+      "9,52",
+      "9,51",
+      "9,47",
+      "9,46",
+      "9,45",
+      "9,44",
+      "8,44",
+      "8,45",
+      "8,46",
+      "8,47",
+      "8,48",
+      "7,48",
+      "7,49",
+      "7,50",
+      "7,51",
+      "7,52",
+      "7,53",
+      "8,52",
+      "8,51",
+      "8,50",
+      "8,49",
+      "8,55",
+      "8,56",
+      "9,58",
+      "9,56",
+      "8,53",
+      "8,54",
+      "9,57",
+      "7,47",
+      "9,33",
+      "8,33",
+      "7,33",
+      "6,33",
+      "6,34",
+      "6,35",
+      "6,36",
+      "6,37",
+      "6,38",
+      "6,39",
+      "6,40",
+      "6,41",
+      "7,41",
+      "7,42",
+      "7,43",
+      "6,43",
+      "6,42",
+      "7,36",
+      "7,35",
+      "7,34",
+      "8,34",
+      "8,35",
+      "8,36",
+      "8,37",
+      "8,38",
+      "8,39",
+      "8,40",
+      "8,41",
+      "8,42",
+      "8,43",
+      "9,43",
+      "9,41",
+      "9,40",
+      "9,39",
+      "9,38",
+      "9,37",
+      "9,36",
+      "9,35",
+      "9,34",
+      "7,38",
+      "7,37",
+      "7,39",
+      "7,40",
+      "62,74",
+      "63,77",
+      "64,77",
+      "65,77",
+      "66,77",
+      "67,77",
+      "67,76",
+      "66,75",
+      "65,75",
+      "65,74",
+      "64,74",
+      "63,74",
+      "64,75",
+      "64,76",
+      "63,76",
+      "63,75",
+      "65,76",
+      "66,76",
+      "67,78",
+      "66,78",
+      "66,79",
+      "66,80",
+      "66,81",
+      "66,82",
+      "66,83",
+      "66,84",
+      "66,85",
+      "66,86",
+      "66,87",
+      "66,88",
+      "66,89",
+      "65,89",
+      "64,89",
+      "63,89",
+      "62,91",
+      "62,92",
+      "63,90",
+      "64,90",
+      "64,91",
+      "63,91",
+      "65,91",
+      "65,92",
+      "64,92",
+      "63,92",
+      "66,92",
+      "67,92",
+      "68,92",
+      "69,92",
+      "70,92",
+      "71,92",
+      "72,92",
+      "73,92",
+      "74,92",
+      "75,92",
+      "76,92",
+      "77,92",
+      "78,92",
+      "78,91",
+      "78,90",
+      "78,89",
+      "78,88",
+      "78,87",
+      "78,86",
+      "78,85",
+      "78,84",
+      "78,83",
+      "78,82",
+      "77,82",
+      "76,82",
+      "75,82",
+      "74,83",
+      "73,83",
+      "72,83",
+      "70,83",
+      "69,83",
+      "68,83",
+      "67,83",
+      "67,84",
+      "67,85",
+      "68,84",
+      "69,84",
+      "71,84",
+      "72,85",
+      "74,85",
+      "75,85",
+      "75,84",
+      "76,84",
+      "76,83",
+      "77,83",
+      "77,84",
+      "75,83",
+      "71,83",
+      "69,85",
+      "72,84",
+      "73,84",
+      "74,84",
+      "76,85",
+      "77,85",
+      "71,85",
+      "70,84",
+      "68,85",
+      "68,86",
+      "69,86",
+      "72,86",
+      "74,86",
+      "75,86",
+      "76,86",
+      "77,86",
+      "77,87",
+      "76,87",
+      "76,88",
+      "75,88",
+      "74,88",
+      "73,88",
+      "72,87",
+      "71,87",
+      "70,87",
+      "68,87",
+      "67,87",
+      "67,89",
+      "69,89",
+      "72,89",
+      "73,89",
+      "75,89",
+      "76,89",
+      "76,90",
+      "76,91",
+      "74,91",
+      "72,91",
+      "71,91",
+      "68,91",
+      "67,91",
+      "66,91",
+      "77,91",
+      "73,91",
+      "70,91",
+      "69,91",
+      "67,90",
+      "66,90",
+      "65,90",
+      "70,90",
+      "75,91",
+      "77,90",
+      "77,89",
+      "74,90",
+      "72,90",
+      "71,90",
+      "68,89",
+      "68,88",
+      "69,87",
+      "67,86",
+      "67,88",
+      "68,90",
+      "69,90",
+      "70,89",
+      "70,88",
+      "70,86",
+      "70,85",
+      "71,86",
+      "69,88",
+      "73,86",
+      "71,89",
+      "73,85",
+      "75,87",
+      "71,88",
+      "72,88",
+      "73,87",
+      "74,87",
+      "77,88",
+      "73,90",
+      "75,90",
+      "74,89",
+      "78,81",
+      "77,81",
+      "76,81",
+      "75,81",
+      "74,81",
+      "73,81",
+      "73,82",
+      "72,82",
+      "71,82",
+      "70,82",
+      "69,82",
+      "68,82",
+      "67,82",
+      "67,81",
+      "67,80",
+      "67,79",
+      "68,79",
+      "68,80",
+      "68,81",
+      "70,81",
+      "70,80",
+      "69,79",
+      "69,81",
+      "71,81",
+      "72,81",
+      "71,80",
+      "69,80",
+      "73,80",
+      "75,80",
+      "74,82",
+      "72,80",
+      "74,80",
+      "76,80",
+      "77,80",
+      "78,80",
+      "78,79",
+      "78,78",
+      "78,77",
+      "78,76",
+      "78,75",
+      "78,74",
+      "78,73",
+      "78,72",
+      "78,71",
+      "78,70",
+      "78,69",
+      "78,68",
+      "78,67",
+      "78,66",
+      "78,65",
+      "78,64",
+      "78,63",
+      "78,62",
+      "78,61",
+      "77,62",
+      "76,62",
+      "75,62",
+      "74,62",
+      "74,63",
+      "74,64",
+      "74,65",
+      "74,66",
+      "74,67",
+      "74,68",
+      "74,69",
+      "74,70",
+      "74,71",
+      "74,72",
+      "74,73",
+      "74,74",
+      "74,75",
+      "74,76",
+      "66,74",
+      "67,74",
+      "68,74",
+      "70,74",
+      "71,74",
+      "72,74",
+      "73,74",
+      "69,74",
+      "69,75",
+      "68,75",
+      "67,75",
+      "71,75",
+      "72,75",
+      "73,75",
+      "75,75",
+      "75,74",
+      "75,73",
+      "75,72",
+      "75,71",
+      "75,70",
+      "75,69",
+      "75,68",
+      "75,67",
+      "75,66",
+      "75,65",
+      "75,64",
+      "75,63",
+      "76,63",
+      "77,63",
+      "77,64",
+      "77,65",
+      "77,66",
+      "77,67",
+      "77,68",
+      "77,69",
+      "77,70",
+      "77,71",
+      "77,72",
+      "77,73",
+      "77,74",
+      "77,75",
+      "77,76",
+      "77,77",
+      "77,78",
+      "77,79",
+      "76,79",
+      "74,79",
+      "73,79",
+      "72,79",
+      "71,79",
+      "70,79",
+      "70,78",
+      "69,78",
+      "68,78",
+      "68,77",
+      "68,76",
+      "69,76",
+      "70,76",
+      "70,75",
+      "70,77",
+      "69,77",
+      "71,77",
+      "72,77",
+      "72,76",
+      "73,76",
+      "73,77",
+      "73,78",
+      "72,78",
+      "71,78",
+      "75,79",
+      "75,78",
+      "75,77",
+      "74,77",
+      "75,76",
+      "76,76",
+      "76,77",
+      "76,78",
+      "76,74",
+      "76,73",
+      "76,72",
+      "76,71",
+      "76,70",
+      "76,69",
+      "76,68",
+      "76,67",
+      "76,66",
+      "76,65",
+      "76,64",
+      "76,75",
+      "71,76",
+      "74,78",
+      "18,66",
+      "9,72",
+      "9,73",
+      "10,73",
+      "11,73",
+      "10,72",
+      "11,72",
+      "12,72",
+      "13,73",
+      "14,73",
+      "12,73",
+      "13,72",
+      "14,72",
+      "15,72",
+      "16,72",
+      "17,72",
+      "17,73",
+      "16,73",
+      "15,73",
+      "18,70",
+      "18,71",
+      "18,72",
+      "59,37",
+      "60,37",
+      "61,37",
+      "68,37",
+      "69,37",
+      "70,37",
+      "9,42"
+    ],
+    "levels": 1
   },
   {
     "id": "map_mw2dn6re",

@@ -60,7 +60,7 @@ function seedCapKing() {
   core.hp = core.maxhp = core.lastHp = CAP_KING.coreHp;
   G.hangiCaps = G.hangiCaps || [];
   const caps = spots.map((p, i) => {
-    const cap = { x: p.x, y: p.y, c: p.c, r: p.r, state: 'closed', t: 0, boss: true, scale: CAP_KING.capScale, spawned: false, slot: i };
+    const cap = { x: p.x, y: p.y, c: p.c, r: p.r, floor: spawnFloorAt(p.c, p.r), state: 'closed', t: 0, boss: true, scale: CAP_KING.capScale, spawned: false, slot: i };
     G.hangiCaps.push(cap);
     capKingBlock(cap, true);
     return cap;
@@ -368,7 +368,7 @@ function updateCapKing(dt) {
 function capKingCapSortable(sortables, cap) {
   const s = cap.scale || CAP_KING.capScale, h = 59 * s;
   if (!isVisible(cap.x, cap.y) && !isVisible(cap.x, cap.y - h * .6)) return;
-  sortables.push({ y: cap.y + 13, draw: () => drawCapKingCap(ctx, cap) });
+  sortables.push({ y: cap.y + 13 + looseSortY(cap), draw: () => drawCapKingCap(ctx, cap) });
 }
 function drawCapKingCap(ctx, cap) {
   const img = hbImg(cap.state === 'open' ? HANGI_CAP.openImage : HANGI_CAP.image);

@@ -652,7 +652,7 @@ function gourdHopOffset(o) {
 function gourdDeathCorpse(e) {
   const f = e.frames || {}, file = (f.blink && f.blink[f.blink.length - 1]) || f.front || e.sprite;   // 眨眼最後一張＝閉眼
   const z = e.slimeLift || 0, onGround = z <= .5;
-  (G.fxCorpses = G.fxCorpses || []).push({ drop: true, noBits: true, img: monsterImage(file), x: e.x, y: e.y, z: onGround ? 0 : z, vz: 0,
+  (G.fxCorpses = G.fxCorpses || []).push({ floor: actorFloor(e), drop: true, noBits: true, img: monsterImage(file), x: e.x, y: e.y, z: onGround ? 0 : z, vz: 0,
     w: e.drawWidth || 70, h: e.drawHeight || 110, t: 0, life: DISSOLVE.start + DISSOLVE.spread + DISSOLVE.life + .05,
     landed: onGround, landT: onGround ? -1 : 0 });
   e.tremble = false;

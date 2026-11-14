@@ -244,7 +244,7 @@ function mothSpray(e, dt, active) {
       s.snd -= dt;   // 撒粉的沙沙聲：撒的時候一直接著播
       if (s.snd <= 0 && s.t < C.sprayTime - .4) { s.snd = C.sound.sprayEvery; if (typeof sfxAt === 'function') sfxAt('mothSpray', e.x, e.y, C.sound.spray, 'moth-spray-' + (e.mothKey ||= Math.random().toString(36).slice(2, 7))); }
       s.puff -= dt;
-      if (s.puff <= 0) { s.puff = C.puffEvery; mothPuff(e.x + mothRand(-62, 62), e.y + mothRand(-24, 34), s.kind); }
+      if (s.puff <= 0) { s.puff = C.puffEvery; mothPuff(e.x + mothRand(-62, 62), e.y + mothRand(-24, 34), s.kind, false, actorFloor(e)); }
       if (s.t >= C.sprayTime) {
         m.spray = null; m.cd = mothRand(C.cooldown[0], C.cooldown[1]); m.sprayEndAt = G.mothClock || 0;
         if (!(m.fleeT > 0) && m.target && Math.hypot(m.target.x - e.x, m.target.y - e.y) <= C.flee.nearRange * CELL) mothStartFlee(e, C.flee.afterSpray);   // 在目標身邊撒完：先逃開，等一下再回來
@@ -257,12 +257,12 @@ function mothSpray(e, dt, active) {
     m.spray = { kind: mothPick(MOTH_KINDS), phase: 'tele', t: 0 };
   }
 }
-// 落下一團鱗粉霧
-function mothPuff(x, y, kind, big) {
+// 落下一團鱗粉霧（floor：撒在幾樓，霧只碰得到那一層的人）
+function mothPuff(x, y, kind, big, floor = 0) {
   const C = MOTH.cloud, list = G.mothClouds = G.mothClouds || [];
   if (list.length >= C.max) list.shift();
   const a = Math.random() * Math.PI * 2, sp = C.drift * mothRand(.3, 1);
-  list.push({ x, y, kind, r: C.r0 * (big ? 1.5 : 1), rMax: C.r1 * (big ? 1.35 : 1), age: 0, life: C.life * (big ? 1.3 : 1), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, seed: Math.random() * 100 });
+  list.push({ x, y, floor: hasFloors ? floor : 0, kind, r: C.r0 * (big ? 1.5 : 1), rMax: C.r1 * (big ? 1.35 : 1), age: 0, life: C.life * (big ? 1.3 : 1), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, seed: Math.random() * 100 });
 }
 const mothCloudDensity = c => Math.min(1, c.age / .35) * Math.min(1, (c.life - c.age) / 1.5);
 
@@ -295,10 +295,11 @@ function mothFireCheck(clouds) {
   if (!fires.length) return;
   for (const c of clouds) {
     if (c.fuse != null || c.boom) continue;
-    if (fires.some(f => Math.hypot(c.x - f.x, (c.y - f.y) / .7) <= c.r + (f.r || 14))) mothIgnite(c);
+    const fireFloor = f => !f.ref ? 0 : f.kind === 'burn' ? actorFloor(f.ref) : (f.ref.floor || 0);   // 火在幾樓（不知道＝0）
+    if (fires.some(f => (!c.floor || !fireFloor(f) || fireFloor(f) === c.floor) && Math.hypot(c.x - f.x, (c.y - f.y) / .7) <= c.r + (f.r || 14))) mothIgnite(c);   // 不同樓層的火點不著
   }
 }
-const mothCloudsTouch = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) <= a.r + b.r + 6;
+const mothCloudsTouch = (a, b) => (!a.floor || !b.floor || a.floor === b.floor) && Math.hypot(a.x - b.x, a.y - b.y) <= a.r + b.r + 6;   // 不同樓層的霧不連在一起
 // 點燃：找出跟這團連在一起的霧，至少 blastMin 團才會炸；從點燃的那團開始一團接一團引爆，blastMul＝這一串的傷害倍率
 function mothIgnite(c) {
   if (c.fuse != null || c.boom) return;
@@ -311,15 +312,16 @@ function mothIgnite(c) {
 }
 // 爆炸、火焰打到 (x, y) 半徑 r 內：碰到的鱗粉霧點燃（js/oil-barrels.js 的 igniteSlicksNear 呼叫，地雷、燃燒彈、希奧妮／安柏的攻擊也會經過那裡）
 function mothIgniteNear(x, y, r = 0) {
-  for (const c of G.mothClouds || []) if (Math.hypot(c.x - x, c.y - y) <= c.r + r) mothIgnite(c);
+  for (const c of G.mothClouds || []) if ((!blastFloor || !c.floor || c.floor === blastFloor) && Math.hypot(c.x - x, c.y - y) <= c.r + r) mothIgnite(c);   // 只點燃同一層的霧
 }
 // 粉塵爆炸：一團霧炸開（連在一起的霧在 mothIgnite 已經排好引爆順序）
-function mothBlast(c) {
+function mothBlast(c) { withBlastFloor(c.floor, () => mothBlastNow(c)); }   // 霧在幾樓，爆炸就只炸那一層（js/pathfinding.js）
+function mothBlastNow(c) {
   const B = MOTH.blast, x = c.x, y = c.y, R = Math.max(B.radius * CELL, c.r * .8), k = (mothCloudDensity(c) * .5 + .5) * (c.blastMul || 1);
   c.boom = true;
   if (G.mothBoomCd <= 0 && typeof sfxAt === 'function') { G.mothBoomCd = .12; G.mothBoomSerial = (G.mothBoomSerial || 0) + 1; sfxAt(c.blastMul > 1 ? 'midBoom' : 'smallBoom', x, y, .7, 'moth-boom-' + G.mothBoomSerial); }   // 大爆炸：比較大聲
   for (const e of G.enemies) {
-    if (e.dead || e.hp <= 0) continue;
+    if (e.dead || e.hp <= 0 || !blastHits(e)) continue;
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R) continue;
     const hurt = B.enemy * k * (1 - .4 * d / R);
@@ -329,7 +331,7 @@ function mothBlast(c) {
     if (typeof enemyHitReact === 'function') enemyHitReact(e, x, y, true);
   }
   for (const t of G.towers) {
-    if (t.hp <= 0 || t.eatenBy) continue;
+    if (t.hp <= 0 || t.eatenBy || !blastHits(t)) continue;
     const d = Math.hypot(t.x - x, t.y - y);
     if (d > R) continue;
     const hurt = B.sentry * k * (1 - .4 * d / R) * (1 - sentryDefense(t));
@@ -338,7 +340,7 @@ function mothBlast(c) {
     if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
   const p = G.player;
-  if (p && p.hp > 0 && Math.hypot(p.x - x, p.y - y) <= R) {
+  if (p && p.hp > 0 && blastHits(p) && Math.hypot(p.x - x, p.y - y) <= R) {
     const d = Math.hypot(p.x - x, p.y - y), raw = B.player * k * (1 - .4 * d / R);
     const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(raw) : raw;
     p.hp = Math.max(0, p.hp - hurt); G.damageVignetteT = .5;
@@ -348,7 +350,7 @@ function mothBlast(c) {
   }
   // 連鎖：油桶被炸爆、油汙被點燃、生命體的碎塊被燒掉、順順宮帽被炸開
   if (typeof oilItem === 'function') for (const o of [...G.obstacles]) {
-    if (!oilItem(o) || o.hp <= 0) continue;
+    if (!oilItem(o) || o.hp <= 0 || !blastHits(o)) continue;
     const oc = oilCenter(o);
     if (Math.hypot(oc.x - x, oc.y - y) <= R) damageOil(o, 9999, 'explosion');
   }
@@ -386,7 +388,7 @@ function mothExposure(dt) {
     const immune = a.mothImmune = a.mothImmune || { poison: 0, confuse: 0, sleep: 0 };
     const inside = { poison: 0, confuse: 0, sleep: 0 };
     for (const c of clouds) {
-      if (c.boom) continue;
+      if (c.boom || !fieldHits(c.floor, a)) continue;   // 不同樓層的霧吸不到
       const d = Math.hypot(a.x - c.x, (a.y - c.y) / .7);
       if (d < c.r) inside[c.kind] = Math.max(inside[c.kind], mothCloudDensity(c) * (1 - .5 * d / c.r));
     }
@@ -602,13 +604,13 @@ function mothDodgesMelee(t, target) {
 // ---- 死掉：炸出一大團鱗粉，屍體從空中掉下來、化成灰（沿用珍珠小童的 drop 屍體，js/pearl-kid.js）----
 function mothDeathBurst(e) {
   const kind = (e.mo && e.mo.spray && e.mo.spray.kind) || mothPick(MOTH_KINDS);
-  mothPuff(e.x, e.y + 4, kind, true);
+  mothPuff(e.x, e.y + 4, kind, true, actorFloor(e));
   for (let i = 0; i < MOTH.deathPuffs - 1; i++) {
     const a = i / (MOTH.deathPuffs - 1) * Math.PI * 2;
-    mothPuff(e.x + Math.cos(a) * 96, e.y + 4 + Math.sin(a) * 53, kind, true);
+    mothPuff(e.x + Math.cos(a) * 96, e.y + 4 + Math.sin(a) * 53, kind, true, actorFloor(e));
   }
   const f = e.frames || {};
-  (G.fxCorpses = G.fxCorpses || []).push({ drop: true, noBits: true, img: monsterImage(f.front || e.sprite), x: e.x, y: e.y, z: e.slimeLift || 0, vz: 0,
+  (G.fxCorpses = G.fxCorpses || []).push({ floor: actorFloor(e), drop: true, noBits: true, img: monsterImage(f.front || e.sprite), x: e.x, y: e.y, z: e.slimeLift || 0, vz: 0,
     w: e.drawWidth || 163, h: e.drawHeight || 125, t: 0, life: DISSOLVE.start + DISSOLVE.spread + DISSOLVE.life + .05 });
 }
 

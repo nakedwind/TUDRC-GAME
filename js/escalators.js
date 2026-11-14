@@ -78,6 +78,13 @@ function drawEscalatorAnimation(ctx, s, img, x, y, w, h) {
   return true;
 }
 
+// 會動的手扶梯目前捲到第幾格（js/maploader.js 的 occluderStateSig）：手扶梯疊在牆、柱子上的那一塊是另外補畫、存起來重複用的，
+// 階梯每動 1 像素這個值就變，補畫才會跟著重做；不會動的、不是手扶梯的回傳空字串
+function escalatorAnimSig(s) {
+  if (s.still || !(escalatorSpec(s.id) || escalatorSideUsable(s))) return '';
+  return 'e' + Math.floor(escalatorPhase);
+}
+
 // 這張地圖上每條階梯的範圍（世界座標）和方向；換地圖、物件數量變了才重算
 let escalatorCache = { map: null, n: -1, lanes: [] };
 function escalatorLanes() {

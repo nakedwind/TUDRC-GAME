@@ -427,7 +427,7 @@ function bananaKingDeath(e) {
   const n = C.dropMin + Math.floor(Math.random() * (C.dropMax - C.dropMin + 1));
   if (n <= 0) return;
   G.groundItems = G.groundItems || [];
-  G.groundItems.push({ id: C.dropId, qty: n, x: e.x + (Math.random() - .5) * 16, y: e.y + 8, at: performance.now() / 1000 });
+  G.groundItems.push({ id: C.dropId, qty: n, x: e.x + (Math.random() - .5) * 16, y: e.y + 8, at: performance.now() / 1000, floor: actorFloor(e) });
   flash('🍌 香蕉 ×' + n, e.x, e.y - 50, '#ffe066');
 }
 

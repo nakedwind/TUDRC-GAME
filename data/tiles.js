@@ -2501,6 +2501,54 @@ const SHARED_TILES = [
     "h": 3
   },
   {
+    "id": "tile_mrt_wall_sign_platform_green",
+    "name": "牆面（綠色①月台指標）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-sign-platform-green.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_green_band",
+    "name": "牆面（綠色飾帶）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-green-band.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_sign_platform_orange",
+    "name": "牆面（橘色①月台指標）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-sign-platform-orange.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_orange_band",
+    "name": "牆面（橘色飾帶）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-orange-band.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_sign_platform_red",
+    "name": "牆面（紅色①月台指標）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-sign-platform-red.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_red_band",
+    "name": "牆面（紅色飾帶）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-red-band.png",
+    "w": 4,
+    "h": 3
+  },
+  {
     "id": "tile_mrt_wall_sign_tamsui",
     "name": "牆面（往淡水指標）",
     "role": "floor",

@@ -281,7 +281,7 @@ function updateFishSprays(dt) {
       s.emit += .028;
       const m = fishMouth(e), a = Math.atan2(s.aim.y - m.y, s.aim.x - m.x) + (Math.random() - .5) * .07;   // 角度只微微晃動，連起來才像一條水柱
       const len = Math.min(FISH_HEAD.sprayRange * CELL + 12, Math.hypot(s.aim.x - m.x, s.aim.y - m.y) + 14);
-      (G.fishDrops = G.fishDrops || []).push({ owner: e, spray: s, x: m.x, y: m.y, z0: m.z, z: m.z, ux: Math.cos(a), uy: Math.sin(a), left: len, len, r: 2 + Math.random() * 1.8 });
+      (G.fishDrops = G.fishDrops || []).push({ owner: e, floor: actorFloor(e), spray: s, x: m.x, y: m.y, z0: m.z, z: m.z, ux: Math.cos(a), uy: Math.sin(a), left: len, len, r: 2 + Math.random() * 1.8 });
     }
     if (s.t <= 0) e.fh.spray = null;
   }
@@ -309,6 +309,7 @@ function fishImpact(d, back = 0) {
 function updateFishDrops(dt) {
   const p = G.player;
   for (const d of G.fishDrops) {
+    setFloorCtxTo(d.floor);   // 水柱照噴出來時在幾樓判斷牆、建築（js/pathfinding.js）
     const e = d.owner, step = FISH_HEAD.dropSpeed * dt;
     d.left -= step; d.x += d.ux * step; d.y += d.uy * step;
     const k = 1 - Math.max(0, d.left / d.len);   // 0＝剛離開嘴巴、1＝飛到底
@@ -326,13 +327,13 @@ function updateFishDrops(dt) {
     if (d.done) { fishImpact(d); continue; }
     // 打到人（一次噴水每個人只算一次傷害）
     if (e && !e.dead && !(d.spray.aim.fire)) {
-      if (p && p.hp > 0 && Math.hypot(p.x - d.x, p.y - d.y) <= 16) {
+      if (p && p.hp > 0 && onFloor(d.floor, p) && Math.hypot(p.x - d.x, p.y - d.y) <= 16) {
         d.done = true; fishImpact(d);
         if (!d.spray.hit.has(p)) { d.spray.hit.add(p); fishHitPlayer(e, d); }
         continue;
       }
       for (const t of G.towers) {
-        if (t.hp <= 0 || t.berserk || Math.hypot(t.x - d.x, t.y - d.y) > 16) continue;
+        if (t.hp <= 0 || t.berserk || !onFloor(d.floor, t) || Math.hypot(t.x - d.x, t.y - d.y) > 16) continue;   // 不同樓層淋不到
         d.done = true; fishImpact(d);
         if (!d.spray.hit.has(t)) {
           d.spray.hit.add(t); e.atkCd = 0; enemyAttackSentry(e, t, 0);
@@ -345,6 +346,7 @@ function updateFishDrops(dt) {
     }
     if (d.left <= 0) { d.done = true; fishImpact(d); }
   }
+  clearFloorCtx();
   G.fishDrops = G.fishDrops.filter(d => !d.done);
 }
 

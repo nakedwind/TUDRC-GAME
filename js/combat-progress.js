@@ -96,6 +96,7 @@ function reclaimAddedWalls() {
   if (typeof restoreMrtLocks === 'function') restoreMrtLocks();               // 捷運閘門、封鎖的入口（js/mrt-locks.js）
   if (typeof restoreMrtTrains === 'function') restoreMrtTrains();             // 停靠的捷運列車（js/mrt-train.js）
   if (typeof restoreStorageBoxWalls === 'function') restoreStorageBoxWalls();  // 置物箱（js/storage-lockers.js）
+  if (typeof restorePropCollisions2F === 'function') restorePropCollisions2F();   // 放在 2 樓、有自帶碰撞格的物件（js/prop-collisions.js）
 }
 // 重新部署＝這張地圖一切重來：開過的箱子、撿過的東西也回到原樣（封鎖的捷運入口除外，解封是永久的，js/mrt-locks.js）
 function resetMapLoot(mapId) {
@@ -168,6 +169,7 @@ function restoreCombatProgress() {
     poweredMap = MAP; mapPowerOn = new Set(Array.isArray(data.power) ? data.power : data.power ? [0] : []);   // 舊存檔：true＝沒編號的電路開著
     openElevatorStamp = data.elevator || null;   // 電梯開著還是關著（擋路格已經跟著 mapWalls 一起還原）
     reclaimAddedWalls();
+    if (typeof setMapObstacleFloor === 'function') for (const o of G.obstacles || []) if (o.floor == null) setMapObstacleFloor(o);   // 舊的保留進度沒記樓層：2 樓的礦物、路障補算成 2 樓（js/maploader.js）
     if (lastSafe === true) resumeSquadFromBase(data.activeSupply);
     if (lastSafe === true && typeof leaderOnSpawn === 'function') { applyOutfits(); leaderOnSpawn(true); }   // 艾德林帶隊：在基地帶的補給加在玩家身上（js/leader-skills.js）
     if (typeof resumeVitals === 'function') resumeVitals();   // 中間回應變中心治療過：換成現在的 HP、負荷（倒下的隊員治好了就站起來，js/vitals.js）
@@ -236,7 +238,7 @@ function rememberStoryBuilds() {
   if (!MAP_STORY || !MAP || !G || !Array.isArray(G.obstacles) || window.STORY_MODE) return;
   const all = readStoryBuilds();
   all[MAP.id] = G.obstacles.filter(o => o.playerBuilt && !(o.hp <= 0)).map(o => ({
-    type: o.type, orient: o.orient, c: o.c, r: o.r, w: o.w, h: o.h, solid: o.solid || [], hp: o.hp, maxhp: o.maxhp, blv: o.blv || 1, trap: !!o.trap, slow: o.slow || null }));   // blv：蓋的時候的建築等級（js/build.js）
+    type: o.type, orient: o.orient, c: o.c, r: o.r, w: o.w, h: o.h, solid: o.solid || [], hp: o.hp, maxhp: o.maxhp, blv: o.blv || 1, trap: !!o.trap, slow: o.slow || null, floor: o.floor === 2 ? 2 : undefined }));   // blv：蓋的時候的建築等級（js/build.js）；floor：蓋在 2 樓
   if (!all[MAP.id].length) delete all[MAP.id];
   try { localStorage.setItem(STORY_BUILDS_KEY, JSON.stringify(all)); } catch (_) {}
 }
@@ -244,9 +246,10 @@ function restoreStoryBuilds() {
   if (!MAP_STORY || !MAP || window.STORY_MODE) return;
   for (const b of readStoryBuilds()[MAP.id] || []) {
     const cells = (b.solid || []).map(([dc, dr]) => (b.c + dc) + ',' + (b.r + dr));
-    if (cells.some(k => G.grid[k] || mapWalls.has(k))) continue;   // 地圖改過、那裡被擋住了：這個就不放
+    if (cells.some(k => G.grid[k] || (b.floor === 2 ? wallOnFloor(2, ...k.split(',').map(Number)) : mapWalls.has(k)))) continue;   // 地圖改過、那裡被擋住了：這個就不放（2 樓的照 2 樓的牆看）
     const o = { kind: 'obstacle', playerBuilt: true, type: b.type, orient: b.orient, c: b.c, r: b.r, w: b.w, h: b.h,
       solid: (b.solid || []).map(x => x.slice()), hp: b.hp, maxhp: b.maxhp, blv: b.blv || 1, trap: !!b.trap, slow: b.slow || null };
+    if (b.floor === 2) o.floor = 2;   // 蓋在 2 樓的照樣算 2 樓
     for (const k of cells) G.grid[k] = o;
     G.obstacles.push(o);
   }

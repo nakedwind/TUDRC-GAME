@@ -26,9 +26,9 @@ function dropItemOnGround(id, qty = 1, aim = null) {
   else if (groundBlocked(x, y)) { x = p.x; y = p.y + 4; }   // 背包的「放在地上」：面前是牆就放在腳下
   if (n >= count) supplyInventory.delete(id); else supplyInventory.set(id, count - n);
   G.groundItems = G.groundItems || [];
-  const pile = G.groundItems.find(g => g.id === id && Math.hypot(g.x - x, g.y - y) < 10);
+  const floor = actorFloor(p), pile = G.groundItems.find(g => g.id === id && (g.floor || 1) === floor && Math.hypot(g.x - x, g.y - y) < 10);   // floor：放在幾樓（同一層的才疊成一堆）
   const at = performance.now() / 1000;   // 什麼時候放的：從上面掉下來的動畫（drawGroundItem）
-  if (pile) Object.assign(pile, { qty: pile.qty + n, at }); else G.groundItems.push({ id, qty: n, x, y, at });
+  if (pile) Object.assign(pile, { qty: pile.qty + n, at }); else G.groundItems.push({ id, qty: n, x, y, at, floor });
   return n;
 }
 function removeGroundItem(g, n) {

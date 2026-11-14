@@ -21,7 +21,7 @@ function updateLandmines(dt) {
       if (o.fuseT <= 0) detonateMine(o);
       continue;
     }
-    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && !e.flying && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL);   // 飄在空中的（珍珠小童）踩不到
+    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && !e.flying && sameFloor(e, o) && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL);   // 飄在空中的（珍珠小童）踩不到
     if (stepped) {
       o.fuseT = LANDMINE.fuse;
       if (typeof sfxAt === 'function') sfxAt('mineBeep', p.x, p.y, .8, 'mine-beep');   // 先「嗶嗶」，引信 1 秒後才爆
@@ -33,6 +33,9 @@ function updateLandmines(dt) {
 // ---- 爆炸 ----
 function detonateMine(o) {
   if (!G.obstacles.includes(o)) return;
+  withBlastFloor(actorFloor(o), () => detonateMineNow(o));   // 地雷在幾樓就只炸那一層（js/pathfinding.js）
+}
+function detonateMineNow(o) {
   const { x, y } = mineCenter(o);
   o.lastHitBy = 'demolish';   // 從清單移除時不要觸發其他效果
   removeBarrier(o);
@@ -40,7 +43,7 @@ function detonateMine(o) {
   damageCoresInBlast(x, y, R, power);
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {   // 怪物
-    if (e.dead || e.hp <= 0) continue;
+    if (e.dead || e.hp <= 0 || !blastHits(e)) continue;   // blastHits：不同樓層炸不到
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
     const dmg = power * (1 - .4 * d / R);
@@ -50,7 +53,7 @@ function detonateMine(o) {
   }
   if (typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, power);   // 地底的版權老鼠被炸出地面（js/burrowing-mouse.js）
   for (const t of G.towers) {   // 隊友也會被炸傷（依防禦減免）
-    if (t.hp <= 0) continue;
+    if (t.hp <= 0 || !blastHits(t)) continue;
     const d = Math.hypot(t.x - x, t.y - y);
     if (d > R || !hasLineOfSight(x, y, t.x, t.y)) continue;
     const def = Math.max(0, Math.min(.75, TYPES[t.type]?.defense || 0));
@@ -60,7 +63,7 @@ function detonateMine(o) {
     if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
   const pl = G.player;   // 玩家
-  if (pl && pl.hp > 0) {
+  if (pl && pl.hp > 0 && blastHits(pl)) {
     const d = Math.hypot(pl.x - x, pl.y - y);
     if (d <= R && hasLineOfSight(x, y, pl.x, pl.y)) {
       const hurt = (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(LANDMINE.player * (1 - .4 * d / R)) : LANDMINE.player * (1 - .4 * d / R));
@@ -72,7 +75,7 @@ function detonateMine(o) {
   }
   // 連鎖：引爆附近的油桶、點燃油汙、引爆附近的其他地雷
   for (const other of [...G.obstacles]) {
-    if (other === o || other.hp <= 0) continue;
+    if (other === o || other.hp <= 0 || !blastHits(other)) continue;   // 只連鎖同一層的油桶、地雷
     if (typeof oilItem === 'function' && oilItem(other)) {
       const c = oilCenter(other);
       if (Math.hypot(c.x - x, c.y - y) <= R) damageOil(other, 9999, 'explosion');
@@ -111,7 +114,7 @@ function detonateMine(o) {
 function drawLandmines(ctx) {
   const now = performance.now() / 1000;
   for (const o of G.obstacles) {
-    if (!isLandmine(o)) continue;
+    if (!isLandmine(o) || fxSkip(hasFloors ? actorFloor(o) : 0)) continue;   // 陸橋補畫時跳過橋下的地雷
     const img = obstacleImgs[o.type] && obstacleImgs[o.type].h;
     const x = OX + o.c * CELL, y = OY + o.r * CELL;
     if (img && img.complete && img.naturalWidth) {
