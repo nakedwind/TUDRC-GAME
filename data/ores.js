@@ -14,7 +14,8 @@ const ORE_TYPES = {
         0,
         0
       ]
-    ]
+    ],
+    "blasts": 1
   },
   "ore_large": {
     "name": "大型異質礦",
@@ -30,7 +31,8 @@ const ORE_TYPES = {
         0,
         1
       ]
-    ]
+    ],
+    "blasts": 1
   },
   "ore_rare": {
     "name": "稀有紫晶礦",
@@ -50,7 +52,8 @@ const ORE_TYPES = {
         1,
         2
       ]
-    ]
+    ],
+    "blasts": 1
   },
   "ore_coal": {
     "name": "煤礦",
@@ -93,19 +96,11 @@ const ORE_TYPES = {
     "h": 6,
     "solid": [
       [
-        1,
-        3
-      ],
-      [
         2,
         3
       ],
       [
         3,
-        3
-      ],
-      [
-        4,
         3
       ],
       [
@@ -125,10 +120,6 @@ const ORE_TYPES = {
         4
       ],
       [
-        0,
-        5
-      ],
-      [
         1,
         5
       ],
@@ -142,10 +133,6 @@ const ORE_TYPES = {
       ],
       [
         4,
-        5
-      ],
-      [
-        5,
         5
       ]
     ]
@@ -167,10 +154,6 @@ const ORE_TYPES = {
       ],
       [
         2,
-        2
-      ],
-      [
-        3,
         2
       ],
       [
@@ -208,10 +191,6 @@ const ORE_TYPES = {
       ],
       [
         2,
-        2
-      ],
-      [
-        3,
         2
       ],
       [
