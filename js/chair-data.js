@@ -13,6 +13,7 @@ const ACTIVE_CHAIRS = chairCatalog(/[?&](preview|previewChairs)=1(&|$)/.test(loc
 const CHAIR_EXTRA_SEATS = {
   tile_restaurant_booth_seating_vertical: [{ y: 112 }, { y: 161 }, { y: 210 }],   // 餐廳長椅：一排坐 4 人
   tile_training_bench: [{ x: 60 }],   // 地下訓練室長椅：左右各坐 1 人
+  tile_mrt_waiting_seats: [{ x: 60 }],   // 捷運候車椅（雙座）：第一個位子在左邊，這裡是右邊那個位子
 };
 function chairConfig(id) {
   const cfg = ACTIVE_CHAIRS[id];

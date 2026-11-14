@@ -647,7 +647,7 @@ const CHAIRS_DEFAULT = {
       ]
     ],
     "seat": {
-      "x": 29,
+      "x": 20,
       "y": 49,
       "dir": "front",
       "rotation": 0
