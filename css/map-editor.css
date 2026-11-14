@@ -227,7 +227,7 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .tool-more > summary { list-style: none; user-select: none; }
 .tool-more > summary::-webkit-details-marker { display: none; }
 .tool-more[open] > summary { border-color: #8fd3ff; }
-.tool-more-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; display: grid; gap: 6px; min-width: 200px; padding: 8px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.tool-more-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; display: grid; gap: 6px; min-width: 200px; padding: 8px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); max-height: calc(100vh - 140px); overflow-y: auto; overscroll-behavior: contain; }   /* 選單太長：超過視窗高度就在選單裡捲動（不然下面的「🛟 深水區」等按鈕會跑到畫面外） */
 .tool-more-menu .btn { text-align: left; }
 /* 收進「⋯ 更多」的地圖機關工具（隱藏地道、霧樹、藤蔓、怪物出生區…） */
 .tool-more-title { margin-top: 4px; padding: 6px 2px 0; border-top: 1px solid #333c49; color: #8fd3ff; font-size: 12px; font-weight: 700; }

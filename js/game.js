@@ -1346,6 +1346,7 @@ function newGame() {
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
+  if (typeof seedPoolBoss === 'function') seedPoolBoss();   // 池核：守在深水區核心旁的巨大比基尼小丑魚（js/pool-boss.js）
   if (typeof seedLoofahQueen === 'function') seedLoofahQueen();
   if (typeof seedGourdKing === 'function') seedGourdKing();   // 葫蘆猴王：躲在 BOSS 牆後面，核心醒了就撞牆出來（js/gourd-king.js）
   if (typeof seedBananaEmperor === 'function') seedBananaEmperor();   // 金蕉大王：守在核心旁邊、大隻隊員＋兩隻金蕉王（js/banana-emperor.js）   // 絲瓜女王：核心吊在她頭上、農田長藤蔓、3 隻絲瓜小姐守著（js/loofah-queen.js）
@@ -2750,7 +2751,7 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.poolBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;

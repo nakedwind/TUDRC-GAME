@@ -1049,6 +1049,7 @@ function draw() {
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
   if (typeof drawBurrowingMouseGround === 'function') drawBurrowingMouseGround(ctx);
+  if (typeof drawPoolBossUnderwater === 'function') drawPoolBossUnderwater(ctx);   // 池核 BOSS 潛在水裡的影子（js/pool-boss.js）
   if (typeof drawGraffitiGround === 'function') drawGraffitiGround(ctx);   // 地板上的塗鴉（js/graffiti.js）
   // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----

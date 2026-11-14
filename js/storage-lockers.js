@@ -94,7 +94,7 @@ function storagePropPrompt(prop){
   if(prop.kind==='ground-item')return '拾取'+groundItemName(prop.drop)+(prop.drop.qty>1?' ×'+prop.drop.qty:'');
   if(prop.kind==='equipment-drop')return '拾取'+(prop.drop.item?(itemById(prop.drop.item)?.name||'道具'):(equipDef(prop.drop.id)?.name||'裝備'));
   if(isWorldPickup(prop.kind))return '拾取';
-  if(prop.kind==='power'&&prop.stamp&&prop.stamp.valve)return '打開抽水閥';   // 抽水閥（js/pool-tide.js）
+  if(prop.kind==='power'&&(typeof poolIsValve==='function'?poolIsValve(prop.stamp):!!(prop.stamp&&prop.stamp.valve)))return '打開抽水閥';   // 抽水閥（js/pool-tide.js）
   if(prop.kind==='power')return mapPowerIsOn(circuitOf(prop.stamp))?'關閉電源':'開啟電源';
   if(prop.kind==='dynamo')return dynamoIsOn(prop.token)?'關閉發電機':'啟動發電機';
   if(prop.open)return '查看置物箱';
@@ -129,7 +129,7 @@ function pickupStorageProp(prop){
 function useStoragePropNearPlayer(filter){
   const prop=storagePropNearPlayer(filter);if(!prop)return false;
   if(isPickupProp(prop))return pickupStorageProp(prop);
-  if(prop.kind==='power'&&prop.stamp&&prop.stamp.valve){
+  if(prop.kind==='power'&&(typeof poolIsValve==='function'?poolIsValve(prop.stamp):!!(prop.stamp&&prop.stamp.valve))){
     if(typeof usePoolValve==='function')usePoolValve();   // 抽水閥：深水區抽乾（js/pool-tide.js）
   }else if(prop.kind==='power'){
     const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice(mapPowerIsOn(n)?'電源已開啟':'電源已關閉');
@@ -257,7 +257,7 @@ function storagePropDisplayTile(id,c,r,layer,stamp=null){
   if(typeof isPoolcoreLed==='function'&&isPoolcoreLed(mapTileById(id)))return null;
   const kind=storagePropKindCached(id);   // 畫地圖時每一格都會問：用記起來的結果
   if(!kind)return null;
-  if(kind==='power'&&stamp&&stamp.valve)return powerSwitchTileFor(id,typeof poolValveShowsOn==='function'&&poolValveShowsOn());   // 抽水閥：水抽掉時是「開」
+  if(kind==='power'&&(typeof poolIsValve==='function'?poolIsValve(stamp):!!(stamp&&stamp.valve)))return powerSwitchTileFor(id,typeof poolValveShowsOn==='function'&&poolValveShowsOn());   // 抽水閥：水抽掉時是「開」
   if(kind==='power')return powerSwitchTileFor(id,mapPowerIsOn(circuitOf(stamp)));
   const token=storagePropToken(id,c,r,layer,stamp?.ox||0,stamp?.oy||0);
   if(kind==='dynamo')return dynamoTileFor(id,dynamoIsOn(token));

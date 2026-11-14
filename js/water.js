@@ -58,6 +58,7 @@ function waterSlowAt(x, y) { const w = waterAt(x, y + WATER.footDy); return w ? 
 function wadeInfo(a, kind) {
   if (!a || a.sitting || a.eatenBy || a.grabbed || a.grabFall) return null;
   if (kind === 'enemy') {
+    if (a.poolBoss && typeof poolBossWade === 'function') { const r = poolBossWade(a); if (r !== undefined) return r; }   // 池核 BOSS 在深水區：露出上半身（js/pool-boss.js）
     if ((a.slimeLift || 0) > 4 || a.dead) return null;   // 浮在空中、跳起來的時候不算
     const w = waterAt(a.x, a.y + WATER.enemyFootDy); if (!w) return null;
     return { w, bottom: a.y + 13, height: (a.drawHeight || 33) * (a.sizeMul || 1), width: (a.drawWidth || 42) * (a.sizeMul || 1) };
@@ -71,7 +72,13 @@ function wadeInfo(a, kind) {
 let waterLayer = null;   // 旁邊的空白畫布（跟遊戲畫面一樣大）
 function drawWaded(a, kind, drawFn) {
   const info = a && a.swimRing ? null : wadeInfo(a, kind);   // 坐在救生圈上：整個人照常畫，不會被水遮住
-  if (a && a.swimRing && typeof drawSwimRinged === 'function') { drawSwimRinged(a, drawFn); return; }   // 坐進救生圈：腳藏起來（js/swim-ring.js）
+  if (a && a.swimRing && typeof drawSwimRinged === 'function') {   // 坐進救生圈：腳藏起來（js/swim-ring.js），救生圈外面一圈水波紋
+    const ri = typeof swimRingRippleInfo === 'function' ? swimRingRippleInfo(a) : null;
+    if (ri) drawWaterRipple(a, ri, 'back');
+    drawSwimRinged(a, drawFn);
+    if (ri) drawWaterRipple(a, ri, 'front');
+    return;
+  }   // 坐進救生圈：腳藏起來（js/swim-ring.js）
   if (!info) { drawFn(); return; }
   const main = ctx, cvs = main.canvas, m = main.getTransform();
   if (!waterLayer) waterLayer = document.createElement('canvas');

@@ -93,7 +93,7 @@ function drawCircuitNumbers(ctx){
   for(const l of poweredLightFixtures())if(l.circuit&&isLit(l.x,l.y))drawCircuitBadge(ctx,l.x+18,l.top+8,l.circuit,mapPowerIsOn(l.circuit));
   if(typeof storagePropEntries!=='function')return;
   for(const prop of storagePropEntries()){
-    if(prop.kind!=='power'||(prop.stamp&&prop.stamp.valve))continue;const n=circuitOf(prop.stamp);   // 抽水閥沒有電路編號
+    if(prop.kind!=='power'||(typeof poolIsValve==='function'?poolIsValve(prop.stamp):!!(prop.stamp&&prop.stamp.valve)))continue;const n=circuitOf(prop.stamp);   // 抽水閥沒有電路編號
     if(n&&isLit(prop.x,prop.y))drawCircuitBadge(ctx,prop.x,prop.top-4,n,mapPowerIsOn(n));
   }
 }
