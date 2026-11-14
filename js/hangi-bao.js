@@ -55,7 +55,7 @@ function hangiCapSpot(minFromPlayer) {
 function placeHangiCap(minFromPlayer) {
   const spot = hangiCapSpot(minFromPlayer);
   if (!spot) return;
-  const cap = { x: spot.x, y: spot.y, c: spot.c, r: spot.r, state: 'closed', t: 0 };
+  const cap = { x: spot.x, y: spot.y, c: spot.c, r: spot.r, floor: spawnFloorAt(spot.c, spot.r), state: 'closed', t: 0 };   // floor：在幾樓（js/pathfinding.js）
   G.hangiCaps.push(cap);
   G.grid[cap.c + ',' + cap.r] = { kind: 'hangiCap', cap };   // 擋路：佔住腳下這一格
 }
@@ -130,7 +130,7 @@ function shootHangiCapOnLine(x1, y1, x2, y2) {
 function hitHangiCapsAt(x, y, R) {
   const caps = liveHangiCaps(); if (!caps) return;
   for (const cap of caps) {
-    if (cap.state !== 'closed') continue;
+    if (cap.state !== 'closed' || !blastHits(cap)) continue;   // 不同樓層的爆炸打不開
     const b = hangiCapBody(cap);
     if (Math.hypot(b.x - x, b.y - y) <= R + b.r || Math.hypot(cap.x - x, cap.y - y) <= R + b.r) openHangiCap(cap);
   }
@@ -252,7 +252,7 @@ function throwCap(e, target) {
   const hit = new Set();   // 同一次丟出去的幾頂共用：同一個人去程、回程各只會被打一次（不會三頂疊在一起打三下）
   for (let i = 0; i < n; i++) {
     const a = a0 + (i - (n - 1) / 2) * (sp ? sp.angle : 0) * Math.PI / 180;   // 散開：中間那頂對準目標，其餘往兩邊
-    (G.capShots = G.capShots || []).push({ owner: e, x: e.x, y: e.y, z, ux: Math.cos(a), uy: Math.sin(a), speed: cfg.capSpeed,
+    (G.capShots = G.capShots || []).push({ owner: e, floor: actorFloor(e), x: e.x, y: e.y, z, ux: Math.cos(a), uy: Math.sin(a), speed: cfg.capSpeed,
       phase: 'out', left: (cfg.throwRange + .8) * CELL, spin: 0, age: 0, hit, trail: [], scale: sp ? sp.scale : 1, hitR: sp ? sp.hitR : HB_HIT_R });
   }
   e.hb.capOut = true;
@@ -273,9 +273,9 @@ function capHitPlayer(s) {
 // 帽子打到人：去程、回程各打一次
 function capCheckHits(s) {
   const p = G.player, key = o => s.phase + ':' + (o === p ? 'p' : G.towers.indexOf(o));
-  if (p && p.hp > 0 && !s.hit.has(key(p)) && Math.hypot(p.x - s.x, p.y - s.y) <= s.hitR) { s.hit.add(key(p)); capHitPlayer(s); }
+  if (p && p.hp > 0 && !s.hit.has(key(p)) && onFloor(s.floor, p) && Math.hypot(p.x - s.x, p.y - s.y) <= s.hitR) { s.hit.add(key(p)); capHitPlayer(s); }
   for (const t of G.towers) {
-    if (t.hp <= 0 || t.berserk || s.hit.has(key(t)) || Math.hypot(t.x - s.x, t.y - s.y) > s.hitR) continue;
+    if (t.hp <= 0 || t.berserk || s.hit.has(key(t)) || !onFloor(s.floor, t) || Math.hypot(t.x - s.x, t.y - s.y) > s.hitR) continue;   // 不同樓層打不到
     s.hit.add(key(t));
     s.owner.atkCd = 0; enemyAttackSentry(s.owner, t, 0);
     if (typeof sfxAt === 'function') sfxAt('knock2', t.x, t.y, .6, 'hangi-hit');
@@ -284,6 +284,7 @@ function capCheckHits(s) {
 function updateCapShots(dt) {
   if (!G.capShots || !G.capShots.length) return;
   for (const s of G.capShots) {
+    setFloorCtxTo(s.floor);   // 帽子照丟出來時在幾樓判斷牆、建築（js/pathfinding.js）
     s.age += dt; s.spin += dt * 18;
     s.trail.push({ x: s.x, y: s.y - s.z }); if (s.trail.length > 6) s.trail.shift();
     const e = s.owner, ownerAlive = e && e.hp > 0 && G.enemies.includes(e);
@@ -317,6 +318,7 @@ function updateCapShots(dt) {
     }
     if (s.age > 8) { s.done = true; if (e.hb && !G.capShots.some(o => o !== s && o.owner === e && !o.done)) e.hb.capOut = false; }   // 保險：卡住太久就收回
   }
+  clearFloorCtx();
   G.capShots = G.capShots.filter(s => !s.done);
 }
 
@@ -326,7 +328,7 @@ function hangiCapSortables(sortables) {
   const caps = liveHangiCaps(); if (!caps) return;
   for (const cap of caps) {
     if (cap.boss && typeof capKingCapSortable === 'function') { capKingCapSortable(sortables, cap); continue; }   // 順順宮主的大宮帽（js/elite-cap-king.js）
-    if (isVisible(cap.x, cap.y)) sortables.push({ y: cap.y + 13, draw: () => drawHangiCap(ctx, cap) });
+    if (isVisible(cap.x, cap.y)) sortables.push({ y: cap.y + 13 + looseSortY(cap), draw: () => drawHangiCap(ctx, cap) });
   }
 }
 function drawHangiCap(ctx, cap) {

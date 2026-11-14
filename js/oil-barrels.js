@@ -68,6 +68,9 @@ function destroyObstacleNow(o) {
 function onObstacleRemoved(o) {
   const it = oilItem(o);
   if (!it) return;
+  withBlastFloor(actorFloor(o), () => oilRemovedNow(o, it));   // 油桶在幾樓，爆炸、火海、油汙就在幾樓（js/pathfinding.js）
+}
+function oilRemovedNow(o, it) {
   if (o.proxy) { o.proxy.dead = true; o.proxy.hp = 0; }
   if (o.lastHitBy === 'demolish' || o.lastHitBy === 'eaten') return;   // 自己拆除、被虱目魚小子吃掉：安全移除，什麼都不會發生
   const p = oilCenter(o);
@@ -122,7 +125,7 @@ function oilExplode(x, y, it) {
   damageCoresInBlast(x, y, R, B.enemy);
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {
-    if (e.dead || e.hp <= 0) continue;
+    if (e.dead || e.hp <= 0 || !blastHits(e)) continue;   // blastHits：不同樓層炸不到
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
     const k = 1 - .4 * d / R;   // 越靠近中心越痛
@@ -133,7 +136,7 @@ function oilExplode(x, y, it) {
   }
   if (typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, B.enemy);   // 地底的版權老鼠被炸出地面（js/burrowing-mouse.js）
   for (const t of G.towers) {
-    if (t.hp <= 0) continue;
+    if (t.hp <= 0 || !blastHits(t)) continue;
     const d = Math.hypot(t.x - x, t.y - y);
     if (d > R || !hasLineOfSight(x, y, t.x, t.y)) continue;
     const def = Math.max(0, Math.min(.75, TYPES[t.type]?.defense || 0));
@@ -143,7 +146,7 @@ function oilExplode(x, y, it) {
     if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
   const p = G.player;
-  if (p && p.hp > 0) {
+  if (p && p.hp > 0 && blastHits(p)) {
     const d = Math.hypot(p.x - x, p.y - y);
     if (d <= R && hasLineOfSight(x, y, p.x, p.y)) {
       const hurt = (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(B.player * (1 - .4 * d / R)) : B.player * (1 - .4 * d / R));
@@ -155,12 +158,12 @@ function oilExplode(x, y, it) {
   }
   // 連鎖：範圍內的其他油桶也被炸爆、油汙被點燃
   for (const o of [...G.obstacles]) {
-    if (!oilItem(o) || o.hp <= 0) continue;
+    if (!oilItem(o) || o.hp <= 0 || !blastHits(o)) continue;
     const c = oilCenter(o);
     if (Math.hypot(c.x - x, c.y - y) <= R) damageOil(o, 9999, 'explosion');
   }
   for (const o of G.obstacles) {   // 地雷也會被引爆（油桶炸不開礦物，但可以引爆旁邊的地雷去炸）
-    if (!o.trap || o.hp <= 0 || o.fuseT > 0) continue;
+    if (!o.trap || o.hp <= 0 || o.fuseT > 0 || !blastHits(o)) continue;
     if (Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15 + Math.random() * .1;
   }
   igniteSlicksNear(x, y, R);
@@ -192,7 +195,7 @@ function oilExplode(x, y, it) {
 function damageCoresInBlast(x, y, radius, damage) {
   if (typeof damageFogCrystalsInBlast === 'function') damageFogCrystalsInBlast(x, y, radius, damage);   // 爆炸也會震碎霧樹的水晶（js/fog.js）
   for (const core of G.cores || []) {
-    if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
+    if (core.dead || core.hp <= 0 || core.hidden || core.carried || !blastHits(core)) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）；不同樓層炸不到
     const d = Math.hypot(core.x - x, core.y - y);
     if (d > radius || !hasLineOfSight(x, y, core.x, core.y)) continue;
     const hurt = damage * (1 - .4 * d / radius);
@@ -203,7 +206,7 @@ function damageCoresInBlast(x, y, radius, damage) {
 
 // ---- 油汙 ----
 function addOilSlick(x, y, r, life) {
-  (G.oilSlicks = G.oilSlicks || []).push({ x, y: y + 6, r, t: life, t0: life, shape: scorchShape(r, 20), ph: Math.random() * 6.28 });
+  (G.oilSlicks = G.oilSlicks || []).push({ x, y: y + 6, floor: blastFloor, r, t: life, t0: life, shape: scorchShape(r, 20), ph: Math.random() * 6.28 });
   if (typeof sfxAt === 'function') sfxAt('knock2', x, y, .5, 'oil-leak');
 }
 function slickContains(s, x, y) { const dx = x - s.x, dy = (y - s.y) / .6; return dx * dx + dy * dy <= s.r * s.r; }
@@ -212,7 +215,7 @@ function igniteSlicksNear(x, y, r = 0) {
   if (typeof mothIgniteNear === 'function') mothIgniteNear(x, y, r);   // 人面蝶的鱗粉霧也會被點燃：粉塵爆炸（js/human-face-butterfly.js）
   if (!G.oilSlicks) return;
   for (const s of G.oilSlicks) {
-    if (s.lit || s.t <= 0) continue;
+    if (s.lit || s.t <= 0 || (blastFloor && s.floor && s.floor !== blastFloor)) continue;   // 不同樓層的油汙點不著
     if (Math.hypot(s.x - x, s.y - y) <= s.r + r) igniteSlick(s);
   }
 }
@@ -220,7 +223,7 @@ function igniteSlick(s) {
   if (!s || s.lit) return;
   s.lit = true; s.t = 0;
   if (s.proxy) { s.proxy.dead = true; s.proxy.hp = 0; }
-  addOilFire(s.x, s.y, s.r * SLICK_FIRE.radiusMul, SLICK_FIRE.life, SLICK_FIRE.dps);
+  withBlastFloor(s.floor, () => addOilFire(s.x, s.y, s.r * SLICK_FIRE.radiusMul, SLICK_FIRE.life, SLICK_FIRE.dps));   // 油汙在幾樓，火就在幾樓
   for (let i = 0; i < 3; i++) spawnFlameBurst(s.x + (Math.random() * 2 - 1) * s.r * .5, s.y + (Math.random() * 2 - 1) * s.r * .3, 1.1);
   if (typeof addLightFlash === 'function') addLightFlash('flame', s.x, s.y);
   if (typeof sfxAt === 'function') sfxAt('fireImpact', s.x, s.y, .7, 'oil-ignite');
@@ -239,9 +242,10 @@ function igniteSlicksOnLine(x0, y0, x1, y1) {
 
 // ---- 火海 ----
 // 這個點有沒有在燒著的火海裡（pad＝範圍外再多算幾像素）。火海是扁的橢圓：上下只有左右的 0.7 倍
-function oilFireAt(x, y, pad = 0) {
+// who：問的是誰（隊員、怪物、地上的食物…有 floor 的都行）；給了就只看同一層的火（陸橋上的火燒不到橋下）
+function oilFireAt(x, y, pad = 0, who = null) {
   if (!G.oilFires) return null;
-  for (const f of G.oilFires) if (f.t > 0 && Math.hypot(x - f.x, (y - f.y) / .7) <= f.r + pad) return f;
+  for (const f of G.oilFires) if (f.t > 0 && (!who || fieldHits(f.floor, who)) && Math.hypot(x - f.x, (y - f.y) / .7) <= f.r + pad) return f;
   return null;
 }
 // ---- 希奧妮的火焰攻擊：打中的地方短暫算「有火」----
@@ -261,7 +265,8 @@ function anyFireAt(x, y, pad = 0) {
   return null;
 }
 function addOilFire(x, y, r, life, dps, foeDps = dps) {   // foeDps：燒怪物、核心的每秒傷害（燃燒彈比較燙，js/special-guns.js；沒給＝跟 dps 一樣）
-  (G.oilFires = G.oilFires || []).push({ x, y, r, t: life, t0: life, dps, foeDps, flameT: 0, smokeT: 0 });
+  (G.oilFires = G.oilFires || []).push({ x, y, floor: blastFloor, r, t: life, t0: life, dps,   // floor：在幾樓燒（0＝不分）
+    foeDps, flameT: 0, smokeT: 0 });
   for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }   // 哨兵重新找路，繞開剛燒起來的火
 }
 
@@ -289,7 +294,8 @@ function updateOil(dt) {
   if (!G.oilFires || !G.oilFires.length) return;
   const fireDps = (o, foe) => {   // 站在哪幾片火裡 → 取最燙的那片；foe＝怪物、核心（用 foeDps）
     let best = 0;
-    for (const f of G.oilFires) if (f.t > 0 && Math.hypot(o.x - f.x, (o.y - f.y) / .7) <= f.r) best = Math.max(best, foe ? (f.foeDps ?? f.dps) : f.dps);
+    for (const f of G.oilFires) if (f.t > 0 && fieldHits(f.floor, o) && Math.hypot(o.x - f.x, (o.y - f.y) / .7) <= f.r) best =   // 不同樓層的火燒不到
+      Math.max(best, foe ? (f.foeDps ?? f.dps) : f.dps);
     return best;
   };
   const fireTick = (o, foe) => {
@@ -334,14 +340,16 @@ function updateOil(dt) {
   }
   for (const f of G.oilFires) {
     f.t -= dt;
-    // 火會延燒：碰到的油汙被點燃、碰到的油桶被燒爆
-    igniteSlicksNear(f.x, f.y, f.r * .6);
-    if (typeof burnLifePilesNear === 'function') burnLifePilesNear(f.x, f.y, f.r * .8);   // 生命體碎掉的那堆在火裡：燒成灰
-    for (const o of [...G.obstacles]) {
-      if (!oilItem(o) || o.hp <= 0) continue;
-      const c = oilCenter(o);
-      if (Math.hypot(c.x - f.x, c.y - f.y) <= f.r) damageOil(o, 30 * dt, 'fire');
-    }
+    // 火會延燒：碰到的油汙被點燃、碰到的油桶被燒爆（只延燒同一層）
+    withBlastFloor(f.floor, () => {
+      igniteSlicksNear(f.x, f.y, f.r * .6);
+      if (typeof burnLifePilesNear === 'function') burnLifePilesNear(f.x, f.y, f.r * .8);   // 生命體碎掉的那堆在火裡：燒成灰
+      for (const o of [...G.obstacles]) {
+        if (!oilItem(o) || o.hp <= 0 || !blastHits(o)) continue;
+        const c = oilCenter(o);
+        if (Math.hypot(c.x - f.x, c.y - f.y) <= f.r) damageOil(o, 30 * dt, 'fire');
+      }
+    });
     // 火焰、黑煙
     const k = Math.min(1, f.t / 1.5);   // 最後 1.5 秒火勢變小
     if (typeof FIRE_FX_VERSION !== 'undefined' && FIRE_FX_VERSION === 2) {   // 火焰 V2：一片營火畫法的火海（js/fire-fx-v2.js）
@@ -369,6 +377,7 @@ function updateOil(dt) {
 // ---- 繪製（地面層：油汙、火海底下的橘光）----
 function drawOilGround(ctx) {
   if (G.oilSlicks) for (const s of G.oilSlicks) {
+    if (fxSkip(s.floor)) continue;   // 陸橋補畫時跳過橋下的
     const a = Math.min(1, s.t / 5) * Math.min(1, (s.t0 - s.t) / .4 + .2);   // 漏出時擴散、最後 5 秒淡掉
     const grow = Math.min(1, (s.t0 - s.t) / .6 + .3);
     ctx.save(); ctx.translate(s.x, s.y); ctx.scale(1, .6);
@@ -389,6 +398,7 @@ function drawOilGround(ctx) {
     ctx.restore();
   }
   if (G.oilFires) for (const f of G.oilFires) {
+    if (fxSkip(f.floor)) continue;
     const k = Math.min(1, f.t / 1.5, (f.t0 - f.t) / .2);
     const flick = .85 + .15 * Math.sin(performance.now() / 70 + f.x);
     ctx.save(); ctx.translate(f.x, f.y); ctx.scale(1, .7);

@@ -567,6 +567,7 @@ function seedOtherMapObstacles() {
     const o = { kind: 'obstacle', c, r, hp: BARRIER.hp, maxhp: BARRIER.hp };
     G.grid[c + ',' + r] = o; G.obstacles.push(o);
   }
+  for (const o of G.obstacles) setMapObstacleFloor(o);   // 放在 2 樓的礦物、路障：算 2 樓的東西，擋 2 樓的人
 }
 
 // ---- 繪製地圖圖片（圖層由下往上，最後大圖）----
@@ -760,7 +761,9 @@ function hasImageAt(c, r) {
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
-const stampOn2F = s => !!s.deck2 || MAP_FLOOR2_LAYERS.has(s.layer || 'top');   // 標了「2樓的圖」，或放在「2樓」圖層裡
+// 這張圖是不是 2 樓的圖：地圖裡有寫 level（地圖編輯器圖片的「樓層」選單，js/map-levels.js）就照寫的；
+// 沒寫的照舊規則：標了「2樓的圖」（舊的 deck2），或放在名稱有「2樓」的圖層裡
+const stampOn2F = s => s && s.level != null ? s.level !== 1 : (!!s.deck2 || MAP_FLOOR2_LAYERS.has(s.layer || 'top'));
 // 2 樓「地板類」圖層（名稱有 2樓、不是物件／上層類）的圖蓋到哪些格子；all＝所有 2 樓的圖蓋到的格子（連接柱只算上半段）。換地圖、物件數量變了才重算
 let floor2CellsCache = null;
 function floor2ArtCells() {
@@ -778,13 +781,89 @@ function floor2ArtCells() {
   for (const s of MAP.stamps || []) if (stampOn2F(s)) cover(s, all, stampConnects(s));
   return floor2CellsCache;
 }
+// 「只有 2 樓、沒有 1 樓」的格子：是 2 樓地面（不是樓層出入口），而且底下沒有任何一樓的圖（一樓圖層的格子圖、一樓圖層的物件都沒蓋到）。
+// 陸橋（底下有一樓的地板）不算。蓋建築用：不管溫特站在幾樓，蓋在這種格子上一律算 2 樓（js/build.js 的 buildFloorAt）
+let floor2OnlyCache = null;
+function floor2OnlyCells() {
+  const n = (MAP.stamps || []).length;
+  if (floor2OnlyCache && floor2OnlyCache.map === MAP && floor2OnlyCache.n === n && floor2OnlyCache.deck === deckCells) return floor2OnlyCache.cells;
+  // 規則在 js/map-levels.js（地圖編輯器也用同一份）：轉換過的地圖照 MAP.only2，沒轉換的照舊規則（沒有一樓的圖蓋到的 2 樓地面）
+  const cells = MapLevels.only2Cells(MAP, mapTileById);
+  floor2OnlyCache = { map: MAP, n, deck: deckCells, cells };
+  return cells;
+}
+// 這格一樓的牆是不是「2 樓的物件加的」（2 樓的人也要擋，js/pathfinding.js 的 deckBlocked）：
+// 不是地圖編輯器手畫的一樓紅格（那個只擋一樓，2 樓另外用「2樓碰撞」畫），而且這格只有 2 樓、或被 2 樓物件圖層的圖蓋著。
+// 置物箱、候車椅、門、電梯這些物件各自把擋路格加進一樓的牆，放在 2 樓時靠這條規則擋住 2 樓的人（開箱、開門拿掉牆時也自動跟著不擋）
+let objWall2FCache = null;
+function objectWallOn2F(k) {
+  if (!MAP) return false;
+  const n = (MAP.stamps || []).length;
+  if (!objWall2FCache || objWall2FCache.map !== MAP || objWall2FCache.n !== n) {
+    const cover = new Set();   // 2 樓物件圖層的圖蓋到的格子
+    for (const s of MAP.stamps || []) {
+      if (!stampOn2F(s) || !isOccLayer(s.layer || 'top')) continue;
+      const t = mapTileById(s.id); if (!t) continue;
+      const w = mapStampW(s, t), h = mapStampH(s, t), c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL;
+      for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r0 + h; r++) cover.add(c + ',' + r);
+    }
+    objWall2FCache = { map: MAP, n, cover, drawn: new Set(MAP.solid || []) };
+  }
+  if (objWall2FCache.drawn.has(k)) return false;
+  return objWall2FCache.cover.has(k) || floor2OnlyCells().has(k);
+}
+// 地圖上擺的可破壞物件（礦物、路障…）算幾樓：擋路格全在 2 樓地面上，而且是 2 樓圖層的圖、或那裡只有 2 樓 → 2 樓（只擋 2 樓的人，js/build.js 的 barrierAt）
+function setMapObstacleFloor(o) {
+  if (!hasFloors || !o || o.playerBuilt) return;
+  const cells = (o.solid && o.solid.length ? o.solid : [[0, 0]]).map(([dc, dr]) => (o.c + dc) + ',' + (o.r + dr));
+  if (!cells.every(k => deckCells.has(k) && !rampCells.has(k))) return;
+  const src = o.mapSource || o.baseStamp;
+  const on2F = src && typeof src === 'object' ? stampOn2F(src) : typeof src === 'string' && MAP_FLOOR2_LAYERS.has(src.split(':')[0]);
+  const only = floor2OnlyCells();
+  if (on2F || cells.every(k => only.has(k))) o.floor = 2;
+}
+// 這張圖蓋到的格子是不是全都「只有 2 樓、沒有 1 樓」（js/maploader.js 的 mapOccluders：這種 2 樓地板當成一般地面畫）
+function floor2ItemOnlyUpstairs(it) {
+  const only = floor2OnlyCells(); let any = false;
+  for (let c = Math.ceil(it.x0 / CELL - .5); (c + .5) * CELL < it.x1; c++) for (let r = Math.ceil(it.y0 / CELL - .5); (r + .5) * CELL < it.y1; r++) {
+    if (!only.has(c + ',' + r)) return false;
+    any = true;
+  }
+  return any;
+}
+// 2 樓地面的範圍（畫面裁切用，js/render.js 補畫地上的特效）：only＝只有 2 樓的格子；bridge＝其他 2 樓地面（陸橋，底下有一樓）
+// onlyLate＝只有 2 樓、但上面鋪的 2 樓地板圖有一部分蓋到陸橋（這種圖跟陸橋一起「晚畫」，見 mapOccluders）：
+//   這些格子的地上特效要等地板畫完才補畫，不然焦痕、碎片會被地板蓋掉一半
+let floor2ClipCache = null;
+function floor2ClipPaths() {
+  const only = floor2OnlyCells(), items = mapOccluders();
+  if (floor2ClipCache && floor2ClipCache.only === only && floor2ClipCache.items === items) return floor2ClipCache;
+  const late = new Set();
+  for (const it of items) {
+    if (it.kind !== 'stamp' || it.part || !itemOn2F(it) || it.y < FLOOR2_SORT - 50000 || it.y >= FLOOR2_SORT - 45000) continue;   // 只看「晚畫的 2 樓地板」
+    for (let c = Math.ceil(it.x0 / CELL - .5); (c + .5) * CELL < it.x1; c++) for (let r = Math.ceil(it.y0 / CELL - .5); (r + .5) * CELL < it.y1; r++) late.add(c + ',' + r);
+  }
+  const a = new Path2D(), b = new Path2D(), d = new Path2D(); let nb = 0, nd = 0;
+  for (const k of deckCells) {
+    if (rampCells.has(k)) continue;
+    const [c, r] = k.split(',').map(Number), x = OX + c * CELL, y = OY + r * CELL;
+    if (!only.has(k)) { b.rect(x, y, CELL, CELL); nb++; }
+    else if (late.has(k)) { d.rect(x, y, CELL, CELL); nd++; }
+    else a.rect(x, y, CELL, CELL);
+  }
+  floor2ClipCache = { only, items, onlyPath: a, onlyLatePath: nd ? d : null, bridgePath: nb ? b : null };
+  return floor2ClipCache;
+}
 // 連接 1、2 樓的東西（從一樓立到二樓的柱子、牆）：2 樓物件圖層裡的圖，底部沒有踩在 2 樓的地板上（底下那格不是 2 樓地面、也沒有 2 樓地板的圖）、高 2 格以上。
 // 這種圖從圖片一半的高度分成上下兩段：下半段算一樓的東西（跟一樓的人照底部排前後），上半段算二樓的（蓋在一樓的人上面、跟二樓的人排前後）。
 function stampConnects(s) {
+  if (s && s.level != null) return hasFloors && s.level === 'span';   // 地圖裡寫明「跨樓層」的才算（js/map-levels.js）；沒寫的照下面的舊規則推算
   const lid = s.layer || 'top';
   if (!hasFloors || !stampOn2F(s) || !isOccLayer(lid) || MAP_FLOOR2_TOP.has(lid)) return false;
   const t = mapTileById(s.id); if (!t) return false;
   const w = mapStampW(s, t), h = mapStampH(s, t); if (h < 2) return false;
+  // 側面的手扶梯一定是連接 1、2 樓的：就算上面的平台稍微疊到 2 樓地面的格子也照樣拆成上下兩段（不然整座被當成 2 樓的牆，一樓的燈照不到、變成一塊黑的）
+  if (typeof escalatorSideUsable === 'function' && escalatorSideUsable(s)) return true;
   // 下半段蓋到的每一格都不能是 2 樓的地面／2 樓地板的圖：只要碰到一格，就是站在陸橋上的牆（整張算 2 樓），不拆
   const c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL, fl = floor2ArtCells().floor;
   // 牆腳正下方那一排是 2 樓地面：這是站在 2 樓走道上的牆（牆身本來就不能走、不是 2 樓地面），整張算 2 樓，不拆
@@ -904,7 +983,9 @@ function drawMapTop(ctx) {
 // 這樣它會緊接在那張圖之後畫出來，跟編輯器看到的上下關係一致。
 // 重疊用「實際像素範圍」判斷（含方向鍵微調的 ox/oy），因為常常是靠微調才疊在一起、格子並沒有交集。
 let occCache = null, occCacheFor = null, stairUpperRects = [];
-function inStairUpper(x, y) { if (hasFloors && MAP) mapOccluders(); for (const b of stairUpperRects) if (x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1) return true; return false; }
+// 側面的手扶梯（b.side）不算：它上半段的長方形還包含手扶梯後面的一樓地面，站在那裡的人不能被當成 2 樓（會畫到圍欄前面）；
+// 真的站在手扶梯上的人由 js/escalators.js 的 escalatorRiderSortY 自己排前後。燈光（js/lighting.js）還是整塊都算
+function inStairUpper(x, y) { if (hasFloors && MAP) mapOccluders(); for (const b of stairUpperRects) if (!b.side && x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1) return true; return false; }
 function mapOccluders() {
   if (occCache && occCacheFor === MAP) return occCache;
   const items = [];
@@ -963,11 +1044,15 @@ function mapOccluders() {
     if (it.part === 'lower') { if (flat) it.y = -1; continue; }   // 樓梯的下半段：一樓的地面，永遠在一樓的人下面
     if (it.part === 'upper') { it.y = flat ? FLOOR2_SORT - 50000 + it.li : FLOOR2_SORT + it.splitY; continue; }   // 上半段：樓梯＝二樓的地面；柱子＝從分界那條線起算，跟二樓的人排前後
     if (!itemOn2F(it)) continue;
-    if (flat) { it.y = FLOOR2_SORT - 50000 + it.li; continue; }
-    it.y = MAP_FLOOR2_TOP.has(lid) ? FLOOR2_SORT + 50000 + it.li : isOccLayer(lid) ? it.y + FLOOR2_SORT : FLOOR2_SORT - 50000 + it.li;
+    // 2 樓的地板（平貼的圖、2 樓地板圖層）：平常排在所有一樓的東西之後（蓋住橋下一樓的人）。
+    // 但整張都落在「只有 2 樓、沒有 1 樓」的格子上的地板，底下沒有人要蓋：當成一般地面最先畫（y 是負的），
+    // 掉在上面的東西（掉落物、碎片、屍體、焦痕…都照一樓的順序畫）才不會被它蓋掉
+    const floor2Y = floor2ItemOnlyUpstairs(it) ? -2 + it.li * 1e-3 : FLOOR2_SORT - 50000 + it.li;
+    if (flat) { it.y = floor2Y; continue; }
+    it.y = MAP_FLOOR2_TOP.has(lid) ? FLOOR2_SORT + 50000 + it.li : isOccLayer(lid) ? it.y + FLOOR2_SORT : floor2Y;
   }
   // 樓梯（平貼、連接 1、2 樓的圖）的上半段範圍：站在裡面的人畫面上算 2 樓（js/pathfinding.js 的 floorSortY）
-  stairUpperRects = items.filter(it => it.part === 'upper' && stampIsStairs(it.stamp)).map(it => ({ x0: OX + it.x0, x1: OX + it.x1, y0: OY + it.y0, y1: OY + it.splitY }));
+  stairUpperRects = items.filter(it => it.part === 'upper' && stampIsStairs(it.stamp)).map(it => ({ x0: OX + it.x0, x1: OX + it.x1, y0: OY + it.y0, y1: OY + it.splitY, side: typeof escalatorSideUsable === 'function' && escalatorSideUsable(it.stamp) }));
   buildLayerOverdraw(items);
   occCache = items; occCacheFor = MAP;
   return items;
@@ -1051,7 +1136,8 @@ function occluderStateSig(x) {
     + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '')
     + (typeof fogTreeStampBroken === 'function' && fogTreeStampBroken(s) ? 'f' : '')   // 霧樹水晶破了：換圖（js/fog.js）
     + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '')   // 隱藏區圖層淡入中：補畫也要跟著重做
-    + (typeof doorCutoutSig === 'function' ? doorCutoutSig(s) : '');   // 疊在這張圖上的挖空門開了／關了：門洞也要挖進補畫裡（js/doors.js）
+    + (typeof doorCutoutSig === 'function' ? doorCutoutSig(s) : '')   // 疊在這張圖上的挖空門開了／關了：門洞也要挖進補畫裡（js/doors.js）
+    + (typeof escalatorAnimSig === 'function' ? escalatorAnimSig(s) : '');   // 會動的手扶梯：階梯捲到下一格，補畫也要跟著重做（不然疊在牆上的那一塊階梯不會動，js/escalators.js）
 }
 function occluderImageReady(x) {
   const s = x.kind === 'cell' ? null : x.stamp;

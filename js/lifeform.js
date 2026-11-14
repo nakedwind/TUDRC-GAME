@@ -50,7 +50,7 @@ function lifeSlices(file, w, h) {
 
 // ---- HP 歸零時（js/game.js 呼叫）：沒在燒 → 碎成一堆，回傳 true（這次不算擊殺）----
 function lifeformOnFire(e) {
-  const standingInFire = typeof oilFireAt === 'function' && !!oilFireAt(e.x,e.y);
+  const standingInFire = typeof oilFireAt === 'function' && !!oilFireAt(e.x,e.y,0,e);   // 只看同一層的火
   return standingInFire || e.burnT > 0 || lifeNow() - (e.fireHitAt ?? -99) < LIFEFORM.burnWindow;
 }
 function lifeformCollapse(e) {
@@ -62,7 +62,7 @@ function lifeformCollapse(e) {
     tx: (Math.random() - .5) * 46, ty: (Math.random() - .3) * 14, rot: (Math.random() - .5) * 3.2,
     delay: Math.random() * .18,
   }));
-  lifePiles().push({ x: e.x, y: e.y, spec: ACTIVE_MONSTERS.find(m => m.id === e.type), t: LIFEFORM.revive, born: lifeNow(),
+  lifePiles().push({ x: e.x, y: e.y, floor: actorFloor(e), spec: ACTIVE_MONSTERS.find(m => m.id === e.type), t: LIFEFORM.revive, born: lifeNow(),
     pieces, tint: e.tint || null, state: 'collapse' });
   e.dead = true; e.lifeformPiled = true;
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', e.x, e.y, .72, 'lifeform-collapse');
@@ -72,13 +72,13 @@ function lifeformCollapse(e) {
 
 // ---- 火燒到地上的碎塊：真的死掉 ----
 function burnLifePilesNear(x, y, R) {
-  for (const p of lifePiles()) if (p.state !== 'burn' && Math.hypot(p.x - x, p.y - y) <= R + 18) burnLifePile(p);
+  for (const p of lifePiles()) if (p.state !== 'burn' && blastHits(p) && Math.hypot(p.x - x, p.y - y) <= R + 18) burnLifePile(p);   // blastHits：不同樓層燒不到
 }
 function burnLifePile(p) {
   if (p.state === 'burn') return;
   p.state = 'burn'; p.burnAt = lifeNow();
   const spec = p.spec || {};
-  if (typeof dropShard === 'function') dropShard(p.x, p.y, spec.crystals ?? 3); else earnCrystals(spec.crystals ?? 3);   // 打怪不加錢；掉一顆碎片
+  if (typeof dropShard === 'function') dropShard(p.x, p.y, spec.crystals ?? 3, p.floor || 0); else earnCrystals(spec.crystals ?? 3);   // 打怪不加錢；掉一顆碎片
   if (typeof trackKillAchievements === 'function') trackKillAchievements({ type: spec.id, x: p.x, y: p.y });
   lifeBurnFx(p.x, p.y);
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', p.x, p.y, .68, 'lifeform-burn-death');
@@ -88,7 +88,7 @@ function burnLifePile(p) {
 function lifeformBurnAway(e) {
   const file = e.frames ? e.frames.front : e.sprite;
   const pieces = lifeSlices(file, e.drawWidth || 60, e.drawHeight || 80).map(p => ({ ...p, tx: 0, ty: 0, rot: 0, delay: 0 }));
-  lifePiles().push({ x: e.x, y: e.y, spec: null, t: 0, born: lifeNow() - LIFEFORM.collapse, pieces, state: 'burn', burnAt: lifeNow(), standing: true });
+  lifePiles().push({ x: e.x, y: e.y, floor: actorFloor(e), spec: null, t: 0, born: lifeNow() - LIFEFORM.collapse, pieces, state: 'burn', burnAt: lifeNow(), standing: true });
   lifeBurnFx(e.x, e.y);
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', e.x, e.y, .68, 'lifeform-burn-away');
 }
@@ -130,7 +130,7 @@ function updateLifePiles(dt) {
 // ---- 繪製：碎掉掉落 → 堆在地上（快復活時抽動）→ 飛回去組裝；著火時四散變黑淡出 ----
 // 跟角色一起依深度排序（js/render.js），組裝到一半的身體才不會被前面的箱子蓋住
 function lifePileSortables(sortables) {
-  for (const p of lifePiles()) if (typeof isVisible !== 'function' || isVisible(p.x, p.y)) sortables.push({ y: p.y + 13, draw: () => drawLifePile(ctx, p) });
+  for (const p of lifePiles()) if (typeof isVisible !== 'function' || isVisible(p.x, p.y)) sortables.push({ y: p.y + 13 + looseSortY(p), draw: () => drawLifePile(ctx, p) });
 }
 function drawLifePile(ctx, p) {
   const now = lifeNow();

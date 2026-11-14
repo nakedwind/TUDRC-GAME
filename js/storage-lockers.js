@@ -75,7 +75,7 @@ function storagePropEntries(){
   };
   for(const s of storagePropSpots()) add(s.id,s.c,s.r,s.layer,s.stamp);   // 順序跟以前一樣：先大圖章、再各圖層的格子
   for (const drop of G?.equipmentDrops || []) entries.push({ kind:'equipment-drop', drop, x:drop.x, y:drop.y, top:drop.y-28 });
-  for (const drop of G?.groundItems || []) entries.push({ kind:'ground-item', drop, x:drop.x, y:drop.y, top:drop.y-30 });   // 溫特自己放在地上的（js/ground-items.js）
+  for (const drop of G?.groundItems || []) if (!G.player || onFloor(drop.floor || 1, G.player)) entries.push({ kind:'ground-item', drop, x:drop.x, y:drop.y, top:drop.y-30 });   // 溫特自己放在地上的、怪物掉的（js/ground-items.js）；陸橋上、橋下的東西要在同一層才撿得到
   return entries;
 }
 // filter：只找某一類（例如 isPickupProp＝只找可以拾取的東西）
@@ -191,7 +191,7 @@ function grantLockerLoot(loot,where='置物櫃'){
     const got=supplyGain(item.id,qty);   // 持有上限：拿不下的會跳提示
     if(got<qty&&G?.player){
       G.groundItems=G.groundItems||[];
-      G.groundItems.push({id:item.id,qty:qty-got,x:G.player.x,y:G.player.y+12,at:performance.now()/1000});
+      G.groundItems.push({id:item.id,qty:qty-got,x:G.player.x,y:G.player.y+12,at:performance.now()/1000,floor:actorFloor(G.player)});
       systemNotice('背包放不下的「'+item.name+'」留在地上');
     }
     if(got){showItemPickupNotice(item.id,got);systemNotice('在'+where+'找到「'+item.name+'」×'+got);}

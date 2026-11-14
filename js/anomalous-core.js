@@ -39,7 +39,7 @@ function seedCores() {
   const seen = new Set();
   const cells = marked.filter(([c, r]) => {
     const key = c + ',' + r;
-    if (seen.has(key) || !inGrid(c, r) || isWall(c, r) || G.grid[key]) return false;
+    if (seen.has(key) || !inGrid(c, r) || spawnWallAt(c, r) || G.grid[key]) return false;   // spawnWallAt：2 樓的點看 2 樓碰撞（js/pathfinding.js）
     seen.add(key); return true;
   });
   for (let i = cells.length - 1; i > 0; i--) {
@@ -53,7 +53,8 @@ function seedCores() {
     const [c, r] = cells[i];
     const [x, y] = center(c, r);
     const hp = CORE.hp * difficulty;
-    G.cores.push({ x, y, hp, maxhp: hp, lastHp: hp, dead: false, awake: false, phase: 0, awakeT: 0,
+    G.cores.push({ x, y, floor: spawnFloorAt(c, r), hp, maxhp: hp, lastHp: hp, dead: false,   // floor：在幾樓（js/pathfinding.js）
+      awake: false, phase: 0, awakeT: 0,
       timer: 1.8 + i * .7 + Math.random() * 2.4, reward: CORE.reward * difficulty, moteT: 0, hitT: 0, seed: Math.random() * 10 });
   }
 }
@@ -382,7 +383,7 @@ function zoneSpawnCells(zone) {
   const dark = [], lit = [], any = [];
   for (const key of zone) {
     const [c, r] = key.split(',').map(Number);
-    if (!inGrid(c, r) || isWall(c, r) || G.grid[key]) continue;
+    if (!inGrid(c, r) || spawnWallAt(c, r) || G.grid[key]) continue;   // 出生區畫在 2 樓的格子：照 2 樓的牆判斷，不是一律看一樓（js/pathfinding.js）
     const [x, y] = center(c, r);
     if (typeof inHiddenArea === 'function' && inHiddenArea(x, y)) continue;   // 出生區畫到隱藏區裡也不生，免得露餡；炸開後才算（js/breakable-walls.js）
     any.push([c, r]);

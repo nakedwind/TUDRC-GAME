@@ -78,20 +78,21 @@ function fireIncendiary(p, aim, lv) {
   const dist = clearDistance(p, ang, Math.min(Math.hypot(aim.x - p.x, aim.y - p.y), S.range * CELL)), k = dist / (S.range * CELL);
   aimPose(p, ang);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
-  (G.incShots = G.incShots || []).push({ x0: mx, y0: my, x1: p.x + Math.cos(ang) * dist, y1: p.y + Math.sin(ang) * dist, t: 0,
+  (G.incShots = G.incShots || []).push({ floor: actorFloor(p), x0: mx, y0: my, x1: p.x + Math.cos(ang) * dist, y1: p.y + Math.sin(ang) * dist, t: 0,
     T: S.flight[0] + (S.flight[1] - S.flight[0]) * k, h: S.arc[0] + (S.arc[1] - S.arc[0]) * k, lv });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .12, life0: .12 });
   addLightFlash('muzzle', mx, my, 1.4);
   sfx('shotIncendiary');
 }
-function incendiaryLand(s) {
+function incendiaryLand(s) { withBlastFloor(s.floor, () => incendiaryLandNow(s)); }   // 燃燒彈在溫特那一層起火（js/pathfinding.js）
+function incendiaryLandNow(s) {
   const x = s.x1, y = s.y1, R = s.lv.r * CELL, S = SPECIAL_GUN.incendiary;
   addOilFire(x, y, R, s.lv.burn, S.fireDps, foeMul(S.fireDps));   // 火海燙隊員照原本，燒怪物乘倍率
   igniteSlicksNear(x, y, R);
   if (typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 生命體碎掉的那堆：燒成灰（js/lifeform.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, 6);
   if (s.lv.ignite) for (const e of G.enemies) {   // ignite：被炸到的怪物身上著火
-    if (e.dead || Math.hypot(e.x - x, (e.y - y) / .7) > R) continue;
+    if (e.dead || !blastHits(e) || Math.hypot(e.x - x, (e.y - y) / .7) > R) continue;
     e.burnT = Math.max(e.burnT || 0, foeMul(s.lv.ignite)); e.burnDmg = foeMul(S.burnDmg); e.burnTick = 1;
   }
   for (let i = 0; i < 7; i++) { const a = Math.random() * Math.PI * 2, rr = Math.random() * R * .7; spawnFlameBurst(x + Math.cos(a) * rr, y + Math.sin(a) * rr * .6, 1); }
@@ -114,7 +115,7 @@ function fireTranq(p, aim, lv) {
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
   let x1 = p.x + Math.cos(ang) * hitD, y1 = p.y + Math.sin(ang) * hitD;
   if (!target) { const cap = shotOpensHangiCap(p, ang, hitD); if (cap) { x1 = cap.x; y1 = cap.y; } }   // 麻醉針打到順順宮帽：打開
-  (G.tranqDarts = G.tranqDarts || []).push({ x0: mx, y0: my, x1, y1, ang, t: 0, T: Math.max(.04, hitD / S.speed), target, lv });
+  (G.tranqDarts = G.tranqDarts || []).push({ floor: actorFloor(p), x0: mx, y0: my, x1, y1, ang, t: 0, T: Math.max(.04, hitD / S.speed), target, lv });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .05, life0: .05 });
   sfx('shotTranq');   // 以前用 18% 音量播，幾乎聽不到
 }
@@ -143,7 +144,7 @@ function tranqLand(s) {
   G.effects.push({ ring: true, x: s.x1, y: s.y1, r: 2, r2: 8, life: .14, life0: .14, color: '#c9b8ff' });
   if (!s.lv.mist || !s.target) return;
   const R = s.lv.mist * CELL;   // mist：麻醉霧，附近的也一起睡
-  for (const o of [...G.enemies, ...G.towers]) if (!hits.has(o) && Math.hypot(o.x - s.x1, o.y - s.y1) <= R) tranqHit(o, s.lv);
+  for (const o of [...G.enemies, ...G.towers]) if (!hits.has(o) && onFloor(s.floor, o) && Math.hypot(o.x - s.x1, o.y - s.y1) <= R) tranqHit(o, s.lv);   // 麻醉霧只飄在溫特那一層
   G.effects.push({ ring: true, x: s.x1, y: s.y1, r: 8, r2: R, life: .5, life0: .5, color: '#b9a7ff' });
   for (let i = 0; i < 10; i++) { const a = Math.random() * Math.PI * 2, rr = Math.random() * R * .8;
     G.effects.push({ ember: true, x: s.x1 + Math.cos(a) * rr, y: s.y1 + Math.sin(a) * rr * .6, vx: (Math.random() - .5) * 20, vy: -10 - Math.random() * 15, r: 4 + Math.random() * 4, life: .9, life0: .9, color: 'rgba(190,170,255,.55)' }); }
@@ -219,7 +220,7 @@ function fireFlashBang(p, aim, b) {
   const dist = clearDistance(p, ang, Math.min(Math.hypot(aim.x - p.x, aim.y - p.y), range)), k = dist / range;
   aimPose(p, ang);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
-  (G.flashShots = G.flashShots || []).push({ x0: mx, y0: my, x1: p.x + Math.cos(ang) * dist, y1: p.y + Math.sin(ang) * dist, t: 0,
+  (G.flashShots = G.flashShots || []).push({ floor: actorFloor(p), x0: mx, y0: my, x1: p.x + Math.cos(ang) * dist, y1: p.y + Math.sin(ang) * dist, t: 0,
     T: S.flight[0] + (S.flight[1] - S.flight[0]) * k, h: S.arc[0] + (S.arc[1] - S.arc[0]) * k, lv: b });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .1, life0: .1 });
   sfx('shotFlash');
@@ -227,14 +228,14 @@ function fireFlashBang(p, aim, b) {
 function flashBangLand(s) {
   const x = s.x1, y = s.y1, R = s.lv.r * CELL, stun = s.lv.stun;
   for (const e of liveEnemies()) {
-    if (Math.hypot(e.x - x, (e.y - y) / .8) > R) continue;
+    if (!onFloor(s.floor, e) || Math.hypot(e.x - x, (e.y - y) / .8) > R) continue;   // 不同樓層閃不到
     if (e.noStun) { flash('沒有效果', e.x, e.y - 40, '#9aa4b2'); continue; }   // 生命體
     const dur = foeMul(stun) * ((e.maxhp || 0) >= SPECIAL_GUN.tranq.bigHp ? .5 : 1);   // 隊員被閃到的秒數在下面，照原本
     e.stunT = Math.max(e.stunT || 0, dur); e.dazeT = Math.max(e.dazeT || 0, dur);
     e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = '#ffffff';
   }
   for (const t of G.towers) {   // 隊員也被閃到
-    if (t.hp <= 0 || Math.hypot(t.x - x, (t.y - y) / .8) > R) continue;
+    if (t.hp <= 0 || !onFloor(s.floor, t) || Math.hypot(t.x - x, (t.y - y) / .8) > R) continue;
     t.dazeT = Math.max(t.dazeT || 0, stun); t.target = null; t.moving = false;
     sentryStatus(t, '被閃到了！', '#fff6a8');
   }

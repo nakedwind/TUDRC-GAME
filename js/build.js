@@ -45,10 +45,21 @@ function placeCheckCells(v) {
   const cells = []; for (let dc = 0; dc < (v.w || 1); dc++) for (let dr = 0; dr < (v.h || 1); dr++) cells.push([dc, dr]);
   return cells;
 }
+// 這個建築蓋下去算幾樓：平常跟著溫特（站在樓梯上半段也算 2 樓）；
+// 但要檢查的格子全都是「只有 2 樓、沒有 1 樓」的地方（js/maploader.js 的 floor2OnlyCells）時一律算 2 樓——
+// 不然溫特站在一樓（例如手扶梯底下）往 2 樓的地面放燈，燈會被算成一樓的，照不到 2 樓
+function buildFloorAt(v, c, r) {
+  if (!hasFloors) return 1;
+  if (typeof floor2OnlyCells === 'function') {
+    const only = floor2OnlyCells(), cells = placeCheckCells(v);
+    if (cells.length && cells.every(([dc, dr]) => only.has((c + dc) + ',' + (r + dr)))) return 2;
+  }
+  return visualFloor(G && G.player);
+}
 function canPlaceObstacle(v, c, r, lightExtra = 0) {
-  // 陸橋：溫特在幾樓就蓋在幾樓（二樓只能蓋在 2 樓地面上，js/pathfinding.js）
+  // 陸橋：溫特在幾樓就蓋在幾樓（二樓只能蓋在 2 樓地面上，js/pathfinding.js）；只有 2 樓的地方一律蓋在 2 樓
   const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
-  floorCtx = visualFloor(G && G.player); floorOnRamp = false; floorOnDeck = false;   // 站在樓梯上半段也算 2 樓：可以直接蓋到 2 樓地面上
+  floorCtx = buildFloorAt(v, c, r); floorOnRamp = false; floorOnDeck = false;
   try { return canPlaceObstacleNow(v, c, r, lightExtra); } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
 }
 function canPlaceObstacleNow(v, c, r, lightExtra = 0) {
@@ -108,7 +119,7 @@ function placeObstacle(ob, c, r) {
   const solid = ob.trap || slow ? [] : variantSolidCells(v).map(cell => cell.slice());
   const blv = buildLevel(ob.id) || 1, hp = Math.max(1, Math.round(ob.hp * buildBoost({ playerBuilt: true, type: ob.id, blv }, 'hp')));   // 建築等級：血量（開發工坊「開發建築物」升級）
   const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, blv, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp, maxhp: hp, spawnT: 0, trap: !!ob.trap, slow: slow || null };
-  if (hasFloors && visualFloor(G.player) === 2) o.floor = 2;   // 蓋在陸橋上：只擋 2 樓的人、燈只照 2 樓、畫在 2 樓
+  if (buildFloorAt(v, c, r) === 2) o.floor = 2;   // 蓋在陸橋上：只擋 2 樓的人、燈只照 2 樓、畫在 2 樓
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
   if (typeof rememberStoryBuilds === 'function') rememberStoryBuilds();   // 劇情地圖：蓋好就記下來（js/combat-progress.js）

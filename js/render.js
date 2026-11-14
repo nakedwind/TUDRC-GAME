@@ -1061,7 +1061,7 @@ function draw() {
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
-  for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
+  for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23+looseSortY(core),draw:()=>drawCore(core)});
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
   if (typeof leafPileSortables === 'function') leafPileSortables(sortables);   // 樹葉堆（js/leaf-piles.js）
@@ -1080,30 +1080,43 @@ function draw() {
   if (typeof streetVehicleSortables === 'function') streetVehicleSortables(sortables);   // K56 的機車、腳踏車（js/street-vehicles.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
-  for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
+  for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13 + looseSortY(c), draw: () => drawCorpseSorted(c) });
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
-  if (typeof drawGroundItem === 'function') for (const g of G.groundItems || []) sortables.push({ y: g.y + GROUND_ITEMS.sortDy, draw: () => drawGroundItem(ctx, g) });   // 溫特從背包放在地上的東西（js/ground-items.js）
+  if (typeof drawGroundItem === 'function') for (const g of G.groundItems || []) sortables.push({ y: g.y + GROUND_ITEMS.sortDy + looseSortY(g), draw: () => drawGroundItem(ctx, g) });   // 溫特從背包放在地上的東西（js/ground-items.js）
   if (typeof mealSortables === 'function') mealSortables(sortables);   // 餐廳：桌上的餐盤、拿在手上的餐盤（js/meal.js）
   if (G.player) sortables.push({ y: (G.player.sitting ? seatDrawY(G.player.sitting) : escalatorRiderSortY(G.player, G.player.y + 16)) + floorSortY(G.player), draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
-  // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
-  drawScorchMarks(ctx);
-  drawAcidWarnings(ctx);       // 腐蝕池的危險範圍圈（js/attack-fx.js）
-  if (typeof drawSootheGroundV2 === 'function') drawSootheGroundV2(ctx);   // 疏導 V2：法陣、光柱畫在地上（人物後面）（js/soothe-fx-v2.js）
-  drawFlares(ctx);            // 地上燃燒的照明彈
-  drawLandmines(ctx);          // 地雷（js/landmine.js）
-  if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
-  if (typeof drawBananaEmperorGround === 'function') drawBananaEmperorGround(ctx);   // 金蕉大王敲地的發光裂縫（js/banana-emperor.js）
-  if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
-  drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
-  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'ground');   // 起霧 V2：落到地上的葉子（畫在人物下面，js/fog-fx-v2.js）
-  drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
-  if (typeof drawFishWater === 'function') drawFishWater(ctx);
-  if (typeof drawEliteGround === 'function') drawEliteGround(ctx);   // 鳥頭大隊長跑步踩出的小裂痕（js/elite-bird-head.js）
-  if (typeof drawGourdGround === 'function') drawGourdGround(ctx);   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
-  if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);
-  if (typeof drawHiddenTunnels === 'function') drawHiddenTunnels(ctx);   // 球球找到的地道（js/rescue-dog.js）   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）
-  drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
-  if (typeof drawGluePools === 'function') drawGluePools(ctx);   // 黏著彈的黏膠（js/special-guns.js）
+  // ---- 地上的特效（焦痕、地雷、碎片、油汙、水漬…）：畫在人物腳下 ----
+  const drawGroundEffects = () => {
+    // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
+    drawScorchMarks(ctx);
+    drawAcidWarnings(ctx);       // 腐蝕池的危險範圍圈（js/attack-fx.js）
+    if (typeof drawSootheGroundV2 === 'function') drawSootheGroundV2(ctx);   // 疏導 V2：法陣、光柱畫在地上（人物後面）（js/soothe-fx-v2.js）
+    drawFlares(ctx);            // 地上燃燒的照明彈
+    drawLandmines(ctx);          // 地雷（js/landmine.js）
+    if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
+    if (typeof drawBananaEmperorGround === 'function') drawBananaEmperorGround(ctx);   // 金蕉大王敲地的發光裂縫（js/banana-emperor.js）
+    if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
+    drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
+    if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'ground');   // 起霧 V2：落到地上的葉子（畫在人物下面，js/fog-fx-v2.js）
+    drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
+    if (typeof drawFishWater === 'function') drawFishWater(ctx);
+    if (typeof drawEliteGround === 'function') drawEliteGround(ctx);   // 鳥頭大隊長跑步踩出的小裂痕（js/elite-bird-head.js）
+    if (typeof drawGourdGround === 'function') drawGourdGround(ctx);   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
+    if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);
+    if (typeof drawHiddenTunnels === 'function') drawHiddenTunnels(ctx);   // 球球找到的地道（js/rescue-dog.js）   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）
+    drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
+    if (typeof drawGluePools === 'function') drawGluePools(ctx);   // 黏著彈的黏膠（js/special-guns.js）
+  };
+  drawGroundEffects();
+  // 陸橋／2 樓：2 樓的地板圖是跟著排序畫的（比上面這一輪晚），會把落在 2 樓的地上特效整塊蓋掉。
+  // 所以 2 樓地板畫完之後，在 2 樓地面的範圍裡再補畫一次（js/maploader.js 的 floor2ClipPaths）：打破礦物的碎片、怪物死掉的痕跡在 2 樓才看得到
+  if (hasFloors && typeof floor2ClipPaths === 'function') {
+    const clips = floor2ClipPaths();
+    const again = (path, pass = 0) => () => { groundFxPass = pass; ctx.save(); ctx.clip(path); if (typeof drawBurrowingMouseGround === 'function') drawBurrowingMouseGround(ctx); if (typeof drawGraffitiGround === 'function') drawGraffitiGround(ctx); drawGroundEffects(); ctx.restore(); groundFxPass = 0; };
+    sortables.push({ y: -.5, draw: again(clips.onlyPath) });   // 只有 2 樓的地方：地板當一般地面最先畫（y 約 -2），緊接著補畫
+    if (clips.onlyLatePath) sortables.push({ y: FLOOR2_SORT - 45000, draw: again(clips.onlyLatePath) });   // 只有 2 樓、但地板圖跟陸橋一起晚畫的格子：地板畫完再補畫（不然焦痕只剩一半）
+    if (clips.bridgePath) sortables.push({ y: FLOOR2_SORT - 45000, draw: again(clips.bridgePath, 2) });   // 2：只補畫記在 2 樓的（橋下的碎片、焦痕不會跑到橋面上）   // 陸橋：2 樓地板（FLOOR2_SORT - 50000 起）之後、2 樓的人之前
+  }
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
   if (typeof drawDoorLocks === 'function') drawDoorLocks(ctx);   // 解開時掉下來的鎖鏈（js/doors.js）

@@ -131,7 +131,7 @@ function fireFlare(p, aim) {
   }
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
   const tx = p.x + Math.cos(ang) * dist, ty = p.y + Math.sin(ang) * dist;
-  (G.flareShots = G.flareShots || []).push({ x0: mx, y0: my, x1: tx, y1: ty, t: 0, T: Math.max(.04, dist / FLARE.speed) });
+  (G.flareShots = G.flareShots || []).push({ floor: actorFloor(p), x0: mx, y0: my, x1: tx, y1: ty, t: 0, T: Math.max(.04, dist / FLARE.speed) });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .1, life0: .1 });
   addLightFlash('muzzle', mx, my, 1.3);
   sfx('shotFlare');
@@ -145,9 +145,9 @@ function updateFlares(dt) {
     for (const s of G.flareShots) {
       s.t += dt;
       if (s.t >= s.T) {   // 落地：開始燃燒
-        (G.flares = G.flares || []).push({ x: s.x1, y: s.y1, t: FLARE.burn, emberT: 0, seed: Math.random() * 10 });
+        (G.flares = G.flares || []).push({ x: s.x1, y: s.y1, floor: s.floor, t: FLARE.burn, emberT: 0, seed: Math.random() * 10 });
         if (fxV2) flareV2Land(G.flares[G.flares.length - 1]);   // V2：落地一閃、火花濺開
-        if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(s.x1, s.y1, 6);   // 照明彈落在順順宮帽上：打開帽子
+        if (typeof hitHangiCapsAt === 'function') withBlastFloor(s.floor, () => hitHangiCapsAt(s.x1, s.y1, 6));   // 只打開同一層的帽子   // 照明彈落在順順宮帽上：打開帽子
         if (typeof sfxAt === 'function') sfxAt('hitFlare', s.x1, s.y1, 1, 'flare-land');
       } else if (fxV2) {   // V2：飛行中拖一條煙
         const k = s.t / s.T;
@@ -188,6 +188,7 @@ function flareLightSources() {
 // ---- 繪製 ----
 function drawFlares(ctx) {   // 地上的照明棒（畫在角色下面）
   for (const f of (G.flares || [])) {
+    if (fxSkip(f.floor)) continue;   // 陸橋補畫時跳過橋下的
     ctx.save(); ctx.translate(f.x, f.y);
     ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(0, 3, 7, 2.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.rotate(-.5); ctx.fillStyle = '#7a1f1f'; ctx.fillRect(-6, -2, 12, 4); ctx.fillStyle = '#c94a3a'; ctx.fillRect(-6, -2, 12, 1.5);

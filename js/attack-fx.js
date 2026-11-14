@@ -292,7 +292,8 @@ function addScorchMark(x, y, R0, pool, styleId = 'corrosion') {
     cracks.push({ pts, w: 1.6 - Math.random() * .6 });
   }
   G.scorchMarks = G.scorchMarks || [];
-  G.scorchMarks.push({ x, y, R, radii, haloRadii, splats, flecks, cracks, st, t: st.life, pool, ph: Math.random() * 6.28,
+  G.scorchMarks.push({ x, y, floor: blastFloor, R, radii,   // floor：爆炸、火海在幾樓留下的（0＝不分，js/pathfinding.js）
+    haloRadii, splats, flecks, cracks, st, t: st.life, pool, ph: Math.random() * 6.28,
     rot: Math.random() * Math.PI, stretch: 1 + Math.random() * .45 });   // 隨機轉向、拉長，不會每個都一樣圓
   if (G.scorchMarks.length > SCORCH.max) G.scorchMarks.shift();
 }
@@ -333,6 +334,7 @@ function drawScorchMarks(ctx) {
   if (!G.scorchMarks) return;
   const rgba = (c, al) => `rgba(${c[0]},${c[1]},${c[2]},${al.toFixed(3)})`;
   for (const m of G.scorchMarks) {
+    if (fxSkip(m.floor)) continue;   // 陸橋補畫時跳過橋下的焦痕
     const st = m.st;
     const a = Math.min(1, (st.life - m.t) / .25, m.t / st.fade);   // 0.25 秒浮現、最後幾秒淡出
     if (a <= 0) continue;

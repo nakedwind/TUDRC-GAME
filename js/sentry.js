@@ -436,7 +436,7 @@ function sentryCellWalkable(c, r, ignoreFire = false, allowDark = false) {
   if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
   const [x, y] = center(c, r);
   if (sentryBlocked(x, y)) return false;
-  if (!ignoreFire && typeof oilFireAt === 'function' && oilFireAt(x, y, 6)   // 燒著的火海：找路時繞開（js/oil-barrels.js）
+  if (!ignoreFire && typeof oilFireAt === 'function' && oilFireAt(x, y, 6, sentryFireWalker)   // 燒著的火海：找路時繞開（js/oil-barrels.js）；只看同一層的火
       && !(typeof sentryFireTrait === 'function' && sentryFireTrait(sentryFireWalker))) return false;   // 希奧妮、雷德不繞（js/game.js 的 SENTRY_FIRE_TRAITS）
   if (!ignoreFire && typeof acidHazardAt === 'function' && acidHazardAt(sentryFireWalker, x, y, 6)) return false;   // 腐蝕池、吐酸史萊姆的酸液：找路時也繞開（js/game.js）
   if (!allowDark && !personnelInLight(x, y)) return false;

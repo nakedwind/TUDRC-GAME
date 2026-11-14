@@ -1127,7 +1127,7 @@ function avoidOilFires(t, dt, moved = false) {
   if (trait === 'immune') return;   // 希奧妮：不怕火
   if (trait === 'brave' && moved) return;   // 雷德正在走（例如穿過火海）：不推他，讓他一口氣走過去
   const brave = trait === 'brave';
-  const hot = (x, y) => G.oilFires.some(f => f.t > 0 && Math.hypot(x - f.x, (y - f.y) / .7) < (brave ? f.r * SENTRY_FIRE_BRAVE.core : f.r + 12));   // 雷德：只有在火中心附近才走
+  const hot = (x, y) => G.oilFires.some(f => f.t > 0 && fieldHits(f.floor, t) && Math.hypot(x - f.x, (y - f.y) / .7) < (brave ? f.r * SENTRY_FIRE_BRAVE.core : f.r + 12));   // 雷德：只有在火中心附近才走
   if (!hot(t.x, t.y)) { t.fireExit = null; return; }
   t.fireExitT = (t.fireExitT || 0) - dt;
   if (!t.fireExit || t.fireExitT <= 0) { t.fireExit = sentryFireExit(t, hot); t.fireExitT = .4; }   // 火會變大變小：每 0.4 秒重找
@@ -1416,9 +1416,10 @@ function groundDrawnAt(c, r) {
   });
 }
 // ---- 玩家移動與碰撞（牆、哨兵、障礙物都擋路；水平垂直分開判斷可貼牆滑行）----
-function playerBlocked(x, y) {
+// who：照誰的樓層判斷（沒給＝溫特；礦物碎片會給自己，js/ore.js）
+function playerBlocked(x, y, who = null) {
   const r = PLAYER.r;
-  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck; setFloorCtx(G.player);   // 溫特在幾樓就照幾樓的規則（js/pathfinding.js）
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck; setFloorCtx(who || G.player);   // 溫特在幾樓就照幾樓的規則（js/pathfinding.js）
   try {
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
@@ -2244,7 +2245,7 @@ function update(dt) {
   if (G.player) {
     G.player.hitT = Math.max(0, (G.player.hitT || 0) - dt);
     G.player.underAttackT = Math.max(0, (G.player.underAttackT || 0) - dt);
-    updatePlayerAttack(dt);   // 玩家自動開槍射擊附近可見的怪物（低傷害、吸引仇恨）
+    setFloorCtx(G.player); updatePlayerAttack(dt); clearFloorCtx();   // 玩家自動開槍射擊附近可見的怪物（低傷害、吸引仇恨）；照明彈、特殊彈照溫特在幾樓判斷牆（js/pathfinding.js）
   }
   G.damageVignetteT = Math.max(0, (G.damageVignetteT || 0) - dt);
   G.cameraShakeT = Math.max(0, (G.cameraShakeT || 0) - dt);
@@ -2576,7 +2577,7 @@ function update(dt) {
     if (e.breakT > 0) { e.breakT -= dt; if (e.prevHp != null && e.hp < e.prevHp) e.hp = e.prevHp - (e.prevHp - e.hp) * ULTIMATES.colyn.breakMul; }
     e.prevHp = e.hp;
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {

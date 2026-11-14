@@ -53584,7 +53584,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_exit_2_sealed",
         "c": 9,
         "r": 80,
-        "layer": "object"
+        "layer": "object",
+        "sortDepth": 3
       },
       {
         "id": "tile_mr4cyy36",
@@ -62203,9 +62204,6 @@ const BATTLE_MAPS = [
       "15,83",
       "14,83",
       "13,83",
-      "12,83",
-      "11,83",
-      "10,83",
       "9,83",
       "8,83",
       "7,83",
@@ -66962,7 +66960,13 @@ const BATTLE_MAPS = [
       "33,3",
       "34,3",
       "38,4",
-      "37,4"
+      "37,4",
+      "9,84",
+      "13,84",
+      "11,82",
+      "10,83",
+      "11,83",
+      "12,83"
     ],
     "breakable": [],
     "coreSpots": [
@@ -67856,6 +67860,21 @@ const BATTLE_MAPS = [
         "c": 71,
         "r": 5,
         "to": "map_mvxz356e"
+      },
+      {
+        "c": 10,
+        "r": 83,
+        "to": "map_mw2dn6re"
+      },
+      {
+        "c": 11,
+        "r": 83,
+        "to": "map_mw2dn6re"
+      },
+      {
+        "c": 12,
+        "r": 83,
+        "to": "map_mw2dn6re"
       }
     ],
     "hiddenPickups": [
@@ -67957,7 +67976,9 @@ const BATTLE_MAPS = [
       "floor": {},
       "ground": {},
       "ground2": {},
-      "ground3": {},
+      "ground3": {
+        "46,94": "tile_obstacle_ore_small"
+      },
       "object": {
         "33,72": "tile_new_decor_fire_extinguisher",
         "47,72": "tile_new_decor_fire_extinguisher"
@@ -69735,18 +69756,6 @@ const BATTLE_MAPS = [
         "layer": "floor"
       },
       {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 62,
-        "r": 90,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 62,
-        "r": 93,
-        "layer": "floor"
-      },
-      {
         "id": "tile_mrt_pillar_a02",
         "c": 64,
         "r": 94,
@@ -69893,12 +69902,6 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mrt_floor_tile_1f",
         "c": 59,
-        "r": 87,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 62,
         "r": 87,
         "layer": "floor"
       },
@@ -70103,7 +70106,7 @@ const BATTLE_MAPS = [
         "c": 31,
         "r": 88,
         "layer": "object",
-        "oy": 33.333333
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mrt_glass_railing",
@@ -70427,12 +70430,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_floor_tile_1f",
-        "c": 63,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
         "c": 60,
         "r": 79,
         "layer": "floor"
@@ -70519,12 +70516,6 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_floor_tile_1f",
         "c": 18,
         "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 63,
-        "r": 76,
         "layer": "floor"
       },
       {
@@ -70759,30 +70750,6 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_floor_tile_1f",
         "c": 35,
         "r": 61,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 26,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 23,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 46,
         "layer": "floor"
       },
       {
@@ -71269,13 +71236,6 @@ const BATTLE_MAPS = [
         "ox": 30
       },
       {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 64,
-        "r": 80,
-        "layer": "floor",
-        "ox": 30
-      },
-      {
         "id": "tile_mrt_floor_tile",
         "c": 64,
         "r": 86,
@@ -71517,7 +71477,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_pillar",
         "c": 61,
         "r": 92,
-        "layer": "object3"
+        "layer": "object10"
       },
       {
         "id": "tile_mrt_glass_railing",
@@ -71790,24 +71750,6 @@ const BATTLE_MAPS = [
         "c": 7,
         "r": 79,
         "layer": "object6"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 9,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 12,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 15,
-        "r": 71,
-        "layer": "floor"
       },
       {
         "id": "tile_mrt_room_wall",
@@ -72153,98 +72095,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_floor_tile_1f",
-        "c": 50,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 50,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 53,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 53,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 56,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 59,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 59,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 56,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
         "c": 32,
         "r": 49,
         "layer": "floor"
       },
       {
         "id": "tile_mrt_floor_tile_1f",
-        "c": 29,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 29,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
         "c": 32,
         "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 43,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 43,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 40,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 40,
         "layer": "floor"
       },
       {
@@ -73942,54 +73800,6 @@ const BATTLE_MAPS = [
         "scale": 335
       },
       {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 26,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 23,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 20,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 17,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 49,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 46,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 43,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile_1f",
-        "c": 14,
-        "r": 40,
-        "layer": "floor"
-      },
-      {
         "id": "tile_eoc_door_exit_fade",
         "c": 46,
         "r": 59,
@@ -74097,7 +73907,7 @@ const BATTLE_MAPS = [
         "id": "tile_interactive_storage_locker",
         "c": 66,
         "r": 86,
-        "layer": "object7"
+        "layer": "object9"
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -75926,13 +75736,6 @@ const BATTLE_MAPS = [
         "fx": true
       },
       {
-        "id": "tile_mrt_room_wallx3_crack_breakable",
-        "c": 63,
-        "r": 21,
-        "layer": "object6",
-        "fx": true
-      },
-      {
         "id": "tile_mrt_floor_tile_1f",
         "c": 32,
         "r": 10,
@@ -76167,20 +75970,9 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_ore_coal",
         "c": 41,
-        "r": 9,
-        "layer": "object12"
-      },
-      {
-        "id": "tile_obstacle_ore_coal",
-        "c": 37,
-        "r": 8,
-        "layer": "object12"
-      },
-      {
-        "id": "tile_obstacle_ore_tin",
-        "c": 45,
-        "r": 9,
-        "layer": "object12"
+        "r": 11,
+        "layer": "object12",
+        "ox": 20
       },
       {
         "id": "tile_obstacle_ore_limestone",
@@ -76226,7 +76018,7 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "fx": true,
         "scale": 80,
-        "ox": 30,
+        "ox": 10,
         "oy": 20
       },
       {
@@ -76236,7 +76028,7 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "oy": 10,
         "fx": true,
-        "scale": 140,
+        "scale": 135,
         "ox": 10
       },
       {
@@ -76381,7 +76173,7 @@ const BATTLE_MAPS = [
         "r": 30,
         "layer": "object3",
         "ox": 20,
-        "scale": 125,
+        "scale": 120,
         "oy": 30
       },
       {
@@ -76448,8 +76240,9 @@ const BATTLE_MAPS = [
         "r": 40,
         "layer": "object3",
         "oy": 10,
-        "scale": 135,
-        "ox": 20
+        "scale": 110,
+        "ox": 20,
+        "sortDepth": 3.5
       },
       {
         "id": "tile_mvmo77lx",
@@ -76821,7 +76614,7 @@ const BATTLE_MAPS = [
         "c": 46,
         "r": 79,
         "layer": "object3",
-        "ox": 10,
+        "ox": 20,
         "fx": true
       },
       {
@@ -76829,15 +76622,16 @@ const BATTLE_MAPS = [
         "c": 35,
         "r": 79,
         "layer": "object3",
-        "ox": 30,
+        "ox": 20,
         "fx": true
       },
       {
         "id": "tile_mrt_waiting_seats",
-        "c": 34,
+        "c": 33,
         "r": 79,
         "layer": "object3",
-        "fx": true
+        "fx": true,
+        "ox": 20
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -77018,11 +76812,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvnn2p1x",
-        "c": 10,
+        "c": 65,
         "r": 72,
         "layer": "object9",
-        "ox": 10,
-        "oy": 30,
+        "ox": 30,
+        "oy": 20,
         "fx": true
       },
       {
@@ -77038,7 +76832,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_planter",
         "c": 57,
         "r": 46,
-        "layer": "object",
+        "layer": "object9",
         "oy": 30,
         "ox": 10
       },
@@ -77046,9 +76840,696 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_waiting_seats",
         "c": 55,
         "r": 46,
-        "layer": "object",
+        "layer": "object9",
         "ox": 10,
         "oy": 20
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 63,
+        "r": 21,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 64,
+        "r": 21,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 65,
+        "r": 21,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 51,
+        "r": 74,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 36,
+        "r": 68,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 14,
+        "r": 73,
+        "layer": "object9",
+        "ox": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 13,
+        "r": 45,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 62,
+        "r": 107,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 20,
+        "r": 107,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 20,
+        "r": 80,
+        "layer": "ground3",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 40,
+        "r": 76,
+        "layer": "ground3",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 34,
+        "r": 38,
+        "layer": "ground3",
+        "ox": 10,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 34,
+        "r": 28,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 63,
+        "r": 73,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 63,
+        "r": 23,
+        "layer": "object9",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 66,
+        "r": 28,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 61,
+        "r": 34,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 66,
+        "r": 46,
+        "layer": "object9",
+        "ox": 20
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 45,
+        "r": 47,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 10,
+        "r": 44,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 5,
+        "r": 51,
+        "layer": "object9",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 17,
+        "r": 61,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 6,
+        "r": 69,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_limestone",
+        "c": 6,
+        "r": 44,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 75,
+        "r": 72,
+        "layer": "object9",
+        "ox": 10
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 7,
+        "r": 61,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_manganese",
+        "c": 18,
+        "r": 44,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 21,
+        "r": 61,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 25,
+        "r": 73,
+        "layer": "object3",
+        "oy": 30
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 10,
+        "r": 72,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 40,
+        "r": 68,
+        "layer": "object2",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 63,
+        "r": 28,
+        "layer": "ground4",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 61,
+        "r": 38,
+        "layer": "ground4",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 14,
+        "r": 45,
+        "layer": "ground4",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 5,
+        "r": 34,
+        "layer": "ground4",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 73,
+        "r": 66,
+        "layer": "ground4",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 6,
+        "r": 72,
+        "layer": "ground4",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 27,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 19,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 21,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 29,
+        "r": 89,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 31,
+        "r": 103,
+        "layer": "ground3",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 48,
+        "r": 103,
+        "layer": "ground3",
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 60,
+        "r": 103,
+        "layer": "ground3",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 19,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 22,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 25,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 28,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 31,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 34,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 37,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 40,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 43,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 46,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 49,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 52,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 55,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 58,
+        "r": 88,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 33,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 36,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 39,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 45,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 42,
+        "r": 19,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 59,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 62,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 65,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 68,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 23,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 26,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 29,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 32,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 35,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 38,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 41,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 44,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 47,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 50,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 53,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 56,
+        "r": 78,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 58,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 55,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 52,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 49,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 46,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 43,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 40,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 37,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 34,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 31,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 28,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 25,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 22,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 19,
+        "r": 84,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 48,
+        "r": 88,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_accessible_waiting_area",
+        "c": 31,
+        "r": 88,
+        "layer": "ground3",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_poster_moonlight",
+        "c": 11,
+        "r": 71,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_street_area_map_board",
+        "c": 53,
+        "r": 72,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_street_area_map_board",
+        "c": 26,
+        "r": 44,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 18,
+        "sortDepth": 3.25
+      },
+      {
+        "id": "tile_mrt_map_kiosk",
+        "c": 27,
+        "r": 101,
+        "layer": "object",
+        "ox": 30
+      },
+      {
+        "id": "tile_mrt_info_board_notice",
+        "c": 41,
+        "r": 45,
+        "layer": "object9",
+        "oy": 11.333333,
+        "sortDepth": 2.25
       }
     ],
     "solid": [
@@ -77350,16 +77831,8 @@ const BATTLE_MAPS = [
       "59,96",
       "64,94",
       "64,93",
-      "64,92",
-      "64,91",
-      "64,90",
-      "64,89",
       "64,88",
       "65,88",
-      "65,89",
-      "65,90",
-      "65,91",
-      "65,92",
       "65,93",
       "65,94",
       "28,98",
@@ -80049,7 +80522,6 @@ const BATTLE_MAPS = [
       "17,84",
       "15,81",
       "16,81",
-      "17,81",
       "14,81",
       "13,81",
       "12,81",
@@ -84315,18 +84787,740 @@ const BATTLE_MAPS = [
       "38,80",
       "39,80",
       "42,80",
-      "43,80"
+      "43,80",
+      "18,80",
+      "19,80",
+      "28,103",
+      "29,103",
+      "61,79",
+      "61,78",
+      "17,79",
+      "17,80",
+      "18,74",
+      "18,77",
+      "18,78",
+      "18,79",
+      "17,81",
+      "19,79",
+      "19,78",
+      "60,78",
+      "60,79",
+      "59,79",
+      "59,78",
+      "59,80",
+      "60,80"
     ],
     "breakable": [],
     "coreSpots": [
       "46,20"
     ],
-    "spawnZone": [],
+    "spawnZone": [
+      "37,78",
+      "36,78",
+      "33,78",
+      "31,78",
+      "30,78",
+      "29,78",
+      "28,78",
+      "27,78",
+      "32,78",
+      "34,78",
+      "35,78",
+      "27,79",
+      "27,80",
+      "27,81",
+      "28,81",
+      "29,81",
+      "30,82",
+      "31,82",
+      "32,82",
+      "33,82",
+      "34,82",
+      "35,82",
+      "36,82",
+      "37,82",
+      "38,82",
+      "39,82",
+      "40,82",
+      "41,82",
+      "42,82",
+      "43,82",
+      "44,82",
+      "46,82",
+      "47,82",
+      "48,82",
+      "49,82",
+      "50,82",
+      "51,82",
+      "51,81",
+      "52,81",
+      "52,80",
+      "52,79",
+      "51,79",
+      "51,78",
+      "50,78",
+      "48,77",
+      "47,77",
+      "46,77",
+      "45,77",
+      "44,77",
+      "43,77",
+      "42,77",
+      "42,78",
+      "43,78",
+      "44,78",
+      "45,78",
+      "46,78",
+      "47,78",
+      "48,78",
+      "49,78",
+      "49,79",
+      "35,71",
+      "36,71",
+      "37,71",
+      "39,71",
+      "40,71",
+      "41,71",
+      "42,71",
+      "43,71",
+      "44,71",
+      "45,71",
+      "38,71",
+      "39,64",
+      "39,65",
+      "38,65",
+      "38,66",
+      "39,66",
+      "39,67",
+      "40,67",
+      "41,67",
+      "42,67",
+      "43,67",
+      "44,67",
+      "45,67",
+      "45,68",
+      "45,69",
+      "45,70",
+      "34,55",
+      "34,56",
+      "34,57",
+      "34,58",
+      "34,59",
+      "34,60",
+      "34,61",
+      "34,62",
+      "34,63",
+      "34,64",
+      "34,65",
+      "34,66",
+      "34,67",
+      "34,68",
+      "34,69",
+      "34,70",
+      "34,71",
+      "46,55",
+      "46,56",
+      "46,59",
+      "46,61",
+      "46,63",
+      "46,64",
+      "46,65",
+      "46,66",
+      "46,67",
+      "46,68",
+      "46,69",
+      "46,70",
+      "37,27",
+      "38,27",
+      "39,26",
+      "39,25",
+      "40,25",
+      "41,25",
+      "42,25",
+      "42,26",
+      "43,26",
+      "43,27",
+      "43,28",
+      "42,28",
+      "41,29",
+      "40,30",
+      "39,30",
+      "38,30",
+      "38,31",
+      "37,31",
+      "37,32",
+      "36,32",
+      "36,33",
+      "35,33",
+      "34,34",
+      "35,35",
+      "36,35",
+      "39,35",
+      "41,35",
+      "42,35",
+      "42,36",
+      "42,37",
+      "42,38",
+      "42,39",
+      "41,39",
+      "40,40",
+      "39,40",
+      "38,40",
+      "38,41",
+      "39,42",
+      "40,43",
+      "41,43",
+      "42,44",
+      "43,44",
+      "44,44",
+      "45,44",
+      "46,43",
+      "46,42",
+      "46,37",
+      "46,38",
+      "46,39",
+      "39,21",
+      "39,22",
+      "39,23",
+      "40,23",
+      "40,24",
+      "39,24",
+      "38,24",
+      "38,23",
+      "34,24",
+      "33,25",
+      "33,24",
+      "34,21",
+      "46,25",
+      "42,11",
+      "41,11",
+      "40,11",
+      "39,11",
+      "37,11",
+      "36,11",
+      "35,11",
+      "34,11",
+      "35,12",
+      "36,12",
+      "37,12",
+      "39,12",
+      "40,12",
+      "42,12",
+      "43,12",
+      "44,12",
+      "45,12",
+      "45,11",
+      "44,11",
+      "37,14",
+      "38,14",
+      "41,13",
+      "43,13",
+      "44,13",
+      "45,13",
+      "39,13",
+      "38,13",
+      "37,13",
+      "36,13",
+      "35,13",
+      "34,14",
+      "35,14",
+      "36,14",
+      "39,14",
+      "42,14",
+      "44,14",
+      "45,14",
+      "61,26",
+      "62,26",
+      "63,26",
+      "63,27",
+      "64,27",
+      "64,28",
+      "64,29",
+      "64,30",
+      "64,31",
+      "65,31",
+      "66,31",
+      "67,31",
+      "67,32",
+      "67,33",
+      "67,34",
+      "67,35",
+      "67,36",
+      "66,36",
+      "66,37",
+      "66,38",
+      "66,39",
+      "67,39",
+      "67,41",
+      "67,42",
+      "66,42",
+      "65,43",
+      "65,47",
+      "64,48",
+      "64,49",
+      "63,49",
+      "62,49",
+      "61,49",
+      "60,49",
+      "59,49",
+      "58,49",
+      "57,49",
+      "55,49",
+      "54,49",
+      "53,49",
+      "52,49",
+      "50,49",
+      "49,49",
+      "48,49",
+      "47,49",
+      "46,49",
+      "45,49",
+      "44,49",
+      "43,49",
+      "42,50",
+      "41,50",
+      "40,49",
+      "39,49",
+      "38,49",
+      "37,49",
+      "36,49",
+      "35,49",
+      "34,49",
+      "33,49",
+      "32,49",
+      "31,49",
+      "30,49",
+      "28,49",
+      "27,49",
+      "25,49",
+      "24,49",
+      "23,49",
+      "22,49",
+      "21,49",
+      "20,49",
+      "19,49",
+      "18,49",
+      "17,49",
+      "17,48",
+      "17,47",
+      "17,46",
+      "17,45",
+      "17,44",
+      "17,43",
+      "18,42",
+      "18,41",
+      "8,50",
+      "9,50",
+      "9,52",
+      "9,53",
+      "9,54",
+      "9,55",
+      "8,56",
+      "8,57",
+      "8,58",
+      "9,59",
+      "9,60",
+      "9,61",
+      "9,62",
+      "9,63",
+      "9,64",
+      "9,65",
+      "10,65",
+      "12,65",
+      "14,65",
+      "16,65",
+      "17,65",
+      "18,65",
+      "20,65",
+      "20,64",
+      "19,64",
+      "17,63",
+      "15,63",
+      "14,63",
+      "13,65",
+      "12,66",
+      "12,67",
+      "13,67",
+      "14,68",
+      "15,68",
+      "16,68",
+      "7,65",
+      "8,66",
+      "7,68",
+      "7,70",
+      "7,72",
+      "7,73",
+      "7,74",
+      "7,75",
+      "7,76",
+      "8,76",
+      "9,76",
+      "10,76",
+      "12,77",
+      "13,77",
+      "14,77",
+      "15,77",
+      "15,76",
+      "14,76",
+      "13,76",
+      "12,76",
+      "11,76",
+      "23,81",
+      "24,81",
+      "25,81",
+      "28,80",
+      "29,80",
+      "29,79",
+      "30,77",
+      "31,77",
+      "36,79",
+      "37,79",
+      "75,77",
+      "74,77",
+      "73,78",
+      "72,78",
+      "71,77",
+      "70,78",
+      "69,79",
+      "68,82",
+      "68,83",
+      "68,85",
+      "68,87",
+      "69,88",
+      "70,89",
+      "71,89",
+      "72,90",
+      "74,90",
+      "75,88",
+      "75,86",
+      "75,84",
+      "75,82",
+      "75,81",
+      "75,80",
+      "75,79",
+      "74,78",
+      "71,82",
+      "71,84",
+      "71,85",
+      "72,87",
+      "72,88",
+      "71,88",
+      "70,88",
+      "69,85",
+      "67,80",
+      "67,79",
+      "66,78",
+      "66,77",
+      "66,76",
+      "67,75",
+      "69,74",
+      "70,74",
+      "72,75",
+      "73,75",
+      "75,75",
+      "76,75",
+      "77,75",
+      "77,77",
+      "76,80",
+      "76,81",
+      "75,83",
+      "74,84",
+      "73,85",
+      "72,86",
+      "71,87",
+      "70,86",
+      "69,83",
+      "69,81",
+      "69,78",
+      "69,77",
+      "70,76",
+      "71,76",
+      "73,77",
+      "74,79",
+      "74,81",
+      "73,83",
+      "73,84",
+      "72,85",
+      "73,86",
+      "73,87",
+      "73,88",
+      "74,88",
+      "76,68",
+      "76,70",
+      "77,71",
+      "76,62",
+      "76,63",
+      "76,65",
+      "76,66",
+      "75,66",
+      "75,65",
+      "74,64",
+      "75,63",
+      "77,63",
+      "78,64",
+      "78,65",
+      "78,66",
+      "25,91",
+      "26,91",
+      "34,90",
+      "38,91",
+      "43,91",
+      "47,91",
+      "49,91",
+      "52,91",
+      "53,92",
+      "52,93",
+      "48,93",
+      "42,92",
+      "37,91",
+      "36,91",
+      "35,91",
+      "34,91",
+      "33,92",
+      "32,93",
+      "31,93",
+      "34,94",
+      "39,94",
+      "42,93",
+      "44,93",
+      "46,93",
+      "48,94",
+      "50,94",
+      "52,94",
+      "52,92",
+      "50,91",
+      "48,91",
+      "46,92",
+      "44,92",
+      "43,93",
+      "41,93",
+      "39,93",
+      "37,93",
+      "35,93",
+      "34,93",
+      "30,93",
+      "29,93",
+      "28,93",
+      "27,93",
+      "26,92",
+      "28,91",
+      "31,92",
+      "35,92",
+      "37,92",
+      "39,92",
+      "41,92",
+      "43,92",
+      "45,92",
+      "47,92",
+      "49,92",
+      "51,92",
+      "44,91",
+      "42,91",
+      "40,91",
+      "33,91",
+      "30,92",
+      "29,92",
+      "28,92",
+      "32,108",
+      "31,108",
+      "30,110",
+      "28,111",
+      "26,111",
+      "25,110",
+      "25,109",
+      "25,108",
+      "25,107",
+      "26,107",
+      "27,107",
+      "29,107",
+      "29,108",
+      "30,109",
+      "31,110",
+      "31,111",
+      "32,111",
+      "32,112",
+      "34,112",
+      "35,112",
+      "36,112",
+      "36,111",
+      "36,110",
+      "35,108",
+      "35,107",
+      "34,107",
+      "33,108",
+      "31,109",
+      "29,109",
+      "28,110",
+      "26,110",
+      "24,110",
+      "23,110",
+      "23,109",
+      "23,108",
+      "24,107",
+      "32,110",
+      "33,111",
+      "35,111",
+      "38,112",
+      "39,112",
+      "40,112",
+      "41,112",
+      "42,112",
+      "43,112",
+      "45,112",
+      "46,112",
+      "47,112",
+      "48,112",
+      "48,111",
+      "49,110",
+      "49,109",
+      "50,108",
+      "51,107",
+      "52,107",
+      "52,106",
+      "53,106",
+      "54,106",
+      "55,106",
+      "57,107",
+      "57,108",
+      "55,109",
+      "55,110",
+      "54,110",
+      "53,111",
+      "53,112",
+      "53,113",
+      "53,114",
+      "53,115",
+      "54,115",
+      "54,116",
+      "55,115",
+      "55,114",
+      "55,112",
+      "54,108",
+      "53,108",
+      "53,105",
+      "54,105",
+      "56,104",
+      "58,105",
+      "59,105",
+      "60,106",
+      "60,107",
+      "60,108",
+      "60,109",
+      "58,110",
+      "56,110",
+      "54,109",
+      "53,110",
+      "54,111",
+      "54,112",
+      "54,113",
+      "54,114",
+      "54,117",
+      "54,118",
+      "55,118",
+      "58,119",
+      "61,119",
+      "63,119",
+      "64,119",
+      "65,118",
+      "66,118",
+      "67,118",
+      "68,118",
+      "63,118",
+      "59,118",
+      "58,118",
+      "56,119",
+      "55,119",
+      "54,119",
+      "53,120",
+      "54,120",
+      "57,120",
+      "61,120",
+      "63,120",
+      "65,120",
+      "67,120",
+      "68,120",
+      "68,121",
+      "67,121",
+      "65,121",
+      "30,105",
+      "31,105",
+      "34,105",
+      "36,105",
+      "37,105",
+      "38,105",
+      "40,105",
+      "41,105",
+      "43,105",
+      "44,105",
+      "45,104",
+      "47,104",
+      "49,104",
+      "51,104",
+      "53,104",
+      "55,105",
+      "57,105"
+    ],
     "coreCount": 1,
     "monsterMix": [
       {
         "id": "slime",
+        "weight": 50
+      },
+      {
+        "id": "bird_head",
+        "weight": 50
+      },
+      {
+        "id": "pearl_kid",
+        "weight": 50
+      },
+      {
+        "id": "lifeform",
+        "weight": 50
+      },
+      {
+        "id": "hangi_bao",
+        "weight": 50
+      },
+      {
+        "id": "fish_head",
+        "weight": 50
+      },
+      {
+        "id": "loofah_lady",
+        "weight": 50
+      },
+      {
+        "id": "milkfish_kid",
+        "weight": 70
+      },
+      {
+        "id": "milkfish_kid_small",
+        "weight": 49
+      },
+      {
+        "id": "burrowing_mouse",
         "weight": 100
+      },
+      {
+        "id": "clownfish",
+        "weight": 50
+      },
+      {
+        "id": "clownfish_small",
+        "weight": 100
+      },
+      {
+        "id": "golden_banana_king",
+        "weight": 50
+      },
+      {
+        "id": "gourd_monkey",
+        "weight": 100
+      },
+      {
+        "id": "human_face_butterfly",
+        "weight": 70
       }
     ],
     "camp": [],
@@ -84340,7 +85534,33 @@ const BATTLE_MAPS = [
     "solidOffsets": {},
     "safe": false,
     "npcs": false,
-    "portals": [],
+    "portals": [
+      {
+        "c": 66,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 67,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 68,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 69,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 70,
+        "r": 115,
+        "to": "map_mvvdbiyx"
+      }
+    ],
     "hiddenPickups": [],
     "cols": 86,
     "rows": 124,
@@ -85759,7 +86979,8 @@ const BATTLE_MAPS = [
       "61,37",
       "68,37",
       "69,37",
-      "70,37"
+      "70,37",
+      "9,42"
     ],
     "ramps": [
       "41,52",
@@ -86122,7 +87343,78 @@ const BATTLE_MAPS = [
       "6,62",
       "7,62",
       "11,62",
-      "12,62"
+      "12,62",
+      "66,83",
+      "67,83",
+      "77,83",
+      "78,83",
+      "78,82",
+      "13,74",
+      "14,74",
+      "14,42",
+      "15,42",
+      "16,42",
+      "17,42",
+      "21,40",
+      "19,40",
+      "18,40",
+      "17,40",
+      "16,40",
+      "15,40",
+      "14,40",
+      "59,37",
+      "60,37",
+      "69,37",
+      "70,37",
+      "14,51",
+      "15,51",
+      "16,51",
+      "17,51",
+      "18,51",
+      "19,51",
+      "20,51",
+      "21,51",
+      "22,51",
+      "23,51",
+      "24,51",
+      "25,51",
+      "26,51",
+      "27,51",
+      "28,51",
+      "29,51",
+      "30,51",
+      "33,51",
+      "34,51",
+      "35,51",
+      "45,51",
+      "46,51",
+      "47,51",
+      "50,51",
+      "51,51",
+      "52,51",
+      "53,51",
+      "54,51",
+      "55,51",
+      "56,51",
+      "57,51",
+      "58,51",
+      "59,51",
+      "60,51",
+      "61,51",
+      "62,51",
+      "63,51",
+      "64,51",
+      "65,51",
+      "66,51",
+      "67,51",
+      "10,70",
+      "11,70",
+      "12,70",
+      "13,70",
+      "14,70",
+      "15,70",
+      "16,70",
+      "17,70"
     ]
   },
   {

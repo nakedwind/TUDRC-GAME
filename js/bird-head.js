@@ -308,6 +308,7 @@ function fallDirection(e) {
 function pushFallCorpse(e) {
   const img = monsterImage(e.lastFrameFile || e.sprite);
   (G.fxCorpses = G.fxCorpses || []).push({
+    floor: actorFloor(e),   // 死在幾樓（陸橋上的屍體才不會被橋面蓋住）
     fall: true, img, x: e.x, y: e.y, z: 0, w: e.drawWidth || 60, h: e.drawHeight || 80,
     t: 0, life: 2.6, dir: fallDirection(e), flip: !!e.lastFrameFlip,
   });

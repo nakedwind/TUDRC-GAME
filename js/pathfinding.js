@@ -27,7 +27,8 @@ function computeRampUpper() {
 // 2 樓碰撞（地圖編輯器的「🚧 2樓碰撞」筆刷，存在 MAP.solid2）：只擋 2 樓的人，1 樓照常走。
 // 1 樓的紅格（MAP.solid）跟它分開，只擋 1 樓
 let floor2Solid = new Set();
-const deckBlocked = k => floor2Solid.has(k);
+// 2 樓的人還會被「2 樓的物件加的牆」擋住（置物箱、候車椅、門…這些程式都是把擋路格加進一樓的牆 mapWalls）：js/maploader.js 的 objectWallOn2F
+const deckBlocked = k => floor2Solid.has(k) || (mapWalls.has(k) && typeof objectWallOn2F === 'function' && objectWallOn2F(k));
 function setMapFloors(deck, ramps, solid2) {
   deckCells = new Set(deck || []); floor2Solid = new Set(solid2 || []); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
 }
@@ -58,16 +59,63 @@ function clearFloorCtx() { floorCtx = 1; floorOnRamp = false; floorOnDeck = fals
 function updateActorFloor(a) {
   if (!hasFloors || !a) return;
   const k = cellAt(a.x, a.y).join(',');
-  if (a.floor == null) a.floor = (mapWalls.has(k) && deckCells.has(k) && !rampCells.has(k)) ? 2 : 1;   // 剛生出來就站在陸橋上（一樓是牆）：算 2 樓
+  // 人面蝶在空中飛、不走手扶梯：牠正下方是 2 樓地面就算 2 樓，不是就算 1 樓（飛過樓層出入口時維持原本那層）。
+  // 不然牠飛到 2 樓上空還是被當成一樓的怪，2 樓的人看得到卻打不到
+  // 在 2 樓邊緣一格以內飛來飛去時維持原本那層：在 2 樓邊上打得到牠，不會一飛出邊緣就變成一樓的怪（從一樓飛進 2 樓邊緣也一樣）
+  if (a.behavior === 'moth') {
+    if (!rampCells.has(k)) {
+      const [c, r] = cellAt(a.x, a.y), on = deckCells.has(k);
+      let edge = false;   // 旁邊一格內有「另一種」格子（在 2 樓地面上：旁邊有不是 2 樓的；不在：旁邊有 2 樓地面）＝在邊緣
+      for (let dc = -1; dc <= 1 && !edge; dc++) for (let dr = -1; dr <= 1; dr++) if (deckCells.has((c + dc) + ',' + (r + dr)) !== on) { edge = true; break; }
+      if (!edge || a.floor == null) a.floor = on ? 2 : 1;   // 在邊緣：維持原本那層
+    }
+    a._fk = k; return;
+  }
+  if (a.floor == null) a.floor = spawnFloorAt(...cellAt(a.x, a.y));   // 剛生出來就站在陸橋上（一樓是牆、或只有 2 樓的地方）：算 2 樓
+  // 站在「只有 2 樓、沒有 1 樓」的格子上（js/maploader.js 的 floor2OnlyCells）：一定是 2 樓的人。
+  // 從別張地圖的出入口走進來、一開局就站在 2 樓的人沒有經過樓層出入口，以前會被當成一樓：2 樓的物件、2 樓碰撞都擋不到他，放的燈也算一樓
+  if (a.floor !== 2 && typeof floor2OnlyCells === 'function' && MAP && floor2OnlyCells().has(k)) a.floor = 2;
   if (a._fk !== k) {
     if (a._fk && rampCells.has(a._fk) && !rampCells.has(k)) a.floor = deckCells.has(k) ? 2 : 1;
     a._fk = k;
   }
 }
 const actorFloor = a => (hasFloors && a && a.floor) || 1;
+// 剛出現在這一格的東西算幾樓：2 樓地面底下是一樓的牆，或是「只有 2 樓、沒有 1 樓」的地方（js/maploader.js 的 floor2OnlyCells）＝2 樓；
+// 其他（陸橋底下、一般地面）＝1 樓
+function spawnFloorAt(c, r) {
+  if (!hasFloors) return 1;
+  const k = c + ',' + r;
+  if (!deckCells.has(k) || rampCells.has(k)) return 1;
+  return mapWalls.has(k) || (typeof floor2OnlyCells === 'function' && MAP && floor2OnlyCells().has(k)) ? 2 : 1;
+}
+// 怪物出生、核心擺放用：照那一格「出現後會在幾樓」判斷是不是牆（2 樓的地方看 2 樓碰撞，不是一律看一樓的牆）
+const spawnWallAt = (c, r) => hasFloors ? wallOnFloor(spawnFloorAt(c, r), c, r) : mapWalls.has(c + ',' + r);
+// 飛行中的東西（照明彈、特殊彈、珍珠、帽子、水柱…）不屬於任何角色：處理它之前用這個設成「它發射時在幾樓」，
+// 牆、建築都照那一層判斷（算完一樣用 clearFloorCtx 還原）
+function setFloorCtxTo(f) { floorCtx = hasFloors && f === 2 ? 2 : 1; floorOnRamp = false; floorOnDeck = false; }
+// 飛行物、爆炸碰不碰得到這個人：不同樓層互相碰不到（沒有陸橋的地圖一律碰得到）
+const onFloor = (f, a) => !hasFloors || (f === 2 ? 2 : 1) === actorFloor(a);
+// 爆炸、火海、地雷、鱗粉霧：這次發生在幾樓（0＝不知道，照舊不分樓層）。引爆的地方用 withBlastFloor 包起來，
+// 裡面的傷害、連鎖引爆、新起的火海都只算同一層（橋上的爆炸炸不到橋下的人，反過來也一樣）
+let blastFloor = 0;
+function withBlastFloor(f, fn) {
+  const keep = blastFloor; blastFloor = hasFloors && f ? (f === 2 ? 2 : 1) : 0;
+  try { return fn(); } finally { blastFloor = keep; }
+}
+// 這個人／東西（怪物、隊員、溫特、建築、核心…有 floor 的都可以）會不會被這次爆炸波及
+const blastHits = a => !blastFloor || actorFloor(a) === blastFloor;
+// 火海、油汙、霧這類留在地上的東西：記下的 floor 跟這個人同一層才碰得到（沒記＝不分樓層）
+const fieldHits = (f, a) => !hasFloors || !f || f === actorFloor(a);
+// 地上特效（礦物碎片、焦痕、照明棒、地雷、油汙、火海）分樓層畫：js/render.js 在陸橋上補畫時設成 2，
+// 這時候記著是 1 樓的東西就跳過（不然橋下的碎片、焦痕會跑到橋面上）；沒記樓層的照舊畫
+let groundFxPass = 0;
+const fxSkip = f => !!(groundFxPass && f && f !== groundFxPass);
 // 畫面前後：二樓的人、二樓的圖都加上這個大數字，排在所有一樓的東西後面畫（蓋在一樓的人上面）
 const FLOOR2_SORT = 100000, floorSortY = a => hasFloors && a && (a.floor === 2 || rampUpperCells.has(cellAt(a.x, a.y).join(',')) || (typeof inStairUpper === 'function' && inStairUpper(a.x, a.y))) ? FLOOR2_SORT : 0;
 // 畫面上看起來在幾樓：真的在 2 樓，或站在樓梯／手扶梯靠 2 樓的那一半 → 2。蓋建築、身上的燈用這個
+// 地上的東西（掉落物、屍體、核心、帽子…）：產生時記下的 floor＝2 就排到 2 樓那一批畫（陸橋上的不會被橋面蓋住）
+const looseSortY = o => hasFloors && o && o.floor === 2 ? FLOOR2_SORT : 0;
 const visualFloor = a => floorSortY(a) ? 2 : 1;
 const sameFloor = (a, b) => actorFloor(a) === actorFloor(b);
 

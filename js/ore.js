@@ -146,7 +146,7 @@ function breakOre(o, bx, by, msg) {
     const value = Math.floor(spec.crystals / spec.shards) + (i < spec.crystals % spec.shards ? 1 : 0);
     const a = away + (Math.random() - .5) * 2.2, sp = 70 + Math.random() * 90;
     G.oreShards.push({ x: c.x, y: c.y, z: 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7, vz: 160 + Math.random() * 120,
-      value, t: 0, spin: Math.random() * 6, rare: o.type === 'ore_rare' });
+      value, t: 0, spin: Math.random() * 6, rare: o.type === 'ore_rare', floor: hasFloors ? actorFloor(o) : 0 });   // floor：在幾樓（陸橋上下分開畫、分開撿）
   }
   // 畫面：紫色爆光、碎石（普通礦石：土黃色）
   G.effects.push({ ring: true, x: c.x, y: c.y, r: 6, r2: 52, life: .5, life0: .5, color: crystal ? '#d69bff' : '#c8b49a' });
@@ -173,7 +173,9 @@ function updateOre(dt) {
       if (s.z <= 0) { s.z = 0; s.vz = Math.abs(s.vz) > 60 ? -s.vz * .32 : 0; s.vx *= .55; s.vy *= .55; }
     }
     // 溫特站不到的地方，碎片也不會落進去；離牆、碰撞格 wallGap 像素內就彈回來（才不會看起來卡進牆裡）
-    const blocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y) : solidBlocksPoint(x, y);
+    // 碎片照自己在幾樓判斷牆（2 樓打碎的礦，碎片在 2 樓彈，不會照溫特那一層、掉出 2 樓地面）
+    const who = hasFloors && s.floor ? { x: s.x, y: s.y, floor: s.floor } : null;
+    const blocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y, who) : solidBlocksPoint(x, y);
     const gap = SHARD.wallGap, tooClose = (x, y) => blocked(x, y) || blocked(x - gap, y) || blocked(x + gap, y) || blocked(x, y - gap) || blocked(x, y + gap);
     const nx = s.x + s.vx * dt;
     if (blocked(nx, s.y) || (tooClose(nx, s.y) && !tooClose(s.x, s.y))) s.vx = -s.vx * SHARD.bounce; else s.x = nx;
@@ -191,7 +193,7 @@ function shardNearPlayer() {
   const p = G && G.player; if (!p || p.hp <= 0 || p.sitting) return null;
   let best = null, bd = SHARD.reach;
   for (const s of G.oreShards || []) {
-    if (s.picked || s.z > 0 || s.t < SHARD.delay) continue;
+    if (s.picked || s.z > 0 || s.t < SHARD.delay || !fieldHits(s.floor, p)) continue;   // 橋上、橋下的碎片要在同一層才撿得到
     const d = Math.hypot(p.x - s.x, p.y - s.y); if (d < bd) { bd = d; best = s; }
   }
   return best;
@@ -216,11 +218,11 @@ function pickShardsNearPlayer() {
 }
 
 // 怪物死掉時掉一顆碎片（value＝這顆值多少碎片），從屍體的位置彈出來落在地上，靠近後可逐顆拾取
-function dropShard(x, y, value) {
+function dropShard(x, y, value, floor = blastFloor) {   // floor：掉在幾樓（0＝不分）
   if (!G || !value) return;
   G.oreShards = G.oreShards || [];
   const a = Math.random() * Math.PI * 2, sp = 20 + Math.random() * 40;
-  G.oreShards.push({ x, y, z: 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7, vz: 140 + Math.random() * 60, value, t: 0, spin: Math.random() * 6 });
+  G.oreShards.push({ x, y, z: 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7, vz: 140 + Math.random() * 60, value, t: 0, spin: Math.random() * 6, floor: hasFloors ? floor || 0 : 0 });
 }
 // 溫特開槍打中礦物（js/game.js 呼叫）：累積傷害，夠了就碎掉
 function pistolHitOre(o, dmg) {
@@ -308,6 +310,7 @@ function drawOreShards(ctx) {
   const list = G.oreShards; if (!list || !list.length) return;
   const now = performance.now() / 1000;
   for (const s of list) {
+    if (fxSkip(s.floor)) continue;   // 陸橋補畫時跳過橋下的（js/pathfinding.js）
     const bob = s.z === 0 ? Math.sin(now * 3 + s.spin) * 1.5 : 0;
     const x = s.x, y = s.y - s.z - 6 + bob;
     ctx.save();

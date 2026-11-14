@@ -160,7 +160,7 @@ function firePearls(e, target) {
   for (let i = 0; i < n; i++) {
     const a = base + (n > 1 ? (i / (n - 1) - .5) * cfg.pearlSpread * Math.PI / 180 : 0);
     (G.pearls = G.pearls || []).push({ x: hand.x, y: hand.y, z: hand.z, vx: Math.cos(a) * cfg.pearlSpeed, vy: Math.sin(a) * cfg.pearlSpeed, vz,
-      left: (cfg.shootRange + 2) * CELL, owner: e, spin: Math.random() * 6, trail: [] });
+      left: (cfg.shootRange + 2) * CELL, owner: e, floor: actorFloor(e), spin: Math.random() * 6, trail: [] });
   }
   G.effects.push({ ring: true, x: hand.x, y: hand.y - hand.z, r: 3, r2: 14, life: .16, life0: .16, color: '#ffffff' });   // 噴出的白光
   if (typeof sfxAt === 'function') sfxAt('pearlShot', e.x, e.y, .8, 'pearl-shot');
@@ -220,6 +220,7 @@ const PEARL_PROBE = [[0, 0], ...Array.from({ length: 8 }, (_, i) => [Math.cos(i 
 function updatePearls(dt) {
   if (!G.pearls || !G.pearls.length) { if (G.pearlBits) updatePearlBits(dt); return; }
   for (const pl of G.pearls) {
+    setFloorCtxTo(pl.floor);   // 珍珠照丟出來時在幾樓判斷牆、建築（js/pathfinding.js）
     pl.spin += dt * 9;
     pl.trail.push({ x: pl.x, y: pl.y - pl.z }); if (pl.trail.length > 5) pl.trail.shift();
     let move = Math.hypot(pl.vx, pl.vy) * dt;
@@ -238,13 +239,13 @@ function updatePearls(dt) {
         break;
       }
       const p = G.player;
-      if (p && p.hp > 0 && !p.sitting && pearlTouches(pl, p, pickCharacterFrame(playerSprites, p))) {
+      if (p && p.hp > 0 && !p.sitting && onFloor(pl.floor, p) && pearlTouches(pl, p, pickCharacterFrame(playerSprites, p))) {
         pl.done = true; pearlBurst(pl.x, pl.y, pl.z); pearlHitPlayer(pl);
         playPlayerHit(1, true);   // 溫特被珍珠打中
         break;
       }
       for (const t of G.towers) {
-        if (t.hp <= 0 || t.berserk || t.eatenBy || !pearlTouches(pl, t, pearlTowerFrame(t))) continue;
+        if (t.hp <= 0 || t.berserk || t.eatenBy || !onFloor(pl.floor, t) || !pearlTouches(pl, t, pearlTowerFrame(t))) continue;
         pl.done = true; pearlBurst(pl.x, pl.y, pl.z);
         pl.owner.atkCd = 0; enemyAttackSentry(pl.owner, t, 0);
         if (typeof sfxAt === 'function') sfxAt('pearlHit', pl.x, pl.y, .9, 'pearl-hit');
@@ -253,6 +254,7 @@ function updatePearls(dt) {
       if (!pl.done && pl.left <= 0) { pl.done = true; pearlBurst(pl.x, pl.y, pl.z); }   // 飛到盡頭碎掉
     }
   }
+  clearFloorCtx();
   G.pearls = G.pearls.filter(pl => !pl.done);
   if (G.pearlBits) updatePearlBits(dt);
 }
@@ -315,7 +317,7 @@ function drawPearls(ctx) {
 // ---- 死亡：掉到地上、珍珠滾出來、變暗淡出 ----
 function pushDropCorpse(e) {
   const img = monsterImage((e.art && e.art.closed) || shooterFrame(e));   // 死掉時閉上眼睛
-  (G.fxCorpses = G.fxCorpses || []).push({ drop: true, img, x: e.x, y: e.y, z: e.slimeLift || 0, vz: 0,
+  (G.fxCorpses = G.fxCorpses || []).push({ floor: actorFloor(e), drop: true, img, x: e.x, y: e.y, z: e.slimeLift || 0, vz: 0,
     w: e.drawWidth || PEARL_ART_W, h: e.drawHeight || PEARL_ART_H, t: 0, life: DISSOLVE.start + DISSOLVE.spread + DISSOLVE.life + .05, pearl: e.art && e.art.pearl });
 }
 function updateDropCorpse(c, dt) {   // 由 combat-feel.js 的屍體更新呼叫

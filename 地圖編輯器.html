@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 地圖編輯器</title>
-<link rel="stylesheet" href="css/map-editor.css?v=layerblend-20261114">   <!-- 地圖編輯器自己的樣式（基地編輯器是 css/base-editor.css） -->
+<link rel="stylesheet" href="css/map-editor.css?v=levels1-20261115">   <!-- 地圖編輯器自己的樣式（基地編輯器是 css/base-editor.css） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/map-editor-copy.css?v=copy-20261021">
 </head>
@@ -45,9 +45,12 @@
             <button class="tool" data-mode="vine" title="點一格放一條垂吊藤蔓、再點一次拿掉。藤蔓從畫面上方垂到這一格，溫特碰到會被纏住拉出畫面，過幾秒丟回附近的地面">🌿 藤蔓</button>
             <button class="tool" data-mode="vineferry" title="傳送藤蔓：先點一格放藤蔓，再點一格當落點。碰到的人會被捲走、丟到落點（過不去的地方靠它過去）；溫特被抓時，跟在旁邊的隊友也會一起被丟過去。點已經放好的藤蔓＝拿掉">🌿➡ 傳送藤蔓</button>
             <button class="tool" data-mode="capking" title="菁英 BOSS「順順宮主」：點空格放一頂大宮帽、再點一次拿掉。核心會躲在其中一頂裡（至少 2 頂）；虛線框是帽子蓋著時擋住的範圍">🎩 順順宮主帽子</button>
-            <button class="tool" data-mode="deck" title="畫陸橋（2 樓）走得到的格子（藍色）。2 樓的人只能走在這些格子和「樓層出入口」上，下面一樓的牆、柱子不擋 2 樓；一樓的人照樣能從下面走過去（拖曳畫一片；再畫一次＝擦掉）">🌉 2樓地面</button>
+            <button class="tool" data-mode="level" title="把格子畫成哪一種樓層（右邊選種類）：只有 2 樓（藍）＝底下沒有 1 樓；陸橋（青色斜線）＝上下都有地面，1 樓的人從底下走過去；樓層出入口（橘）＝樓梯、手扶梯；只有 1 樓＝擦掉。拖曳畫一片">🏢 樓層種類</button>
+            <select id="levelKind" class="level-kind" title="🏢 筆刷要畫成哪一種"><option value="2">只有 2 樓</option><option value="b">陸橋（上下都有）</option><option value="r">樓層出入口</option><option value="1">只有 1 樓（擦掉）</option></select>
+            <button class="btn" id="levelConvert" title="用目前的規則（圖層名稱有「2樓」、格子上有沒有鋪一樓的圖）算一次，把「只有 2 樓的格子」「每張圖在幾樓」明確寫進地圖。之後遊戲照寫的走，不再推算；再用 🏢 筆刷、選物件的「樓層」微調">🏢 產生樓層資料</button>
+            <button class="btn" id="levelCheck" title="列出 1、2 樓可能有問題的地方：牆圖蓋住可以走的格子、出生區或核心點在牆裡、物件跨在 2 樓邊緣、樓層出入口沒接好…點清單跳過去">🔍 樓層檢查</button>
+            <select id="levelView" class="level-kind" title="編輯器畫面只看其中一層（不影響遊戲）"><option value="all">顯示：兩層</option><option value="1">只看 1 樓</option><option value="2">只看 2 樓</option></select>
             <button class="btn" id="genDeck" title="照名稱有「2樓」的圖層自動畫 2 樓地面：地板圖層（例如「2樓地板」）蓋到的格子加進來，名稱有「牆」的 2 樓圖層蓋到的格子拿掉。畫完再用 🌉 筆刷微調">🌉 從2樓圖層產生</button>
-            <button class="tool" data-mode="ramp" title="畫連接 1 樓和 2 樓的格子（橘色，例如手扶梯、樓梯）。從這裡走到「2樓地面」＝上 2 樓，走到其他格子＝回 1 樓。扶手、隔板照一般碰撞擋（拖曳畫一片；再畫一次＝擦掉）">🛗 樓層出入口</button>
             <button class="tool" data-mode="solid2" title="畫只擋 2 樓的碰撞（紫色斜線框），例如 2 樓的牆、欄杆。1 樓的人照樣可以從底下走過去；一般的 🧱 紅格只擋 1 樓（拖曳畫一片；再畫一次＝擦掉）">🚧 2樓碰撞</button>
             <button class="btn" id="deckSolidTo2F" title="把畫在 🌉 2樓地面上的紅格（1 樓碰撞）一次改成 🚧 2樓碰撞：以前用紅格當 2 樓牆的地方用這個換過去">🔁 2樓地面上的紅格→2樓碰撞</button>
             <button class="tool" data-mode="spawn" title="畫上後，這張地圖的怪物只會從這些格子出生（拖曳可以一次畫一片；再畫一次＝擦掉）">👾 怪物出生區</button>
@@ -217,7 +220,7 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=gourd-speed-20261028"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=gourd-20261028"></script>
-  <script src="data/tiles.js?v=oresize-20261115"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/tiles.js?v=mrtwallcolors-20261115"></script>        <!-- 素材庫（兩個編輯器共用） -->
   <script src="data/maps.js?v=mrtmap-20261112"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
   <script src="data/supplies.js?v=toolbox15-20261109"></script>
   <script src="data/items.js?v=swimring-20261113"></script>
@@ -230,8 +233,9 @@
   <script src="js/ui-feedback.js"></script>
   <script src="js/map-picker.js?v=mappicker-20261024"></script>   <!-- 設出入口時選地圖的清單（取代 prompt，地圖多也不會被截斷） -->
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
+  <script src="js/map-levels.js?v=levels1-20261115"></script>   <!-- 地圖的樓層資料規則（遊戲共用） -->
   <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=oresize-20261115", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=levels1-20261115", "js/map-editor-levels.js?v=levels1-20261115", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
