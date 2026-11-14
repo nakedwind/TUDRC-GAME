@@ -650,8 +650,7 @@ function drawMapStampImg(ctx, s, glowPass = false) {
   if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
   const secret = typeof secretAlpha === 'function' ? secretAlpha(s) : 1;   // 隱藏區圖層：炸開前不畫（js/breakable-walls.js）
   if (secret <= 0) return;
-  const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret
-    * (typeof mrtGateAlpha === 'function' ? mrtGateAlpha(s) : 1);   // 月台閘門：捷運開門時變淡（js/mrt-train.js）
+  const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret;
   const blend = mapStampBlend(s);
   if (!blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
   ctx.save();
@@ -716,10 +715,12 @@ function drawMapStampPlain(ctx, s) {
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
       ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
-      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawEscalatorAnimation==='function'&&drawEscalatorAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
+      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawMrtCardGate==='function'&&drawMrtCardGate(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawEscalatorAnimation==='function'&&drawEscalatorAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
       ctx.restore();
     } else if(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,x,y,w,h)) {
       // 閘門的靜態機台與滑動門翼由專用繪製處理。
+    } else if (typeof drawMrtCardGate === 'function' && drawMrtCardGate(ctx, s, img, x, y, w, h)) {
+      // 月台閘門（閘門讀卡機）：兩片門板跟著捷運車門往左右滑開（js/mrt-train.js）
     } else if (typeof drawEscalatorAnimation === 'function' && drawEscalatorAnimation(ctx, s, img, x, y, w, h)) {
       // 手扶梯：階梯循環捲動（js/escalators.js）
     } else {
