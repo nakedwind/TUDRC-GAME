@@ -700,6 +700,8 @@ function drawMapStampPlain(ctx, s) {
   let w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, rot = mapStampTurn(s);
   // 旋轉後的圖跟編輯器一樣：左上角固定在 (c, r)＋微調，往右下佔「轉向後的寬高」，不再以原本大小的中心為準
   let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  const jit = typeof gourdKingWallJitter === 'function' ? gourdKingWallJitter(s) : null;   // BOSS 牆被撞的時候抖一下（js/gourd-king.js）
+  if (jit) { x += jit[0]; y += jit[1]; }
   const opened = (typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s))   // 剛補給過的彈藥箱：換成打開的圖
     || (typeof supplyBoxTile === 'function' && supplyBoxTile(s));   // 物資箱：照箱子裡的數量換圖（js/camp-supply.js）
   if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }

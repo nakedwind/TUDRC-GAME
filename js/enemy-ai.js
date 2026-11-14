@@ -548,6 +548,7 @@ function stepEnemy(e, dt) {
   }
   e.lastSafeX = e.x; e.lastSafeY = e.y;
   if (e.behavior === 'burrow') { stepBurrowingMouse(e, dt); return; }
+  if (e.gourdKing) { stepGourdKing(e, dt); return; }   // 葫蘆猴王：撞破 BOSS 牆跳出來、巨型壓頂、暴怒連跳（js/gourd-king.js）
   if (e.behavior === 'gourd') { stepGourdEnemy(e, dt); return; }   // 葫蘆猴：拖行、泰山壓頂，自己找寬的路回核心（js/gourd-monkey.js）
   if (e.bananaEmperor) { stepBananaEmperor(e, dt); return; }   // 金蕉大王：守在核心旁邊敲地施法（js/banana-emperor.js）
   if (e.behavior === 'healer') { stepHealerEnemy(e, dt); return; }   // 金蕉王：補血、逃跑，核心醒著也不回去守（js/golden-banana-king.js）   // 地底追蹤不用史萊姆跳躍；自身處理核心守衛

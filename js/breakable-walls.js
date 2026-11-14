@@ -103,7 +103,8 @@ const HIDDEN_REVEAL_SEC = .9;   // 炸開後黑幕淡出幾秒
 let breakableWallCells = new Set();   // 這局因為「還沒炸開」而加進固定牆的格子（換地圖／重開時先還原）
 let breakableWallSolid = new Set();   // 牆本身一直擋路的格子（同樣換地圖／重開時先還原）
 
-const breakableWallSpec = s => (s && BREAKABLE_WALLS[s.id]) || null;
+// BOSS 牆（js/gourd-king.js 的 GOURD_KING.maps 指定的那面牆）用 BOSS 自己的規則：換圖順序、打通的格子不一樣
+const breakableWallSpec = s => (s && BREAKABLE_WALLS[(typeof gourdKingWallSpec === 'function' && gourdKingWallSpec(s)) || s.id]) || null;
 function breakableWallStage(s) { return (G && G.wallStage && G.wallStage.get(s)) || 0; }
 // 牆上要通過的那幾格（地圖格座標）
 function breakableWallOpenCells(s) {
@@ -306,22 +307,25 @@ function breakableWallDisplayTile(s, t) {
 function blastWalls(x, y, R) {
   if (!G || !MAP || !(G.wallStage instanceof Map)) return;   // 回憶劇情演出中（newGame 沒跑完）：牆還沒設定，不處理
   for (const s of MAP.stamps || []) {
-    const spec = breakableWallSpec(s); if (!spec) continue;
+    const spec = breakableWallSpec(s); if (!spec || spec.boss) continue;   // BOSS 牆：炸彈炸不開，只會被 BOSS 撞開（js/gourd-king.js）
     const stage = breakableWallStage(s); if (stage >= spec.stages.length) continue;   // 已經炸開了
     const cells = breakableWallOpenCells(s);
     if (!cells.some(([c, r]) => { const [cx, cy] = center(c, r); return Math.hypot(cx - x, cy - y) <= R + (spec.pad ?? 1) * CELL; })) continue;
     const next = stage + 1;
-    G.wallStage.set(s, next);
-    const [hx, hy] = center(...cells[0]);
-    if (next >= spec.stages.length) {   // 炸開：那幾格變成可以通過
-      for (const [c, r] of breakableWallPassCells(s)) { const k = c + ',' + r; if (breakableWallCells.has(k)) { mapWalls.delete(k); breakableWallCells.delete(k); } }
-      if (typeof computeFlow === 'function') computeFlow();
-      for (const a of [...(G.towers || []), ...(G.npcs || [])]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
-      for (const e of G.enemies || []) if (typeof resetEnemyNavigation === 'function') resetEnemyNavigation(e);
-      wallRubble(hx, hy, 18);
-      for (const a of G.hiddenAreas || []) if (a.stamp === s && !a.revealAt) a.revealAt = performance.now() / 1000;   // 隱藏區：黑幕開始淡出
-    } else wallRubble(hx, hy, 7);   // 裂開：少量碎屑
+    if (next >= spec.stages.length) openBreakableWall(s, next);   // 炸開：那幾格變成可以通過
+    else { G.wallStage.set(s, next); wallRubble(...center(...cells[0]), 7); }   // 裂開：少量碎屑
   }
+}
+// 把牆打通（炸開、或被 BOSS 撞破）：換成最後一張圖、那幾格變成可以通過、隱藏區開始顯現
+function openBreakableWall(s, stage) {
+  const spec = breakableWallSpec(s); if (!spec || !G || !(G.wallStage instanceof Map)) return;
+  G.wallStage.set(s, stage || spec.stages.length);
+  for (const [c, r] of breakableWallPassCells(s)) { const k = c + ',' + r; if (breakableWallCells.has(k)) { mapWalls.delete(k); breakableWallCells.delete(k); } }
+  if (typeof computeFlow === 'function') computeFlow();
+  for (const a of [...(G.towers || []), ...(G.npcs || [])]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
+  for (const e of G.enemies || []) if (typeof resetEnemyNavigation === 'function') resetEnemyNavigation(e);
+  wallRubble(...center(...breakableWallOpenCells(s)[0]), 18);
+  for (const a of G.hiddenAreas || []) if (a.stamp === s && !a.revealAt) a.revealAt = performance.now() / 1000;   // 隱藏區：黑幕開始淡出
 }
 // ---- 球球找到的牆：牆上的白色狗腳印＋「?」小牌子（沒帶球球就沒有任何提示，要自己發現）----
 function breakableWallOpened(s) { const spec = breakableWallSpec(s); return !!spec && breakableWallStage(s) >= spec.stages.length; }
@@ -333,7 +337,7 @@ function breakableWallHidesArea(s) {
 // 一開始就是裂縫的牆（「後室牆面（裂縫・可炸開）」系列：只有一個階段，炸一次就開）
 function breakableWallCrackType(s) { const spec = breakableWallSpec(s); return !!spec && spec.stages.length === 1; }
 // 球球（密道搜索）聞得出來的牆：隱藏區的牆＋裂縫牆
-function breakableWallSniffable(s) { return breakableWallHidesArea(s) || breakableWallCrackType(s); }
+function breakableWallSniffable(s) { const spec = breakableWallSpec(s); return !!spec && !spec.boss && (breakableWallHidesArea(s) || breakableWallCrackType(s)); }   // BOSS 牆炸不開，不標腳印
 // js/render.js 在黑幕之上呼叫（暗處也看得到）
 function drawBreakableWallHints(ctx) {
   if (!G || !G.running || MAP_SAFE || !MAP || !(G.wallStage instanceof Map) || typeof dogFoundWall !== 'function') return;

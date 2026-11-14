@@ -477,7 +477,7 @@ function incShotPos(s) {
 
 // ---- 混亂彈：直線打出去，只打怪物（穿過隊員），打中的怪物陷入混亂 ----
 // 頭目（大隊長、宮主、珍珠大童、絲瓜女王、金蕉大王…）、生命體、鑽在地底的版權老鼠沒有效果
-const confuseImmune = e => !!(e.noStun || e.elite || e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.superArmor || e.dummy || (typeof burrowUnderground === 'function' && burrowUnderground(e)));
+const confuseImmune = e => !!(e.noStun || e.elite || e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.superArmor || e.dummy || (typeof burrowUnderground === 'function' && burrowUnderground(e)));
 function fireConfuse(p, aim, b) {
   const S = SPECIAL_GUN.tranq, ang = Math.atan2(aim.y - p.y, aim.x - p.x);
   aimPose(p, ang);

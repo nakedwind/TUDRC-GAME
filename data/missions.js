@@ -39,6 +39,7 @@ const BOSS_BOUNTIES = [
   { id: 'bird', name: '鳥頭大隊長', flag: 'elite', money: 2000 },         // js/elite-bird-head.js
   { id: 'capKing', name: '順順宮主', flag: 'capKingLord', money: 3000 },   // js/elite-cap-king.js（只算跟核心躲在一起的宮主本人，大夯吉寶不算）
   { id: 'pearl', name: '珍珠大童', flag: 'pearlBoss', money: 3000 },       // js/pearl-elder.js
+  { id: 'gourdKing', name: '葫蘆猴王', flag: 'gourdKing', money: 3000 },   // js/gourd-king.js（金額是預設，待確認）
 ];
 
 const MISSIONS = [
