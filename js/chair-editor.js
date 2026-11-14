@@ -62,11 +62,14 @@ function draw() {
   const behind = chair && chair.seat.dir === 'back' && !/bed|床/i.test(selectedId);   // 背面椅子：人在椅子後面（跟遊戲一致）
   if (!behind && image.complete && image.naturalWidth) ctx.drawImage(image,0,0,w,h);
   if (!chair) return;
-  const actor = previewActor[chair.seat.dir];
-  if (actor?.complete && actor.naturalWidth) {
+  // 其他位子（長椅、雙座椅）：寫在 js/chair-data.js 的 CHAIR_EXTRA_SEATS，沒寫的 x、y 跟第一個位子一樣
+  const extraSeats = ((typeof CHAIR_EXTRA_SEATS !== 'undefined' && CHAIR_EXTRA_SEATS[selectedId]) || []).map(e => ({ ...chair.seat, ...e }));
+  for (const spot of [chair.seat, ...extraSeats]) {
+    const actor = previewActor[spot.dir];
+    if (!actor?.complete || !actor.naturalWidth) continue;
     ctx.globalAlpha = .34;
     ctx.save();
-    ctx.translate(chair.seat.x, chair.seat.y-14);
+    ctx.translate(spot.x, spot.y-14);
     ctx.rotate((Number(chair.seat.rotation) || 0) * Math.PI / 180);
     ctx.drawImage(actor,-32,-32,64,64);
     ctx.restore();
@@ -82,6 +85,10 @@ function draw() {
   for(let y=40;y<h;y+=40){ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(w,y+.5);ctx.stroke();}
   ctx.strokeStyle = '#ffd36f'; ctx.lineWidth = 2; ctx.beginPath();ctx.moveTo(0,chair.depth+.5);ctx.lineTo(w,chair.depth+.5);ctx.stroke();
   ctx.fillStyle = '#ffd36f'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('深度 '+chair.depth,3,Math.max(11,chair.depth-4));
+  for (const spot of extraSeats) {   // 其他位子畫成淡色十字（位置在 js/chair-data.js 改，這裡不能拖）
+    ctx.strokeStyle = 'rgba(103,220,255,.55)'; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.arc(spot.x,spot.y,6,0,Math.PI*2); ctx.moveTo(spot.x-9,spot.y); ctx.lineTo(spot.x+9,spot.y); ctx.moveTo(spot.x,spot.y-9); ctx.lineTo(spot.x,spot.y+9); ctx.stroke();
+  }
   const x = chair.seat.x, y = chair.seat.y;
   ctx.strokeStyle = '#062b3c'; ctx.lineWidth = 4; ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.stroke();
   ctx.strokeStyle = '#67dcff'; ctx.lineWidth = 2; ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.moveTo(x-11,y);ctx.lineTo(x+11,y);ctx.moveTo(x,y-11);ctx.lineTo(x,y+11);ctx.stroke();

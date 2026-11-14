@@ -874,5 +874,53 @@ const PROP_COLLISIONS = [
         ]
       ]
     }
+  },
+  {
+    "id": "prop-mrt-planter",
+    "name": "植栽（捷運）",
+    "tile": "tile_mrt_planter",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/捷運車站/mrt-planter.png",
+      "w": 3,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-mrt-recycling-bins",
+    "name": "垃圾桶（分類）",
+    "tile": "tile_mrt_recycling_bins",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/捷運車站/mrt-recycling-bins.png",
+      "w": 2,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    }
   }
 ];
