@@ -131,6 +131,12 @@
           <label title="在水裡走路是平常速度的幾 %（100＝不變慢）">水中走路速度 <input type="number" id="tileWaterSpeed" min="10" max="100" step="5" style="width:56px"> %</label>
           <label title="水面下的身體看得多清楚（0＝完全看不到、100＝跟水面上一樣）">水下看得見 <input type="number" id="tileWaterSee" min="0" max="100" step="5" style="width:56px"> %</label>
         </span>
+        <!-- 坑洞：角色走過素材中間會變慢（js/pits.js）。數字＝走過去是平常速度的幾 % -->
+        <label style="cursor:pointer"><input type="checkbox" id="tilePit"> 這是坑洞（走過會變慢）</label>
+        <span id="tilePitOpts" class="hidden" style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label title="溫特、隊員走過坑洞是平常速度的幾 %（20＝慢 80%）">溫特／隊員速度 <input type="number" id="tilePitAlly" min="5" max="100" step="5" style="width:56px"> %</label>
+          <label title="怪物走過坑洞是平常速度的幾 %（50＝慢 50%）。飛的、鑽地底的不受影響">怪物速度 <input type="number" id="tilePitEnemy" min="5" max="100" step="5" style="width:56px"> %</label>
+        </span>
       </div>
 
       <!-- 磚塊調色盤（由程式產生：內建地板/牆/障礙物 + 你加入的磚塊）-->
@@ -199,7 +205,7 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=gourd-speed-20261028"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=gourd-20261028"></script>
-  <script src="data/tiles.js?v=merge-20261114"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/tiles.js?v=oresize-20261115"></script>        <!-- 素材庫（兩個編輯器共用） -->
   <script src="data/story-maps.js?v=cat-20261112"></script>        <!-- 劇情地圖資料（STORY_MAPS） -->
   <script src="data/supplies.js?v=toolbox15-20261109"></script>
   <script src="data/items.js?v=swimring-20261113"></script>
@@ -227,7 +233,7 @@
     };
   </script>
   <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=edge39-20261115", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
+  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=merge-20261115", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>

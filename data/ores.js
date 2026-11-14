@@ -14,7 +14,8 @@ const ORE_TYPES = {
         0,
         0
       ]
-    ]
+    ],
+    "blasts": 1
   },
   "ore_large": {
     "name": "大型異質礦",
@@ -30,7 +31,8 @@ const ORE_TYPES = {
         0,
         1
       ]
-    ]
+    ],
+    "blasts": 1
   },
   "ore_rare": {
     "name": "稀有紫晶礦",
@@ -50,7 +52,8 @@ const ORE_TYPES = {
         1,
         2
       ]
-    ]
+    ],
+    "blasts": 1
   },
   "ore_coal": {
     "name": "煤礦",
@@ -59,27 +62,8 @@ const ORE_TYPES = {
     "shards": 0,
     "glow": 0,
     "hp": 9999,
-    "w": 2,
-    "h": 2,
-    "solid": [
-      [
-        0,
-        1
-      ],
-      [
-        1,
-        1
-      ]
-    ]
-  },
-  "ore_tin": {
-    "name": "錫礦",
-    "file": "images/item-obstacle/16-ore-tin.png",
-    "crystals": 0,
-    "shards": 0,
-    "glow": 0,
-    "hp": 9999,
-    "w": 3,
+    "blasts": 3,
+    "w": 4,
     "h": 3,
     "solid": [
       [
@@ -93,6 +77,63 @@ const ORE_TYPES = {
       [
         2,
         2
+      ],
+      [
+        3,
+        2
+      ]
+    ]
+  },
+  "ore_tin": {
+    "name": "錫礦",
+    "file": "images/item-obstacle/16-ore-tin.png",
+    "crystals": 0,
+    "shards": 0,
+    "glow": 0,
+    "hp": 9999,
+    "blasts": 3,
+    "w": 6,
+    "h": 6,
+    "solid": [
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        5
       ]
     ]
   },
@@ -103,16 +144,33 @@ const ORE_TYPES = {
     "shards": 0,
     "glow": 0,
     "hp": 9999,
-    "w": 2,
-    "h": 2,
+    "blasts": 2,
+    "w": 4,
+    "h": 4,
     "solid": [
       [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
         0,
-        1
+        3
       ],
       [
         1,
-        1
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
       ]
     ]
   },
@@ -123,16 +181,33 @@ const ORE_TYPES = {
     "shards": 0,
     "glow": 0,
     "hp": 9999,
-    "w": 2,
-    "h": 2,
+    "blasts": 4,
+    "w": 4,
+    "h": 4,
     "solid": [
       [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
         0,
-        1
+        3
       ],
       [
         1,
-        1
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
       ]
     ]
   }

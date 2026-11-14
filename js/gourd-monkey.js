@@ -68,6 +68,8 @@ const GOURD = {
   },
 };
 const gmRand = (a, b) => a + Math.random() * (b - a);
+// 這隻用哪一套數值：一般葫蘆猴用 GOURD；葫蘆猴王（js/gourd-king.js）用自己放大過的那套
+function gmCfg(e) { return e && e.gourdKing && typeof gourdKingCfg === 'function' ? gourdKingCfg(e) : GOURD; }
 
 // ---- 身體很寬：一格的通道走不過 ----
 // 規則跟其他大體型怪物共用（js/enemy-ai.js 的 enemyWideAt／wideEnemyRoute）；建築算空地，擋到就壓壞它
@@ -97,14 +99,14 @@ function gmPickTarget(e) {
   const dist = t => Math.hypot(t.x - e.x, t.y - e.y), targets = gmTargets(e);
   if ((e.playerAggroT || 0) > 0 && targets.includes(G.player) && dist(G.player) <= ENEMY_SENSE_RANGE) return G.player;
   if (e.sentryAggroT > 0 && targets.includes(e.sentryAggro) && dist(e.sentryAggro) <= ENEMY_SENSE_RANGE) return e.sentryAggro;
-  let best = null, bestD = GOURD.noticeRange * CELL;
+  let best = null, bestD = gmCfg(e).noticeRange * CELL;
   for (const t of targets) { const d = dist(t); if (d <= bestD && hasLineOfSight(e.x, e.y, t.x, t.y)) { best = t; bestD = d; } }
   return best;
 }
 
 // ---- 行為（enemy-ai.js 的 stepEnemy 呼叫）----
 function stepGourdEnemy(e, dt) {
-  const C = GOURD;
+  const C = gmCfg(e);
   if (!e.gm) {
     e.gm = { cd: 1 + Math.random(), wait: Math.random() * 2, pulse: Math.random() * 6 }; e.unpushable = true;
     [C.art.squash, C.art.tall, C.crackImage].forEach(monsterImage);   // 先載好壓扁／拉長圖和裂痕圖，第一次壓頂才不會閃空白
@@ -126,7 +128,7 @@ function stepGourdEnemy(e, dt) {
   gourdDragTrail(e, Math.hypot(e.x - x0, e.y - y0));
 }
 function gourdThink(e, dt, moveDt) {
-  const C = GOURD, g = e.gm;
+  const C = gmCfg(e), g = e.gm;
   let target = gmPickTarget(e);
   if (!target && g.target && g.target.hp > 0 && Math.hypot(g.target.x - e.x, g.target.y - e.y) <= C.loseRange * CELL) target = g.target;
   if (target && !g.target) gourdLaugh(e);   // 發現目標：笑一聲
@@ -138,6 +140,14 @@ function gourdThink(e, dt, moveDt) {
       return;   // 冷卻中：就地等著
     }
     const [gc, gr] = cellAt(target.x, target.y);
+    const nav = gourdNavigate(e, gc, gr, moveDt, 'hunt:' + gc + ',' + gr);
+    if (nav.blocker) gourdSmashBlocker(e, nav.blocker);
+    return;
+  }
+  // 葫蘆猴王（hunt）：看不到人也知道溫特在哪，慢慢拖過去
+  const p = G.player;
+  if (C.hunt && p && p.hp > 0 && sameFloor(e, p)) {
+    const [gc, gr] = cellAt(p.x, p.y);
     const nav = gourdNavigate(e, gc, gr, moveDt, 'hunt:' + gc + ',' + gr);
     if (nav.blocker) gourdSmashBlocker(e, nav.blocker);
     return;
@@ -184,14 +194,14 @@ function gourdSmashBlocker(e, o) {
 
 // ---- 泰山壓頂：壓扁蓄力 → 升空（落點跟著目標）→ 砸下 → 陷在地上 ----
 function gourdStartSlam(e, aim, target) {
-  const C = GOURD, g = e.gm;
+  const C = gmCfg(e), g = e.gm;
   const dx = aim.x - e.x, dy = aim.y - e.y, d = Math.hypot(dx, dy), k = d > C.maxLeap * CELL ? C.maxLeap * CELL / d : 1;
   g.slam = { phase: 'crouch', t: 0, target, from: { x: e.x, y: e.y }, spot: { x: e.x + dx * k, y: e.y + dy * k } };
   g.path = null;
   e.faceRight = aim.x > e.x;
 }
 function stepGourdSlam(e, dt) {
-  const C = GOURD, g = e.gm, s = g.slam;
+  const C = gmCfg(e), g = e.gm, s = g.slam;
   s.t += dt;
   if (s.phase === 'crouch') {
     e.forceFrame = C.art.squash; e.slimeLift = 0; e.tremble = true;   // 壓扁、全身發抖（js/render.js）
@@ -230,7 +240,7 @@ function stepGourdSlam(e, dt) {
 }
 // 落點慢慢跟著目標走（有速度上限，跑得快還是閃得掉），也不會離起跳點太遠
 function gourdTrackSpot(e, s, dt) {
-  const C = GOURD, t = s.target;
+  const C = gmCfg(e), t = s.target;
   if (!t || t.hp <= 0) return;
   const dx = t.x - s.spot.x, dy = t.y - s.spot.y, d = Math.hypot(dx, dy);
   if (d > .5) { const m = Math.min(d, C.track * dt); s.spot.x += dx / d * m; s.spot.y += dy / d * m; }
@@ -238,7 +248,7 @@ function gourdTrackSpot(e, s, dt) {
   if (fd > max) { s.spot.x = s.from.x + fx / fd * max; s.spot.y = s.from.y + fy / fd * max; }
 }
 function gourdImpact(e) {
-  const C = GOURD, g = e.gm, R = C.hitRadius, x = e.x, y = e.y;
+  const C = gmCfg(e), g = e.gm, R = C.hitRadius, x = e.x, y = e.y, quick = !!(g.slam && g.slam.quick);
   g.slam = null; g.recover = C.recover; g.cd = C.cooldown; e.slimeLift = 0; e.forceFrame = C.art.squash;
   resetEnemyNavigation(e);
   // 震動、衝擊波、揚塵、地裂
@@ -249,8 +259,8 @@ function gourdImpact(e) {
     G.effects.push({ particle: true, kind: 'spark', x, y: y + 10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45 - 20,
       r: 2 + Math.random() * 2.5, life: .4 + Math.random() * .25, life0: .65, color: Math.random() < .5 ? '#a8936c' : '#d6c49a' });
   }
-  gourdImpactFx(x, y + 12);   // 撞擊閃光、飛起來的石礫、往外翻滾的灰塵
-  (G.gourdCracks = G.gourdCracks || []).push({ x, y: y + 12, life: C.crackLife, life0: C.crackLife, seed: Math.random() * 9, flip: Math.random() < .5 });
+  gourdImpactFx(x, y + 12, R / GOURD.hitRadius);   // 撞擊閃光、飛起來的石礫、往外翻滾的灰塵（葫蘆猴王範圍大，特效跟著放大）
+  (G.gourdCracks = G.gourdCracks || []).push({ x, y: y + 12, life: C.crackLife, life0: C.crackLife, seed: Math.random() * 9, flip: Math.random() < .5, scale: C.crackScale });
   if (typeof sfxAt === 'function') { sfxAt('gourdSlam', x, y, 1, 'gourd-slam'); sfxAt('gourdLandCry', x, y, .9, 'gourd-cry'); }
   // 畫面震動：越近震越大，被壓到再加一點頓格
   const p = G.player, pd = p ? Math.hypot(p.x - x, p.y - y) : Infinity, near = Math.max(0, 1 - pd / (C.shakeRange * CELL));
@@ -291,6 +301,7 @@ function gourdImpact(e) {
       if (o.hp > 0 && !o.isBase) o.gourdHop = { t: -k * .08, h: C.hopMax + (C.hopMin - C.hopMax) * k, landed: false };   // 外圈晚一點點才彈，像震波往外傳
     }
   }
+  if (e.gourdKing && typeof gourdKingImpact === 'function') gourdKingImpact(e, quick);   // 葫蘆猴王：天花板落石、暴怒連跳（js/gourd-king.js）
 }
 function gourdHitPlayer(e, p) {
   if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
@@ -328,7 +339,7 @@ function gourdCrushObstacle(e, o, dmg) {   // 跟 enemyAttackObstacle 一樣扣�
 
 // ---- 拖行的痕跡、揚塵、聲音 ----
 function gourdDragTrail(e, moved) {
-  const C = GOURD, g = e.gm;
+  const C = gmCfg(e), g = e.gm;
   if (moved < .01 || moved > 20) return;
   // 拖行是一頓一頓的：慢的那一下幾乎沒動，render.js 會當成停下來換回「正」。只要還在拖就算走路，右晃／左晃不中斷
   e.walkUntil = performance.now() / 1000 + .35;
@@ -355,6 +366,7 @@ function updateGourd(dt) {
   updateGourdDebris(dt);
   updateGourdHops(dt);
   gourdTestSpawn();
+  if (typeof updateGourdKing === 'function') updateGourdKing(dt);   // 葫蘆猴王：撞牆演出、天花板落石（js/gourd-king.js）
 }
 // ---- 身體擋人：溫特、隊友走不進葫蘆猴的身體（腳下的橢圓），貼上去會沿著邊緣滑開；牠拖過來也會把人推開 ----
 // 不改尋路（隊友照原本的路線走，碰到身體就被擠開繞過去）；升到空中時不擋（落地的震波會把人震開）
@@ -469,7 +481,7 @@ function drawGourdGround(ctx) {
     if (!isVisible(k.x, k.y)) continue;
     const img = monsterImage(C.crackImage);   // 地面裂痕圖（images/破損建築/crack06.png），隨機左右翻
     if (img.complete && img.naturalWidth) {
-      const w = img.naturalWidth * C.crackScale, h = img.naturalHeight * C.crackScale, prev = ctx.imageSmoothingEnabled;
+      const w = img.naturalWidth * (k.scale || C.crackScale), h = img.naturalHeight * (k.scale || C.crackScale), prev = ctx.imageSmoothingEnabled;
       ctx.globalAlpha = Math.min(1, k.life / 1.5); ctx.imageSmoothingEnabled = false;
       ctx.save(); ctx.translate(k.x, k.y); if (k.flip) ctx.scale(-1, 1);
       ctx.drawImage(img, -w / 2, -h / 2, w, h);
@@ -487,6 +499,7 @@ function drawGourdGround(ctx) {
   for (const e of G.enemies) {   // 落點警示：蓄力時淡淡出現，升空後越來越紅、由外往內填滿
     const s = e.gm && e.gm.slam;
     if (!s || e.hp <= 0) continue;
+    const C = gmCfg(e);   // 葫蘆猴王的落點圈比較大
     const total = C.crouch + C.rise + C.hang + C.drop;
     const done = s.phase === 'crouch' ? s.t : s.phase === 'rise' ? C.crouch + s.t : s.phase === 'hang' ? C.crouch + C.rise + s.t : total;
     const k = Math.min(1, done / (total - C.drop)), R = C.hitRadius, gx = s.spot.x, gy = s.spot.y + 12;
@@ -496,22 +509,23 @@ function drawGourdGround(ctx) {
     ctx.beginPath(); ctx.ellipse(gx, gy, R, R * .45, 0, 0, Math.PI * 2); ctx.stroke();
   }
   ctx.restore();
+  if (typeof drawGourdKingGround === 'function') { drawGourdKingAuras(ctx); drawGourdKingGround(ctx); }   // 葫蘆猴王：暴怒紅光、落石影子（js/gourd-king.js）
 }
 
 // ---- 落地特效：撞擊白光＋衝擊圖、石礫拋物線飛起來（落地彈一下、在地上滾停）、灰塵團往外翻滾再往上飄散 ----
 const GM_ROCK_COLORS = [['#8a7f70', '#4e463c'], ['#a19580', '#5c5245'], ['#6f675c', '#3b352e'], ['#b5a88f', '#6b604f']];
-function gourdImpactFx(x, y) {
+function gourdImpactFx(x, y, big = 1) {
   const F = GOURD.fx;
   // 撞擊圖跟鳥頭人衝撞同一組（images/Attack effects/charge-impact，原圖朝右）：轉成朝下，像從天上砸下來；再往四周噴暖色火花
-  if (typeof playAttackSprite === 'function') playAttackSprite('charge-impact', x, y - 12, .42, Math.PI / 2);
-  if (typeof mfxOn === 'function' && mfxOn('monster')) heavyLandingV2(x, y, 70);   // V2：貼地雙圈、灰塵、裂紋光、拉長火花（js/misc-fx-v2.js）
+  if (typeof playAttackSprite === 'function') playAttackSprite('charge-impact', x, y - 12, .42 * big, Math.PI / 2);
+  if (typeof mfxOn === 'function' && mfxOn('monster')) heavyLandingV2(x, y, 70 * big);   // V2：貼地雙圈、灰塵、裂紋光、拉長火花（js/misc-fx-v2.js）
   else for (let i = 0; i < 10; i++) {
     const a = Math.PI * 2 * i / 10 + gmRand(-.25, .25), sp = gmRand(140, 260);
     G.effects.push({ particle: true, kind: 'spark', x, y: y - 8, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5 - 30,
       r: 2 + Math.random() * 2, life: .16 + Math.random() * .14, life0: .3, color: i % 2 ? '#fff0c8' : '#ffb066' });
   }
-  (G.gourdFlashes = G.gourdFlashes || []).push({ x, y, life: F.flash, life0: F.flash });
-  rockBurstFx(x, y, { rocks: F.rocks, speed: F.rockSpeed, up: F.rockUp, dust: F.dust, dustRise: F.dustRise });
+  (G.gourdFlashes = G.gourdFlashes || []).push({ x, y, life: F.flash, life0: F.flash, R: GOURD.hitRadius * big });
+  rockBurstFx(x, y, { rocks: Math.round(F.rocks * big), speed: F.rockSpeed, up: F.rockUp, dust: Math.round(F.dust * big), dustRise: F.dustRise, size: big > 1 ? 1.3 : 1, spread: 14 * big });
 }
 // ---- 共用：石礫＋灰塵噴飛（葫蘆猴落地、自爆史萊姆、希奧妮／安柏大招、油桶油箱、地雷、花蓮老鼠出土和伸手都用這個）----
 // 石礫、灰塵跟葫蘆猴共用同一組陣列，所以更新、繪製都不用另外接。
@@ -573,11 +587,12 @@ function updateGourdDebris(dt) {
 }
 // 角色上層（render.js 呼叫）：石礫、灰塵團、撞擊白光
 function drawGourdTop(ctx) {
+  if (typeof drawGourdKingTop === 'function') drawGourdKingTop(ctx);   // 葫蘆猴王：掉下來的落石、牆面灑下的粉塵（js/gourd-king.js）
   if (!(G.gourdRocks && G.gourdRocks.length) && !(G.gourdDust && G.gourdDust.length) && !(G.gourdFlashes && G.gourdFlashes.length)) return;
   ctx.save();
   for (const f of G.gourdFlashes || []) {   // 撞擊白光：一瞬間亮起的扁橢圓
     if (!isVisible(f.x, f.y)) continue;
-    const k = f.life / f.life0, R = GOURD.hitRadius * (1.25 - .35 * k);
+    const k = f.life / f.life0, R = (f.R || GOURD.hitRadius) * (1.25 - .35 * k);
     ctx.globalCompositeOperation = 'lighter';
     const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, R);
     g.addColorStop(0, `rgba(255,248,225,${(.85 * k).toFixed(3)})`); g.addColorStop(.5, `rgba(255,220,160,${(.35 * k).toFixed(3)})`); g.addColorStop(1, 'rgba(255,200,140,0)');

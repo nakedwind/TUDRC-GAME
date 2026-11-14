@@ -99,7 +99,7 @@ const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商�
 const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v2'; // 後補：彈藥箱（打開）；v2：圖改成 80×80（2×2 格），編輯器裡的素材大小跟著更新
 const STORAGE_AMMO_CRATE_EMPTY = 'tudrc_asset_ammo_crate_empty_v1'; // 後補：彈藥箱（空）；指定內容物的彈藥箱開過後換這張（js/flare.js）
 const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：物資箱（js/camp-supply.js）
-const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v3';              // 後補：異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3；v3：加煤礦、錫礦、石灰岩、錳礦
+const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v4';              // 後補：異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3；v3：加煤礦、錫礦、石灰岩、錳礦；v4：這四種圖放大 2 倍（煤礦 4×3、錫礦 6×6、石灰岩／錳礦 4×4）
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
 const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v6';       // 池核磁磚素材（v3：資料夾改名 images/Poolcore、加地板大中小；v5：柱子；v6：彈藥箱、背包、行軍床）
@@ -274,6 +274,7 @@ function mergeDefaultAssetPack(match, storageKey, idOnly = false) {
       existing.file = t.file; existing.w = t.w; existing.h = t.h;
       if (t.flat) existing.flat = true; else delete existing.flat;   // 讓「平貼地面」標記同步到編輯器暫存，匯出才不會掉
       if (t.water) existing.water = { ...t.water }; else delete existing.water;   // 「這是水」的設定也一樣
+      if (t.pit) existing.pit = { ...t.pit }; else delete existing.pit;   // 「這是坑洞」的設定也一樣
       if (t.baseHp) {
         existing.baseHp = t.baseHp;
         existing.baseDepth = t.baseDepth;
@@ -2880,6 +2881,7 @@ function updateFlatUI() {   // 名稱沿用；現在也負責寬高欄位
   if (t && !t.builtin) {
     tileFlatCb.checked = !!t.flat;
     updateWaterUI(t);
+    updatePitUI(t);
     if (t.systemColor) {
       tileWInput.value = tilePixelW(t); tileHInput.value = tilePixelH(t);
       tileWInput.min = tileHInput.min = 20; tileWInput.max = tileHInput.max = 2000;
@@ -2924,6 +2926,31 @@ for (const [k, el] of Object.entries(tileWaterInputs)) if (el) el.addEventListen
   const [lo, hi] = WATER_EDIT_RANGE[k], v = Math.max(lo, Math.min(hi, Math.round(+el.value || WATER_EDIT_DEFAULT[k])));
   pushUndo(); t.water[k] = v; el.value = v; saveTiles();
   setStatus('「' + t.name + '」水深 ' + t.water.depth + '%、走路速度 ' + t.water.speed + '%、水下看得見 ' + t.water.see + '%', '#8fd3ff');
+});
+// ---- 坑洞：勾「這是坑洞」→ 角色走過這個素材中間會變慢（遊戲裡的效果在 js/pits.js）----
+// 存在素材的 pit：{ ally：溫特和隊員走過去的速度（%）, enemy：怪物走過去的速度（%） }
+const PIT_EDIT_DEFAULT = { ally: 20, enemy: 50 };   // 20％＝慢 80％、50％＝慢 50％
+const tilePitCb = document.getElementById('tilePit'), tilePitOpts = document.getElementById('tilePitOpts');
+const tilePitInputs = { ally: document.getElementById('tilePitAlly'), enemy: document.getElementById('tilePitEnemy') };
+function updatePitUI(t) {
+  if (!tilePitCb) return;
+  tilePitCb.checked = !!t.pit;
+  tilePitOpts.classList.toggle('hidden', !t.pit);
+  for (const [k, el] of Object.entries(tilePitInputs)) if (el && document.activeElement !== el) el.value = t.pit ? (t.pit[k] ?? PIT_EDIT_DEFAULT[k]) : PIT_EDIT_DEFAULT[k];
+}
+const pitStatus = t => '「' + t.name + '」' + (t.pit ? '是坑洞：溫特／隊員速度 ' + t.pit.ally + '%、怪物速度 ' + t.pit.enemy + '%' : '不再是坑洞');
+if (tilePitCb) tilePitCb.addEventListener('change', () => {
+  const t = brushTile(); if (!t || t.builtin) return;
+  pushUndo();
+  if (tilePitCb.checked) t.pit = { ...PIT_EDIT_DEFAULT }; else delete t.pit;
+  updatePitUI(t); saveTiles(); draw();
+  setStatus(pitStatus(t), '#8fd3ff');
+});
+for (const [k, el] of Object.entries(tilePitInputs)) if (el) el.addEventListener('change', () => {
+  const t = brushTile(); if (!t || t.builtin || !t.pit) return;
+  const v = Math.max(5, Math.min(100, Math.round(+el.value || PIT_EDIT_DEFAULT[k])));
+  pushUndo(); t.pit[k] = v; el.value = v; saveTiles();
+  setStatus(pitStatus(t), '#8fd3ff');
 });
 function setTileSize() {
   const t = brushTile(); if (!t || t.builtin) return;

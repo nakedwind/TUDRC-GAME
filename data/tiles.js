@@ -3743,32 +3743,32 @@ const SHARED_TILES = [
     "name": "煤礦",
     "role": "floor",
     "file": "images/item-obstacle/15-ore-coal.png",
-    "w": 2,
-    "h": 2
+    "w": 4,
+    "h": 3
   },
   {
     "id": "tile_obstacle_ore_tin",
     "name": "錫礦",
     "role": "floor",
     "file": "images/item-obstacle/16-ore-tin.png",
-    "w": 3,
-    "h": 3
+    "w": 6,
+    "h": 6
   },
   {
     "id": "tile_obstacle_ore_limestone",
     "name": "石灰岩",
     "role": "floor",
     "file": "images/item-obstacle/17-ore-limestone.png",
-    "w": 2,
-    "h": 2
+    "w": 4,
+    "h": 4
   },
   {
     "id": "tile_obstacle_ore_manganese",
     "name": "錳礦",
     "role": "floor",
     "file": "images/item-obstacle/18-ore-manganese.png",
-    "w": 2,
-    "h": 2
+    "w": 4,
+    "h": 4
   },
   {
     "id": "tile_interactive_storage_locker",
@@ -4612,7 +4612,11 @@ const SHARED_TILES = [
     "file": "images/破損建築/hole01.png",
     "w": 2,
     "h": 2,
-    "flat": true
+    "flat": true,
+    "pit": {
+      "ally": 20,
+      "enemy": 50
+    }
   },
   {
     "id": "tile_mvmo77lx",
@@ -4621,7 +4625,11 @@ const SHARED_TILES = [
     "file": "images/破損建築/hole02.png",
     "w": 3,
     "h": 2,
-    "flat": true
+    "flat": true,
+    "pit": {
+      "ally": 20,
+      "enemy": 50
+    }
   },
   {
     "id": "tile_mvmo7lty",

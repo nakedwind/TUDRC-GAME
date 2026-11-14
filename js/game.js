@@ -1347,6 +1347,7 @@ function newGame() {
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
   if (typeof seedLoofahQueen === 'function') seedLoofahQueen();
+  if (typeof seedGourdKing === 'function') seedGourdKing();   // 葫蘆猴王：躲在 BOSS 牆後面，核心醒了就撞牆出來（js/gourd-king.js）
   if (typeof seedBananaEmperor === 'function') seedBananaEmperor();   // 金蕉大王：守在核心旁邊、大隻隊員＋兩隻金蕉王（js/banana-emperor.js）   // 絲瓜女王：核心吊在她頭上、農田長藤蔓、3 隻絲瓜小姐守著（js/loofah-queen.js）
   if (typeof arriveVitals === 'function' && !MAP_STORY) arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
   if (!MAP_STORY) {     // 劇情地圖：只有溫特一個人，隊友和場景 NPC 都不會跟進來
@@ -2494,7 +2495,7 @@ function update(dt) {
             e.stunT=Math.max(e.stunT||0,spec.stun);
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
           }
-          if (spec.confuse) e.confuseT=Math.max(e.confuseT||0,spec.confuse);
+          if (spec.confuse && !(typeof confuseImmune === 'function' && confuseImmune(e))) e.confuseT=Math.max(e.confuseT||0,spec.confuse);   // 不會混亂的（BOSS、不會被停住的怪物）跟混亂彈一樣免疫（js/special-guns.js 的 confuseImmune）
           if (spec.knockback && !e.unpushable) {
             const dx=e.x-t.x,dy=e.y-t.y;
             displaceEnemy(e,dx,dy,CELL*spec.knockback);
@@ -2749,7 +2750,7 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;

@@ -71920,7 +71920,10 @@ const BATTLE_MAPS = [
       "ground": {},
       "ground2": {},
       "ground3": {},
-      "object": {},
+      "object": {
+        "33,72": "tile_new_decor_fire_extinguisher",
+        "47,72": "tile_new_decor_fire_extinguisher"
+      },
       "object2": {},
       "object3": {},
       "object4": {},
@@ -73547,7 +73550,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_large",
         "c": 17,
         "r": 83,
-        "layer": "object"
+        "layer": "object3"
       },
       {
         "id": "tile_mvyw7lrk",
@@ -74033,73 +74036,85 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_glass_railing",
         "c": 19,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 22,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 25,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 28,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 31,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 52,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 49,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mrt_ticket_gate",
         "c": 34,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_ticket_gate",
         "c": 37,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_ticket_gate",
         "c": 40,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_ticket_gate",
         "c": 43,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.333333
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 46,
         "r": 88,
-        "layer": "object"
+        "layer": "object",
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mrt_train_car_head",
@@ -74330,18 +74345,18 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_searchlight_h",
-        "c": 27,
-        "r": 89,
+        "c": 29,
+        "r": 92,
         "layer": "object",
         "ox": 10,
         "oy": 10
       },
       {
         "id": "tile_obstacle_searchlight_h",
-        "c": 52,
+        "c": 53,
         "r": 89,
         "layer": "object",
-        "ox": 30
+        "oy": 30
       },
       {
         "id": "tile_mvnn2p1x",
@@ -75289,7 +75304,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_escalator_side",
         "c": 55,
         "r": 88,
-        "layer": "object",
+        "layer": "object9",
         "ox": 23.333333
       },
       {
@@ -75523,13 +75538,15 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_glass_railing",
         "c": 55,
         "r": 88,
-        "layer": "ground"
+        "layer": "ground",
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mrt_glass_railing",
         "c": 58,
         "r": 88,
-        "layer": "ground"
+        "layer": "ground",
+        "oy": 32.66666699999996
       },
       {
         "id": "tile_mrt_ticket_gate",
@@ -77404,51 +77421,11 @@ const BATTLE_MAPS = [
         "oy": 15.333333
       },
       {
-        "id": "tile_mrt_platform_screen_doors",
-        "c": 19,
-        "r": 83,
-        "layer": "ground",
-        "oy": 2
-      },
-      {
-        "id": "tile_mrt_platform_screen_doors",
-        "c": 25,
-        "r": 83,
-        "layer": "ground",
-        "oy": 2
-      },
-      {
-        "id": "tile_mrt_platform_screen_doors",
-        "c": 49,
-        "r": 83,
-        "layer": "ground"
-      },
-      {
         "id": "tile_mrt_gate_card_readers",
         "c": 31,
         "r": 86,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_gate_card_readers",
-        "c": 58,
-        "r": 85,
         "layer": "object",
-        "oy": 6.666667
-      },
-      {
-        "id": "tile_mrt_gate_card_readers",
-        "c": 55,
-        "r": 85,
-        "layer": "object",
-        "oy": 6.666667
-      },
-      {
-        "id": "tile_mrt_gate_card_readers",
-        "c": 52,
-        "r": 85,
-        "layer": "object",
-        "oy": 6.666667
+        "ox": 20
       },
       {
         "id": "tile_mrt_stairs_dark",
@@ -78206,7 +78183,8 @@ const BATTLE_MAPS = [
         "c": 19,
         "r": 111,
         "layer": "object4",
-        "oy": 20
+        "oy": 20,
+        "rush": true
       },
       {
         "id": "tile_street_ubike",
@@ -79557,10 +79535,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_gate_card_readers",
-        "c": 49,
+        "c": 48,
         "r": 85,
         "layer": "object",
-        "oy": 6.666667
+        "oy": 36.66666699999996,
+        "ox": 20
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -79588,13 +79567,6 @@ const BATTLE_MAPS = [
         "c": 63,
         "r": 84,
         "layer": "object6"
-      },
-      {
-        "id": "tile_mrt_glass_railing",
-        "c": 61,
-        "r": 86,
-        "layer": "object3",
-        "oy": 26
       },
       {
         "id": "tile_mrt_floor_tile",
@@ -79660,15 +79632,16 @@ const BATTLE_MAPS = [
         "c": 6,
         "r": 30,
         "layer": "object9",
-        "ox": 10,
-        "oy": 30
+        "oy": 20,
+        "fx": true,
+        "ox": 30
       },
       {
         "id": "tile_street_claw_machine",
-        "c": 8,
+        "c": 6,
         "r": 30,
         "layer": "object9",
-        "oy": 30
+        "oy": 20
       },
       {
         "id": "tile_street_utility_box_painted",
@@ -79816,9 +79789,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvmo77lx",
-        "c": 37,
+        "c": 38,
         "r": 22,
-        "layer": "ground3"
+        "layer": "ground3",
+        "oy": 10
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -79836,18 +79810,6 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_large",
         "c": 43,
         "r": 60,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_mrt_pillar_large",
-        "c": 44,
-        "r": 37,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_mrt_pillar_large",
-        "c": 37,
-        "r": 24,
         "layer": "object3"
       },
       {
@@ -80060,7 +80022,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_platform_screen_doors",
-        "c": 19,
+        "c": 17,
         "r": 86,
         "layer": "object2"
       },
@@ -80068,7 +80030,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_platform_screen_doors",
         "c": 25,
         "r": 86,
-        "layer": "object2"
+        "layer": "object2",
+        "ox": 20
       },
       {
         "id": "tile_mrt_platform_screen_doors",
@@ -80182,217 +80145,872 @@ const BATTLE_MAPS = [
         "layer": "object12"
       },
       {
-        "id": "tile_obstacle_ore_tin",
-        "c": 34,
-        "r": 18,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_obstacle_ore_tin",
-        "c": 42,
-        "r": 18,
-        "layer": "object3"
-      },
-      {
         "id": "tile_obstacle_ore_limestone",
-        "c": 35,
-        "r": 20,
+        "c": 41,
+        "r": 16,
         "layer": "object3",
-        "scale": 130,
-        "ox": 10,
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_limestone",
-        "c": 43,
-        "r": 19,
-        "layer": "object3",
-        "ox": 20,
-        "oy": 20
+        "oy": 20,
+        "ox": 10
       },
       {
         "id": "tile_obstacle_ore_rare",
-        "c": 44,
-        "r": 21,
-        "layer": "object3",
-        "ox": 30
+        "c": 46,
+        "r": 27,
+        "layer": "object3"
       },
       {
         "id": "tile_obstacle_ore_coal",
-        "c": 38,
-        "r": 24,
+        "c": 33,
+        "r": 17,
         "layer": "object2",
-        "ox": 20,
-        "scale": 165
-      },
-      {
-        "id": "tile_obstacle_ore_coal",
-        "c": 34,
-        "r": 29,
-        "layer": "object3",
-        "scale": 175
+        "oy": 29.33333300000004,
+        "ox": 10,
+        "fx": true
       },
       {
         "id": "tile_obstacle_ore_limestone",
-        "c": 33,
-        "r": 22,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
-        "c": 46,
-        "r": 29,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
-        "c": 38,
-        "r": 31,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
-        "c": 41,
-        "r": 35,
-        "layer": "object3",
-        "scale": 130
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
         "c": 34,
-        "r": 35,
+        "r": 19,
         "layer": "object3",
-        "scale": 150,
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
-        "c": 42,
-        "r": 27,
-        "layer": "object3",
-        "fx": false,
-        "ox": 10
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
-        "c": 45,
-        "r": 28,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
-        "c": 34,
-        "r": 26,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_obstacle_ore_manganese",
-        "c": 42,
-        "r": 20,
-        "layer": "object3",
-        "fx": true,
-        "ox": 10,
         "oy": 20
       },
       {
         "id": "tile_obstacle_ore_manganese",
-        "c": 43,
-        "r": 21,
+        "c": 37,
+        "r": 25,
         "layer": "object3",
-        "fx": false,
-        "scale": 120,
-        "oy": 20,
-        "ox": 10
-      },
-      {
-        "id": "tile_obstacle_ore_coal",
-        "c": 45,
-        "r": 22,
-        "layer": "object3",
-        "oy": 20,
-        "fx": true,
-        "scale": 140,
         "ox": 30
       },
       {
-        "id": "tile_obstacle_ore_coal",
-        "c": 39,
-        "r": 26,
-        "layer": "object2",
-        "oy": 20,
+        "id": "tile_obstacle_ore_manganese",
+        "c": 35,
+        "r": 21,
+        "layer": "object3",
         "fx": true,
-        "scale": 155
+        "scale": 80,
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 33,
+        "r": 28,
+        "layer": "object3",
+        "oy": 10,
+        "fx": true,
+        "scale": 140,
+        "ox": 10
       },
       {
         "id": "tile_mvmo77lx",
-        "c": 42,
-        "r": 23,
+        "c": 37,
+        "r": 34,
         "layer": "ground3",
-        "ox": 20,
-        "fx": true
-      },
-      {
-        "id": "tile_obstacle_ore_limestone",
-        "c": 43,
-        "r": 29,
-        "layer": "object3",
         "ox": 30,
-        "oy": 10,
         "fx": true,
-        "scale": 150
-      },
-      {
-        "id": "tile_obstacle_ore_limestone",
-        "c": 36,
-        "r": 29,
-        "layer": "object3",
-        "oy": 30,
-        "fx": true
-      },
-      {
-        "id": "tile_obstacle_ore_limestone",
-        "c": 46,
-        "r": 35,
-        "layer": "object3",
         "oy": 10
       },
       {
         "id": "tile_obstacle_ore_limestone",
         "c": 41,
-        "r": 38,
+        "r": 27,
         "layer": "object3",
-        "ox": 20,
-        "oy": 20,
-        "scale": 160
+        "ox": 30,
+        "oy": 30,
+        "fx": true
       },
       {
         "id": "tile_obstacle_ore_limestone",
+        "c": 35,
+        "r": 33,
+        "layer": "object3",
+        "fx": true,
+        "scale": 85,
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_gate_card_readers",
+        "c": 23,
+        "r": 86,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 42,
+        "r": 86,
+        "layer": "object2",
+        "ox": 20
+      },
+      {
+        "id": "tile_mrt_gate_card_readers",
+        "c": 40,
+        "r": 86,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 51,
+        "r": 86,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 55,
+        "r": 86,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 50,
+        "r": 83,
+        "layer": "ground",
+        "ox": 30
+      },
+      {
+        "id": "tile_mrt_gate_card_readers",
+        "c": 48,
+        "r": 83,
+        "layer": "ground",
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 42,
+        "r": 83,
+        "layer": "ground",
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_gate_card_readers",
+        "c": 39,
+        "r": 83,
+        "layer": "ground",
+        "ox": 30
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 33,
+        "r": 83,
+        "layer": "ground",
+        "ox": 30
+      },
+      {
+        "id": "tile_mrt_gate_card_readers",
+        "c": 31,
+        "r": 83,
+        "layer": "ground",
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 25,
+        "r": 83,
+        "layer": "ground",
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_gate_card_readers",
+        "c": 22,
+        "r": 83,
+        "layer": "ground",
+        "ox": 30
+      },
+      {
+        "id": "tile_mrt_platform_screen_doors",
+        "c": 16,
+        "r": 83,
+        "layer": "ground",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 36,
+        "r": 18,
+        "layer": "ground3",
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_limestone",
+        "c": 40,
+        "r": 18,
+        "layer": "object3",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 38,
+        "r": 30,
+        "layer": "object3",
+        "ox": 20,
+        "scale": 125,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 44,
+        "r": 21,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_obstacle_ore_manganese",
+        "c": 42,
+        "r": 21,
+        "layer": "object13",
+        "ox": 10
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 41,
+        "r": 20,
+        "layer": "object3",
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 33,
+        "r": 24,
+        "layer": "object3",
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 33,
+        "r": 29,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_limestone",
+        "c": 42,
+        "r": 39,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_obstacle_ore_manganese",
+        "c": 44,
+        "r": 32,
+        "layer": "object3",
+        "ox": 20
+      },
+      {
+        "id": "tile_obstacle_ore_limestone",
+        "c": 32,
+        "r": 37,
+        "layer": "object3",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_obstacle_ore_manganese",
         "c": 33,
         "r": 40,
         "layer": "object3",
+        "oy": 10,
+        "scale": 135,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 44,
+        "r": 10,
+        "layer": "ground5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 36,
+        "r": 10,
+        "layer": "ground5",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 40,
+        "r": 7,
+        "layer": "ground5",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 41,
+        "r": 35,
+        "layer": "ground2",
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_floor_stain_seep",
+        "c": 44,
+        "r": 39,
+        "layer": "ground2",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 36,
+        "r": 41,
+        "layer": "ground2",
+        "ox": 20
+      },
+      {
+        "id": "tile_dmg_floor_stain_smudge",
+        "c": 41,
+        "r": 33,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_dmg_floor_crack_cross",
+        "c": 35,
+        "r": 31,
+        "layer": "ground2",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 35,
+        "r": 33,
+        "layer": "ground2",
+        "ox": 20
+      },
+      {
+        "id": "tile_dmg_rubble_scatter",
+        "c": 37,
+        "r": 40,
+        "layer": "ground2",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_rubble_brick_chunks",
+        "c": 38,
+        "r": 43,
+        "layer": "ground2",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_chips_02",
+        "c": 41,
+        "r": 39,
+        "layer": "ground2",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_scatter_02",
+        "c": 44,
+        "r": 36,
+        "layer": "ground2",
+        "ox": 20
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 39,
+        "r": 30,
+        "layer": "ground2",
+        "ox": 20
+      },
+      {
+        "id": "tile_dmg_crack07",
+        "c": 42,
+        "r": 27,
+        "layer": "ground2",
+        "ox": 10
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 41,
+        "r": 23,
+        "layer": "ground2",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_rubble_small",
+        "c": 33,
+        "r": 36,
+        "layer": "ground2",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_rubble_small",
+        "c": 33,
+        "r": 23,
+        "layer": "ground2",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 38,
+        "r": 19,
+        "layer": "ground2",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 45,
+        "r": 21,
+        "layer": "ground2",
+        "ox": 10
+      },
+      {
+        "id": "tile_dmg_rubble_small",
+        "c": 47,
+        "r": 30,
+        "layer": "ground2",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_rubble_small",
+        "c": 46,
+        "r": 30,
+        "layer": "ground2",
+        "ox": 30
+      },
+      {
+        "id": "tile_dmg_crack06",
+        "c": 42,
+        "r": 31,
+        "layer": "ground2",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_crack06",
+        "c": 37,
+        "r": 25,
+        "layer": "ground2",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 36,
+        "r": 27,
+        "layer": "ground2",
+        "ox": 10,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 34,
+        "r": 23,
+        "layer": "ground2",
+        "ox": 20
+      },
+      {
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 33,
+        "r": 20,
+        "layer": "ground2",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 43,
+        "r": 19,
+        "layer": "ground2",
         "ox": 20,
         "oy": 30,
         "fx": true
       },
       {
-        "id": "tile_obstacle_ore_tin",
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 39,
+        "r": 35,
+        "layer": "ground2",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 40,
+        "r": 40,
+        "layer": "ground2",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 58,
+        "r": 31,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 63,
+        "r": 31,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 67,
+        "r": 31,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 69,
+        "r": 27,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 8,
+        "r": 36,
+        "layer": "object9",
+        "ox": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 12,
+        "r": 53,
+        "layer": "object9",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 6,
+        "r": 76,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 24,
+        "r": 113,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 52,
+        "r": 120,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 69,
+        "r": 120,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
         "c": 41,
-        "r": 30,
+        "r": 79,
+        "layer": "ground3",
+        "ox": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 37,
+        "r": 79,
+        "layer": "ground3",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 61,
+        "r": 87,
+        "layer": "object9",
+        "fx": true,
+        "ox": 12.666667
+      },
+      {
+        "id": "tile_mrt_recycling_bins",
+        "c": 30,
+        "r": 74,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_recycling_bins",
+        "c": 48,
+        "r": 74,
+        "layer": "object3",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 44,
+        "r": 79,
+        "layer": "object3",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 46,
+        "r": 79,
+        "layer": "object3",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 35,
+        "r": 79,
         "layer": "object3",
         "ox": 30,
         "fx": true
       },
       {
-        "id": "tile_obstacle_ore_tin",
-        "c": 35,
+        "id": "tile_mrt_waiting_seats",
+        "c": 34,
+        "r": 79,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 66,
+        "r": 23,
+        "layer": "object9",
+        "fx": true,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 61,
+        "r": 28,
+        "layer": "object6",
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 64,
         "r": 33,
-        "layer": "object2",
+        "layer": "object9",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 9,
+        "r": 67,
+        "layer": "object9",
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 11,
+        "r": 55,
+        "layer": "object9",
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 6,
+        "r": 55,
+        "layer": "object9",
+        "fx": true
+      },
+      {
+        "id": "tile_street_ubike",
+        "c": 66,
+        "r": 48,
+        "layer": "object9",
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 37,
+        "r": 68,
+        "layer": "object",
+        "ox": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 40,
+        "r": 65,
+        "layer": "object",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 58,
+        "r": 79,
+        "layer": "object",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 76,
+        "r": 82,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 65,
+        "r": 82,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 10,
+        "r": 61,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 5,
+        "r": 61,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwfznsib",
+        "c": 50,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mwfznsic",
+        "c": 29,
+        "r": 75,
+        "layer": "object",
+        "ox": 30,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mwfznsie",
+        "c": 40,
+        "r": 78,
+        "layer": "object3",
+        "oy": 10,
+        "fx": true,
+        "ox": 10
+      },
+      {
+        "id": "tile_mwfznsie",
+        "c": 41,
+        "r": 78,
+        "layer": "object3",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_hq_potted_plant",
+        "c": 36,
+        "r": 59,
+        "layer": "object3",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 23,
+        "r": 46,
+        "layer": "object9",
         "ox": 30,
         "oy": 30,
         "fx": true
+      },
+      {
+        "id": "tile_mrt_recycling_bins",
+        "c": 22,
+        "r": 46,
+        "layer": "object9",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 64,
+        "r": 38,
+        "layer": "object9",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mvnn2p1x",
+        "c": 10,
+        "r": 72,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 12,
+        "r": 72,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 57,
+        "r": 46,
+        "layer": "object",
+        "oy": 30,
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 55,
+        "r": 46,
+        "layer": "object",
+        "ox": 10,
+        "oy": 20
       }
     ],
     "solid": [
@@ -86654,10 +87272,6 @@ const BATTLE_MAPS = [
       "44,17",
       "45,17",
       "46,17",
-      "44,43",
-      "44,42",
-      "45,42",
-      "45,43",
       "32,16",
       "36,69",
       "37,69",
@@ -86676,40 +87290,8 @@ const BATTLE_MAPS = [
       "13,93",
       "18,83",
       "18,84",
-      "19,89",
-      "20,89",
-      "21,89",
-      "22,89",
-      "23,89",
-      "24,89",
-      "25,89",
-      "26,89",
-      "27,89",
-      "28,89",
-      "29,89",
-      "30,89",
-      "31,89",
-      "32,89",
-      "33,89",
-      "46,89",
-      "47,89",
-      "48,89",
-      "49,89",
-      "50,89",
-      "51,89",
-      "52,89",
-      "53,89",
-      "54,89",
-      "55,89",
-      "56,89",
-      "57,89",
-      "58,89",
       "60,88",
       "59,88",
-      "37,29",
-      "37,30",
-      "38,30",
-      "38,29",
       "18,4",
       "19,4",
       "20,4",
@@ -87603,10 +88185,104 @@ const BATTLE_MAPS = [
       "0,79",
       "1,79",
       "0,80",
-      "1,80"
+      "1,80",
+      "19,87",
+      "20,87",
+      "21,87",
+      "22,87",
+      "26,87",
+      "27,87",
+      "28,87",
+      "29,87",
+      "30,87",
+      "35,87",
+      "36,87",
+      "37,87",
+      "38,87",
+      "39,87",
+      "43,87",
+      "44,87",
+      "45,87",
+      "46,87",
+      "47,87",
+      "53,87",
+      "54,87",
+      "55,87",
+      "56,87",
+      "57,87",
+      "58,87",
+      "59,87",
+      "60,87",
+      "52,87",
+      "60,84",
+      "59,84",
+      "58,84",
+      "56,84",
+      "55,84",
+      "54,84",
+      "53,84",
+      "52,84",
+      "51,84",
+      "47,84",
+      "46,84",
+      "45,84",
+      "44,84",
+      "43,84",
+      "38,84",
+      "39,84",
+      "37,84",
+      "36,84",
+      "35,84",
+      "34,84",
+      "30,84",
+      "29,84",
+      "28,84",
+      "27,84",
+      "26,84",
+      "22,84",
+      "21,84",
+      "20,84",
+      "19,84",
+      "33,90",
+      "32,90",
+      "31,90",
+      "30,90",
+      "29,90",
+      "28,90",
+      "27,90",
+      "26,90",
+      "25,90",
+      "24,90",
+      "23,90",
+      "22,90",
+      "21,90",
+      "20,90",
+      "19,90",
+      "46,90",
+      "47,90",
+      "48,90",
+      "49,90",
+      "50,90",
+      "51,90",
+      "52,90",
+      "53,90",
+      "54,90",
+      "55,90",
+      "56,90",
+      "57,90",
+      "66,28",
+      "66,29",
+      "67,29",
+      "67,28",
+      "38,80",
+      "39,80",
+      "42,80",
+      "43,80"
     ],
     "breakable": [],
-    "coreSpots": [],
+    "coreSpots": [
+      "46,20"
+    ],
     "spawnZone": [],
     "coreCount": 1,
     "monsterMix": [
@@ -89061,7 +89737,11 @@ const BATTLE_MAPS = [
       "61,76",
       "62,75",
       "62,76",
-      "61,75"
+      "61,75",
+      "61,89",
+      "61,90",
+      "60,89",
+      "60,90"
     ],
     "solid2": [
       "11,61",
@@ -89384,7 +90064,27 @@ const BATTLE_MAPS = [
       "68,39",
       "61,39",
       "58,38",
-      "58,39"
+      "58,39",
+      "66,82",
+      "67,82",
+      "68,82",
+      "75,82",
+      "76,82",
+      "77,82",
+      "66,88",
+      "67,88",
+      "64,39",
+      "65,39",
+      "65,38",
+      "64,38",
+      "61,33",
+      "62,33",
+      "62,34",
+      "61,34",
+      "6,62",
+      "7,62",
+      "11,62",
+      "12,62"
     ]
   },
   {

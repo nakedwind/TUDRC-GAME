@@ -10,6 +10,9 @@
 //    （哨兵不會主動去打礦物，只會在攻擊範圍剛好涵蓋礦物時波及）
 //    ・希奧妮：大招的小爆炸會炸開礦物
 //    ・安柏：雷電打偏時，有機率劈中附近的礦物
+//  很硬的礦（data/ores.js 的 blasts＝硬度，例如煤礦 3、錫礦 3、石灰岩 2、錳礦 4）要被爆炸打到好幾次才會碎；
+//  手槍要的傷害、路德敲的下數、腐蝕泡的秒數也都乘上硬度，安柏的雷劈一下算炸一次。
+//  數字在物件編輯器選礦物後的「硬度（炸幾次才碎）」改。
 //  炸開後異質碎片會散落在地上，溫特走到旁邊按互動鍵逐顆撿起來，畫面中間跳出拾取提示。
 //  礦物每次出勤重新出現。在黑暗中不會發光；被探照燈、營燈或其他燈照亮時，
 //  露出的紫色結晶會亮起鮮豔的紫光（發光圖在 images/item-obstacle/glow/，由原圖的紫色部分做成）。
@@ -26,7 +29,14 @@ const ORE_LUTHER = { hits: 4, pad: .5 };
 const ORE_PISTOL = { ore_small: 80, ore_large: 140, ore_rare: 200, default: 120 };
 const ORE_DISSOLVE = 3;                       // 礦物泡在腐蝕池裡累積幾秒會溶解
 const ORE_STRAY = { chance: .4, range: 3 };   // 安柏打偏時：多少機率劈中目標附近幾格內的礦物
-const ORE_THEONIE_R = 1.2;                    // 希奧妮大招的爆炸半徑（格）
+const ORE_THEONIE_R = 1.2;
+// 普通礦石（煤礦、錫礦、石灰岩、錳礦）比較大顆：碎掉時噴出又大又多的石塊（畫法在 js/gourd-monkey.js 的 rockBurstFx）
+// rocks：幾塊、size：石塊大小倍率（1＝油桶爆炸的石塊）、speed／up：往外、往上噴的速度、dust：灰塵團數、spread：從中心多遠開始噴
+// crack：還沒碎、只是被炸裂時噴的少量石塊
+const ORE_ROCK_BURST = {
+  break: { rocks: 28, size: 1.7, speed: [60, 190], up: [150, 300], dust: 12, dustRise: 4, spread: 22 },
+  crack: { rocks: 8, size: 1.2, speed: [40, 120], up: [110, 220], dust: 4, dustRise: 2, spread: 16 },
+};                    // 希奧妮大招的爆炸半徑（格）
 
 // 結晶發光：strength＝紫光亮度；halo＝外圍光暈亮度；pulse＝閃爍幅度；speed＝閃爍快慢；pad＝光暈圖四周多留的像素
 const ORE_CRYSTAL_GLOW = { strength: .85, halo: .6, pulse: .25, speed: 1.8, pad: 8 };
@@ -102,8 +112,26 @@ function blastOres(x, y, R) {
   for (const o of [...G.obstacles]) {
     if (!o.ore || o.hp <= 0) continue;
     const c = oreCenter(o);
-    if (Math.hypot(c.x - x, c.y - y) <= R + ORE_BLAST_PAD * CELL) breakOre(o, x, y);
+    if (Math.hypot(c.x - x, c.y - y) <= R + ORE_BLAST_PAD * CELL) blastHitOre(o, x, y);
   }
+}
+// 礦物的硬度＝data/ores.js 的 blasts（沒填＝1）。爆炸要打幾次、手槍要多少傷害、路德敲幾下、腐蝕泡幾秒，都乘上這個數字
+const oreHardness = o => Math.max(1, Math.round(ORE_TYPES[o.type]?.blasts || 1));
+// 一次爆炸打到礦物：很硬的礦（data/ores.js 的 blasts，物件編輯器「炸幾次才碎」）要炸好幾次；沒填＝炸一次就碎
+function blastHitOre(o, bx, by) {
+  const need = oreHardness(o);
+  o.blastHits = (o.blastHits || 0) + 1;
+  if (o.blastHits >= need) { breakOre(o, bx, by); return; }
+  // 還沒碎：閃一下、噴幾顆碎石（不跳文字提示）
+  const c = oreCenter(o);
+  o.hitT = HIT_DUR; o.gunFlashAt = performance.now();
+  for (let i = 0; i < 6; i++) {
+    const a = Math.random() * Math.PI * 2, sp = 40 + Math.random() * 80;
+    G.effects.push({ ember: true, spark: true, x: c.x, y: c.y - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 50,
+      r: 1.3 + Math.random() * 1.5, life: .4 + Math.random() * .3, life0: .7, color: '#a08a6e' });
+  }
+  if (!oreHasCrystals(o) && typeof rockBurstFx === 'function') rockBurstFx(c.x, c.y, ORE_ROCK_BURST.crack);   // 普通礦石：掉一些石塊
+  if (typeof sfxAt === 'function') sfxAt('knock2', c.x, c.y, .6, 'ore-hit');
 }
 function breakOre(o, bx, by, msg) {
   const crystal = oreHasCrystals(o);
@@ -128,6 +156,7 @@ function breakOre(o, bx, by, msg) {
       r: 1.5 + Math.random() * 2, life: .5 + Math.random() * .3, life0: .8, color: crystal ? '#c47dff' : '#a08a6e' });
   }
   if (typeof spawnGoo === 'function') spawnGoo(c.x, c.y - 4, '#6b6372', 8, 1.1);   // 碎石
+  if (!crystal && typeof rockBurstFx === 'function') rockBurstFx(c.x, c.y, ORE_ROCK_BURST.break);   // 普通礦石：噴出又大又多的石塊
   if (crystal && typeof LOOT_FX_VERSION !== 'undefined' && LOOT_FX_VERSION === 2) lootV2OreBreak(c.x, c.y - 6);   // V2：水晶碎片、星光、一閃（js/loot-fx-v2.js）
   if (typeof sfxAt === 'function') { if (crystal) sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break'); sfxAt('oreMine', c.x, c.y, .7, 'ore-mine'); }   // 碎掉的玻璃聲＋挖礦聲
 }
@@ -196,7 +225,7 @@ function dropShard(x, y, value) {
 // 溫特開槍打中礦物（js/game.js 呼叫）：累積傷害，夠了就碎掉
 function pistolHitOre(o, dmg) {
   if (!o || !o.ore || o.hp <= 0 || !G.obstacles.includes(o)) return;
-  const need = ORE_PISTOL[o.type] ?? ORE_PISTOL.default, c = oreCenter(o);
+  const need = (ORE_PISTOL[o.type] ?? ORE_PISTOL.default) * oreHardness(o), c = oreCenter(o);   // 很硬的礦要打更多發
   o.gunDmg = (o.gunDmg || 0) + dmg; o.hitT = HIT_DUR * .7; o.gunFlashAt = performance.now();   // 閃白（js/render.js 的 drawObstacle）
   if (o.gunDmg >= need) breakOre(o, G.player.x, G.player.y, '');   // 不跳文字提示
   else if (typeof sfxAt === 'function') sfxAt('knock2', c.x, c.y, .45, 'ore-hit');
@@ -226,7 +255,7 @@ function sentryHitOre(t, point, splashPx) {
     if (Math.hypot(c.x - point.x, c.y - point.y) > R) continue;
     o.hitT = HIT_DUR * .7;
     o.oreHits = (o.oreHits || 0) + (t.berserk ? 2 : 1);
-    if (o.oreHits >= ORE_LUTHER.hits) breakOre(o, t.x, t.y, '路德的怪力把礦物震碎了！');
+    if (o.oreHits >= ORE_LUTHER.hits * oreHardness(o)) breakOre(o, t.x, t.y, '路德的怪力把礦物震碎了！');
   }
 }
 // ---- 腐蝕：礦物泡在腐蝕池裡會慢慢溶解（阿瓦倫的腐蝕池；異質核心腳下的不算）----
@@ -243,7 +272,7 @@ function updateOreDissolve(dt) {
       o.fizzT = .35; o.hitT = HIT_DUR * .5;
       G.effects.push({ ember: true, x: c.x + (Math.random() - .5) * 18, y: c.y + 4, vx: 0, vy: -30 - Math.random() * 20, r: 2 + Math.random() * 2, life: .5, life0: .5, color: '#9c5cff' });
     }
-    if (o.dissolve >= ORE_DISSOLVE) breakOre(o, c.x, c.y + 1, '礦物被腐蝕溶解了！');
+    if (o.dissolve >= ORE_DISSOLVE * oreHardness(o)) breakOre(o, c.x, c.y + 1, '礦物被腐蝕溶解了！');
   }
 }
 // ---- 安柏：雷電打偏時，有機率劈中附近的礦物（js/game.js 打偏時呼叫）----
@@ -256,6 +285,7 @@ function strayBoltOre(t, target) {
   if (Math.hypot(c.x - t.x, c.y - t.y) > (spec.range + 1) * CELL) return;
   const hitPoint = { x: c.x, y: c.y - 4, hp: 1, maxhp: 1 };
   spawnAttackVisual(t, hitPoint, spec, [], hitPoint);
+  if (oreHardness(o) > 1) { blastHitOre(o, t.x, t.y); return; }   // 很硬的礦：劈一下只算炸一次
   breakOre(o, t.x, t.y, '雷打偏了……劈開了礦物！');
 }
 

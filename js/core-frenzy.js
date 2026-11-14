@@ -23,7 +23,7 @@ function updateCoreFrenzy(dt) {
   if (!G || !G.enemies) return;
   const on = coreFrenzyActive();
   for (const e of G.enemies) {
-    if (e.elite || e.capKing || e.pearlBoss || e.bananaEmperor) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js、js/elite-cap-king.js、js/pearl-elder.js；金蕉大王要一直慢慢走，js/banana-emperor.js）
+    if (e.elite || e.capKing || e.pearlBoss || e.bananaEmperor || e.gourdKing) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js、js/elite-cap-king.js、js/pearl-elder.js；金蕉大王要一直慢慢走，js/banana-emperor.js）
     if (e.coreGiveUpT > 0) e.coreGiveUpT -= dt;
     if (on && !e.frenzy && e.hp > 0) {
       e.frenzy = { speed: e.speed, sentryDamage: e.sentryDamage, playerDamage: e.playerDamage };
@@ -103,6 +103,8 @@ function drawCoreBossUI(ctx, cv) {
   if (queenBars.length) rows.push(queenBars);
   const emperorBars = typeof bananaEmperorBars === 'function' ? bananaEmperorBars() : [];   // 金蕉大王（js/banana-emperor.js）
   if (emperorBars.length) rows.push(emperorBars);
+  const gourdBars = typeof gourdKingBars === 'function' ? gourdKingBars() : [];   // 葫蘆猴王（js/gourd-king.js）
+  if (gourdBars.length) rows.push(gourdBars);
   rows.slice(0, 3).forEach((row, j) => {
     const i = Math.min(3, awake.length) + j;
     const W = Math.min(520, cv.width * .45), gap = 14, h = 14, y = 58 + i * 40;

@@ -704,6 +704,8 @@ function drawMapStampPlain(ctx, s) {
   let w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, rot = mapStampTurn(s);
   // 旋轉後的圖跟編輯器一樣：左上角固定在 (c, r)＋微調，往右下佔「轉向後的寬高」，不再以原本大小的中心為準
   let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  const jit = typeof gourdKingWallJitter === 'function' ? gourdKingWallJitter(s) : null;   // BOSS 牆被撞的時候抖一下（js/gourd-king.js）
+  if (jit) { x += jit[0]; y += jit[1]; }
   const opened = (typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s))   // 剛補給過的彈藥箱：換成打開的圖
     || (typeof supplyBoxTile === 'function' && supplyBoxTile(s));   // 物資箱：照箱子裡的數量換圖（js/camp-supply.js）
   if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }
@@ -719,10 +721,12 @@ function drawMapStampPlain(ctx, s) {
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
       ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
-      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawEscalatorAnimation==='function'&&drawEscalatorAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
+      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawMrtCardGate==='function'&&drawMrtCardGate(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawEscalatorAnimation==='function'&&drawEscalatorAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
       ctx.restore();
     } else if(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,x,y,w,h)) {
       // 閘門的靜態機台與滑動門翼由專用繪製處理。
+    } else if (typeof drawMrtCardGate === 'function' && drawMrtCardGate(ctx, s, img, x, y, w, h)) {
+      // 月台閘門（閘門讀卡機）：兩片門板跟著捷運車門往左右滑開（js/mrt-train.js）
     } else if (typeof drawEscalatorAnimation === 'function' && drawEscalatorAnimation(ctx, s, img, x, y, w, h)) {
       // 手扶梯：階梯循環捲動（js/escalators.js）
     } else {
