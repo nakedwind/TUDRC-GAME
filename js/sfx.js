@@ -227,6 +227,9 @@ const SFX = (() => {
     mothDeath: '怪物/人面蝶/人面蝶死掉.mp3',
     // 環境背景音：Y 區地圖一直循環播放（js/ambience.js）
     whiteNoise: '環境/白噪音.mp3',
+    poolDrip: '滴水聲.mp3',
+    poolWaterDrop: '環境/水滴聲.mp3',   // 池核的環境背景音（跟滴水聲一起循環，js/map-ambient.js）
+    poolPaddle: '划水聲.mp3',   // 坐救生圈在深水區划水時循環播放（js/swim-ring.js）   // 池核的環境背景音：在池核一直循環（js/map-ambient.js）
     // BOSS 音樂（js/boss-music.js）：一直循環、淡入淡出；音量在音效編輯器的「音樂」調整
     bossElite: '戰鬥/中BOSS.mp3',             // 鳥頭大隊長盯上玩家
     clawMusic: '設施/娃娃機音樂.mp3',          // 夾娃娃機打開時循環播放（js/claw-machine.js）

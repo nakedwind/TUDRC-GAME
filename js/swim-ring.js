@@ -1,0 +1,211 @@
+/* ===== 深水區＋救生圈 =====
+   深水區：地圖編輯器「🛟 深水區」筆刷框選的格子（存在地圖資料 MAP.deepWater：['c,r', …]）
+     ・沒坐救生圈的人走不進去：溫特、隊員、地面怪物都擋（會飛的人面蝶照樣飛過去）；子彈、燈光不擋
+     ・不能在上面蓋建築、放燈（js/build.js 的放置判定會看 isWall，這裡另外擋，見 deepWaterBlocksCell）
+     ・划水速度：地圖設定的「🛟 深水區划水速度 %」（MAP.deepWaterSpeed，沒填＝SWIM_RING.speed）
+   救生圈：溫特想走進深水區時，頭上跳出提示；按空白鍵（或 Enter）→ 身上有救生圈就坐上去下水，沒有就跳「身上沒有救生圈。」
+     ・救生圈不會用掉，有一個就能一直用
+     ・坐在救生圈上：只能划水移動（不能開槍、蓋建築）；划回不是深水的地方就自動收起救生圈
+     ・坐進救生圈的畫法（每個角色都通用，不用另外畫圖）：救生圈後半圈 → 角色原本的圖（腳裁掉）→ 救生圈前半圈
+       划水時用原本的走路圖，手照樣擺動；腳被救生圈遮住
+   隊員：溫特坐救生圈下水後，每隔 0.6～0.8 秒，讓「離溫特最近、而且正要走進深水區」的隊員拿一個救生圈下水
+     ・救生圈不夠（身上的救生圈數量 − 溫特用的 − 已經在水裡的隊員）：剩下的隊員留在岸上
+     ・坐救生圈的隊員一樣不能攻擊（js/game.js 的哨兵攻擊），划回岸上就自動收起救生圈
+     ・划水的時候循環播放划水聲（音效編輯器的 poolPaddle） */
+const SWIM_RING = {
+  itemId: 'swim-ring',
+  hintText: '好像可以拿救生圈做點什麼……',   // 想走進深水區時溫特頭上的泡泡
+  noRingText: '身上沒有救生圈。',            // 沒有救生圈還按空白鍵
+  hintSecs: 1.6,       // 頭上的泡泡停多久（秒）
+  reach: 12,           // 離深水區幾點以內算「在岸邊」（可以按空白鍵下水）
+  speed: 60,           // 划水速度＝平常走路的幾 %（地圖沒設定時用這個）
+  image: 'images/Poolcore/Poolcore_swimring.png',
+  ringW: 29,           // 救生圈畫多寬（點）：跟角色圖同比例（64 點的角色坐得進去）
+  ringDy: 10,          // 救生圈中心在角色位置（y）往下幾點（大約腰的地方）
+  cutDy: 13,           // 角色圖畫到角色位置（y）往下幾點為止，再下面（腳）不畫＝藏進救生圈裡（角色圖第 59 列）
+  split: .5,           // 救生圈圖上半部＝後半圈（畫在人後面）、下半部＝前半圈（畫在人前面）
+  allyDelay: [.6, .8], // 溫特下水後，隊員隔幾秒拿救生圈下水（每個隊員之間也隔這麼久）
+  allyWantSecs: .5,    // 隊員多久以內「想走進深水區」才算（js/sentry.js 的 moveSentryWithPath 記下來）
+  paddleSound: 'poolPaddle',
+  paddleFade: .3,      // 划水聲淡入淡出幾秒
+};
+
+// ---- 深水區的格子：換地圖才重新整理 ----
+const deepEmpty = new Set();
+let deepCache = { map: null, list: null, cells: new Set() };
+function deepWaterCells() {
+  if (typeof MAP === 'undefined' || !MAP) return deepCache.cells;
+  if (typeof poolDeepIsDeep === 'function' && !poolDeepIsDeep()) return deepEmpty;   // 抽水抽成淺水了：深水區暫時不算深水（js/pool-tide.js）
+  if (deepCache.map !== MAP || deepCache.list !== MAP.deepWater) deepCache = { map: MAP, list: MAP.deepWater, cells: new Set(Array.isArray(MAP.deepWater) ? MAP.deepWater : []) };
+  return deepCache.cells;
+}
+const isDeepWaterCell = (c, r) => deepWaterCells().has(c + ',' + r);
+const deepWaterAtPoint = (x, y) => { const cells = deepWaterCells(); return cells.size > 0 && cells.has(cellAt(x, y).join(',')); };
+const riding = () => !!(typeof G !== 'undefined' && G && G.player && G.player.swimRing);
+// 現在在更新哪個隊員（js/sentry.js 的 updateSentry 設定）：隊員坐救生圈時深水不擋、划水變慢
+let swimCurActor = null;
+function swimRingWithActor(t, fn) { const prev = swimCurActor; swimCurActor = t; try { return fn(); } finally { swimCurActor = prev; } }
+const swimMover = () => swimCurActor || (typeof G !== 'undefined' && G ? G.player : null);
+// 隊員的碰撞（js/sentry.js 的 sentryBlocked）：沒坐救生圈的隊員不會下水
+function deepWaterBlocksAlly(x, y) { return !(swimCurActor && (swimCurActor.swimRing || swimCurActor.drowning)) && deepWaterAtPoint(x, y); }   // 溺水中的隊友（js/pool-tide.js）可以自己游出來
+// 怪物尋路、建築放置用：這格是深水（不管有沒有人坐救生圈，怪物和建築都不能進去）
+function deepWaterBlocksCell(c, r) { return isDeepWaterCell(c, r); }
+// 溫特的碰撞（js/game.js 的 playerBlocked）：沒坐救生圈就不能踩進深水
+function deepWaterBlocksPlayer(x, y) { return !riding() && deepWaterAtPoint(x, y); }
+// 划水速度（給 js/build.js 的 slowFactorAt）
+function swimRingSpeedAt(x, y) {
+  const m = swimMover(); if (!m || !m.swimRing || !deepWaterAtPoint(x, y)) return 1;
+  const v = Number(MAP && MAP.deepWaterSpeed);
+  return Math.max(10, Math.min(100, Number.isFinite(v) && v > 0 ? v : SWIM_RING.speed)) / 100;
+}
+const swimRingCount = () => typeof supplyInventory !== 'undefined' ? (supplyInventory.get(SWIM_RING.itemId) || 0) : 0;
+const hasSwimRing = () => swimRingCount() > 0;
+
+// ---- 岸邊：溫特身體旁邊 reach 點以內有沒有深水；有的話回傳最近那格深水的中心 ----
+function deepWaterNearPlayer() { const p = G && G.player; return p && !riding() ? deepWaterNearActor(p) : null; }
+function deepWaterNearActor(p) {
+  if (!p || p.swimRing || !deepWaterCells().size) return null;
+  const R = PLAYER.r + SWIM_RING.reach;
+  let best = null, bd = Infinity;
+  const [c0, r0] = cellAt(p.x, p.y);
+  for (let dc = -2; dc <= 2; dc++) for (let dr = -2; dr <= 2; dr++) {
+    const c = c0 + dc, r = r0 + dr; if (!isDeepWaterCell(c, r)) continue;
+    const x0 = OX + c * CELL, y0 = OY + r * CELL;
+    const d = Math.hypot(Math.max(x0 - p.x, 0, p.x - (x0 + CELL)), Math.max(y0 - p.y, 0, p.y - (y0 + CELL)));
+    if (d <= R && d < bd) { bd = d; best = { c, r, x: x0 + CELL / 2, y: y0 + CELL / 2 }; }
+  }
+  return best;
+}
+
+// ---- 每次溫特走動之後（js/game.js 的 updatePlayer 呼叫）：撞到深水跳提示、划上岸收起救生圈 ----
+function swimRingAfterMove(p, dx, dy) {
+  if (!p) return;
+  if (p.swimRing) {
+    const r = PLAYER.r;
+    const inDeep = [[-r, -r], [r, -r], [-r, r], [r, r]].some(([sx, sy]) => deepWaterAtPoint(p.x + sx, p.y + sy));
+    if (!inDeep) p.swimRing = false;   // 整個人都划出深水區了：收起救生圈
+    return;
+  }
+  if (!(dx || dy) || !deepWaterCells().size) return;
+  const len = Math.hypot(dx, dy), ahead = PLAYER.r + 6;
+  if (deepWaterAtPoint(p.x + dx / len * ahead, p.y + dy / len * ahead)) p.swimHintAt = performance.now();   // 往深水走：頭上跳提示
+}
+
+// ---- 空白鍵：在岸邊 → 坐上救生圈下水（js/game.js 的互動鍵）----
+function useSwimRingNearPlayer() {
+  const p = G && G.player; if (!p || p.sitting) return false;
+  const spot = deepWaterNearPlayer(); if (!spot) return false;
+  if (!hasSwimRing()) { sfx('error'); systemNotice(SWIM_RING.noRingText, true); return true; }
+  const keepX = p.x, keepY = p.y;
+  p.swimRing = true; p.swimHintAt = 0;
+  p.x = spot.x; p.y = spot.y;   // 下水：移到那格深水的中間
+  if (playerBlocked(p.x, p.y)) { p.x = keepX; p.y = keepY; p.swimRing = false; sfx('error'); return true; }   // 那裡被別的東西擋住：下不去
+  if (typeof sfx === 'function') sfx('fishDouse');   // 噗通一聲（音效編輯器的「水把火澆熄」）
+  swimAllyNextAt = performance.now() + swimAllyDelay();   // 隊員過一下子再跟著下水
+  return true;
+}
+
+// ---- 隊員拿救生圈下水 ----
+let swimAllyNextAt = Infinity;
+const swimAllyDelay = () => (SWIM_RING.allyDelay[0] + Math.random() * (SWIM_RING.allyDelay[1] - SWIM_RING.allyDelay[0])) * 1000;
+// 隊員想走去的地方是深水（跟著溫特、追怪、指派位置…；js/sentry.js 的 moveSentryWithPath 呼叫）：
+// 記下時間（溫特在水裡時會拿救生圈下水），並改成走到離那裡最近、走得到的岸邊（不然找不到路會站著不動）。回傳 [x, y]，不用改就回傳 null
+function swimRingShoreGoal(t, tx, ty, dark) {
+  if (!t || t.swimRing || !deepWaterCells().size || !deepWaterAtPoint(tx, ty)) return null;
+  t.swimWantAt = performance.now();
+  const [c, r] = cellAt(tx, ty);
+  for (let radius = 1; radius <= 16; radius++) {
+    let best = null, bd = Infinity;
+    for (let dc = -radius; dc <= radius; dc++) for (let dr = -radius; dr <= radius; dr++) {
+      if (Math.abs(dc) !== radius && Math.abs(dr) !== radius) continue;
+      const nc = c + dc, nr = r + dr; if (!sentryCellWalkable(nc, nr, false, dark)) continue;
+      const [x, y] = center(nc, nr), d = Math.hypot(x - tx, y - ty) + Math.hypot(x - t.x, y - t.y) * .25;   // 離目的地近的優先，同樣近就挑離自己近的
+      if (d < bd) { bd = d; best = [x, y]; }
+    }
+    if (best) return best;
+  }
+  return null;
+}
+const swimRingsFree = () => swimRingCount() - (riding() ? 1 : 0) - ((G && G.towers) || []).filter(t => t.swimRing).length;
+// 每一幀（js/sentry.js 的 updateSentry 呼叫，同一幀只做一次）：時間到了就挑一個隊員下水
+let swimAllyTickAt = -1;
+function swimRingAllyTick() {
+  const now = performance.now(); if (now === swimAllyTickAt) return; swimAllyTickAt = now;
+  if (!riding()) { swimAllyNextAt = Infinity; return; }   // 溫特不在水裡：隊員不會自己下水
+  if (now < swimAllyNextAt || swimRingsFree() <= 0) return;
+  const p = G.player; let best = null, bd = Infinity;
+  for (const t of G.towers || []) {
+    if (t.swimRing || t.hp <= 0 || t.sitting || t.eatenBy || t.mrtRide || !(now - (t.swimWantAt || -1e9) <= SWIM_RING.allyWantSecs * 1000)) continue;
+    const spot = deepWaterNearActor(t); if (!spot) continue;   // 還沒走到岸邊
+    const d = Math.hypot(t.x - p.x, t.y - p.y);
+    if (d < bd) { bd = d; best = { t, spot }; }
+  }
+  if (!best) return;   // 現在沒有人要下水：等有人走到岸邊
+  const { t, spot } = best, keepX = t.x, keepY = t.y;
+  t.swimRing = true; t.x = spot.x; t.y = spot.y; t.navPath = null; t.navGoal = null;
+  if (swimRingWithActor(t, () => sentryBlocked(t.x, t.y))) { t.x = keepX; t.y = keepY; t.swimRing = false; return; }   // 那裡被擋住：下不去
+  t.gunT = 0; t.meleeSwing = null; t.gunSwing = null;
+  if (typeof sfx === 'function') sfx('fishDouse');
+  swimAllyNextAt = now + swimAllyDelay();
+}
+// 隊員更新完（js/sentry.js 的 updateSentry）：整個人都划出深水區就收起救生圈
+function swimRingAllyAfterMove(t) {
+  if (!t || !t.swimRing) return;
+  const r = 12;
+  if (![[-r, -r], [r, -r], [-r, r], [r, r]].some(([sx, sy]) => deepWaterAtPoint(t.x + sx, t.y + sy))) t.swimRing = false;
+}
+
+// ---- 畫面 ----
+// 溫特頭上的提示泡泡（js/render.js 的 drawInteractionPrompts 呼叫）
+function drawSwimRingHint() {
+  const p = G && G.player; if (!p || riding() || !p.swimHintAt) return;
+  if (performance.now() - p.swimHintAt > SWIM_RING.hintSecs * 1000) return;
+  if (!deepWaterNearPlayer()) return;   // 走開了就不顯示
+  if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, SWIM_RING.hintText);
+}
+// 坐進救生圈（js/water.js 的 drawWaded 呼叫；溫特、隊員都一樣）：
+// 救生圈後半圈 → 角色原本的圖（腳裁掉，划水時用走路圖，手照樣擺）→ 救生圈前半圈。整組一起在水上輕輕晃
+const swimRingImg = new Image(); swimRingImg.src = SWIM_RING.image;
+function drawSwimRinged(a, drawFn) {
+  if (!swimRingImg.complete || !swimRingImg.naturalWidth) { drawFn(); return; }
+  const iw = swimRingImg.naturalWidth, ih = swimRingImg.naturalHeight, w = SWIM_RING.ringW, h = w * ih / iw, k = SWIM_RING.split;
+  const bob = Math.sin(performance.now() / 420 + (a.x + a.y) * .05) * 1.2;   // 每個人晃的節奏錯開一點
+  const x = a.x - w / 2, y = a.y + SWIM_RING.ringDy - h / 2 + bob;
+  const ring = (front) => {
+    ctx.save(); ctx.imageSmoothingEnabled = false;
+    if (front) ctx.drawImage(swimRingImg, 0, ih * k, iw, ih * (1 - k), x, y + h * k, w, h * (1 - k));
+    else ctx.drawImage(swimRingImg, 0, 0, iw, ih * k, x, y, w, h * k);
+    ctx.restore();
+  };
+  ring(false);
+  ctx.save();
+  ctx.translate(0, bob);
+  ctx.beginPath(); ctx.rect(a.x - 400, a.y - 2000, 800, 2000 + SWIM_RING.cutDy); ctx.clip();   // 腳不畫
+  drawFn();
+  ctx.restore();
+  ring(true);
+}
+
+// ---- 划水聲：坐在救生圈上移動時循環播放 ----
+(() => {
+  if (typeof document === 'undefined') return;
+  let unlocked = false, audio = null, audioFile = null;
+  ['pointerdown', 'keydown'].forEach(n => window.addEventListener(n, () => { unlocked = true; }, true));
+  const fileOf = name => { const it = typeof SFX !== 'undefined' && SFX.list().find(x => x.name === name); return it && typeof it.file === 'string' ? it.file : null; };
+  setInterval(() => {
+    if (!unlocked || typeof SFX === 'undefined') return;
+    const p = typeof G !== 'undefined' && G && G.player;
+    const on = !!(p && p.swimRing && p.moving && G.running && !G.over);
+    const file = fileOf(SWIM_RING.paddleSound);
+    const want = on && file && SFX.enabled ? Math.min(1, SFX.volume * (SFX.gainOf(SWIM_RING.paddleSound) ?? 1)) : 0;
+    if (file && want > 0 && (!audio || audioFile !== file)) {
+      if (audio) audio.pause();
+      audio = new Audio('Sound effects/' + file); audio.loop = true; audio.volume = 0; audioFile = file;
+    }
+    if (!audio) return;
+    const step = .1 / SWIM_RING.paddleFade * Math.max(want, audio.volume, .05);
+    audio.volume = Math.max(0, Math.min(1, audio.volume + Math.max(-step, Math.min(step, want - audio.volume))));
+    if (want > 0 && audio.paused) audio.play().catch(() => {});
+    else if (want <= 0 && audio.volume <= 0 && !audio.paused) audio.pause();   // 停下來就停，下次接著播
+  }, 100);
+})();

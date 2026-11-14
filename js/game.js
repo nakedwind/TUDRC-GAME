@@ -637,6 +637,7 @@ window.addEventListener('keydown', e => {
       } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else if (typeof useSwimRingNearPlayer === 'function' && useSwimRingNearPlayer()) {}   // 深水區岸邊：坐上救生圈下水（js/swim-ring.js）
     else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
     else if (useCampInteractionNearPlayer(true)) {}
@@ -1425,6 +1426,7 @@ function playerBlocked(x, y) {
     const go = G.grid[c + ',' + rr];
     if (!inGrid(c, rr) || (go && (!hasFloors || (go.floor === 2 ? 2 : 1) === floorCtx))) return true;   // 建築只擋同一層的人
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
+    if (typeof deepWaterBlocksPlayer === 'function' && deepWaterBlocksPlayer(px, py)) return true;   // 深水區：沒坐救生圈走不進去（js/swim-ring.js）
   }
   // 邊緣碰撞（薄牆，js/pathfinding.js）：四個角再加四邊的中點，薄牆的一端剛好卡在身體中間也擋得到
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r], [0, -r], [0, r], [-r, 0], [r, 0]]) if (edgeWallBlocksPoint(x + sx, y + sy)) return true;
@@ -1589,6 +1591,7 @@ function updatePlayer(dt) {
   // edgeWallCrossed：一步走太遠（衝刺、畫面卡一下）時，不會直接跳過薄牆（js/pathfinding.js）
   if (!playerBlocked(nx, p.y) && !edgeWallCrossed(p.x, p.y, nx, p.y, PLAYER.r)) p.x = nx; else if (!dy && !pushing) slideIntoGap(p, 'x', nx - p.x, step);
   if (!playerBlocked(p.x, ny) && !edgeWallCrossed(p.x, p.y, p.x, ny, PLAYER.r)) p.y = ny; else if (!dx && !pushing) slideIntoGap(p, 'y', ny - p.y, step);
+  if (typeof swimRingAfterMove === 'function') swimRingAfterMove(p, dx, dy);   // 撞到深水跳提示、划上岸收起救生圈（js/swim-ring.js）
   if (p.dashPart > 0) {   // 衝刺中：身後留殘影（js/render.js 的 drawDashTrail）
     const now = performance.now() / 1000, tr = p.dashTrail || (p.dashTrail = []);
     if (!tr.length || now - tr[tr.length - 1].t >= DASH.trailGap) tr.push({ x: p.x, y: p.y, t: now });
@@ -1944,6 +1947,7 @@ function updatePlayerAttack(dt) {
   if (p.gunT > 0) p.gunT -= dt;
   if (p.recoilT > 0) p.recoilT -= dt;
   p.atkCd = (p.atkCd || 0) - dt;
+  if (p.swimRing) { shotQueuedAt = -Infinity; p.gunT = 0; updateAmmoHud(); return; }   // 坐在救生圈上：只能划水，不能開槍（js/swim-ring.js）
   if (aimHeld && p.hp > 0) p.gunT = Math.max(p.gunT, 0.3);   // 按住時持續舉槍，不會射完一發就跳回
   if (G.over || dialogueState || elevatorMenuOpen) shotQueuedAt = -Infinity;   // 選單、對話開著：剛才那一下不要留到之後才開
   const wid = playerWeapon(p).id, paint = wid === 'paint';   // 裝的子彈（滾輪換，js/flare.js）
@@ -2240,6 +2244,7 @@ function update(dt) {
   updateCores(dt);
   if (typeof updateTutorial === 'function') updateTutorial(dt);   // 新手區教學提示（js/tutorial.js）
   if (typeof updateCoreFrenzy === 'function') updateCoreFrenzy(dt);   // 核心醒著：異質體狂暴化（js/core-frenzy.js）
+  if (typeof updatePoolTide === 'function') updatePoolTide(dt);   // 池核的抽水、漲潮、溺水（js/pool-tide.js）
   if (G.player) {
     G.player.hitT = Math.max(0, (G.player.hitT || 0) - dt);
     G.player.underAttackT = Math.max(0, (G.player.underAttackT || 0) - dt);
@@ -2313,8 +2318,8 @@ function update(dt) {
   for (const t of G.towers) {
     const spec = TYPES[t.type];
     if (typeof tickSkillBuffs === 'function') tickSkillBuffs(t, dt);   // 嚮導技能給的增益倒數（js/guide-skills.js）
-    if (t.gsCast && (t.hp <= 0 || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0 || t.eatenBy || t.sleepT > 0 || t.dazeT > 0 || t.frozenT > 0)) cancelGuideCast(t);   // 嚮導詠唱中被打斷：技能取消
-    if (t.hp <= 0 || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 倒下、被抓著（js/grab.js）、被藤蔓吊走（js/vines.js）：不攻擊
+    if (t.gsCast && (t.hp <= 0 || t.swimRing || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0 || t.eatenBy || t.sleepT > 0 || t.dazeT > 0 || t.frozenT > 0)) cancelGuideCast(t);   // 嚮導詠唱中被打斷：技能取消
+    if (t.hp <= 0 || t.swimRing || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // swimRing：坐救生圈划水，不能攻擊（js/swim-ring.js）   // 倒下、被抓著（js/grab.js）、被藤蔓吊走（js/vines.js）：不攻擊
     if (t.gunT > 0) t.gunT -= dt;   // 持槍攻擊圖計時
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0) {
       t.gunReloadT = Math.max(0, t.gunReloadT - dt);

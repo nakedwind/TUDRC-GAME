@@ -577,7 +577,8 @@ function drawMapTileImg(ctx, id, x, y, layer='top', fading=false) {
   if(display===false)return;
   if(display)t=display;
   if (typeof ballBedHidden === 'function' && ballBedHidden(c + ',' + r, id)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
-  const secret = !fading && typeof secretAlpha === 'function' ? secretAlpha(null, layer, c + ',' + r) : 1;   // 隱藏區圖層：炸開前不畫、炸開時淡入（js/breakable-walls.js）
+  const secret = fading ? 1 : (typeof secretAlpha === 'function' ? secretAlpha(null, layer, c + ',' + r) : 1)   // 隱藏區圖層：炸開前不畫、炸開時淡入（js/breakable-walls.js）；fading＝已經套過透明度，不再算
+    * (!fading && typeof poolLayerAlpha === 'function' ? poolLayerAlpha(layer) : 1);   // 池核的水位圖層：照水位淡入淡出（js/pool-tide.js）
   if (secret <= 0) return;
   if (secret < 1) { ctx.save(); ctx.globalAlpha *= secret; drawMapTileImg(ctx, id, x, y, layer, true); ctx.restore(); return; }
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, CELL, CELL); return; }
@@ -644,14 +645,16 @@ function drawMapLayerGroup(ctx, lid) {
   g.setTransform(ctx.getTransform()); g.imageSmoothingEnabled = ctx.imageSmoothingEnabled; g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   drawLayerCellsInView(g, lid);
   for (const s of list) if (stampInDrawRect(s) && !(G.mapDestroyed && G.mapDestroyed.has(s))) drawMapStampImg(g, s);
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = mapLayerBlend(lid); ctx.drawImage(off, 0, 0); ctx.restore();
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = mapLayerBlend(lid); ctx.globalAlpha *= (typeof poolLayerAlpha === 'function' ? poolLayerAlpha(lid) : 1); ctx.drawImage(off, 0, 0); ctx.restore();
 }
 function drawMapStampImg(ctx, s, glowPass = false) {
   if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
   const secret = typeof secretAlpha === 'function' ? secretAlpha(s) : 1;   // 隱藏區圖層：炸開前不畫（js/breakable-walls.js）
   if (secret <= 0) return;
   const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret
-    * (typeof mrtGateAlpha === 'function' ? mrtGateAlpha(s) : 1);   // 月台閘門：捷運開門時變淡（js/mrt-train.js）
+    * (typeof mrtGateAlpha === 'function' ? mrtGateAlpha(s) : 1)   // 月台閘門：捷運開門時變淡（js/mrt-train.js）
+    * (typeof poolLayerAlpha === 'function' ? poolLayerAlpha(s.layer) : 1);   // 池核的水位圖層（js/pool-tide.js）
+  if (alpha <= 0) return;
   const blend = mapStampBlend(s);
   if (!blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
   ctx.save();
