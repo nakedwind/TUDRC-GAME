@@ -33,13 +33,29 @@ const GOURD_KING = {
   knock: {                       // 撞牆演出（index 0＝第 1 下 …… 3＝第 4 下撞破）
     delay: 1.4,                  // 核心醒來後幾秒開始撞第 1 下
     gaps: [2.4, 2.0, 1.6],       // 第 1→2、2→3、3→4 下之間隔幾秒（越撞越急）
-    shake: [6, 9, 12, 16],       // 畫面搖晃強度（上限 16）
-    jitter: [2.5, 3.5, 5, 0],    // 牆本身抖幾像素
-    pebbles: [6, 10, 16],        // 牆面掉下來的碎石（落在牆腳）
-    ceiling: [2, 4, 7],          // 天花板掉下來的小碎石（落在牆前面幾格內）
-    dust: [4, 7, 11],            // 牆腳揚起的灰塵團
-    sift: [16, 28, 44],          // 沿著牆面往下灑的粉塵粒
-    shakeRange: 30,              // 溫特離牆幾格以上，搖晃只剩 35%
+    shake: [12, 15, 18, 24],     // 畫面搖晃強度（像素；一般攻擊最多 16，這裡可以更大）
+    rumble: [.55, .7, .9, 1.6],  // 搖晃持續幾秒（慢慢變小；撞破那下最久）
+    hitstop: [.03, .05, .07, .09],   // 撞到的瞬間畫面頓一下（秒，最多 .09）
+    jitter: [4, 6, 8, 0],        // 牆本身抖幾像素
+    pebbles: [12, 20, 30],       // 牆面掉下來的碎石（落在牆腳）
+    ceiling: [5, 9, 14],         // 天花板掉下來的小碎石（落在牆前面幾格內）
+    dust: [8, 13, 20],           // 牆腳揚起的灰塵團
+    sift: [36, 60, 90],          // 沿著牆面往下灑的粉塵粒
+    haze: [3, 6, 10],            // 牆前面飄著的灰濛濛粉塵（大團、慢慢散）
+    chunks: [4, 8, 12],          // 從裂縫噴出來的碎石塊
+    shakeRange: 30,              // 溫特離牆幾格以上，搖晃只剩 45%
+  },
+  breach: {                      // 撞破那一下的額外演出
+    bursts: 5,                   // 洞口噴出幾團碎石
+    smoke: 34,                   // 洞口冒出幾團大煙霧（會停留一陣子才散）
+    smokeLife: [2.4, 3.8],       // 煙霧停留幾秒
+    pebbles: 26,                 // 天花板跟著掉下來的碎石
+    flash: .35,                  // 畫面泛起一層土色閃光（秒）
+  },
+  landing: {                     // 葫蘆猴王跳出來落地那一下的額外演出
+    shake: 22, rumble: 1.1,      // 搖晃強度、持續幾秒
+    smoke: 22,                   // 落地四周捲起的大煙霧
+    bursts: 3,                   // 額外噴出幾團碎石
   },
   emerge: { start: 3, land: 3.5 },   // 撞破後：從洞裡第幾排起跳、跳到牆腳下面幾格的地方砸下來
   // ---- 巨型泰山壓頂：蓋過一般葫蘆猴的 GOURD 數值（沒寫的照 GOURD）----
@@ -129,6 +145,9 @@ function seedGourdKing() {
 // ---- 每幀（gourd-monkey.js 的 updateGourd 呼叫）----
 function updateGourdKing(dt) {
   updateGkRocks(dt); updateGkSift(dt);
+  const Rb = G.gkRumble;
+  if (Rb && Rb.t > 0) { Rb.t -= dt; const k = Math.max(0, Rb.t / Rb.dur); shakeAmt = Math.max(shakeAmt, Rb.amt * (.35 + .65 * k) * (k > 0 ? 1 : 0)); }
+  if (G.gkFlash && (G.gkFlash.t -= dt) <= 0) G.gkFlash = null;
   const K = G.gourdKing; if (!K || !G.running || G.over) return;
   if (K.jitterT > 0) K.jitterT -= dt;
   if (K.phase === 'sleep') {
@@ -151,8 +170,8 @@ function gkWallHit(K, n) {
   if (last) {
     if (typeof openBreakableWall === 'function') openBreakableWall(s, n); else G.wallStage.set(s, n);   // 打通、隱藏區顯現（js/breakable-walls.js）
   } else G.wallStage.set(s, n);
-  gkShake(box.cx, box.bottom, C.shake[i] || 8);
-  if (last) addHitstop(.08);
+  gkRumble(box.cx, box.bottom, C.shake[i] || 8, C.rumble[i] || .5);
+  addHitstop(C.hitstop[i] || 0);
   K.jitter = C.jitter[i] || 0; K.jitterT = .4;
   // 聲音：撞擊聲越來越大；離得遠也聽得到一點（悶悶的）
   gkSound('gourdSlam', box.cx, box.bottom, .7 + .15 * n);
@@ -173,12 +192,34 @@ function gkWallHit(K, n) {
     for (let k = 0; k < (C.sift[i] || 0); k++)   // 沿著牆面往下灑的粉塵：從牆頂、裂縫附近往下飄落
       G.gkSift.push({ x: box.x0 + gkRand(.05, .95) * W, y: box.top + gkRand(.15, .7) * (box.bottom - box.top), vx: gkRand(-6, 6), vy: gkRand(10, 40), r: gkRand(1, 2.4), life: 0, life0: gkRand(1, 1.8), floor: box.bottom + gkRand(0, 12) });
     for (const g of G.gkSift) if (g.life === 0) g.life = g.life0;
+    for (let k = 0; k < (C.haze[i] || 0); k++)   // 牆前面飄著的灰濛濛粉塵
+      gkSmoke(box.x0 + gkRand(0, 1) * W, box.bottom + gkRand(-.5, 2.5) * CELL, gkRand(50, 80), gkRand(1.6, 2.6), 14);
+    rockBurstFx(box.cx, box.bottom - 4, { rocks: C.chunks[i] || 0, speed: [40, 120], up: [90, 200], dust: 2 + n, dustRise: n, size: .9 + .15 * n, spread: 30 });   // 裂縫噴出碎石塊
   } else {
-    // 撞破：大量碎石、灰塵往外噴（js/gourd-monkey.js 的 rockBurstFx）
-    for (const dx of [-1.5, 0, 1.5]) rockBurstFx(box.cx + dx * CELL, box.bottom - 6, { rocks: 14, speed: [80, 230], up: [150, 320], dust: 8, dustRise: 4, size: 1.2, spread: 24 });
-    for (let k = 0; k < 12; k++) gkPebble(box.cx + gkRand(-6, 6) * CELL, box.bottom + gkRand(.5, 6) * CELL, gkRand(260, 380), .9);
-    G.effects.push({ ring: true, x: box.cx, y: box.bottom, r: 10, r2: 200, life: .5, life0: .5, color: '#b49a6c' });
+    // 撞破：大量碎石、灰塵往外噴（js/gourd-monkey.js 的 rockBurstFx），洞口冒出大團煙霧、天花板跟著掉石頭
+    const Bk = GOURD_KING.breach;
+    for (let k = 0; k < Bk.bursts; k++) rockBurstFx(box.cx + (k / (Bk.bursts - 1) - .5) * 4 * CELL, box.bottom - gkRand(0, 60), { rocks: 18, speed: [90, 260], up: [160, 360], dust: 10, dustRise: 5, size: 1.6, spread: 30 });
+    for (let k = 0; k < Bk.pebbles; k++) gkPebble(box.cx + gkRand(-7, 7) * CELL, box.bottom + gkRand(.5, 7) * CELL, gkRand(260, 420), 1.2);
+    for (let k = 0; k < Bk.smoke; k++) {   // 煙霧：從洞口往外、往前翻滾出來，停留一陣子才散
+      const a = gkRand(.15, Math.PI - .15), sp = gkRand(30, 140);
+      gkSmoke(box.cx + gkRand(-2, 2) * CELL, box.bottom - gkRand(0, 3) * CELL, gkRand(60, 110), gkRand(Bk.smokeLife[0], Bk.smokeLife[1]), 0, Math.cos(a) * sp, Math.sin(a) * sp * .7);
+    }
+    G.effects.push({ ring: true, x: box.cx, y: box.bottom, r: 10, r2: 260, life: .6, life0: .6, color: '#b49a6c' });
+    G.effects.push({ ring: true, x: box.cx, y: box.bottom, r: 6, r2: 160, life: .4, life0: .4, color: '#efe0b8' });
+    G.gkFlash = { t: Bk.flash, t0: Bk.flash };
   }
+}
+// 一大團慢慢散開的煙霧（跟葫蘆猴落地的灰塵團共用：js/gourd-monkey.js 的 G.gourdDust）；spread＝出現位置的隨機範圍
+function gkSmoke(x, y, r1, life, spread = 0, vx = gkRand(-12, 12), vy = gkRand(-10, 6)) {
+  const d = { x: x + gkRand(-spread, spread), y: y + gkRand(-spread, spread) * .5, vx, vy, r0: r1 * .35, r1, life, life0: life, shade: Math.random() };
+  (G.gourdDust = G.gourdDust || []).push(d);
+}
+// 持續的強烈搖晃：amt 像素，dur 秒內慢慢變小（js/attack-fx.js 的 shakeAmt；一般 addShake 最多 16，這裡可以更大）
+function gkRumble(x, y, amt, dur) {
+  const p = G.player, d = p ? Math.hypot(p.x - x, p.y - y) / CELL : 0;
+  const k = Math.max(.45, 1 - d / GOURD_KING.knock.shakeRange);
+  G.gkRumble = { amt: amt * k, t: dur, dur };
+  shakeAmt = Math.max(shakeAmt, amt * k);
 }
 // 一顆從高處掉下來的小石頭（跟葫蘆猴落地的石礫共用：js/gourd-monkey.js 的 G.gourdRocks，落地會彈、會滾）
 function gkPebble(x, y, z, size = 1) {
@@ -261,7 +302,7 @@ function gkComboTarget(e) {
 // gourd-monkey.js 的 gourdImpact 最後呼叫：每次砸下來之後
 function gourdKingImpact(e, quick) {
   const B = GOURD_KING, g = e.gm;
-  if (!e.eliteAwake) gkWake(e);   // 第一下（從牆裡跳出來）落地：BOSS 戰開始
+  if (!e.eliteAwake) { gkWake(e); gkLandingFx(e); }   // 第一下（從牆裡跳出來）落地：BOSS 戰開始、更大的震動和煙霧
   gkCrushOres(e);
   gkDropRocks(e, quick ? B.rocks.quick : B.rocks.count);
   if (!e.gkEnraged) return;
@@ -269,6 +310,17 @@ function gourdKingImpact(e, quick) {
   if (!quick) g.comboLeft = B.combo.hops; else g.comboLeft = Math.max(0, (g.comboLeft || 0) - 1);
   if (g.comboLeft > 0) { g.recover = B.combo.gap; g.cd = 0; }
   else if (quick) g.recover = B.combo.tired;
+}
+function gkLandingFx(e) {
+  const L = GOURD_KING.landing;
+  gkRumble(e.x, e.y, L.shake, L.rumble);
+  addHitstop(.09);
+  for (let k = 0; k < L.bursts; k++) rockBurstFx(e.x + gkRand(-1.5, 1.5) * CELL, e.y + 10, { rocks: 16, speed: [100, 260], up: [160, 340], dust: 10, dustRise: 4, size: 1.5, spread: 40 });
+  for (let k = 0; k < L.smoke; k++) {   // 四周捲起的大煙霧：往外滾開
+    const a = k / L.smoke * Math.PI * 2 + gkRand(-.2, .2), sp = gkRand(60, 150);
+    gkSmoke(e.x + Math.cos(a) * 40, e.y + 10 + Math.sin(a) * 18, gkRand(55, 95), gkRand(1.8, 3), 0, Math.cos(a) * sp, Math.sin(a) * sp * .45);
+  }
+  G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 20, r2: 340, life: .7, life0: .7, color: '#8f7b56' });
 }
 function gkWake(e) {
   e.eliteAwake = true;
@@ -377,6 +429,12 @@ function drawGourdKingGround(ctx) {
 function drawGourdKingTop(ctx) {
   const R = GOURD_KING.rocks;
   ctx.save();
+  if (G.gkFlash && typeof cam !== 'undefined') {
+    const k = G.gkFlash.t / G.gkFlash.t0;
+    ctx.globalAlpha = .45 * k; ctx.fillStyle = '#f2e2c0';
+    ctx.fillRect(cam.x - 200, cam.y - 200, 4000, 3000);
+    ctx.globalAlpha = 1;
+  }
   for (const k of G.gkRocks || []) {
     if (k.t < R.fall * .35 || k.hit || (typeof isVisible === 'function' && !isVisible(k.x, k.y))) continue;
     const u = (k.t - R.fall * .35) / (R.fall * .65), z = R.height * (1 - u * u), s = 9 * k.size;
