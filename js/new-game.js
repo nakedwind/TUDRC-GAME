@@ -48,6 +48,18 @@
     });
   }
   if (window.STORY_PREVIEW) return;   // 回憶預覽不處理待執行的新遊戲／讀檔／測試要求。
+  // ---- 地圖編輯器的「▶ 預覽遊戲」（網址帶 ?preview=1）：物品全解鎖 ----
+  // 預覽分頁跟正式遊戲共用同一份瀏覽器存檔，所以預覽時「進度」那些存檔只寫在這個分頁的記憶體裡，
+  // 讀的時候先看記憶體、沒有才讀正式存檔：全解鎖的物品、預覽裡花的錢都不會帶回正式遊戲
+  window.PREVIEW_UNLOCK = /[?&]preview=1(&|$)/.test(location.search);
+  if (window.PREVIEW_UNLOCK) {
+    const shadow = new Map(), keys = new Set(progressKeys), real = Storage.prototype;
+    const { getItem, setItem, removeItem } = real;
+    const mine = (store, key) => store === window.localStorage && keys.has(String(key));
+    real.getItem = function (key) { if (mine(this, key) && shadow.has(String(key))) return shadow.get(String(key)); return getItem.call(this, key); };
+    real.setItem = function (key, value) { if (mine(this, key)) { shadow.set(String(key), String(value)); return; } return setItem.call(this, key, value); };
+    real.removeItem = function (key) { if (mine(this, key)) { shadow.set(String(key), null); return; } return removeItem.call(this, key); };
+  }
   try {
     const request = sessionStorage.getItem(REQUEST);
     const testActive = sessionStorage.getItem('tudrc-test-mode-v1') === '1';
@@ -109,6 +121,33 @@
       location.reload();
     } catch (error) { alert('無法重新開始：' + error.message); }
   }
+  // 全部物品解鎖：每種物品 20 個（略過一般背包容量）、裝備與武器最高等級、子彈補滿、背包／彈匣擴充到最大、建築都開發好
+  // 開始畫面的 🧪 測試模式、地圖編輯器的 ▶ 預覽遊戲都用這個
+  function grantEverything() {
+    for (const item of [...SUPPLIES, ...ITEMS]) Map.prototype.set.call(supplyInventory, item.id, 20);
+    for (const def of EQUIPMENT) equipState.owned[def.id] = def.levels.length;
+    for (const [id, def] of Object.entries(WEAPON_UPGRADES)) {
+      if (def.removed) continue;   // 開發工坊編輯器刪掉的武器不給
+      equipState.weapons[id] = def.levels.length;
+    }
+    for (const id of Object.keys(BULLETS)) if (id !== 'pistol' && !BULLETS[id].removed) { equipState.bullets.owned[id] = true; equipState.bullets.n[id] = BULLETS[id].max; }   // 所有子彈補滿
+    equipState.bag = { items: BAG_UPGRADES.items.slots.length, ammo: BAG_UPGRADES.ammo.slots.length };   // 背包、彈藥包擴充到最大
+    equipState.magazine = { lv: MAGAZINE.slots.length, load: magCandidates().slice(0, MAGAZINE.slots[MAGAZINE.slots.length - 1]) };   // 彈匣升到最大、先裝滿（測試模式滾輪本來就換得到全部子彈，js/magazine.js）
+    for (const o of buildAll()) equipState.builds[o.id] = true;   // 所有建築都開發好（js/build.js）
+    equipState.battery = 100; training.crystals = Math.max(training.crystals, 99999);
+    saveEquipment(); saveTraining();
+  }
+  // 預覽遊戲：等存檔都讀完（所有 DOMContentLoaded 跑完）再全解鎖，不然背包會被讀檔蓋回去
+  if (window.PREVIEW_UNLOCK) window.addEventListener('DOMContentLoaded', () => setTimeout(() => {
+    try {
+      grantEverything();
+      if (typeof G !== 'undefined' && G) G.money = Math.max(G.money || 0, 99999);
+      if (typeof renderBuildBar === 'function') renderBuildBar();
+      if (typeof updateHUD === 'function') updateHUD();
+      const note = document.querySelector('.header-note'); if (note && !note.textContent.includes('全物品')) note.textContent += ' · 全物品解鎖';
+      if (typeof systemNotice === 'function') systemNotice('預覽模式：全部物品 ×20、最高等級的裝備與武器已解鎖（不會存進正式存檔）');
+    } catch (error) { console.warn('預覽全解鎖失敗', error); }
+  }, 0));
   window.addEventListener('DOMContentLoaded', () => {
     if (!startedFresh && !(typeof PREVIEW !== 'undefined' && PREVIEW)) {
       const continueButton = document.getElementById('ov-btn');
@@ -138,21 +177,7 @@
     }
     // 等所有載入存檔的 DOMContentLoaded 處理完成後才進場。
     if (startedFresh) setTimeout(() => {
-      if (window.TEST_MODE) {
-        // 測試模式直接設定每種物品 20 個，略過一般背包容量，確保全品項都能測試。
-        for (const item of [...SUPPLIES, ...ITEMS]) Map.prototype.set.call(supplyInventory, item.id, 20);
-        for (const def of EQUIPMENT) equipState.owned[def.id] = def.levels.length;
-        for (const [id, def] of Object.entries(WEAPON_UPGRADES)) {
-          if (def.removed) continue;   // 開發工坊編輯器刪掉的武器不給
-          equipState.weapons[id] = def.levels.length;
-        }
-        for (const id of Object.keys(BULLETS)) if (id !== 'pistol' && !BULLETS[id].removed) { equipState.bullets.owned[id] = true; equipState.bullets.n[id] = BULLETS[id].max; }   // 所有子彈補滿
-        equipState.bag = { items: BAG_UPGRADES.items.slots.length, ammo: BAG_UPGRADES.ammo.slots.length };   // 背包、彈藥包擴充到最大
-        equipState.magazine = { lv: MAGAZINE.slots.length, load: magCandidates().slice(0, MAGAZINE.slots[MAGAZINE.slots.length - 1]) };   // 彈匣升到最大、先裝滿（測試模式滾輪本來就換得到全部子彈，js/magazine.js）
-        for (const o of buildAll()) equipState.builds[o.id] = true;   // 所有建築都開發好（js/build.js）
-        equipState.battery = 100; training.crystals = Math.max(training.crystals, 99999);
-        saveEquipment(); saveTraining();
-      }
+      if (window.TEST_MODE) grantEverything();
       if (resumeScene && typeof MAPS_DEFAULT !== 'undefined' && !PREVIEW) {
         const index = MAPS_DEFAULT.findIndex(m => m.id === resumeScene.mapId);
         if (index >= 0) { switchMap(index); const pick = document.getElementById('mapPick'); if (pick) pick.value = index; }

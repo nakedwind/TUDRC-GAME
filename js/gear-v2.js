@@ -110,7 +110,7 @@ function gearEnsureCopies() {
   if (!GEAR_V2 || !gearReady) return;
   gearNormalize();
   for (const d of EQUIPMENT) if (equipState.owned[d.id] && gearTotal(d.id) < 1) gearBagAdd(d.id, 1);
-  if (window.TEST_MODE) for (const d of EQUIPMENT) if (equipState.owned[d.id] && gearTotal(d.id) < 3) gearBagAdd(d.id, 3 - gearTotal(d.id));   // 測試模式：每種 3 件，隊員也有得穿
+  if (window.TEST_MODE || window.PREVIEW_UNLOCK) for (const d of EQUIPMENT) if (equipState.owned[d.id] && gearTotal(d.id) < 3) gearBagAdd(d.id, 3 - gearTotal(d.id));   // 測試模式：每種 3 件，隊員也有得穿
   gearSaveIfDirty();
 }
 function gearSaveIfDirty() {
