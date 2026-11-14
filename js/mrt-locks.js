@@ -22,6 +22,10 @@ function mrtSaveUnlocked() { try { localStorage.setItem(MRT_STORE, JSON.stringif
 
 // 換地圖、重新開始時：哪些格子要擋（js/game.js 在 setupDoors 之後呼叫）
 let mrtAddedWalls = new Set();   // 這裡加進固定牆的格子（G 會整個換掉，所以另外記：重開時先全部還原）
+// 放在 2 樓的閘門（圖層名稱有「2樓」，js/maploader.js 的 stampOn2F）：擋路格加進「2 樓碰撞」（js/pathfinding.js 的 floor2Solid），
+// 只擋 2 樓的人；一般牆只擋 1 樓，放在那裡 2 樓的人會直接走過去、底下 1 樓的人反而被擋
+let mrtAdded2F = new Set();
+const mrtLockOn2F = l => typeof hasFloors !== 'undefined' && hasFloors && typeof stampOn2F === 'function' && stampOn2F(l.stamp);
 // 這張地圖有封鎖的入口，而且全部解封了（解封是永久的）：之後打破核心不再掉異質鑰匙，只掉 MRT_OPEN_CORE_REWARD 異質碎片
 const MRT_OPEN_CORE_REWARD = 350;
 function mrtExitsAllOpen() {
@@ -31,6 +35,8 @@ function mrtExitsAllOpen() {
 function setupMrtLocks() {
   for (const k of mrtAddedWalls) mapWalls.delete(k);
   mrtAddedWalls = new Set();
+  if (typeof floor2Solid !== 'undefined') for (const k of mrtAdded2F) floor2Solid.delete(k);
+  mrtAdded2F = new Set();
   G.mrtLocks = [];
   if (!MAP) return;
   const perm = mrtUnlocked[MAP.id] || [];
@@ -52,15 +58,22 @@ function restoreMrtLocks() {
   mrtAddedWalls = new Set();
   if (!G) return;
   if (!G.mrtLocks) G.mrtLocks = [];
-  for (const l of G.mrtLocks) for (const k of l.added || []) mrtAddedWalls.add(k);
+  for (const l of G.mrtLocks) {
+    for (const k of l.added || []) mrtAddedWalls.add(k);
+    for (const k of l.added2 || []) { mrtAdded2F.add(k); if (typeof floor2Solid !== 'undefined') floor2Solid.add(k); }   // 2 樓碰撞沒有跟著存：補回去
+  }
 }
 // 依開關狀態加／拿掉擋路格（只管原本不是牆的格子）
 function applyMrtLock(lock) {
   for (const k of lock.added) { mapWalls.delete(k); mrtAddedWalls.delete(k); }
-  lock.added = [];
+  for (const k of lock.added2 || []) { if (typeof floor2Solid !== 'undefined') floor2Solid.delete(k); mrtAdded2F.delete(k); }
+  lock.added = []; lock.added2 = [];
+  const on2F = mrtLockOn2F(lock);
   for (const { key, dc, off } of lock.cells) {
     const passable = lock.open && !lock.opening && (lock.cfg.kind === 'exit' || (lock.cfg.open || []).includes(dc));
-    if (!passable && !mapWalls.has(key)) { mapWalls.add(key); lock.added.push(key); mrtAddedWalls.add(key); addStampSolidOffset(key, off); }
+    if (passable) continue;
+    if (on2F) { if (!floor2Solid.has(key)) { floor2Solid.add(key); lock.added2.push(key); mrtAdded2F.add(key); } }   // 2 樓的閘門：只擋 2 樓
+    else if (!mapWalls.has(key)) { mapWalls.add(key); lock.added.push(key); mrtAddedWalls.add(key); addStampSolidOffset(key, off); }
   }
   if (typeof computeFlow === 'function') computeFlow();
 }
@@ -97,6 +110,7 @@ function mrtLockNearPlayer() {
   let best = null, bd = CELL * 1.6;
   for (const l of G.mrtLocks || []) {
     if (l.open) continue;
+    if (typeof hasFloors !== 'undefined' && hasFloors && typeof visualFloor === 'function' && visualFloor(p) !== (mrtLockOn2F(l) ? 2 : 1)) continue;   // 不同樓層的閘門刷不到
     // 閘門可以從上下兩邊刷卡（距離算到擋路那排的上下緣）；入口只能從前面（下方）靠近
     let dy;
     if (l.cfg.kind === 'gate') dy = Math.max(0, p.y - l.bottom, l.bottom - CELL - p.y);
