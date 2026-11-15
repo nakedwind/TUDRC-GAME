@@ -22,14 +22,21 @@ const BossMusic = (() => {
   let unlocked = false, eliteHateT = 0, last = performance.now();
   let eliteWaitT = 0, eliteHeard = false, battleG = null;   // 大隊長盯上了多久；這場戰鬥的「中BOSS」播過了沒（換地圖、新的一場重算）
 
-  const fileOf = name => { const it = SFX.list().find(x => x.name === name); return it && typeof it.file === 'string' ? it.file : null; };
+  // 音效編輯器裡設的檔案：一個（字串）或好幾個（陣列＝疊在一起播，跟一般音效一樣，例如「異質核心甦醒」＋「異質核心甦醒02」）
+  // 以前只認一個檔案，設成兩個時整首都不播（異質核心甦醒的音樂就是這樣不見的）
+  const filesOf = name => {
+    const it = SFX.list().find(x => x.name === name), f = it && it.file;
+    const list = Array.isArray(f) ? f : typeof f === 'string' ? [f] : [];
+    return list.filter(x => typeof x === 'string' && x);
+  };
   function track(key) {
-    const file = fileOf(B.sounds[key]);
-    if (!file) return null;
+    const files = filesOf(B.sounds[key]);
+    if (!files.length) return null;
+    const file = files.join('|');
     if (!tracks[key] || tracks[key].file !== file) {   // 音效編輯器換了檔案：換新的
-      if (tracks[key]) tracks[key].a.pause();
-      const a = new Audio('Sound effects/' + file); a.loop = true; a.volume = 0;
-      tracks[key] = { a, file, level: tracks[key] ? tracks[key].level : 0 };   // level：淡入淡出的進度（0～1）
+      if (tracks[key]) tracks[key].as.forEach(a => a.pause());
+      const as = files.map(f => { const a = new Audio('Sound effects/' + f); a.loop = true; a.volume = 0; return a; });   // 每個檔案一條，同時播
+      tracks[key] = { as, file, level: tracks[key] ? tracks[key].level : 0 };   // level：淡入淡出的進度（0～1）
     }
     return tracks[key];
   }
@@ -76,14 +83,17 @@ const BossMusic = (() => {
       t.level = t.level < goal ? Math.min(goal, t.level + dt / B.fadeIn) : Math.max(goal, t.level - dt / B.fadeOut);
       on = goal > 0;
       const swell = key === 'core' ? B.swell.low + (B.swell.high - B.swell.low) * (.5 + .5 * Math.sin(now / 1000 * Math.PI * 2 / B.swell.period)) : 1;
-      t.a.volume = Math.max(0, Math.min(1, musicVolume() * (SFX.gainOf(B.sounds[key]) ?? 1) * t.level * swell));
-      if (on && t.a.paused) t.a.play().catch(() => {});
-      else if (!on && t.level <= 0 && !t.a.paused) t.a.pause();   // 淡出完才停（下次從停下的地方接著播）
+      const vol = Math.max(0, Math.min(1, musicVolume() * (SFX.gainOf(B.sounds[key]) ?? 1) * t.level * swell));
+      for (const a of t.as) {   // 疊在一起的每一條都同樣處理
+        a.volume = vol;
+        if (on && a.paused) a.play().catch(() => {});
+        else if (!on && t.level <= 0 && !a.paused) a.pause();   // 淡出完才停（下次從停下的地方接著播）
+      }
     }
   }
   const unlock = () => { unlocked = true; };
   window.addEventListener('pointerdown', unlock, true);
   window.addEventListener('keydown', unlock, true);
   setInterval(tick, 50);
-  return { get playing() { return Object.keys(tracks).filter(k => !tracks[k].a.paused); }, level: k => tracks[k] ? tracks[k].a.volume : 0 };
+  return { get playing() { return Object.keys(tracks).filter(k => tracks[k].as.some(a => !a.paused)); }, level: k => tracks[k] ? tracks[k].as[0].volume : 0 };
 })();
