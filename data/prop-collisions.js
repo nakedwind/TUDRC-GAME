@@ -1164,5 +1164,149 @@ const PROP_COLLISIONS = [
         ]
       ]
     }
+  },
+  {
+    "id": "prop-forest-root-closed",
+    "name": "森林樹根（平時擋路・炸了會開）",
+    "tile": "tile_forest_group_20",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/森林/forest_group_20.png",
+      "w": 7,
+      "h": 4,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          6,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-forest-root-open",
+    "name": "森林樹根（炸開後的拱門）",
+    "tile": "tile_forest_group_2002",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/森林/forest_group_2002.png",
+      "w": 7,
+      "h": 4,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          6,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-forestblue-root-closed",
+    "name": "藍森林樹根（平時擋路・炸了會開）",
+    "tile": "tile_forestblue_group_20",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/森林藍/forest_group_20_blue.png",
+      "w": 7,
+      "h": 4,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          6,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-forestblue-root-open",
+    "name": "藍森林樹根（炸開後的拱門）",
+    "tile": "tile_forestblue_group_2002",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/森林藍/forest_group_2002_blue.png",
+      "w": 7,
+      "h": 4,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          6,
+          2
+        ]
+      ]
+    }
   }
 ];

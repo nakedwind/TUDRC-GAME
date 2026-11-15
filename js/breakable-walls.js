@@ -10,6 +10,8 @@
    另一種做法：地圖編輯器把圖層設成「🧱 隱藏區」，那些圖層上的東西在炸開最近的可炸開牆之前不畫（secretLayerAreas、secretAlpha）。
    捷運站也有同一套：「捷運灰牆X3（可炸開／可炸開・隱藏區／裂縫・可炸開／裂縫・可炸開・隱藏區）」，3 格寬 4 格高。
    「捷運高牆X6」也一樣（6 格寬 6 格高，炸開後中間兩欄打通）。
+   森林樹根（forest_group_20，藍森林 forest_group_20_blue 也是）：平時擋路，炸一次就換成拱門（forest_group_2002）可以穿過去；
+   擋哪幾格用物件編輯器的「自帶碰撞格」設（data/prop-collisions.js，完整、拱門各一份），不用在地圖上畫紅格。
    「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
    提示：隱藏區的牆、裂縫牆都要帶球球（學會密道搜索）才找得到，找到後牆上一直有白色狗腳印＋「?」的小牌子
    （drawBreakableWallHints）；沒帶球球就沒有任何提示。
@@ -98,7 +100,18 @@ const BREAKABLE_WALLS = {
     pad: 1,
     hide: true, hideFrom: [2, 0], hideMax: 1500,
   },
+  // ---- 森林樹根（images/森林/forest_group_20 → forest_group_2002）：平時擋路，炸一次就變成拱門可以穿過去 ----
+  // prop：擋路格不寫在這裡，用物件編輯器設的「自帶碰撞格」（data/prop-collisions.js）：
+  //   還沒炸開 → 用完整那張（forest_group_20）的格子；炸開 → 換成破洞那張（forest_group_2002）的格子。
+  //   兩張的格子差在哪，就是炸開後打通的地方（也是爆炸要炸到的地方）。藍色森林的版本規則一樣。
+  tile_forest_group_20: { stages: ['tile_forest_group_2002'], prop: true, pad: 1 },
+  tile_forestblue_group_20: { stages: ['tile_forestblue_group_2002'], prop: true, pad: 1 },
 };
+// prop 版本：炸開前、炸開後各擋哪幾格（'c,r' 字串）
+function breakablePropCells(s, spec) {
+  if (typeof propCellsOfStamp !== 'function') return { before: [], after: [] };
+  return { before: propCellsOfStamp(s, s.id), after: propCellsOfStamp(s, spec.stages[spec.stages.length - 1]) };
+}
 const HIDDEN_REVEAL_SEC = .9;   // 炸開後黑幕淡出幾秒
 let breakableWallCells = new Set();   // 這局因為「還沒炸開」而加進固定牆的格子（換地圖／重開時先還原）
 let breakableWallSolid = new Set();   // 牆本身一直擋路的格子（同樣換地圖／重開時先還原）
@@ -110,6 +123,13 @@ function breakableWallStage(s) { return (G && G.wallStage && G.wallStage.get(s))
 function breakableWallOpenCells(s) {
   const spec = breakableWallSpec(s); if (!spec) return [];
   const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+  if (spec.prop) {   // 森林樹根：炸開前擋、炸開後不擋的格子；兩張一樣（或都沒設）就用炸開前的格子，再沒有就用圖片最下排中間
+    const { before, after } = breakablePropCells(s, spec), keep = new Set(after);
+    let cells = before.filter(k => !keep.has(k));
+    if (!cells.length) cells = before;
+    if (!cells.length) { const t = mapTileById(s.id); cells = [(c0 + Math.floor(((t && mapStampW(s, t)) || 1) / 2)) + ',' + (r0 + ((t && mapStampH(s, t)) || 1) - 1)]; }
+    return cells.map(k => k.split(',').map(Number));
+  }
   return spec.open.map(([dc, dr]) => [c0 + dc, r0 + dr]);
 }
 // 炸開後要打通的格子：洞口那幾格，加上同一欄往上到牆頂（牆面那幾排）。
@@ -129,6 +149,7 @@ function setupBreakableWalls() {
   const drawn = new Set((MAP && MAP.solid) || []);   // 重開時，上一局炸開拿掉的編輯器擋路格要補回來
   for (const s of (MAP && MAP.stamps) || []) {
     const spec = breakableWallSpec(s); if (!spec) continue;
+    if (spec.prop) continue;   // 森林樹根：炸開前的擋路格由 js/prop-collisions.js 加（物件編輯器設的）
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
     for (const [dc, dr] of spec.solid || []) {   // 牆最下排左右兩格：一直擋路
       const c = c0 + dc, r = r0 + dr, k = c + ',' + r;
@@ -238,6 +259,12 @@ function restoreBreakableWalls() {
   const added =(c, r) => { const k = c + ',' + r; return inGrid(c, r) && mapWalls.has(k) && !drawn.has(k) ? k : null; };
   for (const s of MAP.stamps || []) {
     const spec = breakableWallSpec(s); if (!spec) continue;
+    if (spec.prop) {   // 森林樹根已經炸開：破洞那張多擋的格子是炸開時加的，記回來（重新開始時才拿得掉）
+      if (breakableWallStage(s) < spec.stages.length) continue;
+      const { before, after } = breakablePropCells(s, spec), had = new Set(before);
+      for (const k of after) if (!had.has(k)) { const [c, r] = k.split(',').map(Number); if (added(c, r)) breakableWallSolid.add(k); }
+      continue;
+    }
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
     for (const [dc, dr] of spec.solid || []) { const k = added(c0 + dc, r0 + dr); if (k) breakableWallSolid.add(k); }
     if (breakableWallStage(s) >= spec.stages.length) continue;   // 已經炸開了
@@ -320,6 +347,15 @@ function blastWalls(x, y, R) {
 function openBreakableWall(s, stage) {
   const spec = breakableWallSpec(s); if (!spec || !G || !(G.wallStage instanceof Map)) return;
   G.wallStage.set(s, stage || spec.stages.length);
+  if (spec.prop) {   // 森林樹根：擋路格從完整那張換成破洞那張（物件編輯器設的自帶碰撞格）
+    const { before, after } = breakablePropCells(s, spec), keep = new Set(after), had = new Set(before);
+    const drawn = new Set((MAP && MAP.solid) || []);   // 地圖編輯器自己畫的紅格不動
+    for (const k of before) if (!keep.has(k) && !drawn.has(k)) {
+      mapWalls.delete(k);
+      if (typeof mapSolidOffsets !== 'undefined' && typeof propAddedOffsets !== 'undefined' && propAddedOffsets.has(k)) delete mapSolidOffsets[k];
+    }
+    for (const k of after) if (!had.has(k) && !mapWalls.has(k)) { mapWalls.add(k); breakableWallSolid.add(k); }   // 重新開始時 setupBreakableWalls 會拿掉
+  }
   for (const [c, r] of breakableWallPassCells(s)) { const k = c + ',' + r; if (breakableWallCells.has(k)) { mapWalls.delete(k); breakableWallCells.delete(k); } }
   if (typeof computeFlow === 'function') computeFlow();
   for (const a of [...(G.towers || []), ...(G.npcs || [])]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
@@ -337,7 +373,7 @@ function breakableWallHidesArea(s) {
 // 一開始就是裂縫的牆（「後室牆面（裂縫・可炸開）」系列：只有一個階段，炸一次就開）
 function breakableWallCrackType(s) { const spec = breakableWallSpec(s); return !!spec && spec.stages.length === 1; }
 // 球球（密道搜索）聞得出來的牆：隱藏區的牆＋裂縫牆
-function breakableWallSniffable(s) { const spec = breakableWallSpec(s); return !!spec && !spec.boss && (breakableWallHidesArea(s) || breakableWallCrackType(s)); }   // BOSS 牆炸不開，不標腳印
+function breakableWallSniffable(s) { const spec = breakableWallSpec(s); return !!spec && !spec.boss && !spec.prop && (breakableWallHidesArea(s) || breakableWallCrackType(s)); }   // BOSS 牆炸不開，不標腳印
 // js/render.js 在黑幕之上呼叫（暗處也看得到）
 function drawBreakableWallHints(ctx) {
   if (!G || !G.running || MAP_SAFE || !MAP || !(G.wallStage instanceof Map) || typeof dogFoundWall !== 'function') return;
@@ -377,7 +413,7 @@ function wallRubble(x, y, n) {
 function lightBreakableWallFaces(fields) {
   if (!MAP || !MAP.stamps) return;
   for (const s of MAP.stamps) {
-    if (!breakableWallSpec(s)) continue;
+    { const spec = breakableWallSpec(s); if (!spec || spec.prop) continue; }   // 森林樹根在戶外，不用補亮
     const t = mapTileById(s.id); if (!t) continue;
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL), w = mapStampW(s, t), h = mapStampH(s, t);
     for (let dc = 0; dc < w; dc++) {
