@@ -27,7 +27,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=firsthint-20261115"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=restore-20261114">
+<link rel="stylesheet" href="css/style.css?v=fundcard-20261115">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
@@ -439,9 +439,10 @@
   <script src="data/mrt-train.js?v=mrtesc-20261111"></script>   <!-- 捷運列車的設定（物件編輯器匯出） -->
   <script src="js/mrt-train.js?v=gatefoot-20261115"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
-  <script src="js/ui-layout.js?v=mmdrag-20261109"></script>   <!-- 套用上面的 UI 版面 -->
+  <script src="js/fund-card.js?v=fundcard-20261115"></script>   <!-- 作戰經費提示卡：第一次到達戰鬥地圖時右邊跳卡 -->
+  <script src="js/ui-layout.js?v=fundcard-20261115"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/save-restore.js?v=restore2-20261114"></script>   <!-- 設定→存檔：匯出／匯入存檔、找回進度 -->
-  <script src="js/game.js?v=blocked5-20261115"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=fundcard-20261115"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->

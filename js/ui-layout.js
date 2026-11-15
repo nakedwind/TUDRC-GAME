@@ -22,6 +22,11 @@ const UI_ELEMENTS = [
       P('list', '每位隊員之間', '#fieldSquadHud .field-squad-list', ['gap']) ] },
   { key: 'notices',       group: '畫面中間', label: '系統訊息',         sel: '#systemNotices',           origin: 'center top', parts: [P('text', '文字', '#systemNotices > *', ['font'])] },
   { key: 'pickups',       group: '畫面中間', label: '拾取提示',         sel: '#itemPickupNotices',       origin: 'center top', parts: [P('text', '文字', '#itemPickupNotices > *', ['font'])] },
+  { key: 'fundCard',      group: '畫面右邊', label: '作戰經費提示卡（第一次到達地圖）', sel: '#fundCard', origin: 'right center', parts: [
+      P('self', '卡片', '#fundCard', ['w', 'radius']),
+      P('title', '標題（作戰經費 +$金額）', '#fundCard .fund-card-title', ['font']),
+      P('body', '說明文字', '#fundCard .fund-card-body', ['font']),
+      P('note', '小字（每一區只撥一次）', '#fundCard .fund-card-note', ['font']) ] },
   { key: 'buildBar',      group: '畫面下方', label: '建造列',           sel: '#buildToolbar',            origin: 'left bottom', parts: [
       P('slot', '物件按鈕框', '#buildQuickSlots .build-quick-slot', ['w', 'h', 'radius']),
       P('icon', '物件圖示', '#buildQuickSlots .build-quick-slot img', ['w', 'h']),
