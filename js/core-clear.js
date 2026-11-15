@@ -6,6 +6,8 @@
 //    精神的鑰匙還沒拼好的話，再多掉一片精神的碎片（溫特篇的回憶碎片只從這裡拿）。
 //  ・這張地圖的核心全部打破：跳出結算畫面，可以「返回應變中心」或「留下來繼續探索」。
 //  ・核心全破、異質體也清光：畫面中間跳「已徹底控制」的大橫幅，記一次成就（fullControls）。
+//    留下來清光的話，過 resultDelay 秒再跳一次「已徹底控制」的結算畫面。
+//  ・兩個結算畫面都會寫用了多少時間：核心全破的時間（G.battle.coreClearTime）、徹底控制的時間（G.battle.fullControlTime）。
 // ============================================================
 const CORE_CLEAR = { keyItem: 'anomaly-key', spiritShard: 'spirit-shard', fullColor: '#7ee0a8', resultDelay: 3, newbieTitle: '✅ Y區入口已控制' };   // resultDelay：最後一個核心碎掉後幾秒才跳結算（先看碎裂表演）；newbieTitle：新手區結算的標題
 
@@ -108,6 +110,7 @@ function coreKeyLights() {
   return ((G && G.coreKeyDrops) || []).map(d => ({ x: d.x, y: d.y - 14, r: 60, life: 1, life0: 1, power: .45, color: [200, 130, 255] }));
 }
 const coreClearMapName = () => (MAP && MAP.name) || '這一區';
+const coreClearTimeText = sec => typeof battleTimeText === 'function' ? battleTimeText(sec) : '';   // 分:秒（js/battle-result.js）
 // 每幀檢查（game.js 的 update 呼叫；取代原本「核心全破＋異質體清光才勝利」）
 function checkCoreClear(dt = 0) {
   if (MAP_SAFE || !G.cores.length || !G.cores.every(c => c.dead)) return;
@@ -118,18 +121,36 @@ function checkCoreClear(dt = 0) {
     }
     if (G.coreClearWait < CORE_CLEAR.resultDelay) return;
     G.coreClearShown = true;
+    if (G.battle) G.battle.coreClearTime = G.battle.time;   // 記下核心全破時用了多久（結算畫面顯示）
     if (G.enemies.length === 0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) markFullControl(true);
     win();                            // 記勝利、任務完成、結算畫面（js/game.js、js/missions.js）
     addCoreClearChoices();
     return;
   }
   if (!G.fullControl && !G.over && G.enemies.length === 0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) markFullControl(false);   // 留下來把異質體清光了
+  if (G.fullControl && !G.fullControlShown && !G.over) {   // 留下來清光了：等一下（先看橫幅）再跳徹底控制的結算畫面
+    G.fullControlWait = (G.fullControlWait || 0) + dt;
+    if (G.fullControlWait >= CORE_CLEAR.resultDelay) showFullControlResult();
+  }
+}
+// 留下來清光異質體後的結算畫面：標題寫「已徹底控制」，統計跟打破核心時一樣（作戰時間繼續算到清光那一刻）
+// 不再呼叫 win()：勝利次數、任務完成在打破核心時已經記過了
+function showFullControlResult() {
+  G.fullControlShown = true;
+  G.over = true; G.won = true; G.running = false; G.phase = 'won';
+  if (typeof setPaused === 'function') setPaused(false);
+  const inMission = typeof missionOfMap === 'function' && missionOfMap(MAP && MAP.id);
+  showOverlay('✅ ' + coreClearMapName() + ' 已徹底控制', '異質核心和殘存的異質體全部清除了！', inMission ? '返回應變中心' : '再玩一次');
+  if (typeof appendBattleResult === 'function') appendBattleResult();
+  if (typeof enterResultMode === 'function') enterResultMode();   // 結算版面（js/result-screen.js）
+  addCoreClearChoices();
 }
 function markFullControl(quiet) {
   G.fullControl = true;
+  if (G.battle) G.battle.fullControlTime = G.battle.time;   // 記下徹底控制時用了多久（結算畫面顯示）
   if (typeof addStat === 'function') { addStat('fullControls'); achieveOnBattleEnd('control'); }   // 成就：沒用醫療包、10 分鐘內
   if (quiet) return;                  // 跟結算一起發生：寫在結算畫面上就好
-  if (typeof coreBanner === 'function') coreBanner(coreClearMapName() + ' 已徹底控制', '這一區的異質體全部清除了，可以從營地帳篷返回應變中心', CORE_CLEAR.fullColor);
+  if (typeof coreBanner === 'function') coreBanner(coreClearMapName() + ' 已徹底控制', '用時 ' + coreClearTimeText(G.battle && G.battle.fullControlTime), CORE_CLEAR.fullColor);
   systemNotice('✓ ' + coreClearMapName() + ' 已徹底控制');
   if (typeof sfx === 'function') sfx('win');
 }
@@ -138,8 +159,12 @@ function addCoreClearChoices() {
   const box = document.getElementById('ov-text'), ok = document.getElementById('ov-btn'); if (!box || !ok) return;
   const left = G.enemies.filter(e => !e.dead && e.hp > 0).length + (typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0);
   const note = document.createElement('p'); note.className = 'core-clear-note' + (G.fullControl ? ' full' : '');
-  note.innerHTML = G.fullControl ? '✓ 異質體也全部清除了：<b>' + coreClearMapName() + ' 已徹底控制</b>'
-    : '還有 <b>' + left + '</b> 隻異質體在這一區。留下來清光，就能<b>徹底控制</b>這一區。';
+  const b = G.battle || {}, t = sec => '<b>' + coreClearTimeText(sec) + '</b>';
+  const times = b.coreClearTime != null && b.fullControlTime != null && Math.floor(b.fullControlTime) > Math.floor(b.coreClearTime)
+    ? '（核心全破 ' + t(b.coreClearTime) + '，徹底控制 ' + t(b.fullControlTime) + '）'   // 留下來清場：兩個時間都列
+    : '（用時 ' + t(G.fullControl ? b.fullControlTime : b.coreClearTime) + '）';
+  note.innerHTML = G.fullControl ? '✓ 異質體也全部清除了：<b>' + coreClearMapName() + ' 已徹底控制</b>' + times
+    : '還有 <b>' + left + '</b> 隻異質體在這一區。留下來清光，就能<b>徹底控制</b>這一區。' + times;
   box.prepend(note);
   document.getElementById('coreStay')?.remove();
   const stay = document.createElement('button'); stay.type = 'button'; stay.id = 'coreStay'; stay.className = 'core-stay'; stay.textContent = '留下來繼續探索';
@@ -158,5 +183,6 @@ document.addEventListener('click', e => {
   document.getElementById('coreStay')?.remove();
   G.over = false; G.won = false; G.running = true; G.phase = 'playing';   // 回到戰場（任務已經記成完成了）
   hideOverlay();
+  if (G.fullControl) G.fullControlShown = true;   // 已經徹底控制了才留下來：不要再跳一次結算
   systemNotice(G.fullControl ? '可以從營地帳篷返回應變中心' : '把剩下的異質體清光，就能徹底控制這一區');
 });
