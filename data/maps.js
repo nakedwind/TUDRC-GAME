@@ -103107,12 +103107,11 @@ const BATTLE_MAPS = [
       {
         "id": "tile_forest_layer_160",
         "c": 83,
-        "r": 54,
-        "layer": "object4",
+        "r": 59,
+        "layer": "object6",
         "fx": true,
-        "scale": 165,
-        "oy": 10,
-        "ox": 20
+        "scale": 150,
+        "oy": -4
       },
       {
         "id": "tile_forest_gradient",
@@ -110482,10 +110481,9 @@ const BATTLE_MAPS = [
       {
         "id": "tile_forest_group_20",
         "c": 85,
-        "r": 86,
+        "r": 85,
         "layer": "object",
-        "sortDepth": 3.25,
-        "oy": -16
+        "sortDepth": 3.25
       },
       {
         "id": "tile_mr4cyy36",
@@ -110497,9 +110495,8 @@ const BATTLE_MAPS = [
       {
         "id": "tile_forest_group_2002",
         "c": 103,
-        "r": 89,
+        "r": 88,
         "layer": "object",
-        "oy": -16.666667,
         "sortDepth": 3
       },
       {
@@ -114854,7 +114851,6 @@ const BATTLE_MAPS = [
         "c": 99,
         "r": 41,
         "layer": "object",
-        "oy": 22,
         "fx": true,
         "sortDepth": 3
       },
@@ -117498,8 +117494,7 @@ const BATTLE_MAPS = [
         "id": "tile_forest_group_20",
         "c": 33,
         "r": 70,
-        "layer": "object",
-        "oy": 18
+        "layer": "object"
       },
       {
         "id": "tile_forest_layer_115_copy_15",
@@ -128674,6 +128669,14 @@ const BATTLE_MAPS = [
       {
         "at": "64,33",
         "to": "61,46"
+      },
+      {
+        "at": "63,47",
+        "to": "61,36"
+      },
+      {
+        "at": "61,46",
+        "to": "61,35"
       }
     ]
   },

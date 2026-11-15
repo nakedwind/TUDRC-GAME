@@ -915,10 +915,6 @@ const PROP_COLLISIONS = [
         [
           0,
           1
-        ],
-        [
-          1,
-          1
         ]
       ]
     }
@@ -1174,7 +1170,7 @@ const PROP_COLLISIONS = [
     "h": {
       "file": "images/森林/forest_group_20.png",
       "w": 7,
-      "h": 4,
+      "h": 5,
       "solid": [
         [
           0,
@@ -1203,6 +1199,34 @@ const PROP_COLLISIONS = [
         [
           6,
           2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          5,
+          3
+        ],
+        [
+          6,
+          3
         ]
       ]
     }
@@ -1216,7 +1240,7 @@ const PROP_COLLISIONS = [
     "h": {
       "file": "images/森林/forest_group_2002.png",
       "w": 7,
-      "h": 4,
+      "h": 5,
       "solid": [
         [
           0,
@@ -1233,6 +1257,22 @@ const PROP_COLLISIONS = [
         [
           6,
           2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          5,
+          3
+        ],
+        [
+          6,
+          3
         ]
       ]
     }

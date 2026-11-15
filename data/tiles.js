@@ -5780,7 +5780,7 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_group_20.png",
     "w": 7,
-    "h": 4
+    "h": 5
   },
   {
     "id": "tile_forest_group_2002",
@@ -5788,7 +5788,7 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_group_2002.png",
     "w": 7,
-    "h": 4
+    "h": 5
   },
   {
     "id": "tile_forest_group_7_copy_12",
