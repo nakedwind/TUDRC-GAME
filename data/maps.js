@@ -126066,7 +126066,23 @@ const BATTLE_MAPS = [
     "safe": false,
     "fog": "heavy",
     "npcs": false,
-    "portals": [],
+    "portals": [
+      {
+        "c": 124,
+        "r": 89,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 125,
+        "r": 89,
+        "to": "map_mvvdbiyx"
+      },
+      {
+        "c": 126,
+        "r": 89,
+        "to": "map_mvvdbiyx"
+      }
+    ],
     "hiddenPickups": [
       "ground9:115,61",
       "ground9:78,70",
