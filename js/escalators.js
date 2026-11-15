@@ -24,6 +24,7 @@ const ESCALATOR = {
   rideSound: 'escalatorRide', rideSoundCd: 10,   // 溫特踩上手扶梯的廣播（音效編輯器可以換）、幾秒內不重播
   period: 10,    // 一階幾個像素（原始圖片）
   footDy: 14,    // 角色的位置往下幾點是腳
+  riderTall: 72, // 乘客從腳往上大約多高（像素）：身體碰到手扶梯上半段就改畫在 2 樓地板之上（escalatorRiderHigh）
   enemyFootDy: 10,
   tiles: {
     tile_mrt_escalator_front: { y: 27, h: 100, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
@@ -120,6 +121,19 @@ function escalatorCoversCell(c, r) {
   }
   return false;
 }
+// 這一格的手扶梯往哪邊帶（隊員找路用，js/sentry.js 的 buildSentryPath）：回傳 [dc, dr]（-1、0、1），不是會動的手扶梯回傳 null。
+// 正面的（直的）：上下帶；側面的（斜的）：斜坡那一段左右帶。停住不動的（still）不算
+function escalatorFlowAt(c, r) {
+  const x = OX + (c + .5) * CELL, y = OY + (r + .5) * CELL;
+  const lane = escalatorLaneAt(x, y);
+  if (lane && !(lane.stamp && lane.stamp.still)) return [0, Math.sign(lane.dir) || 0];
+  for (const L of escalatorSideLanes()) {
+    if (L.stamp.still || x < L.x || x >= L.x + L.w || y < L.y || y >= L.y + L.h) continue;
+    const ix = escalatorSideIx(L, x); if (ix < L.spec.x0 || ix > L.spec.x1) continue;   // 兩頭的平台不會動
+    return [escalatorSideDir(L), 0];
+  }
+  return null;
+}
 function escalatorLaneAt(x, y) {
   for (const l of escalatorLanes()) if (x >= l.x0 && x < l.x1 && y >= l.y0 && y < l.y1) return l;
   return null;
@@ -131,7 +145,8 @@ function escalatorAgainstPush(a, lane, carry) {
   return Math.max(0, Math.min(against * ESCALATOR.againstSlow, against * (1 - ESCALATOR.againstMinKeep) - carry));
 }
 // 把一個角色沿著階梯帶著走（逐小步檢查，撞到東西就停）；回傳這一幀有沒有站在階梯上
-function carryOnEscalator(a, footDy, dt, blocked) {
+function carryOnEscalator(a, footDy, dt, blocked) { return onFloorDo(a, () => carryOnEscalatorNow(a, footDy, dt, blocked)); }   // 照站在上面那個人的樓層（js/pathfinding.js）
+function carryOnEscalatorNow(a, footDy, dt, blocked) {
   const lane = escalatorLaneAt(a.x, a.y + footDy);
   if (!lane) { a.escY = null; return false; }
   const carry = ESCALATOR.speed * dt;
@@ -258,16 +273,15 @@ function rideSideEscalator(a, footDy, dt, blocked) {
   return carried;
 }
 // 站在側面手扶梯上的人排前後用的值（js/render.js）：排在整張手扶梯之後、前面的扶手外殼之前；不在上面就用原本的 y
-function escalatorRiderSortY(a, y) {
+// 乘客要畫在哪（js/render.js）：回傳 { floor, band, y }（js/pathfinding.js 的 drawOrder）
+function escalatorRiderKey(a, y) {
   const L = a && a.escSide;
-  if (!L || L.map !== MAP) return y;
-  if (escalatorRiderHigh(a, L)) return escalatorHighSortY(L) + a.y * 1e-7;   // 快到 2 樓：排在 2 樓地板之上（不會被 2 樓地板蓋住）
-  return L.sortY + a.y * 1e-4;
+  if (!L || L.map !== MAP) return { floor: visualFloor(a), band: DRAW_BAND.obj, y };
+  if (escalatorRiderHigh(a, L)) return { floor: 2, band: DRAW_BAND.onGround, y: L.sortY + a.y * 1e-7 };   // 1e-7：一定排在上半段扶手外殼（L.sortY + .5）之前   // 快到 2 樓：畫在 2 樓地板之上、2 樓的牆和人之下
+  return { floor: visualFloor(a), band: DRAW_BAND.obj, y: L.sortY + a.y * 1e-4 };
 }
 // ---- 接到 2 樓的側面手扶梯：人走到上半段（靠 2 樓那頭）時，畫面上改排在 2 樓地板的圖之上 ----
 // 不然還沒踩到 2 樓出入口的格子前，人都算一樓、會被 2 樓地板的圖蓋住。
-// 排序位置：2 樓地板（FLOOR2_SORT - 50000 起）之後、2 樓的牆和人（FLOOR2_SORT 起）之前
-const escalatorHighSortY = L => FLOOR2_SORT - 40000 + L.sortY * 1e-3;
 // 這座手扶梯高的那頭有沒有接到 2 樓（平台那格或旁邊一格是樓層出入口／2 樓地面）
 function escalatorSideTo2F(L) {
   if (L.to2F !== undefined && L.to2FMap === MAP) return L.to2F;
@@ -280,9 +294,11 @@ function escalatorSideTo2F(L) {
   return false;
 }
 // 站在接到 2 樓的手扶梯上半段（還沒被算成 2 樓的人）
+// 手扶梯的圖從一半高度切成上下兩段（上半段算 2 樓、在 2 樓地板那一批畫，js/maploader.js 的 stampConnects）：
+// 乘客的身體只要碰到上半段（腳往上 ESCALATOR.riderTall 像素，超過切開的那條線），就要畫在 2 樓地板之上，不然會被上半段的階梯蓋掉
 function escalatorRiderHigh(a, L) {
-  if (!escalatorSideTo2F(L) || (typeof floorSortY === 'function' && floorSortY(a))) return false;
-  return escalatorSideIx(L, a.x) > (L.spec.x0 + L.spec.x1) / 2;
+  if (!escalatorSideTo2F(L) || visualFloor(a) === 2) return false;
+  return a.y + ESCALATOR.footDy - ESCALATOR.riderTall < L.y + L.h / 2 || escalatorSideIx(L, a.x) > (L.spec.x0 + L.spec.x1) / 2;
 }
 // 整張側面手扶梯排前後用的值（js/maploader.js 的 mapOccluders）：比站在上面的人早一點；不是側面手扶梯回傳 null
 function escalatorSideSortY(s, bottomY) { return escalatorSideUsable(s) ? bottomY - 2 : null; }
@@ -318,14 +334,14 @@ function escalatorSortables(out) {
       if (L.fx) { ctx.save(); ctx.translate(L.x + L.w, L.y); ctx.scale(-1, 1); ctx.drawImage(cover, 0, 0, L.w, L.h); ctx.restore(); }
       else ctx.drawImage(cover, L.x, L.y, L.w, L.h);
     };
-    out.push({ y: L.sortY + 1, draw: drawCover });
-    // 有人在上半段、排到 2 樓地板之上時：上半段的扶手外殼再畫一次，蓋在他身上（外殼圖只有全透明和不透明，重畫不會變深）。
-    // 只畫上半段、手扶梯底部不畫：站在手扶梯前面的一樓的人不會被蓋到
+    out.push({ floor: 1, y: L.sortY + 1, draw: drawCover });   // 側面手扶梯的外殼：從一樓立起來（快到 2 樓的乘客另外在下面補畫）
+    // 有乘客排到 2 樓地板之上時：扶手外殼再畫一次，蓋在他身上（外殼圖只有全透明和不透明，重畫不會變深）。
+    // 只畫「前面扶手那條線」以上（沿著斜坡）：站在手扶梯前面的一樓的人不會被蓋到
     const riders = [G.player, ...(G.towers || []), ...(G.npcs || []), ...(G.enemies || [])];
-    if (riders.some(a => a && a.escSide === L && escalatorRiderHigh(a, L))) out.push({ y: escalatorHighSortY(L) + .5, draw: () => {
-      const mid = (L.spec.x0 + L.spec.x1) / 2, cx = L.fx ? L.x : L.x + mid * L.k, cw = (L.spec.size - mid) * L.k;
-      const ch = (escalatorSideTopPx(L.spec, mid) + L.spec.band[1] + 16) * L.k;
-      ctx.save(); ctx.beginPath(); ctx.rect(cx, L.y, cw, ch); ctx.clip(); drawCover(); ctx.restore();
+    if (riders.some(a => a && a.escSide === L && escalatorRiderHigh(a, L))) out.push({ floor: 2, band: DRAW_BAND.onGround, y: L.sortY + .5, draw: () => {
+      ctx.save(); ctx.beginPath(); ctx.moveTo(L.x, L.y);
+      for (let x = L.x; x <= L.x + L.w + .1; x += 4) ctx.lineTo(x, escalatorSideTopY(L, Math.min(x, L.x + L.w - .01)) + (L.spec.band[1] + 16) * L.k);   // 前面扶手下緣
+      ctx.lineTo(L.x + L.w, L.y); ctx.closePath(); ctx.clip(); drawCover(); ctx.restore();
     } });
   }
 }

@@ -150,7 +150,7 @@ function layFishClutch(e) {
     const a = base + i / size * Math.PI * 2, r = C.clutchSpread * (.45 + Math.random() * .55);
     const x = e.x + Math.cos(a) * r, y = e.y + 6 + Math.sin(a) * r * .55;
     if (typeof enemyBlocked === 'function' && enemyBlocked(x, y)) continue;
-    eggs.push({ x, y, vx: 0, vy: 0, arm: C.eggArm, life: C.eggLife, age: 0, fuse: 0, seed: Math.random() * 9, hatch: C.hatch && Math.random() < C.hatchChance });   // hatch：這顆會不會孵化
+    eggs.push({ x, y, floor: actorFloor(e), vx: 0, vy: 0, arm: C.eggArm, life: C.eggLife, age: 0, fuse: 0, seed: Math.random() * 9, hatch: C.hatch && Math.random() < C.hatchChance });   // hatch：這顆會不會孵化
     laid++;
   }
   if (laid && typeof sfxAt === 'function') sfxAt('pop', e.x, e.y, .55, 'egg-pop');
@@ -192,7 +192,7 @@ function updateFishEggs(dt) {
   if (C.testSpawn) cfTestSpawn(dt);
   if (!eggs || !eggs.length) return;
   for (const egg of [...eggs]) {
-    pushFishEggAside(egg, dt);   // 怪物路過會把魚卵撞開
+    onFloorDo(egg.floor || 1, () => pushFishEggAside(egg, dt));   // 怪物路過會把魚卵撞開（照魚卵那一層的牆）
     if (egg.fuse > 0) {   // 已經被踩到：晃動倒數
       egg.fuse -= dt;
       if (egg.fuse <= 0) blowFishEgg(egg);
@@ -267,43 +267,36 @@ function shootFishEggOnLine(x1, y1, x2, y2) {
 function blowFishEgg(egg) {
   const C = CLOWNFISH, x = egg.x, y = egg.y, R = C.eggRadius * CELL;
   removeFishEgg(egg);
-  const pl = G.player;
-  if (pl && pl.hp > 0) {
-    const d = Math.hypot(pl.x - x, pl.y - y);
-    if (d <= R && hasLineOfSight(x, y, pl.x, pl.y)) {
-      const raw = C.eggPlayer * (1 - .4 * d / R);
-      const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(raw) : raw;
-      pl.hp = Math.max(0, pl.hp - hurt); pl.hitT = .45; G.damageVignetteT = .45;
+  withBlastFloor(egg.floor, () => {   // 魚卵在幾樓就只炸那一層（js/pathfinding.js）
+  // 範圍內、同一層、看得到的對象（js/pathfinding.js 的 areaTargets：範圍效果的唯一入口）
+  for (const { a, kind, d } of areaTargets(x, y, R, { los: true })) {
+    const k = 1 - .4 * d / R;   // 越靠近中心越痛
+    if (kind === 'player') {
+      const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(C.eggPlayer * k) : C.eggPlayer * k;
+      a.hp = Math.max(0, a.hp - hurt); a.hitT = .45; G.damageVignetteT = .45;
       if (typeof playPlayerHit === 'function') playPlayerHit();
-      if (typeof blastPush === 'function') blastPush(pl, x, y, hurt, 34);
-      if (pl.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', pl.x, pl.y - 58, '#ff5b6e'); lose('player', '被魚卵炸到'); }
+      if (typeof blastPush === 'function') blastPush(a, x, y, hurt, 34);
+      if (a.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', a.x, a.y - 58, '#ff5b6e'); lose('player', '被魚卵炸到'); }
+    } else if (kind === 'tower') {
+      const def = Math.max(0, Math.min(.75, (TYPES[a.type] && TYPES[a.type].defense) || 0));
+      const hurt = C.eggSentry * k * (1 - def);
+      a.hp = Math.max(0, a.hp - hurt); a.hitT = Math.max(a.hitT || 0, .2);
+      if (typeof blastPush === 'function') blastPush(a, x, y, hurt, 26);
+      else flashDmg('-' + Math.round(hurt), a.x, a.y - 26, '#ff9a3c');
+      if (a.hp <= 0) { a.target = null; sentryStatus(a, '失去戰鬥能力', '#ff5b6e', true); }
+    } else {   // 怪物也會被自家的卵炸到：溫特可以開槍引爆當陷阱
+      const hurt = C.eggEnemy * k;
+      a.hp -= hurt; a.hitT = .2; a.hitColor = '#ff9a3c';
+      flashDmg('-' + Math.round(hurt), a.x, a.y - 26, '#ff9a3c');
+      if (typeof enemyHitReact === 'function') enemyHitReact(a, x, y, true);
     }
   }
-  for (const t of G.towers) {
-    if (t.hp <= 0) continue;
-    const d = Math.hypot(t.x - x, t.y - y);
-    if (d > R || !hasLineOfSight(x, y, t.x, t.y)) continue;
-    const def = Math.max(0, Math.min(.75, (TYPES[t.type] && TYPES[t.type].defense) || 0));
-    const hurt = C.eggSentry * (1 - .4 * d / R) * (1 - def);
-    t.hp = Math.max(0, t.hp - hurt); t.hitT = Math.max(t.hitT || 0, .2);
-    if (typeof blastPush === 'function') blastPush(t, x, y, hurt, 26);
-    else flashDmg('-' + Math.round(hurt), t.x, t.y - 26, '#ff9a3c');
-    if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
-  }
-  for (const e of G.enemies) {   // 怪物也會被自家的卵炸到：溫特可以開槍引爆當陷阱
-    if (e.dead || e.hp <= 0) continue;
-    const d = Math.hypot(e.x - x, e.y - y);
-    if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
-    const hurt = C.eggEnemy * (1 - .4 * d / R);
-    e.hp -= hurt; e.hitT = .2; e.hitColor = '#ff9a3c';
-    flashDmg('-' + Math.round(hurt), e.x, e.y - 26, '#ff9a3c');
-    if (typeof enemyHitReact === 'function') enemyHitReact(e, x, y, true);
-  }
   if (typeof damageCoresInBlast === 'function') damageCoresInBlast(x, y, R, C.eggEnemy);
-  for (const other of [...(G.fishEggs || [])]) {   // 連鎖引爆旁邊的魚卵
-    if (other.fuse > 0) continue;
+  for (const other of [...(G.fishEggs || [])]) {   // 連鎖引爆旁邊的魚卵（同一層的）
+    if (other.fuse > 0 || !blastHits(other)) continue;
     if (Math.hypot(other.x - x, other.y - y) <= R) other.fuse = .12 + Math.random() * .1;
   }
+  });
   // 畫面與音效：橘色小爆炸
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
   G.effects.push({ fglow: true, x, y: y - 6, r0: 12, r1: R, life: .3, life0: .3 });
@@ -325,6 +318,7 @@ function drawFishEggs(ctx) {
   const C = CLOWNFISH, now = performance.now() / 1000;
   const img = typeof monsterImage === 'function' ? monsterImage(CF_ART.egg) : null;
   for (const egg of eggs) {
+    if (fxSkip(egg.floor)) continue;   // 另一層的魚卵這一輪不畫
     const armed = egg.fuse > 0;
     const soon = egg.hatch && egg.age > C.hatchT - C.hatchWarn;   // 快孵化了：微微抖動
     const shake = armed ? (Math.random() * 2 - 1) * 2.2 : soon ? Math.sin(now * 26 + egg.seed) * 1.1 : 0;

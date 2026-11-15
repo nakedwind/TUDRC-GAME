@@ -86,7 +86,7 @@ function addPuddle(x, y, r, life, grow) {
   r *= FISH_HEAD.puddleScale;
   // shape：水灘邊緣一圈的凹凸（每個點的半徑倍率），讓每一灘形狀都不一樣
   const n = r > 9 ? 11 : 7, shape = Array.from({ length: n }, () => .7 + Math.random() * .45);
-  const p = { x, y, r, t: life, t0: life, seed: Math.random() * 10, grow: !!grow, shape };
+  const p = { x, y, floor: floorAtPoint(x, y), r, t: life, t0: life, seed: Math.random() * 10, grow: !!grow, shape };   // floor：水灘在幾樓
   list.push(p);
   if (list.length > FISH_HEAD.maxPuddles) list.splice(0, list.length - FISH_HEAD.maxPuddles);
   return p;
@@ -414,7 +414,7 @@ function drawFishWater(ctx) {
   const now = performance.now() / 1000;
   ctx.save();
   for (const p of G.waterPuddles) {
-    if (!isVisible(p.x, p.y)) continue;
+    if (!isVisible(p.x, p.y) || fxSkip(p.floor)) continue;   // 另一層的水灘這一輪不畫
     const fade = Math.min(1, p.t / Math.min(2, p.t0)), rx = p.r, ry = p.r * .5;
     // 水面：中間淡、邊緣稍深的透明藍
     const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rx);

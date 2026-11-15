@@ -27,11 +27,17 @@ function computeRampUpper() {
 // 2 樓碰撞（地圖編輯器的「🚧 2樓碰撞」筆刷，存在 MAP.solid2）：只擋 2 樓的人，1 樓照常走。
 // 1 樓的紅格（MAP.solid）跟它分開，只擋 1 樓
 let floor2Solid = new Set();
+// 2 樓擋路格的像素微調（地圖上用方向鍵微調過位置、有自帶碰撞格的物件，js/prop-collisions.js）：跟一樓的 mapSolidOffsets 一樣，記每格偏了幾像素
+let floor2SolidOffsets = {};
+const solid2OffsetAt = (c, r) => floor2SolidOffsets[c + ',' + r];
 // 2 樓的人還會被「2 樓的物件加的牆」擋住（置物箱、候車椅、門…這些程式都是把擋路格加進一樓的牆 mapWalls）：js/maploader.js 的 objectWallOn2F
 const deckBlocked = k => floor2Solid.has(k) || (mapWalls.has(k) && typeof objectWallOn2F === 'function' && objectWallOn2F(k));
 function setMapFloors(deck, ramps, solid2) {
+  floor2SolidOffsets = {};
   deckCells = new Set(deck || []); floor2Solid = new Set(solid2 || []); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
 }
+// 明確指定樓層查牆（不看「現在處理誰」）：不屬於任何角色的程式（飛行物、出生點、檢查）用這個
+const wallAt = (f, c, r) => hasFloors ? wallOnFloor(f, c, r) : mapWalls.has(c + ',' + r);
 function wallOnFloor(f, c, r) {
   const k = c + ',' + r;
   if (rampCells.has(k)) return mapWalls.has(k);
@@ -40,7 +46,29 @@ function wallOnFloor(f, c, r) {
 }
 // 站在樓層出入口上的人，走出去的格子照「走出去之後在哪一層」判斷：走到 2 樓地面不管一樓有沒有牆都走得過去，走到一般格子照一樓的牆
 let floorOnRamp = false, floorOnDeck = false;
+// floorScoped＝現在有沒有人說過「照第幾樓」（setFloorCtx／setFloorCtxTo／onFloorDo 都會設好）。
+// 有陸橋的地圖上沒設就查牆＝程式漏了：照舊當一樓，但測試模式會在主控台記下是哪段程式（floorUnscoped）
+let floorScoped = false;
+const floorUnscopedLog = new Map();   // 漏設樓層的程式位置 → 次數（測試模式；主控台打 floorUnscopedLog 可以看）
+let floorUnscopedN = 0;
+function floorUnscoped() {
+  if (!hasFloors || floorScoped || typeof window === 'undefined' || !(window.TEST_MODE || window.FLOOR_DEBUG)) return;
+  if ((floorUnscopedN++ & 31) !== 0) return;   // 每 32 次抽查一次：抓程式位置很花時間
+  const lines = String(new Error().stack || '').split('\n').map(l => l.trim()).filter(l => l.startsWith('at '));
+  const helper = /floorUnscoped|wallNow|isWall|barrierAt|edgeWall|solidBlocksPoint|flowAt|enemyBlocked|lineOfSightRaw|nudgedWallAt|enemyWallCell|enemyWallPoint|enemyBarrierAt|enemyWideAt|enemyWideOpen|at Set\.|at Array\./;
+  const i = lines.findIndex(l => !helper.test(l)), short = l => (l || '?').replace(/\(?https?:\/\/[^/]+\//, '(').replace(/\?v=[^:]*/, '');
+  const site = i < 0 ? short(lines[2]) : short(lines[i]) + ' ← ' + short(lines[i + 1]);   // 漏設的那段程式 ← 呼叫它的地方
+  if (!floorUnscopedLog.has(site)) console.warn('[樓層] 沒指定樓層就查牆／建築（照一樓算）：' + site);
+  floorUnscopedLog.set(site, (floorUnscopedLog.get(site) || 0) + 1);
+}
+// 在某一層的規則下做事（who＝角色：連他是不是站在樓層出入口上一起算；或直接給 1、2）；做完自動還原成原本的狀態
+function onFloorDo(who, fn) {
+  const keep = [floorCtx, floorOnRamp, floorOnDeck, floorScoped];
+  if (typeof who === 'number') setFloorCtxTo(who); else setFloorCtx(who);
+  try { return fn(); } finally { [floorCtx, floorOnRamp, floorOnDeck, floorScoped] = keep; }
+}
 function wallNow(c, r) {
+  if (!floorScoped) floorUnscoped();
   const k = c + ',' + r;
   if (rampCells.has(k)) return mapWalls.has(k) || (floorCtx !== 2 && !floorOnRamp && floorOnDeck);   // 一樓的人站在 2 樓地面的格子上：不能從這邊走進手扶梯（只能從一樓那頭上去）
   if (floorOnRamp) return deckCells.has(k) ? deckBlocked(k) : mapWalls.has(k);
@@ -49,12 +77,13 @@ function wallNow(c, r) {
 const isWall = (c, r) => hasFloors ? wallNow(c, r) : mapWalls.has(c + ',' + r);
 // 處理某個角色之前先呼叫：設好「他在幾樓、是不是站在樓層出入口上」（算完用 clearFloorCtx 還原）
 function setFloorCtx(a) {
+  floorScoped = true;
   floorCtx = actorFloor(a);
   const k = hasFloors && a ? cellAt(a.x, a.y).join(',') : '';
   floorOnRamp = !!(k && rampCells.has(k));
   floorOnDeck = !!(k && deckCells.has(k) && !floorOnRamp);
 }
-function clearFloorCtx() { floorCtx = 1; floorOnRamp = false; floorOnDeck = false; }
+function clearFloorCtx() { floorCtx = 1; floorOnRamp = false; floorOnDeck = false; floorScoped = false; }
 // 角色走出「樓層出入口」時換樓層（每幀、每個角色呼叫一次；a._fk＝上一幀站的格子）
 function updateActorFloor(a) {
   if (!hasFloors || !a) return;
@@ -93,7 +122,7 @@ function spawnFloorAt(c, r) {
 const spawnWallAt = (c, r) => hasFloors ? wallOnFloor(spawnFloorAt(c, r), c, r) : mapWalls.has(c + ',' + r);
 // 飛行中的東西（照明彈、特殊彈、珍珠、帽子、水柱…）不屬於任何角色：處理它之前用這個設成「它發射時在幾樓」，
 // 牆、建築都照那一層判斷（算完一樣用 clearFloorCtx 還原）
-function setFloorCtxTo(f) { floorCtx = hasFloors && f === 2 ? 2 : 1; floorOnRamp = false; floorOnDeck = false; }
+function setFloorCtxTo(f) { floorScoped = true; floorCtx = hasFloors && f === 2 ? 2 : 1; floorOnRamp = false; floorOnDeck = false; }
 // 飛行物、爆炸碰不碰得到這個人：不同樓層互相碰不到（沒有陸橋的地圖一律碰得到）
 const onFloor = (f, a) => !hasFloors || (f === 2 ? 2 : 1) === actorFloor(a);
 // 爆炸、火海、地雷、鱗粉霧：這次發生在幾樓（0＝不知道，照舊不分樓層）。引爆的地方用 withBlastFloor 包起來，
@@ -107,16 +136,76 @@ function withBlastFloor(f, fn) {
 const blastHits = a => !blastFloor || actorFloor(a) === blastFloor;
 // 火海、油汙、霧這類留在地上的東西：記下的 floor 跟這個人同一層才碰得到（沒記＝不分樓層）
 const fieldHits = (f, a) => !hasFloors || !f || f === actorFloor(a);
-// 地上特效（礦物碎片、焦痕、照明棒、地雷、油汙、火海）分樓層畫：js/render.js 在陸橋上補畫時設成 2，
-// 這時候記著是 1 樓的東西就跳過（不然橋下的碎片、焦痕會跑到橋面上）；沒記樓層的照舊畫
+// 落在某個點的效果（酸液池、吐酸、魚卵、落石…）算幾樓：正在爆炸的那層 → 那個點上站的人 → 那格是不是只有 2 樓；沒有陸橋的地圖＝0（不分）
+function floorAtPoint(x, y) {
+  if (!hasFloors) return 0;
+  if (blastFloor) return blastFloor;
+  const f = typeof actorFloorNear === 'function' ? actorFloorNear(x, y) : 0;
+  return f || spawnFloorAt(...cellAt(x, y));
+}
+// ---- 樓層體檢（測試模式、或主控台打 FLOOR_DEBUG = true）：場上的東西有沒有都記了樓層 ----
+// 漏記的東西會被當成「不知道在幾樓」：畫錯層、打到另一層。新增會留在場上的東西（子彈、掉落物、地上的效果…）時要記 floor
+const FLOOR_AUDIT_LISTS = ['enemies', 'towers', 'npcs', 'groundItems', 'fxCorpses', 'oreShards', 'cores', 'hangiCaps', 'pearls', 'capShots', 'fishDrops', 'fishEggs',
+  'oilFires', 'oilSlicks', 'scorchMarks', 'mothClouds', 'flares', 'acidPools', 'spitPools', 'acidShots', 'gkRocks', 'bananaPeels', 'incShots', 'tranqDarts', 'flashShots', 'flareShots'];
+const floorAuditSeen = new Set();
+let floorAuditT = 0;
+function floorAudit(dt) {
+  if (!hasFloors || typeof window === 'undefined' || !(window.TEST_MODE || window.FLOOR_DEBUG) || typeof G === 'undefined' || !G) return;
+  if ((floorAuditT -= dt) > 0) return;
+  floorAuditT = 3;   // 每 3 秒查一次
+  const bad = [];
+  if (G.player && G.player.floor == null) bad.push('player');
+  for (const name of FLOOR_AUDIT_LISTS) {
+    const list = G[name]; if (!Array.isArray(list)) continue;
+    const n = list.filter(o => o && o.floor == null).length;
+    if (n) bad.push(name + '×' + n);
+  }
+  const key = bad.join(',');
+  if (bad.length && !floorAuditSeen.has(key)) { floorAuditSeen.add(key); console.warn('[樓層體檢] 這些東西沒記樓層：' + key); }
+  return bad;
+}
+// 把東西放在 (x, y) 算幾樓（放地上的物品、背包放不下掉出來的…）：只有 2 樓的格子＝2、只有 1 樓的＝1；
+// 陸橋、樓層出入口（上下都有）照放的人畫面上在幾樓（站在手扶梯靠 2 樓那半＝2）。沒有陸橋的地圖＝undefined（不分）
+function placeFloorAt(x, y, who) {
+  if (!hasFloors) return undefined;
+  const k = cellAt(x, y).join(',');
+  if (rampCells.has(k) || (deckCells.has(k) && !(typeof floor2OnlyCells === 'function' && floor2OnlyCells().has(k)) && !mapWalls.has(k))) return visualFloor(who);
+  return deckCells.has(k) ? 2 : 1;
+}
+// ---- 範圍效果的唯一入口：找出 (x, y) 附近、同一層的怪物、隊員、溫特 ----
+// 爆炸、落石、自爆、濺射、霧…新寫的範圍技能都用這個找對象，就會自動分樓層（不用每次記得接）。
+// opts：floor＝哪一層（沒給＝withBlastFloor 設的那層；0＝不分）、squash＝上下方向壓扁的倍率（地上的橢圓範圍，例如 .7）、
+//       los＝牆後面的不算、enemies／towers／player＝要不要這幾種（預設都要）、alive＝只要還活著的（預設是）、except＝排除這一個
+// 回傳 [{ a: 對象, kind: 'enemy'｜'tower'｜'player', d: 距離 }]，由近到遠
+function areaTargets(x, y, R, opts = {}) {
+  const f = !hasFloors ? 0 : opts.floor != null ? (opts.floor === 2 ? 2 : opts.floor ? 1 : 0) : blastFloor;
+  const sq = opts.squash || 1, out = [];
+  const consider = (a, kind) => {
+    if (!a || a === opts.except) return;
+    if (opts.alive !== false && (a.dead || !(a.hp > 0))) return;
+    if (f && actorFloor(a) !== f) return;
+    const d = Math.hypot(a.x - x, (a.y - y) / sq); if (d > R) return;
+    if (opts.los && !hasLineOfSight(x, y, a.x, a.y)) return;
+    out.push({ a, kind, d });
+  };
+  if (opts.enemies !== false && typeof G !== 'undefined') for (const e of G.enemies) consider(e, 'enemy');
+  if (opts.towers !== false && typeof G !== 'undefined') for (const t of G.towers) consider(t, 'tower');
+  if (opts.player !== false && typeof G !== 'undefined') consider(G.player, 'player');
+  return out.sort((p, q) => p.d - q.d);
+}
+// 地上特效（礦物碎片、焦痕、照明棒、地雷、油汙、火海、水灘…）分兩輪畫（js/render.js）：
+// 第 1 輪（groundFxPass＝1）畫 1 樓的、和沒記樓層的；第 2 輪（＝2）在 2 樓地板畫好之後，只畫記著 2 樓的。沒有陸橋的地圖＝0，全部照畫
 let groundFxPass = 0;
-const fxSkip = f => !!(groundFxPass && f && f !== groundFxPass);
-// 畫面前後：二樓的人、二樓的圖都加上這個大數字，排在所有一樓的東西後面畫（蓋在一樓的人上面）
-const FLOOR2_SORT = 100000, floorSortY = a => hasFloors && a && (a.floor === 2 || rampUpperCells.has(cellAt(a.x, a.y).join(',')) || (typeof inStairUpper === 'function' && inStairUpper(a.x, a.y))) ? FLOOR2_SORT : 0;
-// 畫面上看起來在幾樓：真的在 2 樓，或站在樓梯／手扶梯靠 2 樓的那一半 → 2。蓋建築、身上的燈用這個
-// 地上的東西（掉落物、屍體、核心、帽子…）：產生時記下的 floor＝2 就排到 2 樓那一批畫（陸橋上的不會被橋面蓋住）
-const looseSortY = o => hasFloors && o && o.floor === 2 ? FLOOR2_SORT : 0;
-const visualFloor = a => floorSortY(a) ? 2 : 1;
+const fxSkip = f => !!groundFxPass && (groundFxPass === 2) !== (f === 2);
+// ---- 畫面的前後順序（js/render.js）----
+// 每個要畫的東西都標明 floor（第幾樓）、band（哪一層）、y（同一層裡照底部 Y 排前後）。先畫完整個 1 樓，再畫 2 樓；
+// 每一樓裡依序：ground 地板 → groundFx 地上特效 → onGround 貼著地板的（快到 2 樓的手扶梯乘客）→ obj 物件和人 → top 永遠在最上面（2 樓上層的屋簷）
+const DRAW_BAND = { ground: 0, groundFx: 1, onGround: 1.5, obj: 2, top: 3 };
+const drawOrder = (a, b) => ((a.floor || 1) - (b.floor || 1)) || ((a.band ?? DRAW_BAND.obj) - (b.band ?? DRAW_BAND.obj)) || (a.y - b.y);
+// 畫面上看起來在幾樓：真的在 2 樓，或站在樓梯／手扶梯靠 2 樓的那一半 → 2。排畫面、蓋建築、身上的燈用這個
+const visualFloor = a => hasFloors && a && (a.floor === 2 || rampUpperCells.has(cellAt(a.x, a.y).join(',')) || (typeof inStairUpper === 'function' && inStairUpper(a.x, a.y))) ? 2 : 1;
+// 地上的東西（掉落物、屍體、核心、帽子…）畫在幾樓：產生時記下的 floor
+const looseFloor = o => hasFloors && o && o.floor === 2 ? 2 : 1;
 const sameFloor = (a, b) => actorFloor(a) === actorFloor(b);
 
 // ---- 邊緣碰撞（地圖編輯器「📏 邊緣碰撞」畫的薄牆）----
@@ -145,7 +234,7 @@ function mapEdgeSet() {   // 跟著目前的地圖重建（換地圖、從劇情
 }
 // 相鄰兩格之間有沒有薄牆（尋路用；斜走不算）
 function edgeBetween(c, r, nc, nr) {
-  const E = mapEdgeSet(); if (!E.size || floorCtx === 2) return false;   // 薄牆只擋一樓
+  const E = mapEdgeSet(); if (!E.size) return false; if (!floorScoped) floorUnscoped(); if (floorCtx === 2) return false;   // 薄牆只擋一樓
   if (nr === r && nc === c + 1) return E.has(c + ',' + r + ',R');
   if (nr === r && nc === c - 1) return E.has(nc + ',' + r + ',R');
   if (nc === c && nr === r + 1) return E.has(c + ',' + r + ',B');
@@ -155,7 +244,7 @@ function edgeBetween(c, r, nc, nr) {
 // 這個點有沒有碰到薄牆（線的兩側各 EDGE_WALL.half 像素；兩端也多延伸一點，轉角接得起來）
 // 一張地圖的薄牆通常只有幾十條，直接每條檢查
 function edgeWallBlocksPoint(x, y) {
-  const E = mapEdgeSet(); if (!E.size || floorCtx === 2) return false;
+  const E = mapEdgeSet(); if (!E.size) return false; if (!floorScoped) floorUnscoped(); if (floorCtx === 2) return false;
   const lx = x - OX, ly = y - OY, H = EDGE_WALL.half;
   for (const s of edgeSegs) {
     if (s.v ? (Math.abs(lx - s.x) <= H && ly >= s.a - H && ly <= s.b + H)
@@ -166,7 +255,7 @@ function edgeWallBlocksPoint(x, y) {
 // 身體（半徑 r 的方塊）從 (x0,y0) 直直移到 (x1,y1) 會不會穿過薄牆：一次走很遠（衝刺、卡頓）也不會直接跳過去
 // 只處理水平或垂直的移動（溫特的移動是 x、y 分開判斷）
 function edgeWallCrossed(x0, y0, x1, y1, r) {
-  const E = mapEdgeSet(); if (!E.size || floorCtx === 2) return false;
+  const E = mapEdgeSet(); if (!E.size) return false; if (!floorScoped) floorUnscoped(); if (floorCtx === 2) return false;
   const passes = (line, a, b) => a < b ? line > a && line <= b : line < a && line >= b;   // 身體前緣從 a 移到 b，有沒有越過 line
   const lx0 = x0 - OX, ly0 = y0 - OY, lx1 = x1 - OX, ly1 = y1 - OY;
   for (const s of edgeSegs) {
@@ -183,8 +272,9 @@ function edgeWallCrossed(x0, y0, x1, y1, r) {
 
 // ---- 怪物也吃不可碰撞的像素微調（跟溫特一樣）----
 // wall(c, r)＝那一格是不是牆；牆格用方向鍵微調過（js/maploader.js 的 solidOffsetAt）：擋的是移過去之後的那一格大小的範圍，原本那格空出來的地方可以走
-function nudgedWallAt(x, y, wall) {
-  const [c, r] = cellAt(x, y), off = typeof solidOffsetAt === 'function' ? solidOffsetAt : () => null;
+// off：照哪一份像素微調（沒給＝一樓的 solidOffsetAt；2 樓用 solid2OffsetAt）
+function nudgedWallAt(x, y, wall, offFn = null) {
+  const [c, r] = cellAt(x, y), off = offFn || (typeof solidOffsetAt === 'function' ? solidOffsetAt : () => null);
   if (wall(c, r) && !off(c, r)) return true;                      // 沒微調過：整格都擋
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
     const cc = c + dc, rr = r + dr, o = off(cc, rr);
@@ -196,12 +286,12 @@ function nudgedWallAt(x, y, wall) {
 }
 // 怪物尋路、流場看的「這格是不是牆」：格子中心被（微調後的）牆擋住才算。二樓沒有微調，照原本
 function enemyWallCell(c, r, f = floorCtx) {
-  if (f === 2) return wallOnFloor(2, c, r);
   const [x, y] = center(c, r);
+  if (f === 2) return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(2, cc, rr), solid2OffsetAt);   // 2 樓：照 2 樓的像素微調
   return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(1, cc, rr));
 }
 // 怪物走路的碰撞：這個點有沒有撞到（微調後的）牆
-const enemyWallPoint = (x, y) => floorCtx === 2 ? isWall(...cellAt(x, y)) : nudgedWallAt(x, y, isWall);
+const enemyWallPoint = (x, y) => floorCtx === 2 ? nudgedWallAt(x, y, isWall, solid2OffsetAt) : nudgedWallAt(x, y, isWall);
 
 // ---- 營地（怪物的目標格）；空的話預設為最下面一排 ----
 let campCells = new Set();
@@ -210,7 +300,7 @@ const isCamp = (c, r) => campCells.size ? campCells.has(c + ',' + r) : (r === RO
 // ---- 流場（每格到營地的最短步數，會繞過固定牆）----
 let flow = [], flow2 = [];   // flow2＝二樓的人用的（有陸橋的地圖才有）
 function computeFlow() {
-  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;   // 算一樓的薄牆要用一樓的規則
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck, keepScoped = floorScoped; floorCtx = 1; floorOnRamp = false; floorOnDeck = false; floorScoped = true;   // 算一樓的薄牆要用一樓的規則
   flow = new Array(COLS * ROWS).fill(Infinity);
   flow2 = hasFloors ? new Array(COLS * ROWS).fill(Infinity) : [];
   const q = [];   // [樓層, c, r]：營地在一樓；二樓的人要先走到樓層出入口、下到一樓才到得了
@@ -237,6 +327,6 @@ function computeFlow() {
       }
     }
   }
-  floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck;
+  floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; floorScoped = keepScoped;
 }
-const flowAt = (c, r) => inGrid(c, r) ? (floorCtx === 2 ? flow2 : flow)[r * COLS + c] : Infinity;
+const flowAt = (c, r) => { if (!floorScoped) floorUnscoped(); return inGrid(c, r) ? (floorCtx === 2 ? flow2 : flow)[r * COLS + c] : Infinity; };

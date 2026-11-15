@@ -298,9 +298,9 @@ function gkFreeSpot(x, y) {
   for (let rad = 0; rad <= 4; rad++) for (let dr = -rad; dr <= rad; dr++) for (let dc = -rad; dc <= rad; dc++) {
     if (Math.max(Math.abs(dc), Math.abs(dr)) !== rad) continue;
     const c = gc + dc, r = gr + dr;
-    if (!inGrid(c, r) || isWall(c, r) || !enemyWideAt(c, r)) continue;
+    if (!inGrid(c, r) || spawnWallAt(c, r)) continue;
     const [px, py] = center(c, r);
-    if (!enemyBlocked(px, py)) return { x: px, y: py };
+    if (onFloorDo(spawnFloorAt(c, r), () => enemyWideAt(c, r) && !enemyBlocked(px, py))) return { x: px, y: py };   // 照那一格的樓層（js/pathfinding.js）
   }
   return null;
 }
@@ -391,7 +391,7 @@ function gkDropRocks(e, n) {
       x = null;
     }
     if (x == null) continue;
-    G.gkRocks.push({ x, y, t: -gkRand(R.delay[0], R.delay[1]), seed: Math.random() * 9, size: gkRand(.9, 1.3) });
+    G.gkRocks.push({ x, y, floor: gkRockFloor(x, y), t: -gkRand(R.delay[0], R.delay[1]), seed: Math.random() * 9, size: gkRand(.9, 1.3) });
   }
 }
 function updateGkRocks(dt) {
@@ -401,19 +401,31 @@ function updateGkRocks(dt) {
     k.t += dt;
     if (k.hit || k.t < R.fall) continue;
     k.hit = true;   // 砸下來了
+    withBlastFloor(k.floor, () => gkRockLand(k, R));   // 只砸到落點那一層（js/pathfinding.js）
+  }
+  G.gkRocks = G.gkRocks.filter(k => !k.hit || k.t < R.fall + .05);
+}
+// 落石從天花板掉下來：落在最上面那層地面（陸橋、2 樓地面上＝2 樓；其他＝1 樓），橋下的人不會被砸到
+function gkRockFloor(x, y) {
+  if (!hasFloors) return 0;
+  const k = cellAt(x, y).join(',');
+  return deckCells.has(k) && !rampCells.has(k) ? 2 : 1;
+}
+function gkRockLand(k, R) {
+  {
     rockBurstFx(k.x, k.y, { rocks: 7, speed: [40, 120], up: [90, 180], dust: 4, dustRise: 1, size: .8 * k.size, spread: 10 });
     G.effects.push({ ring: true, x: k.x, y: k.y, r: 4, r2: R.radius * 1.3, life: .3, life0: .3, color: '#a8936c' });
     if (typeof nearbyImpact === 'function') nearbyImpact(k.x, k.y, 4, 0);
     if (typeof sfxAt === 'function') sfxAt('gourdTossLand', k.x, k.y, .5, 'gk-rock');
     const p = G.player;
-    if (p && p.hp > 0 && Math.hypot(p.x - k.x, p.y - k.y) <= R.radius + 10 && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
+    if (p && p.hp > 0 && blastHits(p) && Math.hypot(p.x - k.x, p.y - k.y) <= R.radius + 10 && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
       const dmg = Math.round(typeof equipPlayerDamage === 'function' ? equipPlayerDamage(R.playerDamage) : R.playerDamage);
       p.hp = Math.max(0, p.hp - dmg); p.hitT = .35; p.underAttackT = 5;
       G.damageVignetteT = .4; flashDmg('-' + dmg, p.x, p.y - 46, '#ff6b6b'); playPlayerHit(1, true);
       if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被落石砸中'); }
     }
     for (const t of G.towers || []) {
-      if (t.hp <= 0 || Math.hypot(t.x - k.x, t.y - k.y) > R.radius + 8 || (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(t))) continue;
+      if (t.hp <= 0 || !blastHits(t) || Math.hypot(t.x - k.x, t.y - k.y) > R.radius + 8 || (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(t))) continue;
       const dmg = R.sentryDamage * (1 - sentryDefense(t));
       t.hp = Math.max(0, t.hp - dmg); t.hitT = Math.max(t.hitT || 0, .25);
       flash('-' + Math.round(dmg), t.x, t.y - 30, '#ff8f8f');
@@ -421,14 +433,13 @@ function updateGkRocks(dt) {
     }
     // 不分敵我：怪物也會被砸到（倒下的結算在 game.js 統一處理）
     for (const m of G.enemies || []) {
-      if (m.dead || m.hp <= 0 || (m.gourdKing && !R.hitKing) || Math.hypot(m.x - k.x, m.y - k.y) > R.radius + (m.drawWidth || 40) * .25) continue;
+      if (m.dead || m.hp <= 0 || !blastHits(m) || (m.gourdKing && !R.hitKing) || Math.hypot(m.x - k.x, m.y - k.y) > R.radius + (m.drawWidth || 40) * .25) continue;
       if (typeof burrowUnderground === 'function' && burrowUnderground(m)) continue;   // 鑽在地底的老鼠砸不到
       m.hp -= R.monsterDamage; m.hitT = .2; m.hitColor = '#c8b590';
       flashDmg('-' + R.monsterDamage, m.x, m.y - 26, '#e0c890');
       if (typeof enemyHitReact === 'function') enemyHitReact(m, k.x, k.y, true);
     }
   }
-  G.gkRocks = G.gkRocks.filter(k => !k.hit || k.t < R.fall + .05);
 }
 // 沿著牆面往下灑的粉塵：往下飄、到牆腳就散掉
 function updateGkSift(dt) {

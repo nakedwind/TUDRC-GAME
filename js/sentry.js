@@ -228,8 +228,13 @@ function boxStartCells(n = 16) {
 // 有營地的戰鬥地圖：出生在營地裡。放了營地（帳篷）：用營地周圍走得到的格子（campCells 在這時只有營地正中間一格——
 // 那是怪物的目標，不夠大家站）；沒放營地、只畫了營地格：用畫的格子。近營地中心的排前面
 // （有放營地時不用畫的營地格：地圖編輯器預設會把最下面兩排畫成營地，常常跟真正的營地不在一起）
+// 營地在幾樓：照營地中心那一格（js/pathfinding.js 的 spawnFloorAt）
+const campFloor = () => campCells.size ? spawnFloorAt(...[...campCells][0].split(',').map(Number)) : 1;
 function campSpawnCells(n = 24) {
   if (MAP_SAFE || !MAP || !campCells.size) return [];
+  return onFloorDo(campFloor(), () => campSpawnCellsNow(n));
+}
+function campSpawnCellsNow(n) {
   // 也要檢查站得下（sentryBlocked）：營地裡的行軍床、物資箱用像素微調擋路時，會擋到隔壁格，生在那裡就走不出來
   const free = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r));
   const [cc, cr] = [...campCells][0].split(',').map(Number);
@@ -256,7 +261,7 @@ function squadSpawnCells() {
   else if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
   else if (start.length > 1) cand.push(...start.slice(1));   // 沒營地、有營地箱子：箱子前面（第一格留給溫特）
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
-  return cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r)));
+  return onFloorDo(campFloor(), () => cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r))));   // 照營地那一層判斷
 }
 function spawnSentries(only = null) {   // only：只生這幾位（接續戰場時新編入的隊員，js/combat-progress.js）
   const ok = squadSpawnCells();
@@ -338,7 +343,7 @@ function sentryBlocked(x, y) {
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
-    if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
+    if (!inGrid(c, rr) || gridAtPointForWalker(px, py)) return true;   // 建築只擋同一層的人；微調過位置的照微調後的範圍（js/build.js）
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
     if (typeof deepWaterBlocksAlly === 'function' && deepWaterBlocksAlly(px, py)) return true;   // 深水區：沒坐救生圈的隊員不會下水，在岸邊等（js/swim-ring.js）
     if (edgeWallBlocksPoint(px, py) || edgeWallBlocksPoint(x + sx, y) || edgeWallBlocksPoint(x, y + sy)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）：角和四邊中點
@@ -443,13 +448,13 @@ function sentryCellWalkable(c, r, ignoreFire = false, allowDark = false) {
   if (!allowDark && !personnelInLight(x, y)) return false;
   return true;
 }
-function nearestSentryGoal(c, r, allowDark = false) {   // allowDark：暗處的格子也可以當目的地
+function nearestSentryGoal(c, r, allowDark = false, skip = null) {   // allowDark：暗處的格子也可以當目的地；skip(c, r)＝這格不能當目的地
   for (let radius = 0; radius <= 4; radius++) {
     let best = null, bestDistance = Infinity;
     for (let dc = -radius; dc <= radius; dc++) for (let dr = -radius; dr <= radius; dr++) {
       if (radius && Math.abs(dc) !== radius && Math.abs(dr) !== radius) continue;
       const nc = c + dc, nr = r + dr;
-      if (!sentryCellWalkable(nc, nr, false, allowDark)) continue;
+      if (!sentryCellWalkable(nc, nr, false, allowDark) || (skip && skip(nc, nr))) continue;
       const distance = Math.abs(dc) + Math.abs(dr);
       if (distance < bestDistance) { best = [nc, nr]; bestDistance = distance; }
     }
@@ -466,7 +471,9 @@ function unwedgeSentry(t) {
   [t.x, t.y] = center(...goal); t.navPath = null; t.navGoal = null; t.navTimer = 0;
 }
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
-function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.followDark)) {   // allowDark：找一條可以穿過黑暗的路（召喚時、跟著溫特走時、去撿地上的東西時）
+// goalFloor：目的地在幾樓（有陸橋的地圖才用；沒給＝照那一格：只有 2 樓的＝2、只有 1 樓的＝1、陸橋上照隊員自己）
+function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.followDark), goalFloor = null) {   // allowDark：找一條可以穿過黑暗的路（召喚時、跟著溫特走時、去撿地上的東西時）
+  if (hasFloors) return buildSentryPathFloors(t, targetX, targetY, allowDark, goalFloor || placeFloorAt(targetX, targetY, t));
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
   const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return null;
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
@@ -486,6 +493,115 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.f
   const path = []; let key = goalKey;
   while (key && key !== startKey) {
     const [c, r] = key.split(',').map(Number); path.push({ c, r }); key = cameFrom.get(key);
+  }
+  return path.reverse();
+}
+// ---- 有陸橋的地圖：兩層一起找路 ----
+// 每一步都記著「在幾樓」，規則跟走路判斷一樣（js/pathfinding.js 的 wallNow）：只有經過樓層出入口才換樓層——
+// 從出入口走到 2 樓地面＝2 樓、走到其他格子＝1 樓；一樓的人站在 2 樓地面那格，不能從那一側走進出入口。
+// 會動的手扶梯（js/escalators.js 的 escalatorFlowAt）：順著走每格成本比較低，逆著走每格多加 SENTRY_ESC_AGAINST——
+// 優先走順向的手扶梯，只有逆向的到得了才走逆向
+const SENTRY_ESC_HURRY = 2.2;   // 逆著側面手扶梯走時，隊員的腳步加快幾倍（不然會被階梯帶回去）
+const SENTRY_ESC_AGAINST = 400, SENTRY_ESC_WITH = .7;
+const SENTRY_PATH_MAX = 6000;   // 一次找路最多搜幾格（兩層加起來）   // 逆向每格加 400：只要有順向的路（再遠也一樣）就走順向，真的只有逆向到得了才走逆向
+// 側面的手扶梯是斜的：斜坡上能站的格子排成一條斜線，上下左右一格一格接不起來。
+// 所以每座當成一條「低的那頭 ↔ 高的那頭」的通道：走的時候只管左右走，高度由手扶梯自己跟著斜坡調（js/escalators.js 的 rideSideEscalator）。
+// 回傳 [{ a: [欄, 列], b: [欄, 列], cells: 斜坡長幾格, flowAB: 1＝從 a 走到 b 是順向、-1＝逆向、0＝停住不動的 }]
+let sentryLinkCache = null;   // 半秒內重複用（找路很常呼叫，每次重算太慢）
+function sentryEscalatorLinks(allowDark) {
+  if (typeof escalatorSideLanes !== 'function') return [];
+  const now = performance.now();
+  if (sentryLinkCache && sentryLinkCache.map === MAP && sentryLinkCache.dark === !!allowDark && now - sentryLinkCache.at < 500) return sentryLinkCache.links;
+  const links = sentryEscalatorLinksNow(allowDark);
+  sentryLinkCache = { map: MAP, dark: !!allowDark, at: now, links };
+  return links;
+}
+function sentryEscalatorLinksNow(allowDark) {
+  const out = [], footDy = typeof ESCALATOR !== 'undefined' ? ESCALATOR.footDy : 14;
+  for (const L of escalatorSideLanes()) {
+    const mid = (L.spec.band[0] + L.spec.band[1]) / 2;
+    const standAt = ix => { const x = L.fx ? L.x + (L.spec.size - ix) * L.k : L.x + ix * L.k; return [x, escalatorSideTopY(L, x) + mid * L.k - footDy]; };   // 站在走道中間時角色的位置
+    const lowX = standAt(Math.max(0, L.spec.x0 - 6)), highX = standAt(Math.min(L.spec.size - 1, L.spec.x1 + 10));
+    const lowC = cellAt(...lowX), highC = cellAt(...highX);
+    const hk = highC.join(','), highFloor = rampCells.has(hk) || deckCells.has(hk) ? 2 : 1;
+    const ok = ([c, r], f) => onFloorDo(f, () => sentryCellWalkable(c, r, false, allowDark));
+    if (!ok(lowC, 1) || !ok(highC, highFloor)) continue;
+    const highDir = L.fx ? -1 : 1, flow = L.stamp.still ? 0 : escalatorSideDir(L);   // 往高的那頭是 x 的哪個方向；階梯往哪邊帶
+    out.push({ L, a: lowC, b: highC, ax: lowX[0], bx: highX[0], cells: Math.max(1, Math.abs(highX[0] - lowX[0]) / CELL), flowAB: flow ? (flow === highDir ? 1 : -1) : 0 });
+  }
+  return out;
+}
+function buildSentryPathFloors(t, targetX, targetY, allowDark, goalFloor) {
+  const sf = actorFloor(t), gf = goalFloor === 2 ? 2 : 1;
+  const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
+  // 目的地不能挑在側面手扶梯的斜坡上（斜坡的格子只能沿著手扶梯進出，一格一格走不到）
+  const slopeCell = (c, r) => { const fl = typeof escalatorFlowAt === 'function' ? escalatorFlowAt(c, r) : null; return !!fl && fl[1] === 0; };
+  const goal = onFloorDo(gf, () => nearestSentryGoal(rawGc, rawGr, allowDark, slopeCell)); if (!goal) return null;
+  const [gc, gr] = goal, startKey = sc + ',' + sr + ',' + sf, goalKey = gc + ',' + gr + ',' + gf;
+  if (startKey === goalKey) return [];
+  const dist = new Map([[startKey, 0]]), cameFrom = new Map([[startKey, null]]), flows = new Map();
+  const flowAt = (c, r) => { const k = c + ',' + r; if (!flows.has(k)) flows.set(k, typeof escalatorFlowAt === 'function' ? escalatorFlowAt(c, r) : null); return flows.get(k); };
+  // 小小的二元堆積（每次拿成本最小的出來）
+  const heap = [];
+  const push = item => { heap.push(item); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+  const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const a = 2 * i + 1, b = a + 1; let m = i; if (a < heap.length && heap[a][0] < heap[m][0]) m = a; if (b < heap.length && heap[b][0] < heap[m][0]) m = b; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
+  // A*：排順序用「已經走的成本＋到目的地的大概距離」，往目的地的方向優先找（近的路幾乎不用多搜）
+  const h = (c, r) => (Math.abs(c - gc) + Math.abs(r - gr)) * SENTRY_ESC_WITH;   // 每格最少也要 SENTRY_ESC_WITH 的成本
+  push([h(sc, sr), sc, sr, sf]);
+  const onSlope = !!t.escSide && onMovingEscalator(t);
+  const walkCache = new Map();   // 同一次找路裡，同一格同一層只判斷一次走不走得過
+  const walkable = (c, r, f) => { const k = c + ',' + r + ',' + f; if (!walkCache.has(k)) walkCache.set(k, onFloorDo(f, () => sentryCellWalkable(c, r, false, allowDark))); return walkCache.get(k); };
+  let pops = 0; const closed = new Set();
+  // 側面手扶梯的通道：從一頭的格子可以直接到另一頭（經過的格子當成一步，成本照長度、順逆向算）
+  const links = new Map();
+  const factor = (ln, d) => ln.flowAB * d > 0 ? SENTRY_ESC_WITH : ln.flowAB * d < 0 ? 1 + SENTRY_ESC_AGAINST : 1;   // d：1＝往高的那頭走、-1＝往低的那頭走
+  for (const ln of sentryEscalatorLinks(allowDark)) {
+    const add = (from, to, d) => { const k = from.join(','); if (!links.has(k)) links.set(k, []); links.get(k).push({ to, cost: ln.cells * factor(ln, d) }); };
+    add(ln.a, ln.b, 1); add(ln.b, ln.a, -1);
+    // 已經站在這座手扶梯的斜坡上：可以直接從現在的位置走到上下任一頭（不用先走回某一頭才算上了手扶梯）
+    if (t.escSide === ln.L) {
+      const k = sc + ',' + sr; if (!links.has(k)) links.set(k, []);
+      const toA = Math.abs(t.x - ln.ax) / CELL, toB = Math.abs(t.x - ln.bx) / CELL;
+      links.get(k).push({ to: ln.a, cost: toA * factor(ln, -1) }, { to: ln.b, cost: toB * factor(ln, 1) });
+    }
+  }
+  let found = false;
+  while (heap.length) {
+    const [, c, r, f] = pop(), key = c + ',' + r + ',' + f, d = dist.get(key);
+    if (closed.has(key)) continue; closed.add(key);   // 同一格同一層只展開一次
+    if (++pops > SENTRY_PATH_MAX) break;   // 搜太多格還沒找到：當成走不到（不然走不到的地方會把整張地圖搜完）
+    if (key === goalKey) { found = true; break; }
+    const kc = c + ',' + r, onRamp = rampCells.has(kc), onDeck = deckCells.has(kc) && !onRamp;
+    const slopeStart = key === startKey && onSlope;   // 起點在手扶梯斜坡上：只能沿著手扶梯走到上下其中一頭（被扶手夾著，不能橫著走出去）
+    for (const [dc, dr] of slopeStart ? [] : [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      const nc = c + dc, nr = r + dr; if (!inGrid(nc, nr)) continue;
+      const nk = nc + ',' + nr;
+      let wall;   // 跟 wallNow 一樣的規則
+      if (rampCells.has(nk)) wall = mapWalls.has(nk) || (f !== 2 && !onRamp && onDeck);
+      else if (onRamp) wall = deckCells.has(nk) ? deckBlocked(nk) : mapWalls.has(nk);
+      else wall = f === 2 ? (!deckCells.has(nk) || deckBlocked(nk)) : mapWalls.has(nk);
+      if (wall) continue;
+      const nf = onRamp && !rampCells.has(nk) ? (deckCells.has(nk) ? 2 : 1) : f;   // 走出樓層出入口：換樓層
+      if (!walkable(nc, nr, nf) || onFloorDo(nf, () => edgeBetween(c, r, nc, nr))) continue;
+      const fl = flowAt(nc, nr) || flowAt(c, r), along = fl ? dc * fl[0] + dr * fl[1] : 0;
+      const nd = d + (along > 0 ? SENTRY_ESC_WITH : along < 0 ? 1 + SENTRY_ESC_AGAINST : 1);
+      const nKey = nk + ',' + nf;
+      if (nd >= (dist.has(nKey) ? dist.get(nKey) : Infinity)) continue;
+      dist.set(nKey, nd); cameFrom.set(nKey, key); push([nd + h(nc, nr), nc, nr, nf]);
+    }
+    for (const lk of links.get(kc) || []) {   // 走側面手扶梯到另一頭（另一頭在 2 樓地面或出入口上＝2 樓那側；不然＝1 樓）
+      const [nc, nr] = lk.to, nk = nc + ',' + nr, nf = rampCells.has(nk) ? f : deckCells.has(nk) ? 2 : 1;
+      const nd = d + lk.cost, nKey = nk + ',' + nf;
+      if (nd >= (dist.has(nKey) ? dist.get(nKey) : Infinity)) continue;
+      dist.set(nKey, nd); cameFrom.set(nKey, key + '|esc'); push([nd + h(nc, nr), nc, nr, nf]);
+    }
+  }
+  if (!found) return null;
+  const path = []; let key = goalKey;
+  while (key && key !== startKey) {
+    const prev = cameFrom.get(key), esc = !!prev && prev.endsWith('|esc');
+    const [c, r, f] = key.split(',').map(Number); path.push(esc ? { c, r, f, esc: true } : { c, r, f });   // esc：這一步是走側面手扶梯（只管左右走）
+    key = esc ? prev.slice(0, -4) : prev;
   }
   return path.reverse();
 }
@@ -510,20 +626,45 @@ function sentryFleeSpot(t, threat, maxSteps = 6) {
   }
   return best;
 }
-function moveSentryWithPath(t, targetX, targetY, speed, dt) {
+// goalFloor：目的地在幾樓（跟著溫特時＝溫特在的那層；沒給＝照目的地那一格，js/pathfinding.js 的 placeFloorAt）
+function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
   const dark = !!(t.summonDark || t.followDark);   // 被召喚、跟著溫特走、去撿地上的東西：可以穿過黑暗
   if (typeof swimRingShoreGoal === 'function') {   // 想走進深水區（沒坐救生圈）：先走到最靠近的岸邊；溫特在水裡時會拿救生圈下水（js/swim-ring.js）
     const shore = swimRingShoreGoal(t, targetX, targetY, dark); if (shore) [targetX, targetY] = shore;
   }
-  const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
-  if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r, false, dark))) {
-    t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
+  const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR + (hasFloors && goalFloor ? ',' + goalFloor : '');
+  const nextOk = !next || (next.f ? onFloorDo(next.f, () => sentryCellWalkable(next.c, next.r, false, dark)) : sentryCellWalkable(next.c, next.r, false, dark));   // 路上的下一格照它在的那層判斷
+  const midEscalator = next && next.esc && t.escSide && t.navStall <= .8 && nextOk;   // 正在走側面手扶梯那一步：目的地小小移動不用重找（重找會被叫回某一頭）
+  // 目的地換了：有陸橋的地圖至少隔 0.3 秒才重找（跟隨時目的地一直小小移動，每一幀都重找太花時間；路走完、卡住、下一格不能走照樣馬上重找）
+  // 剛找不到路：先等 0.75 秒再試（不然目的地每動一下就把整區搜一遍）
+  const goalMoved = t.navGoal !== goalKey && !midEscalator && (!hasFloors || (t.navReplanT || 0) <= 0 || (!t.navFailed && (!t.navPath || !t.navPath.length)));
+  if (hasFloors) t.navReplanT = (t.navReplanT || 0) - dt;
+  if (goalMoved || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || !nextOk) {
+    if (hasFloors) t.navReplanT = .3;
+    t.navPath = buildSentryPath(t, targetX, targetY, dark, goalFloor); t.navGoal = goalKey; t.navTimer = .75;
+    if (!t.navPath && t.navFallback) t.navPath = buildSentryPath(t, t.navFallback.x, t.navFallback.y, dark, goalFloor);   // 找不到：改找去跟隨對象站的地方
     t.navStall = 0;
   }
-  if (!t.navPath) { t.navFailed = true; unwedgeSentry(t); return false; }
+  if (!t.navPath) { t.navFailed = true; if (hasFloors) t.navReplanT = .75; unwedgeSentry(t); return false; }
   t.navFailed = false;
+  // 下一步是走側面手扶梯：只管左右走，高度由手扶梯跟著斜坡調（js/escalators.js 的 rideSideEscalator）；左右到了就算到
+  if (t.navPath.length && t.navPath[0].esc) {
+    // 逆著階梯走：隊員走路比溫特慢很多，照平常的速度會被階梯抵銷、永遠下不去 → 這一段加快腳步（SENTRY_ESC_HURRY 倍）
+    const [wx] = center(t.navPath[0].c, t.navPath[0].r), dx = wx - t.x, L = t.escSide;
+    const against = L && !L.stamp.still && Math.sign(dx) === -escalatorSideDir(L);
+    const step = speed * dt * (against ? SENTRY_ESC_HURRY : 1);
+    if (L) {   // 先靠到走道正中間（貼著扶手走，頭會撞到扶手後面的牆）
+      const wantY = escalatorSideTopY(L, t.x) + (L.spec.band[0] + L.spec.band[1]) / 2 * L.k - ESCALATOR.footDy, gap = wantY - t.y;
+      if (Math.abs(gap) > .5) { const ny = t.y + Math.sign(gap) * Math.min(Math.abs(gap), speed * dt); if (personnelStepAllowed(t.x, t.y, t.x, ny, dark)) t.y = ny; }
+    }
+    if (Math.abs(dx) <= Math.max(1, step)) { t.x = wx; t.navPath.shift(); return false; }
+    const nx = t.x + Math.sign(dx) * step;
+    if (personnelStepAllowed(t.x, t.y, nx, t.y, dark)) { t.x = nx; t.navStall = 0; }
+    else { t.navStall = (t.navStall || 0) + dt; if (t.navStall > .8) { t.navTimer = 0; t.navFailed = true; } }
+    return false;
+  }
   // 必須到達轉彎格中心，不能剛跨入格子就跳過路點，否則會切角卡牆。
   while (t.navPath.length) {
     const [wx, wy] = center(t.navPath[0].c, t.navPath[0].r);
@@ -755,7 +896,8 @@ function updateSentryMain(t, dt) {
   const companion = sentryCompanionRule(t);
   if (companion && !hasAggroTarget(t)) {   // 有敵可打時交給接敵邏輯，護衛圈先讓位（避免圈邊抖動）
     const companionDistance = Math.hypot(companion.anchor.x - t.x, companion.anchor.y - t.y);
-    if (companionDistance > companion.radius) {
+    const otherFloor = hasFloors && actorFloor(companion.anchor) !== actorFloor(t);   // 跟隨的人在另一層（例如溫特上了 2 樓）：再近也要跟過去
+    if (companionDistance > companion.radius || otherFloor || onMovingEscalator(t)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
       t.target = null; t.waitT = 0;
       t.followDark = companion.anchor === G.player;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）
       followTarget(t, companion.anchor, { dist: companion.radius * .82, speed: companion.speed }, dt);
@@ -856,12 +998,24 @@ function updateNpcTalk(npc, dt) {
   }
 }
 // 跟隨：朝目標移動，保持 cfg.dist 的距離就停（只改座標，走路動畫由主迴圈處理）
+// 站在會動的手扶梯上（側面的、正面的都算）：停下來會被階梯帶走，所以跟隨時不能停在上面
+// 側面的只算斜坡那一段（兩頭的平台不會動，可以停）
+function onMovingEscalator(a) {
+  if (!a) return false;
+  const L = a.escSide;
+  if (L && L.map === MAP && !L.stamp.still) { const ix = escalatorSideIx(L, a.x); if (ix >= L.spec.x0 && ix <= L.spec.x1) return true; }
+  const lane = typeof escalatorLaneAt === 'function' ? escalatorLaneAt(a.x, a.y + (typeof ESCALATOR !== 'undefined' ? ESCALATOR.footDy : 14)) : null;
+  return !!(lane && !(lane.stamp && lane.stamp.still));
+}
 function followTarget(mover, target, cfg, dt) {
   if (!target) return false;
   const dx = target.x - mover.x, dy = target.y - mover.y, d = Math.hypot(dx, dy);
-  if (d <= cfg.dist) return true;          // 夠近了就停
-  const tx = target.x - dx / d * cfg.dist, ty = target.y - dy / d * cfg.dist;
-  moveSentryWithPath(mover, tx, ty, cfg.speed, dt);
+  if (d <= cfg.dist && (!hasFloors || actorFloor(target) === actorFloor(mover)) && !onMovingEscalator(mover)) return true;   // 夠近了就停（不同樓層不算近：溫特在橋上、自己在橋下時要繞去上面；還站在手扶梯上就先走下來）
+  const near = d <= cfg.dist || d < 1;   // 平面上已經很近（只是在另一層）：直接走去對方站的位置那一層
+  const tx = near ? target.x : target.x - dx / d * cfg.dist, ty = near ? target.y : target.y - dy / d * cfg.dist;
+  mover.navFallback = hasFloors && !near ? target : null;   // 有陸橋的地圖：停在中間的那個點找不到路（例如落在別的區塊）→ 改成直接找去對方站的地方
+  moveSentryWithPath(mover, tx, ty, cfg.speed, dt, hasFloors ? actorFloor(target) : null);
+  mover.navFallback = null;   // 目的地在跟隨對象那一層（溫特上 2 樓就找上 2 樓的路）
   return true;
 }
 // ---- 安全區：NPC 閒逛時，路過椅子或床會有機率坐下／躺下 ----
@@ -882,7 +1036,7 @@ function seatApproachPoint(seat) {
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
     if (!inGrid(c, r)) continue;
     const [x, y] = center(c, r);
-    if (sentryBlocked(x, y) || !personnelInLight(x, y)) continue;
+    if (onFloorDo(seat.floor || 1, () => sentryBlocked(x, y)) || !personnelInLight(x, y)) continue;   // 照椅子那一層判斷站不站得下
     const d = Math.hypot(x - seat.x, y - seat.y);
     if (d < bestD) { bestD = d; best = { x, y }; }
   }

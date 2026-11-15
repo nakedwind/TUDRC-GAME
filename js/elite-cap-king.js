@@ -368,7 +368,7 @@ function updateCapKing(dt) {
 function capKingCapSortable(sortables, cap) {
   const s = cap.scale || CAP_KING.capScale, h = 59 * s;
   if (!isVisible(cap.x, cap.y) && !isVisible(cap.x, cap.y - h * .6)) return;
-  sortables.push({ y: cap.y + 13 + looseSortY(cap), draw: () => drawCapKingCap(ctx, cap) });
+  sortables.push({ floor: looseFloor(cap), y: cap.y + 13, draw: () => drawCapKingCap(ctx, cap) });
 }
 function drawCapKingCap(ctx, cap) {
   const img = hbImg(cap.state === 'open' ? HANGI_CAP.openImage : HANGI_CAP.image);

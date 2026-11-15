@@ -80,7 +80,7 @@ function smilerDarkSpot(x, y, min, max) {
   for (let tries = 0; tries < 40; tries++) {
     const a = Math.random() * Math.PI * 2, d = min + Math.random() * (max - min);
     const c = Math.round(pc + Math.cos(a) * d), r = Math.round(pr + Math.sin(a) * d);
-    if (!inGrid(c, r) || isWall(c, r) || cellLit(c, r)) continue;
+    if (!inGrid(c, r) || spawnWallAt(c, r) || cellLit(c, r)) continue;   // 照那一格的樓層（js/pathfinding.js）
     const [cx, cy] = center(c, r);
     return { x: cx, y: cy };
   }

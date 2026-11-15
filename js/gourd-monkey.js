@@ -251,7 +251,8 @@ function gourdTrackSpot(e, s, dt) {
   const fx = s.spot.x - s.from.x, fy = s.spot.y - s.from.y, fd = Math.hypot(fx, fy), max = C.maxLeap * CELL;
   if (fd > max) { s.spot.x = s.from.x + fx / fd * max; s.spot.y = s.from.y + fy / fd * max; }
 }
-function gourdImpact(e) {
+function gourdImpact(e) { withBlastFloor(actorFloor(e), () => gourdImpactNow(e)); }   // 葫蘆猴在幾樓，壓扁、震飛就只算那一層（js/pathfinding.js）
+function gourdImpactNow(e) {
   const C = gmCfg(e), g = e.gm, R = C.hitRadius, x = e.x, y = e.y, quick = !!(g.slam && g.slam.quick);
   g.slam = null; g.recover = C.recover; g.cd = C.cooldown; e.slimeLift = 0; e.forceFrame = C.art.squash;
   resetEnemyNavigation(e);
@@ -264,7 +265,7 @@ function gourdImpact(e) {
       r: 2 + Math.random() * 2.5, life: .4 + Math.random() * .25, life0: .65, color: Math.random() < .5 ? '#a8936c' : '#d6c49a' });
   }
   gourdImpactFx(x, y + 12, R / GOURD.hitRadius);   // 撞擊閃光、飛起來的石礫、往外翻滾的灰塵（葫蘆猴王範圍大，特效跟著放大）
-  (G.gourdCracks = G.gourdCracks || []).push({ x, y: y + 12, life: C.crackLife, life0: C.crackLife, seed: Math.random() * 9, flip: Math.random() < .5, scale: C.crackScale });
+  (G.gourdCracks = G.gourdCracks || []).push({ x, y: y + 12, floor: actorFloor(e), life: C.crackLife, life0: C.crackLife, seed: Math.random() * 9, flip: Math.random() < .5, scale: C.crackScale });
   if (typeof sfxAt === 'function') { sfxAt('gourdSlam', x, y, 1, 'gourd-slam'); sfxAt('gourdLandCry', x, y, .9, 'gourd-cry'); }
   // 畫面震動：越近震越大，被壓到再加一點頓格
   const p = G.player, pd = p ? Math.hypot(p.x - x, p.y - y) : Infinity, near = Math.max(0, 1 - pd / (C.shakeRange * CELL));
@@ -272,16 +273,16 @@ function gourdImpact(e) {
   if (pd <= R) addHitstop(.07); else if (pd <= C.knockRadius) addHitstop(.04);
   // 壓到人：溫特、隊友（沒惹牠的阿瓦倫不算，跟史萊姆撲擊一樣）
   let crushed = false;
-  if (p && p.hp > 0 && pd <= R && !parryMiss(p, true)) { gourdHitPlayer(e, p); crushed = true; }
+  if (p && p.hp > 0 && blastHits(p) && pd <= R && !parryMiss(p, true)) { gourdHitPlayer(e, p); crushed = true; }
   for (const t of G.towers) {
-    if (t.hp <= 0 || Math.hypot(t.x - x, t.y - y) > R + 6 || !enemyNoticesSentry(e, t) || parryMiss(t, false)) continue;
+    if (t.hp <= 0 || !blastHits(t) || Math.hypot(t.x - x, t.y - y) > R + 6 || !enemyNoticesSentry(e, t) || parryMiss(t, false)) continue;
     gourdHitSentry(e, t); crushed = true;
   }
   if (crushed) g.laughAt = C.laughDelay;   // 壓到人：喘氣時得意地笑
   // 震波：範圍內的隊友（和溫特）以葫蘆猴為中心往外震飛（沒受傷的也會飛；撞到牆就停）
   const shove = a => {
     const dx = a.x - x, dy = a.y - y, d = Math.hypot(dx, dy);
-    if (d > C.knockRadius || a.rootT > 0) return;   // 被絲瓜藤纏住的飛不動
+    if (d > C.knockRadius || a.rootT > 0 || !blastHits(a)) return;   // 被絲瓜藤纏住的飛不動；不同樓層震不到
     const ang = d > 1 ? Math.atan2(dy, dx) : Math.random() * Math.PI * 2, k = d / C.knockRadius;
     knockActor(a, Math.cos(ang), Math.sin(ang), (C.knockMax + (C.knockMin - C.knockMax) * k) * CELL, C.knockTime);
     a.gourdToss = { t: 0, h: C.tossHeight + (C.tossMinHeight - C.tossHeight) * k, side: Math.cos(ang) >= 0 ? 1 : -1, bounced: false };   // 飛起來（畫的時候往上抬，影子留在地上）
@@ -379,7 +380,7 @@ function gourdDragTrail(e, moved) {
   if (g.markDist >= C.markEvery) {
     g.markDist = 0;
     const a = Math.atan2(e.y - (g.lastMarkY ?? e.y), e.x - (g.lastMarkX ?? e.x));
-    (G.gourdMarks = G.gourdMarks || []).push({ x: e.x, y: e.y + 11, a, life: C.markLife });
+    (G.gourdMarks = G.gourdMarks || []).push({ x: e.x, y: e.y + 11, floor: actorFloor(e), a, life: C.markLife });
     g.lastMarkX = e.x; g.lastMarkY = e.y;
     if (Math.random() < .5) gmDust(e.x + gmRand(-14, 14), e.y + 12, false);
   }
@@ -420,13 +421,15 @@ function updateGourdBodies() {
       const k = 1 / Math.max(q, .05), tx = cx + dx * k, ty = cy + dy * k;
       // 往外一小步一小步推，前面是牆就停（不要把人推進牆裡）
       const dist = Math.hypot(tx - a.x, ty - a.y), steps = Math.max(1, Math.ceil(dist / 3));
-      for (let i = 0; i < steps; i++) {
-        const nx = a.x + (tx - a.x) / (steps - i), ny = a.y + (ty - a.y) / (steps - i);
-        if (!blocked(nx, ny)) { a.x = nx; a.y = ny; }
-        else if (!blocked(nx, a.y)) a.x = nx;
-        else if (!blocked(a.x, ny)) a.y = ny;
-        else break;
-      }
+      onFloorDo(a, () => {   // 照被推開的那個人那一層的牆（js/pathfinding.js）
+        for (let i = 0; i < steps; i++) {
+          const nx = a.x + (tx - a.x) / (steps - i), ny = a.y + (ty - a.y) / (steps - i);
+          if (!blocked(nx, ny)) { a.x = nx; a.y = ny; }
+          else if (!blocked(nx, a.y)) a.x = nx;
+          else if (!blocked(a.x, ny)) a.y = ny;
+          else break;
+        }
+      });
     }
   }
 }
@@ -502,6 +505,7 @@ function drawGourdGround(ctx) {
   const C = GOURD;
   ctx.save();
   for (const m of G.gourdMarks || []) {   // 兩道平行的刮痕
+    if (fxSkip(m.floor)) continue;
     if (!isVisible(m.x, m.y)) continue;
     ctx.globalAlpha = .22 * Math.min(1, m.life / 2); ctx.strokeStyle = '#2a2116'; ctx.lineWidth = 2;
     const ca = Math.cos(m.a), sa = Math.sin(m.a), nx = -sa, ny = ca;
@@ -510,6 +514,7 @@ function drawGourdGround(ctx) {
     }
   }
   for (const k of G.gourdCracks || []) {   // 砸出來的地裂
+    if (fxSkip(k.floor)) continue;
     if (!isVisible(k.x, k.y)) continue;
     const img = monsterImage(C.crackImage);   // 地面裂痕圖（images/破損建築/crack06.png），隨機左右翻
     if (img.complete && img.naturalWidth) {
@@ -581,7 +586,8 @@ function rockBurstFx(x, y, o) {
     const pts = [];   // 不規則的小石塊（5～6 個角）
     const n = 5 + (Math.random() < .5 ? 1 : 0), sz = (big ? gmRand(4, 6.5) : gmRand(2, 4)) * S;
     for (let k = 0; k < n; k++) { const t = k / n * Math.PI * 2; pts.push([Math.cos(t) * sz * gmRand(.65, 1.1), Math.sin(t) * sz * gmRand(.55, 1)]); }
-    rocks.push({ x: x + Math.cos(a) * sp0, y: y + Math.sin(a) * sp0 * .43, z: gmRand(4, 14), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: gmRand(up[0], up[1]) * (big ? .75 : 1),
+    rocks.push({ floor: floorAtPoint(x, y), x: x + Math.cos(a) * sp0, y: y + Math.sin(a) * sp0 * .43,   // floor：碎石噴在幾樓（js/pathfinding.js）
+      z: gmRand(4, 14), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: gmRand(up[0], up[1]) * (big ? .75 : 1),
       spin: gmRand(-12, 12), rot: Math.random() * 6, pts, col: GM_ROCK_COLORS[Math.floor(Math.random() * GM_ROCK_COLORS.length)], life: gmRand(1.6, 2.6), bounces: 0 });
   }
   const dust = [], nd = o.dust || 0;
@@ -608,7 +614,7 @@ function updateGourdDebris(dt) {
         }
       } else { r.vx *= Math.pow(.02, dt); r.vy *= Math.pow(.02, dt); r.rot += r.spin * dt * .2; r.spin *= Math.pow(.05, dt); }
       const nx = r.x + r.vx * dt, ny = r.y + r.vy * dt, [c, rr] = cellAt(nx, ny);
-      if (inGrid(c, rr) && !isWall(c, rr)) { r.x = nx; r.y = ny; } else { r.vx *= -.35; r.vy *= -.35; }   // 撞牆彈回來
+      if (inGrid(c, rr) && !wallAt(r.floor, c, rr)) { r.x = nx; r.y = ny; } else { r.vx *= -.35; r.vy *= -.35; }   // 撞牆彈回來（照碎石那一層的牆）
     }
     G.gourdRocks = G.gourdRocks.filter(r => r.life > 0);
   }

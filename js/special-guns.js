@@ -318,13 +318,13 @@ function fireSticky(p, aim, b) {
   const dist = clearDistance(p, ang, Math.min(Math.hypot(aim.x - p.x, aim.y - p.y), b.range * CELL)), r = lineHit(p, ang, dist, glueTargets(), 16);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
   const end = r.target ? { x: r.target.x, y: r.target.y } : { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };   // 打中怪物：黏膠落在牠腳下
-  (G.glueShots = G.glueShots || []).push({ x0: mx, y0: my, x1: end.x, y1: end.y, ang, t: 0, T: Math.max(.05, Math.hypot(end.x - mx, end.y - my) / b.speed), lv: b, hit: r.target || null });
+  (G.glueShots = G.glueShots || []).push({ floor: actorFloor(p), x0: mx, y0: my, x1: end.x, y1: end.y, ang, t: 0, T: Math.max(.05, Math.hypot(end.x - mx, end.y - my) / b.speed), lv: b, hit: r.target || null });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
   sfx('shotSticky');
 }
 function glueLand(s) {
   const b = s.lv, x = s.x1, y = s.y1;
-  (G.gluePools = G.gluePools || []).push({ x, y, R: b.r * CELL, t: b.stick, T: b.stick, seed: Math.random() * 1000 });
+  (G.gluePools = G.gluePools || []).push({ x, y, floor: s.floor || floorAtPoint(x, y), R: b.r * CELL, t: b.stick, T: b.stick, seed: Math.random() * 1000 });
   if (s.hit && !s.hit.dead && s.hit.hp > 0) { s.hit.hitT = Math.max(s.hit.hitT || 0, .15); s.hit.hitColor = b.color; }
   for (let i = 0; i < 12; i++) { const a = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 90;
     G.effects.push({ ember: true, x, y: y - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 30, r: 1.8 + Math.random() * 1.6, life: .35, life0: .35, color: b.color }); }
@@ -360,7 +360,7 @@ function drawGluePools(ctx) {
   const pools = G.gluePools; if (!pools || !pools.length) return;
   const now = performance.now() / 1000;
   for (const g of pools) {
-    if (!isVisible(g.x, g.y)) continue;
+    if (!isVisible(g.x, g.y) || fxSkip(g.floor)) continue;   // 另一層的黏膠這一輪不畫
     const a = Math.min(1, g.t / 3, (g.T - g.t) / .15);
     ctx.save(); ctx.globalAlpha = a;
     ctx.translate(g.x, g.y);

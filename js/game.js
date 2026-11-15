@@ -177,6 +177,7 @@ function createMonster(spec, x, y, variant) {
   const dmg = n => n == null ? n : Math.round(n * difficultyOf('monsterDamage'));
   const monster = {
     type: spec.id, x, y, hp, maxhp: hp,
+    floor: hasFloors ? floorAtPoint(x, y) : undefined,   // 一出生就定好在幾樓（js/pathfinding.js）：正在爆炸的那層、旁邊的人、或那格是不是只有 2 樓
     speed: Number(oldRules.speed) || spec.speed,
     reward: oldRules.reward != null ? Number(oldRules.reward) : spec.reward,
     crystals: spec.crystals, playerDamage: dmg(spec.playerDamage),
@@ -1073,8 +1074,8 @@ const acidPoolDist = (pool, x, y) => Math.hypot(x - pool.x, (y - pool.y) / ACID_
 // t＝哪位隊友（null 或暴走中＝不怕）；pad＝往外多留幾像素
 function acidHazardAt(t, x, y, pad = 0) {
   if (!t || t.berserk) return false;
-  if (t.type !== 'avaren') for (const pool of G.acidPools || []) if (pool.t > 0 && acidPoolDist(pool, x, y) < pool.r + pad) return true;
-  for (const pool of G.spitPools || []) if (pool.t > 0 && acidPoolDist(pool, x, y) < pool.r + pad) return true;
+  if (t.type !== 'avaren') for (const pool of G.acidPools || []) if (pool.t > 0 && fieldHits(pool.floor, t) && acidPoolDist(pool, x, y) < pool.r + pad) return true;
+  for (const pool of G.spitPools || []) if (pool.t > 0 && fieldHits(pool.floor, t) && acidPoolDist(pool, x, y) < pool.r + pad) return true;
   return false;
 }
 // 隊友避開酸液：站在裡面／貼邊時，照 sentryFireExit 找最近走得出去的格子走出去（跟火海一樣；暴走中不避）
@@ -1420,13 +1421,11 @@ function groundDrawnAt(c, r) {
 // who：照誰的樓層判斷（沒給＝溫特；礦物碎片會給自己，js/ore.js）
 function playerBlocked(x, y, who = null) {
   const r = PLAYER.r;
-  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck; setFloorCtx(who || G.player);   // 溫特在幾樓就照幾樓的規則（js/pathfinding.js）
-  try {
+  return onFloorDo(who || G.player, () => {   // 溫特在幾樓就照幾樓的規則（js/pathfinding.js）
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
-    const go = G.grid[c + ',' + rr];
-    if (!inGrid(c, rr) || (go && (!hasFloors || (go.floor === 2 ? 2 : 1) === floorCtx))) return true;   // 建築只擋同一層的人
+    if (!inGrid(c, rr) || gridAtPointForWalker(px, py)) return true;   // 建築只擋同一層的人；微調過位置的照微調後的範圍（js/build.js）
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
     if (typeof deepWaterBlocksPlayer === 'function' && deepWaterBlocksPlayer(px, py)) return true;   // 深水區：沒坐救生圈走不進去（js/swim-ring.js）
   }
@@ -1435,7 +1434,7 @@ function playerBlocked(x, y, who = null) {
   if (typeof escalatorSideBlocks === 'function' && escalatorSideBlocks(x, y + ESCALATOR.footDy)) return true;   // 側面手扶梯的扶手、外殼（看腳的位置，js/escalators.js）
   if (typeof bigPearlBlocksPlayer === 'function' && bigPearlBlocksPlayer(x, y)) return true;   // 珍珠大童的大珍珠（js/pearl-elder.js）
   return false;
-  } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
+  });
 }
 // 救援機制：角色若被卡在牆／建築裡（例如放置時的邊角誤差），
 // 由近到遠繞圈找最近的空位，把角色推出去。
@@ -1477,6 +1476,7 @@ function mapSeats() {
     if (s.fy && (dir === 'front' || dir === 'back')) dir = dir === 'front' ? 'back' : 'front';
     const sy = y0 + (s.fy ? h - spot.y : spot.y);
     seats.push({
+      floor: typeof stampDrawFloor === 'function' ? stampDrawFloor(s) : 1,   // 椅子在幾樓：照那張圖的樓層（js/maploader.js）
       x: x0 + (s.fx ? w - spot.x : spot.x),
       y: sy,
       top: multi ? sy - 50 : y0, dir, x0, y0, w, h, multi,
@@ -2241,6 +2241,7 @@ function frame(ts) {
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
 }
 function update(dt) {
+  floorAudit(dt);   // 樓層體檢：測試模式下，場上有東西沒記樓層就在主控台提醒（js/pathfinding.js）
   if (typeof updateBurrowingMouseFx === 'function') updateBurrowingMouseFx(dt);
   if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);
@@ -2459,9 +2460,9 @@ function update(dt) {
       const U = ((t.gunSwing && t.gunSwing.ult) || (t.meleeSwing && t.meleeSwing.ult)) ? ULTIMATES[t.type] : null;   // 大招（在揮擊啟動時已決定）
       if (U && U.radius) {   // 近戰大招：大範圍（紅＝盾牌衝撞＋回復；路德＝重擊＋暈眩）
         const r = U.radius * CELL, dmg = spec.dmg * U.dmgMul * (1 + (spec.ultDmgBonus || 0)) * sentryDamageMul(t), col = U.kind === 'bash' ? '#bfe0ff' : '#ffd0d5';
-        const hitEnemy = G.enemies.find(e => !e.dead && Math.hypot(e.x - t.x, e.y - t.y) <= r && hasLineOfSight(t.x, t.y, e.x, e.y));
+        const hitEnemy = G.enemies.find(e => !e.dead && sameFloor(e, t) && Math.hypot(e.x - t.x, e.y - t.y) <= r && hasLineOfSight(t.x, t.y, e.x, e.y));
         for (const e of G.enemies) {
-          if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r || !hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 牆後的不受影響
+          if (e.dead || !sameFloor(e, t) || Math.hypot(e.x - t.x, e.y - t.y) > r || !hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 牆後的、不同樓層的不受影響
           e.hp -= dmg;
           aggroOnSentry(e, t);
           if (U.knockback && !e.unpushable) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
@@ -2485,7 +2486,7 @@ function update(dt) {
         onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);
         if (typeof sentryHitOre === 'function') sentryHitOre(t, impactPoint, (atkSplash || 0) * CELL);   // 路德：拳頭剛好波及礦物（js/ore.js）   // 安柏／希奧妮：不小心波及附近的油桶、油汙
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
-        if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
+        if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && sameFloor(e, target) && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
         for (const e of affected) {
           if (spec.ability === '火焰' || spec.ability === '雷電') {   // 記下屬性傷害（魚頭君抗火、怕電；js/fish-head.js）
             const amt = e === target ? atkDmg : atkDmg * .6;
@@ -2514,7 +2515,7 @@ function update(dt) {
       let best = null;
       const isEnemy = G.enemies.includes(o);
       for (const pool of G.acidPools) {
-        if (!(pool.t > 0) || (isEnemy && pool.noEnemy) || acidPoolDist(pool, o.x, o.y) > pool.r) continue;
+        if (!(pool.t > 0) || (isEnemy && pool.noEnemy) || !fieldHits(pool.floor, o) || acidPoolDist(pool, o.x, o.y) > pool.r) continue;   // fieldHits：不同樓層的池子踩不到
         const h = !isEnemy && pool.allyHit != null ? { dmg: pool.allyHit, tick: pool.allyTick || ACID_TICK }   // 我方踩到阿瓦倫的池子：固定、間隔比較長
           : { dmg: pool.dps * ACID_TICK, tick: ACID_TICK };
         if (!best || h.dmg / h.tick > best.dmg / best.tick) best = h;

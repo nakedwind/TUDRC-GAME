@@ -130,7 +130,7 @@ function updateLifePiles(dt) {
 // ---- 繪製：碎掉掉落 → 堆在地上（快復活時抽動）→ 飛回去組裝；著火時四散變黑淡出 ----
 // 跟角色一起依深度排序（js/render.js），組裝到一半的身體才不會被前面的箱子蓋住
 function lifePileSortables(sortables) {
-  for (const p of lifePiles()) if (typeof isVisible !== 'function' || isVisible(p.x, p.y)) sortables.push({ y: p.y + 13 + looseSortY(p), draw: () => drawLifePile(ctx, p) });
+  for (const p of lifePiles()) if (typeof isVisible !== 'function' || isVisible(p.x, p.y)) sortables.push({ floor: looseFloor(p), y: p.y + 13, draw: () => drawLifePile(ctx, p) });
 }
 function drawLifePile(ctx, p) {
   const now = lifeNow();

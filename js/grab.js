@@ -243,7 +243,7 @@ function dropGrabBuilding(cancel = false) {
 function grabBuildingSortables(list) {
   const g = grabB; if (!g || g.G !== G) return;
   const o = g.o, w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
-  list.push({ y: g.y - OY + h + 1, draw: () => {
+  list.push({ floor: visualFloor(G.player), y: g.y - OY + h + 1, draw: () => {   // 抓著的建築跟溫特畫在同一樓
     ctx.fillStyle = 'rgba(0,0,0,.25)';
     ctx.beginPath(); ctx.ellipse(g.x + w / 2, g.y + h - 4, w * .42, Math.max(4, h * .08), 0, 0, Math.PI * 2); ctx.fill();
     ctx.save();

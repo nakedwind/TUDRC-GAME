@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>樓層自動測試</title>
+<style>
+  /* 跟編輯器一樣的深色畫面 */
+  :root { --bg: #14181f; --panel: #1d222b; --line: #333c49; --text: #dfe6ef; --dim: #9fb0c3; --ok: #7ee0a0; --bad: #ff8f8f; --accent: #8fc8ff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.6 system-ui, "Noto Sans TC", sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 8px 0 4px; }
+  .intro { color: var(--dim); margin: 0 0 12px; }
+  .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  button { background: #2a3140; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  #summary { font-weight: 600; }
+  #summary.ok { color: var(--ok); } #summary.bad { color: var(--bad); }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--dim); font-weight: 500; }
+  td.res { white-space: nowrap; font-weight: 600; }
+  td.res.ok { color: var(--ok); } td.res.bad { color: var(--bad); }
+  td.note { color: var(--dim); }
+  details { margin-top: 14px; color: var(--dim); }
+  #game { width: 100%; height: 360px; border: 1px solid var(--line); border-radius: 10px; margin-top: 8px; background: #000; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🧪 1、2 樓自動測試</h1>
+  <p class="intro">在真的遊戲裡擺好情境跑一遍（測試模式、不存檔）：飛行物撞牆、範圍攻擊分樓層、出生點、撿東西、畫面順序，最後實際打一分鐘看有沒有漏設樓層。改了樓層相關的程式後跑一次，全部通過再推。</p>
+  <div class="bar">
+    <button id="run" type="button">▶ 開始測試</button>
+    <span id="summary">還沒開始</span>
+  </div>
+  <table>
+    <thead><tr><th style="width:44%">項目</th><th style="width:72px">結果</th><th>說明</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <details>
+    <summary>測試用的遊戲畫面</summary>
+    <iframe id="game" title="測試用的遊戲畫面"></iframe>
+  </details>
+</main>
+<script>
+  // 把遊戲開在下面的框裡，載入 js/floor-tests.js，跑完把每一項結果列出來
+  const runBtn = document.getElementById('run'), rows = document.getElementById('rows'), summary = document.getElementById('summary'), frame = document.getElementById('game');
+  const addRow = ({ name, ok, note }) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td></td><td class="res ' + (ok ? 'ok' : 'bad') + '">' + (ok ? '✅ 通過' : '❌ 失敗') + '</td><td class="note"></td>';
+    tr.children[0].textContent = name; tr.children[2].textContent = note || '';
+    rows.appendChild(tr);
+  };
+  async function run() {
+    runBtn.disabled = true; rows.innerHTML = ''; summary.className = ''; summary.textContent = '載入遊戲中…';
+    await new Promise(res => { frame.onload = res; frame.src = '塔防原型.html?floortest=' + Date.now(); });
+    const w = frame.contentWindow;
+    // 等遊戲的素材載完（開始畫面出現）
+    for (let i = 0; i < 120 && !(w.mapList && w.begin && w.MapLevels); i++) await new Promise(r => setTimeout(r, 250));
+    await new Promise(r => setTimeout(r, 1500));
+    const s = w.document.createElement('script'); s.src = 'js/floor-tests.js?v=' + Date.now();
+    await new Promise((res, rej) => { s.onload = res; s.onerror = rej; w.document.body.appendChild(s); });
+    summary.textContent = '測試中…（最後一項會實際打一分鐘，約 20～40 秒）';
+    let results = [];
+    try { results = await w.runFloorTests(addRow); }
+    catch (e) { addRow({ name: '測試本身出錯', ok: false, note: String(e && e.message || e) }); results = [{ ok: false }]; }
+    const bad = results.filter(r => !r.ok).length;
+    summary.className = bad ? 'bad' : 'ok';
+    summary.textContent = bad ? bad + ' 項失敗（共 ' + results.length + ' 項）' : '全部 ' + results.length + ' 項通過';
+    runBtn.disabled = false; runBtn.textContent = '↻ 重新測試';
+  }
+  runBtn.addEventListener('click', run);
+</script>
+</body>
+</html>

@@ -37,7 +37,7 @@ function burrowMousePolarSpots(anchor, radii, actor = null) {
   for (const radius of radii) for (let i = 0; i < 40; i++) {
     const angle = (i + .37) / 40 * Math.PI * 2;
     const x = anchor.x + Math.cos(angle) * radius, y = anchor.y + Math.sin(angle) * radius;
-    if (burrowMouseCanStand(x, y, actor)) spots.push({ x, y });
+    if (onFloorDo(actor || (anchor.floor ? anchor : floorAtPoint(anchor.x, anchor.y) || 1), () => burrowMouseCanStand(x, y, actor))) spots.push({ x, y });   // 照那隻老鼠（沒有就照目標）的樓層（js/pathfinding.js）   // 照那隻老鼠的樓層（js/pathfinding.js）
     if (!radius) break;
   }
   return spots;
@@ -140,14 +140,14 @@ function* burrowMouseMoundShapes() {
 }
 function burrowMouseLeaveHole(e, delay = 0) {
   (G.burrowHoles || (G.burrowHoles = [])).push({
-    x: e.x, y: e.y, w: e.drawWidth || 110, h: e.drawHeight || 90,
+    x: e.x, y: e.y, floor: actorFloor(e), w: e.drawWidth || 110, h: e.drawHeight || 90,
     image: burrowMouseArt(e).hole, age: 0, lifetime: 5 + delay,
   });
 }
 // 死亡洞：等收回動畫（1.1 秒）快結束才浮現；橢圓取 hole02 洞口範圍。
 function burrowMouseDeathHole(e) {
   (G.burrowHoles || (G.burrowHoles = [])).push({
-    x: e.x, y: e.y, w: e.drawWidth || 110, h: e.drawHeight || 90,
+    x: e.x, y: e.y, floor: actorFloor(e), w: e.drawWidth || 110, h: e.drawHeight || 90,
     image: burrowMouseArt(e).deathHole, age: 0, show: .8, lifetime: 1.1 + BURROW_DEATH_HOLE.lifetime, slow: BURROW_DEATH_HOLE.slow,
   });
 }
@@ -196,7 +196,7 @@ function burrowMouseSurface(e, stun = 0) {
 function burrowMouseTrail(e, b) {
   const [c, r] = cellAt(e.x, e.y), floor = typeof mapFloorCells !== 'function' || mapFloorCells().has(c + ',' + r);
   if (!floor || isWall(c, r)) return;   // 穿過牆底下不留痕
-  (G.burrowTrails || (G.burrowTrails = [])).push({ x: e.x, y: e.y, a: Math.atan2(b.dy || 0, b.dx || 1) + (Math.random() - .5) * .9, life: BURROW_UNDER.trailLife });
+  (G.burrowTrails || (G.burrowTrails = [])).push({ x: e.x, y: e.y, floor: actorFloor(e), a: Math.atan2(b.dy || 0, b.dx || 1) + (Math.random() - .5) * .9, life: BURROW_UNDER.trailLife });
   const n = Math.random() < .4 ? 2 : 1;
   for (let i = 0; i < n; i++) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() - .5) * 14, y: e.y - 2,
     vx: (Math.random() - .5) * 34, vy: -(18 + Math.random() * 32), r: 2 + Math.random() * 2.5, life: .45 + Math.random() * .3, life0: .75,
@@ -238,7 +238,7 @@ function stepBurrowLurker(e, dt) {
 function burrowMouseBlast(x, y, R, damage) {
   const shock = Math.max(R * BURROW_UNDER.shockMul, R + BURROW_UNDER.shockExtra * CELL);
   for (const e of [...(G.burrowLurkers || [])]) {
-    if (e.dead || e.hp <= 0) continue;
+    if (e.dead || e.hp <= 0 || !blastHits(e)) continue;   // blastHits：不同樓層的爆炸震不到（js/pathfinding.js）
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > shock) continue;
     // 正在鑽的位置不能站（牆邊、別人腳下）：就近找一塊出土。
@@ -433,6 +433,7 @@ function drawBurrowingMouseGround(context) {
   if (G.burrowTrails?.length) {
     context.save(); context.strokeStyle = '#4a3b26'; context.lineCap = 'round'; context.lineWidth = 2;
     for (const k of G.burrowTrails) {
+      if (fxSkip(k.floor)) continue;   // 另一層的鑽地痕這一輪不畫（js/pathfinding.js）
       if (!isLit(k.x, k.y)) continue;
       context.globalAlpha = Math.min(1, k.life / .6) * .7;
       const L = 9;
@@ -443,15 +444,15 @@ function drawBurrowingMouseGround(context) {
     context.restore();
   }
   // 地底的老鼠：只看得到 hole 土堆；鑽地時微微起伏。
-  for (const e of G.burrowLurkers || []) if (!e.dead && isLit(e.x, e.y)) {
+  for (const e of G.burrowLurkers || []) if (!e.dead && isLit(e.x, e.y) && !fxSkip(actorFloor(e))) {   // 另一層的老鼠這一輪不畫
     // 鑽過牆底下或沒有地板的空洞時看不到土堆，回到地板上再出現。
     const [c, r] = cellAt(e.x, e.y);
-    if (isWall(c, r) || (typeof mapFloorCells === 'function' && !mapFloorCells().has(c + ',' + r))) continue;
+    if (wallAt(actorFloor(e), c, r) || (typeof mapFloorCells === 'function' && !mapFloorCells().has(c + ',' + r))) continue;
     const moving = e.bm?.phase === 'tunnel', t = performance.now() / 1000;
     const bob = moving ? Math.round(Math.sin(t * 18 + e.x * .1)) : 0;
     drawBurrowFrame(context, monsterImage(burrowMouseArt(e).hole), e.x, e.y + bob, e.drawWidth || 110, e.drawHeight || 90);
   }
-  for (const h of G.burrowHoles || []) if (h.age >= (h.show || 0) && isLit(h.x, h.y)) {
+  for (const h of G.burrowHoles || []) if (h.age >= (h.show || 0) && isLit(h.x, h.y) && !fxSkip(h.floor)) {   // 另一層的洞這一輪不畫
     // 死亡洞：在收回動畫尾段淡入，消失前淡出。
     const alpha = h.slow ? Math.min(1, (h.age - h.show) / .3, (h.lifetime - h.age) / BURROW_DEATH_HOLE.fade) : 1;
     drawBurrowFrame(context, monsterImage(h.image), h.x, h.y, h.w, h.h, alpha);
@@ -464,11 +465,11 @@ function drawBurrowingMouseGround(context) {
 function burrowingMouseSortables(list) {
   for (const e of G.enemies) if (e.behavior === 'burrow' && !e.dead) {
     const c = validBurrowCfg(e.burrowCfg), art = burrowMouseArt(e);
-    for (const h of e.bm?.hands || []) if (isLit(h.x, h.y)) list.push({ y: h.y + 13, draw: () => {
+    for (const h of e.bm?.hands || []) if (isLit(h.x, h.y)) list.push({ floor: visualFloor(e), y: h.y + 13, draw: () => {
       drawBurrowingMouseHand(ctx, h, art, c);
     } });
   }
-  for (const d of G.burrowDeaths || []) if (isLit(d.x, d.y)) list.push({ y: d.y + 13, draw: () => {
+  for (const d of G.burrowDeaths || []) if (isLit(d.x, d.y)) list.push({ floor: looseFloor(d), y: d.y + 13, draw: () => {
     drawBurrowingMouseBody(ctx, { ...d, drawWidth: d.w, drawHeight: d.h, burrowCfg: { emergeTime: .8 }, bm: { phase: 'sink', age: d.age }, burrowAlpha: Math.min(1, (1.1 - d.age) / .3) });
   } });
 }
@@ -476,7 +477,7 @@ function burrowingMouseDeath(e) {
   if (e.bm) e.bm.hands = [];
   // 死亡收回動畫結束後留下大洞（hole02），不擋路但會減速，保留 60 秒。
   burrowMouseDeathHole(e);
-  (G.burrowDeaths || (G.burrowDeaths = [])).push({ x: e.x, y: e.y, w: e.drawWidth || 110, h: e.drawHeight || 90, art: burrowMouseArt(e), age: 0 });
+  (G.burrowDeaths || (G.burrowDeaths = [])).push({ x: e.x, y: e.y, floor: actorFloor(e), w: e.drawWidth || 110, h: e.drawHeight || 90, art: burrowMouseArt(e), age: 0 });
 }
 function updateBurrowingMouseFx(dt) {
   updateBurrowMouseTestSpawn(dt);
@@ -486,7 +487,7 @@ function updateBurrowingMouseFx(dt) {
     const e = G.enemies[i];
     if (e.behavior === 'burrow' && !e.dead && e.hp > 0 && burrowUnderground(e)) { G.enemies.splice(i, 1); e.bm.hands = []; lurkers.push(e); }
   }
-  if (dt > 0) for (const e of [...lurkers]) stepBurrowLurker(e, dt);
+  if (dt > 0) for (const e of [...lurkers]) onFloorDo(e, () => stepBurrowLurker(e, dt));   // 鑽在地底的老鼠不在怪物清單裡：照牠自己的樓層走（js/pathfinding.js）
   if (G.burrowTrails) G.burrowTrails = G.burrowTrails.filter(k => (k.life -= dt) > 0);
   if (G.burrowHoles) G.burrowHoles = G.burrowHoles.filter(h => (h.age += dt) < h.lifetime);
   if (G.burrowDeaths) G.burrowDeaths = G.burrowDeaths.filter(d => (d.age += dt) < 1.1);

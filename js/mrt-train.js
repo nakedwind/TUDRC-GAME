@@ -140,10 +140,11 @@ function restoreMrtTrains() {
 // ===== 月台閘門（閘門讀卡機）：捷運停好、車門打開才可以通過 =====
 // 地圖上放在列車旁邊（左右跟列車停的位置重疊、上下離列車 2 格以內）的「閘門讀卡機」「閘門讀卡機（小）」會跟那班車連動。
 // 擋路規則（每一格）：
-//   ・列車沒停在站上（還沒來、進站中、開走了）：閘門圖片蓋到的格子全部擋住（軌道上空著也不能走過去）
+//   ・列車沒停在站上（還沒來、進站中、開走了）：閘門圖片最下面那一排全部擋住（軌道上空著也不能走過去）
 //   ・列車停好了：跟車廂重疊的格子交給列車自己管（車門、車廂走道）；月台那側的格子照車門開關——車門開到可以走才打開
 // 畫：兩片門板跟著車門一起往左右滑開，收進閘門兩側（drawMrtCardGate）
-// 不靠近任何列車的閘門照原本的樣子（只看地圖編輯器畫的紅格）。
+// 在月台邊（上下離列車 2 格以內）、但左右超出列車停車範圍的閘門：車廂停不到，永遠不會開，一律關著擋路。
+// 完全不靠近任何列車的閘門照原本的樣子（只看地圖編輯器畫的紅格）。
 const MRT_GATE_TILES = new Set(['tile_mrt_gate_card_readers', 'tile_mrt_gate_card_readers_small']);
 const MRT_GATE = { link: 2, slide: .42 };   // link：離列車幾格內算同一班；slide：門板打開時往外滑多遠（閘門寬度的幾成，每片門板是一半寬）
 let mrtGateCells = new Set();   // 所有閘門管的格子（換地圖、重開時先還原成地圖原本的樣子）
@@ -151,6 +152,7 @@ function setupMrtGates() {
   const drawn = new Set((MAP && MAP.solid) || []);
   for (const k of mrtGateCells) { if (drawn.has(k)) mapWalls.add(k); else mapWalls.delete(k); }
   mrtGateCells = new Set();
+  const linked = new Set(), besidePlatform = new Map();   // 跟列車連動的閘門；在月台邊但車廂停不到的閘門（→ 它蓋到的格子）
   for (const tr of G.mrtTrains || []) {
     tr.gates = []; tr.gateKey = null;
     const trainCells = new Set();
@@ -170,10 +172,19 @@ function setupMrtGates() {
       for (let c = Math.ceil(x0 - .5); c + .5 < x0 + w; c++) for (let r = Math.ceil(y0 - .5); r + .5 < y0 + h; r++) if (inGrid(c, r)) cells.push(c + ',' + r);
       if (!cells.length) continue;
       const cs = cells.map(k => +k.split(',')[0]), rs = cells.map(k => +k.split(',')[1]);
-      if (Math.max(...cs) < cL || Math.min(...cs) >= cR || Math.min(...rs) > bottom + MRT_GATE.link || Math.max(...rs) < top - MRT_GATE.link) continue;   // 不在這班車旁邊
-      cells.forEach(k => mrtGateCells.add(k));
-      tr.gates.push({ stamp: s, cells, added: new Set(), cleared: new Set(), below: Math.max(...rs) > bottom });   // below：閘門在列車下面（推人時往下推）
+      // 擋路只擋圖片最下面那一排（門腳站的地方）：上面那排是門的上半身，人可以走到門前、被門的圖遮住一點，跟其他物件「最下排擋路」一樣
+      const footRow = Math.max(...rs), foot = cells.filter(k => +k.split(',')[1] === footRow);
+      if (Math.min(...rs) > bottom + MRT_GATE.link || Math.max(...rs) < top - MRT_GATE.link) continue;   // 上下離這班車太遠：不在這個月台
+      if (Math.max(...cs) < cL || Math.min(...cs) >= cR) { besidePlatform.set(s, foot); continue; }   // 在月台邊、但超出列車停的範圍：車廂停不到
+      linked.add(s);
+      foot.forEach(k => mrtGateCells.add(k));
+      tr.gates.push({ stamp: s, cells: foot, added: new Set(), cleared: new Set(), below: Math.max(...rs) > bottom });   // below：閘門在列車下面（推人時往下推）
     }
+  }
+  // 車廂停不到的閘門（沒跟任何一班車連動）：一直關著，蓋到的格子都擋（重開、換地圖時跟其他閘門一樣先還原）
+  for (const [st, cells] of besidePlatform) {
+    if (linked.has(st)) continue;
+    for (const k of cells) { mrtGateCells.add(k); mapWalls.add(k); }
   }
 }
 // 每幀（列車更新擋路格的前後各一次）：照列車狀態算每一格該不該擋。前一次：列車剛停好時先把閘門加的牆拿掉，列車才記得到自己的牆；
@@ -506,16 +517,17 @@ function updateMrtTrains(dt) {
 function mrtTrainSortables(list) {
   for (const tr of G.mrtTrains || []) {
     if (tr.state === 'away') continue;
-    list.push({ y: tr.top, draw: () => drawMrtTrain(ctx, tr, 'back') });
-    list.push({ y: tr.bottom + MRT_TRAIN.frontSortDy, draw: () => drawMrtTrain(ctx, tr, 'front') });
-    list.push({ y: tr.bottom + MRT_TRAIN.doorSortDy, draw: () => drawMrtTrain(ctx, tr, 'frontDoor') });
+    const floor = tr.cars && tr.cars[0] ? stampDrawFloor(tr.cars[0].stamp) : 1;   // 列車在幾樓：照車頭那張圖的樓層
+    list.push({ floor, y: tr.top, draw: () => drawMrtTrain(ctx, tr, 'back') });
+    list.push({ floor, y: tr.bottom + MRT_TRAIN.frontSortDy, draw: () => drawMrtTrain(ctx, tr, 'front') });
+    list.push({ floor, y: tr.bottom + MRT_TRAIN.doorSortDy, draw: () => drawMrtTrain(ctx, tr, 'frontDoor') });
   }
 }
 // 地圖上擺的物件（例如月台邊的閘門讀卡機、圍欄）底部剛好落在列車底邊附近時：
 // 車殼排在底邊往下 frontSortDy、車門那幾欄排在底邊往下 doorSortDy，物件夾在兩者中間就會「車門處在前面、其他地方被車殼蓋住」，看起來破圖。
 // 這種物件一律排到整個車殼前面（js/maploader.js 的 collectMapOccluders 會問這裡）。
 function mrtMapItemSortY(it, y) {
-  if (!G || !G.mrtTrains || it.part || y >= FLOOR2_SORT - 60000) return y;   // 2 樓的東西、上下拆開的柱子不管
+  if (!G || !G.mrtTrains || it.part || it.floor === 2) return y;   // 2 樓的東西、上下拆開的柱子不管
   for (const tr of G.mrtTrains) {
     if (tr.state === 'away') continue;
     const lo = tr.bottom + Math.min(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy), hi = tr.bottom + Math.max(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy);

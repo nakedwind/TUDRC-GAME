@@ -325,7 +325,7 @@ function mfRelease(t, rescued) {
   t.eatenBy = null;
   if (e.mf && e.mf.prey === t) { e.mf.prey = null; e.mf.cd = MILKFISH.eatCooldown; }
   // 放在虱目魚小子腳邊找得到的空地
-  const ok = (x, y) => typeof sentryBlocked !== 'function' || !sentryBlocked(x, y);
+  const ok = (x, y) => typeof sentryBlocked !== 'function' || !onFloorDo(e, () => sentryBlocked(x, y));   // 照虱目魚小子那一層找空地（js/pathfinding.js）
   let px = e.x, py = e.y + 14;
   if (!ok(px, py)) for (let k = 1; k <= 24 && !ok(px, py); k++) { const a = k * 2.4, r = 8 + k * 2.5; px = e.x + Math.cos(a) * r; py = e.y + Math.sin(a) * r; }
   if (ok(px, py)) { t.x = px; t.y = py; }

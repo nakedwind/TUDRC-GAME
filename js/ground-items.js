@@ -10,7 +10,8 @@ const GROUND_ITEMS = { size: 26, sortDy: 10, guideReach: 30, throwReach: 120, ki
 
 // 背包「放在地上」呼叫：從背包拿掉 qty 個，放在溫特面前一點點的地上（同一個位置已經有同樣的東西就疊在一起）
 // aim＝{x, y}：丟到這個位置（快捷欄拖到地圖上，js/quick-slots.js）；太遠就丟到 throwReach 那麼遠。那裡有障礙物＝不能放（回傳 0）
-const groundBlocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y) : solidBlocksPoint(x, y);
+// 這個點能不能放東西：照放下去那一層的牆、建築判斷（js/pathfinding.js 的 placeFloorAt）
+const groundBlocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y, hasFloors ? { x, y, floor: placeFloorAt(x, y, G.player) } : null) : solidBlocksPoint(x, y);
 function groundDropSpot(aim) {   // 拖到 aim 會落在哪裡；有障礙物＝null
   const p = G && G.player; if (!p) return null;
   const dx = aim.x - p.x, dy = aim.y - p.y, d = Math.hypot(dx, dy), k = d > GROUND_ITEMS.throwReach ? GROUND_ITEMS.throwReach / d : 1;
@@ -26,7 +27,7 @@ function dropItemOnGround(id, qty = 1, aim = null) {
   else if (groundBlocked(x, y)) { x = p.x; y = p.y + 4; }   // 背包的「放在地上」：面前是牆就放在腳下
   if (n >= count) supplyInventory.delete(id); else supplyInventory.set(id, count - n);
   G.groundItems = G.groundItems || [];
-  const floor = actorFloor(p), pile = G.groundItems.find(g => g.id === id && (g.floor || 1) === floor && Math.hypot(g.x - x, g.y - y) < 10);   // floor：放在幾樓（同一層的才疊成一堆）
+  const floor = hasFloors ? placeFloorAt(x, y, p) : 1, pile = G.groundItems.find(g => g.id === id && (g.floor || 1) === floor && Math.hypot(g.x - x, g.y - y) < 10);   // floor：放在幾樓（同一層的才疊成一堆）
   const at = performance.now() / 1000;   // 什麼時候放的：從上面掉下來的動畫（drawGroundItem）
   if (pile) Object.assign(pile, { qty: pile.qty + n, at }); else G.groundItems.push({ id, qty: n, x, y, at, floor });
   return n;

@@ -42,7 +42,8 @@ function setupStreetVehicles() {
     if (!tile || (byDefault ? s.still : !s.rush)) continue;   // 沒開「會暴衝撞人」的車：留在地圖上當一般物件
     G.mapDestroyed.add(s);
     G.streetVehicles.push({
-      stamp: s, tile, cfg: STREET_VEHICLES[kind], kind, state: 'idle', dir: s.fx ? -1 : 1, spd: 0, cd: Math.random() * 2, scanT: Math.random() * .25,
+      stamp: s, floor: stampDrawFloor(s), tile, cfg: STREET_VEHICLES[kind], kind, state: 'idle',   // floor：照地圖上那張圖的樓層
+      dir: s.fx ? -1 : 1, spd: 0, cd: Math.random() * 2, scanT: Math.random() * .25,
       x: OX + (s.c + mapTileW(tile) / 2) * CELL + (s.ox || 0),
       y: OY + (s.r + mapTileH(tile) - .5) * CELL + (s.oy || 0),   // 最下面那一格的中心：輪子壓的那條線
       outOfStart: false, stopX: 0, hit: new Set(), warnT: 0, crashT: 0,
@@ -52,7 +53,7 @@ function setupStreetVehicles() {
   }
 }
 
-const vehicleBlockedAt = (x, y) => { const [c, r] = cellAt(x, y); return !inGrid(c, r) || solidBlocksPoint(x, y) || !!barrierAt(c, r); };
+const vehicleBlockedAt = (x, y) => { const [c, r] = cellAt(x, y); return !inGrid(c, r) || onFloorDo(spawnFloorAt(c, r), () => solidBlocksPoint(x, y) || !!barrierAt(c, r)); };   // 車在地面上跑：照那一格的樓層（js/pathfinding.js）
 // 往車頭方向看：能衝到哪裡（回傳車身中心的停止 x）；前面沒地方衝就回傳 null
 function vehicleLaneStop(v) {
   const S = STREET_VEHICLES, step = CELL / 4;
@@ -212,7 +213,7 @@ function updateStreetVehicles(dt) {
 
 // ---- 畫車：跟角色一起排前後（js/render.js）----
 function streetVehicleSortables(list) {
-  for (const v of G.streetVehicles || []) list.push({ y: v.y + 16, draw: () => drawStreetVehicle(ctx, v) });
+  for (const v of G.streetVehicles || []) list.push({ floor: v.floor || 1, y: v.y + 16, draw: () => drawStreetVehicle(ctx, v) });
 }
 function drawStreetVehicle(ctx, v) {
   const img = tileImage(v.tile); if (!img) return;

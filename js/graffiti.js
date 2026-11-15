@@ -136,12 +136,14 @@ function graffitiLists() {
   return (graffitiCache = { map: MAP, ground, onOcc });
 }
 // render.js：地板塗鴉畫在地面層之後、角色之前
-function drawGraffitiGround(ctx) { for (const g of graffitiLists().ground) drawGraffitiMark(ctx, g); }
+// 地板塗鴉在幾樓：畫的時候記下的（舊的沒記：那格只有 2 樓＝2）
+const graffitiFloor = g => g.floor || (hasFloors ? spawnFloorAt(...cellAt(g.x, g.y)) : 1);
+function drawGraffitiGround(ctx) { for (const g of graffitiLists().ground) if (!fxSkip(graffitiFloor(g))) drawGraffitiMark(ctx, g); }
 // render.js：畫在物品上的塗鴉，緊接在那個物品之後畫（人走到物品後面時一起被擋住）
 function graffitiSortables(out) {
   for (const [it, list] of graffitiLists().onOcc) {
     if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
-    out.push({ y: it.y + .01, draw: () => { for (const g of list) drawGraffitiMark(ctx, g); } });
+    out.push({ floor: it.floor, band: it.band, y: it.y + .01, draw: () => { for (const g of list) drawGraffitiMark(ctx, g); } });   // 跟著那張圖的樓層、層
   }
 }
 
@@ -310,6 +312,7 @@ function placeGraffiti(x, y) {
   const chk = graffitiCheck(x, y);
   if (chk.bad) { sfx('error'); flash(chk.bad, x, y - 20, '#ff8f8f', 1.4); return; }
   const mark = { s: pl.sym, c: pl.color, x: Math.round(x), y: Math.round(y), on: chk.on };
+  if (hasFloors && visualFloor(G.player) === 2) mark.floor = 2;   // 在 2 樓畫的
   if (pl.custom) { delete mark.s; mark.p = pl.custom; }   // 自訂圖案：塗鴉自己帶一份圖
   graffitiHere().push(mark);
   saveGraffiti();

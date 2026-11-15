@@ -196,13 +196,14 @@ function bomberShouldArm(e) {
 }
 
 // ---- 自爆 ----
-function slimeExplode(e, mul) {
+function slimeExplode(e, mul) { withBlastFloor(actorFloor(e), () => slimeExplodeNow(e, mul)); }   // 史萊姆在幾樓就只炸那一層（js/pathfinding.js）
+function slimeExplodeNow(e, mul) {
   const R = SLIME_BOMB.radius, x = e.x, y = e.y;
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 自爆史萊姆也炸得開可炸開的牆（js/breakable-walls.js）
   if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 炸開珍珠大童的貝殼（js/pearl-elder.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 自爆史萊姆的爆炸波及順順宮帽：打開帽子
   const p = G.player;
-  if (p && p.hp > 0 && Math.hypot(p.x - x, p.y - y) <= R) {
+  if (p && p.hp > 0 && blastHits(p) && Math.hypot(p.x - x, p.y - y) <= R) {
     const dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SLIME_BOMB.player * mul) : SLIME_BOMB.player * mul));
     p.hp = Math.max(0, p.hp - dmg);
     p.hitT = .45; p.underAttackT = 5; G.damageVignetteT = .5;
@@ -216,7 +217,7 @@ function slimeExplode(e, mul) {
     if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被自爆史萊姆的爆炸波及'); }
   }
   for (const t of G.towers) {
-    if (t.hp <= 0 || Math.hypot(t.x - x, t.y - y) > R) continue;
+    if (t.hp <= 0 || !blastHits(t) || Math.hypot(t.x - x, t.y - y) > R) continue;
     const defense = sentryDefense(t);
     const dmg = SLIME_BOMB.sentry * mul * (1 - defense);
     t.hp = Math.max(0, t.hp - dmg); t.hitT = Math.max(t.hitT || 0, .25);
@@ -224,6 +225,7 @@ function slimeExplode(e, mul) {
     if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
   for (const o of [...G.obstacles]) {
+    if (!blastHits(o)) continue;   // 不同樓層的建築炸不到
     if (o.trap) {   // 地雷：被炸到會跟著爆（連鎖）
       if (o.hp > 0 && !(o.fuseT > 0) && Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15;
       continue;
@@ -237,7 +239,7 @@ function slimeExplode(e, mul) {
     if (o.hp <= 0) removeBarrier(o);
   }
   for (const other of G.enemies) {   // 炸到其他怪物（可以引發連鎖爆炸）
-    if (other === e || other.dead || other.hp <= 0 || Math.hypot(other.x - x, other.y - y) > R) continue;
+    if (other === e || other.dead || other.hp <= 0 || !blastHits(other) || Math.hypot(other.x - x, other.y - y) > R) continue;
     other.hp -= SLIME_BOMB.monster * mul; other.hitT = .16; other.hitColor = '#ffb37a';
     enemyHitReact(other, x, y, true);
   }
@@ -341,7 +343,7 @@ function addSlimeSplat(x, y, color, r) {
     const a = Math.random() * Math.PI * 2, d = Math.random() * r * .55;
     blobs.push({ dx: Math.cos(a) * d, dy: Math.sin(a) * d * .55, rr: r * (.35 + Math.random() * .4) });
   }
-  G.slimeSplats.push({ x, y: y + 10, color, blobs, t: 7, t0: 7 });
+  G.slimeSplats.push({ x, y: y + 10, floor: floorAtPoint(x, y), color, blobs, t: 7, t0: 7 });
   if (G.slimeSplats.length > 80) G.slimeSplats.shift();
 }
 
@@ -405,6 +407,7 @@ function drawCombatFeelGround(ctx) {
   drawAcidGround(ctx);   // 吐酸：酸液池、落點警示
   // （倒下的鳥頭人、珍珠小童的屍體改由 render.js 依位置排序畫，見 drawCorpseSorted）
   if (G.slimeSplats) for (const s of G.slimeSplats) {
+    if (fxSkip(s.floor)) continue;   // 另一層的黏液這一輪不畫
     const a = Math.min(1, s.t / 2) * .55;   // 最後 2 秒淡出
     ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = s.color;
     for (const b of s.blobs) {
@@ -413,7 +416,7 @@ function drawCombatFeelGround(ctx) {
     ctx.restore();
   }
   for (const e of G.enemies) {
-    if (!(e.fuseT > 0) || !isLit(e.x, e.y)) continue;
+    if (!(e.fuseT > 0) || !isLit(e.x, e.y) || fxSkip(actorFloor(e))) continue;
     const p = 1 - e.fuseT / SLIME_BOMB.fuse, R = SLIME_BOMB.radius;
     ctx.save();
     ctx.globalAlpha = .12 + .2 * p; ctx.fillStyle = '#ff3b2a';
@@ -517,7 +520,7 @@ function launchAcidSpit(e) {
   const g = e.spitGoal; e.spitGoal = null;
   const d = Math.hypot(g.x - e.x, g.y - e.y);
   (G.acidShots = G.acidShots || []).push({
-    x0: e.x, y0: e.y - 8, x1: g.x, y1: g.y, t: 0,
+    x0: e.x, y0: e.y - 8, x1: g.x, y1: g.y, t: 0, floor: actorFloor(e),   // floor：吐酸的史萊姆在幾樓，酸液就落在那層
     dur: Math.max(.4, Math.min(.9, d / (SLIME_SPIT.flySpeed * CELL))), h: 34 + d * .18, trailT: 0,
   });
   e.spitCd = SLIME_SPIT.cooldown; e.spitRecoverT = .22;
@@ -533,7 +536,7 @@ function updateAcidSpit(dt) {
         const [x, y, z] = acidShotPos(s);
         (G.fxGoo = G.fxGoo || []).push({ x, y: y + 8, z: z + 2, vx: (Math.random() * 2 - 1) * 15, vy: 0, vz: -10, r: 1.5 + Math.random(), color: SLIME_VARIANTS.spitter.goo });
       }
-      if (s.t >= s.dur) { s.done = true; addSpitPool(s.x1, s.y1); }
+      if (s.t >= s.dur) { s.done = true; withBlastFloor(s.floor, () => addSpitPool(s.x1, s.y1)); }
     }
     G.acidShots = G.acidShots.filter(s => !s.done);
   }
@@ -544,7 +547,7 @@ function updateAcidSpit(dt) {
       if (pool.t <= 0) continue;
       const inPool = o => { const dx = o.x - pool.x, dy = (o.y - pool.y) / .6; return dx * dx + dy * dy <= pool.r * pool.r; };
       const p = G.player;
-      if (p && p.hp > 0 && inPool(p)) {
+      if (p && p.hp > 0 && fieldHits(pool.floor, p) && inPool(p)) {
         p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(P.playerDps * dt * (typeof equipAcidMul === 'function' ? equipAcidMul() : 1)) : P.playerDps * dt));   // 防毒面具也減少酸液傷害
         p.hitT = Math.max(p.hitT || 0, .15); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .25);
         p.acidTick = (p.acidTick || 0) - dt;
@@ -552,7 +555,7 @@ function updateAcidSpit(dt) {
         if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '踩進吐酸史萊姆的酸液'); }
       }
       for (const t of G.towers) {
-        if (t.hp <= 0 || !inPool(t)) continue;
+        if (t.hp <= 0 || !fieldHits(pool.floor, t) || !inPool(t)) continue;
         const def = sentryDefense(t);
         t.hp = Math.max(0, t.hp - P.sentryDps * (1 - def) * dt);
         t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#d4e04a';
@@ -576,7 +579,7 @@ function acidShotPos(s) {
 }
 function addSpitPool(x, y) {
   const P = SLIME_SPIT.pool, r = P.radius * CELL;
-  (G.spitPools = G.spitPools || []).push({ x, y, r, t: P.life, t0: P.life, shape: scorchShape(r, 18), bubbles: [], fizzT: 0 });
+  (G.spitPools = G.spitPools || []).push({ x, y, floor: floorAtPoint(x, y), r, t: P.life, t0: P.life, shape: scorchShape(r, 18), bubbles: [], fizzT: 0 });
   spawnGoo(x, y - 8, SLIME_VARIANTS.spitter.goo, 8, .9);
   G.effects.push({ ring: true, x, y, r: 4, r2: r * 1.1, life: .25, life0: .25, color: '#e6f06a' });
   if (typeof mfxOn === 'function' && mfxOn('acid')) acidSpitLandV2(x, y);   // V2：黃綠色液體皇冠、拋出去的酸液（js/misc-fx-v2.js）
@@ -585,6 +588,7 @@ function addSpitPool(x, y) {
 // 地面層：酸液池＋落點警示（蓄力中、飛行中）
 function drawAcidGround(ctx) {
   if (G.spitPools) for (const pool of G.spitPools) {
+    if (fxSkip(pool.floor)) continue;   // 另一層的酸液這一輪不畫
     const a = Math.min(1, (pool.t0 - pool.t) / .2, pool.t / 1);   // 0.2 秒擴散開、最後 1 秒淡掉
     const grow = Math.min(1, (pool.t0 - pool.t) / .2);
     ctx.save(); ctx.translate(pool.x, pool.y); ctx.scale(1, .6);
@@ -613,7 +617,7 @@ function drawAcidGround(ctx) {
     ctx.restore();
   };
   for (const e of G.enemies) if (e.spitWindT > 0 && e.spitGoal && isLit(e.x, e.y)) warn(e.spitGoal.x, e.spitGoal.y, .4 * (1 - e.spitWindT / SLIME_SPIT.windup));
-  if (G.acidShots) for (const s of G.acidShots) warn(s.x1, s.y1, .4 + .6 * Math.min(1, s.t / s.dur));
+  if (G.acidShots) for (const s of G.acidShots) if (!fxSkip(s.floor)) warn(s.x1, s.y1, .4 + .6 * Math.min(1, s.t / s.dur));   // 只在落點那一層畫警示
 }
 // 角色上層：飛行中的酸液球（地上有影子）
 function drawAcidTop(ctx) {

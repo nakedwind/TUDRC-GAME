@@ -196,7 +196,7 @@ function grantLockerLoot(loot,where='置物櫃'){
     const got=supplyGain(item.id,qty);   // 持有上限：拿不下的會跳提示
     if(got<qty&&G?.player){
       G.groundItems=G.groundItems||[];
-      G.groundItems.push({id:item.id,qty:qty-got,x:G.player.x,y:G.player.y+12,at:performance.now()/1000,floor:actorFloor(G.player)});
+      G.groundItems.push({id:item.id,qty:qty-got,x:G.player.x,y:G.player.y+12,at:performance.now()/1000,floor:hasFloors?placeFloorAt(G.player.x,G.player.y+12,G.player):1});
       systemNotice('背包放不下的「'+item.name+'」留在地上');
     }
     if(got){showItemPickupNotice(item.id,got);systemNotice('在'+where+'找到「'+item.name+'」×'+got);}
