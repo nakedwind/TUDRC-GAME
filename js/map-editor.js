@@ -2549,6 +2549,29 @@ function renderLayerBlendRow() {
   row.append(label, sel);
   return row;
 }
+// ---- 🏢 圖層在幾樓（存在 layerOrder 那一層的 level／top2，js/map-levels.js）：1 樓／2 樓／2 樓上層 ----
+// 圖層名稱不再決定樓層（以前名稱有「2樓」就算 2 樓）；這層裡沒另外設樓層的圖都跟著這層
+function renderLayerFloorRow() {
+  const row = document.createElement('div'); row.className = 'layer-blend';
+  const l = layersOf(curMap()).find(x => x.id === activeLayer) || {};
+  row.title = '目前圖層「' + layerName(activeLayer) + '」在幾樓。2 樓：裡面的圖蓋在一樓的人上面、2 樓的人走在它上面；2 樓上層：永遠蓋在 2 樓的人上面（像屋簷）。這層裡沒另外設樓層的圖都跟著這層';
+  const label = document.createElement('span'); label.className = 'layer-op-label'; label.textContent = '🏢 樓層';
+  const sel = document.createElement('select');
+  sel.innerHTML = '<option value="1">1 樓</option><option value="2">2 樓</option><option value="top">2 樓上層</option>';
+  sel.value = l.level === 2 ? (l.top2 ? 'top' : '2') : '1';
+  sel.addEventListener('change', () => setLayerFloor(activeLayer, sel.value));
+  row.append(label, sel);
+  return row;
+}
+function setLayerFloor(id, v) {
+  const m = curMap();
+  pushUndo();
+  const cur = customizeLayers(m).find(l => l.id === id); if (!cur) return;
+  if (v === '1') { delete cur.level; delete cur.top2; } else { cur.level = 2; if (v === 'top') cur.top2 = true; else delete cur.top2; }
+  if (typeof levelCache !== 'undefined') levelCache = null;
+  syncLayers(); renderLayers(); saveMaps(); draw();
+  setStatus('「' + cur.name + '」設為' + ({ 1: '1 樓', 2: '2 樓', top: '2 樓上層' }[v]) + '的圖層（這層裡沒另外設樓層的圖都跟著這層）', '#8fc8ff');
+}
 function setLayerBlend(id, mode) {
   const m = curMap();
   pushUndo();
@@ -2574,6 +2597,7 @@ function renderLayers() {
   layerBtnsEl.appendChild(tools);
   layerBtnsEl.appendChild(renderLayerOpacityRow());
   layerBtnsEl.appendChild(renderLayerBlendRow());
+  if (typeof MapLevels !== 'undefined' && document.getElementById('levelConvert')) layerBtnsEl.appendChild(renderLayerFloorRow());   // 🏢 圖層在幾樓（只有地圖編輯器有 2 樓功能）
   // 顯示順序反轉：上層在最上、地板在最下（不改 LAYERS 本身的疊圖 z 順序）
   [...LAYERS].reverse().forEach(l => {
     const group = document.createElement('span'); group.className = 'layer-group';
@@ -2584,6 +2608,10 @@ function renderLayers() {
     if (layerOpacityOf(l.id) < 100) {   // 調過透明度的圖層：名字旁標出百分比，免得忘記
       const tag = document.createElement('span'); tag.className = 'layer-op-tag'; tag.textContent = layerOpacityOf(l.id) + '%';
       tag.title = '這層在編輯器裡調成半透明（遊戲裡不會變）'; b.querySelector('.layer-label').after(tag);
+    }
+    if (l.level === 2) {   // 2 樓的圖層：名字旁標出來（js/map-levels.js）
+      const tag = document.createElement('span'); tag.className = 'layer-op-tag layer-floor-tag'; tag.textContent = l.top2 ? '2F上層' : '2F';
+      tag.title = l.top2 ? '2 樓上層：永遠蓋在 2 樓的人上面（像屋簷）' : '2 樓的圖層：裡面的圖蓋在一樓的人上面、2 樓的人走在它上面'; b.querySelector('.layer-label').after(tag);
     }
     if (l.blend) {   // 整層設了混合模式：名字旁標出來
       const tag = document.createElement('span'); tag.className = 'layer-op-tag layer-blend-tag'; tag.textContent = layerBlendName(l.blend);
@@ -3274,13 +3302,13 @@ function selectedMrtCars() {
   return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(s => s && MRT_TRAIN_CAR_IDS.has(s.id));
 }
 // ---- 選物件時的「🏢 樓層」選單：這張圖在幾樓（存在 stamp.level，規則在 js/map-levels.js，遊戲照這個畫、照這個擋路）----
-// 自動＝沒寫 level，照舊規則推算（名稱有「2樓」的圖層、或舊的「🌉 2樓的圖」勾選）；跨樓層＝從一樓立到二樓的柱子、牆（上下兩半各算一層）
+// 跟著圖層＝沒寫 level，照所在圖層的「🏢 樓層」；跨樓層＝從一樓立到二樓的柱子、牆（上下兩半各算一層）
 function refreshDeck2Control() {
   let box = document.getElementById('deck2Control');
   if (!box) {
     box = document.createElement('div'); box.id = 'deck2Control'; box.className = 'blend-control';
     box.innerHTML = '<label title="這張圖在幾樓。2 樓的圖蓋在一樓的人上面、2 樓的人走在它上面；跨樓層＝從一樓立到二樓的柱子、牆，下半段算 1 樓、上半段算 2 樓。2 樓能不能走要另外用「🏢 樓層種類」畫格子">🏢 樓層 '
-      + '<select id="levelStampSel"><option value="auto">自動</option><option value="1">1 樓</option><option value="2">2 樓</option><option value="span">跨樓層</option></select></label>';
+      + '<select id="levelStampSel"><option value="auto">跟著圖層</option><option value="1">1 樓</option><option value="2">2 樓</option><option value="span">跨樓層</option></select></label>';
     document.getElementById('selControls').appendChild(box);
     document.getElementById('levelStampSel').addEventListener('change', e => {
       if (dropLockedSelections('切換樓層')) return;
@@ -3289,7 +3317,7 @@ function refreshDeck2Control() {
       const v = e.target.value;
       for (const s of list) {
         delete s.deck2;   // 舊的「2樓的圖」勾選：改用 level
-        if (v === 'auto') delete s.level; else s.level = v === 'span' ? 'span' : Number(v);
+        if (v === 'auto') delete s.level;   // 跟著圖層 else s.level = v === 'span' ? 'span' : Number(v);
       }
       if (typeof levelCache !== 'undefined') levelCache = null;
       saveMaps(); draw(); refreshSelPanel();
@@ -3303,9 +3331,10 @@ function refreshDeck2Control() {
   const vals = new Set(list.map(s => s.level == null ? 'auto' : String(s.level)));
   sel.value = vals.size === 1 ? [...vals][0] : 'auto';
   // 自動的：在選項上寫出目前推算成幾樓
+  if (m.levels === 1) MapLevels.prepare(m, tileById);   // 第一版的樓層資料先升級（圖層名稱→圖層的樓層）
   const auto = list.filter(s => s.level == null);
   const guess = auto.length ? new Set(auto.map(s => String(MapLevels.stampLevel(s, m, tileById)))) : null;
-  sel.options[0].textContent = guess && guess.size === 1 ? '自動（目前算 ' + ({ 1: '1 樓', 2: '2 樓', span: '跨樓層' }[[...guess][0]]) + '）' : '自動';
+  sel.options[0].textContent = guess && guess.size === 1 ? '跟著圖層（' + ({ 1: '1 樓', 2: '2 樓', span: '跨樓層' }[[...guess][0]]) + '）' : '跟著圖層';
   sel.title = vals.size > 1 ? '選了好幾個，樓層不一樣' : '';
 }
 function refreshMrtDoorsControl() {
@@ -4176,8 +4205,9 @@ if (storyField) storyField.addEventListener('change', e => {
 // 原本畫好的 2 樓地面保留（只加、只拿掉牆），畫完還能用 🌉 筆刷微調。
 function generateDeckFromLayers() {
   const m = curMap(), order = layersOf(m);
-  const f2 = order.filter(l => /2樓|二樓/.test(l.name || ''));
-  if (!f2.length) { setStatus('這張地圖沒有名稱含「2樓」的圖層：先在圖層面板把 2 樓的圖層改名（例如「2樓地板」「2樓牆壁」）', '#ff8f8f'); return; }
+  const explicit = order.some(l => l.level != null);   // 圖層有設樓層（🏢 樓層）就照設的；都沒設的舊地圖才看名稱有沒有「2樓」
+  const f2 = order.filter(l => explicit ? l.level === 2 : /2樓|二樓/.test(l.name || ''));
+  if (!f2.length) { setStatus('這張地圖沒有 2 樓的圖層：先在圖層面板把 2 樓的圖層設成「🏢 樓層：2 樓」', '#ff8f8f'); return; }
   const isObj = id => /^object\d*$/.test(id) || id === 'overlay' || id === 'top';
   const floorIds = new Set(f2.filter(l => !isObj(l.id) && !/牆/.test(l.name)).map(l => l.id));
   const wallIds = new Set(f2.filter(l => /牆/.test(l.name)).map(l => l.id));

@@ -15,6 +15,7 @@ let levelCheckList = null;  // 上一次檢查的結果（檢查面板開著時�
 let levelCache = null;
 function levelInfo(m) {
   if (levelCache && levelCache.m === m) return levelCache;
+  if (m.levels === 1) MapLevels.prepare(m, tileById);   // 第一版的樓層資料：圖層名稱的「2樓」寫成圖層的樓層（存檔後就是新格式）
   const L = MapLevels.floor2Layers(m);
   levelCache = { m, L, deck: new Set(m.deck || []), ramps: new Set(m.ramps || []), only2: MapLevels.only2Cells(m, tileById), art: null };
   levelCache.ctx = { L, deck: levelCache.deck, get art() { return levelCache.art || (levelCache.art = MapLevels.floorArtCells(m, tileById, L)); } };

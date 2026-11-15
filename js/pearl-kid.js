@@ -329,7 +329,7 @@ function updateDropCorpse(c, dt) {   // 由 combat-feel.js 的屍體更新呼叫
     G.pearlBits = G.pearlBits || [];
     for (let i = 0; i < 3; i++) {
       const a = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 60;
-      G.pearlBits.push({ x: c.x, y: c.y + 4, z: 10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: 70 + Math.random() * 60, spin: 0, life: 2.2, file: c.pearl });
+      G.pearlBits.push({ x: c.x, y: c.y + 4, floor: c.floor || 1, z: 10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: 70 + Math.random() * 60, spin: 0, life: 2.2, file: c.pearl });
     }
     if (typeof sfxAt === 'function') sfxAt('pearlHit', c.x, c.y, .7, 'pearl-drop');
   }
@@ -339,7 +339,7 @@ function updatePearlBits(dt) {
     b.life -= dt; b.spin += (Math.hypot(b.vx, b.vy) / 6) * dt;
     if (b.z > 0 || b.vz > 0) { b.vz -= 420 * dt; b.z = Math.max(0, b.z + b.vz * dt); if (b.z === 0 && b.vz < 0) b.vz = Math.abs(b.vz) > 60 ? -b.vz * .35 : 0; }
     const nx = b.x + b.vx * dt, ny = b.y + b.vy * dt;
-    if (!enemyBlocked(nx, ny)) { b.x = nx; b.y = ny; } else { b.vx *= -.4; b.vy *= -.4; }
+    if (!onFloorDo(b.floor || 1, () => enemyBlocked(nx, ny))) { b.x = nx; b.y = ny; } else { b.vx *= -.4; b.vy *= -.4; }   // 照珍珠滾在那一層的牆（js/pathfinding.js）
     b.vx *= Math.pow(.25, dt); b.vy *= Math.pow(.25, dt);   // 在地上滾慢下來
   }
   G.pearlBits = G.pearlBits.filter(b => b.life > 0);

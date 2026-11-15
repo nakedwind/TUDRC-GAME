@@ -107,8 +107,8 @@ function computeLightField() {
   // 陸橋：一樓的燈照一樓的牆擴散、只照亮「不是 2 樓地面」的格子；二樓的燈只在 2 樓地面（和樓層出入口）上擴散、只照亮那些格子。
   // 畫面上每一格看到的是最上面那一層：2 樓地面的格子顯示二樓的亮度，其他格子顯示一樓的亮度。
   const walls1 = lightWalls, twoFloors = hasFloors && refreshLightFloors();
-  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
-  losNoFloors = true;
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck, keepScoped = floorScoped;
+  losNoFloors = true; floorScoped = true;   // 光照自己管樓層（下面每盞燈設好那一層）
   // floor 0 的燈（溫特站在樓梯上時手上的燈）兩層各照一次
   const passes = []; for (const l of lightsCache) { if (twoFloors && l.floor === 0) passes.push([l, 1], [l, 2]); else passes.push([l, l.floor === 2 ? 2 : 1]); }
   for (const [l, lf] of passes) {
@@ -126,7 +126,7 @@ function computeLightField() {
   }
   beamNoLos = false;
   if (twoFloors) lightFloor2WallFaces();
-  lightWalls = walls1; lightSkipSurf = -1; losNoFloors = false; floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck;
+  lightWalls = walls1; lightSkipSurf = -1; losNoFloors = false; floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; floorScoped = keepScoped;
   if (typeof lightBreakableWallFaces === 'function') lightBreakableWallFaces([lightField, visField, warmField]);   // 可炸開的牆：牆面跟著牆腳一起亮（js/breakable-walls.js）
 }
 // 頭燈、手電筒畫面上照得到的格子：格子擴散（不限扇形，讓柔邊也有地方亮；範圍多一點給柔邊）＋從燈到格子要「直線看得到」。

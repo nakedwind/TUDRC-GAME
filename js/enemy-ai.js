@@ -209,7 +209,8 @@ function enemyBarrierAt(c, r) {
 }
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
-  if (!inGrid(c, r) || enemyWallPoint(x, y) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 牆吃像素微調（js/pathfinding.js）；順順宮帽也擋路（js/hangi-bao.js）
+  if (!inGrid(c, r) || enemyWallPoint(x, y) || !!gridBlockAtPoint(x, y, enemyBarrierAt) ||   // 建築：微調過位置的照微調後的範圍（js/build.js）
+      (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 牆吃像素微調（js/pathfinding.js）；順順宮帽也擋路（js/hangi-bao.js）
   if (edgeWallBlocksPoint(x, y)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）
   if (typeof deepWaterBlocksCell === 'function' && !(actor && (actor.behavior === 'moth' || (typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(actor.x, actor.y)))) && deepWaterBlocksCell(c, r)) return true;   // 深水區：地面怪物進不去，會飛的人面蝶照樣飛（js/swim-ring.js）
   if (typeof escalatorSideBlocks === 'function' && !(actor && actor.behavior === 'moth') && escalatorSideBlocks(x, y + ESCALATOR.enemyFootDy)) return true;   // 側面手扶梯的扶手、外殼（js/escalators.js）
@@ -256,7 +257,8 @@ function resetEnemyNavigation(e) {
   e.wanderCell = null;
 }
 // 擊退與衝撞要逐小步檢查，避免一次跨進基地、牆壁或建築的阻擋格。
-function displaceEnemy(e, dx, dy, distance, resetRoute = true) {
+function displaceEnemy(e, dx, dy, distance, resetRoute = true) { return onFloorDo(e, () => displaceEnemyNow(e, dx, dy, distance, resetRoute)); }   // 照被推的怪物那一層（js/pathfinding.js）
+function displaceEnemyNow(e, dx, dy, distance, resetRoute) {
   const length = Math.hypot(dx, dy);
   if (!length || distance <= 0) return false;
   const steps = Math.max(1, Math.ceil(distance / 4));

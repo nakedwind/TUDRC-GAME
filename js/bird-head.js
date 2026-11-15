@@ -303,7 +303,7 @@ function drawChargerEyeFlashes(ctx) {
 function fallDirection(e) {
   const dir = e.faceRight ? 1 : -1, len = (e.drawHeight || 80) * .9;
   const blocked = d => { for (let k = 10; k <= len; k += 10) if (enemyBlocked(e.x + d * k, e.y)) return true; return false; };
-  return blocked(dir) && !blocked(-dir) ? -dir : dir;
+  return onFloorDo(e, () => blocked(dir) && !blocked(-dir) ? -dir : dir);   // 照倒下的那一層判斷牆
 }
 function pushFallCorpse(e) {
   const img = monsterImage(e.lastFrameFile || e.sprite);

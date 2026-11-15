@@ -30,6 +30,10 @@ const GOURD = {
   tossSpin: 0.55,       // 飛在空中時往後仰幾度（弧度）
   bounceTime: 0.2,      // 落地後再小彈一下（秒）
   knockPlayer: true,    // 溫特也會被震飛（false＝只震飛隊友）
+  hitMonsters: true,    // 壓頂也會打到其他怪物（不分敵我；葫蘆猴王也是）
+  monsterDamageMul: 0.3,   // 打到怪物的傷害：打隊友傷害的幾成（0.3＝3 成）
+  knockMonsters: true,  // 震波範圍內的怪物也會被震飛（推不動的怪，例如其他葫蘆猴、BOSS，只受傷不會飛）
+  shakeOutMice: true,   // 鑽在地底的花蓮老鼠會被震出地面、暈眩（跟被爆炸炸出來一樣）
   shockBuildingDamage: 15,   // 震波範圍內（沒被壓到）的建築受到的傷害：只晃一下、不會飛
   hopMax: 18,           // 震波範圍內的建築原地彈起來多高（像素）：最靠近葫蘆猴的
   hopMin: 7,            // 震波邊緣的建築彈多高（像素）
@@ -247,7 +251,8 @@ function gourdTrackSpot(e, s, dt) {
   const fx = s.spot.x - s.from.x, fy = s.spot.y - s.from.y, fd = Math.hypot(fx, fy), max = C.maxLeap * CELL;
   if (fd > max) { s.spot.x = s.from.x + fx / fd * max; s.spot.y = s.from.y + fy / fd * max; }
 }
-function gourdImpact(e) {
+function gourdImpact(e) { withBlastFloor(actorFloor(e), () => gourdImpactNow(e)); }   // 葫蘆猴在幾樓，壓扁、震飛就只算那一層（js/pathfinding.js）
+function gourdImpactNow(e) {
   const C = gmCfg(e), g = e.gm, R = C.hitRadius, x = e.x, y = e.y, quick = !!(g.slam && g.slam.quick);
   g.slam = null; g.recover = C.recover; g.cd = C.cooldown; e.slimeLift = 0; e.forceFrame = C.art.squash;
   resetEnemyNavigation(e);
@@ -260,7 +265,7 @@ function gourdImpact(e) {
       r: 2 + Math.random() * 2.5, life: .4 + Math.random() * .25, life0: .65, color: Math.random() < .5 ? '#a8936c' : '#d6c49a' });
   }
   gourdImpactFx(x, y + 12, R / GOURD.hitRadius);   // 撞擊閃光、飛起來的石礫、往外翻滾的灰塵（葫蘆猴王範圍大，特效跟著放大）
-  (G.gourdCracks = G.gourdCracks || []).push({ x, y: y + 12, life: C.crackLife, life0: C.crackLife, seed: Math.random() * 9, flip: Math.random() < .5, scale: C.crackScale });
+  (G.gourdCracks = G.gourdCracks || []).push({ x, y: y + 12, floor: actorFloor(e), life: C.crackLife, life0: C.crackLife, seed: Math.random() * 9, flip: Math.random() < .5, scale: C.crackScale });
   if (typeof sfxAt === 'function') { sfxAt('gourdSlam', x, y, 1, 'gourd-slam'); sfxAt('gourdLandCry', x, y, .9, 'gourd-cry'); }
   // 畫面震動：越近震越大，被壓到再加一點頓格
   const p = G.player, pd = p ? Math.hypot(p.x - x, p.y - y) : Infinity, near = Math.max(0, 1 - pd / (C.shakeRange * CELL));
@@ -268,22 +273,23 @@ function gourdImpact(e) {
   if (pd <= R) addHitstop(.07); else if (pd <= C.knockRadius) addHitstop(.04);
   // 壓到人：溫特、隊友（沒惹牠的阿瓦倫不算，跟史萊姆撲擊一樣）
   let crushed = false;
-  if (p && p.hp > 0 && pd <= R && !parryMiss(p, true)) { gourdHitPlayer(e, p); crushed = true; }
+  if (p && p.hp > 0 && blastHits(p) && pd <= R && !parryMiss(p, true)) { gourdHitPlayer(e, p); crushed = true; }
   for (const t of G.towers) {
-    if (t.hp <= 0 || Math.hypot(t.x - x, t.y - y) > R + 6 || !enemyNoticesSentry(e, t) || parryMiss(t, false)) continue;
+    if (t.hp <= 0 || !blastHits(t) || Math.hypot(t.x - x, t.y - y) > R + 6 || !enemyNoticesSentry(e, t) || parryMiss(t, false)) continue;
     gourdHitSentry(e, t); crushed = true;
   }
   if (crushed) g.laughAt = C.laughDelay;   // 壓到人：喘氣時得意地笑
   // 震波：範圍內的隊友（和溫特）以葫蘆猴為中心往外震飛（沒受傷的也會飛；撞到牆就停）
   const shove = a => {
     const dx = a.x - x, dy = a.y - y, d = Math.hypot(dx, dy);
-    if (d > C.knockRadius || a.rootT > 0) return;   // 被絲瓜藤纏住的飛不動
+    if (d > C.knockRadius || a.rootT > 0 || !blastHits(a)) return;   // 被絲瓜藤纏住的飛不動；不同樓層震不到
     const ang = d > 1 ? Math.atan2(dy, dx) : Math.random() * Math.PI * 2, k = d / C.knockRadius;
     knockActor(a, Math.cos(ang), Math.sin(ang), (C.knockMax + (C.knockMin - C.knockMax) * k) * CELL, C.knockTime);
     a.gourdToss = { t: 0, h: C.tossHeight + (C.tossMinHeight - C.tossHeight) * k, side: Math.cos(ang) >= 0 ? 1 : -1, bounced: false };   // 飛起來（畫的時候往上抬，影子留在地上）
   };
   if (C.knockPlayer && p && p.hp > 0) shove(p);
   for (const t of G.towers) if (t.hp > 0) { shove(t); t.navPath = null; t.navGoal = null; }
+  if (C.hitMonsters) gourdHitMonsters(e, x, y, R, C);   // 不分敵我：旁邊的怪物也會被壓到、震飛
   G.effects.push({ ring: true, x, y: y + 12, r: R, r2: C.knockRadius, life: .45, life0: .45, color: '#8f7b56' });   // 外圈震波
   // 建築：壓到的扣「建築傷害」；壓不到、但在震波範圍內的晃一下、受一點傷（不會被震飛）
   const blds = new Map(), span = Math.ceil(C.knockRadius / CELL) + 1, [ec, er] = cellAt(x, y);
@@ -323,6 +329,33 @@ function gourdHitSentry(e, t) {
   if (typeof mateHurtSay === 'function') mateHurtSay(t, 'slammed');   // 對話編輯器「被葫蘆猴壓到」
   if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
 }
+// 壓頂打到其他怪物：落點圈裡的扣血（打隊友傷害 × monsterDamageMul），震波範圍內的往外震飛（推不動的不飛）
+function gourdHitMonsters(e, x, y, R, C) {
+  const dmg = Math.max(1, Math.round((e.sentryDamage ?? 28) * C.monsterDamageMul));
+  for (const m of [...G.enemies]) {
+    if (m === e || m.dead || m.hp <= 0) continue;
+    if (typeof blastHits === 'function' && !blastHits(m)) continue;   // 不同樓層打不到（js/pathfinding.js）
+    if (typeof burrowUnderground === 'function' && burrowUnderground(m)) continue;   // 鑽在地底的老鼠壓不到
+    const dx = m.x - x, dy = m.y - y, d = Math.hypot(dx, dy);
+    if (d > C.knockRadius) continue;
+    if (d <= R + (m.drawWidth || 40) * .2) {   // 被壓到：扣血
+      m.hp -= dmg; m.hitT = .2; m.hitColor = '#c8b590';
+      flashDmg('-' + dmg, m.x, m.y - 26, '#e0c890');
+      if (typeof enemyHitReact === 'function') enemyHitReact(m, x, y, true);
+    }
+    if (!C.knockMonsters || m.unpushable || m.hp <= 0) continue;
+    const resist = (typeof SLIME_VARIANTS !== 'undefined' && SLIME_VARIANTS[m.variant]?.knockResist) || 0, mul = (1 - resist) * (m.knockMul ?? 1);
+    if (mul <= 0) continue;
+    const ang = d > 1 ? Math.atan2(dy, dx) : Math.random() * Math.PI * 2, k = d / C.knockRadius;
+    const dist = (C.knockMax + (C.knockMin - C.knockMax) * k) * CELL * mul;   // 越靠近葫蘆猴飛越遠
+    m.knockT = C.knockTime; m.knockVX = Math.cos(ang) * dist / C.knockTime; m.knockVY = Math.sin(ang) * dist / C.knockTime;   // 水平滑出去（跟 K56 機車撞飛怪物同一套，js/street-vehicles.js）
+    m.gourdToss = { t: 0, h: (C.tossHeight + (C.tossMinHeight - C.tossHeight) * k) * Math.min(1, mul), side: Math.cos(ang) >= 0 ? 1 : -1, bounced: false };   // 飛起來再落地
+    if (typeof resetEnemyNavigation === 'function') resetEnemyNavigation(m);
+  }
+  // 鑽在地底的花蓮老鼠：跟被爆炸炸到一樣，震出地面、暈眩（js/burrowing-mouse.js；範圍是壓頂範圍的 2 倍或再多 3 格，壓頂範圍內才扣血）
+  // 放在最後：剛被震出來的老鼠不會再被上面算一次傷害
+  if (C.shakeOutMice && typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, dmg);
+}
 function gourdCrushObstacle(e, o, dmg) {   // 跟 enemyAttackObstacle 一樣扣血，只是不揮手、一次壓一下；hitT 會讓建築閃紅、晃一下（js/render.js）
   if (o.type === 'camping_lights') return;
   o.lastHitBy = 'monster';   // 油桶被怪物打壞只會漏油、不會爆炸
@@ -347,7 +380,7 @@ function gourdDragTrail(e, moved) {
   if (g.markDist >= C.markEvery) {
     g.markDist = 0;
     const a = Math.atan2(e.y - (g.lastMarkY ?? e.y), e.x - (g.lastMarkX ?? e.x));
-    (G.gourdMarks = G.gourdMarks || []).push({ x: e.x, y: e.y + 11, a, life: C.markLife });
+    (G.gourdMarks = G.gourdMarks || []).push({ x: e.x, y: e.y + 11, floor: actorFloor(e), a, life: C.markLife });
     g.lastMarkX = e.x; g.lastMarkY = e.y;
     if (Math.random() < .5) gmDust(e.x + gmRand(-14, 14), e.y + 12, false);
   }
@@ -388,13 +421,15 @@ function updateGourdBodies() {
       const k = 1 / Math.max(q, .05), tx = cx + dx * k, ty = cy + dy * k;
       // 往外一小步一小步推，前面是牆就停（不要把人推進牆裡）
       const dist = Math.hypot(tx - a.x, ty - a.y), steps = Math.max(1, Math.ceil(dist / 3));
-      for (let i = 0; i < steps; i++) {
-        const nx = a.x + (tx - a.x) / (steps - i), ny = a.y + (ty - a.y) / (steps - i);
-        if (!blocked(nx, ny)) { a.x = nx; a.y = ny; }
-        else if (!blocked(nx, a.y)) a.x = nx;
-        else if (!blocked(a.x, ny)) a.y = ny;
-        else break;
-      }
+      onFloorDo(a, () => {   // 照被推開的那個人那一層的牆（js/pathfinding.js）
+        for (let i = 0; i < steps; i++) {
+          const nx = a.x + (tx - a.x) / (steps - i), ny = a.y + (ty - a.y) / (steps - i);
+          if (!blocked(nx, ny)) { a.x = nx; a.y = ny; }
+          else if (!blocked(nx, a.y)) a.x = nx;
+          else if (!blocked(a.x, ny)) a.y = ny;
+          else break;
+        }
+      });
     }
   }
 }
@@ -470,6 +505,7 @@ function drawGourdGround(ctx) {
   const C = GOURD;
   ctx.save();
   for (const m of G.gourdMarks || []) {   // 兩道平行的刮痕
+    if (fxSkip(m.floor)) continue;
     if (!isVisible(m.x, m.y)) continue;
     ctx.globalAlpha = .22 * Math.min(1, m.life / 2); ctx.strokeStyle = '#2a2116'; ctx.lineWidth = 2;
     const ca = Math.cos(m.a), sa = Math.sin(m.a), nx = -sa, ny = ca;
@@ -478,6 +514,7 @@ function drawGourdGround(ctx) {
     }
   }
   for (const k of G.gourdCracks || []) {   // 砸出來的地裂
+    if (fxSkip(k.floor)) continue;
     if (!isVisible(k.x, k.y)) continue;
     const img = monsterImage(C.crackImage);   // 地面裂痕圖（images/破損建築/crack06.png），隨機左右翻
     if (img.complete && img.naturalWidth) {
@@ -549,7 +586,8 @@ function rockBurstFx(x, y, o) {
     const pts = [];   // 不規則的小石塊（5～6 個角）
     const n = 5 + (Math.random() < .5 ? 1 : 0), sz = (big ? gmRand(4, 6.5) : gmRand(2, 4)) * S;
     for (let k = 0; k < n; k++) { const t = k / n * Math.PI * 2; pts.push([Math.cos(t) * sz * gmRand(.65, 1.1), Math.sin(t) * sz * gmRand(.55, 1)]); }
-    rocks.push({ x: x + Math.cos(a) * sp0, y: y + Math.sin(a) * sp0 * .43, z: gmRand(4, 14), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: gmRand(up[0], up[1]) * (big ? .75 : 1),
+    rocks.push({ floor: floorAtPoint(x, y), x: x + Math.cos(a) * sp0, y: y + Math.sin(a) * sp0 * .43,   // floor：碎石噴在幾樓（js/pathfinding.js）
+      z: gmRand(4, 14), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: gmRand(up[0], up[1]) * (big ? .75 : 1),
       spin: gmRand(-12, 12), rot: Math.random() * 6, pts, col: GM_ROCK_COLORS[Math.floor(Math.random() * GM_ROCK_COLORS.length)], life: gmRand(1.6, 2.6), bounces: 0 });
   }
   const dust = [], nd = o.dust || 0;
@@ -576,7 +614,7 @@ function updateGourdDebris(dt) {
         }
       } else { r.vx *= Math.pow(.02, dt); r.vy *= Math.pow(.02, dt); r.rot += r.spin * dt * .2; r.spin *= Math.pow(.05, dt); }
       const nx = r.x + r.vx * dt, ny = r.y + r.vy * dt, [c, rr] = cellAt(nx, ny);
-      if (inGrid(c, rr) && !isWall(c, rr)) { r.x = nx; r.y = ny; } else { r.vx *= -.35; r.vy *= -.35; }   // 撞牆彈回來
+      if (inGrid(c, rr) && !wallAt(r.floor, c, rr)) { r.x = nx; r.y = ny; } else { r.vx *= -.35; r.vy *= -.35; }   // 撞牆彈回來（照碎石那一層的牆）
     }
     G.gourdRocks = G.gourdRocks.filter(r => r.life > 0);
   }

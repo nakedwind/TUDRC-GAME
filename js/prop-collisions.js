@@ -9,7 +9,7 @@
 */
 // 物件在地圖編輯器用方向鍵微調過位置（ox、oy 像素）：擋路格也照像素對齊圖片，
 // 用「不可穿透格的像素微調」（js/maploader.js 的 mapSolidOffsets）記下每格偏了多少，不會只能整格整格跳
-let propWallMap = null, propAddedWalls = new Set(), propAddedOffsets = new Set(), propAddedWalls2F = new Set();
+let propWallMap = null, propAddedWalls = new Set(), propAddedOffsets = new Set(), propAddedWalls2F = new Set(), propAddedOffsets2F = new Set();
 function propCollisionList() {
   let edited = []; try { edited = JSON.parse(localStorage.getItem('td-object-editor-v1') || '[]'); } catch (_) {}
   const base = typeof PROP_COLLISIONS !== 'undefined' ? PROP_COLLISIONS : [];
@@ -38,21 +38,32 @@ function setupPropCollisions() {
   if (propWallMap === MAP) {
     for (const key of propAddedWalls) mapWalls.delete(key);
     if (typeof floor2Solid !== 'undefined') for (const key of propAddedWalls2F) floor2Solid.delete(key);
+    if (typeof floor2SolidOffsets !== 'undefined') for (const key of propAddedOffsets2F) delete floor2SolidOffsets[key];
     if (typeof mapSolidOffsets !== 'undefined') for (const key of propAddedOffsets) delete mapSolidOffsets[key];
   }
-  propWallMap = MAP; propAddedWalls = new Set(); propAddedOffsets = new Set(); propAddedWalls2F = new Set();
+  propWallMap = MAP; propAddedWalls = new Set(); propAddedOffsets = new Set(); propAddedWalls2F = new Set(); propAddedOffsets2F = new Set();
   if (typeof mapSolidOffsets !== 'undefined' && MAP.solidOffsets && mapSolidOffsets === MAP.solidOffsets) mapSolidOffsets = { ...mapSolidOffsets };   // 別改到地圖資料本身
   eachPropSolidCell((key, off, deck2F, both) => {
-    let added = false;
-    if (deck2F && !floor2Solid.has(key)) { floor2Solid.add(key); propAddedWalls2F.add(key); added = true; }   // 2 樓地面上的格子：擋 2 樓
-    if ((!deck2F || both) && !mapWalls.has(key)) { mapWalls.add(key); propAddedWalls.add(key); added = true; }   // 其他的（和手扶梯）：擋 1 樓
-    if (!added) return;
-    if ((off[0] || off[1]) && typeof mapSolidOffsets !== 'undefined' && !mapSolidOffsets[key]) { mapSolidOffsets[key] = off.slice(); propAddedOffsets.add(key); }
+    const nudged = off[0] || off[1];
+    // 2 樓地面上的格子：擋 2 樓，像素微調記在 2 樓那一份（js/pathfinding.js 的 floor2SolidOffsets）
+    if (deck2F && !floor2Solid.has(key)) {
+      floor2Solid.add(key); propAddedWalls2F.add(key);
+      if (nudged && !floor2SolidOffsets[key]) { floor2SolidOffsets[key] = off.slice(); propAddedOffsets2F.add(key); }
+    }
+    // 其他的（和手扶梯）：擋 1 樓，像素微調記在一樓那一份
+    if ((!deck2F || both) && !mapWalls.has(key)) {
+      mapWalls.add(key); propAddedWalls.add(key);
+      if (nudged && typeof mapSolidOffsets !== 'undefined' && !mapSolidOffsets[key]) { mapSolidOffsets[key] = off.slice(); propAddedOffsets.add(key); }
+    }
   });
 }
 // 接回保存的戰場（js/combat-progress.js 的 reclaimAddedWalls，不會跑 newGame）：一樓的牆跟著存檔還原了，2 樓碰撞沒有跟著存，這裡補回去
 function restorePropCollisions2F() {
   if (!MAP || typeof floor2Solid === 'undefined') return;
-  propWallMap = MAP; propAddedWalls2F = new Set();
-  eachPropSolidCell((key, off, deck2F) => { if (deck2F && !floor2Solid.has(key)) { floor2Solid.add(key); propAddedWalls2F.add(key); } });
+  propWallMap = MAP; propAddedWalls2F = new Set(); propAddedOffsets2F = new Set();
+  eachPropSolidCell((key, off, deck2F) => {
+    if (!deck2F || floor2Solid.has(key)) return;
+    floor2Solid.add(key); propAddedWalls2F.add(key);
+    if ((off[0] || off[1]) && !floor2SolidOffsets[key]) { floor2SolidOffsets[key] = off.slice(); propAddedOffsets2F.add(key); }   // 2 樓的像素微調也補回去
+  });
 }

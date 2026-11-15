@@ -114,7 +114,7 @@ function drawCorrosionV2(ctx) {
     ctx.restore();
   }
   for (const v of F.vapour) {   // 蒸氣：淡紫、慢慢變大變淡
-    const q = v.t / v.life, r = v.r0 + (v.r1 - v.r0) * q, a = (q < .2 ? q / .2 : (1 - q) / .8) * .22;
+    const q = Math.max(0, Math.min(1, v.t / v.life)), r = Math.max(.1, v.r0 + (v.r1 - v.r0) * q), a = (q < .2 ? q / .2 : (1 - q) / .8) * .22;   // 夾在合理範圍：半徑變成負的會讓整個畫面畫不出來（黑屏）
     const g = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, r);
     g.addColorStop(0, `rgba(170,120,210,${a.toFixed(3)})`); g.addColorStop(1, 'rgba(170,120,210,0)');
     ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(v.x, v.y, r, 0, 6.283); ctx.fill();

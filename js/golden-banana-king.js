@@ -70,7 +70,7 @@ const bkHurt = o => bkAlive(o) && o.hp < (o.maxhp || o.hp);
 // ---- 補血範圍內有沒有人受傷 ----
 function bkHealTargets(e) {
   const C = BANANA_KING, R = C.healRange * CELL;
-  const near = o => Math.hypot(o.x - e.x, o.y - e.y) <= R;
+  const near = o => fieldHits(actorFloor(e), o) && Math.hypot(o.x - e.x, o.y - e.y) <= R;   // 只補同一層的
   return [...G.enemies.filter(o => bkAlive(o) && (o !== e || C.healSelf) && near(o)),
     ...G.towers.filter(t => C.healSentries.includes(t.type) && t.hp > 0 && near(t)),
     ...bkHealCores().filter(near)];   // 異質核心也補
@@ -253,7 +253,7 @@ function bkTossPeels(e, threats) {
     const dist = (C.peelDist[0] + Math.random() * (C.peelDist[1] - C.peelDist[0])) * CELL;
     let tx = e.x + Math.cos(a) * dist, ty = e.y + Math.sin(a) * dist;
     for (let k = 0; k < 4 && enemyBlocked(tx, ty); k++) { tx = (tx + e.x) / 2; ty = (ty + e.y) / 2; }   // 落點在牆裡：往回拉
-    peels.push({ sx: e.x, sy: e.y - 50, x: tx, y: ty, fly: C.peelFly * (.85 + Math.random() * .3), t: 0, life: C.peelLife, rot: Math.random() * Math.PI * 2, spin: (Math.random() < .5 ? -1 : 1) * (8 + Math.random() * 6) });
+    peels.push({ sx: e.x, sy: e.y - 50, x: tx, y: ty, floor: actorFloor(e), fly: C.peelFly * (.85 + Math.random() * .3), t: 0, life: C.peelLife, rot: Math.random() * Math.PI * 2, spin: (Math.random() < .5 ? -1 : 1) * (8 + Math.random() * 6) });
   }
   while (peels.length > C.peelMax) peels.shift();
   e.forceFrame = BK_ART.cast1; e.forceFlip = !!e.faceRight; bk.tossT = .25;   // 舉手拋出的一瞬間
@@ -286,7 +286,7 @@ function updateBananaPeels(dt) {
       if (peel.t < peel.fly) { peel.t += dt; peel.rot += peel.spin * dt; continue; }   // 還在空中
       peel.life -= dt;
       if (peel.life <= 0) { peels.splice(peels.indexOf(peel), 1); continue; }
-      const a = actors.find(o => !(o.knockT > 0) && !(o.slipDizzyT > 0) && Math.hypot(o.x - peel.x, o.y - peel.y) <= C.peelTrigger);
+      const a = actors.find(o => !(o.knockT > 0) && !(o.slipDizzyT > 0) && fieldHits(peel.floor, o) && Math.hypot(o.x - peel.x, o.y - peel.y) <= C.peelTrigger);   // 只踩得到同一層的香蕉皮
       if (!a) continue;
       peels.splice(peels.indexOf(peel), 1);   // 踩過就爛掉
       bkSlip(a, peel);
@@ -340,6 +340,7 @@ function drawBananaPeels(ctx) {
   const C = BANANA_KING, img = typeof monsterImage === 'function' ? monsterImage(BK_ART.peel) : null;
   const ready = img && img.complete && img.naturalWidth, w = ready ? img.naturalWidth * C.peelScale : 32, h = ready ? img.naturalHeight * C.peelScale : 24, s = w;
   for (const peel of peels) {
+    if (fxSkip(peel.floor)) continue;   // 另一層的香蕉皮這一輪不畫
     const k = Math.min(1, peel.t / peel.fly), air = k < 1;
     const x = peel.sx + (peel.x - peel.sx) * k, y = peel.sy + (peel.y - peel.sy) * (peel.sky ? k * k : k) - (peel.sky ? 0 : Math.sin(Math.PI * k) * C.peelHeight);   // sky：直直往下掉，越掉越快
     const fade = peel.life < 3 ? Math.max(.2, peel.life / 3) : 1;

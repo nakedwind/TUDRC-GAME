@@ -117,7 +117,7 @@ function loofahStomp(e) {
   if (!t || t.hp <= 0) return;
   const dx = t.x - e.x, dy = t.y - e.y, d = Math.hypot(dx, dy) || 1;
   const len = d + C.vineOvershoot * CELL;
-  (G.loofahVines = G.loofahVines || []).push({ owner: e, target: t, x: e.x, y: e.y + 10, ux: dx / d, uy: dy / d, left: len, travel: 0, state: 'dig', t: 0, puff: 0, cracks: [], seed: Math.random() * 9 });
+  (G.loofahVines = G.loofahVines || []).push({ owner: e, floor: actorFloor(e), target: t, x: e.x, y: e.y + 10, ux: dx / d, uy: dy / d, left: len, travel: 0, state: 'dig', t: 0, puff: 0, cracks: [], seed: Math.random() * 9 });
 }
 function llDust(x, y, big) {
   const n = big ? 2 : 1;
@@ -132,6 +132,7 @@ function updateLoofahVines(dt) {
   if (G.loofahVines && G.loofahVines.length) {
     const C = LOOFAH;
     for (const v of G.loofahVines) {
+      setFloorCtxTo(v.floor || 1);   // 藤蔓照絲瓜女那一層的牆鑽（js/pathfinding.js）
       v.t += dt;
       if (v.farm) {   // 絲瓜女王農田上的藤蔓（js/loofah-queen.js）：一直長在那裡，碰到就纏；被火燒掉才縮回去
         if (v.state === 'grab') { if (typeof lqFarmVineStep === 'function') lqFarmVineStep(v, dt); }
@@ -171,6 +172,7 @@ function updateLoofahVines(dt) {
       for (const k of v.cracks) k.life -= dt;
       v.cracks = v.cracks.filter(k => k.life > 0);
     }
+    clearFloorCtx();
     G.loofahVines = G.loofahVines.filter(v => !v.done || v.cracks.length);
   }
   // 被纏住的人：倒數
@@ -206,7 +208,7 @@ function loofahErupt(v) {
 // 抓住藤蔓旁邊的人（冒出來那一刻，還有停在地上的這段時間都會呼叫；同一根藤蔓不會重複抓同一個人）
 function llCatchNearby(v) {
   const C = LOOFAH, e = v.owner;
-  const p = G.player, inR = a => Math.hypot(a.x - v.x, a.y - v.y) <= C.eruptRadius && !v.caught.includes(a) && !(a.rootT > 0);
+  const p = G.player, inR = a => (!e || sameFloor(a, e)) && Math.hypot(a.x - v.x, a.y - v.y) <= C.eruptRadius && !v.caught.includes(a) && !(a.rootT > 0);   // 只纏得到絲瓜女同一層的人
   if (p && p.hp > 0 && inR(p)) {
     v.caught.push(p); p.rootT = C.rootTime; p.rootT0 = C.rootTime; p.struggleCount = 0; p.knockT = 0; p.moving = false;
     if (C.eruptDamage && e && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {   // 剛被打過：照樣被纏住，只是不扣血（js/combat-feel.js）
@@ -364,6 +366,7 @@ function isRooted(a) { return !!(a && a.rootT > 0); }
 function drawLoofahGround(ctx) {
   const now = performance.now() / 1000;
   for (const v of G.loofahVines || []) {
+    if (fxSkip(v.floor)) continue;   // 另一層的藤蔓裂痕這一輪不畫
     if (v.state !== 'dig' && !v.done && isVisible(v.x, v.y)) {   // 藤蔓冒出來的地方：地上破開的洞（畫在角色底下）
       const grow = v.state === 'retract' ? Math.max(0, 1 - v.rt / .35) : Math.min(1, (now - v.eruptAt) / .22);
       ctx.save(); ctx.globalAlpha = .55; ctx.fillStyle = '#3a2d1c';

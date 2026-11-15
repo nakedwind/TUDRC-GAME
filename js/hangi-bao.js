@@ -36,15 +36,15 @@ function hangiCapSpot(minFromPlayer) {
   const p = G.player;
   for (let tries = 0; tries < 120; tries++) {
     const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
-    if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;
+    if (!inGrid(c, r) || spawnWallAt(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;   // spawnWallAt：照那一格的樓層（js/pathfinding.js）
     if (cellNearLight(c, r, CELL)) continue;                        // 要在黑暗裡（離光源至少一格）
     let nearWall = false;                                           // 周圍 wallGap 格內不能有牆（不要貼著牆）
     for (let dc = -HANGI_CAP.wallGap; dc <= HANGI_CAP.wallGap && !nearWall; dc++)
       for (let dr = -HANGI_CAP.wallGap; dr <= HANGI_CAP.wallGap; dr++)
-        if (!inGrid(c + dc, r + dr) || isWall(c + dc, r + dr) || G.grid[(c + dc) + ',' + (r + dr)]) { nearWall = true; break; }
+        if (!inGrid(c + dc, r + dr) || wallAt(spawnFloorAt(c, r), c + dc, r + dr) || G.grid[(c + dc) + ',' + (r + dr)]) { nearWall = true; break; }
     if (nearWall) continue;
     const [x, y] = center(c, r);
-    if (enemyBlocked(x, y)) continue;
+    if (onFloorDo(spawnFloorAt(c, r), () => enemyBlocked(x, y))) continue;
     if (p && Math.hypot(p.x - x, p.y - y) < minFromPlayer * CELL) continue;
     if (G.hangiCaps.some(cap => Math.hypot(cap.x - x, cap.y - y) < 4 * CELL)) continue;   // 帽子之間不要擠在一起
     if ([...G.enemies, ...G.towers].some(o => Math.hypot(o.x - x, o.y - y) < CELL * 1.2)) continue;   // 不要壓在怪物、隊員身上
@@ -328,7 +328,7 @@ function hangiCapSortables(sortables) {
   const caps = liveHangiCaps(); if (!caps) return;
   for (const cap of caps) {
     if (cap.boss && typeof capKingCapSortable === 'function') { capKingCapSortable(sortables, cap); continue; }   // 順順宮主的大宮帽（js/elite-cap-king.js）
-    if (isVisible(cap.x, cap.y)) sortables.push({ y: cap.y + 13 + looseSortY(cap), draw: () => drawHangiCap(ctx, cap) });
+    if (isVisible(cap.x, cap.y)) sortables.push({ floor: looseFloor(cap), y: cap.y + 13, draw: () => drawHangiCap(ctx, cap) });
   }
 }
 function drawHangiCap(ctx, cap) {

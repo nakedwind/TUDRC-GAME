@@ -55,10 +55,10 @@ function sv2Twinkle(ctx, x, y, r, col, a) {   // 很小的圓光點（亮芯＋�
 // 地面層（render.js 在畫人物之前呼叫）：法陣、法陣光柱都畫在這裡，才會在人物後面
 function drawSootheGroundV2(ctx) {
   if (typeof SOOTHE_FX_VERSION === 'undefined' || SOOTHE_FX_VERSION !== 2) return;
-  for (const f of G.effects || []) if (f.sootheSigil && f.life > 0) { drawSootheSigilV2(ctx, f); f.groundDrawn = true; }
+  for (const f of G.effects || []) if (f.sootheSigil && f.life > 0 && !fxSkip(f.follow ? visualFloor(f.follow) : f.floor)) { drawSootheSigilV2(ctx, f); f.groundDrawn = true; }   // 法陣跟著施法的人在哪一層
   if (!G.sootheV2 || !G.sootheV2.length) return;
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  for (const f of G.sootheV2) if (f.cast) { sv2DrawShafts(ctx, f); f.groundDrawn = true; }
+  for (const f of G.sootheV2) if (f.cast && !fxSkip(f.follow ? visualFloor(f.follow) : f.floor)) { sv2DrawShafts(ctx, f); f.groundDrawn = true; }
   ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
 }
 // 法陣（render.js 的 sootheSigil 會呼叫）：全部圓圈設計——柔光底、外圈＋細圈＋內圈（不放小光點）

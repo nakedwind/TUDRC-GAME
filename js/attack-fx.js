@@ -152,7 +152,7 @@ function spawnSootheEffect(x, y, color, follow) {
 // dur：腳下法陣留多久（秒；沒給＝1.1 秒）。溫特疏導時會給整段進度條的時間，法陣一直轉到疏導結束
 function spawnSootheCast(caster, col, radius, dur = 1.1) {
   if (!caster) return null;
-  const sigil = { sootheSigil: true, follow: caster, col, life: dur, life0: dur, spin: Math.random() * Math.PI };
+  const sigil = { sootheSigil: true, follow: caster, floor: actorFloor(caster), col, life: dur, life0: dur, spin: Math.random() * Math.PI };
   G.effects.push(sigil);
   if (radius > 0) G.effects.push({ sootheWave: true, x: caster.x, y: caster.y, r: radius, col, life: .7, life0: .7 });
   addLightFlash('soothe', caster.x, caster.y - 10, 1, col);
@@ -386,6 +386,7 @@ function drawAcidWarnings(ctx) {
   const now = performance.now() / 1000;
   ctx.save();
   for (const p of G.acidPools) {
+    if (fxSkip(p.floor)) continue;   // 另一層的池子這一輪不畫
     if (!(p.t > 0)) continue;
     const a = Math.min(1, (p.t0 - p.t) / .25, p.t);   // 0.25 秒浮現、最後 1 秒淡出
     if (a <= 0) continue;
@@ -423,7 +424,7 @@ function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
   // 地上腐蝕痕跡（存活 5 秒，範圍內怪物持續扣血）
   const blobs = [];
   for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * R * 0.5, dy: (Math.random() * 2 - 1) * R * 0.35, rr: R * (0.55 + Math.random() * 0.5) });
-  const pool = { x, y, r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), allyHit: ACID_ALLY_HIT, allyTick: ACID_ALLY_TICK, blobs, fizz: 0 };   // dps＝怪物踩到（每秒）；allyHit／allyTick＝溫特、隊友踩到（js/game.js）
+  const pool = { x, y, floor: floorAtPoint(x, y), r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), allyHit: ACID_ALLY_HIT, allyTick: ACID_ALLY_TICK, blobs, fizz: 0 };   // dps＝怪物踩到（每秒）；allyHit／allyTick＝溫特、隊友踩到（js/game.js）
   (G.acidPools = G.acidPools || []).push(pool);
   addScorchMark(x, y, R, pool);   // 地上焦黑燒痕
   for (let i = 0; i < Math.round(4 * scale); i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * R * .5, y + (Math.random() * 2 - 1) * R * .25, true);

@@ -6,7 +6,21 @@ window.addEventListener('keydown', e => { if (!e.repeat && e.key.toLowerCase() =
 
 // ---- 佈署物件查詢 ----
 const buildAt = (c, r) => G.grid[c + ',' + r];
-const barrierAt = (c, r) => { const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle' && (!hasFloors || (o.floor === 2 ? 2 : 1) === floorCtx)) ? o : null; };   // 陸橋：建築只擋同一層的（js/pathfinding.js）
+// 這個點有沒有被格子上的東西擋住（pick(c, r)＝那一格算不算擋、回傳擋的東西）：
+// 地圖上用方向鍵微調過位置的建築、礦物（o.off＝偏了幾像素，js/maploader.js 的 seedOtherMapObstacles）照微調後的範圍算，不是整格整格對齊
+function gridBlockAtPoint(x, y, pick) {
+  const [c, r] = cellAt(x, y), here = pick(c, r);
+  if (here && !here.off) return here;
+  for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
+    const o = pick(c + dc, r + dr); if (!o) continue;
+    const off = o.off || [0, 0], x0 = OX + (c + dc) * CELL + off[0], y0 = OY + (r + dr) * CELL + off[1];
+    if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return o;
+  }
+  return null;
+}
+// 溫特、隊員走路用：格子上的東西（建築、礦物、順順宮帽…）只擋同一層的人
+const gridAtPointForWalker = (x, y) => gridBlockAtPoint(x, y, (c, r) => { const go = G.grid[c + ',' + r]; return go && (!hasFloors || (go.floor === 2 ? 2 : 1) === floorCtx) ? go : null; });
+const barrierAt = (c, r) => { if (!floorScoped) floorUnscoped(); const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle' && (!hasFloors || (o.floor === 2 ? 2 : 1) === floorCtx)) ? o : null; };   // 陸橋：建築只擋同一層的（js/pathfinding.js）
 function removeBarrier(o) {
   if (o.isBase && o.hp <= 0 && o.baseStamp) {
     if (!G.destroyedBases) G.destroyedBases = new Set();
@@ -58,9 +72,7 @@ function buildFloorAt(v, c, r) {
 }
 function canPlaceObstacle(v, c, r, lightExtra = 0) {
   // 陸橋：溫特在幾樓就蓋在幾樓（二樓只能蓋在 2 樓地面上，js/pathfinding.js）；只有 2 樓的地方一律蓋在 2 樓
-  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
-  floorCtx = buildFloorAt(v, c, r); floorOnRamp = false; floorOnDeck = false;
-  try { return canPlaceObstacleNow(v, c, r, lightExtra); } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
+  return onFloorDo(buildFloorAt(v, c, r), () => canPlaceObstacleNow(v, c, r, lightExtra));   // 照建築要蓋的那一層判斷（js/pathfinding.js）
 }
 function canPlaceObstacleNow(v, c, r, lightExtra = 0) {
   if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;

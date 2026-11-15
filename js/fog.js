@@ -520,5 +520,5 @@ function fogSenseMul(e, target) {
 // 走路變慢：包住 js/sentry.js 的 moveSentryWithPath（隊友各種走路都經過這裡）
 if (typeof moveSentryWithPath === 'function') {
   const fogBaseMoveSentry = moveSentryWithPath;
-  moveSentryWithPath = (t, x, y, speed, dt) => fogBaseMoveSentry(t, x, y, speed * fogSpeedMul(t), dt);
+  moveSentryWithPath = (t, x, y, speed, dt, ...rest) => fogBaseMoveSentry(t, x, y, speed * fogSpeedMul(t), dt, ...rest);   // ...rest：後面的參數（例如目的地在幾樓）照樣傳下去
 }

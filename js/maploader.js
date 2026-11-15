@@ -38,15 +38,12 @@ const DEFAULT_MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'objec
 // 目前這張地圖的圖層順序（由底到上）：編輯器裡新增／刪除過圖層的地圖存在 MAP.layerOrder，沒改過的用上面的預設。
 // 圖層的畫法看 id：ground…＝地面（在角色下面）、object…／overlay＝立體物（跟角色排前後）、top＝永遠在角色上面
 let MAP_LAYER_ORDER = DEFAULT_MAP_LAYER_ORDER;
-// 陸橋（2 樓）的圖層：圖層名稱有「2樓」（或「二樓」）的整層都算 2 樓——裡面的圖蓋在一樓的人上面、2 樓的人走在它上面（js/pathfinding.js 的樓層）。
-// 名稱還有「上層」的（例如「2樓上層」）永遠蓋在 2 樓的人上面（像屋簷）；其他照底部Y跟 2 樓的人排前後，地板類（非物件圖層）永遠在人下面。
+// 陸橋（2 樓）的圖層：地圖編輯器圖層面板設成「2 樓」的圖層（圖層的 level＝2，js/map-levels.js）——裡面的圖蓋在一樓的人上面、2 樓的人走在它上面。
+// 設成「2 樓上層」的（top2）永遠蓋在 2 樓的人上面（像屋簷）；其他照底部Y跟 2 樓的人排前後，地板類（非物件圖層）永遠在人下面。
 let MAP_FLOOR2_LAYERS = new Set(), MAP_FLOOR2_TOP = new Set();
 function computeFloor2Layers(m) {
-  MAP_FLOOR2_LAYERS = new Set(); MAP_FLOOR2_TOP = new Set();
-  for (const l of (m && Array.isArray(m.layerOrder) ? m.layerOrder : [])) {
-    const nm = String(l.name || ''); if (!/2樓|二樓/.test(nm)) continue;
-    MAP_FLOOR2_LAYERS.add(l.id); if (nm.includes('上層')) MAP_FLOOR2_TOP.add(l.id);
-  }
+  const L = MapLevels.floor2Layers(m);   // 只看圖層寫明的樓層，不看名字
+  MAP_FLOOR2_LAYERS = L.all; MAP_FLOOR2_TOP = L.top;
 }
 const mapLayerOrderOf = m => (m && Array.isArray(m.layerOrder) && m.layerOrder.length) ? m.layerOrder.map(l => l.id) : DEFAULT_MAP_LAYER_ORDER;
 const TILE_REGISTRY = {};
@@ -233,7 +230,8 @@ function initMap() {
   MAP = next;
   window.STORY_MODE = !!StoryScene.config();
   MAP_LAYER_ORDER = mapLayerOrderOf(MAP);   // 這張地圖自己的圖層
-  computeFloor2Layers(MAP);                 // 名稱有「2樓」的圖層＝陸橋
+  MapLevels.prepare(MAP, mapTileById, true);   // 舊格式的樓層資料升級成現在的格式（沒產生過的先暫時產生一份，js/map-levels.js）
+  computeFloor2Layers(MAP);                 // 設成 2 樓的圖層＝陸橋
   if(typeof resetMapPower==='function')resetMapPower();
   preloadMapTiles(MAP);
   openElevatorStamp = null;
@@ -423,9 +421,7 @@ function hasLineOfSight(x0, y0, x1, y1) {
   if (hasFloors && !losNoFloors && typeof G !== 'undefined' && G && G.towers) {
     const fa = actorFloorNear(x0, y0), fb = actorFloorNear(x1, y1);
     if (fa && fb && fa !== fb) return false;   // 一個在陸橋上、一個在下面：互相看不到、打不到
-    const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
-    floorCtx = fa || fb || floorCtx; floorOnRamp = false; floorOnDeck = false;   // 照這一層的牆算視線
-    try { return lineOfSightRaw(x0, y0, x1, y1); } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
+    return onFloorDo(fa || fb || floorCtx, () => lineOfSightRaw(x0, y0, x1, y1));   // 照這一層的牆算視線
   }
   return lineOfSightRaw(x0, y0, x1, y1);
 }
@@ -449,7 +445,7 @@ function solidBlocksPoint(x, y) {
   if (elevator !== null) return elevator;
   if (typeof tileBoxBlocksPoint === 'function' && tileBoxBlocksPoint(x, y)) return true;   // 素材碰撞方框（物件編輯器設定，js/tile-collisions.js）
   const [c, r] = cellAt(x, y);
-  if (floorCtx === 2) return isWall(c, r);                      // 二樓：只看有沒有陸橋地面（不吃一樓牆的微調）
+  if (floorCtx === 2) return nudgedWallAt(x, y, isWall, solid2OffsetAt);   // 二樓：照 2 樓的擋路格和 2 樓的像素微調（不吃一樓牆的微調）
   if (isWall(c, r) && !solidOffsetAt(c, r)) return true;        // 沒微調過：整格都擋
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
     const cc = c + dc, rr = r + dr;
@@ -545,6 +541,8 @@ function seedOtherMapObstacles() {
     if (!solid.length) return;
     const o = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type,
       c, r, w, h, solid, hp: spec.hp, maxhp: spec.hp, hitT: 0, ore: !!spec.ore };
+    // 用方向鍵微調過位置：c、r 已經對齊到最近的格子，剩下不到半格的像素記在 off，走路碰撞照微調後的範圍算（js/build.js 的 gridBlockAtPoint）
+    if (stamp) { const ox = stamp.ox || 0, oy = stamp.oy || 0, off = [ox - Math.round(ox / CELL) * CELL, oy - Math.round(oy / CELL) * CELL]; if (off[0] || off[1]) o.off = off; }
     for (const [dc, dr] of solid) {
       const key = (c + dc) + ',' + (r + dr);
       mapWalls.delete(key); // 舊地圖若另畫了固定碰撞，改由可破壞物件接管。
@@ -766,9 +764,10 @@ function hasImageAt(c, r) {
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
-// 這張圖是不是 2 樓的圖：地圖裡有寫 level（地圖編輯器圖片的「樓層」選單，js/map-levels.js）就照寫的；
-// 沒寫的照舊規則：標了「2樓的圖」（舊的 deck2），或放在名稱有「2樓」的圖層裡
-const stampOn2F = s => s && s.level != null ? s.level !== 1 : (!!s.deck2 || MAP_FLOOR2_LAYERS.has(s.layer || 'top'));
+// 這張圖是不是 2 樓的圖：照圖片的 level（地圖編輯器的「🏢 樓層」選單）；沒寫就跟著所在圖層的樓層（js/map-levels.js）
+const stampOn2F = s => s && s.level != null ? s.level !== 1 : MAP_FLOOR2_LAYERS.has((s && s.layer) || 'top');
+// 地圖上的物件變成會動的東西（門、腳踏車、捷運列車…）時畫在幾樓：2 樓的圖＝2，其他（1 樓、跨樓層）＝1
+const stampDrawFloor = s => hasFloors && s && stampOn2F(s) && s.level !== 'span' ? 2 : 1;
 // 2 樓「地板類」圖層（名稱有 2樓、不是物件／上層類）的圖蓋到哪些格子；all＝所有 2 樓的圖蓋到的格子（連接柱只算上半段）。換地圖、物件數量變了才重算
 let floor2CellsCache = null;
 function floor2ArtCells() {
@@ -792,7 +791,7 @@ let floor2OnlyCache = null;
 function floor2OnlyCells() {
   const n = (MAP.stamps || []).length;
   if (floor2OnlyCache && floor2OnlyCache.map === MAP && floor2OnlyCache.n === n && floor2OnlyCache.deck === deckCells) return floor2OnlyCache.cells;
-  // 規則在 js/map-levels.js（地圖編輯器也用同一份）：轉換過的地圖照 MAP.only2，沒轉換的照舊規則（沒有一樓的圖蓋到的 2 樓地面）
+  // 照地圖寫明的 MAP.only2（js/map-levels.js；地圖編輯器的「🏢 樓層種類」筆刷畫的）
   const cells = MapLevels.only2Cells(MAP, mapTileById);
   floor2OnlyCache = { map: MAP, n, deck: deckCells, cells };
   return cells;
@@ -827,56 +826,11 @@ function setMapObstacleFloor(o) {
   const only = floor2OnlyCells();
   if (on2F || cells.every(k => only.has(k))) o.floor = 2;
 }
-// 這張圖蓋到的格子是不是全都「只有 2 樓、沒有 1 樓」（js/maploader.js 的 mapOccluders：這種 2 樓地板當成一般地面畫）
-function floor2ItemOnlyUpstairs(it) {
-  const only = floor2OnlyCells(); let any = false;
-  for (let c = Math.ceil(it.x0 / CELL - .5); (c + .5) * CELL < it.x1; c++) for (let r = Math.ceil(it.y0 / CELL - .5); (r + .5) * CELL < it.y1; r++) {
-    if (!only.has(c + ',' + r)) return false;
-    any = true;
-  }
-  return any;
-}
-// 2 樓地面的範圍（畫面裁切用，js/render.js 補畫地上的特效）：only＝只有 2 樓的格子；bridge＝其他 2 樓地面（陸橋，底下有一樓）
-// onlyLate＝只有 2 樓、但上面鋪的 2 樓地板圖有一部分蓋到陸橋（這種圖跟陸橋一起「晚畫」，見 mapOccluders）：
-//   這些格子的地上特效要等地板畫完才補畫，不然焦痕、碎片會被地板蓋掉一半
-let floor2ClipCache = null;
-function floor2ClipPaths() {
-  const only = floor2OnlyCells(), items = mapOccluders();
-  if (floor2ClipCache && floor2ClipCache.only === only && floor2ClipCache.items === items) return floor2ClipCache;
-  const late = new Set();
-  for (const it of items) {
-    if (it.kind !== 'stamp' || it.part || !itemOn2F(it) || it.y < FLOOR2_SORT - 50000 || it.y >= FLOOR2_SORT - 45000) continue;   // 只看「晚畫的 2 樓地板」
-    for (let c = Math.ceil(it.x0 / CELL - .5); (c + .5) * CELL < it.x1; c++) for (let r = Math.ceil(it.y0 / CELL - .5); (r + .5) * CELL < it.y1; r++) late.add(c + ',' + r);
-  }
-  const a = new Path2D(), b = new Path2D(), d = new Path2D(); let nb = 0, nd = 0;
-  for (const k of deckCells) {
-    if (rampCells.has(k)) continue;
-    const [c, r] = k.split(',').map(Number), x = OX + c * CELL, y = OY + r * CELL;
-    if (!only.has(k)) { b.rect(x, y, CELL, CELL); nb++; }
-    else if (late.has(k)) { d.rect(x, y, CELL, CELL); nd++; }
-    else a.rect(x, y, CELL, CELL);
-  }
-  floor2ClipCache = { only, items, onlyPath: a, onlyLatePath: nd ? d : null, bridgePath: nb ? b : null };
-  return floor2ClipCache;
-}
 // 連接 1、2 樓的東西（從一樓立到二樓的柱子、牆）：2 樓物件圖層裡的圖，底部沒有踩在 2 樓的地板上（底下那格不是 2 樓地面、也沒有 2 樓地板的圖）、高 2 格以上。
 // 這種圖從圖片一半的高度分成上下兩段：下半段算一樓的東西（跟一樓的人照底部排前後），上半段算二樓的（蓋在一樓的人上面、跟二樓的人排前後）。
+// 跨樓層的圖（從一樓立到二樓的柱子、牆、側面手扶梯）：地圖裡寫明 level＝'span' 的才算，上下兩半各算一層
 function stampConnects(s) {
-  if (s && s.level != null) return hasFloors && s.level === 'span';   // 地圖裡寫明「跨樓層」的才算（js/map-levels.js）；沒寫的照下面的舊規則推算
-  const lid = s.layer || 'top';
-  if (!hasFloors || !stampOn2F(s) || !isOccLayer(lid) || MAP_FLOOR2_TOP.has(lid)) return false;
-  const t = mapTileById(s.id); if (!t) return false;
-  const w = mapStampW(s, t), h = mapStampH(s, t); if (h < 2) return false;
-  // 側面的手扶梯一定是連接 1、2 樓的：就算上面的平台稍微疊到 2 樓地面的格子也照樣拆成上下兩段（不然整座被當成 2 樓的牆，一樓的燈照不到、變成一塊黑的）
-  if (typeof escalatorSideUsable === 'function' && escalatorSideUsable(s)) return true;
-  // 下半段蓋到的每一格都不能是 2 樓的地面／2 樓地板的圖：只要碰到一格，就是站在陸橋上的牆（整張算 2 樓），不拆
-  const c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL, fl = floor2ArtCells().floor;
-  // 牆腳正下方那一排是 2 樓地面：這是站在 2 樓走道上的牆（牆身本來就不能走、不是 2 樓地面），整張算 2 樓，不拆
-  for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) if (deckCells.has(c + ',' + Math.ceil(r0 + h - .5))) return false;
-  for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 + h / 2 - .5); r + .5 < r0 + h; r++) {
-    const k = c + ',' + r; if (deckCells.has(k) || fl.has(k)) return false;
-  }
-  return true;
+  return hasFloors && !!s && s.level === 'span';
 }
 // 樓梯類的連接物（人是踩在上面走的，不能蓋住人）：平貼的圖、手扶梯、或圖蓋到「樓層出入口」的格子
 function stampIsStairs(s) {
@@ -989,7 +943,7 @@ function drawMapTop(ctx) {
 // 重疊用「實際像素範圍」判斷（含方向鍵微調的 ox/oy），因為常常是靠微調才疊在一起、格子並沒有交集。
 let occCache = null, occCacheFor = null, stairUpperRects = [];
 // 側面的手扶梯（b.side）不算：它上半段的長方形還包含手扶梯後面的一樓地面，站在那裡的人不能被當成 2 樓（會畫到圍欄前面）；
-// 真的站在手扶梯上的人由 js/escalators.js 的 escalatorRiderSortY 自己排前後。燈光（js/lighting.js）還是整塊都算
+// 真的站在手扶梯上的人由 js/escalators.js 的 escalatorRiderKey 自己決定畫在哪。燈光（js/lighting.js）還是整塊都算
 function inStairUpper(x, y) { if (hasFloors && MAP) mapOccluders(); for (const b of stairUpperRects) if (!b.side && x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1) return true; return false; }
 function mapOccluders() {
   if (occCache && occCacheFor === MAP) return occCache;
@@ -1047,17 +1001,17 @@ function mapOccluders() {
   for (const it of items) {
     const lid = MAP_LAYER_ORDER[it.li];
     const flat = it.kind === 'stamp' && (it.part ? stampIsStairs(it.stamp) : !!(mapTileById(it.stamp.id) || {}).flat);   // 平貼的圖（樓梯、手扶梯、地上的線）：人是踩在上面的，不能蓋住人
-    if (it.part === 'lower') { if (flat) it.y = -1; continue; }   // 樓梯的下半段：一樓的地面，永遠在一樓的人下面
-    if (it.part === 'upper') { it.y = flat ? FLOOR2_SORT - 50000 + it.li : FLOOR2_SORT + it.splitY; continue; }   // 上半段：樓梯＝二樓的地面；柱子＝從分界那條線起算，跟二樓的人排前後
+    it.floor = 1; it.band = DRAW_BAND.obj;   // 預設：一樓的物件，照底部 Y 跟人排前後（js/pathfinding.js 的 drawOrder）
+    if (it.part === 'lower') { if (flat) { it.band = DRAW_BAND.ground; it.y = it.li; } continue; }   // 樓梯的下半段：一樓的地面，永遠在一樓的人下面
+    if (it.part === 'upper') { it.floor = 2; if (flat) { it.band = DRAW_BAND.ground; it.y = it.li; } else it.y = it.splitY; continue; }   // 上半段：樓梯＝二樓的地面；柱子＝從分界那條線起算，跟二樓的人排前後
     if (!itemOn2F(it)) continue;
-    // 2 樓的地板（平貼的圖、2 樓地板圖層）：平常排在所有一樓的東西之後（蓋住橋下一樓的人）。
-    // 但整張都落在「只有 2 樓、沒有 1 樓」的格子上的地板，底下沒有人要蓋：當成一般地面最先畫（y 是負的），
-    // 掉在上面的東西（掉落物、碎片、屍體、焦痕…都照一樓的順序畫）才不會被它蓋掉
-    const floor2Y = floor2ItemOnlyUpstairs(it) ? -2 + it.li * 1e-3 : FLOOR2_SORT - 50000 + it.li;
-    if (flat) { it.y = floor2Y; continue; }
-    it.y = MAP_FLOOR2_TOP.has(lid) ? FLOOR2_SORT + 50000 + it.li : isOccLayer(lid) ? it.y + FLOOR2_SORT : floor2Y;
+    // 2 樓的圖：地板類（平貼的圖、非物件圖層）＝2 樓的地板，在 2 樓的地上特效和人下面；物件類照底部 Y 跟 2 樓的人排前後；
+    // 「2樓上層」圖層永遠在 2 樓的人上面。整個 2 樓都在 1 樓畫完之後才畫（蓋住橋下一樓的人）
+    it.floor = 2;
+    if (flat || (!isOccLayer(lid) && !MAP_FLOOR2_TOP.has(lid))) { it.band = DRAW_BAND.ground; it.y = it.li; }
+    else if (MAP_FLOOR2_TOP.has(lid)) { it.band = DRAW_BAND.top; it.y = it.li; }
   }
-  // 樓梯（平貼、連接 1、2 樓的圖）的上半段範圍：站在裡面的人畫面上算 2 樓（js/pathfinding.js 的 floorSortY）
+  // 樓梯（平貼、連接 1、2 樓的圖）的上半段範圍：站在裡面的人畫面上算 2 樓（js/pathfinding.js 的 visualFloor）
   stairUpperRects = items.filter(it => it.part === 'upper' && stampIsStairs(it.stamp)).map(it => ({ x0: OX + it.x0, x1: OX + it.x1, y0: OY + it.y0, y1: OY + it.splitY, side: typeof escalatorSideUsable === 'function' && escalatorSideUsable(it.stamp) }));
   buildLayerOverdraw(items);
   occCache = items; occCacheFor = MAP;
@@ -1116,7 +1070,7 @@ function collectMapOccluders(ctx, out) {
       : (it.x1 + OX <= v.x0 || it.x0 + OX >= v.x1 || it.y1 + OY <= v.y0 || it.y0 + OY >= v.y1))) continue;
     if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
     const y = typeof mrtMapItemSortY === 'function' ? mrtMapItemSortY(it, it.y) : it.y;   // 跟捷運列車底邊對齊的物件：整個排在車殼前面（js/mrt-train.js）
-    out.push({ y, draw: () => withPartClip(ctx, it, () => {
+    out.push({ floor: it.floor, band: it.band, y, draw: () => withPartClip(ctx, it, () => {
       drawOccluderItem(ctx, it);
       for (const od of it.overdraw || []) drawOverdrawPatch(ctx, it, od);   // 上層圖在重疊處補畫回來
     }) });

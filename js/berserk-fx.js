@@ -79,6 +79,9 @@ function friendlyHitReact(o, fromX, fromY, dmg, heavy, attacker) {
 // 擊退滑行：逐小步移動，撞牆就沿可走的那一軸滑或停下
 function updateKnockSlide(o, dt, blocked) {
   if (!(o.knockT > 0)) return;
+  return onFloorDo(o, () => updateKnockSlideNow(o, dt, blocked));   // 被震飛的人照自己那一層的牆滑（js/pathfinding.js）
+}
+function updateKnockSlideNow(o, dt, blocked) {
   const step = Math.min(dt, o.knockT); o.knockT -= step;
   const n = 3, sx = o.knockVX * step / n, sy = o.knockVY * step / n;
   for (let i = 0; i < n; i++) {

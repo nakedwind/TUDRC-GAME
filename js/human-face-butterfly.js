@@ -567,9 +567,11 @@ function mothConfusedSentry(t, spec, dt) {
   if (bestD > range * .9 || !hasLineOfSight(t.x, t.y, best.x, best.y)) {
     const sp = (spec.walkSpeed || 80) * dt, dx = best.x - t.x, dy = best.y - t.y, d = bestD || 1;
     const nx = t.x + dx / d * sp, ny = t.y + dy / d * sp, [cc, cr] = cellAt(nx, ny), ox = t.x, oy = t.y;
-    if (sentryCellWalkable(cc, cr)) { t.x = nx; t.y = ny; }
-    else if (sentryCellWalkable(cellAt(nx, t.y)[0], cellAt(t.x, t.y)[1])) t.x = nx;
-    else if (sentryCellWalkable(cellAt(t.x, t.y)[0], cellAt(t.x, ny)[1])) t.y = ny;
+    onFloorDo(t, () => {   // 被混亂的隊員照自己那一層的牆走（js/pathfinding.js）
+      if (sentryCellWalkable(cc, cr)) { t.x = nx; t.y = ny; }
+      else if (sentryCellWalkable(cellAt(nx, t.y)[0], cellAt(t.x, t.y)[1])) t.x = nx;
+      else if (sentryCellWalkable(cellAt(t.x, t.y)[0], cellAt(t.x, ny)[1])) t.y = ny;
+    });
     t.anim = t.mothWalkAnim || 0;   // game.js 前面的 animateSentry 每幀會把 anim 歸零（那時還沒走），所以自己記著
     animateSentry(t, t.x - ox, t.y - oy, dt);   // 走路動畫（跟平常走路一樣用實際移動的距離）
     t.mothWalkAnim = t.moving ? t.anim : 0;

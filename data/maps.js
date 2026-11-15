@@ -80699,25 +80699,25 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_highwall03",
         "c": 56,
         "r": 67,
-        "layer": "object"
+        "layer": "ground2"
       },
       {
         "id": "tile_mrt_room_highwall03",
         "c": 57,
         "r": 67,
-        "layer": "object"
+        "layer": "ground2"
       },
       {
         "id": "tile_mrt_room_highwall03",
         "c": 58,
         "r": 67,
-        "layer": "floor"
+        "layer": "ground2"
       },
       {
         "id": "tile_mrt_room_highwall03",
         "c": 59,
         "r": 67,
-        "layer": "floor"
+        "layer": "ground2"
       },
       {
         "id": "tile_mrt_floor_tile",
@@ -80895,7 +80895,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_a02",
         "c": 60,
         "r": 66,
-        "layer": "floor",
+        "layer": "ground2",
         "ox": -10
       },
       {
@@ -87818,7 +87818,7 @@ const BATTLE_MAPS = [
         "r": 72,
         "layer": "object2",
         "ox": 30,
-        "oy": 30
+        "oy": 35.333333
       },
       {
         "id": "tile_street_area_map_board",
@@ -88483,12 +88483,10 @@ const BATTLE_MAPS = [
       "56,75",
       "54,72",
       "55,72",
-      "56,72",
       "57,72",
       "57,73",
       "57,74",
       "58,72",
-      "58,73",
       "58,74",
       "57,75",
       "58,75",
@@ -95123,7 +95121,12 @@ const BATTLE_MAPS = [
       "59,79",
       "59,78",
       "59,80",
-      "60,80"
+      "60,80",
+      "54,76",
+      "55,76",
+      "56,76",
+      "57,76",
+      "58,73"
     ],
     "breakable": [],
     "coreSpots": [
@@ -95909,19 +95912,24 @@ const BATTLE_MAPS = [
       },
       {
         "id": "ground4",
-        "name": "2樓地板"
+        "name": "2樓地板",
+        "level": 2
       },
       {
         "id": "object6",
-        "name": "2樓牆壁"
+        "name": "2樓牆壁",
+        "level": 2
       },
       {
         "id": "object9",
-        "name": "2樓物件"
+        "name": "2樓物件",
+        "level": 2
       },
       {
         "id": "object10",
-        "name": "2樓上層"
+        "name": "2樓上層",
+        "level": 2,
+        "top2": true
       },
       {
         "id": "ground5",
@@ -98947,7 +98955,7 @@ const BATTLE_MAPS = [
       "70,37",
       "9,42"
     ],
-    "levels": 1
+    "levels": 2
   },
   {
     "id": "map_mw2dn6re",

@@ -133,6 +133,7 @@ function spawnCoreGroup(core) {
     const spot = spec.behavior === 'burrow' ? burrowMouseSpawnPosition(x, y) : { x, y };
     if (!spot) continue;
     const m = createMonster(spec, spot.x, spot.y);
+    if (hasFloors) m.floor = spawnFloorAt(c, r);   // 從出生區生的：照那一格的樓層（不看旁邊的人）
     m.speed *= rule.speed;   // 第二階段：召喚出的異質體跑得更快
     G.enemies.push(m);
     G.recentMonsterSpawns = G.recentMonsterSpawns || [];
@@ -149,7 +150,7 @@ function wakeCore(core) {
   // 腳下的腐蝕痕跡：沿用阿瓦倫腐蝕池（扣溫特與哨兵的血、哨兵會避開、冒黑霧），但不傷異質體
   const blobs = [];
   for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * CORE.pool.r * .5, dy: (Math.random() * 2 - 1) * CORE.pool.r * .35, rr: CORE.pool.r * (.55 + Math.random() * .5) });
-  core.pool = { x: core.x, y: core.y + 8, r: CORE.pool.r, t: 999, t0: 999, dps: CORE.pool.dps, blobs, fizz: 0, noEnemy: true, fromCore: true };
+  core.pool = { x: core.x, y: core.y + 8, floor: core.floor || 0, r: CORE.pool.r, t: 999, t0: 999, dps: CORE.pool.dps, blobs, fizz: 0, noEnemy: true, fromCore: true };
   (G.acidPools = G.acidPools || []).push(core.pool);
   core.scorch = null; keepCoreScorch(core);
   // 甦醒表演：紫色衝擊波、黑紫霧、附近震動
