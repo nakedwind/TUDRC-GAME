@@ -2750,7 +2750,7 @@ function loseOverlay(reason, cause) {
   let [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base;
   if (reason === 'player' && PLAYER_CHARACTER !== 'winter') { title = '💀 隊長倒下'; text = text.replace('溫特', playerName()); }   // 艾德林帶隊
   const causeLine = cause ? '<span class="lose-cause">倒下原因：<b>' + cause + '</b></span>' : '';
-  showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
+  showOverlay(title, causeLine + text, typeof missionLoseButton === 'function' ? missionLoseButton() : '重新部署');   // 有應變中心可回時，大按鈕＝撤退回應變中心（js/missions.js）
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
 function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.poolBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
