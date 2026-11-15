@@ -30,6 +30,9 @@ const GOURD = {
   tossSpin: 0.55,       // 飛在空中時往後仰幾度（弧度）
   bounceTime: 0.2,      // 落地後再小彈一下（秒）
   knockPlayer: true,    // 溫特也會被震飛（false＝只震飛隊友）
+  hitMonsters: true,    // 壓頂也會打到其他怪物（不分敵我；葫蘆猴王也是）
+  monsterDamageMul: 0.3,   // 打到怪物的傷害：打隊友傷害的幾成（0.3＝3 成）
+  knockMonsters: true,  // 震波範圍內的怪物也會被震飛（推不動的怪，例如其他葫蘆猴、BOSS，只受傷不會飛）
   shockBuildingDamage: 15,   // 震波範圍內（沒被壓到）的建築受到的傷害：只晃一下、不會飛
   hopMax: 18,           // 震波範圍內的建築原地彈起來多高（像素）：最靠近葫蘆猴的
   hopMin: 7,            // 震波邊緣的建築彈多高（像素）
@@ -284,6 +287,7 @@ function gourdImpact(e) {
   };
   if (C.knockPlayer && p && p.hp > 0) shove(p);
   for (const t of G.towers) if (t.hp > 0) { shove(t); t.navPath = null; t.navGoal = null; }
+  if (C.hitMonsters) gourdHitMonsters(e, x, y, R, C);   // 不分敵我：旁邊的怪物也會被壓到、震飛
   G.effects.push({ ring: true, x, y: y + 12, r: R, r2: C.knockRadius, life: .45, life0: .45, color: '#8f7b56' });   // 外圈震波
   // 建築：壓到的扣「建築傷害」；壓不到、但在震波範圍內的晃一下、受一點傷（不會被震飛）
   const blds = new Map(), span = Math.ceil(C.knockRadius / CELL) + 1, [ec, er] = cellAt(x, y);
@@ -322,6 +326,30 @@ function gourdHitSentry(e, t) {
   flash('-' + Math.round(dmg), t.x, t.y - 30, '#ff8f8f');
   if (typeof mateHurtSay === 'function') mateHurtSay(t, 'slammed');   // 對話編輯器「被葫蘆猴壓到」
   if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+}
+// 壓頂打到其他怪物：落點圈裡的扣血（打隊友傷害 × monsterDamageMul），震波範圍內的往外震飛（推不動的不飛）
+function gourdHitMonsters(e, x, y, R, C) {
+  const dmg = Math.max(1, Math.round((e.sentryDamage ?? 28) * C.monsterDamageMul));
+  for (const m of G.enemies) {
+    if (m === e || m.dead || m.hp <= 0) continue;
+    if (typeof blastHits === 'function' && !blastHits(m)) continue;   // 不同樓層打不到（js/pathfinding.js）
+    if (typeof burrowUnderground === 'function' && burrowUnderground(m)) continue;   // 鑽在地底的老鼠壓不到
+    const dx = m.x - x, dy = m.y - y, d = Math.hypot(dx, dy);
+    if (d > C.knockRadius) continue;
+    if (d <= R + (m.drawWidth || 40) * .2) {   // 被壓到：扣血
+      m.hp -= dmg; m.hitT = .2; m.hitColor = '#c8b590';
+      flashDmg('-' + dmg, m.x, m.y - 26, '#e0c890');
+      if (typeof enemyHitReact === 'function') enemyHitReact(m, x, y, true);
+    }
+    if (!C.knockMonsters || m.unpushable || m.hp <= 0) continue;
+    const resist = (typeof SLIME_VARIANTS !== 'undefined' && SLIME_VARIANTS[m.variant]?.knockResist) || 0, mul = (1 - resist) * (m.knockMul ?? 1);
+    if (mul <= 0) continue;
+    const ang = d > 1 ? Math.atan2(dy, dx) : Math.random() * Math.PI * 2, k = d / C.knockRadius;
+    const dist = (C.knockMax + (C.knockMin - C.knockMax) * k) * CELL * mul;   // 越靠近葫蘆猴飛越遠
+    m.knockT = C.knockTime; m.knockVX = Math.cos(ang) * dist / C.knockTime; m.knockVY = Math.sin(ang) * dist / C.knockTime;   // 水平滑出去（跟 K56 機車撞飛怪物同一套，js/street-vehicles.js）
+    m.gourdToss = { t: 0, h: (C.tossHeight + (C.tossMinHeight - C.tossHeight) * k) * Math.min(1, mul), side: Math.cos(ang) >= 0 ? 1 : -1, bounced: false };   // 飛起來再落地
+    if (typeof resetEnemyNavigation === 'function') resetEnemyNavigation(m);
+  }
 }
 function gourdCrushObstacle(e, o, dmg) {   // 跟 enemyAttackObstacle 一樣扣血，只是不揮手、一次壓一下；hitT 會讓建築閃紅、晃一下（js/render.js）
   if (o.type === 'camping_lights') return;
