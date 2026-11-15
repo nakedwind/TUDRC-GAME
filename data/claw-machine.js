@@ -14,6 +14,8 @@ const CLAW_MACHINE = {
   packPlays: 5,          // 優惠包幾次
   packCost: 120,         //         多少錢
   aimTime: 15,           // 每次可以移動爪子幾秒
+  reach: 24,             // 互動距離：溫特離機台「最下面那排」幾 px 內才能按 Space（只算機台本體，站在機台後面、隔著牆點不到）
+  reachRows: 1,          //           機台最下面幾排算本體（跟 data/prop-collisions.js 擋路的那排一樣）
   pityPlays: 10,         // 保夾：連續幾次沒拿到東西後，下一爪必中
   minAim: .4,            // 對得最歪（剛好擦到）時夾力剩幾成
   moveSpeed: 135,        // 爪子左右移動的速度（畫面單位／秒；機台內部高 360）

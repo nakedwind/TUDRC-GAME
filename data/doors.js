@@ -5,12 +5,13 @@
      打開時門板範圍裡的牆不畫、露出最底下那層地板；frame＝留門圖最外圈幾像素當門框（地圖上的像素，預設 2）；
      frameFile＝另外畫的門框圖（跟門一樣大、中間透明），有給就用它當門框。門要放在牆的上層、門底下要有鋪地板。
    knock：溫特走近關著的門時，有這個機率聽到門後傳來敲門聲（0.2＝20%；有沒有上鎖都一樣，音效「敲門」）。
+   tryOpen：門設成「只是圖片」時，溫特在門前按 Space 播這個音效（音效編輯器的名稱；沒寫就沒聲音）。
    hug：門關著時，擋路的下緣在門圖下緣往上幾像素，角色可以走到貼著門（沒寫＝js/doors.js 的 DOOR.hug，所有門都適用）。 */
 const DOOR_TILES = {
   tile_bg_backroom_door_wood: { panel: [19, 61], sound: 'backroomDoor', knock: 0.2 },
   tile_mvfonrdd: { panel: [0, 80], mode: 'practice' },
-  tile_mvobex5o: { panel: [0, 40], cutout: { frame: 2, frameFile: 'images/Poolcore/Poolcore_door_frame.png' } },   // 池核的門（Poolcore_door.png，1×2 格，整片都是門板）：打開時挖空門洞、留外框
-  tile_mvobzfro: { panel: [0, 40], cutout: { frame: 2, frameFile: 'images/Poolcore/Poolcore_door_frame.png' } },   // 池核的門（Poolcore_door_2.png）：同上；想用另外畫的門框就加 frameFile: 'images/Poolcore/xxx.png'   // B-2 訓練室的玻璃門（2×3 格，整片都是門板）：平常關著，訓練時從選單結束（js/practice.js）   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
+  tile_mvobex5o: { panel: [0, 40], tryOpen: 'TryingToOpenDoor', cutout: { frame: 2, frameFile: 'images/Poolcore/Poolcore_door_frame.png' } },   // 池核的門（Poolcore_door.png，1×2 格，整片都是門板）：打開時挖空門洞、留外框
+  tile_mvobzfro: { panel: [0, 40], tryOpen: 'TryingToOpenDoor', cutout: { frame: 2, frameFile: 'images/Poolcore/Poolcore_door_frame.png' } },   // 池核的門（Poolcore_door_2.png）：同上；想用另外畫的門框就加 frameFile: 'images/Poolcore/xxx.png'   // B-2 訓練室的玻璃門（2×3 格，整片都是門板）：平常關著，訓練時從選單結束（js/practice.js）   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
 };
 const DOOR_MODES = {
   manual: '自由開關（玩家按 Space 開關）',
@@ -20,7 +21,7 @@ const DOOR_MODES = {
   memory: '記憶之門（要回憶鑰匙；打開後可以進入回憶劇情）',   // 用哪把鑰匙、播哪段劇情：選取門後在旁邊設定（js/memory-doors.js）
   auto: '自動門（異質核心醒來時打開）',
   practice: '訓練室的門（關著；跟塔納對話開始訓練，在門邊結束訓練）',
-  picture: '只是圖片（永遠關著、不能開，沒有互動提示和開關門音效）',   // 照樣擋住門板下方那一格（js/doors.js）
+  picture: '只是圖片（永遠關著、不能開，沒有互動提示和開關門音效；有寫 tryOpen 的門按 Space 會播「打不開」音效）',   // 照樣擋住門板下方那一格（js/doors.js）
 };
 // 上鎖的門要什麼鑰匙（物品 id，data/items.js）；random：隨機開關的門每隔幾秒（最短～最長）動一次
 const DOOR_LOCKS = { key: 'backroom-door-key', chain: 'anomaly-key' };

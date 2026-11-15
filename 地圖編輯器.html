@@ -54,6 +54,7 @@
             <button class="tool" data-mode="solid2" title="畫只擋 2 樓的碰撞（紫色斜線框），例如 2 樓的牆、欄杆。1 樓的人照樣可以從底下走過去；一般的 🧱 紅格只擋 1 樓（拖曳畫一片；再畫一次＝擦掉）">🚧 2樓碰撞</button>
             <button class="btn" id="deckSolidTo2F" title="把畫在 🌉 2樓地面上的紅格（1 樓碰撞）一次改成 🚧 2樓碰撞：以前用紅格當 2 樓牆的地方用這個換過去">🔁 2樓地面上的紅格→2樓碰撞</button>
             <button class="tool" data-mode="deepwater" title="畫深水區（深藍色）：沒坐救生圈走不進去。溫特走到岸邊會想到救生圈，身上有救生圈按空白鍵就能坐上去下水；隊友、地面怪物都進不去，也不能蓋建築。划水速度在「地圖設定」調（拖曳畫一片；再畫一次＝擦掉）">🛟 深水區</button>
+            <button class="tool" data-mode="deepkeep" title="畫永遠深水（深藍色＋🔒）：跟 🛟 深水區一樣要坐救生圈才過得去，但抽水機、抽水閥都不會讓它變淺（例如救生員台四周）。拖曳畫一片；再畫一次＝擦掉">🔒 永遠深水</button>
             <button class="tool" data-mode="spawn" title="畫上後，這張地圖的怪物只會從這些格子出生（拖曳可以一次畫一片；再畫一次＝擦掉）">👾 怪物出生區</button>
           </div>
         </details>
@@ -82,7 +83,7 @@
         <div id="selControls">
           <span title="目前選取的物件">已選取：<b id="selName">—</b></span>
           <label title="圖層"><select id="selLayer"></select></label>
-          <label id="selDepthControl" title="人物遮擋線：由圖片頂端往下數幾格；線上方的人會被物件遮住，線下方的人會顯示在物件前面">遮擋 <input id="selDepthInput" type="number" min="0" max="8" step="0.25" style="width:38px"> 格</label>
+          <label id="selDepthControl" title="人物遮擋線：由圖片頂端往下數幾格；線上方的人會被物件遮住，線下方的人會顯示在物件前面">遮擋 <input id="selDepthInput" type="number" min="0" max="8" step="0.25" style="width:72px"> 格</label>
           <label id="selDoorControl" class="hidden" title="手動門：玩家走到門前按 E 開關。自動門：玩家打不開，異質核心醒來時自動打開。">🚪 門：<select id="selDoorMode"></select></label>
           <button class="btn" id="selUp" title="上移一層">↑</button>
           <button class="btn" id="selDown" title="下移一層">↓</button>
@@ -190,6 +191,7 @@
         <div class="field col"><label>🌫️ 起霧 <select id="f_fog"><option value="">沒有霧</option><option value="light">薄霧</option><option value="heavy">濃霧</option></select></label><small>遠處白茫茫、有一團團的霧慢慢飄；溫特身邊看得比較清楚。濃淡、顏色在 data/balance.js 的 FOG 調。</small></div>
         <div class="field col"><div>🔊 環境背景音 <span id="f_ambient"></span></div><label>白噪音音量 <input id="f_whiteNoise" type="number" min="0" max="100" style="width:70px">%</label><small>勾起來的背景音會在這張地圖上一直循環播放，可以勾好幾個一起播。白噪音是所有 Y 區地圖都有的背景音，這裡調它在這張地圖的音量（100＝原本、0＝不播）。音檔、音量在 <a href="音效編輯器.html">音效編輯器</a> 調整。</small></div>
         <div class="field col"><label>🛟 深水區划水速度 <input id="f_deepWaterSpeed" type="number" min="10" max="100" placeholder="60" style="width:70px">%</label><small>坐救生圈在深水區划水的速度＝平常走路的幾 %（空白＝60）。深水區用「⋯ 更多」裡的 🛟 深水區筆刷畫。</small></div>
+        <div class="field col"><label><input id="f_wetFloor" type="checkbox"> 💦 泳池旁的地板是濕的（會滑倒）</label><label>濕幾格 <input id="f_wetRange" type="number" min="1" max="20" placeholder="6" style="width:70px">格</label><small>離水（勾了「這是水」的素材、🛟 深水區）越近越濕：地上水漬越多、越容易滑倒、滑得越遠。滑不到 4 格只晃一下，4 格以上像踩到香蕉皮。機率等數值在 js/wet-floor.js 的 WET_FLOOR。</small></div>
 
         <div class="subhead">地圖大小</div>
         <div class="map-size-panel">
@@ -223,22 +225,22 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=gourd-speed-20261028"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=gourd-20261028"></script>
-  <script src="data/tiles.js?v=merge2-20261115"></script>        <!-- 素材庫（兩個編輯器共用） -->
-  <script src="data/maps.js?v=f307portal-20261115"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
+  <script src="data/tiles.js?v=pullmerge2-20261115"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/maps.js?v=pullmerge2-20261115"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
   <script src="data/supplies.js?v=toolbox15-20261109"></script>
   <script src="data/items.js?v=swimring-20261113"></script>
   <script src="data/equipment.js?v=gearinst-20261112"></script>
-  <script src="data/doors.js?v=hugall-20261028"></script>        <!-- 可開關的門 -->
+  <script src="data/doors.js?v=tryopen-20261115"></script>        <!-- 可開關的門 -->
   <script src="data/story-scenes.js?v=cat14-20261112"></script>   <!-- 記憶之門可以選的劇情 -->
   <script src="data/story-kai.js?v=colynfx14-20261106"></script>   <!-- 記憶之門也可以選「劇情編輯器（改）」做的劇情 -->
   <script src="js/memory-door-editor.js?v=kai-20261103"></script>   <!-- 記憶之門：鑰匙、劇情選單 -->
-  <script src="js/sfx.js?v=fieldgen-20261115"></script><script src="js/map-ambient.js?v=ambmulti-20261115"></script>
+  <script src="js/sfx.js?v=jumpscare2-20261115"></script><script src="js/map-ambient.js?v=ambmulti-20261115"></script><script src="js/wet-floor.js?v=ladder-20261115"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/map-picker.js?v=mappicker-20261024"></script>   <!-- 設出入口時選地圖的清單（取代 prompt，地圖多也不會被截斷） -->
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/map-levels.js?v=levels4-20261115"></script>   <!-- 地圖的樓層資料規則（遊戲共用） -->
   <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=merge3-20261115", "js/map-editor.js?v=merge3-20261115", "js/map-editor-levels.js?v=merge3-20261115", "js/map-editor-transform.js?v=merge3-20261115", "js/map-editor-save.js?v=merge3-20261115", "js/map-editor-copy.js?v=merge3-20261115", "js/asset-finder.js?v=merge3-20261115"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/stamp-transform.js?v=merge4-20261115", "data/tile-collisions.js?v=merge4-20261115", "js/tile-collisions.js?v=merge4-20261115", "js/map-editor.js?v=merge4-20261115", "js/map-editor-hidezone.js?v=merge4-20261115", "js/map-editor-levels.js?v=merge4-20261115", "js/map-editor-transform.js?v=merge4-20261115", "js/map-editor-save.js?v=merge4-20261115", "js/map-editor-copy.js?v=merge4-20261115", "js/asset-finder.js?v=merge4-20261115"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>

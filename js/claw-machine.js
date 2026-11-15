@@ -35,7 +35,19 @@ function clawItemInfo(def) {   // 獎品要顯示的名字、圖、說明（服�
 
 // ---- 地圖上的位置 ----
 const clawSpots = () => costumeSpots((id, t) => CLAW_MACHINE.tiles.includes(id) || /夾娃娃機/.test(t.name || ''), false);
-const clawNearPlayer = () => costumeSpotNearPlayer(clawSpots());
+// 靠近判定：只量到機台「最下面 reachRows 排」（機台本體），不是整張圖。
+// 整張圖的上半部是機台頂端的空間，站在機台後面、隔著牆也會量到，所以不能算（data/claw-machine.js 的 reach、reachRows）
+function clawNearPlayer() {
+  const p = G && G.player; if (!p || p.sitting || !G.running) return null;
+  const rows = CLAW_MACHINE.reachRows || 1, reach = CLAW_MACHINE.reach ?? 24;
+  let best = null, bd = reach;
+  for (const s of clawSpots()) {
+    const by0 = Math.max(s.y0, s.y1 - rows * CELL);   // 本體的上緣
+    const d = Math.hypot(Math.max(s.x0 - p.x, 0, p.x - s.x1), Math.max(by0 - p.y, 0, p.y - s.y1));
+    if (d <= bd) { bd = d; best = s; }
+  }
+  return best;
+}
 function useClawNearPlayer() { const s = clawNearPlayer(); if (!s) return false; openClawMachine(s); return true; }
 const clawPromptLabel = spot => clawMachineState(spot).stock.length ? '夾娃娃' : '夾娃娃（空了）';   // 地圖上的互動提示
 

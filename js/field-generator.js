@@ -1,13 +1,14 @@
 /* ===== 池核的力場產生器（Poolcore_field-generator.png）：溫特第一次走近時的音效 =====
-   ・溫特走到產生器一格內：同時播「無線電雜音＋無線電」和「拉炮」，過 0.4 秒再播「生日吹笛」
+   ・溫特走到產生器一格內：同時播「無線電雜音＋無線電」和「拉炮」，過 0.4 秒再播「生日吹笛」、過 0.6 秒再播「Jumpscare」
    ・在這張地圖裡只會觸發一次；離開這張地圖再回來，才會再觸發一次
    ・只有 FIELD_GEN.maps 裡的地圖會觸發（其他地圖放這張圖只是裝飾）
-   ・音檔、音量在「音效編輯器」調整：fieldGenRadio、fieldGenPopper、fieldGenHorn（js/sfx.js） */
+   ・音檔、音量在「音效編輯器」調整：fieldGenRadio、fieldGenPopper、fieldGenHorn（js/sfx.js）；Jumpscare＝音效編輯器裡的自訂音效「Jumpscare」（音檔、剪輯的段落都在 data/sound-settings.js） */
 const FIELD_GEN = {
   maps: ['map_mv1bzur4'],   // 04. 池核
   file: /\/Poolcore_field-generator\.png$/,
   reach: 1,                 // 離產生器幾格內算「走近」（量到圖片範圍最近的地方）
   hornDelay: 400,           // 生日吹笛晚幾毫秒播
+  jumpscareDelay: 600,      // Jumpscare 晚幾毫秒播（跟無線電、拉炮比）
 };
 
 (() => {
@@ -41,5 +42,6 @@ const FIELD_GEN = {
     doneMap = MAP;
     sfx('fieldGenRadio'); sfx('fieldGenPopper');
     setTimeout(() => sfx('fieldGenHorn'), FIELD_GEN.hornDelay);
+    setTimeout(() => sfx('Jumpscare'), FIELD_GEN.jumpscareDelay);
   }, 100);
 })();

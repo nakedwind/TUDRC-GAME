@@ -7016,7 +7016,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_pool_2_middle.png",
     "w": 4,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_mwdqrv1c",
@@ -7394,7 +7395,7 @@ const SHARED_TILES = [
     "flat": true,
     "water": {
       "depth": 20,
-      "speed": 60,
+      "speed": 40,
       "see": 45
     }
   },
@@ -7408,7 +7409,7 @@ const SHARED_TILES = [
     "flat": true,
     "water": {
       "depth": 10,
-      "speed": 70,
+      "speed": 40,
       "see": 45
     }
   },
@@ -7421,7 +7422,7 @@ const SHARED_TILES = [
     "h": 1,
     "water": {
       "depth": 25,
-      "speed": 70,
+      "speed": 40,
       "see": 45
     },
     "flat": true

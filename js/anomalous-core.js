@@ -193,7 +193,7 @@ function updateCores(dt) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;
     if (core.hp < core.lastHp) {
-      if (core.awake && !core.hidden && !core.carried) core.hitT = .16;
+      if (core.awake && !core.hidden && !core.carried && !(typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(core))) core.hitT = .16;   // 泡在深水裡（js/pool-tide.js）：也不會受傷
       else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）；躲在順順宮帽裡、抱在珍珠大童身上也不會（js/elite-cap-king.js、js/pearl-elder.js 自己扣）
     }
     core.lastHp = core.hp;

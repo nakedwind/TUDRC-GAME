@@ -18,7 +18,7 @@
   button:hover { background:#34516d } button.primary { background:#276f80; border-color:#64b6bd }
   input { background:#121a23; color:#f3f6fb; border:1px solid #52677d; border-radius:7px; padding:7px 9px; font:inherit; min-width:0 }
   #search { flex:1; min-width:180px }
-  .row { display:grid; grid-template-columns:minmax(145px,1.2fr) minmax(180px,1.5fr) minmax(130px,1.4fr) 78px auto auto; gap:10px; align-items:center;
+  .row { display:grid; grid-template-columns:minmax(145px,1.2fr) minmax(180px,1.5fr) minmax(130px,1.4fr) 78px auto auto auto; gap:10px; align-items:center;
          padding:7px 8px; border-radius:8px }
   .row + .row { border-top:1px solid #29384a }
   .row.changed { background:#22323f }
@@ -32,10 +32,15 @@
   .new-sound label { display:grid; gap:5px; color:#9fb0c3; font-size:12px }
   .folder-note { margin:9px 0 0; color:#d3bd82; font-size:12px }
   .custom-tag { display:inline-block; margin-left:5px; padding:1px 5px; border-radius:99px; background:#465c72; color:#dbefff; font-size:9px }
-  .reset:disabled { opacity:.3; cursor:default }
+  .reset:disabled, .cut:disabled { opacity:.3; cursor:default }
+  .cut { padding:8px 10px; white-space:nowrap }
+  /* 剪輯對話框：跟劇情編輯器（改）的「播放秒數」同一個樣子 */
+  dialog { background:#16202b; color:#e8edf5; border:1px solid #57718b; border-radius:12px; padding:14px } dialog::backdrop { background:rgba(0,0,0,.55) }
+  dialog h3 { margin:0 0 8px; font-size:16px } dialog .acts { display:flex; justify-content:flex-end; gap:8px; margin-top:10px }
+  dialog .note { font-size:12px; color:#91a3b8; line-height:1.5; margin:6px 0 0 } dialog .bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px }
   #status { min-height:22px; color:#84ddbd; margin:10px 0 0 }
   #exportOut { width:100%; min-height:120px; margin-top:10px; background:#0d151e; border:1px solid #4c6479; color:#b6d5e6; border-radius:8px; padding:12px; font:12px/1.5 Consolas,monospace; resize:vertical }
-  @media(max-width:850px) { body { padding:16px } .row { grid-template-columns:1fr 1fr 78px auto auto } .file-pick { grid-column:1/-1 } .row input[type=range] { grid-column:1/-1; order:6 } .new-sound { grid-template-columns:1fr 1fr } }
+  @media(max-width:850px) { body { padding:16px } .row { grid-template-columns:1fr 1fr 78px auto auto auto } .file-pick { grid-column:1/-1 } .row input[type=range] { grid-column:1/-1; order:6 } .new-sound { grid-template-columns:1fr 1fr } }
 </style>
 </head>
 <body>
@@ -68,12 +73,31 @@
   <div id="groups"></div>
   <section class="panel"><h2>匯出內容</h2><small>按任一「下載」時也會顯示在這裡。</small>
     <textarea id="exportOut" readonly aria-label="匯出內容"></textarea></section>
+  <!-- 剪輯（✂）：波形上拖曳選出要播的那一段；跟劇情編輯器（改）的「✂ 播放秒數」同一套（js/sound-trim.js） -->
+  <dialog id="trimDlg" aria-labelledby="trimTitle" style="width:min(760px,96vw)">
+    <h3 id="trimTitle">剪輯</h3>
+    <p class="note" id="trimFile" style="margin:0 0 6px"></p>
+    <canvas id="trimWave" width="720" height="140" style="width:100%;height:140px;background:#0b1016;border:1px solid #2d3f52;border-radius:6px;cursor:crosshair;display:block;touch-action:none"></canvas>
+    <div class="bar">
+      <label>開始 <input id="trimFrom" type="number" min="0" step="10" style="width:80px"> ms</label>
+      <label>結束 <input id="trimTo" type="number" min="0" step="10" style="width:80px"> ms</label>
+      <label title="變慢或變快、但不改變音高（1＝原速，0.25～4）">播放速度 <input id="trimSpeed" type="number" min="0.25" max="4" step="0.05" style="width:64px"> 倍</label>
+      <label title="就是這一列的音量（100＝原本）">音量 <input id="trimVol" type="number" min="0" max="300" step="5" style="width:64px"> %</label>
+      <span class="note" id="trimLen" style="margin:0"></span>
+      <span style="flex:1"></span>
+      <button type="button" id="trimPlay" data-ui-sound="none">▶ 試聽選取的段</button><button type="button" id="trimAll">整段</button>
+    </div>
+    <p class="note" id="trimLayers" hidden></p>
+    <p class="note">在波形上按住拖曳＝選出要播的那一段；拖兩邊的黃線可以微調。遊戲裡只播這一段。播放速度：變慢或變快但音高不變（開始、結束照原本音檔的時間）。</p>
+    <div class="acts"><button type="button" id="trimClear" style="margin-right:auto">清除剪輯</button><button type="button" id="trimCancel">取消</button><button type="button" class="primary" id="trimOk">確定</button></div>
+  </dialog>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
-  <script src="data/sound-settings.js?v=basemusic-20261110"></script>
+  <script src="data/sound-settings.js?v=jumpscare-20261115"></script>
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/sfx.js?v=fieldgen-20261115"></script>
+  <script src="js/sfx.js?v=jumpscare2-20261115"></script>
   <script src="js/ui-feedback.js?v=k56merge-20261101"></script>
-  <script src="js/sound-editor.js?v=fieldgen-20261115"></script>
+  <script src="js/sound-trim.js?v=soundclip-20261115"></script>   <!-- 剪輯的波形視窗（跟劇情編輯器（改）共用） -->
+  <script src="js/sound-editor.js?v=jumpscare2-20261115"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportSettings'], files: [{ path: 'data/sound-settings.js', label: '音效設定', text: () => settingsExport() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

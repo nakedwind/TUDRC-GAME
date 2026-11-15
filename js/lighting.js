@@ -371,8 +371,48 @@ function cellNearLight(c, r, extra) {
   return false;
 }
 
+// ---- 牆面跟著牆腳一起亮（只影響畫面）----
+// 牆的圖常常有好幾格高，但不可穿透格只畫在最下面那一排（牆腳）：光碰到牆腳就停，上面那幾格牆面算在「牆後」，整片是黑的。
+// 畫黑幕時，立體物圖層上「下面有牆腳」的圖：牆腳以上、同一張圖蓋到的格子，亮度跟著同一行的牆腳（取比較亮的）。
+// 只在畫黑幕的時候暫時改，畫完還原：遊戲的「亮處」判定（隊員走不走、看不看得到怪物）不變，光也不會照進牆後面的房間。
+let wallFaceCache = { map: null, n: -1, walls: -1, cols: -1, pairs: [] };
+function wallFacePairs() {
+  const stamps = (MAP && MAP.stamps) || [];
+  if (wallFaceCache.map === MAP && wallFaceCache.n === stamps.length && wallFaceCache.walls === mapWalls.size && wallFaceCache.cols === COLS) return wallFaceCache.pairs;
+  const pairs = [];   // [牆面格, 牆腳格, …]
+  for (const s of stamps) {
+    const lid = s.layer || 'top';
+    if (typeof isOccLayer !== 'function' || !isOccLayer(lid) || (typeof MAP_FLOOR2_LAYERS !== 'undefined' && MAP_FLOOR2_LAYERS.has(lid))) continue;   // 只看牆、櫃子這類立體物（2 樓另外處理）
+    const t = mapTileById(s.id); if (!t || t.flat) continue;
+    const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL), w = Math.ceil(mapStampW(s, t)), h = Math.ceil(mapStampH(s, t));
+    if (h < 2) continue;
+    const bases = [];   // 每一行最下面的牆腳在第幾排（沒有＝-1）
+    for (let dc = 0; dc < w; dc++) { let rb = -1; for (let r = r0 + h - 1; r >= r0; r--) if (inGrid(c0 + dc, r) && mapWalls.has((c0 + dc) + ',' + r)) { rb = r; break; } bases.push(rb); }
+    if (bases.every(b => b < 0)) continue;
+    for (let dc = 0; dc < w; dc++) {
+      let k = dc;   // 這一行沒有牆腳：用最近那一行的
+      if (bases[k] < 0) { let best = Infinity; bases.forEach((b, j) => { if (b >= 0 && Math.abs(j - dc) < best) { best = Math.abs(j - dc); k = j; } }); }
+      const c = c0 + dc, rb = bases[k], bc = c0 + k;
+      for (let r = r0; r < rb; r++) if (inGrid(c, r) && !mapWalls.has(c + ',' + r)) pairs.push(r * COLS + c, rb * COLS + bc);
+    }
+  }
+  wallFaceCache = { map: MAP, n: stamps.length, walls: mapWalls.size, cols: COLS, pairs };
+  return pairs;
+}
 function drawDarkness() {
   if (!LIGHT.enabled) return;
+  const pairs = MAP ? wallFacePairs() : [], saved = [];
+  for (let k = 0; k < pairs.length; k += 2) {
+    const i = pairs[k], b = pairs[k + 1];
+    saved.push(i, visField[i], warmField[i], beamMask[i]);
+    if (visField[b] > visField[i]) visField[i] = visField[b];
+    if (warmField[b] > warmField[i]) warmField[i] = warmField[b];
+    if (beamMask[b] > beamMask[i]) beamMask[i] = beamMask[b];   // 溫特身上的燈（頭燈、手電筒）照到牆腳：牆面也照得到
+  }
+  try { drawDarknessLayers(); }
+  finally { for (let k = saved.length - 4; k >= 0; k -= 4) { const i = saved[k]; visField[i] = saved[k + 1]; warmField[i] = saved[k + 2]; beamMask[i] = saved[k + 3]; } }
+}
+function drawDarknessLayers() {
   const now = performance.now() / 1000;
 
   // 雙燈向上投射的柔和光束。先畫光束、再蓋黑幕，牆後區域會被照明遮罩自然壓暗。

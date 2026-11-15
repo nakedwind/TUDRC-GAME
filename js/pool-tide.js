@@ -4,7 +4,7 @@
    ② 抽水機（地圖上的發電機 dynamo）全部打開 → 1.5 秒抽乾：淺水區變成地面（之後永遠沒水）、深水區變成淺水，大家都能走
       坐救生圈的人自動收起救生圈。抽水機打開後就關不掉（按了沒效果）
    ③ 第一次抽乾後過 3 分鐘：水漲回來（2 秒），深水區又變回深水
-   ④ 水漲起來時：打開「抽水閥」（地圖編輯器選電源開關 → 勾「抽水閥」）→ 1.5 秒抽乾深水區；之後每 50 秒漲一次
+   ④ 水漲起來時：打開「抽水閥」（地圖編輯器選電源開關 → 勾「抽水閥」）→ 1.5 秒抽乾深水區；之後每 45 秒漲一次（第一次 90 秒）
    ⑤ 水漲起來時還在深水區的隊友（沒坐救生圈）會溺水：每秒扣 1 HP，畫面上方中間跳「快打開抽水閥！」
       深水區裡沒有隊友：溫特頭上冒泡泡「一定有開關可以把這些水抽走。」
    畫面怎麼跟著變：圖層名稱裡寫這些字（地圖編輯器圖層列的「改名」），那層就照水位淡入淡出
@@ -12,8 +12,8 @@
      「深水時顯現」：深水區是深水時的樣子　　　　　　「淺水時顯現」：深水區抽成淺水時的樣子
      看不到的圖層：裡面勾了「這是水」的素材也不算水（js/water.js） */
 const POOL_TIDE = {
-  firstHoldSecs: 180,   // 第一次抽乾後，過幾秒水才漲回來
-  holdSecs: 50,         // 之後每次抽乾後，過幾秒水又漲回來
+  firstHoldSecs: 90,    // 第一次抽乾後，過幾秒水才漲回來（從抽水閥走到核心約 5～7 秒、溫特一個人打核心約 45 秒：第一次留寬一點，讓玩家看清楚抽乾的地形）
+  holdSecs: 45,         // 之後每次抽乾後，過幾秒水又漲回來（越後面越趕；核心扣的血不會回來，打不完下次抽乾再接著打）
   riseSecs: 2,          // 水漲起來要幾秒
   drainSecs: 1.5,       // 抽乾要幾秒
   drownDps: 1,          // 溺水每秒扣幾 HP
@@ -23,6 +23,7 @@ const POOL_TIDE = {
   winterSecs: 3.5,      // 溫特的泡泡停多久
   pumpedText: '抽水機已經在運轉了。',   // 抽水機打開後再按
   valveNoPowerText: '沒有什麼反應……',   // 兩台抽水機（發電機）還沒都啟動時按抽水閥
+  valveSaySecs: 2.2,   // 上面那句在溫特頭上的泡泡停幾秒
   valveLowText: '水已經抽掉了。',
   marks: { shallowGone: '抽水後消失', shallowDry: '抽水後出現', deep: '深水時顯現', deepShallow: '淺水時顯現' },
 };
@@ -73,7 +74,7 @@ function poolPumpCheck() {
 // ---- 抽水閥（地圖編輯器勾了「抽水閥」的電源開關）----
 function usePoolValve() {
   const s = poolTideActive() ? poolTide() : null;
-  if (!s || !s.pumped) { sfx('error'); systemNotice(POOL_TIDE.valveNoPowerText, true); return; }
+  if (!s || !s.pumped) { sfx('error'); if (G && G.player) G.player.poolSay = { text: POOL_TIDE.valveNoPowerText, until: performance.now() + POOL_TIDE.valveSaySecs * 1000 }; return; }   // 溫特頭上的泡泡（drawPoolTideBubble）
   if (s.phase !== 'high' && s.phase !== 'rising') { sfx('switch'); systemNotice(POOL_TIDE.valveLowText); return; }
   s.phase = 'draining'; s.firstDrain = false; sfx('powerOn');
 }
@@ -103,6 +104,7 @@ function updatePoolTide(dt) {
   if (deepNow !== poolDeepWas) {
     poolDeepWas = deepNow;
     if (!deepNow) { if (G.player) G.player.swimRing = false; for (const t of G.towers || []) t.swimRing = false; }
+    else poolDouseLights();   // 水漲回深水：放在深水區裡的燈熄滅、消失
     if (typeof computeFlow === 'function') computeFlow();
   }
   // 溺水：深水時，還在深水區、沒坐救生圈的隊友每秒扣血
@@ -128,14 +130,32 @@ function poolMatesInDeep() {
 // 不管現在水位，這個點在不在畫好的深水區範圍裡
 function poolPointInDeepZone(x, y) {
   const list = MAP && MAP.deepWater; if (!Array.isArray(list) || !list.length) return false;
-  if (poolZoneCache.list !== list) poolZoneCache = { list, set: new Set(list) };
+  if (poolZoneCache.list !== list || poolZoneCache.keep !== MAP.deepWaterKeep) poolZoneCache = { list, keep: MAP.deepWaterKeep, set: new Set([...list, ...(MAP.deepWaterKeep || [])]) };   // 永遠深水也算在深水區裡
   return typeof deepCellsHavePoint === 'function' ? deepCellsHavePoint(poolZoneCache.set, x, y) : poolZoneCache.set.has(cellAt(x, y).join(','));   // 有微調過的深水格照微調後的位置（js/swim-ring.js）
 }
 let poolZoneCache = { list: null, set: null };
+// 異質核心泡在深水裡（深水區的水還沒抽乾）：打不到——溫特的槍、隊員、油桶爆炸都傷不了它，隊員也不會去打它
+// （js/anomalous-core.js、js/game.js、js/sentry.js、js/oil-barrels.js 問這個）
+function poolCoreSubmerged(core) { return !!core && typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(core.x, core.y); }
+// 泡在深水裡的核心：畫的時候水面以下半透明（跟 BOSS、泡在水裡的人同一套畫法，js/water.js 的 drawWaded）；水抽乾了就恢復清楚
+//   line＝水面在核心圖片的哪裡（從底部往上算，.55＝泡到 55% 高）；see＝水面以下多清楚（深水區沒有水素材時用這個）
+const POOL_CORE_WADE = { line: .55, see: .45 };
+function poolCoreWade(core) {
+  if (!poolCoreSubmerged(core) || typeof CORE === 'undefined') return null;
+  const lift = typeof coreLift === 'function' ? Math.max(0, coreLift(core)) : 0;
+  const H = CORE.h + lift + 30;   // 處理的範圍：核心本體＋浮起來的高度＋頭上的血條
+  const w = typeof waterAt === 'function' ? waterAt(core.x, core.y + 10) : null;
+  const see = w && Number.isFinite(w.see) ? w.see : POOL_CORE_WADE.see;
+  return { w: { depth: CORE.h * POOL_CORE_WADE.line / H, see }, bottom: core.y + 20, height: H, width: 60 };   // width：水面波紋的寬度
+}
 
 // ---- 畫面：溫特頭上的泡泡（js/render.js 的 drawInteractionPrompts 呼叫）----
 function drawPoolTideBubble() {
   const s = poolTideActive() ? poolTide() : null, p = G && G.player;
+  if (p && p.poolSay) {   // 抽水閥還沒反應：「沒有什麼反應……」（usePoolValve）
+    if (performance.now() < p.poolSay.until) { if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, p.poolSay.text); return; }
+    p.poolSay = null;
+  }
   if (!s || !p || performance.now() > s.winterUntil) return;
   if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, POOL_TIDE.winterText);
 }
@@ -207,4 +227,25 @@ function poolIsValve(stamp) {
   const list = typeof MAP !== 'undefined' && MAP && Array.isArray(MAP.layerOrder) ? MAP.layerOrder : [];
   const l = list.find(x => x.id === (stamp.layer || 'top'));
   return !!(l && String(l.name || '').includes('抽水閥'));
+}
+
+// ---- 水漲回深水：玩家放在深水區裡的燈（js/build.js 的 emitsLight）熄滅、消失 ----
+// 燈只能放在淺水池：深水區要等水抽乾才放得下去（深水時不能蓋，js/build.js 的放置判定），水一漲回來就被淹掉
+function poolDouseLights() {
+  if (typeof emitsLight !== 'function' || typeof removeBarrier !== 'function') return;
+  let n = 0;
+  for (const o of [...(G.obstacles || [])]) {
+    if (o.hp <= 0 || !emitsLight({ id: o.type })) continue;
+    let wet = false;
+    for (let dc = 0; dc < (o.w || 1) && !wet; dc++) for (let dr = 0; dr < (o.h || 1) && !wet; dr++) wet = poolPointInDeepZone(...center(o.c + dc, o.r + dr));
+    if (!wet) continue;
+    const [x, y] = center(o.c + ((o.w || 1) - 1) / 2, o.r + ((o.h || 1) - 1) / 2);
+    o.lastHitBy = 'eaten';   // 安全移除（不會觸發爆炸之類的效果）
+    removeBarrier(o); n++;
+    G.effects.push({ ring: true, x, y: y + 8, r: 6, r2: 40, life: .5, life0: .5, color: '#cfeeff' });
+    if (typeof pushBlackSmoke === 'function') for (let i = 0; i < 3; i++) pushBlackSmoke(x + (Math.random() - .5) * 16, y - 6);   // 冒一點煙
+    if (typeof flash === 'function') flash('熄滅了', x, y - 24, '#9fd8ff');
+    if (typeof sfxAt === 'function') sfxAt('poolLightDouse', x, y, 1, 'pool-light-douse'); else if (typeof sfx === 'function') sfx('poolLightDouse');
+  }
+  if (n) { for (const t of G.towers || []) { t.navPath = null; t.navGoal = null; t.navTimer = 0; } }
 }

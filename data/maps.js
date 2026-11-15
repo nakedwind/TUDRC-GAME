@@ -12705,7 +12705,9 @@ const BATTLE_MAPS = [
       "object31": {},
       "object32": {},
       "object33": {},
-      "object34": {}
+      "object34": {
+        "62,27": "tile_mwdka8vr"
+      }
     },
     "stamps": [
       {
@@ -14418,6 +14420,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 14,
         "r": 62,
         "layer": "object6",
@@ -14433,6 +14436,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 2,
         "r": 62,
         "layer": "object6",
@@ -14454,7 +14458,8 @@ const BATTLE_MAPS = [
         "r": 35,
         "layer": "object11",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_mvoa0cqd",
@@ -14607,6 +14612,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 17,
         "r": 54,
         "layer": "object",
@@ -14614,6 +14620,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 25,
         "r": 54,
         "layer": "object",
@@ -14991,6 +14998,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 24,
         "r": 62,
         "layer": "object6",
@@ -14999,6 +15007,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 37,
         "r": 57,
         "layer": "object",
@@ -15102,6 +15111,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 37,
         "r": 45,
         "layer": "object31",
@@ -15110,6 +15120,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 37,
         "r": 62,
         "layer": "object",
@@ -15150,6 +15161,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 36,
         "r": 72,
         "layer": "object6",
@@ -15174,7 +15186,8 @@ const BATTLE_MAPS = [
         "r": 71,
         "layer": "object6",
         "ox": 20,
-        "oy": 20
+        "oy": 20,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvr3kqob",
@@ -15201,6 +15214,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 31,
         "r": 66,
         "layer": "object6",
@@ -15260,6 +15274,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr2fi62",
+        "sortDepth": 0,
         "c": 36,
         "r": 71,
         "layer": "object6",
@@ -15293,28 +15308,32 @@ const BATTLE_MAPS = [
         "r": 71,
         "layer": "object6",
         "ox": 20,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvquvyy8",
-        "c": 12,
-        "r": 64,
-        "layer": "object17",
-        "oy": 20
+        "oy": 20,
+        "sortDepth": 0
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 62,
         "r": 71,
         "layer": "object6",
         "ox": 20
       },
       {
+        "id": "tile_mvquvyy8",
+        "c": 12,
+        "r": 64,
+        "layer": "object17",
+        "oy": 20,
+        "sortDepth": 0
+      },
+      {
         "id": "tile_mvr3nuyx",
         "c": 33,
         "r": 74,
         "layer": "object6",
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_poolcore_floor_l",
@@ -16992,6 +17011,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 13,
         "r": 58,
         "layer": "object5",
@@ -17000,6 +17020,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 13,
         "r": 53,
         "layer": "object5",
@@ -17008,6 +17029,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 2,
         "r": 53,
         "layer": "object5",
@@ -17047,6 +17069,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 10,
         "r": 55,
         "layer": "object5",
@@ -17055,6 +17078,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 11,
         "r": 55,
         "layer": "object5",
@@ -17063,6 +17087,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 2,
         "r": 55,
         "layer": "object5",
@@ -17071,6 +17096,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 8,
         "r": 55,
         "layer": "object5",
@@ -17079,6 +17105,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3nuyx",
+        "sortDepth": 0,
         "c": 4,
         "r": 55,
         "layer": "object5",
@@ -17087,6 +17114,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 13,
         "r": 53,
         "layer": "object5",
@@ -17104,6 +17132,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 13,
         "r": 51,
         "layer": "object5",
@@ -17112,6 +17141,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 13,
         "r": 48,
         "layer": "object5",
@@ -17120,6 +17150,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 13,
         "r": 49,
         "layer": "object5",
@@ -17132,7 +17163,8 @@ const BATTLE_MAPS = [
         "r": 48,
         "layer": "object5",
         "ox": 16,
-        "oy": 24
+        "oy": 24,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvr40sp8",
@@ -17140,10 +17172,12 @@ const BATTLE_MAPS = [
         "r": 50,
         "layer": "object5",
         "ox": 16,
-        "oy": 14
+        "oy": 14,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 2,
         "r": 54,
         "layer": "object5",
@@ -17161,6 +17195,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 3,
         "r": 48,
         "layer": "object5",
@@ -17168,6 +17203,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 4,
         "r": 48,
         "layer": "object5",
@@ -17176,6 +17212,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 11,
         "r": 48,
         "layer": "object5",
@@ -17184,6 +17221,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 10,
         "r": 48,
         "layer": "object5",
@@ -17192,6 +17230,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 6,
         "r": 48,
         "layer": "object5",
@@ -17200,6 +17239,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr32pqo",
+        "sortDepth": 0,
         "c": 8,
         "r": 48,
         "layer": "object5",
@@ -17289,7 +17329,7 @@ const BATTLE_MAPS = [
         "c": 57,
         "r": 67,
         "layer": "top",
-        "ox": 30,
+        "ox": 10,
         "circuit": 2
       },
       {
@@ -17298,7 +17338,7 @@ const BATTLE_MAPS = [
         "r": 67,
         "layer": "object19",
         "blend": "hard-light",
-        "ox": 30
+        "ox": 10
       },
       {
         "id": "tile_mvodgug9",
@@ -17335,7 +17375,9 @@ const BATTLE_MAPS = [
           "kind": "item",
           "id": "eye-drops",
           "qty": 1
-        }
+        },
+        "sortDepth": 1.25,
+        "oy": 30
       },
       {
         "id": "tile_mvymwgxl",
@@ -17361,7 +17403,8 @@ const BATTLE_MAPS = [
           "id": "swim-ring",
           "qty": 1
         },
-        "oy": -4
+        "oy": -4,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvymwgxl",
@@ -17385,7 +17428,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvyo15bc",
         "c": 59,
-        "r": 65,
+        "r": 66,
         "layer": "object9",
         "oy": 30.66666699999996,
         "circuit": 2
@@ -17608,7 +17651,8 @@ const BATTLE_MAPS = [
         "c": 35,
         "r": 11,
         "layer": "object22",
-        "ox": 37.333333
+        "ox": 37.333333,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvocpp0c",
@@ -17716,6 +17760,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 5,
         "r": 2,
         "layer": "object23",
@@ -17724,6 +17769,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 18,
         "r": 2,
         "layer": "object23",
@@ -17732,6 +17778,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 36,
         "r": 0,
         "layer": "object23",
@@ -17866,6 +17913,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 0,
         "r": 11,
         "layer": "object22",
@@ -17873,11 +17921,21 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 35,
         "r": 15,
         "layer": "object22",
         "oy": 25.33333300000001,
         "ox": 38
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 35,
+        "r": 15,
+        "layer": "object22",
+        "oy": 25.33333300000001,
+        "ox": 38,
+        "sortDepth": 5
       },
       {
         "id": "tile_mvoa0cqd",
@@ -17926,6 +17984,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 0,
         "r": 15,
         "layer": "object22",
@@ -18008,6 +18067,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 37,
         "r": 50,
         "layer": "object13",
@@ -18983,6 +19043,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 8,
         "r": 2,
         "layer": "object23",
@@ -18991,6 +19052,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 9,
         "r": 2,
         "layer": "object23",
@@ -18999,6 +19061,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 0,
         "r": 7,
         "layer": "object23",
@@ -19014,6 +19077,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 14,
         "r": 50,
         "layer": "object14",
@@ -19258,7 +19322,8 @@ const BATTLE_MAPS = [
         "r": 52,
         "layer": "object5",
         "ox": 16,
-        "oy": 14
+        "oy": 14,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvzbvnsy",
@@ -19472,6 +19537,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 0,
         "r": 30,
         "layer": "object18",
@@ -19635,6 +19701,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 33,
         "r": 50,
         "layer": "object14",
@@ -19643,6 +19710,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 35,
         "r": 30,
         "layer": "object18",
@@ -19651,6 +19719,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 37,
         "r": 35,
         "layer": "object18",
@@ -19659,6 +19728,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 37,
         "r": 39,
         "layer": "object11",
@@ -20106,6 +20176,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 62,
         "r": 58,
         "layer": "object13",
@@ -20440,6 +20511,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 43,
         "r": 71,
         "layer": "object6",
@@ -20520,6 +20592,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0.25,
         "c": 24,
         "r": 77,
         "layer": "object6",
@@ -20528,6 +20601,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 0,
         "r": 77,
         "layer": "object6",
@@ -20535,15 +20609,8 @@ const BATTLE_MAPS = [
         "oy": 20
       },
       {
-        "id": "tile_mvnn2p1x",
-        "c": 42,
-        "r": 73,
-        "layer": "object17",
-        "oy": 30,
-        "ox": 30
-      },
-      {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 67,
         "layer": "object13",
@@ -20552,6 +20619,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 16,
         "layer": "object25",
@@ -20560,6 +20628,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 36,
         "layer": "object25",
@@ -20568,6 +20637,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 39,
         "layer": "object25",
@@ -20576,6 +20646,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 38,
         "layer": "object25",
@@ -20584,6 +20655,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 26,
         "layer": "object25",
@@ -20592,6 +20664,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 63,
         "layer": "object13",
@@ -20600,6 +20673,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 12,
         "layer": "object25",
@@ -20608,6 +20682,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 32,
         "layer": "object25",
@@ -20616,6 +20691,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 22,
         "layer": "object25",
@@ -20624,6 +20700,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 65,
         "layer": "object13",
@@ -20632,6 +20709,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 14,
         "layer": "object25",
@@ -20640,6 +20718,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 34,
         "layer": "object25",
@@ -20648,6 +20727,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 24,
         "layer": "object25",
@@ -20656,6 +20736,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 61,
         "layer": "object13",
@@ -20664,6 +20745,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 10,
         "layer": "object25",
@@ -20672,6 +20754,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 30,
         "layer": "object25",
@@ -20680,6 +20763,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 20,
         "layer": "object25",
@@ -20688,6 +20772,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 59,
         "layer": "object13",
@@ -20696,6 +20781,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 8,
         "layer": "object25",
@@ -20704,6 +20790,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 28,
         "layer": "object25",
@@ -20712,11 +20799,21 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
+        "sortDepth": 0,
         "c": 61,
         "r": 18,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvnn2p1x",
+        "c": 42,
+        "r": 73,
+        "layer": "object17",
+        "oy": 30,
+        "ox": 30,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvr2fi62",
@@ -20836,7 +20933,8 @@ const BATTLE_MAPS = [
         "r": 75,
         "layer": "object17",
         "ox": 10,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0.75
       },
       {
         "id": "tile_mw49f97t",
@@ -20851,7 +20949,8 @@ const BATTLE_MAPS = [
         "c": 38,
         "r": 74,
         "layer": "object17",
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvzbna04",
@@ -20862,6 +20961,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 29,
         "r": 39,
         "layer": "object11",
@@ -20878,6 +20978,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 15,
         "r": 45,
         "layer": "object14",
@@ -20954,6 +21055,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 36,
         "r": 71,
         "layer": "object6",
@@ -21112,14 +21214,16 @@ const BATTLE_MAPS = [
         "r": 79,
         "layer": "object17",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 8,
         "r": 81,
         "layer": "object17",
-        "oy": 30
+        "oy": 30,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_mwdqrv1c",
@@ -21772,6 +21876,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 43,
         "r": 77,
         "layer": "object12",
@@ -22115,6 +22220,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 20,
         "r": 37,
         "layer": "object18",
@@ -22123,18 +22229,21 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 43,
         "r": 52,
         "layer": "object31"
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 57,
         "r": 52,
         "layer": "object31"
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 9,
         "r": 39,
         "layer": "object18",
@@ -22143,6 +22252,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 6,
         "r": 39,
         "layer": "object18",
@@ -22167,6 +22277,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 24,
         "r": 37,
         "layer": "object18",
@@ -22175,6 +22286,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 46,
         "r": 52,
         "layer": "object31",
@@ -22182,6 +22294,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 60,
         "r": 52,
         "layer": "object31",
@@ -22884,7 +22997,8 @@ const BATTLE_MAPS = [
         "r": 4,
         "layer": "object10",
         "oy": 17.333333,
-        "ox": 20
+        "ox": 20,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvobzfro",
@@ -23021,7 +23135,8 @@ const BATTLE_MAPS = [
         "r": 29,
         "layer": "object23",
         "ox": 16.666667,
-        "oy": 21.333333
+        "oy": 21.333333,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1tds",
@@ -23029,7 +23144,8 @@ const BATTLE_MAPS = [
         "r": 29,
         "layer": "object23",
         "ox": 16,
-        "oy": 21.333333
+        "oy": 21.333333,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1jix",
@@ -23037,7 +23153,8 @@ const BATTLE_MAPS = [
         "r": 29,
         "layer": "object23",
         "ox": 16.666667,
-        "oy": -8.666667
+        "oy": -8.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1tds",
@@ -23045,7 +23162,8 @@ const BATTLE_MAPS = [
         "r": 29,
         "layer": "object23",
         "ox": 16,
-        "oy": -8.666667
+        "oy": -8.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1jix",
@@ -23053,7 +23171,8 @@ const BATTLE_MAPS = [
         "r": 6,
         "layer": "object23",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1odn",
@@ -23061,7 +23180,8 @@ const BATTLE_MAPS = [
         "r": 6,
         "layer": "object23",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1tds",
@@ -23069,21 +23189,24 @@ const BATTLE_MAPS = [
         "r": 6,
         "layer": "object23",
         "ox": 10,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1jix",
         "c": 57,
         "r": 27,
         "layer": "object23",
-        "ox": 16.666667
+        "ox": 16.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1tds",
         "c": 59,
         "r": 27,
         "layer": "object23",
-        "ox": 16
+        "ox": 16,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph143o",
@@ -23091,7 +23214,8 @@ const BATTLE_MAPS = [
         "r": 8,
         "layer": "object23",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph143o",
@@ -23107,7 +23231,8 @@ const BATTLE_MAPS = [
         "r": 8,
         "layer": "object23",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1e62",
@@ -23115,7 +23240,8 @@ const BATTLE_MAPS = [
         "r": 8,
         "layer": "object23",
         "ox": 10,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvph1e62",
@@ -23130,10 +23256,12 @@ const BATTLE_MAPS = [
         "c": 10,
         "r": 9,
         "layer": "object23",
-        "ox": 8.666667000000018
+        "ox": 8.666667000000018,
+        "sortDepth": 0
       },
       {
         "id": "tile_mvr3nuyx",
+        "sortDepth": 0,
         "c": 21,
         "r": 9,
         "layer": "object24",
@@ -23143,6 +23271,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr3nuyx",
+        "sortDepth": 0,
         "c": 36,
         "r": 9,
         "layer": "object24",
@@ -23224,7 +23353,8 @@ const BATTLE_MAPS = [
         "c": 36,
         "r": 68,
         "layer": "object9",
-        "ox": 10
+        "ox": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwdkb1l7",
@@ -23267,6 +23397,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 36,
         "r": 5,
         "layer": "object23",
@@ -23275,6 +23406,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 40,
         "r": 0,
         "layer": "object23",
@@ -23283,6 +23415,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 46,
         "r": 0,
         "layer": "object23",
@@ -23291,6 +23424,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 60,
         "r": 0,
         "layer": "object23",
@@ -23299,6 +23433,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 54,
         "r": 0,
         "layer": "object23",
@@ -23307,6 +23442,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
+        "sortDepth": 0,
         "c": 63,
         "r": 0,
         "layer": "object23",
@@ -24237,7 +24373,8 @@ const BATTLE_MAPS = [
         "id": "tile_mwbro91n",
         "c": 12,
         "r": 5,
-        "layer": "object9"
+        "layer": "object9",
+        "sortDepth": 0
       },
       {
         "id": "tile_mwbro91n",
@@ -24277,7 +24414,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 5.333333,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24286,7 +24424,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 10,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24295,7 +24434,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 15.333333,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24304,7 +24444,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 20,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24313,7 +24454,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 30,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24322,7 +24464,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 25.333333,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24331,7 +24474,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 28,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24340,7 +24484,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 32.666667,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24349,7 +24494,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 38,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24358,7 +24504,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 42.666667,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24367,7 +24514,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 12.666667,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24376,7 +24524,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 35.333333,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgchw5x",
@@ -24385,7 +24534,8 @@ const BATTLE_MAPS = [
         "layer": "object26",
         "rot": 3,
         "oy": 48,
-        "ox": 4.666667
+        "ox": 4.666667,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwgdh193",
@@ -24393,7 +24543,8 @@ const BATTLE_MAPS = [
         "r": 45,
         "layer": "object14",
         "ox": 10,
-        "oy": 36
+        "oy": 36,
+        "sortDepth": 0
       },
       {
         "id": "tile_mwggq9a4",
@@ -24854,26 +25005,26 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 26,
+        "r": 25,
         "layer": "object27",
         "ox": 14,
-        "oy": 33.33333300000004
+        "oy": 3.3333330000000387
       },
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 26,
+        "r": 25,
         "layer": "object27",
         "ox": 4,
-        "oy": 33.333333
+        "oy": 3.3333330000000387
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 57,
+        "c": 55,
         "r": 26,
         "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
+        "ox": 34,
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mwggq9a4",
@@ -24933,11 +25084,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 57,
+        "c": 55,
         "r": 30,
         "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
+        "ox": 34,
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mwggq9a4",
@@ -25513,7 +25664,15 @@ const BATTLE_MAPS = [
         "r": 24,
         "layer": "object27",
         "ox": 4,
-        "oy": 33.333333
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 25,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.3333330000000387
       },
       {
         "id": "tile_mwggq9a4",
@@ -25557,27 +25716,19 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 28,
+        "c": 57,
+        "r": 30,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 59,
+        "c": 55,
         "r": 28,
         "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 28,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
+        "ox": 34,
+        "oy": 33.33333300000004
       },
       {
         "id": "tile_mwggq9a4",
@@ -26136,8 +26287,8 @@ const BATTLE_MAPS = [
         "c": 57,
         "r": 25,
         "layer": "object28",
-        "ox": 14.666667,
-        "oy": 2.666667
+        "ox": 14.666666999999961,
+        "oy": 4.666666999999961
       },
       {
         "id": "tile_mwggq9a4",
@@ -26972,7 +27123,8 @@ const BATTLE_MAPS = [
         "r": -1,
         "layer": "ground4",
         "oy": 20,
-        "ox": 6.666666999999961
+        "ox": 6.666666999999961,
+        "sortDepth": 5
       },
       {
         "id": "tile_mwgnngo0",
@@ -26980,7 +27132,8 @@ const BATTLE_MAPS = [
         "r": -1,
         "layer": "ground4",
         "oy": 20,
-        "ox": 6.666667
+        "ox": 6.666667,
+        "sortDepth": 5
       },
       {
         "id": "tile_mwggq9a4",
@@ -27408,6 +27561,60 @@ const BATTLE_MAPS = [
         "layer": "object31",
         "oy": 20,
         "ox": 1.333333
+      },
+      {
+        "id": "tile_hq_potted_plant",
+        "c": 59,
+        "r": 63,
+        "layer": "object34"
+      },
+      {
+        "id": "tile_mwfznsie",
+        "c": 34,
+        "r": 6,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwfznsia",
+        "c": 31,
+        "r": 72,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwfznsia",
+        "c": 30,
+        "r": 40,
+        "layer": "object34",
+        "oy": 20
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 61,
+        "r": 25,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 61,
+        "r": 27,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwfznsic",
+        "c": 61,
+        "r": 26,
+        "layer": "object34",
+        "ox": 10,
+        "oy": 20,
+        "sortDepth": 0
       }
     ],
     "solid": [
@@ -27529,20 +27736,12 @@ const BATTLE_MAPS = [
       "1,47",
       "1,46",
       "1,45",
-      "1,44",
-      "1,43",
-      "1,42",
-      "1,41",
-      "1,40",
       "1,39",
       "1,38",
       "1,37",
       "1,36",
       "1,35",
       "1,34",
-      "1,33",
-      "1,32",
-      "1,31",
       "2,32",
       "2,33",
       "3,32",
@@ -27791,7 +27990,6 @@ const BATTLE_MAPS = [
       "15,56",
       "15,57",
       "15,58",
-      "15,59",
       "16,54",
       "17,54",
       "18,54",
@@ -27866,11 +28064,8 @@ const BATTLE_MAPS = [
       "3,45",
       "2,45",
       "6,43",
-      "11,43",
       "7,43",
-      "10,43",
       "8,43",
-      "12,43",
       "6,44",
       "11,44",
       "31,43",
@@ -27951,7 +28146,6 @@ const BATTLE_MAPS = [
       "44,47",
       "44,46",
       "44,45",
-      "44,44",
       "46,45",
       "47,45",
       "48,45",
@@ -28040,16 +28234,6 @@ const BATTLE_MAPS = [
       "38,41",
       "38,42",
       "45,45",
-      "2,31",
-      "2,30",
-      "2,29",
-      "2,28",
-      "2,27",
-      "2,26",
-      "2,25",
-      "2,24",
-      "2,23",
-      "2,22",
       "9,31",
       "9,30",
       "9,29",
@@ -28119,23 +28303,17 @@ const BATTLE_MAPS = [
       "36,30",
       "36,31",
       "36,25",
-      "3,31",
       "10,31",
-      "12,31",
-      "19,31",
       "21,31",
       "27,27",
-      "28,31",
       "30,31",
       "37,31",
       "37,33",
       "37,32",
-      "3,24",
       "4,24",
       "5,24",
       "8,24",
       "7,24",
-      "12,24",
       "13,24",
       "14,24",
       "16,24",
@@ -28309,12 +28487,6 @@ const BATTLE_MAPS = [
       "53,3",
       "54,3",
       "55,3",
-      "61,3",
-      "62,3",
-      "63,3",
-      "64,3",
-      "64,4",
-      "64,5",
       "64,6",
       "64,7",
       "64,8",
@@ -28335,8 +28507,6 @@ const BATTLE_MAPS = [
       "64,25",
       "64,18",
       "64,21",
-      "60,27",
-      "61,27",
       "64,26",
       "64,27",
       "64,28",
@@ -28380,7 +28550,6 @@ const BATTLE_MAPS = [
       "7,42",
       "10,39",
       "10,40",
-      "10,41",
       "10,42",
       "39,62",
       "40,63",
@@ -28418,7 +28587,1061 @@ const BATTLE_MAPS = [
       "20,40",
       "20,41",
       "9,8",
-      "10,8"
+      "10,8",
+      "18,62",
+      "18,63",
+      "8,65",
+      "9,65",
+      "10,65",
+      "11,65",
+      "12,65",
+      "13,65",
+      "14,65",
+      "15,65",
+      "16,65",
+      "17,65",
+      "19,65",
+      "20,65",
+      "21,65",
+      "18,65",
+      "23,65",
+      "24,65",
+      "6,65",
+      "4,65",
+      "3,65",
+      "2,65",
+      "33,65",
+      "32,65",
+      "31,65",
+      "30,65",
+      "29,65",
+      "28,65",
+      "27,65",
+      "26,65",
+      "35,65",
+      "36,65",
+      "37,65",
+      "27,60",
+      "28,60",
+      "29,60",
+      "30,60",
+      "31,60",
+      "32,60",
+      "33,60",
+      "34,60",
+      "35,60",
+      "36,60",
+      "37,60",
+      "16,53",
+      "17,53",
+      "18,53",
+      "19,53",
+      "20,53",
+      "21,53",
+      "22,53",
+      "23,53",
+      "24,53",
+      "25,53",
+      "26,53",
+      "27,53",
+      "28,53",
+      "29,53",
+      "30,53",
+      "31,53",
+      "32,53",
+      "33,53",
+      "34,53",
+      "17,47",
+      "18,47",
+      "19,47",
+      "20,47",
+      "21,47",
+      "22,47",
+      "23,47",
+      "24,47",
+      "25,47",
+      "26,47",
+      "27,47",
+      "28,47",
+      "29,47",
+      "30,47",
+      "31,47",
+      "32,47",
+      "33,47",
+      "34,47",
+      "31,42",
+      "32,42",
+      "34,42",
+      "35,42",
+      "36,42",
+      "37,42",
+      "29,41",
+      "27,41",
+      "26,41",
+      "31,38",
+      "32,38",
+      "33,38",
+      "34,38",
+      "35,38",
+      "36,38",
+      "37,38",
+      "38,38",
+      "25,38",
+      "26,38",
+      "27,38",
+      "28,38",
+      "29,38",
+      "30,38",
+      "21,38",
+      "20,38",
+      "19,38",
+      "18,38",
+      "17,38",
+      "2,18",
+      "3,18",
+      "4,18",
+      "5,18",
+      "6,18",
+      "7,18",
+      "8,18",
+      "9,18",
+      "10,18",
+      "11,18",
+      "12,18",
+      "13,18",
+      "14,18",
+      "15,18",
+      "16,18",
+      "17,18",
+      "18,18",
+      "19,18",
+      "20,18",
+      "21,18",
+      "22,18",
+      "23,18",
+      "24,18",
+      "25,18",
+      "26,18",
+      "27,18",
+      "28,18",
+      "29,18",
+      "30,18",
+      "31,18",
+      "32,18",
+      "33,18",
+      "34,18",
+      "35,18",
+      "36,18",
+      "2,13",
+      "3,13",
+      "5,13",
+      "6,13",
+      "7,13",
+      "8,13",
+      "9,13",
+      "11,13",
+      "12,13",
+      "13,13",
+      "14,13",
+      "15,13",
+      "16,13",
+      "17,13",
+      "18,13",
+      "19,13",
+      "20,13",
+      "44,44",
+      "46,44",
+      "47,44",
+      "48,44",
+      "49,44",
+      "50,44",
+      "51,44",
+      "52,44",
+      "53,44",
+      "54,44",
+      "56,44",
+      "57,44",
+      "58,44",
+      "59,44",
+      "60,44",
+      "49,56",
+      "50,56",
+      "51,56",
+      "52,56",
+      "53,56",
+      "54,56",
+      "55,56",
+      "56,56",
+      "39,56",
+      "40,56",
+      "41,56",
+      "42,56",
+      "63,56",
+      "64,56",
+      "65,56",
+      "66,56",
+      "62,54",
+      "39,73",
+      "40,73",
+      "41,73",
+      "42,73",
+      "43,73",
+      "44,73",
+      "26,71",
+      "27,71",
+      "28,71",
+      "30,71",
+      "31,71",
+      "29,71",
+      "26,72",
+      "27,72",
+      "28,72",
+      "29,72",
+      "30,72",
+      "31,72",
+      "8,62",
+      "9,62",
+      "10,62",
+      "11,62",
+      "12,62",
+      "13,62",
+      "15,62",
+      "16,62",
+      "17,62",
+      "14,62",
+      "17,63",
+      "16,63",
+      "15,63",
+      "14,63",
+      "13,63",
+      "12,63",
+      "11,63",
+      "10,63",
+      "9,63",
+      "8,63",
+      "8,64",
+      "9,64",
+      "10,64",
+      "11,64",
+      "12,64",
+      "13,64",
+      "14,64",
+      "15,64",
+      "16,64",
+      "17,64",
+      "18,64",
+      "0,22",
+      "1,22",
+      "2,22",
+      "0,20",
+      "0,21",
+      "1,20",
+      "1,21",
+      "2,20",
+      "2,21",
+      "3,20",
+      "4,20",
+      "5,20",
+      "6,20",
+      "7,20",
+      "8,20",
+      "9,20",
+      "10,20",
+      "11,20",
+      "12,20",
+      "13,20",
+      "14,20",
+      "16,20",
+      "17,20",
+      "18,20",
+      "19,20",
+      "20,20",
+      "21,20",
+      "15,20",
+      "3,21",
+      "4,21",
+      "5,21",
+      "6,21",
+      "8,21",
+      "9,21",
+      "10,21",
+      "11,21",
+      "12,21",
+      "14,21",
+      "15,21",
+      "16,21",
+      "17,21",
+      "18,21",
+      "20,21",
+      "21,21",
+      "22,21",
+      "7,21",
+      "13,21",
+      "19,21",
+      "22,20",
+      "0,23",
+      "1,23",
+      "2,23",
+      "0,24",
+      "1,24",
+      "0,25",
+      "1,25",
+      "0,26",
+      "1,26",
+      "0,27",
+      "1,27",
+      "0,28",
+      "1,28",
+      "0,29",
+      "1,29",
+      "0,30",
+      "1,30",
+      "0,31",
+      "1,31",
+      "2,31",
+      "2,30",
+      "2,27",
+      "2,26",
+      "2,25",
+      "2,24",
+      "2,29",
+      "2,28",
+      "23,20",
+      "24,20",
+      "25,20",
+      "27,20",
+      "28,20",
+      "29,20",
+      "31,20",
+      "32,20",
+      "33,20",
+      "34,20",
+      "35,20",
+      "30,20",
+      "26,20",
+      "36,20",
+      "36,21",
+      "35,21",
+      "34,21",
+      "33,21",
+      "32,21",
+      "31,21",
+      "30,21",
+      "29,21",
+      "28,21",
+      "27,21",
+      "26,21",
+      "25,21",
+      "24,21",
+      "23,21",
+      "28,22",
+      "28,23",
+      "28,24",
+      "28,25",
+      "28,26",
+      "28,27",
+      "28,28",
+      "28,29",
+      "28,30",
+      "28,31",
+      "19,22",
+      "19,23",
+      "19,24",
+      "19,25",
+      "19,26",
+      "19,27",
+      "19,28",
+      "19,29",
+      "19,30",
+      "19,31",
+      "10,41",
+      "11,39",
+      "12,39",
+      "13,39",
+      "14,39",
+      "15,39",
+      "11,40",
+      "12,40",
+      "13,40",
+      "14,40",
+      "15,40",
+      "11,41",
+      "12,41",
+      "13,41",
+      "14,41",
+      "15,41",
+      "11,42",
+      "12,42",
+      "13,42",
+      "14,42",
+      "15,42",
+      "13,43",
+      "14,43",
+      "15,43",
+      "12,43",
+      "12,44",
+      "13,44",
+      "14,44",
+      "15,44",
+      "11,43",
+      "10,43",
+      "6,39",
+      "5,39",
+      "4,39",
+      "3,39",
+      "2,39",
+      "2,40",
+      "4,40",
+      "5,40",
+      "6,40",
+      "6,41",
+      "5,41",
+      "4,41",
+      "3,41",
+      "2,41",
+      "3,40",
+      "6,42",
+      "5,42",
+      "4,42",
+      "3,42",
+      "2,42",
+      "5,43",
+      "4,43",
+      "3,43",
+      "2,43",
+      "5,44",
+      "4,44",
+      "3,44",
+      "2,44",
+      "7,5",
+      "6,5",
+      "15,5",
+      "14,5",
+      "17,5",
+      "18,5",
+      "20,7",
+      "21,7",
+      "22,7",
+      "23,7",
+      "24,7",
+      "25,7",
+      "26,7",
+      "27,7",
+      "28,7",
+      "29,7",
+      "30,7",
+      "31,7",
+      "32,7",
+      "33,7",
+      "34,7",
+      "35,7",
+      "36,7",
+      "26,40",
+      "27,40",
+      "28,40",
+      "29,40",
+      "30,40",
+      "30,41",
+      "31,40",
+      "32,40",
+      "33,40",
+      "34,40",
+      "35,40",
+      "36,40",
+      "37,40",
+      "31,41",
+      "32,41",
+      "33,41",
+      "34,41",
+      "35,41",
+      "36,41",
+      "37,41",
+      "48,49",
+      "49,49",
+      "50,49",
+      "51,49",
+      "52,49",
+      "53,49",
+      "54,49",
+      "55,49",
+      "56,49",
+      "57,49",
+      "57,50",
+      "56,50",
+      "54,50",
+      "52,50",
+      "51,50",
+      "50,50",
+      "49,50",
+      "48,50",
+      "53,50",
+      "55,50",
+      "48,51",
+      "49,51",
+      "50,51",
+      "51,51",
+      "52,51",
+      "53,51",
+      "54,51",
+      "55,51",
+      "56,51",
+      "57,51",
+      "39,55",
+      "40,55",
+      "41,55",
+      "42,55",
+      "43,54",
+      "42,54",
+      "41,54",
+      "40,54",
+      "39,54",
+      "39,53",
+      "40,53",
+      "41,53",
+      "42,53",
+      "43,53",
+      "43,52",
+      "42,52",
+      "41,52",
+      "40,52",
+      "39,52",
+      "20,3",
+      "21,3",
+      "22,3",
+      "20,4",
+      "21,4",
+      "22,4",
+      "20,5",
+      "21,5",
+      "22,5",
+      "23,3",
+      "24,3",
+      "25,3",
+      "23,4",
+      "24,4",
+      "25,4",
+      "23,5",
+      "24,5",
+      "25,5",
+      "26,3",
+      "27,3",
+      "28,3",
+      "26,4",
+      "27,4",
+      "28,4",
+      "26,5",
+      "27,5",
+      "28,5",
+      "20,0",
+      "21,0",
+      "22,0",
+      "20,1",
+      "21,1",
+      "22,1",
+      "20,2",
+      "21,2",
+      "22,2",
+      "23,0",
+      "23,1",
+      "23,2",
+      "24,0",
+      "24,1",
+      "24,2",
+      "25,0",
+      "25,1",
+      "25,2",
+      "26,0",
+      "26,1",
+      "26,2",
+      "27,0",
+      "27,1",
+      "27,2",
+      "28,0",
+      "28,1",
+      "28,2",
+      "29,0",
+      "29,1",
+      "29,2",
+      "30,0",
+      "30,1",
+      "30,2",
+      "31,0",
+      "31,1",
+      "31,2",
+      "32,0",
+      "32,1",
+      "32,2",
+      "33,0",
+      "33,1",
+      "33,2",
+      "34,1",
+      "34,2",
+      "32,3",
+      "33,3",
+      "35,1",
+      "35,2",
+      "36,1",
+      "36,2",
+      "34,0",
+      "35,0",
+      "36,0",
+      "31,3",
+      "31,4",
+      "32,4",
+      "33,4",
+      "31,5",
+      "32,5",
+      "33,5",
+      "29,3",
+      "30,3",
+      "29,4",
+      "30,4",
+      "29,5",
+      "30,5",
+      "3,7",
+      "4,7",
+      "5,7",
+      "2,5",
+      "2,6",
+      "2,7",
+      "1,5",
+      "1,6",
+      "1,7",
+      "2,4",
+      "3,4",
+      "4,4",
+      "5,4",
+      "3,5",
+      "4,5",
+      "5,5",
+      "3,6",
+      "4,6",
+      "5,6",
+      "3,3",
+      "4,3",
+      "5,3",
+      "3,2",
+      "4,2",
+      "5,2",
+      "3,1",
+      "4,1",
+      "5,1",
+      "3,0",
+      "4,0",
+      "5,0",
+      "2,1",
+      "2,2",
+      "2,3",
+      "1,0",
+      "2,0",
+      "6,0",
+      "7,0",
+      "8,0",
+      "6,1",
+      "7,1",
+      "8,1",
+      "6,2",
+      "7,2",
+      "8,2",
+      "9,0",
+      "9,1",
+      "9,2",
+      "10,0",
+      "10,1",
+      "10,2",
+      "11,0",
+      "11,1",
+      "11,2",
+      "12,0",
+      "12,1",
+      "12,2",
+      "13,0",
+      "14,0",
+      "13,1",
+      "14,1",
+      "13,2",
+      "14,2",
+      "15,0",
+      "15,1",
+      "15,2",
+      "16,0",
+      "16,1",
+      "16,2",
+      "17,0",
+      "17,1",
+      "17,2",
+      "18,0",
+      "18,1",
+      "18,2",
+      "19,0",
+      "19,1",
+      "19,2",
+      "6,3",
+      "7,3",
+      "9,3",
+      "10,3",
+      "11,3",
+      "12,3",
+      "13,3",
+      "14,3",
+      "15,3",
+      "16,3",
+      "17,3",
+      "18,3",
+      "19,3",
+      "8,3",
+      "34,3",
+      "34,4",
+      "34,5",
+      "35,3",
+      "36,3",
+      "36,4",
+      "35,4",
+      "35,5",
+      "36,5",
+      "0,7",
+      "0,6",
+      "0,5",
+      "0,4",
+      "1,2",
+      "1,3",
+      "1,4",
+      "0,3",
+      "0,2",
+      "0,1",
+      "0,0",
+      "1,1",
+      "0,8",
+      "0,9",
+      "0,11",
+      "0,12",
+      "0,13",
+      "0,14",
+      "0,15",
+      "0,16",
+      "0,17",
+      "0,18",
+      "0,19",
+      "0,10",
+      "38,0",
+      "39,0",
+      "40,0",
+      "38,1",
+      "39,1",
+      "40,1",
+      "38,2",
+      "39,2",
+      "40,2",
+      "37,0",
+      "37,1",
+      "37,2",
+      "41,0",
+      "42,0",
+      "43,0",
+      "41,1",
+      "42,1",
+      "43,1",
+      "41,2",
+      "42,2",
+      "43,2",
+      "44,0",
+      "44,1",
+      "44,2",
+      "45,0",
+      "45,1",
+      "45,2",
+      "46,0",
+      "46,1",
+      "46,2",
+      "47,0",
+      "47,1",
+      "47,2",
+      "48,0",
+      "49,0",
+      "48,1",
+      "49,1",
+      "48,2",
+      "49,2",
+      "50,0",
+      "50,1",
+      "50,2",
+      "51,0",
+      "51,1",
+      "51,2",
+      "52,0",
+      "52,1",
+      "52,2",
+      "53,0",
+      "54,0",
+      "53,1",
+      "54,1",
+      "53,2",
+      "54,2",
+      "55,0",
+      "56,0",
+      "55,1",
+      "56,1",
+      "55,2",
+      "56,2",
+      "57,0",
+      "58,0",
+      "57,1",
+      "58,1",
+      "57,2",
+      "58,2",
+      "59,0",
+      "60,0",
+      "61,0",
+      "59,1",
+      "60,1",
+      "61,1",
+      "59,2",
+      "60,2",
+      "61,2",
+      "63,0",
+      "64,0",
+      "63,1",
+      "64,1",
+      "62,2",
+      "63,2",
+      "64,2",
+      "61,44",
+      "26,69",
+      "27,69",
+      "28,69",
+      "29,69",
+      "30,69",
+      "31,69",
+      "7,59",
+      "8,59",
+      "9,59",
+      "10,59",
+      "11,59",
+      "12,59",
+      "13,59",
+      "14,59",
+      "16,59",
+      "17,59",
+      "15,59",
+      "59,66",
+      "57,65",
+      "64,3",
+      "64,4",
+      "64,5",
+      "61,3",
+      "62,3",
+      "63,3",
+      "62,1",
+      "62,0",
+      "45,73",
+      "46,73",
+      "47,73",
+      "48,73",
+      "49,73",
+      "50,73",
+      "51,73",
+      "52,73",
+      "53,73",
+      "54,73",
+      "55,73",
+      "56,73",
+      "57,73",
+      "58,73",
+      "59,73",
+      "60,73",
+      "61,73",
+      "62,73",
+      "26,74",
+      "27,74",
+      "28,74",
+      "29,74",
+      "31,74",
+      "43,45",
+      "43,44",
+      "56,3",
+      "57,3",
+      "58,3",
+      "59,3",
+      "60,3",
+      "32,68",
+      "33,68",
+      "34,68",
+      "35,68",
+      "36,68",
+      "37,68",
+      "9,43",
+      "3,22",
+      "3,23",
+      "3,25",
+      "3,26",
+      "3,27",
+      "3,28",
+      "3,29",
+      "3,30",
+      "3,24",
+      "3,31",
+      "12,22",
+      "12,23",
+      "12,25",
+      "12,26",
+      "12,27",
+      "12,24",
+      "12,28",
+      "12,29",
+      "12,30",
+      "12,31",
+      "62,27",
+      "62,26",
+      "61,28",
+      "61,25",
+      "60,26",
+      "43,3",
+      "44,3",
+      "45,3",
+      "46,3",
+      "59,27",
+      "60,27",
+      "61,27",
+      "56,34",
+      "58,35",
+      "55,43",
+      "54,43",
+      "56,43",
+      "48,52",
+      "49,52",
+      "50,52",
+      "51,52",
+      "52,52",
+      "53,52",
+      "54,52",
+      "55,52",
+      "56,52",
+      "57,52",
+      "48,53",
+      "49,53",
+      "50,53",
+      "52,53",
+      "54,53",
+      "55,53",
+      "56,53",
+      "57,53",
+      "53,53",
+      "51,53",
+      "48,54",
+      "49,54",
+      "50,54",
+      "51,54",
+      "52,54",
+      "53,54",
+      "54,54",
+      "55,54",
+      "56,54",
+      "57,54",
+      "49,55",
+      "50,55",
+      "51,55",
+      "52,55",
+      "53,55",
+      "54,55",
+      "55,55",
+      "56,55",
+      "64,54",
+      "64,55",
+      "65,55",
+      "65,54",
+      "65,53",
+      "65,52",
+      "65,51",
+      "66,51",
+      "66,52",
+      "66,53",
+      "66,54",
+      "66,55",
+      "0,40",
+      "0,41",
+      "0,42",
+      "0,43",
+      "0,44",
+      "1,44",
+      "1,43",
+      "1,42",
+      "1,41",
+      "1,40",
+      "0,32",
+      "0,33",
+      "1,32",
+      "1,33",
+      "1,80",
+      "2,80",
+      "3,80",
+      "4,80",
+      "2,81",
+      "3,81",
+      "1,81",
+      "4,81",
+      "0,64",
+      "0,65",
+      "0,66",
+      "0,34",
+      "1,8",
+      "2,8",
+      "3,8",
+      "4,8",
+      "5,8",
+      "1,9",
+      "2,9",
+      "3,9",
+      "4,9",
+      "5,9",
+      "8,4",
+      "7,4",
+      "6,4",
+      "11,4",
+      "12,4",
+      "13,4",
+      "14,4",
+      "15,4",
+      "16,4",
+      "17,4",
+      "18,4",
+      "20,6",
+      "21,6",
+      "22,6",
+      "23,6",
+      "24,6",
+      "25,6",
+      "26,6",
+      "27,6",
+      "28,6",
+      "29,6",
+      "30,6",
+      "31,6",
+      "32,6",
+      "33,6",
+      "34,6",
+      "35,6",
+      "36,6",
+      "19,4",
+      "19,5",
+      "24,72",
+      "26,73",
+      "27,73",
+      "28,73",
+      "29,73",
+      "31,73",
+      "30,73",
+      "47,47",
+      "48,47",
+      "49,47",
+      "50,47",
+      "51,47",
+      "52,47",
+      "53,47",
+      "54,47",
+      "55,47",
+      "56,47",
+      "57,47",
+      "58,47"
     ],
     "breakable": [],
     "coreSpots": [
@@ -28432,19 +29655,19 @@ const BATTLE_MAPS = [
       },
       {
         "id": "lifeform",
-        "weight": 100
+        "weight": 30
       },
       {
         "id": "fish_head",
-        "weight": 100
+        "weight": 50
       },
       {
         "id": "milkfish_kid",
-        "weight": 100
+        "weight": 50
       },
       {
         "id": "milkfish_kid_small",
-        "weight": 100
+        "weight": 50
       },
       {
         "id": "clownfish",
@@ -28936,26 +30159,6 @@ const BATTLE_MAPS = [
         10,
         9
       ],
-      "1,44": [
-        10,
-        9
-      ],
-      "1,43": [
-        10,
-        9
-      ],
-      "1,42": [
-        10,
-        9
-      ],
-      "1,41": [
-        10,
-        9
-      ],
-      "1,40": [
-        10,
-        9
-      ],
       "1,39": [
         10,
         9
@@ -28977,18 +30180,6 @@ const BATTLE_MAPS = [
         9
       ],
       "1,34": [
-        10,
-        9
-      ],
-      "1,33": [
-        10,
-        9
-      ],
-      "1,32": [
-        10,
-        9
-      ],
-      "1,31": [
         10,
         9
       ],
@@ -29242,7 +30433,7 @@ const BATTLE_MAPS = [
       ],
       "2,75": [
         9,
-        -13
+        0
       ],
       "2,76": [
         9,
@@ -29250,7 +30441,7 @@ const BATTLE_MAPS = [
       ],
       "3,75": [
         9,
-        -13
+        0
       ],
       "3,76": [
         9,
@@ -29258,7 +30449,7 @@ const BATTLE_MAPS = [
       ],
       "4,75": [
         9,
-        -13
+        0
       ],
       "4,76": [
         9,
@@ -29426,7 +30617,7 @@ const BATTLE_MAPS = [
       ],
       "24,74": [
         1,
-        -10
+        -13
       ],
       "15,52": [
         11,
@@ -29453,10 +30644,6 @@ const BATTLE_MAPS = [
         -15
       ],
       "15,58": [
-        11,
-        -15
-      ],
-      "15,59": [
         11,
         -15
       ],
@@ -29605,27 +30792,15 @@ const BATTLE_MAPS = [
         -16
       ],
       "7,43": [
-        -14,
-        -16
+        -2,
+        -9
       ],
       "6,43": [
-        -14,
-        -16
-      ],
-      "11,43": [
-        -14,
-        -15
-      ],
-      "12,43": [
-        -14,
-        -15
-      ],
-      "10,43": [
-        -14,
-        -15
+        -15,
+        -6
       ],
       "6,44": [
-        6,
+        -2,
         -19
       ],
       "11,44": [
@@ -29820,10 +30995,6 @@ const BATTLE_MAPS = [
         -16,
         11
       ],
-      "44,44": [
-        -19,
-        13
-      ],
       "44,45": [
         -19,
         13
@@ -29972,46 +31143,6 @@ const BATTLE_MAPS = [
         -38,
         0
       ],
-      "2,22": [
-        20,
-        -14
-      ],
-      "2,23": [
-        20,
-        -14
-      ],
-      "2,24": [
-        20,
-        -14
-      ],
-      "2,25": [
-        20,
-        -14
-      ],
-      "2,26": [
-        20,
-        -14
-      ],
-      "2,27": [
-        20,
-        -14
-      ],
-      "2,28": [
-        20,
-        -14
-      ],
-      "2,29": [
-        20,
-        -14
-      ],
-      "2,30": [
-        20,
-        -14
-      ],
-      "2,31": [
-        20,
-        -14
-      ],
       "9,31": [
         20,
         -14
@@ -30053,44 +31184,44 @@ const BATTLE_MAPS = [
         -14
       ],
       "11,22": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,23": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,24": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,25": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,26": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,27": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,28": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,29": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,30": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "11,31": [
-        20,
-        -14
+        -21,
+        -15
       ],
       "18,31": [
         20,
@@ -30284,27 +31415,11 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
-      "3,31": [
-        -19,
-        25
-      ],
       "10,31": [
         -21,
         0
       ],
-      "12,31": [
-        -21,
-        0
-      ],
-      "19,31": [
-        -21,
-        0
-      ],
       "21,31": [
-        -21,
-        0
-      ],
-      "28,31": [
         -21,
         0
       ],
@@ -30600,22 +31715,6 @@ const BATTLE_MAPS = [
         7,
         11
       ],
-      "61,3": [
-        5,
-        10
-      ],
-      "62,3": [
-        5,
-        10
-      ],
-      "63,3": [
-        5,
-        10
-      ],
-      "64,3": [
-        5,
-        10
-      ],
       "64,52": [
         7,
         8
@@ -30804,22 +31903,6 @@ const BATTLE_MAPS = [
         7,
         8
       ],
-      "64,5": [
-        7,
-        8
-      ],
-      "64,4": [
-        7,
-        8
-      ],
-      "61,27": [
-        -16,
-        -11
-      ],
-      "60,27": [
-        -16,
-        -11
-      ],
       "25,42": [
         19,
         0
@@ -30836,17 +31919,13 @@ const BATTLE_MAPS = [
         11,
         0
       ],
-      "10,41": [
-        11,
-        0
-      ],
       "10,42": [
         11,
         0
       ],
       "39,65": [
-        16,
-        0
+        14,
+        -11
       ],
       "40,64": [
         0,
@@ -30947,6 +32026,886 @@ const BATTLE_MAPS = [
       "9,8": [
         -18,
         15
+      ],
+      "18,62": [
+        -19,
+        -3
+      ],
+      "18,63": [
+        -19,
+        -3
+      ],
+      "16,53": [
+        10,
+        -12
+      ],
+      "17,53": [
+        10,
+        -12
+      ],
+      "18,53": [
+        10,
+        -12
+      ],
+      "19,53": [
+        10,
+        -12
+      ],
+      "20,53": [
+        10,
+        -12
+      ],
+      "21,53": [
+        10,
+        -12
+      ],
+      "22,53": [
+        10,
+        -12
+      ],
+      "23,53": [
+        10,
+        -12
+      ],
+      "24,53": [
+        10,
+        -12
+      ],
+      "25,53": [
+        10,
+        -12
+      ],
+      "26,53": [
+        10,
+        -12
+      ],
+      "27,53": [
+        10,
+        -12
+      ],
+      "28,53": [
+        10,
+        -12
+      ],
+      "29,53": [
+        10,
+        -12
+      ],
+      "30,53": [
+        10,
+        -12
+      ],
+      "31,53": [
+        10,
+        -12
+      ],
+      "32,53": [
+        10,
+        -12
+      ],
+      "33,53": [
+        10,
+        -12
+      ],
+      "34,53": [
+        10,
+        -12
+      ],
+      "17,47": [
+        0,
+        19
+      ],
+      "18,47": [
+        0,
+        19
+      ],
+      "19,47": [
+        0,
+        19
+      ],
+      "20,47": [
+        0,
+        19
+      ],
+      "21,47": [
+        0,
+        19
+      ],
+      "22,47": [
+        0,
+        19
+      ],
+      "23,47": [
+        0,
+        19
+      ],
+      "24,47": [
+        0,
+        19
+      ],
+      "25,47": [
+        0,
+        19
+      ],
+      "26,47": [
+        0,
+        19
+      ],
+      "27,47": [
+        0,
+        19
+      ],
+      "28,47": [
+        0,
+        19
+      ],
+      "29,47": [
+        0,
+        19
+      ],
+      "30,47": [
+        0,
+        19
+      ],
+      "31,47": [
+        0,
+        19
+      ],
+      "32,47": [
+        0,
+        19
+      ],
+      "33,47": [
+        0,
+        19
+      ],
+      "34,47": [
+        -1,
+        18
+      ],
+      "2,22": [
+        -1,
+        -2
+      ],
+      "2,23": [
+        -1,
+        -2
+      ],
+      "2,24": [
+        -1,
+        -2
+      ],
+      "2,25": [
+        -1,
+        -2
+      ],
+      "2,26": [
+        -1,
+        -2
+      ],
+      "2,27": [
+        -1,
+        -2
+      ],
+      "2,28": [
+        -1,
+        -2
+      ],
+      "2,29": [
+        -1,
+        -2
+      ],
+      "2,30": [
+        -1,
+        -2
+      ],
+      "2,31": [
+        -1,
+        -2
+      ],
+      "19,22": [
+        20,
+        -14
+      ],
+      "19,23": [
+        20,
+        -14
+      ],
+      "19,24": [
+        20,
+        -14
+      ],
+      "19,25": [
+        20,
+        -14
+      ],
+      "19,26": [
+        20,
+        -14
+      ],
+      "19,27": [
+        20,
+        -14
+      ],
+      "19,28": [
+        20,
+        -14
+      ],
+      "19,29": [
+        20,
+        -14
+      ],
+      "19,30": [
+        20,
+        -14
+      ],
+      "19,31": [
+        20,
+        -14
+      ],
+      "28,31": [
+        20,
+        -14
+      ],
+      "28,30": [
+        20,
+        -14
+      ],
+      "28,29": [
+        20,
+        -14
+      ],
+      "28,28": [
+        20,
+        -14
+      ],
+      "28,27": [
+        20,
+        -14
+      ],
+      "28,26": [
+        20,
+        -14
+      ],
+      "28,22": [
+        20,
+        -14
+      ],
+      "28,23": [
+        20,
+        -14
+      ],
+      "28,24": [
+        20,
+        -14
+      ],
+      "28,25": [
+        20,
+        -14
+      ],
+      "20,7": [
+        -12,
+        9
+      ],
+      "21,7": [
+        -12,
+        9
+      ],
+      "22,7": [
+        -12,
+        9
+      ],
+      "23,7": [
+        -12,
+        9
+      ],
+      "24,7": [
+        -12,
+        9
+      ],
+      "26,7": [
+        -12,
+        9
+      ],
+      "27,7": [
+        -12,
+        9
+      ],
+      "28,7": [
+        -12,
+        9
+      ],
+      "29,7": [
+        -12,
+        9
+      ],
+      "30,7": [
+        -12,
+        9
+      ],
+      "31,7": [
+        -12,
+        9
+      ],
+      "32,7": [
+        -12,
+        9
+      ],
+      "33,7": [
+        -12,
+        9
+      ],
+      "34,7": [
+        -12,
+        9
+      ],
+      "35,7": [
+        -12,
+        9
+      ],
+      "36,7": [
+        -12,
+        9
+      ],
+      "25,7": [
+        -13,
+        9
+      ],
+      "36,5": [
+        -11,
+        0
+      ],
+      "36,4": [
+        -11,
+        0
+      ],
+      "36,3": [
+        -11,
+        0
+      ],
+      "36,2": [
+        -11,
+        0
+      ],
+      "36,1": [
+        -11,
+        0
+      ],
+      "36,0": [
+        -11,
+        0
+      ],
+      "37,0": [
+        -9,
+        6
+      ],
+      "37,1": [
+        -9,
+        6
+      ],
+      "37,2": [
+        -9,
+        6
+      ],
+      "38,0": [
+        -9,
+        6
+      ],
+      "39,0": [
+        -9,
+        6
+      ],
+      "40,0": [
+        -9,
+        6
+      ],
+      "41,0": [
+        -9,
+        6
+      ],
+      "42,0": [
+        -9,
+        6
+      ],
+      "43,0": [
+        -9,
+        6
+      ],
+      "43,1": [
+        -9,
+        6
+      ],
+      "43,2": [
+        -9,
+        6
+      ],
+      "42,2": [
+        -9,
+        6
+      ],
+      "41,2": [
+        -9,
+        6
+      ],
+      "40,2": [
+        -9,
+        6
+      ],
+      "39,2": [
+        -9,
+        6
+      ],
+      "38,2": [
+        -9,
+        6
+      ],
+      "38,1": [
+        -9,
+        6
+      ],
+      "39,1": [
+        -9,
+        6
+      ],
+      "40,1": [
+        -9,
+        6
+      ],
+      "41,1": [
+        -9,
+        6
+      ],
+      "42,1": [
+        -9,
+        6
+      ],
+      "44,1": [
+        -9,
+        6
+      ],
+      "45,1": [
+        -9,
+        6
+      ],
+      "46,1": [
+        -9,
+        6
+      ],
+      "47,1": [
+        -9,
+        6
+      ],
+      "48,1": [
+        -9,
+        6
+      ],
+      "50,1": [
+        -9,
+        6
+      ],
+      "51,1": [
+        -9,
+        6
+      ],
+      "52,1": [
+        -9,
+        6
+      ],
+      "53,1": [
+        -9,
+        6
+      ],
+      "54,1": [
+        -9,
+        6
+      ],
+      "58,0": [
+        -9,
+        6
+      ],
+      "57,0": [
+        -9,
+        6
+      ],
+      "56,0": [
+        -9,
+        6
+      ],
+      "55,0": [
+        -9,
+        6
+      ],
+      "54,0": [
+        -9,
+        6
+      ],
+      "53,0": [
+        -9,
+        6
+      ],
+      "52,0": [
+        -9,
+        6
+      ],
+      "51,0": [
+        -9,
+        6
+      ],
+      "50,0": [
+        -9,
+        6
+      ],
+      "49,0": [
+        -9,
+        6
+      ],
+      "48,0": [
+        -9,
+        6
+      ],
+      "47,0": [
+        -9,
+        6
+      ],
+      "46,0": [
+        -9,
+        6
+      ],
+      "45,0": [
+        -9,
+        6
+      ],
+      "44,0": [
+        -9,
+        6
+      ],
+      "58,2": [
+        -9,
+        6
+      ],
+      "57,2": [
+        -9,
+        6
+      ],
+      "56,2": [
+        -9,
+        6
+      ],
+      "55,2": [
+        -9,
+        6
+      ],
+      "54,2": [
+        -9,
+        6
+      ],
+      "53,2": [
+        -9,
+        6
+      ],
+      "52,2": [
+        -9,
+        6
+      ],
+      "51,2": [
+        -9,
+        6
+      ],
+      "50,2": [
+        -9,
+        6
+      ],
+      "49,2": [
+        -9,
+        6
+      ],
+      "48,2": [
+        -9,
+        6
+      ],
+      "47,2": [
+        -9,
+        6
+      ],
+      "46,2": [
+        -9,
+        6
+      ],
+      "45,2": [
+        -9,
+        6
+      ],
+      "44,2": [
+        -9,
+        6
+      ],
+      "58,1": [
+        -9,
+        6
+      ],
+      "57,1": [
+        -9,
+        6
+      ],
+      "56,1": [
+        -9,
+        6
+      ],
+      "55,1": [
+        -9,
+        6
+      ],
+      "59,66": [
+        4,
+        6
+      ],
+      "57,65": [
+        -18,
+        0
+      ],
+      "61,3": [
+        4,
+        9
+      ],
+      "61,2": [
+        4,
+        9
+      ],
+      "61,1": [
+        4,
+        9
+      ],
+      "61,0": [
+        4,
+        9
+      ],
+      "63,1": [
+        4,
+        9
+      ],
+      "63,0": [
+        4,
+        9
+      ],
+      "64,0": [
+        4,
+        9
+      ],
+      "64,1": [
+        4,
+        9
+      ],
+      "64,2": [
+        4,
+        9
+      ],
+      "63,2": [
+        4,
+        9
+      ],
+      "62,2": [
+        4,
+        9
+      ],
+      "62,3": [
+        4,
+        9
+      ],
+      "63,3": [
+        4,
+        9
+      ],
+      "64,3": [
+        4,
+        9
+      ],
+      "64,4": [
+        4,
+        9
+      ],
+      "64,5": [
+        4,
+        9
+      ],
+      "62,1": [
+        4,
+        10
+      ],
+      "62,0": [
+        4,
+        10
+      ],
+      "26,74": [
+        1,
+        -1
+      ],
+      "27,74": [
+        1,
+        -1
+      ],
+      "28,74": [
+        1,
+        -1
+      ],
+      "29,74": [
+        1,
+        -1
+      ],
+      "31,74": [
+        1,
+        -1
+      ],
+      "43,44": [
+        18,
+        0
+      ],
+      "43,45": [
+        18,
+        0
+      ],
+      "10,41": [
+        10,
+        0
+      ],
+      "10,43": [
+        10,
+        0
+      ],
+      "9,43": [
+        24,
+        -14
+      ],
+      "3,22": [
+        -19,
+        -3
+      ],
+      "3,23": [
+        -19,
+        -3
+      ],
+      "3,24": [
+        -19,
+        -3
+      ],
+      "3,25": [
+        -19,
+        -3
+      ],
+      "3,26": [
+        -19,
+        -3
+      ],
+      "3,27": [
+        -19,
+        -3
+      ],
+      "3,28": [
+        -19,
+        -3
+      ],
+      "3,29": [
+        -19,
+        -3
+      ],
+      "3,30": [
+        -19,
+        -3
+      ],
+      "3,31": [
+        -19,
+        -3
+      ],
+      "12,22": [
+        -21,
+        -15
+      ],
+      "12,23": [
+        -21,
+        -15
+      ],
+      "12,24": [
+        -21,
+        -15
+      ],
+      "12,25": [
+        -21,
+        -15
+      ],
+      "12,26": [
+        -21,
+        -15
+      ],
+      "12,27": [
+        -21,
+        -15
+      ],
+      "12,28": [
+        -21,
+        -15
+      ],
+      "12,29": [
+        -21,
+        -15
+      ],
+      "12,30": [
+        -21,
+        -15
+      ],
+      "12,31": [
+        -21,
+        -15
+      ],
+      "61,25": [
+        14,
+        31
+      ],
+      "61,28": [
+        19,
+        -22
+      ],
+      "43,3": [
+        -8,
+        10
+      ],
+      "44,3": [
+        -8,
+        10
+      ],
+      "45,3": [
+        -8,
+        10
+      ],
+      "46,3": [
+        -8,
+        10
+      ],
+      "59,27": [
+        25,
+        -12
+      ],
+      "60,27": [
+        25,
+        -12
+      ],
+      "56,34": [
+        10,
+        11
+      ],
+      "58,35": [
+        21,
+        20
+      ],
+      "24,72": [
+        -8,
+        -9
+      ],
+      "30,73": [
+        0,
+        -8
+      ],
+      "58,47": [
+        -19,
+        0
       ]
     },
     "safe": false,
@@ -31093,29 +33052,35 @@ const BATTLE_MAPS = [
       },
       {
         "c": 56,
-        "r": 3,
+        "r": 4,
         "to": "map_mvxz356e",
-        "ox": 16
+        "ox": 21,
+        "oy": -6
       },
       {
         "c": 57,
-        "r": 3,
-        "to": "map_mvxz356e"
+        "r": 4,
+        "to": "map_mvxz356e",
+        "oy": -6
       },
       {
         "c": 58,
-        "r": 3,
-        "to": "map_mvxz356e"
+        "r": 4,
+        "to": "map_mvxz356e",
+        "oy": -7
       },
       {
         "c": 59,
-        "r": 3,
-        "to": "map_mvxz356e"
+        "r": 4,
+        "to": "map_mvxz356e",
+        "oy": -6
       },
       {
         "c": 60,
-        "r": 3,
-        "to": "map_mvxz356e"
+        "r": 4,
+        "to": "map_mvxz356e",
+        "ox": -7,
+        "oy": -6
       }
     ],
     "cols": 67,
@@ -31172,8 +33137,6 @@ const BATTLE_MAPS = [
       "7,10",
       "8,10",
       "9,10",
-      "8,7",
-      "8,8",
       "10,7",
       "11,7",
       "38,5",
@@ -31243,44 +33206,7 @@ const BATTLE_MAPS = [
       "33,28",
       "34,28",
       "34,27",
-      "2,35",
-      "3,35",
-      "4,35",
-      "5,35",
-      "6,35",
-      "7,35",
-      "8,35",
-      "9,35",
-      "10,35",
-      "11,35",
-      "12,35",
-      "13,35",
-      "14,35",
-      "15,35",
-      "16,35",
-      "17,35",
-      "18,35",
-      "19,35",
-      "20,35",
-      "21,35",
-      "22,35",
-      "23,35",
-      "24,35",
-      "25,35",
-      "26,35",
-      "27,35",
-      "28,35",
-      "29,35",
-      "30,35",
-      "31,35",
       "32,35",
-      "33,35",
-      "34,35",
-      "35,35",
-      "36,35",
-      "37,35",
-      "9,36",
-      "8,36",
       "24,50",
       "25,50",
       "26,50",
@@ -31415,7 +33341,9 @@ const BATTLE_MAPS = [
       "62,31",
       "62,32",
       "62,33",
-      "62,30"
+      "62,30",
+      "46,54",
+      "45,68"
     ],
     "layerOrder": [
       {
@@ -31590,7 +33518,21 @@ const BATTLE_MAPS = [
       "59,67,R",
       "55,67,R",
       "13,10,R",
-      "9,10,R"
+      "9,10,R",
+      "57,27,R",
+      "57,28,R",
+      "57,29,R",
+      "57,30,R",
+      "57,31,R",
+      "58,31,B",
+      "59,31,B",
+      "60,31,B",
+      "61,31,B",
+      "60,28,R",
+      "60,29,R",
+      "60,30,R",
+      "60,31,R",
+      "60,27,R"
     ],
     "edgeOffsets": {
       "20,73,R": [
@@ -31666,12 +33608,12 @@ const BATTLE_MAPS = [
         -28
       ],
       "58,26,B": [
-        22,
-        9
+        24,
+        4
       ],
       "57,26,B": [
-        22,
-        9
+        24,
+        4
       ],
       "55,66,R": [
         8,
@@ -31720,371 +33662,619 @@ const BATTLE_MAPS = [
       "9,10,R": [
         11,
         -33
+      ],
+      "57,27,R": [
+        -21,
+        9
+      ],
+      "57,28,R": [
+        -22,
+        -12
+      ],
+      "57,29,R": [
+        -22,
+        -12
+      ],
+      "57,30,R": [
+        -22,
+        -12
+      ],
+      "57,31,R": [
+        -22,
+        -12
+      ],
+      "58,31,B": [
+        -20,
+        -5
+      ],
+      "59,31,B": [
+        -20,
+        -5
+      ],
+      "60,31,B": [
+        -20,
+        -5
+      ],
+      "61,31,B": [
+        -20,
+        -5
+      ],
+      "60,31,R": [
+        14,
+        -11
+      ],
+      "60,30,R": [
+        14,
+        -11
+      ],
+      "60,29,R": [
+        14,
+        -11
+      ],
+      "60,28,R": [
+        14,
+        -11
+      ],
+      "60,27,R": [
+        16,
+        1
       ]
     },
-    "deepWater": [
-      "50,9",
-      "51,9",
-      "52,9",
-      "53,9",
-      "54,9",
-      "55,9",
-      "56,9",
-      "57,9",
-      "58,9",
-      "59,9",
-      "60,9",
-      "61,9",
-      "50,10",
-      "51,10",
-      "52,10",
-      "53,10",
-      "54,10",
-      "55,10",
-      "56,10",
-      "57,10",
-      "58,10",
-      "59,10",
-      "60,10",
-      "61,10",
-      "50,11",
-      "51,11",
-      "53,11",
-      "54,11",
-      "55,11",
-      "56,11",
-      "57,11",
-      "58,11",
-      "59,11",
-      "60,11",
-      "61,11",
-      "52,11",
-      "50,12",
-      "50,13",
-      "50,14",
-      "50,15",
-      "50,16",
-      "50,17",
-      "51,17",
-      "51,19",
-      "51,20",
-      "51,21",
-      "51,22",
-      "51,12",
-      "51,13",
-      "51,14",
-      "51,15",
-      "51,16",
-      "51,18",
-      "52,19",
-      "52,12",
-      "52,13",
-      "52,14",
-      "52,16",
-      "52,18",
-      "52,20",
-      "52,21",
-      "52,22",
-      "53,12",
-      "54,12",
-      "55,12",
-      "56,12",
-      "57,12",
-      "58,12",
-      "59,12",
-      "60,12",
-      "61,12",
-      "61,13",
-      "60,13",
-      "59,13",
-      "58,13",
-      "57,13",
-      "56,13",
-      "55,13",
-      "54,13",
-      "53,13",
-      "52,15",
-      "53,15",
-      "54,15",
-      "56,15",
-      "57,15",
-      "59,15",
-      "60,15",
-      "61,15",
-      "61,14",
-      "60,14",
-      "59,14",
-      "57,14",
-      "56,14",
-      "54,14",
-      "53,14",
-      "55,14",
-      "55,15",
-      "58,14",
-      "58,15",
-      "52,17",
-      "53,16",
-      "54,16",
-      "56,16",
-      "57,16",
-      "59,16",
-      "60,16",
-      "61,16",
-      "58,16",
-      "55,16",
-      "50,18",
-      "50,19",
-      "50,20",
-      "50,21",
-      "50,22",
-      "50,23",
-      "50,24",
-      "50,25",
-      "50,26",
-      "50,27",
-      "50,28",
-      "50,29",
-      "51,30",
-      "53,17",
-      "53,18",
-      "53,19",
-      "53,22",
-      "53,24",
-      "53,26",
-      "53,28",
-      "53,29",
-      "53,20",
-      "53,21",
-      "53,23",
-      "53,25",
-      "53,27",
-      "51,23",
-      "52,23",
-      "52,24",
-      "52,25",
-      "51,24",
-      "51,25",
-      "51,26",
-      "51,27",
-      "51,28",
-      "52,28",
-      "52,29",
-      "52,27",
-      "52,26",
-      "51,29",
-      "54,17",
-      "55,17",
-      "56,17",
-      "57,17",
-      "58,17",
-      "59,17",
-      "60,17",
-      "61,17",
-      "61,18",
-      "61,19",
-      "61,20",
-      "61,21",
-      "61,22",
-      "61,23",
-      "61,24",
-      "60,24",
-      "59,24",
-      "57,24",
-      "56,24",
-      "54,24",
-      "54,23",
-      "54,22",
-      "54,20",
-      "54,19",
-      "54,18",
-      "55,18",
-      "56,18",
-      "58,18",
-      "58,19",
-      "59,20",
-      "59,21",
-      "58,22",
-      "57,23",
-      "55,23",
-      "54,21",
-      "55,19",
-      "58,21",
-      "57,21",
-      "56,20",
-      "57,19",
-      "58,20",
-      "55,22",
-      "55,21",
-      "57,20",
-      "56,22",
-      "57,22",
-      "56,21",
-      "56,19",
-      "55,20",
-      "57,18",
-      "59,18",
-      "60,18",
-      "60,19",
-      "59,22",
-      "60,22",
-      "60,21",
-      "59,19",
-      "60,20",
-      "60,23",
-      "59,23",
-      "58,23",
-      "56,23",
-      "55,24",
-      "58,24",
-      "61,25",
-      "60,25",
-      "58,25",
-      "56,25",
-      "55,25",
-      "59,25",
-      "57,25",
-      "59,26",
-      "58,26",
-      "57,26",
-      "56,26",
-      "55,26",
-      "54,25",
-      "54,26",
-      "50,30",
-      "50,31",
-      "50,32",
-      "50,34",
-      "50,36",
-      "50,37",
-      "50,33",
-      "50,35",
-      "51,32",
-      "51,33",
-      "51,34",
-      "51,36",
-      "51,31",
-      "52,30",
-      "52,31",
-      "52,33",
-      "52,35",
-      "52,36",
-      "53,30",
-      "53,31",
-      "53,33",
-      "53,35",
-      "53,36",
-      "53,37",
-      "54,28",
-      "54,29",
-      "54,32",
-      "54,34",
-      "54,36",
-      "54,27",
-      "55,27",
-      "56,27",
-      "56,28",
-      "56,29",
-      "56,30",
-      "56,31",
-      "56,33",
-      "56,34",
-      "56,36",
-      "55,28",
-      "55,29",
-      "55,34",
-      "55,35",
-      "55,36",
-      "55,37",
-      "57,27",
-      "57,28",
-      "57,29",
-      "57,30",
-      "57,31",
-      "57,32",
-      "57,33",
-      "57,34",
-      "57,35",
-      "57,36",
-      "57,37",
-      "54,30",
-      "54,31",
-      "55,30",
-      "55,31",
-      "55,32",
-      "55,33",
-      "56,32",
-      "54,33",
-      "53,32",
-      "52,32",
-      "52,34",
-      "53,34",
-      "51,35",
-      "51,37",
-      "52,37",
-      "54,37",
-      "56,37",
-      "54,35",
-      "56,35",
-      "58,32",
-      "59,32",
-      "60,32",
-      "61,32",
-      "61,33",
-      "60,33",
-      "59,33",
-      "58,33",
-      "61,34",
-      "60,34",
-      "58,34",
-      "59,34",
-      "58,35",
-      "58,36",
-      "58,37",
-      "58,38",
-      "58,39",
-      "58,40",
-      "50,38",
-      "50,39",
-      "50,40",
-      "51,40",
-      "52,40",
-      "53,40",
-      "54,40",
-      "55,40",
-      "56,40",
-      "57,40",
-      "57,39",
-      "56,39",
-      "55,39",
-      "54,39",
-      "53,39",
-      "52,39",
-      "51,39",
-      "51,38",
-      "52,38",
-      "53,38",
-      "54,38",
-      "55,38",
-      "57,38",
-      "56,38",
-      "59,35",
-      "60,35",
-      "61,35",
-      "61,36",
-      "61,37",
-      "61,38",
-      "61,39",
-      "61,40",
-      "60,40",
-      "59,40",
-      "59,39",
-      "59,38",
-      "59,37",
-      "59,36",
-      "60,36",
-      "60,37",
-      "60,38",
-      "60,39",
+    "deepWaterOffsets": {
+      "24,10": [
+        -2,
+        -9
+      ],
+      "24,11": [
+        -2,
+        -9
+      ],
+      "25,11": [
+        -2,
+        -9
+      ],
+      "26,11": [
+        -2,
+        -9
+      ],
+      "27,11": [
+        -2,
+        -9
+      ],
+      "28,11": [
+        -2,
+        -9
+      ],
+      "29,11": [
+        -2,
+        -9
+      ],
+      "30,11": [
+        -2,
+        -9
+      ],
+      "31,11": [
+        -2,
+        -9
+      ],
+      "32,11": [
+        -2,
+        -9
+      ],
+      "33,11": [
+        -2,
+        -9
+      ],
+      "34,11": [
+        -2,
+        -9
+      ],
+      "35,11": [
+        -2,
+        -9
+      ],
+      "36,11": [
+        -23,
+        -9
+      ],
+      "36,10": [
+        -23,
+        -9
+      ],
+      "35,10": [
+        -2,
+        -9
+      ],
+      "34,10": [
+        -2,
+        -9
+      ],
+      "33,10": [
+        -2,
+        -9
+      ],
+      "32,10": [
+        -2,
+        -9
+      ],
+      "31,10": [
+        -2,
+        -9
+      ],
+      "29,10": [
+        -2,
+        -9
+      ],
+      "28,10": [
+        -2,
+        -9
+      ],
+      "27,10": [
+        -2,
+        -9
+      ],
+      "26,10": [
+        -2,
+        -9
+      ],
+      "25,10": [
+        -2,
+        -9
+      ],
+      "24,12": [
+        -2,
+        -9
+      ],
+      "25,12": [
+        -2,
+        -9
+      ],
+      "26,12": [
+        -2,
+        -9
+      ],
+      "27,12": [
+        -2,
+        -9
+      ],
+      "28,12": [
+        -2,
+        -9
+      ],
+      "29,12": [
+        -2,
+        -9
+      ],
+      "30,12": [
+        -2,
+        -9
+      ],
+      "31,12": [
+        -2,
+        -9
+      ],
+      "32,12": [
+        -2,
+        -9
+      ],
+      "33,12": [
+        -2,
+        -9
+      ],
+      "34,12": [
+        -2,
+        -9
+      ],
+      "35,12": [
+        -2,
+        -9
+      ],
+      "36,12": [
+        -23,
+        -9
+      ],
+      "30,10": [
+        -1,
+        -8
+      ],
+      "50,60": [
+        0,
+        12
+      ],
+      "51,60": [
+        0,
+        12
+      ],
+      "52,60": [
+        0,
+        12
+      ],
+      "53,60": [
+        0,
+        12
+      ],
+      "54,60": [
+        0,
+        12
+      ],
+      "55,60": [
+        0,
+        12
+      ],
+      "56,60": [
+        0,
+        12
+      ],
+      "57,60": [
+        0,
+        12
+      ],
+      "58,60": [
+        0,
+        12
+      ],
+      "59,60": [
+        0,
+        12
+      ],
+      "60,60": [
+        0,
+        12
+      ],
+      "50,69": [
+        1,
+        -13
+      ],
+      "51,69": [
+        1,
+        -13
+      ],
+      "60,69": [
+        1,
+        -13
+      ],
+      "58,69": [
+        1,
+        -13
+      ],
+      "57,69": [
+        1,
+        -13
+      ],
+      "56,69": [
+        1,
+        -13
+      ],
+      "55,69": [
+        1,
+        -13
+      ],
+      "54,69": [
+        1,
+        -13
+      ],
+      "53,69": [
+        1,
+        -13
+      ],
+      "52,69": [
+        1,
+        -13
+      ],
+      "59,69": [
+        1,
+        -13
+      ],
+      "50,9": [
+        0,
+        13
+      ],
+      "51,9": [
+        0,
+        13
+      ],
+      "53,9": [
+        0,
+        13
+      ],
+      "55,9": [
+        0,
+        13
+      ],
+      "57,9": [
+        0,
+        13
+      ],
+      "58,9": [
+        0,
+        13
+      ],
+      "59,9": [
+        0,
+        13
+      ],
+      "60,9": [
+        0,
+        13
+      ],
+      "61,9": [
+        -24,
+        13
+      ],
+      "56,9": [
+        0,
+        13
+      ],
+      "54,9": [
+        0,
+        13
+      ],
+      "52,9": [
+        0,
+        13
+      ],
+      "61,10": [
+        -24,
+        0
+      ],
+      "61,11": [
+        -24,
+        0
+      ],
+      "61,12": [
+        -24,
+        0
+      ],
+      "61,13": [
+        -24,
+        0
+      ],
+      "61,14": [
+        -24,
+        0
+      ],
+      "61,15": [
+        -24,
+        0
+      ],
+      "61,16": [
+        -24,
+        0
+      ],
+      "61,17": [
+        -24,
+        0
+      ],
+      "61,18": [
+        -24,
+        0
+      ],
+      "61,19": [
+        -24,
+        0
+      ],
+      "61,20": [
+        -24,
+        0
+      ],
+      "61,21": [
+        -24,
+        0
+      ],
+      "61,22": [
+        -24,
+        0
+      ],
+      "61,23": [
+        -24,
+        0
+      ],
+      "61,24": [
+        -24,
+        0
+      ],
+      "61,25": [
+        -24,
+        0
+      ],
+      "61,26": [
+        -24,
+        0
+      ],
+      "61,32": [
+        -24,
+        0
+      ],
+      "61,33": [
+        -24,
+        0
+      ],
+      "61,34": [
+        -24,
+        0
+      ],
+      "61,35": [
+        -24,
+        0
+      ],
+      "61,36": [
+        -24,
+        0
+      ],
+      "61,37": [
+        -24,
+        0
+      ],
+      "61,38": [
+        -24,
+        0
+      ],
+      "61,39": [
+        -24,
+        0
+      ],
+      "61,40": [
+        -24,
+        0
+      ],
+      "49,9": [
+        19,
+        7
+      ],
+      "49,10": [
+        19,
+        -5
+      ],
+      "49,11": [
+        19,
+        -5
+      ],
+      "49,12": [
+        19,
+        -5
+      ],
+      "49,13": [
+        19,
+        -5
+      ],
+      "49,14": [
+        19,
+        -5
+      ],
+      "49,15": [
+        19,
+        -5
+      ],
+      "49,16": [
+        19,
+        -5
+      ],
+      "49,17": [
+        19,
+        -5
+      ],
+      "49,18": [
+        19,
+        -5
+      ],
+      "49,19": [
+        19,
+        -5
+      ],
+      "49,20": [
+        19,
+        -5
+      ],
+      "49,21": [
+        19,
+        -5
+      ],
+      "49,22": [
+        19,
+        -5
+      ],
+      "49,23": [
+        19,
+        -5
+      ],
+      "49,25": [
+        19,
+        -5
+      ],
+      "49,27": [
+        19,
+        -5
+      ],
+      "49,28": [
+        19,
+        -5
+      ],
+      "49,30": [
+        19,
+        -5
+      ],
+      "49,24": [
+        19,
+        -5
+      ],
+      "49,26": [
+        19,
+        -5
+      ],
+      "49,29": [
+        19,
+        -5
+      ],
+      "49,31": [
+        19,
+        -5
+      ],
+      "49,32": [
+        19,
+        -5
+      ],
+      "49,33": [
+        19,
+        -5
+      ],
+      "49,34": [
+        19,
+        -5
+      ],
+      "49,35": [
+        19,
+        -5
+      ],
+      "49,36": [
+        19,
+        -5
+      ],
+      "49,37": [
+        19,
+        -5
+      ],
+      "49,38": [
+        19,
+        -5
+      ],
+      "49,39": [
+        19,
+        -5
+      ],
+      "49,40": [
+        19,
+        -5
+      ],
+      "57,27": [
+        -22,
+        0
+      ],
+      "57,28": [
+        -22,
+        0
+      ],
+      "57,29": [
+        -22,
+        0
+      ],
+      "57,30": [
+        -22,
+        0
+      ],
+      "57,31": [
+        -22,
+        0
+      ],
+      "59,64": [
+        1,
+        -29
+      ],
+      "58,64": [
+        1,
+        -29
+      ]
+    },
+    "deepWaterKeep": [
       "24,10",
       "25,10",
       "26,10",
@@ -32124,607 +34314,575 @@ const BATTLE_MAPS = [
       "34,12",
       "35,12",
       "36,12",
-      "60,60",
-      "59,60",
-      "58,60",
-      "57,60",
-      "56,60",
-      "55,60",
-      "54,60",
-      "53,60",
-      "52,60",
-      "51,60",
       "50,60",
-      "50,61",
-      "51,61",
-      "52,61",
-      "53,61",
-      "54,61",
-      "55,61",
-      "56,61",
-      "57,61",
-      "58,61",
-      "59,61",
+      "51,60",
+      "52,60",
+      "53,60",
+      "54,60",
+      "55,60",
+      "56,60",
+      "57,60",
+      "58,60",
+      "59,60",
+      "60,60",
       "60,61",
-      "60,62",
-      "59,62",
-      "58,62",
-      "56,62",
-      "55,62",
-      "54,62",
-      "53,62",
-      "52,62",
-      "51,62",
+      "59,61",
+      "58,61",
+      "57,61",
+      "56,61",
+      "55,61",
+      "54,61",
+      "53,61",
+      "52,61",
+      "51,61",
+      "50,61",
       "50,62",
+      "51,62",
+      "52,62",
+      "53,62",
+      "54,62",
+      "55,62",
+      "56,62",
       "57,62",
-      "50,63",
-      "51,63",
-      "52,63",
-      "53,63",
-      "54,63",
-      "55,63",
-      "56,63",
-      "57,63",
-      "58,63",
-      "59,63",
+      "58,62",
+      "59,62",
+      "60,62",
       "60,63",
-      "60,64",
-      "60,65",
-      "60,66",
-      "60,67",
-      "60,68",
-      "60,69",
-      "59,69",
-      "58,69",
-      "57,69",
-      "56,69",
-      "55,69",
-      "54,69",
-      "53,69",
-      "52,69",
-      "51,69",
-      "50,69",
+      "59,63",
+      "58,63",
+      "57,63",
+      "55,63",
+      "54,63",
+      "53,63",
+      "52,63",
+      "51,63",
+      "50,63",
       "50,64",
-      "50,65",
-      "50,66",
-      "50,67",
-      "50,68",
-      "51,68",
-      "51,67",
-      "51,66",
-      "51,65",
       "51,64",
       "52,64",
-      "52,65",
-      "52,66",
-      "52,67",
-      "52,68",
-      "53,68",
-      "53,67",
-      "53,66",
-      "53,65",
       "53,64",
       "54,64",
-      "54,65",
-      "54,66",
-      "54,67",
-      "54,68",
-      "55,68",
-      "55,67",
-      "55,66",
-      "55,65",
       "55,64",
       "56,64",
       "57,64",
       "58,64",
       "59,64",
+      "60,64",
+      "56,63",
+      "50,65",
+      "51,65",
+      "52,65",
+      "53,65",
+      "54,65",
+      "55,65",
+      "50,66",
+      "51,66",
+      "52,66",
+      "53,66",
+      "54,66",
+      "55,66",
+      "50,67",
+      "51,67",
+      "52,67",
+      "53,67",
+      "54,67",
+      "55,67",
+      "50,68",
+      "51,68",
+      "52,68",
+      "53,68",
+      "54,68",
+      "55,68",
       "56,68",
       "57,68",
       "58,68",
-      "59,68"
+      "59,68",
+      "60,68",
+      "60,67",
+      "60,66",
+      "60,65",
+      "50,69",
+      "51,69",
+      "52,69",
+      "53,69",
+      "54,69",
+      "55,69",
+      "56,69",
+      "57,69",
+      "58,69",
+      "59,69",
+      "60,69"
     ],
-    "deepWaterOffsets": {
-      "36,10": [
-        -20,
-        0
-      ],
-      "36,11": [
-        -20,
-        0
-      ],
-      "36,12": [
-        -20,
-        0
-      ],
-      "61,9": [
-        -23,
-        0
-      ],
-      "61,10": [
-        -23,
-        0
-      ],
-      "61,11": [
-        -23,
-        0
-      ],
-      "61,12": [
-        -23,
-        0
-      ],
-      "61,13": [
-        -23,
-        0
-      ],
-      "61,14": [
-        -23,
-        0
-      ],
-      "61,15": [
-        -23,
-        0
-      ],
-      "61,16": [
-        -23,
-        0
-      ],
-      "61,17": [
-        -23,
-        0
-      ],
-      "61,18": [
-        -23,
-        0
-      ],
-      "61,19": [
-        -23,
-        0
-      ],
-      "61,20": [
-        -23,
-        0
-      ],
-      "61,21": [
-        -23,
-        0
-      ],
-      "61,22": [
-        -23,
-        0
-      ],
-      "61,23": [
-        -23,
-        0
-      ],
-      "61,24": [
-        -23,
-        0
-      ],
-      "61,25": [
-        -23,
-        0
-      ],
-      "61,32": [
-        -23,
-        0
-      ],
-      "61,33": [
-        -23,
-        0
-      ],
-      "61,34": [
-        -23,
-        0
-      ],
-      "61,35": [
-        -23,
-        0
-      ],
-      "61,36": [
-        -23,
-        0
-      ],
-      "61,37": [
-        -23,
-        0
-      ],
-      "61,38": [
-        -23,
-        0
-      ],
-      "61,39": [
-        -23,
-        0
-      ],
-      "61,40": [
-        -23,
-        0
-      ],
-      "50,69": [
-        3,
-        -10
-      ],
-      "51,69": [
-        3,
-        -10
-      ],
-      "52,69": [
-        3,
-        -10
-      ],
-      "53,69": [
-        3,
-        -10
-      ],
-      "54,69": [
-        3,
-        -10
-      ],
-      "55,69": [
-        3,
-        -10
-      ],
-      "56,69": [
-        3,
-        -10
-      ],
-      "57,69": [
-        3,
-        -10
-      ],
-      "58,69": [
-        3,
-        -10
-      ],
-      "59,69": [
-        3,
-        -10
-      ],
-      "60,69": [
-        3,
-        -10
-      ],
-      "60,60": [
-        3,
-        11
-      ],
-      "59,60": [
-        3,
-        11
-      ],
-      "58,60": [
-        3,
-        11
-      ],
-      "57,60": [
-        3,
-        11
-      ],
-      "56,60": [
-        3,
-        11
-      ],
-      "54,60": [
-        3,
-        11
-      ],
-      "53,60": [
-        3,
-        11
-      ],
-      "52,60": [
-        3,
-        11
-      ],
-      "51,60": [
-        3,
-        11
-      ],
-      "50,60": [
-        3,
-        11
-      ],
-      "60,68": [
-        3,
-        0
-      ],
-      "60,67": [
-        3,
-        0
-      ],
-      "60,66": [
-        3,
-        0
-      ],
-      "60,65": [
-        3,
-        0
-      ],
-      "60,64": [
-        3,
-        0
-      ],
-      "60,63": [
-        3,
-        0
-      ],
-      "60,62": [
-        3,
-        0
-      ],
-      "60,61": [
-        3,
-        0
-      ],
-      "55,60": [
-        3,
-        10
-      ],
-      "50,61": [
-        3,
-        0
-      ],
-      "51,61": [
-        3,
-        0
-      ],
-      "52,61": [
-        3,
-        0
-      ],
-      "54,61": [
-        3,
-        0
-      ],
-      "55,61": [
-        3,
-        0
-      ],
-      "56,61": [
-        3,
-        0
-      ],
-      "57,61": [
-        3,
-        0
-      ],
-      "58,61": [
-        3,
-        0
-      ],
-      "59,61": [
-        3,
-        0
-      ],
-      "53,61": [
-        3,
-        0
-      ],
-      "50,62": [
-        3,
-        0
-      ],
-      "51,62": [
-        3,
-        0
-      ],
-      "52,62": [
-        3,
-        0
-      ],
-      "53,62": [
-        3,
-        0
-      ],
-      "54,62": [
-        3,
-        0
-      ],
-      "55,62": [
-        3,
-        0
-      ],
-      "56,62": [
-        3,
-        0
-      ],
-      "57,62": [
-        3,
-        0
-      ],
-      "58,62": [
-        3,
-        0
-      ],
-      "59,62": [
-        3,
-        0
-      ],
-      "59,63": [
-        3,
-        0
-      ],
-      "58,63": [
-        3,
-        0
-      ],
-      "57,63": [
-        3,
-        0
-      ],
-      "56,63": [
-        3,
-        0
-      ],
-      "54,63": [
-        3,
-        0
-      ],
-      "53,63": [
-        3,
-        0
-      ],
-      "52,63": [
-        3,
-        0
-      ],
-      "51,63": [
-        3,
-        0
-      ],
-      "50,63": [
-        3,
-        0
-      ],
-      "50,64": [
-        3,
-        0
-      ],
-      "51,64": [
-        3,
-        0
-      ],
-      "53,64": [
-        3,
-        0
-      ],
-      "54,64": [
-        3,
-        0
-      ],
-      "55,64": [
-        3,
-        0
-      ],
-      "56,64": [
-        3,
-        0
-      ],
-      "57,64": [
-        3,
-        0
-      ],
-      "58,64": [
-        3,
-        0
-      ],
-      "59,64": [
-        3,
-        0
-      ],
-      "55,65": [
-        3,
-        0
-      ],
-      "54,65": [
-        3,
-        0
-      ],
-      "53,65": [
-        3,
-        0
-      ],
-      "52,65": [
-        3,
-        0
-      ],
-      "51,65": [
-        3,
-        0
-      ],
-      "50,65": [
-        3,
-        0
-      ],
-      "50,66": [
-        3,
-        0
-      ],
-      "51,66": [
-        3,
-        0
-      ],
-      "52,66": [
-        3,
-        0
-      ],
-      "54,66": [
-        3,
-        0
-      ],
-      "55,66": [
-        3,
-        0
-      ],
-      "55,67": [
-        3,
-        0
-      ],
-      "54,67": [
-        3,
-        0
-      ],
-      "53,67": [
-        3,
-        0
-      ],
-      "52,67": [
-        3,
-        0
-      ],
-      "51,67": [
-        3,
-        0
-      ],
-      "50,67": [
-        3,
-        0
-      ],
-      "53,66": [
-        3,
-        0
-      ],
-      "50,68": [
-        3,
-        0
-      ],
-      "51,68": [
-        3,
-        0
-      ],
-      "52,68": [
-        3,
-        0
-      ],
-      "53,68": [
-        3,
-        0
-      ],
-      "54,68": [
-        3,
-        0
-      ],
-      "55,68": [
-        3,
-        0
-      ],
-      "56,68": [
-        3,
-        0
-      ],
-      "57,68": [
-        3,
-        0
-      ],
-      "58,68": [
-        3,
-        0
-      ],
-      "59,68": [
-        3,
-        0
+    "deepWater": [
+      "50,9",
+      "51,9",
+      "52,9",
+      "53,9",
+      "54,9",
+      "55,9",
+      "56,9",
+      "57,9",
+      "58,9",
+      "59,9",
+      "60,9",
+      "60,10",
+      "59,10",
+      "58,10",
+      "56,10",
+      "55,10",
+      "54,10",
+      "52,10",
+      "51,10",
+      "50,10",
+      "53,10",
+      "57,10",
+      "61,9",
+      "61,10",
+      "50,11",
+      "51,11",
+      "52,11",
+      "53,11",
+      "54,11",
+      "55,11",
+      "58,11",
+      "59,11",
+      "60,11",
+      "61,11",
+      "56,11",
+      "61,12",
+      "60,12",
+      "59,12",
+      "58,12",
+      "57,12",
+      "56,12",
+      "55,12",
+      "54,12",
+      "53,12",
+      "52,12",
+      "51,12",
+      "50,12",
+      "50,13",
+      "51,13",
+      "52,13",
+      "53,13",
+      "54,13",
+      "55,13",
+      "56,13",
+      "58,13",
+      "59,13",
+      "60,13",
+      "61,13",
+      "57,13",
+      "50,14",
+      "50,15",
+      "50,16",
+      "50,17",
+      "50,18",
+      "50,19",
+      "61,14",
+      "61,15",
+      "61,16",
+      "61,17",
+      "61,18",
+      "61,19",
+      "61,20",
+      "60,14",
+      "59,14",
+      "58,14",
+      "57,14",
+      "56,14",
+      "52,14",
+      "51,14",
+      "51,15",
+      "51,18",
+      "51,20",
+      "52,15",
+      "52,19",
+      "52,21",
+      "51,16",
+      "52,17",
+      "52,16",
+      "52,18",
+      "51,17",
+      "51,19",
+      "52,20",
+      "53,16",
+      "53,18",
+      "53,19",
+      "53,20",
+      "53,21",
+      "53,22",
+      "53,15",
+      "53,17",
+      "55,14",
+      "55,16",
+      "55,18",
+      "55,19",
+      "55,20",
+      "55,22",
+      "55,15",
+      "54,14",
+      "53,14",
+      "54,15",
+      "57,11",
+      "54,16",
+      "54,18",
+      "54,19",
+      "54,20",
+      "54,21",
+      "54,22",
+      "54,17",
+      "55,17",
+      "55,21",
+      "56,15",
+      "57,15",
+      "58,15",
+      "59,15",
+      "60,15",
+      "60,16",
+      "59,16",
+      "58,16",
+      "57,16",
+      "56,16",
+      "56,17",
+      "57,17",
+      "58,17",
+      "59,17",
+      "60,17",
+      "60,18",
+      "59,18",
+      "58,18",
+      "57,18",
+      "56,18",
+      "56,19",
+      "58,19",
+      "59,19",
+      "60,19",
+      "60,20",
+      "59,20",
+      "58,20",
+      "57,20",
+      "56,20",
+      "57,19",
+      "61,21",
+      "60,21",
+      "59,21",
+      "58,21",
+      "57,21",
+      "56,21",
+      "50,20",
+      "50,21",
+      "50,22",
+      "50,23",
+      "50,24",
+      "50,25",
+      "50,26",
+      "50,27",
+      "50,28",
+      "51,21",
+      "51,22",
+      "51,24",
+      "51,25",
+      "51,26",
+      "51,27",
+      "51,28",
+      "51,29",
+      "51,23",
+      "52,23",
+      "52,22",
+      "52,24",
+      "52,26",
+      "52,27",
+      "52,28",
+      "52,29",
+      "53,23",
+      "53,24",
+      "53,25",
+      "53,26",
+      "53,27",
+      "53,28",
+      "53,29",
+      "54,23",
+      "54,24",
+      "54,26",
+      "54,27",
+      "54,28",
+      "54,29",
+      "55,23",
+      "55,24",
+      "55,25",
+      "55,26",
+      "55,28",
+      "55,29",
+      "54,25",
+      "56,22",
+      "56,24",
+      "56,26",
+      "56,27",
+      "56,28",
+      "56,29",
+      "56,30",
+      "55,27",
+      "56,25",
+      "56,23",
+      "57,23",
+      "57,24",
+      "57,25",
+      "57,26",
+      "58,26",
+      "59,26",
+      "60,26",
+      "60,25",
+      "60,24",
+      "60,23",
+      "60,22",
+      "61,22",
+      "61,23",
+      "61,24",
+      "61,25",
+      "61,26",
+      "59,22",
+      "59,23",
+      "59,24",
+      "59,25",
+      "58,22",
+      "58,24",
+      "58,25",
+      "57,22",
+      "58,23",
+      "50,29",
+      "50,30",
+      "50,31",
+      "50,32",
+      "50,33",
+      "50,34",
+      "50,35",
+      "50,36",
+      "51,30",
+      "51,31",
+      "51,33",
+      "51,34",
+      "51,35",
+      "51,36",
+      "51,32",
+      "52,30",
+      "52,31",
+      "52,32",
+      "52,33",
+      "52,34",
+      "52,35",
+      "52,36",
+      "53,36",
+      "53,35",
+      "53,34",
+      "53,33",
+      "53,32",
+      "53,31",
+      "53,30",
+      "54,30",
+      "54,31",
+      "54,32",
+      "54,34",
+      "54,35",
+      "54,36",
+      "55,36",
+      "55,35",
+      "55,33",
+      "55,32",
+      "55,31",
+      "55,30",
+      "56,31",
+      "56,32",
+      "56,33",
+      "56,34",
+      "56,35",
+      "56,36",
+      "55,34",
+      "57,27",
+      "57,28",
+      "57,29",
+      "57,30",
+      "57,31",
+      "57,33",
+      "57,34",
+      "57,35",
+      "57,36",
+      "60,32",
+      "59,32",
+      "58,32",
+      "57,32",
+      "61,32",
+      "61,33",
+      "60,33",
+      "59,33",
+      "58,33",
+      "58,34",
+      "58,35",
+      "58,36",
+      "59,34",
+      "59,35",
+      "59,36",
+      "60,34",
+      "60,35",
+      "60,36",
+      "61,34",
+      "61,35",
+      "61,36",
+      "61,37",
+      "61,38",
+      "61,39",
+      "61,40",
+      "60,40",
+      "59,40",
+      "58,40",
+      "57,40",
+      "56,40",
+      "55,40",
+      "54,40",
+      "53,40",
+      "52,40",
+      "51,40",
+      "50,40",
+      "50,39",
+      "50,38",
+      "50,37",
+      "51,37",
+      "51,38",
+      "51,39",
+      "52,39",
+      "52,38",
+      "52,37",
+      "53,37",
+      "53,38",
+      "53,39",
+      "54,39",
+      "54,38",
+      "54,37",
+      "55,37",
+      "55,38",
+      "55,39",
+      "56,39",
+      "56,38",
+      "56,37",
+      "57,37",
+      "57,38",
+      "57,39",
+      "58,39",
+      "58,38",
+      "58,37",
+      "59,37",
+      "59,38",
+      "59,39",
+      "60,39",
+      "60,38",
+      "60,37",
+      "49,9",
+      "49,10",
+      "49,11",
+      "49,12",
+      "49,13",
+      "49,14",
+      "49,15",
+      "49,16",
+      "49,17",
+      "49,18",
+      "49,19",
+      "49,20",
+      "49,21",
+      "49,22",
+      "49,23",
+      "49,24",
+      "49,25",
+      "49,26",
+      "49,27",
+      "49,28",
+      "49,29",
+      "49,30",
+      "49,31",
+      "49,32",
+      "49,34",
+      "49,35",
+      "49,36",
+      "49,33",
+      "49,37",
+      "49,38",
+      "49,39",
+      "49,40"
+    ],
+    "hideZones": [
+      [
+        1460,
+        458,
+        38,
+        937
+      ],
+      [
+        1520,
+        1450,
+        40,
+        1026
+      ],
+      [
+        1370,
+        2036,
+        40,
+        145
+      ],
+      [
+        1051,
+        2206,
+        41,
+        88
+      ],
+      [
+        701,
+        2205,
+        39,
+        88
+      ],
+      [
+        610,
+        2025,
+        42,
+        83
+      ],
+      [
+        642,
+        1425,
+        39,
+        121
+      ],
+      [
+        1521,
+        2476,
+        41,
+        163
+      ],
+      [
+        1521,
+        2525,
+        41,
+        114
+      ],
+      [
+        1482,
+        2855,
+        39,
+        103
+      ],
+      [
+        1760,
+        2854,
+        41,
+        106
+      ],
+      [
+        121,
+        2524,
+        40,
+        105
       ]
-    }
+    ]
   },
   {
     "id": "map_mvnjr2ze",
@@ -46951,7 +49109,8 @@ const BATTLE_MAPS = [
         "r": 68,
         "layer": "object3",
         "fx": true,
-        "sortDepth": 2.75
+        "sortDepth": 2.75,
+        "ox": 20
       },
       {
         "id": "tile_street_capsule_toy_machines",
@@ -46974,7 +49133,9 @@ const BATTLE_MAPS = [
         "c": 63,
         "r": 71,
         "layer": "object3",
-        "fx": true
+        "fx": true,
+        "oy": -7.333333,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_street_utility_box_painted",
@@ -85021,10 +87182,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_large",
-        "c": 13,
-        "r": 45,
+        "c": 19,
+        "r": 39,
         "layer": "object9",
-        "ox": 20,
+        "ox": 10,
         "oy": 30,
         "fx": true,
         "level": 2
@@ -85134,13 +87295,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_large",
-        "c": 10,
-        "r": 44,
+        "c": 12,
+        "r": 46,
         "layer": "object9",
-        "ox": 20,
+        "ox": 10,
         "oy": 20,
         "fx": true,
-        "level": 2
+        "level": 2,
+        "sortDepth": 2
       },
       {
         "id": "tile_obstacle_ore_large",
@@ -85667,6 +87829,15 @@ const BATTLE_MAPS = [
         "layer": "object2",
         "ox": 30,
         "oy": 35.333333
+      },
+      {
+        "id": "tile_street_area_map_board",
+        "c": 53,
+        "r": 72,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 35.333333,
+        "sortDepth": 3
       },
       {
         "id": "tile_street_area_map_board",

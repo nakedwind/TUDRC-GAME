@@ -195,7 +195,7 @@ function oilExplode(x, y, it) {
 function damageCoresInBlast(x, y, radius, damage) {
   if (typeof damageFogCrystalsInBlast === 'function') damageFogCrystalsInBlast(x, y, radius, damage);   // 爆炸也會震碎霧樹的水晶（js/fog.js）
   for (const core of G.cores || []) {
-    if (core.dead || core.hp <= 0 || core.hidden || core.carried || !blastHits(core)) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）；不同樓層炸不到
+    if (core.dead || core.hp <= 0 || core.hidden || core.carried || !blastHits(core) || (typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(core))) continue;   // 泡在深水裡的核心：炸不到（js/pool-tide.js）   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）；不同樓層炸不到
     const d = Math.hypot(core.x - x, core.y - y);
     if (d > radius || !hasLineOfSight(x, y, core.x, core.y)) continue;
     const hurt = damage * (1 - .4 * d / radius);
@@ -307,7 +307,7 @@ function updateOil(dt) {
     return dps * FIRE_TICK;
   };
   for (const core of G.cores || []) {
-    if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
+    if (core.dead || core.hp <= 0 || core.hidden || core.carried || (typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(core))) continue;   // 泡在深水裡的核心：燒不到（js/pool-tide.js）   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
     const damage = fireTick(core, true); if (!damage) continue;
     wakeCore(core); core.lastHp = core.hp; core.hp = Math.max(0, core.hp - damage); core.hitT = .16;
     flashDmg('-' + Math.round(damage), core.x, core.y - 56, '#ff9a3c');

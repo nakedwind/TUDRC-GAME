@@ -345,6 +345,7 @@ function sentryBlocked(x, y) {
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || gridAtPointForWalker(px, py)) return true;   // 建築只擋同一層的人；微調過位置的照微調後的範圍（js/build.js）
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
+    if (typeof poolPlatformBlocksPoint === 'function' && poolPlatformBlocksPoint(px, py)) return true;   // 抽水機平台：隊員上不去（js/pool-platform.js）
     if (typeof deepWaterBlocksAlly === 'function' && deepWaterBlocksAlly(px, py)) return true;   // 深水區：沒坐救生圈的隊員不會下水，在岸邊等（js/swim-ring.js）
     if (edgeWallBlocksPoint(px, py) || edgeWallBlocksPoint(x + sx, y) || edgeWallBlocksPoint(x, y + sy)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）：角和四邊中點
   }
@@ -751,7 +752,7 @@ function hasAggroTarget(t) {
   if (!G.enemies.length && !cores.some(c => !c.dead && c.awake && !c.hidden)) return false;
   const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
   for (const e of [...G.enemies, ...cores]) {
-    if (e.dead || e.awake === false || e.hidden || e.carried) continue;   // 沉睡的核心不算目標；躲在順順宮帽裡、抱在珍珠大童身上的也不算（js/elite-cap-king.js、js/pearl-elder.js）
+    if (e.dead || e.awake === false || e.hidden || e.carried || (typeof poolCoreSubmerged === 'function' && G.cores.includes(e) && poolCoreSubmerged(e))) continue;   // 泡在深水裡的核心也不算（js/pool-tide.js）；沉睡的核心不算目標；躲在順順宮帽裡、抱在珍珠大童身上的也不算（js/elite-cap-king.js、js/pearl-elder.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不主動接敵（js/elite-bird-head.js）
     if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
@@ -939,7 +940,7 @@ function updateSentryMain(t, dt) {
     const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
-      if (e.dead || e.awake === false || e.hidden || e.carried) continue;   // 沉睡的核心不去追；躲在順順宮帽裡、抱在珍珠大童身上的也不追（js/elite-cap-king.js、js/pearl-elder.js）
+      if (e.dead || e.awake === false || e.hidden || e.carried || (typeof poolCoreSubmerged === 'function' && G.cores.includes(e) && poolCoreSubmerged(e))) continue;   // 泡在深水裡的核心也不追（js/pool-tide.js）；沉睡的核心不去追；躲在順順宮帽裡、抱在珍珠大童身上的也不追（js/elite-cap-king.js、js/pearl-elder.js）
       if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不去追
       if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
       if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心

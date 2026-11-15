@@ -1124,53 +1124,17 @@ async function openTrim(st) {
 const trimTotal = () => trim?.buf ? Math.round(trim.buf.duration * 1000) : 0;
 const trimSpeed = () => clamp(Number($('trimSpeed').value) || 1, .25, 4);
 function trimInputs() { $('trimFrom').value = Math.round(trim.from); $('trimTo').value = Math.round(trim.to); const sp = trimSpeed(); $('trimLen').textContent = '長度 ' + secText((trim.to - trim.from) / sp) + ' 秒' + (sp !== 1 ? '（原本 ' + secText(trim.to - trim.from) + ' 秒）' : ''); }
-function drawTrim() {
-  const cv = $('trimWave'), g = cv.getContext('2d'), W = cv.width, H = cv.height;
-  g.clearRect(0, 0, W, H);
-  if (!trim?.buf) { g.fillStyle = '#7f93a6'; g.font = '14px sans-serif'; g.fillText('讀取音檔中…', 12, 24); return; }
-  const data = trim.buf.getChannelData(0), total = trimTotal(), step = Math.max(1, Math.floor(data.length / W));
-  const xOf = ms => ms / total * W, x0 = xOf(trim.from), x1 = xOf(trim.to);
-  g.fillStyle = 'rgba(255,212,121,.12)'; g.fillRect(x0, 0, x1 - x0, H);   // 選取的那一段
-  for (let x = 0; x < W; x++) {   // 波形：每一欄的最高、最低
-    let lo = 1, hi = -1;
-    for (let i = x * step, e = Math.min(data.length, i + step); i < e; i++) { const v = data[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
-    g.fillStyle = x >= x0 && x <= x1 ? '#8fd3ff' : '#3c5266';
-    g.fillRect(x, (1 - hi) * H / 2, 1, Math.max(1, (hi - lo) * H / 2));
-  }
-  g.fillStyle = '#7f93a6'; g.font = '11px sans-serif';   // 時間刻度：每 0.5 秒（太長就每 1 秒）
-  const tick = total > 8000 ? 1000 : 500;
-  for (let ms = 0; ms <= total; ms += tick) { const x = xOf(ms); g.fillRect(x, H - 6, 1, 6); g.fillText(secText(ms), x + 2, H - 8); }
-  g.fillStyle = '#ffd479'; g.fillRect(x0 - 1, 0, 2, H); g.fillRect(x1 - 1, 0, 2, H);   // 開始、結束的黃線
-  if (seg && trimFor && seg.key.startsWith(trimFor.src + '|')) {   // 試聽中：白線＝播到哪
-    const len = seg.to - seg.from; let pos;
+function drawTrim() {   // 波形畫法、拖曳選段在 js/sound-trim.js（音效編輯器也用同一套）
+  let pos = null;
+  if (trim?.buf && seg && trimFor && seg.key.startsWith(trimFor.src + '|')) {   // 試聽中：白線＝播到哪
+    const len = seg.to - seg.from;
     if (seg.el) pos = seg.el.currentTime;
     else { let p = audioCtx().currentTime - seg.t0; p = seg.loop ? p % len : Math.min(p, len); pos = seg.from + p; }
-    g.fillStyle = '#fff'; g.fillRect(xOf(pos * 1000), 0, 1, H);
-    requestAnimationFrame(drawTrim);
+    pos *= 1000; requestAnimationFrame(drawTrim);
   }
+  SoundTrim.draw($('trimWave'), trim?.buf, trim?.from || 0, trim?.to || 0, pos);
 }
-function trimMs(e) { const r = $('trimWave').getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width, 0, 1) * trimTotal(); }
-$('trimWave').addEventListener('pointerdown', e => {
-  if (!trim?.buf) return;
-  const ms = trimMs(e), near = trimTotal() * 8 / $('trimWave').getBoundingClientRect().width;   // 離黃線 8 像素內＝拖那條線
-  trim.drag = Math.abs(ms - trim.from) <= near ? 'from' : Math.abs(ms - trim.to) <= near ? 'to' : 'new';
-  if (trim.drag === 'new') { trim.anchor = ms; trim.from = trim.to = ms; }
-  try { $('trimWave').setPointerCapture(e.pointerId); } catch (err) {}   // 拖到波形外面也繼續算
-  trimInputs(); drawTrim();
-});
-$('trimWave').addEventListener('pointermove', e => {
-  if (!trim?.drag) return;
-  const ms = trimMs(e);
-  if (trim.drag === 'new') { trim.from = Math.min(trim.anchor, ms); trim.to = Math.max(trim.anchor, ms); }
-  else if (trim.drag === 'from') trim.from = Math.min(ms, trim.to);
-  else trim.to = Math.max(ms, trim.from);
-  trimInputs(); drawTrim();
-});
-$('trimWave').addEventListener('pointerup', () => {
-  if (!trim?.drag) return;
-  if (trim.drag === 'new' && trim.to - trim.from < 20) { trim.from = 0; trim.to = trimTotal(); }   // 只點一下沒拖：選整段
-  trim.drag = null; trimInputs(); drawTrim();
-});
+SoundTrim.bind($('trimWave'), () => trim, () => { trimInputs(); drawTrim(); });
 $('trimFrom').onchange = () => { trim.from = clamp(Number($('trimFrom').value) || 0, 0, trim.to); trimInputs(); drawTrim(); };
 $('trimTo').onchange = () => { trim.to = clamp(Number($('trimTo').value) || 0, trim.from, trimTotal()); trimInputs(); drawTrim(); };
 $('trimSpeed').onchange = () => { $('trimSpeed').value = trimSpeed(); trimInputs(); };

@@ -85,6 +85,7 @@ function canPlaceObstacleNow(v, c, r, lightExtra = 0) {
   for (const [dc, dr] of placeCheckCells(v)) {
     const cc = c + dc, rr = r + dr;
     if (!inGrid(cc, rr)) return false;
+    if (typeof tileBoxCoversCell === 'function' && tileBoxCoversCell(cc, rr)) return false;   // 素材碰撞方框蓋住這格（js/tile-collisions.js）
     if (isWall(cc, rr) || isEntrance(cc, rr)) return false;
     if (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(cc, rr)) return false;   // 深水區不能蓋（js/swim-ring.js）
     if (hasFloors && rampCells.has(cc + ',' + rr)) return false;   // 樓層出入口（手扶梯）上不能蓋
@@ -118,8 +119,9 @@ function buildFail(msg, c, r, color = '#ff8f8f') {
 function placeObstacle(ob, c, r) {
   if(!ob||DISABLED_BUILD_IDS.has(ob.id))return false;
   const v = ob[buildOrient], extra = placeExtra(ob);
-  if (G.player && G.player.swimRing) return buildFail('坐在救生圈上不能蓋東西', c, r);   // js/swim-ring.js
   if (!buildInRange(v, c, r)) return buildFail('太遠了', c, r);
+  // 要蓋的地方有深水格：蓋不了。坐在救生圈上也可以蓋在岸上、救生台上（只看蓋的位置，不看人在哪；js/swim-ring.js）
+  if (typeof deepWaterBlocksCell === 'function' && placeCheckCells(v).some(([dc, dr]) => deepWaterBlocksCell(c + dc, r + dr))) return buildFail('水太深了，蓋不了東西', c, r);
   if (!footprintNearLight(v, c, r, extra)) return buildFail('太黑了', c, r, '#ffd24a');
   if (!canPlaceObstacle(v, c, r, extra)) return buildFail('不能放這裡', c, r);
   if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) return buildFail('已經有地雷了', c, r);

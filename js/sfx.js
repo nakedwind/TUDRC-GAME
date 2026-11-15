@@ -230,6 +230,9 @@ const SFX = (() => {
     poolDrip: '滴水聲.mp3',
     poolWaterDrop: '環境/水滴聲.mp3',   // 池核的環境背景音（跟滴水聲一起循環，js/map-ambient.js）
     poolPaddle: '划水聲.mp3',
+    wetSlip: '環境/水滴聲.mp3',   // 池核濕地板滑倒（js/wet-floor.js）
+    poolBossSplash: '怪物/魚頭君/噴水攻擊.mp3',   // 池核 BOSS 浮上來、潛下去（js/pool-boss.js）
+    poolLightDouse: '怪物/魚頭君/火被澆熄.mp3',   // 池核水漲回深水：深水區裡的燈熄滅（js/pool-tide.js）
     fieldGenRadio: ['無線電雜音.mp3', '無線電.mp3'],   // 池核的力場產生器：溫特第一次走近（兩個一起播，js/field-generator.js）
     fieldGenPopper: 'party-popper.wav',                  // 池核的力場產生器：跟無線電同時播
     fieldGenHorn: 'birthday-party-horn.mp3',             // 池核的力場產生器：0.4 秒後播   // 坐救生圈在深水區划水時循環播放（js/swim-ring.js）   // 池核的環境背景音：在池核一直循環（js/map-ambient.js）
@@ -296,10 +299,10 @@ const SFX = (() => {
     lastPlayed.set(sourceKey, now);
     const vary = VARIED.has(name), rate = (vary ? jitter(VARY.pitch) : 1) * (SOUND_PITCH[name] || 1);
     if (vary) gain *= jitter(VARY.gain);
-    const base = gain;
+    const base = gain, clip = clipOf(name);
     playbackLayers(files[name]).forEach(({ file, index }) => {
       const key = name + ':' + index, gain = base * (LAYER_GAIN[name]?.[index] ?? 1);
-      if (buffers[key]) {             // 已預先載入：所有疊加層在同一刻播放
+      if (buffers[key] && clip.speed === 1) {             // 已預先載入：所有疊加層在同一刻播放
         ensure();
         const src = ctx.createBufferSource(); src.buffer = buffers[key]; src.playbackRate.value = rate;
         const g = ctx.createGain(); g.gain.value = gain;
@@ -312,13 +315,26 @@ const SFX = (() => {
           src.addEventListener('ended', () => setTimeout(() => { d.disconnect(); fb.disconnect(); wet.disconnect(); }, 2500));
         }
         const h = { src, g }; remember(sourceKey, h);
-        src.onended = () => { activeSources.delete(src); forget(sourceKey, h); }; src.start(); return;
+        src.onended = () => { activeSources.delete(src); forget(sourceKey, h); };
+        // 剪輯：有設開始／結束就只播那一段（start 的第 2 個數字＝從第幾秒開始、第 3 個＝播幾秒）
+        if (clip.to > clip.from) src.start(0, clip.from / 1000, (clip.to - clip.from) / 1000);
+        else if (clip.from) src.start(0, clip.from / 1000); else src.start();
+        return;
       }
-      const audio = new Audio('Sound effects/' + file);   // file:// 開啟時的疊加播放
-      audio.volume = Math.min(1, volume * gain); audio.preservesPitch = false; audio.playbackRate = rate;
+      // 舊播放方式（HTML Audio）：file:// 開啟時，或音效編輯器設了「播放速度」時用這個
+      // （播放速度要「變快變慢但音高不變」，只有 <audio> 做得到，跟劇情編輯器（改）的音效一樣）
+      const audio = new Audio('Sound effects/' + file);
+      const speedOn = clip.speed !== 1;
+      audio.volume = Math.min(1, volume * gain); audio.preservesPitch = audio.mozPreservesPitch = audio.webkitPreservesPitch = speedOn;
+      audio.playbackRate = speedOn ? clip.speed : rate;
       const h = { audio }; remember(sourceKey, h);
-      activeAudio.set(audio, gain); const cleanup = () => { activeAudio.delete(audio); forget(sourceKey, h); };
+      let timer = 0;
+      activeAudio.set(audio, gain); const cleanup = () => { clearInterval(timer); activeAudio.delete(audio); forget(sourceKey, h); };
       audio.addEventListener('ended', cleanup, { once: true }); audio.addEventListener('error', cleanup, { once: true });
+      if (clip.from || clip.to > clip.from) {   // 剪輯：先跳到開始的地方；每 10 毫秒看一次，播到結束就停
+        audio.addEventListener('loadedmetadata', () => { audio.currentTime = clip.from / 1000; }, { once: true });
+        if (clip.to > clip.from) timer = setInterval(() => { if (audio.currentTime >= clip.to / 1000) { audio.pause(); audio.dispatchEvent(new Event('ended')); } }, 10);
+      }
       audio.play().catch(cleanup);
     });
   }
@@ -519,6 +535,18 @@ const SFX = (() => {
   if (/[?&]previewSounds=1(&|$)/.test(location.search)) {
     try { const draft = JSON.parse(localStorage.getItem(GAIN_KEY) || 'null'); if (draft && typeof draft === 'object') SOUND_GAIN = draft; } catch (_) {}
   }
+  // 剪輯（在「音效編輯器」的 ✂ 按鈕設定，存在 data/sound-settings.js 的 clips）：
+  //   from／to＝只播這一段（毫秒，to 沒寫＝播到尾）；speed＝播放速度（0.25～4，變快變慢但音高不變）
+  //   沒有設定的音效照原本整段、原速播。音量照舊用上面的 SOUND_GAIN。
+  const CLIP_KEY = 'tudrc_sound_clips_v1';
+  let SOUND_CLIP = { ...(typeof SOUND_SETTINGS !== 'undefined' ? (SOUND_SETTINGS.clips || {}) : {}) };
+  if (/[?&]previewSounds=1(&|$)/.test(location.search)) {
+    try { const draft = JSON.parse(localStorage.getItem(CLIP_KEY) || 'null'); if (draft && typeof draft === 'object') SOUND_CLIP = draft; } catch (_) {}
+  }
+  function clipOf(name) {
+    const c = SOUND_CLIP[name] || {}, from = Math.max(0, Number(c.from) || 0), to = Math.max(0, Number(c.to) || 0);
+    return { from, to: to > from ? to : 0, speed: Math.min(4, Math.max(.25, Number(c.speed) || 1)) };
+  }
   function play(name, gain = 1, sourceKey = name) {
     if (!enabled) return;
     gain *= SOUND_GAIN[name] ?? 1;
@@ -550,6 +578,9 @@ const SFX = (() => {
     FILE_KEY,
     gainOf: name => SOUND_GAIN[name] ?? 1,                 // 某個音效目前的音量倍率
     setGains(map) { SOUND_GAIN = { ...(map || {}) }; },    // 音效編輯器即時套用
+    CLIP_KEY,
+    clipOf,                                                // 某個音效的剪輯設定 { from, to（毫秒，0＝到尾）, speed }
+    setClips(map) { SOUND_CLIP = { ...(map || {}) }; },    // 音效編輯器即時套用剪輯
     setFiles(config) {
       const next = { ...baseFiles, ...((config || {}).overrides || {}), ...((config || {}).extras || {}) };
       Object.keys(files).forEach(name => { delete files[name]; delete buffers[name]; });

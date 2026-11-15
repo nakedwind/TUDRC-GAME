@@ -3,7 +3,8 @@
    - 打開：門的圖片直接消失，可以通過。
    - 手動門：溫特走到門前按 Spacenter 開關（有人站在門口時不能關）。
    - 自動門：平常關著、玩家打不開；觸發條件達成時自動打開（目前：異質核心醒來）。
-   - 只是圖片（picture）：永遠關著（一樣擋路），按 Space 沒反應、不顯示提示、不會播開關門音效。
+   - 只是圖片（picture）：永遠關著（一樣擋路），不顯示提示、不會播開關門音效；
+     data/doors.js 有寫 tryOpen 的門（例如池核的門），按 Space 會播「打不開門」的音效。
 */
 const DOOR = { radius: 58, minOverlap: 10, hug: 12 };   // hug＝門關著時，擋路的下緣在門圖下緣往上幾像素（所有門的預設；data/doors.js 每種門可以另外寫 hug）   // radius＝離門多近可以按 Space；minOverlap＝門板蓋到一格多少像素才算擋那格
 let mapDoors = [];
@@ -240,6 +241,26 @@ function unlockDoor(door) {
   setDoorOpen(door, true);
   if (typeof updateHUD === 'function') updateHUD();
   if (typeof saveGame === 'function') saveGame();
+}
+// 「只是圖片」的門：溫特在門前按 Space 時，播 data/doors.js 的 tryOpen 音效（假裝轉門把，門打不開）
+// 排在其他互動後面（js/game.js），旁邊有別的東西可以按時讓給它們
+let pictureDoorSfxT = 0;
+function tryPictureDoorNearPlayer() {
+  const p = G.player; if (!p || p.sitting) return false;
+  let best = null, bd = DOOR.radius;
+  for (const d of mapDoors) {
+    const snd = d.mode === 'picture' && DOOR_TILES[d.stamp.id] && DOOR_TILES[d.stamp.id].tryOpen;
+    if (!snd) continue;
+    const dd = Math.hypot(d.x - p.x, Math.max(d.rowTopY, Math.min(d.rowBotY, p.y)) - p.y);   // 跟一般門一樣量到擋路那幾排
+    if (dd < bd) { bd = dd; best = d; }
+  }
+  if (!best) return false;
+  const now = performance.now();
+  if (now - pictureDoorSfxT > 600 && typeof sfxAt === 'function') {   // 連按時不要一直疊在一起（0.6 秒內只播一次）
+    pictureDoorSfxT = now;
+    sfxAt(DOOR_TILES[best.stamp.id].tryOpen, best.x, best.y, .7, 'picture-door');
+  }
+  return true;
 }
 function toggleDoorNearPlayer() {
   const door = doorNearPlayer(); if (!door) return false;
