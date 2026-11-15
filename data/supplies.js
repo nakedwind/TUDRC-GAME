@@ -45,7 +45,7 @@ const SUPPLIES = [
   { id:'egg', name:'雞蛋', kind:'medical', act:'food', price:8, special:true, image:'images/森林/egg.png', cookTo:'roasted-egg', groundSize:16,
     food:{ hp:6, sp:4, sick:.25 }, effect:'❤ HP +6　✦ SP +4　🤢 可能鬧肚子', desc:'森林裡的雞生的蛋，還溫溫的。直接生吃只恢復一點 HP 和 SP，而且有機會鬧肚子（一陣子走不快）。放在地上用火烤，會變成烤雞蛋。' },
   { id:'roasted-egg', name:'烤雞蛋', kind:'medical', act:'food', price:20, special:true, image:'images/森林/egg_roasted.png', groundSize:16,
-    food:{ hp:15, sp:78, buff:{ kind:'guard', val:.10, dur:30 } }, effect:'❤ HP +15　✦ SP +78　🛡️ 減傷 10%', desc:'用火烤得香噴噴的雞蛋，剝開還冒著熱氣。吃下去恢復 HP 和 SP，30 秒內受到的傷害減少 10%。' },
+    food:{ hp:15, sp:8, buff:{ kind:'guard', val:.10, dur:30 } }, effect:'❤ HP +15　✦ SP +8　🛡️ 減傷 10%', desc:'用火烤得香噴噴的雞蛋，剝開還冒著熱氣。吃下去恢復 HP 和 SP，30 秒內受到的傷害減少 10%。' },
   // ---- 零食 ----
   { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.03 }, file:'小學麵.png' },
   { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.04 }, file:'卡迪這.png' },
