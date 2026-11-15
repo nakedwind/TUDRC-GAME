@@ -6,8 +6,8 @@
    ・文字改這裡的 FUND_CARD；{money} 會換成金額。 */
 const FUND_CARD = {
   title: '💰 作戰經費 +${money}',
-  body: '應變中心已撥下這一區的作戰經費，可用來建造防禦設施與補給。',
-  note: '每一區只撥一次',
+  body: '首次進入本區，應變中心已撥下這一區的作戰經費，可用來建造防禦設施與補給。',
+  note: '',   // 最下面的小字；空白＝不顯示
   delay: 1.2,    // 進地圖後幾秒才滑出來（等黑幕淡出）
   stay: 7,       // 停留幾秒（點一下卡片可以提早關掉）
   sample: 5000,  // UI編輯器裡範例卡顯示的金額
@@ -26,7 +26,7 @@ function ensureFundCard() {
 }
 function fillFundCard(money) {
   const el = ensureFundCard(); if (!el) return null;
-  const fill = s => String(s || '').replace(/\{money\}/g, Math.round(money).toLocaleString('en-US'));
+  const fill = s => String(s || '').replace(/\{money\}/g, String(Math.round(money)));   // 金額不加千分位逗號（$5000）
   el.querySelector('.fund-card-title').textContent = fill(FUND_CARD.title);
   el.querySelector('.fund-card-body').textContent = fill(FUND_CARD.body);
   const note = el.querySelector('.fund-card-note'); note.textContent = fill(FUND_CARD.note); note.hidden = !FUND_CARD.note;
