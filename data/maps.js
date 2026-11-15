@@ -2742,7 +2742,6 @@ const BATTLE_MAPS = [
         "13,57": "tile_interactive_pickup_battery",
         "15,56": "tile_interactive_storage_locker_key",
         "40,42": "tile_interactive_pickup_almond_water",
-        "13,18": "tile_interactive_pickup_almond_water",
         "54,42": "tile_obstacle_ore_small",
         "43,57": "tile_interactive_storage_locker_key",
         "15,44": "tile_interactive_pickup_almond_water",
@@ -2763,7 +2762,8 @@ const BATTLE_MAPS = [
         "52,21": "tile_interactive_pickup_almond_water",
         "39,21": "tile_interactive_pickup_backroom_door_key",
         "42,14": "tile_interactive_storage_locker_key",
-        "58,52": "tile_interactive_pickup_battery"
+        "58,52": "tile_interactive_pickup_battery",
+        "13,19": "tile_interactive_pickup_almond_water"
       },
       "object3": {
         "8,30": "tile_obstacle_ore_small"
@@ -5065,8 +5065,6 @@ const BATTLE_MAPS = [
         "r": 16,
         "layer": "object3",
         "fx": true,
-        "ox": -18,
-        "oy": -28,
         "sortDepth": 2.5
       },
       {
@@ -111293,7 +111291,8 @@ const BATTLE_MAPS = [
         "id": "tile_forest_twisted_tree_dark_crystal",
         "c": 62,
         "r": 18,
-        "layer": "object2"
+        "layer": "object2",
+        "sortDepth": 9.25
       },
       {
         "id": "tile_forest_twisted_tree_dark_crystal",
@@ -129128,7 +129127,15 @@ const BATTLE_MAPS = [
       "129,0",
       "130,0",
       "129,1",
-      "130,1"
+      "130,1",
+      "107,72",
+      "107,71",
+      "110,72",
+      "111,72",
+      "110,71",
+      "111,71",
+      "108,71",
+      "108,72"
     ],
     "breakable": [],
     "coreSpots": [
