@@ -629,6 +629,7 @@ window.addEventListener('keydown', e => {
     // 隊員的疏導改成 C、急救是 F（js/equipment.js、js/shop.js），空白鍵不會再撿東西撿到一半變成疏導
     if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer() && useStoragePropNearPlayer(isPickupProp)) {}   // 拾取地上的道具（js/storage-lockers.js）
+    else if (typeof useChickenNearPlayer === 'function' && useChickenNearPlayer()) {}   // 放下雞／撿鳥巢的蛋／抱起雞（js/chickens.js）
     else if (typeof useMealNearPlayer === 'function' && useMealNearPlayer()) {}   // 餐廳：拿餐盤、裝菜、坐下用餐、吃、回收（js/meal.js）
     else if (elevator) {
       if (elevator.mode === 'closed') {
@@ -1352,6 +1353,7 @@ function newGame() {
   if (typeof seedFogTrees === 'function') seedFogTrees();   // 霧樹：燒掉就散掉那一區的霧（js/fog.js）
   if (typeof seedVines === 'function') seedVines();   // 森林的垂吊藤蔓（js/vines.js）
   if (typeof seedLeafPiles === 'function') seedLeafPiles();   // 森林的樹葉堆：燒掉露出道具或小史萊姆（js/leaf-piles.js）
+  if (typeof seedChickens === 'function') seedChickens();   // 森林的鳥巢和雞（js/chickens.js）
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
@@ -2667,6 +2669,7 @@ function update(dt) {
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   if (typeof updateFogTrees === 'function') updateFogTrees(dt);   // 霧樹被火燒、火海周圍暫時散霧（js/fog.js）
   if (typeof updateLeafPiles === 'function') updateLeafPiles(dt);   // 樹葉堆被火燒（js/leaf-piles.js）
+  if (typeof updateChickens === 'function') updateChickens(dt);   // 雞閒晃、下蛋，鳥巢長蛋（js/chickens.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
   if (typeof updateNpcChats === 'function') updateNpcChats(dt);   // 基地裡的 NPC 閒聊小表演（js/npc-chats.js）
   if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）

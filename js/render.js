@@ -1071,6 +1071,7 @@ function draw() {
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
   if (typeof leafPileSortables === 'function') leafPileSortables(sortables);   // 樹葉堆（js/leaf-piles.js）
+  if (typeof chickenSortables === 'function') chickenSortables(sortables);   // 森林的雞（含溫特抱著的；js/chickens.js）
   for (const o of G.obstacles) if (!o.trap) sortables.push({ floor: looseFloor(o), y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -1184,6 +1185,7 @@ function draw() {
     if (G.running && typeof drawRepairPrompt === 'function' && !(typeof playerChannel !== 'undefined' && playerChannel)) drawRepairPrompt();   // 身上有工具箱、旁邊有受損的建築：「R 修理」（js/equipment.js）
     if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
+    else if (typeof chickenPrompt === 'function' && chickenPrompt()) { const q = chickenPrompt(); drawInteractPrompt(q.x, q.y, q.label); }   // 放下雞／撿雞蛋／抱起雞（js/chickens.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (typeof ladderNearPlayer === 'function' && ladderNearPlayer()) { const l = ladderNearPlayer(); drawInteractPrompt(l.x, l.topY - 6, LADDER.prompt); }   // 坐救生圈到梯子底下：「爬梯子」（js/swim-ring.js）
     else if (typeof poolPlatformNearPlayer === 'function' && poolPlatformNearPlayer()) { const q = poolPlatformNearPlayer(); drawInteractPrompt(q.x, q.y - 6, POOL_PLATFORM.prompt); }   // 坐救生圈到抽水機平台旁邊：「上岸」（js/pool-platform.js）

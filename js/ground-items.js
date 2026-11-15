@@ -109,7 +109,7 @@ function groundItemImg(id) {
   const img = groundItemImgs[id]; return img.complete && img.naturalWidth ? img : null;
 }
 function drawGroundItem(ctx, g) {
-  const now = performance.now() / 1000, S = GROUND_ITEMS.size, x = g.x, y = g.y;
+  const now = performance.now() / 1000, S = (typeof itemById === 'function' && (itemById(g.id) || {}).groundSize) || GROUND_ITEMS.size, x = g.x, y = g.y;   // groundSize：個別道具在地上畫多大（雞蛋比較小，data/supplies.js）
   const a = typeof dropAnim === 'function' ? dropAnim(now - (g.at || 0)) : null;   // 從上面掉下來 → 壓扁 → 回彈（跟放建築一樣，js/build.js）
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y + 2, S * .36, S * .13, 0, 0, Math.PI * 2); ctx.fill();   // 影子

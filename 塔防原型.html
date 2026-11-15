@@ -272,7 +272,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=jumpscare-20261115"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=jumpscare2-20261115"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=chicken1-20261115"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=clawstock-20261101"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -281,7 +281,8 @@
   <script src="data/characters.js?v=guideability-20261025"></script>  <!-- 集中管理所有角色 -->
   <script src="data/gifts.js?v=devotion-20261103"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=swimring-20261113"></script>   <!-- 背包物品分類與其他物品 -->
-  <script src="data/supplies.js?v=toolbox15-20261109"></script>   <!-- 溫特可購買、使用的個人補給 -->
+  <script src="data/supplies.js?v=chicken1-20261115"></script>   <!-- 溫特可購買、使用的個人補給 -->
+  <script src="data/chickens.js?v=chicken1-20261115"></script>   <!-- 森林的雞、鳥巢、雞蛋：數值設定 -->
   <script src="data/equipment.js?v=gearinst-20261112"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=bldabout-20261109"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
@@ -316,7 +317,7 @@
   <script src="js/tile-collisions.js?v=merge4-20261115"></script>   <!-- 素材碰撞方框：擋路、自動人物遮擋線 -->
   <script src="js/hide-zones.js?v=nofade-20261115"></script>   <!-- 🙈 完全遮住區：腳踩進去的角色不畫 -->
   <script src="js/map-levels.js?v=merge4-20261115"></script>   <!-- 地圖的樓層資料規則（地圖編輯器共用） -->
-  <script src="js/maploader.js?v=merge4-20261115"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=chicken1-20261115"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=merge4-20261115"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/pits.js?v=pit-20261114"></script>   <!-- 6b. 坑洞：走過會變慢（hole01、hole02 等）；哪些素材是坑洞在地圖／基地編輯器勾 -->
   <script src="js/swim-ring.js?v=ringshore-20261115"></script>   <!-- 6b. 深水區＋救生圈：坐救生圈才能下深水、划水聲 -->
@@ -365,7 +366,7 @@
   <script src="js/gourd-king.js?v=pullmerge2-20261115"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
   <script src="js/human-face-butterfly.js?v=pullmerge2-20261115"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=pullmerge2-20261115"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=pullmerge2-20261115"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=chicken1-20261115"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=levels3-20261115"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/blast-fx-v2.js?v=v2-20261105"></script> <!-- 9e2. 爆炸特效 V2：pixelfx 風格的煙霧、火星（BLAST_FX_VERSION 切換 1／2） -->
@@ -411,8 +412,9 @@
   <script src="js/prop-collisions.js?v=forestroot-20261115"></script>
   <script src="js/escalators.js?v=merge4-20261115"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
   <script src="js/rescue-dog.js?v=twosquad2-20261103"></script>
-  <script src="js/ground-items.js?v=placefloor-20261115"></script>   <!-- 背包裡的東西放在地上、撿回來；嚮導撿、球球叼急救包和杏仁水 -->
-  <script src="js/food.js?v=floorfix2-20261115"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
+  <script src="js/ground-items.js?v=chicken1-20261115"></script>   <!-- 背包裡的東西放在地上、撿回來；嚮導撿、球球叼急救包和杏仁水 -->
+  <script src="js/food.js?v=chicken1-20261115"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
+  <script src="js/chickens.js?v=chicken2-20261115"></script>   <!-- 森林的雞：閒晃、下蛋、抱起來；鳥巢長蛋（數值在 data/chickens.js） -->
   <script src="js/cooking.js?v=wspages-20261109"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
   <script src="js/meal.js?v=firsthint3-20261115"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
   <script src="js/meal-invite.js?v=merge-20261110"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
@@ -447,7 +449,7 @@
   <script src="js/fund-card.js?v=fundcard2-20261115"></script>   <!-- 作戰經費提示卡：第一次到達戰鬥地圖時右邊跳卡 -->
   <script src="js/ui-layout.js?v=fundcard2-20261115"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/save-restore.js?v=restore2-20261114"></script>   <!-- 設定→存檔：匯出／匯入存檔、找回進度 -->
-  <script src="js/game.js?v=pullmerge2-20261115"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=chicken1-20261115"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->

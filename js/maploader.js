@@ -698,6 +698,7 @@ function drawMapStampPlain(ctx, s) {
   if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
   if (typeof mrtDisplayTile === 'function') t = mrtDisplayTile(s, t);   // 解封的捷運入口換圖（js/mrt-locks.js）
   if (typeof fogTreeDisplayTile === 'function') t = fogTreeDisplayTile(s, t);   // 霧樹的水晶打破了：換成沒有水晶的樹（js/fog.js）
+  if (typeof nestDisplayTile === 'function') t = nestDisplayTile(s, t);   // 鳥巢：有蛋／空巢換圖（js/chickens.js）
   const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(s.id,s.c,s.r,s.layer||'top',s):null;
   if(display===false)return;
   if(display)t=display;
@@ -1095,6 +1096,7 @@ function occluderStateSig(x) {
     + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
     + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '')
     + (typeof fogTreeStampBroken === 'function' && fogTreeStampBroken(s) ? 'f' : '')   // 霧樹水晶破了：換圖（js/fog.js）
+    + (typeof nestStampSig === 'function' ? nestStampSig(s) : '')   // 鳥巢有蛋／空巢：換圖（js/chickens.js）
     + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '')   // 隱藏區圖層淡入中：補畫也要跟著重做
     + (typeof doorCutoutSig === 'function' ? doorCutoutSig(s) : '')   // 疊在這張圖上的挖空門開了／關了：門洞也要挖進補畫裡（js/doors.js）
     + (typeof escalatorAnimSig === 'function' ? escalatorAnimSig(s) : '');   // 會動的手扶梯：階梯捲到下一格，補畫也要跟著重做（不然疊在牆上的那一塊階梯不會動，js/escalators.js）
