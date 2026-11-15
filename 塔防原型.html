@@ -25,7 +25,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
-<script src="js/new-game.js?v=slotscene-20261115"></script>
+<script src="js/new-game.js?v=firsthint-20261115"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
 <link rel="stylesheet" href="css/style.css?v=restore-20261114">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
@@ -360,7 +360,7 @@
   <script src="js/gourd-king.js?v=merge3-20261115"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
   <script src="js/human-face-butterfly.js?v=tranqwake-20261115"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=merge3-20261115"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=merge3-20261115"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=firsthint-20261115"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=levels3-20261115"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/blast-fx-v2.js?v=v2-20261105"></script> <!-- 9e2. 爆炸特效 V2：pixelfx 風格的煙霧、火星（BLAST_FX_VERSION 切換 1／2） -->
@@ -387,15 +387,15 @@
   <script src="js/ore.js?v=floorfix3-20261115"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=floorfix2-20261115"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=sellbullet-20261115"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=gearinst-20261112"></script> <!-- 9j. 背包：物品格與說明 -->
-  <script src="js/storage-cabinet.js?v=twosquad2-20261103"></script> <!-- 置物櫃：指定的櫃子打開放東西（借用物資箱視窗） -->
+  <script src="js/backpack.js?v=firsthint-20261115"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/storage-cabinet.js?v=firsthint-20261115"></script> <!-- 置物櫃：指定的櫃子打開放東西（借用物資箱視窗） -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
   <script src="js/squad-gear.js?v=gear3slot-20261110"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=dlgicon2-20261109"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=dismantle-20261109"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=bday-20261108"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=dismantle-20261109"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
-  <script src="js/costumes.js?v=dismantle-20261109"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
+  <script src="js/costumes.js?v=firsthint-20261115"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
   <script src="js/gacha.js?v=dismantle2-20261109"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
   <script src="data/claw-machine.js?v=onepen-20261107"></script> <!-- 夾娃娃機設定：價錢、獎品、夾力、保夾 -->
   <script src="js/claw-machine.js?v=gamestats-20261107"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
@@ -414,6 +414,7 @@
   <script src="js/base-follow.js?v=rooms2f-20261104"></script>   <!-- 雷德在基地裡跟著溫特換地圖（不進溫特辦公室、別人寢室） -->
   <script src="js/ball-poses.js?v=ballsit-20261109"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
+  <script src="js/first-hints.js?v=firsthint2-20261115"></script> <!-- 首次遊玩：基地裡諾亞、置物櫃、衣櫃、防具箱頭上飄提示，用過就不再出現 -->
   <script src="js/missions.js?v=noredeploy-20261115"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
   <script src="js/save.js?v=slotscene-20261115"></script> <!-- 9k. 存檔、設定選單 -->
@@ -422,7 +423,7 @@
   <script src="js/map-ambient.js?v=ambmulti-20261115"></script> <!-- 9k3. 地圖專屬環境背景音：池核的滴水聲 -->
   <script src="js/sanity.js?v=leader2-20261103"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=floorfix2-20261115"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=ore4-20261114"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=firsthint-20261115"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/gear-v2.js?v=previewall-20261114"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
   <script src="js/special-guns.js?v=tranqsleep-20261115"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=previewall-20261114"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->

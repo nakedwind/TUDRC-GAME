@@ -1011,6 +1011,7 @@ function openWorkshopResetScrap() { wsScrapSel = null; wsScrapArmed = false; wsP
 function openWorkshop(page) {
   if (typeof page === 'string' && WORKSHOP_PAGES.some(p => p[0] === page)) wsPage = page;
   ensureWorkshop(); if (typeof closeDialogue === 'function') closeDialogue(true);
+  if (typeof firstHintDone === 'function') firstHintDone('workshop');   // 諾亞頭上的首次提示不再飄（js/first-hints.js）
   workshopOpen = true; openWorkshopResetScrap(); Object.keys(keys).forEach(k => { keys[k] = false; });
   workshopEl.classList.remove('hidden'); renderWorkshop(false); sfx('menu');   // 先顯示再畫，才量得到欄位高度
 }

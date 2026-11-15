@@ -25,6 +25,7 @@
     'tudrc_explored_v1',   // 慣性導航記錄器記下的戰鬥地圖（js/tpad-map.js）
     'tudrc_story_builds_v1',   // 劇情地圖裡蓋的建築（js/combat-progress.js）
     'tudrc_tutorial_v1',   // 新手區教學：要不要看、看過哪些提示（js/tutorial.js）
+    'tudrc_first_hints_v1',   // 基地裡首次提示（諾亞、置物櫃、衣櫃、防具箱）點開過哪些（js/first-hints.js）
     'tudrc_story_triggers_v1',   // 走進地圖時播過的劇情（js/story-triggers.js）
     'tudrc_squad_gear_v1',   // 隊員身上穿的裝備（js/squad-gear.js）：要跟背包一起重設／還原，不然測試模式穿上的裝備會留在正式存檔
     'tudrc_squad_gear_v2',   // 新版裝備：隊員身上穿的（js/gear-v2.js）

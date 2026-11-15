@@ -21,6 +21,7 @@ function useCabinetNearPlayer() { const b = cabinetNearPlayer(); if (!b) return 
 let cabinetOpen = null;   // 打開中的櫃子 { def, key, image }
 function openCabinet(s) {
   const def = cabinetDefFor(s); if (!def || !G?.player || G.over) return;
+  if (typeof firstHintDone === 'function') firstHintDone('cabinet');   // 置物櫃的首次提示不再飄（js/first-hints.js）
   cabinetOpen = { def, key: MAP.id + '@' + s.c + ',' + s.r, image: mapTileById(s.id)?.file || '' };
   openCampSupply('cabinet');
 }

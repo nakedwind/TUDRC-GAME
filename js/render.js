@@ -1275,6 +1275,7 @@ function draw() {
   drawInteractionPrompts();   // 互動提示（開門、對話、拾取…）：黑幕之上，暗處也看得到
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
   if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
+  if (typeof drawFirstHints === 'function') drawFirstHints(ctx);   // 首次遊玩：諾亞、置物櫃、衣櫃、防具箱頭上飄名字（js/first-hints.js）
   flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
   if (typeof drawNpcChatMarks === 'function') drawNpcChatMarks(ctx);   // 有人在閒聊、等溫特來聽：中間的「● ● ●」（js/npc-chats.js）
   drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
