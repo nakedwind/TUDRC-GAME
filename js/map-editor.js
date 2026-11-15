@@ -762,7 +762,7 @@ window.addEventListener('keydown', e => {
   }
   if (!inField && brush.mode === 'solidnudge' && (solidNudgeCells.size || solidNudgeEdges.size || solidNudgeDeep.size)) {
     const m = curMap();
-    for (const k of [...solidNudgeDeep]) if (!(m.deepWater || []).includes(k)) solidNudgeDeep.delete(k);   // 已經不是深水區的不算
+    for (const k of [...solidNudgeDeep]) if (![...(m.deepWater || []), ...(m.deepWaterKeep || [])].includes(k)) solidNudgeDeep.delete(k);   // 已經不是深水區的不算
     for (const k of [...solidNudgeCells]) if (m.solid.indexOf(k) < 0) solidNudgeCells.delete(k);   // 回復（Ctrl+Z）後已經不是紅格的不算
     for (const k of [...solidNudgeEdges]) if (!(m.edges || []).includes(k)) solidNudgeEdges.delete(k);   // 邊緣碰撞線也一樣
     const n = solidNudgeCells.size + solidNudgeEdges.size + solidNudgeDeep.size;
@@ -1285,7 +1285,7 @@ function setDeepOffset(m, k, off) {
 }
 // 滑鼠點到哪一格深水（照微調後畫出來的位置；沒有微調的格子就是原本那格）
 function deepHitAtPx(m, x, y) {
-  const list = m.deepWater || []; if (!list.length) return null;
+  const list = [...(m.deepWater || []), ...(m.deepWaterKeep || [])]; if (!list.length) return null;   // 🔒 永遠深水也可以微調
   for (const k of list) {
     const [c, r] = k.split(',').map(Number), off = deepOffsetOf(m, k);
     const x0 = OX + c * CELL + off[0], y0 = OY + r * CELL + off[1];
@@ -1321,7 +1321,7 @@ function beginNudgeDrag() {
   const m = curMap();
   for (const k of [...solidNudgeCells]) if (m.solid.indexOf(k) < 0) solidNudgeCells.delete(k);   // 已經不是紅格的不算
   for (const k of [...solidNudgeEdges]) if (!(m.edges || []).includes(k)) solidNudgeEdges.delete(k);
-  for (const k of [...solidNudgeDeep]) if (!(m.deepWater || []).includes(k)) solidNudgeDeep.delete(k);
+  for (const k of [...solidNudgeDeep]) if (![...(m.deepWater || []), ...(m.deepWaterKeep || [])].includes(k)) solidNudgeDeep.delete(k);
   if (!nudgeHitSelected(m)) return false;
   nudgeDrag = { start: { ...pointerPx }, moved: false,
     cells: [...solidNudgeCells].map(k => [k, (m.solidOffsets[k] || [0, 0]).slice()]),
@@ -1450,7 +1450,7 @@ function draw() {
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
   const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
   const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []), solid2Set = new Set(m.solid2 || []);   // 陸橋：2樓地面、樓層出入口
-  const deepSet = new Set(m.deepWater || []);   // 🛟 深水區（js/swim-ring.js）
+  const deepSet = new Set([...(m.deepWater || []), ...(m.deepWaterKeep || [])]), keepSet = new Set(m.deepWaterKeep || []);   // 🛟 深水區、🔒 永遠深水（js/swim-ring.js）
 
   ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0);   // 遊戲畫質：放大畫（座標照舊用一格 40）
   ctx.imageSmoothingEnabled = false;
@@ -1494,7 +1494,7 @@ function draw() {
       ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6); ctx.setLineDash([]);
     }
-    if ((showSolid || brush.mode === 'deepwater') && deepSet.has(key)) {   // 🛟 深水區（深藍色斜線框）：沒坐救生圈走不進去；有微調就畫在微調後的位置
+    if ((showSolid || brush.mode === 'deepwater' || brush.mode === 'deepkeep') && deepSet.has(key)) {   // 🛟 深水區（深藍色斜線框）：沒坐救生圈走不進去；有微調就畫在微調後的位置
       const off = deepOffsetOf(m, key), dx2 = x + off[0], dy2 = y + off[1];
       ctx.fillStyle = 'rgba(30,110,230,.30)'; ctx.fillRect(dx2, dy2, CELL, CELL);
       ctx.strokeStyle = 'rgba(110,190,255,.9)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 3]);
@@ -1507,8 +1507,9 @@ function draw() {
         ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 2; ctx.setLineDash([6, 3]);
         ctx.strokeRect(dx2 + 1, dy2 + 1, CELL - 2, CELL - 2); ctx.setLineDash([]);
       }
+      if (keepSet.has(key)) { ctx.fillStyle = 'rgba(10,40,120,.35)'; ctx.fillRect(dx2, dy2, CELL, CELL); }   // 🔒 永遠深水：再深一點
       ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🛟', dx2 + CELL / 2, dy2 + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
+      ctx.fillText(keepSet.has(key) ? '🔒' : '🛟', dx2 + CELL / 2, dy2 + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
     }
     if (showSolid && spawnZone.has(key)) {   // 怪物出生區與紅格共用顯示開關
       ctx.fillStyle = 'rgba(80,220,120,.22)'; ctx.fillRect(x, y, CELL, CELL);
@@ -1557,13 +1558,15 @@ function draw() {
   drawLeafPileMarks(m);
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
+  // 素材碰撞方框（物件編輯器「🧱 素材碰撞」設定，js/tile-collisions.js）：顯示紅格時畫成橘色，同一張素材貼幾個都一樣
+  if ((showSolid || brush.mode === 'solidnudge') && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
-  if (brush.mode === 'deepwater' || (showSolid && (m.deepWater || []).length)) {
+  if (brush.mode === 'deepwater' || brush.mode === 'deepkeep' || (showSolid && ((m.deepWater || []).length || (m.deepWaterKeep || []).length))) {
     ctx.fillStyle = '#8fd0ff'; ctx.textAlign = 'left';
-    ctx.fillText('🛟 深水區 ' + (m.deepWater || []).length + ' 格（坐救生圈才能進去；划水速度在「地圖設定」調）', OX + 6, OY + 70);
+    ctx.fillText('🛟 深水區 ' + (m.deepWater || []).length + ' 格／🔒 永遠深水 ' + (m.deepWaterKeep || []).length + ' 格（坐救生圈才能進去；永遠深水抽水也不會變淺）', OX + 6, OY + 70);
   }
   if (typeof levelCountText === 'function' && ((m.deck || []).length || (m.ramps || []).length || brush.mode === 'level')) {   // 🏢 樓層統計（js/map-editor-levels.js）
     ctx.fillStyle = '#8fc8ff'; ctx.textAlign = 'left'; ctx.fillText(levelCountText(m), OX + 6, OY + 52);
@@ -1706,12 +1709,13 @@ function draw() {
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
       ctx.fillText('深度線 ' + depth, x + 5, y - 4);
     } else if (s && t && (Number.isFinite(s.sortDepth) || (!t.flat && (s.layer || 'top') !== 'top' && (stampH(s, t) > 1 || /^object\d*$/.test(s.layer || '') || s.layer === 'overlay')))) {
-      const depth = Number.isFinite(s.sortDepth) ? s.sortDepth : stampH(s, t);
+      const autoPx = !Number.isFinite(s.sortDepth) && typeof tileCollisionDepthPx === 'function' ? tileCollisionDepthPx(s, tileW(t) * CELL, tileH(t) * CELL) : null;   // 素材有設人物遮擋線、或有碰撞方框（自動用方框的中間）
+      const depth = Number.isFinite(s.sortDepth) ? s.sortDepth : autoPx != null ? Math.round(autoPx / CELL * 100) / 100 : stampH(s, t);
       const x = OX + s.c * CELL + (s.ox || 0), y = stampDepthY(s, OY + s.r * CELL + (s.oy || 0), stampH(s, t) * CELL, depth * CELL);
       ctx.strokeStyle = '#55d9ff'; ctx.lineWidth = 3; ctx.setLineDash([9, 5]);
       ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + stampW(s, t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-      ctx.fillText('人物遮擋線 ' + depth, x + 5, y - 4);
+      ctx.fillText('人物遮擋線 ' + depth + (autoPx != null ? (typeof tileManualDepth === 'function' && tileManualDepth(s.id) != null ? '（素材設定）' : '（碰撞方框自動）') : ''), x + 5, y - 4);
     }
   }
   drawLocateFlash();   // 從圖層物件清單選取時，物件周圍閃一個圈
@@ -1906,6 +1910,11 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (isDown) deckPaintAdd = !list.includes(key);
     if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
     if (!list.length) delete m[f];
+  } else if (brush.mode === 'deepkeep') {   // 🔒 永遠深水：拖曳畫一片、再畫一次＝擦掉（跟深水區分開存，MAP.deepWaterKeep）
+    const list = m.deepWaterKeep || (m.deepWaterKeep = []);
+    if (isDown) deckPaintAdd = !list.includes(key);
+    if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else { removeFrom(list, key); if (!(m.deepWater || []).includes(key)) { setDeepOffset(m, key, [0, 0]); solidNudgeDeep.delete(key); } }
+    if (!list.length) delete m.deepWaterKeep;
   } else if (brush.mode === 'deepwater') {   // 🛟 深水區：拖曳畫一片、再畫一次＝擦掉
     const list = m.deepWater || (m.deepWater = []);
     if (isDown) deckPaintAdd = !list.includes(key);
@@ -3627,7 +3636,11 @@ function refreshSelPanel() {
   const depthStamp = selectedDepthStamp();
   if (depthStamp) {
     depthInput.max = stampH(depthStamp.s, depthStamp.t);
-    depthInput.value = Number.isFinite(depthStamp.s.sortDepth) ? depthStamp.s.sortDepth : stampH(depthStamp.s, depthStamp.t);
+    // 這個物件自己設過＝顯示自己的；沒設過＝欄位空白，提示目前照素材設定（物件編輯器）或碰撞方框算出來的、還是圖片最下面
+    const own = Number.isFinite(depthStamp.s.sortDepth), autoPx = !own && typeof tileCollisionDepthPx === 'function' ? tileCollisionDepthPx(depthStamp.s, tileW(depthStamp.t) * CELL, tileH(depthStamp.t) * CELL) : null;
+    depthInput.value = own ? depthStamp.s.sortDepth : '';
+    depthInput.placeholder = own ? '' : autoPx != null ? Math.round(autoPx / CELL * 100) / 100 + '（素材）' : stampH(depthStamp.s, depthStamp.t) + '（預設）';
+    depthInput.title = own ? '這個物件自己設的人物遮擋線（優先於物件編輯器的素材設定）。清空＝改回照素材設定' : '沒有自己設：照' + (autoPx != null ? '物件編輯器的素材設定（或碰撞方框）' : '預設（圖片最下面）') + '。填數字＝這個物件自己的，優先於素材設定';
     depthInput.disabled = false;
   }
   refreshBaseCollisionPanel();
@@ -3658,6 +3671,11 @@ function deleteSelection() {
 document.getElementById('selLayer').addEventListener('change', e => moveSelectionToLayer(e.target.value));
 document.getElementById('selDepthInput').addEventListener('change', e => {
   const picked = selectedDepthStamp(); if (!picked) return;
+  if (String(e.target.value).trim() === '') {   // 清空：拿掉這個物件自己的遮擋線，改回照素材設定（物件編輯器）
+    if (!Number.isFinite(picked.s.sortDepth)) return;
+    pushUndo(); delete picked.s.sortDepth; saveMaps(); draw(); refreshSelPanel();
+    setStatus('已拿掉這個物件自己的人物遮擋線：改回照素材設定（物件編輯器）', '#55d9ff'); return;
+  }
   const value = Number(e.target.value);
   if (!Number.isFinite(value)) { refreshSelPanel(); return; }
   const next = Math.max(0, Math.min(stampH(picked.s, picked.t), value));
@@ -4008,6 +4026,9 @@ function loadRules() {
   const fogField = document.getElementById('f_fog');
   if (fogField) fogField.value = m.fog || '';
   fillAmbientField(m);
+  const wetField = document.getElementById('f_wetFloor'), wetRangeField = document.getElementById('f_wetRange');   // 💦 濕地板（js/wet-floor.js）：沒設定過的地圖顯示預設
+  if (wetField) wetField.checked = typeof wetFloorOn === 'function' ? wetFloorOn(m) : !!m.wetFloor;
+  if (wetRangeField) wetRangeField.value = m.wetRange ?? '';
   const deepSpeedField = document.getElementById('f_deepWaterSpeed');
   if (deepSpeedField) deepSpeedField.value = m.deepWaterSpeed ?? '';
   document.getElementById('f_coreCount').value = m.coreCount;
@@ -4051,6 +4072,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.solid2) m.solid2 = m.solid2.map(shiftKey);
   if (m.only2) m.only2 = m.only2.map(shiftKey);
   if (m.deepWater) m.deepWater = m.deepWater.map(shiftKey);
+  if (m.deepWaterKeep) m.deepWaterKeep = m.deepWaterKeep.map(shiftKey);
   if (m.deepWaterOffsets) { const o = {}; for (const k in m.deepWaterOffsets) o[shiftKey(k)] = m.deepWaterOffsets[k]; m.deepWaterOffsets = o; }
   if (solidNudgeDeep.size) { const moved = [...solidNudgeDeep].map(shiftKey); solidNudgeDeep.clear(); moved.forEach(k => solidNudgeDeep.add(k)); }
   const off = {};
@@ -4090,6 +4112,7 @@ function dropOutsideContent(m) {
   if (m.solid2) { m.solid2 = m.solid2.filter(insideKey); if (!m.solid2.length) delete m.solid2; }
   if (m.only2) m.only2 = m.only2.filter(insideKey);
   if (m.deepWater) { m.deepWater = m.deepWater.filter(insideKey); if (!m.deepWater.length) delete m.deepWater; }
+  if (m.deepWaterKeep) { m.deepWaterKeep = m.deepWaterKeep.filter(insideKey); if (!m.deepWaterKeep.length) delete m.deepWaterKeep; }
   if (m.deepWaterOffsets) { for (const k in m.deepWaterOffsets) if (!insideKey(k)) delete m.deepWaterOffsets[k]; if (!Object.keys(m.deepWaterOffsets).length) delete m.deepWaterOffsets; }
   for (const k of [...solidNudgeDeep]) if (!insideKey(k)) solidNudgeDeep.delete(k);
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
@@ -4222,6 +4245,18 @@ function fillAmbientField(m) {
   if (wn) wn.value = Math.round((typeof mapWhiteNoiseOf === 'function' ? mapWhiteNoiseOf(m) : 1) * 100);
 }
 // 🛟 深水區的划水速度 %（空白＝js/swim-ring.js 的 SWIM_RING.speed）
+// 💦 泳池旁的濕地板（js/wet-floor.js）：勾選＝有、取消＝沒有（都會存，蓋過預設）；濕幾格空白＝預設 6 格
+const wetFloorInput = document.getElementById('f_wetFloor');
+if (wetFloorInput) wetFloorInput.addEventListener('change', e => {
+  pushUndo(); curMap().wetFloor = e.target.checked; saveMaps();
+  setStatus(e.target.checked ? '這張地圖泳池旁的地板是濕的：走路有機會滑倒' : '這張地圖沒有濕地板了', '#8fd3ff');
+});
+const wetRangeInput = document.getElementById('f_wetRange');
+if (wetRangeInput) wetRangeInput.addEventListener('change', e => {
+  const v = parseFloat(e.target.value);
+  pushUndo(); if (Number.isFinite(v) && v >= 1) { curMap().wetRange = Math.min(20, Math.round(v)); e.target.value = curMap().wetRange; } else { delete curMap().wetRange; e.target.value = ''; }
+  saveMaps(); setStatus('濕地板範圍：離水 ' + (curMap().wetRange || '（預設）6') + ' 格內', '#8fd3ff');
+});
 const deepSpeedInput = document.getElementById('f_deepWaterSpeed');
 if (deepSpeedInput) deepSpeedInput.addEventListener('change', e => {
   const v = parseFloat(e.target.value);

@@ -23,6 +23,7 @@ const POOL_TIDE = {
   winterSecs: 3.5,      // 溫特的泡泡停多久
   pumpedText: '抽水機已經在運轉了。',   // 抽水機打開後再按
   valveNoPowerText: '沒有什麼反應……',   // 兩台抽水機（發電機）還沒都啟動時按抽水閥
+  valveSaySecs: 2.2,   // 上面那句在溫特頭上的泡泡停幾秒
   valveLowText: '水已經抽掉了。',
   marks: { shallowGone: '抽水後消失', shallowDry: '抽水後出現', deep: '深水時顯現', deepShallow: '淺水時顯現' },
 };
@@ -73,7 +74,7 @@ function poolPumpCheck() {
 // ---- 抽水閥（地圖編輯器勾了「抽水閥」的電源開關）----
 function usePoolValve() {
   const s = poolTideActive() ? poolTide() : null;
-  if (!s || !s.pumped) { sfx('error'); systemNotice(POOL_TIDE.valveNoPowerText, true); return; }
+  if (!s || !s.pumped) { sfx('error'); if (G && G.player) G.player.poolSay = { text: POOL_TIDE.valveNoPowerText, until: performance.now() + POOL_TIDE.valveSaySecs * 1000 }; return; }   // 溫特頭上的泡泡（drawPoolTideBubble）
   if (s.phase !== 'high' && s.phase !== 'rising') { sfx('switch'); systemNotice(POOL_TIDE.valveLowText); return; }
   s.phase = 'draining'; s.firstDrain = false; sfx('powerOn');
 }
@@ -129,14 +130,32 @@ function poolMatesInDeep() {
 // 不管現在水位，這個點在不在畫好的深水區範圍裡
 function poolPointInDeepZone(x, y) {
   const list = MAP && MAP.deepWater; if (!Array.isArray(list) || !list.length) return false;
-  if (poolZoneCache.list !== list) poolZoneCache = { list, set: new Set(list) };
+  if (poolZoneCache.list !== list || poolZoneCache.keep !== MAP.deepWaterKeep) poolZoneCache = { list, keep: MAP.deepWaterKeep, set: new Set([...list, ...(MAP.deepWaterKeep || [])]) };   // 永遠深水也算在深水區裡
   return typeof deepCellsHavePoint === 'function' ? deepCellsHavePoint(poolZoneCache.set, x, y) : poolZoneCache.set.has(cellAt(x, y).join(','));   // 有微調過的深水格照微調後的位置（js/swim-ring.js）
 }
 let poolZoneCache = { list: null, set: null };
+// 異質核心泡在深水裡（深水區的水還沒抽乾）：打不到——溫特的槍、隊員、油桶爆炸都傷不了它，隊員也不會去打它
+// （js/anomalous-core.js、js/game.js、js/sentry.js、js/oil-barrels.js 問這個）
+function poolCoreSubmerged(core) { return !!core && typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(core.x, core.y); }
+// 泡在深水裡的核心：畫的時候水面以下半透明（跟 BOSS、泡在水裡的人同一套畫法，js/water.js 的 drawWaded）；水抽乾了就恢復清楚
+//   line＝水面在核心圖片的哪裡（從底部往上算，.55＝泡到 55% 高）；see＝水面以下多清楚（深水區沒有水素材時用這個）
+const POOL_CORE_WADE = { line: .55, see: .45 };
+function poolCoreWade(core) {
+  if (!poolCoreSubmerged(core) || typeof CORE === 'undefined') return null;
+  const lift = typeof coreLift === 'function' ? Math.max(0, coreLift(core)) : 0;
+  const H = CORE.h + lift + 30;   // 處理的範圍：核心本體＋浮起來的高度＋頭上的血條
+  const w = typeof waterAt === 'function' ? waterAt(core.x, core.y + 10) : null;
+  const see = w && Number.isFinite(w.see) ? w.see : POOL_CORE_WADE.see;
+  return { w: { depth: CORE.h * POOL_CORE_WADE.line / H, see }, bottom: core.y + 20, height: H, width: 60 };   // width：水面波紋的寬度
+}
 
 // ---- 畫面：溫特頭上的泡泡（js/render.js 的 drawInteractionPrompts 呼叫）----
 function drawPoolTideBubble() {
   const s = poolTideActive() ? poolTide() : null, p = G && G.player;
+  if (p && p.poolSay) {   // 抽水閥還沒反應：「沒有什麼反應……」（usePoolValve）
+    if (performance.now() < p.poolSay.until) { if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, p.poolSay.text); return; }
+    p.poolSay = null;
+  }
   if (!s || !p || performance.now() > s.winterUntil) return;
   if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, POOL_TIDE.winterText);
 }

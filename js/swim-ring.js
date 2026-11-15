@@ -33,12 +33,18 @@ const SWIM_RING = {
 // ---- 深水區的格子：換地圖才重新整理 ----
 const deepEmpty = new Set();
 let deepCache = { map: null, list: null, cells: new Set() };
+// 永遠深水（地圖編輯器「🔒 永遠深水」筆刷，MAP.deepWaterKeep）：一樣是深水區，但抽水不影響，永遠要坐救生圈才過得去（例如救生員台四周）
 function deepWaterCells() {
   if (typeof MAP === 'undefined' || !MAP) return deepCache.cells;
-  if (typeof poolDeepIsDeep === 'function' && !poolDeepIsDeep()) return deepEmpty;   // 抽水抽成淺水了：深水區暫時不算深水（js/pool-tide.js）
-  if (deepCache.map !== MAP || deepCache.list !== MAP.deepWater) deepCache = { map: MAP, list: MAP.deepWater, cells: new Set(Array.isArray(MAP.deepWater) ? MAP.deepWater : []) };
+  if (deepCache.map !== MAP || deepCache.list !== MAP.deepWater || deepCache.keepList !== MAP.deepWaterKeep) {
+    const keep = new Set(Array.isArray(MAP.deepWaterKeep) ? MAP.deepWaterKeep : []);
+    deepCache = { map: MAP, list: MAP.deepWater, keepList: MAP.deepWaterKeep, keep, cells: new Set([...(Array.isArray(MAP.deepWater) ? MAP.deepWater : []), ...keep]) };
+  }
+  if (typeof poolDeepIsDeep === 'function' && !poolDeepIsDeep()) return deepCache.keep;   // 抽水抽成淺水了：一般深水區暫時不算深水，永遠深水照樣是（js/pool-tide.js）
   return deepCache.cells;
 }
+// 地圖上所有深水區的格子（一般＋永遠深水，不管現在水位）
+function deepWaterAllList() { if (typeof MAP === 'undefined' || !MAP) return []; deepWaterCells(); return [...deepCache.cells]; }
 const isDeepWaterCell = (c, r) => deepWaterCells().has(c + ',' + r);
 // 這個點在不在深水區：有用地圖編輯器「🎯 碰撞微調」移過的深水格（MAP.deepWaterOffsets），照移過去的位置算（跟紅格的微調一樣，最多將近一格）
 function deepCellsHavePoint(cells, x, y) {
@@ -79,7 +85,8 @@ const hasSwimRing = () => swimRingCount() > 0;
 function deepWaterNearPlayer() { const p = G && G.player; return p && !riding() ? deepWaterNearActor(p) : null; }
 function deepWaterNearActor(p) {
   if (!p || p.swimRing || !deepWaterCells().size) return null;
-  const R = PLAYER.r + SWIM_RING.reach;
+  const onPlatform = typeof poolPlatformStandingAny === 'function' && G && p === G.player && poolPlatformStandingAny();   // 站在救生台上（js/pool-platform.js）：邊緣有碰撞擋著，放寬一點
+  const R = PLAYER.r + SWIM_RING.reach + (onPlatform ? POOL_PLATFORM.leaveReach : 0);
   let best = null, bd = Infinity;
   const [c0, r0] = cellAt(p.x, p.y);
   for (let dc = -2; dc <= 2; dc++) for (let dr = -2; dr <= 2; dr++) {
@@ -112,11 +119,29 @@ function useSwimRingNearPlayer() {
   if (!hasSwimRing()) { sfx('error'); systemNotice(SWIM_RING.noRingText, true); return true; }
   const keepX = p.x, keepY = p.y;
   p.swimRing = true; p.swimHintAt = 0;
-  p.x = spot.x; p.y = spot.y;   // 下水：移到那格深水的中間
-  if (playerBlocked(p.x, p.y)) { p.x = keepX; p.y = keepY; p.swimRing = false; sfx('error'); return true; }   // 那裡被別的東西擋住：下不去
-  if (typeof sfx === 'function') sfx('fishDouse');   // 噗通一聲（音效編輯器的「水把火澆熄」）
+  // 下水：移到最近那格深水的中間；那裡被擋住（例如救生台四周畫了邊緣碰撞，線剛好穿過那格深水），就試那格的其他位置、再試旁邊的深水格
+  const spots = deepWaterSpotsNear(p, spot);
+  // 落點要站得住、而且往四個方向都能動一點（不能剛好跨在邊緣碰撞的線上，不然下水後會卡住）
+  const roomy = (x, y) => !playerBlocked(x, y) && [[5, 0], [-5, 0], [0, 5], [0, -5]].every(([dx, dy]) => !playerBlocked(x + dx, y + dy));
+  const ok = spots.find(([x, y]) => { p.x = x; p.y = y; return roomy(x, y); }) || spots.find(([x, y]) => { p.x = x; p.y = y; return !playerBlocked(x, y); });
+  if (!ok) { p.x = keepX; p.y = keepY; p.swimRing = false; sfx('error'); return true; }   // 全部被別的東西擋住：下不去
+  // 坐進救生圈不播音效（原本借用的「水把火澆熄」被換成火熄滅的聲音，聽起來不對）
   swimAllyNextAt = performance.now() + swimAllyDelay();   // 隊員過一下子再跟著下水
   return true;
+}
+
+// 下水可以落在哪些點：最近那格深水（spot）優先，再來是旁邊一格以內的深水格；每格試中間和往四周偏一點的位置。回傳 [[x, y], …]（近的在前）
+function deepWaterSpotsNear(p, spot) {
+  const out = [[spot.x, spot.y]], R = PLAYER.r + SWIM_RING.reach + CELL, [c0, r0] = cellAt(p.x, p.y), cells = [];
+  for (let dc = -2; dc <= 2; dc++) for (let dr = -2; dr <= 2; dr++) {
+    const c = c0 + dc, r = r0 + dr; if (!isDeepWaterCell(c, r)) continue;
+    const x0 = OX + c * CELL, y0 = OY + r * CELL;
+    const d = Math.hypot(Math.max(x0 - p.x, 0, p.x - (x0 + CELL)), Math.max(y0 - p.y, 0, p.y - (y0 + CELL)));
+    if (d <= R) cells.push({ d, x: x0 + CELL / 2, y: y0 + CELL / 2 });
+  }
+  cells.sort((a, b) => a.d - b.d);
+  for (const k of cells) for (const [dx, dy] of [[0, 0], [-10, 0], [10, 0], [0, -10], [0, 10], [-19, 0], [19, 0], [0, -19], [0, 19]]) out.push([k.x + dx, k.y + dy]);
+  return out;
 }
 
 // ---- 隊員拿救生圈下水 ----
@@ -159,7 +184,7 @@ function swimRingAllyTick() {
   t.swimRing = true; t.x = spot.x; t.y = spot.y; t.navPath = null; t.navGoal = null;
   if (swimRingWithActor(t, () => sentryBlocked(t.x, t.y))) { t.x = keepX; t.y = keepY; t.swimRing = false; return; }   // 那裡被擋住：下不去
   t.gunT = 0; t.meleeSwing = null; t.gunSwing = null;
-  if (typeof sfx === 'function') sfx('fishDouse');
+  // 隊員坐進救生圈也不播音效
   swimAllyNextAt = now + swimAllyDelay();
 }
 // 隊員更新完（js/sentry.js 的 updateSentry）：整個人都划出深水區就收起救生圈
@@ -227,4 +252,50 @@ function drawSwimRinged(a, drawFn) {
 // 救生圈外面的一圈水波紋（js/water.js 的 drawWaded 呼叫；跟泡在水裡的波紋同一套，走動時往外擴散）
 function swimRingRippleInfo(a) {
   return { w: { depth: 0, see: 1 }, bottom: a.y + SWIM_RING.ringDy + 2, height: 1, width: SWIM_RING.ringW * 1.35 };
+}
+
+// ---- 爬梯子：坐救生圈划到梯子底下（梯子下端泡在深水裡）→ 出現「爬梯子」，按空白鍵（或 Enter）收起救生圈、爬到梯子上面 ----
+// 梯子＝地圖上的 poolcore_ladder 素材（例如救生員台的梯子）；爬上去的位置＝梯子上端附近、不是深水、站得住的地方
+const LADDER = { file: /\/poolcore_ladder\.png$/i, reach: 40, prompt: '爬梯子' };
+let ladderCache = { map: null, n: -1, list: [] };
+function ladderSpots() {
+  if (typeof MAP === 'undefined' || !MAP) return [];
+  const n = (MAP.stamps || []).length;
+  if (ladderCache.map === MAP && ladderCache.n === n) return ladderCache.list;
+  const list = [];
+  for (const s of MAP.stamps || []) {
+    const t = mapTileById(s.id); if (!t || !LADDER.file.test(String(t.file || '').replace(/\\/g, '/'))) continue;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
+    list.push({ s, x: x0 + w / 2, topY: y0, bottomY: y0 + h });
+  }
+  return (ladderCache = { map: MAP, n, list }).list;
+}
+// 坐在救生圈上、離某個「下端在深水裡」的梯子底下夠近：回傳那個梯子
+function ladderNearPlayer() {
+  const p = typeof G !== 'undefined' && G && G.player; if (!p || !p.swimRing || p.hp <= 0) return null;
+  let best = null, bd = LADDER.reach;
+  for (const l of ladderSpots()) {
+    if (!deepWaterAtPoint(l.x, l.bottomY + 4) && !deepWaterAtPoint(l.x, l.bottomY - 8)) continue;   // 梯子下端沒泡在深水裡：不是給救生圈爬的
+    const d = Math.hypot(p.x - l.x, p.y - l.bottomY);
+    if (d < bd) { bd = d; best = l; }
+  }
+  return best;
+}
+// 按空白鍵：收起救生圈，爬到梯子上面（js/game.js 的互動鍵）
+function useLadderNearPlayer() {
+  const l = ladderNearPlayer(); if (!l) return false;
+  const p = G.player, keep = [p.x, p.y];
+  p.swimRing = false;
+  // 從梯子上端往下找第一個站得住、又不是深水的位置（梯子上端通常就是平台）
+  for (let y = l.topY + 6; y <= l.bottomY; y += 6) for (const dx of [0, -12, 12, -24, 24]) {
+    const x = l.x + dx;
+    if (deepWaterAtPoint(x, y) || deepWaterAtPoint(x, y + 14) || playerBlocked(x, y)) continue;
+    p.x = x; p.y = y; p.moving = false; p.dir = 'back';
+    // 收起救生圈不播音效（原本借用的「水把火澆熄」被換成火熄滅的聲音，聽起來不對）
+    if (typeof flash === 'function') flash('爬上去了', p.x, p.y - 50, '#bfe8ff');
+    return true;
+  }
+  p.swimRing = true; p.x = keep[0]; p.y = keep[1];   // 上面沒有站得住的地方：爬不上去
+  if (typeof sfx === 'function') sfx('error');
+  return true;
 }

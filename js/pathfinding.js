@@ -184,6 +184,8 @@ function edgeWallCrossed(x0, y0, x1, y1, r) {
 // ---- 怪物也吃不可碰撞的像素微調（跟溫特一樣）----
 // wall(c, r)＝那一格是不是牆；牆格用方向鍵微調過（js/maploader.js 的 solidOffsetAt）：擋的是移過去之後的那一格大小的範圍，原本那格空出來的地方可以走
 function nudgedWallAt(x, y, wall) {
+  if (typeof tileBoxBlocksPoint === 'function' && tileBoxBlocksPoint(x, y)) return true;   // 素材碰撞方框（js/tile-collisions.js）
+  if (typeof poolPlatformBlocksPoint === 'function' && poolPlatformBlocksPoint(x, y)) return true;   // 抽水機平台：怪物上不去（js/pool-platform.js）
   const [c, r] = cellAt(x, y), off = typeof solidOffsetAt === 'function' ? solidOffsetAt : () => null;
   if (wall(c, r) && !off(c, r)) return true;                      // 沒微調過：整格都擋
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {

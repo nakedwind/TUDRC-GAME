@@ -227,6 +227,7 @@ function drawTower(t) {
     seatRotate(t, size);   // 躺在橫放的床上：跟溫特一樣旋轉
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, t);   // 被絲瓜藤纏住：扭動
     if (typeof applySlipTransform === 'function') applySlipTransform(ctx, t);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
+    if (typeof applyWetWobble === 'function') applyWetWobble(ctx, t);   // 濕地板小滑：晃一下（js/wet-floor.js）
     if (typeof applyGourdTossTransform === 'function') applyGourdTossTransform(ctx, t);   // 被葫蘆猴震飛：飛起來（js/gourd-monkey.js）
     if (typeof applyMothSleepTransform === 'function') applyMothSleepTransform(ctx, t);   // 人面蝶的睡眠鱗粉：搖晃、倒在地上（js/human-face-butterfly.js）
     if (t.hp > 0) t.downAt = null;
@@ -955,6 +956,7 @@ function drawPlayer(p) {
     }
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, p);   // 被絲瓜藤纏住：掙扎扭動（js/loofah-lady.js）
     if (typeof applySlipTransform === 'function') applySlipTransform(ctx, p);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
+    if (typeof applyWetWobble === 'function') applyWetWobble(ctx, p);   // 濕地板小滑：晃一下（js/wet-floor.js）
     if (typeof applyGourdTossTransform === 'function') applyGourdTossTransform(ctx, p);   // 被葫蘆猴震飛：飛起來（js/gourd-monkey.js）
     if (typeof applyMothSleepTransform === 'function') applyMothSleepTransform(ctx, p);   // 人面蝶的睡眠鱗粉：搖晃、倒在地上（js/human-face-butterfly.js）
     ctx.imageSmoothingEnabled = false;
@@ -1055,14 +1057,16 @@ function draw() {
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
+  if (typeof wetFloorSortables === 'function') wetFloorSortables(sortables);   // 泳池旁的濕地板：水漬、反光（js/wet-floor.js；跟地板素材一起排前後，在人物下面）
   // 角色泡在水裡：下半身半透明＋水面波紋（js/water.js 的 drawWaded；沒載入就照常畫）
   const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色
-  const wadeDraw = (a, kind, fn) => { ctx.save(); if (typeof doorActorClip === 'function') doorActorClip(ctx, a); wadeDraw0(a, kind, fn); ctx.restore(); };
+  // 🙈 完全遮住區（js/hide-zones.js）：腳踩進去就不畫，靠近邊緣慢慢淡出
+  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a); wadeDraw0(a, kind, fn); ctx.restore(); };
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
-  for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23+looseSortY(core),draw:()=>drawCore(core)});
+  for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23+looseSortY(core),draw:()=>wadeDraw0(core,'core',()=>drawCore(core))});   // 泡在深水裡：水面以下半透明（js/pool-tide.js 的 poolCoreWade）
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
   if (typeof leafPileSortables === 'function') leafPileSortables(sortables);   // 樹葉堆（js/leaf-piles.js）
@@ -1171,6 +1175,9 @@ function draw() {
     if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
+    else if (typeof ladderNearPlayer === 'function' && ladderNearPlayer()) { const l = ladderNearPlayer(); drawInteractPrompt(l.x, l.topY - 6, LADDER.prompt); }   // 坐救生圈到梯子底下：「爬梯子」（js/swim-ring.js）
+    else if (typeof poolPlatformNearPlayer === 'function' && poolPlatformNearPlayer()) { const q = poolPlatformNearPlayer(); drawInteractPrompt(q.x, q.y - 6, POOL_PLATFORM.prompt); }   // 坐救生圈到抽水機平台旁邊：「上岸」（js/pool-platform.js）
+    else if (typeof poolPlatformLeaveSpot === 'function' && poolPlatformLeaveSpot()) { const q = poolPlatformLeaveSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.leavePrompt); }   // 站在救生台上靠近深水：「下水」（按空白鍵坐救生圈離開；js/pool-platform.js）
     else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, near.portal.locked ? '鎖住了' : near.portal.at ? '進入' : '進入 ' + portalTargetName(near.portal));   // at＝同地圖傳送點：不顯示地圖名稱
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }

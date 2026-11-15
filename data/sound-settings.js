@@ -88,6 +88,7 @@ const SOUND_SETTINGS = {
     "vendingOpen": 3,
     "vineLand": 2.15,
     "vineLift": 1.3,
+    "WalkOnWater": 0.3,
     "wearGear": 2.1
   },
   "files": {
@@ -131,7 +132,30 @@ const SOUND_SETTINGS = {
       "vineLand": "戰鬥/命中/hit.mp3",
       "vineGrab": "環境/藤蔓抓住.mp3"
     },
-    "extras": {},
-    "meta": {}
+    "extras": {
+      "TryingToOpenDoor": "打不開門_未剪輯.mp3",
+      "WalkOnWater": "走在水中.mp3",
+      "FootstepEcho": "腳步回音.mp3"
+    },
+    "meta": {
+      "TryingToOpenDoor": {
+        "label": "TryingToOpenDoor",
+        "group": "場景與物件"
+      },
+      "WalkOnWater": {
+        "label": "走在水中",
+        "group": "其他"
+      },
+      "FootstepEcho": {
+        "label": "腳步回音（池核走路）",
+        "group": "溫特"
+      }
+    }
+  },
+  "clips": {
+    "TryingToOpenDoor": {
+      "from": 113,
+      "to": 732
+    }
   }
 };

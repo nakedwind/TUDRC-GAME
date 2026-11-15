@@ -637,6 +637,8 @@ window.addEventListener('keydown', e => {
       } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else if (typeof useLadderNearPlayer === 'function' && useLadderNearPlayer()) {}   // 坐救生圈到梯子底下：收起救生圈爬上去（js/swim-ring.js）
+    else if (typeof usePoolPlatformNearPlayer === 'function' && usePoolPlatformNearPlayer()) {}   // 坐救生圈到抽水機平台旁邊（深水時）：上岸（js/pool-platform.js）
     else if (typeof useSwimRingNearPlayer === 'function' && useSwimRingNearPlayer()) {}   // 深水區岸邊：坐上救生圈下水（js/swim-ring.js）
     else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
@@ -658,6 +660,7 @@ window.addEventListener('keydown', e => {
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
     else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
     else if (typeof tryLockedDoorNearPlayer === 'function' && tryLockedDoorNearPlayer()) {}   // 鎖住的房門：溫特說「好像被鎖住了」（js/locked-doors.js）
+    else if (typeof tryPictureDoorNearPlayer === 'function' && tryPictureDoorNearPlayer()) {}   // 「只是圖片」的門（例如池核的門）：播打不開的音效（js/doors.js）
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) openMissionBoard();   // 作戰桌／作戰螢幕（js/missions.js；旁邊的椅子或人更近時讓給它們）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) openVendingMachine();   // 販賣機：只賣飲料（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) openDrinkShop();   // 飲料店：只賣飲料（js/shop.js）
@@ -1167,7 +1170,7 @@ function updateChaosSentry(t, spec, dt) {
   for (const o of G.towers) if (o !== t && o.hp > 0) consider(o, o.x, o.y);
   if (G.player && G.player.hp > 0) consider(G.player, G.player.x, G.player.y);
   for (const o of G.obstacles) if (o.isBase && o.hp > 0) consider(o, (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2);
-  for (const c of G.cores) if (!c.dead && c.awake && !c.hidden && !c.carried) consider(c, c.x, c.y);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
+  for (const c of G.cores) if (!c.dead && c.awake && !c.hidden && !c.carried && !(typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(c))) consider(c, c.x, c.y);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
   if (!best) return;
   const range = spec.range * CELL;
   const canSee = hasLineOfSight(t.x, t.y, best.x, best.y);
@@ -1360,6 +1363,7 @@ function newGame() {
   const [px, py] = playerSpawnPos();
   const playerMaxHp = PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER] ? TYPES[PLAYER_CHARACTER].hp : PLAYER.hp ?? 100;   // 操作艾德林：用艾德林自己的 HP
   G.player = { char: PLAYER_CHARACTER, x: px, y: py, hp: playerMaxHp, maxhp: playerMaxHp, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
+  if (PREVIEW) placePreviewSpawn();   // 地圖編輯器「▶ 預覽遊戲」：測試用的出生點（PREVIEW_SPAWN）
   if (typeof leaderOnSpawn === 'function') leaderOnSpawn();   // 艾德林帶隊：出勤補給的效果（js/leader-skills.js）
   if (typeof afterVitalsSpawn === 'function') afterVitalsSpawn();   // 溫特的 HP 帶到這張地圖、住院的隊員躺上病床（js/vitals.js）
   updateCamera();
@@ -1368,6 +1372,19 @@ function newGame() {
   updateBuildToggle();
 }
 
+// ---- 「▶ 預覽遊戲」的出生點（只在地圖編輯器的預覽裡，正式遊戲不受影響）：方便測試某個區域 ----
+// 地圖名稱 → { to: 通往哪張地圖的出入口 }：有好幾格的出入口就站中間那格旁邊（跟從那張地圖走過來一樣）
+const PREVIEW_SPAWN = {
+  '04. 池核': { to: 'R89區-捷運站' },   // 地圖最右上方的捷運站出入口
+};
+function placePreviewSpawn() {
+  const cfg = MAP && PREVIEW_SPAWN[MAP.name]; if (!cfg || typeof mapPortals === 'undefined') return;
+  const all = typeof MAPS_DEFAULT !== 'undefined' ? MAPS_DEFAULT : mapList();   // 預覽時的地圖清單只有這一張：用全部地圖查出入口通往哪裡
+  const hits = mapPortals.filter(p => !p.elevator && (all.find(m => m.id === p.to) || {}).name === cfg.to);
+  if (!hits.length) return;
+  hits.sort((a, b) => a.c - b.c || a.r - b.r);
+  placePlayerNearPortal(hits[Math.floor((hits.length - 1) / 2)]);
+}
 // ---- 玩家出生點：基地地圖可指定格子；其他情況優先站營地，再找空地 ----
 function playerSpawnPos() {
   if (MAP_SAFE && MAP && Array.isArray(MAP.playerSpawn) && MAP.playerSpawn.length === 2) {
@@ -1430,11 +1447,13 @@ function playerBlocked(x, y, who = null) {
     if (!inGrid(c, rr) || (go && (!hasFloors || (go.floor === 2 ? 2 : 1) === floorCtx))) return true;   // 建築只擋同一層的人
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
     if (typeof deepWaterBlocksPlayer === 'function' && deepWaterBlocksPlayer(px, py)) return true;   // 深水區：沒坐救生圈走不進去（js/swim-ring.js）
+    if (typeof poolPlatformBlocksPlayer === 'function' && poolPlatformBlocksPlayer(px, py)) return true;   // 深水裡的抽水機平台：用走的上不去，只能從救生圈上岸（js/pool-platform.js）
   }
   // 邊緣碰撞（薄牆，js/pathfinding.js）：四個角再加四邊的中點，薄牆的一端剛好卡在身體中間也擋得到
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r], [0, -r], [0, r], [-r, 0], [r, 0]]) if (edgeWallBlocksPoint(x + sx, y + sy)) return true;
   if (typeof escalatorSideBlocks === 'function' && escalatorSideBlocks(x, y + ESCALATOR.footDy)) return true;   // 側面手扶梯的扶手、外殼（看腳的位置，js/escalators.js）
   if (typeof bigPearlBlocksPlayer === 'function' && bigPearlBlocksPlayer(x, y)) return true;   // 珍珠大童的大珍珠（js/pearl-elder.js）
+  if (!who && typeof poolBossBlocksPlayer === 'function' && poolBossBlocksPlayer(x, y)) return true;   // 池核 BOSS 巨大比基尼小丑魚的身體（js/pool-boss.js）
   return false;
   } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
 }
@@ -1549,6 +1568,7 @@ function startDashIfPressed(p, dt) {
   if (dashPressedAt < 0) return;
   const fresh = performance.now() - dashPressedAt < 150; dashPressedAt = -1;
   if (!fresh || p.dashCd > 0 || p.hp <= 0) return;   // 冷卻中：沒反應
+  if (p.swimRing) return;   // 坐在救生圈上：只能慢慢划水，不能衝刺（js/swim-ring.js）
   p.dashPart = Math.min(1, DASH.time / dt); p.dashT = Math.max(0, DASH.time - dt); p.dashCd = DASH.cd - dt; p.dashTrail = [];   // 這一格就開始衝
   if (typeof sfxAt === 'function') sfxAt('swordSwing', p.x, p.y, .32, 'dash');   // 咻一聲
 }
@@ -1556,6 +1576,7 @@ function updatePlayer(dt) {
   const p = G.player; if (!p) return;
   p.dashPart = dt > 0 ? Math.min(dt, p.dashT || 0) / dt : 0;   // 衝刺剩下的時間、冷卻
   p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
+  if (p.swimRing) { p.dashPart = 0; p.dashT = 0; }   // 衝刺到一半坐上救生圈：衝刺立刻停掉
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
   if (p.mrtRide) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
   if (p.vineCap || p.vineDazeT > 0) { p.moving = false; p.anim = 0; return; }   // 被藤蔓吊走、摔下來頭暈（js/vines.js）
@@ -1571,8 +1592,10 @@ function updatePlayer(dt) {
   }
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
-  if (p.sleepT > 0 || p.mothWakeT > 0) { p.moving = false; p.anim = 0; stepActorKnock(p, dt, playerBlocked); return; }   // 吸了人面蝶的睡眠鱗粉：睡著、正在爬起來都不能動（js/human-face-butterfly.js）
-  if (stepActorKnock(p, dt, playerBlocked)) { p.moving = false; p.anim = 0; return; }   // 被鳥頭人撞飛：滑行中不能走（js/bird-head.js）
+  // 被撞飛、滑倒的滑行：碰撞優先——跟走路一樣，除了「這個位置有沒有被擋」，也檢查有沒有穿過邊緣碰撞（薄牆）
+  const knockBlocked = (x, y) => playerBlocked(x, y) || (typeof edgeWallCrossed === 'function' && edgeWallCrossed(p.x, p.y, x, y, PLAYER.r));
+  if (p.sleepT > 0 || p.mothWakeT > 0) { p.moving = false; p.anim = 0; stepActorKnock(p, dt, knockBlocked); return; }   // 吸了人面蝶的睡眠鱗粉：睡著、正在爬起來都不能動（js/human-face-butterfly.js）
+  if (stepActorKnock(p, dt, knockBlocked)) { p.moving = false; p.anim = 0; return; }   // 被鳥頭人撞飛：滑行中不能走（js/bird-head.js）
   if (p.slipDizzyT > 0) { p.moving = false; p.anim = 0; return; }   // 踩香蕉皮滑去撞到東西：頭暈不能動（js/golden-banana-king.js）
   startDashIfPressed(p, dt);   // Shift：衝刺（能走路的時候才算）
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
@@ -1806,7 +1829,7 @@ function pickSentryTarget(t, R) {
       if (distance <= R && distance < bestScore && hasLineOfSight(t.x, t.y, f.x, f.y)) { best = f; bestScore = distance; }
     }
   for (const core of G.cores) {
-    if (core.dead || !core.awake || core.hidden || core.carried) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡、抱在珍珠大童身上的也打不到（js/elite-cap-king.js、js/pearl-elder.js）
+    if (core.dead || !core.awake || core.hidden || core.carried || (typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(core))) continue;   // 泡在深水裡的也打不到（js/pool-tide.js）；沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡、抱在珍珠大童身上的也打不到（js/elite-cap-king.js、js/pearl-elder.js）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
     if (distance <= R + CORE_HIT_PAD && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
   }
@@ -1922,6 +1945,7 @@ const SHOT_BODY_PAD = 8;   // 游標點在身體框外幾像素內也算點到
 function playerShotCheck(p, e, aim, angDiff) {
   const isCore = G.cores.includes(e);
   if (e.dead || e.carried) return null;
+  if (isCore && typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(e)) return null;   // 泡在深水裡的核心（深水區還沒抽乾）：打不到（js/pool-tide.js）
   if (!isCore && !sameFloor(p, e)) return null;   // 不同樓層的怪物打不到（js/pathfinding.js）   // carried：抱在珍珠大童身上的核心打不到（js/pearl-elder.js）
   const box = targetBodyBox(e);
   const lit = bodyVisible(box, e.x, e.y) || isLit(e.x, e.y) || isLit(box.cx, box.cy);   // 畫面上看得到就打得到
@@ -2128,15 +2152,37 @@ function updateAmmoHud() {
 // ---- 主迴圈（幀率校正）----
 let last = 0;
 // ---- 腳步聲（走路時循環播放；安全場景=footsteps02、戰鬥場景=footsteps01）----
-const FOOT = { audio: null, file: '' };
+//   MAP_FOOTSTEPS：某張地圖改用別的腳步聲（填音效編輯器裡的音效名稱；音檔、音量都在音效編輯器改）
+//     walk＝平常走路、water＝走在淺水裡（坐救生圈划水也算）
+const MAP_FOOTSTEPS = {
+  map_mv1bzur4: { walk: 'FootstepEcho', water: 'WalkOnWater' },   // 04. 池核：腳步回音、走在水中
+};
+const FOOT = { audio: null, file: '', gain: 'footsteps' };
+// 音效編輯器裡某個音效的音檔路徑（只用第一個音檔；沒有就回傳空字串）
+function footSoundFile(name) {
+  const it = typeof SFX !== 'undefined' && SFX.list ? SFX.list().find(s => s.name === name) : null;
+  const f = it && it.file, one = Array.isArray(f) ? f[0] : f && typeof f === 'object' ? (f.files || [])[0] : f;
+  return typeof one === 'string' && one ? 'Sound effects/' + one : '';
+}
+// 現在要播哪個腳步聲：{ file：音檔、gain：用哪個音效的音量倍率 }
+function footstepWant(p) {
+  const cfg = typeof MAP !== 'undefined' && MAP && !MAP_SAFE && MAP_FOOTSTEPS[MAP.id];
+  if (cfg) {
+    const wet = p && (p.swimRing || (typeof wadeInfo === 'function' && wadeInfo(p, 'char')));   // 在水裡（js/water.js）
+    const name = wet ? cfg.water : cfg.walk;
+    if (FOOT.cache?.name !== name) FOOT.cache = { name, file: footSoundFile(name) };
+    if (FOOT.cache.file) return { file: FOOT.cache.file, gain: name };
+  }
+  return { file: MAP_SAFE ? 'Sound effects/環境/腳步/footsteps02.mp3' : 'Sound effects/環境/腳步/footsteps01.mp3', gain: 'footsteps' };
+}
 function updateFootsteps(menuOpen = false) {
   const p = G && G.player;
   const walking = !!(p && p.moving && !p.sitting && G.running && !G.over && !paused && !menuOpen);   // 選單開著時玩家停住，p.moving 會停在 true
   if (!FOOT.audio) { FOOT.audio = new Audio(); FOOT.audio.loop = true; FOOT.audio.volume = 0.5; }
   const a = FOOT.audio;
-  const want = MAP_SAFE ? 'Sound effects/環境/腳步/footsteps02.mp3' : 'Sound effects/環境/腳步/footsteps01.mp3';
-  if (FOOT.file !== want) { FOOT.file = want; a.src = want; }
-  a.volume = Math.min(1, 0.5 * SFX.volume / 0.35 * SFX.gainOf('footsteps'));   // 跟著設定裡的音效音量＋音效編輯器的倍率
+  const want = footstepWant(p);
+  if (FOOT.file !== want.file) { FOOT.file = want.file; FOOT.gain = want.gain; const playing = !a.paused; a.src = want.file; if (playing) a.play().catch(() => {}); }   // 換腳步聲（例如走進水裡）：馬上換
+  a.volume = Math.min(1, 0.5 * SFX.volume / 0.35 * SFX.gainOf(FOOT.gain));   // 跟著設定裡的音效音量＋音效編輯器的倍率
   a.muted = !SFX.enabled;                       // 跟著設定裡的靜音
   if (walking) { if (a.paused) a.play().catch(() => {}); }
   else if (!a.paused) a.pause();
@@ -2248,6 +2294,7 @@ function update(dt) {
   if (typeof updateTutorial === 'function') updateTutorial(dt);   // 新手區教學提示（js/tutorial.js）
   if (typeof updateCoreFrenzy === 'function') updateCoreFrenzy(dt);   // 核心醒著：異質體狂暴化（js/core-frenzy.js）
   if (typeof updatePoolTide === 'function') updatePoolTide(dt);   // 池核的抽水、漲潮、溺水（js/pool-tide.js）
+  if (typeof updateWetFloor === 'function') updateWetFloor(dt);   // 池核泳池旁的濕地板：走路有機會滑倒（js/wet-floor.js）
   if (G.player) {
     G.player.hitT = Math.max(0, (G.player.hitT || 0) - dt);
     G.player.underAttackT = Math.max(0, (G.player.underAttackT || 0) - dt);

@@ -52,17 +52,21 @@ function waterAt(x, y) {
   return best;
 }
 // 給 js/build.js 的 slowFactorAt：在水裡走路變慢（x, y＝角色的位置）
-function waterSlowAt(x, y) { const w = waterAt(x, y + WATER.footDy); return w ? w.speed : 1; }
+function waterSlowAt(x, y) { if (onPoolPlatform(x, y)) return 1; const w = waterAt(x, y + WATER.footDy); return w ? w.speed : 1; }
+// 站在池核深水裡的平台（救生台）上：平台下緣有水的素材蓋過來，但人是站在平台上、沒有泡在水裡（js/pool-platform.js）
+const onPoolPlatform = (x, y) => typeof poolPlatformAt === 'function' && !!poolPlatformAt(x, y);
 
 // 角色現在泡在哪種水裡、身體多高、腳在哪（沒泡在水裡＝null）
 function wadeInfo(a, kind) {
   if (!a || a.sitting || a.eatenBy || a.grabbed || a.grabFall) return null;
+  if (kind === 'core') return typeof poolCoreWade === 'function' ? poolCoreWade(a) : null;   // 異質核心：只有泡在深水區裡才算（js/pool-tide.js）
   if (kind === 'enemy') {
     if (a.poolBoss && typeof poolBossWade === 'function') { const r = poolBossWade(a); if (r !== undefined) return r; }   // 池核 BOSS 在深水區：露出上半身（js/pool-boss.js）
     if ((a.slimeLift || 0) > 4 || a.dead) return null;   // 浮在空中、跳起來的時候不算
     const w = waterAt(a.x, a.y + WATER.enemyFootDy); if (!w) return null;
     return { w, bottom: a.y + 13, height: (a.drawHeight || 33) * (a.sizeMul || 1), width: (a.drawWidth || 42) * (a.sizeMul || 1) };
   }
+  if (onPoolPlatform(a.x, a.y)) return null;   // 站在救生台上：不算泡在水裡（不然下半身會被藏起來，看起來像被平台蓋住）
   const w = waterAt(a.x, a.y + WATER.footDy); if (!w) return null;
   const size = (typeof PLAYER !== 'undefined' && PLAYER.drawSize) || 64;
   return { w, bottom: a.y + 18, height: size, width: size * .62 };

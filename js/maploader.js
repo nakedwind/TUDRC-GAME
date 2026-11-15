@@ -447,6 +447,7 @@ function lineOfSightRaw(x0, y0, x1, y1) {
 function solidBlocksPoint(x, y) {
   const elevator = elevatorBlocksPoint(x, y);
   if (elevator !== null) return elevator;
+  if (typeof tileBoxBlocksPoint === 'function' && tileBoxBlocksPoint(x, y)) return true;   // 素材碰撞方框（物件編輯器設定，js/tile-collisions.js）
   const [c, r] = cellAt(x, y);
   if (floorCtx === 2) return isWall(c, r);                      // 二樓：只看有沒有陸橋地面（不吃一樓牆的微調）
   if (isWall(c, r) && !solidOffsetAt(c, r)) return true;        // 沒微調過：整格都擋
@@ -1013,7 +1014,8 @@ function mapOccluders() {
       const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0), stampWpx = mapStampW(s, t) * CELL, stampHpx = mapStampH(s, t) * CELL;
       const depth = chair ? y0 + (s.fy ? mapStampH(s, t) * CELL - chair.depth : chair.depth) : t.baseHp
         ? Math.max(0, Math.min(mapStampH(s, t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapStampH(s, t) - 2))))
-        : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapStampH(s, t), s.sortDepth)) : null);
+        : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapStampH(s, t), s.sortDepth))
+          : (typeof tileCollisionDepthPx === 'function' && tileCollisionDepthPx(s, mapTileW(t) * CELL, mapTileH(t) * CELL) != null ? tileCollisionDepthPx(s, mapTileW(t) * CELL, mapTileH(t) * CELL) / CELL : null));   // 沒手動設遮擋線：素材有碰撞方框就用方框的中間（js/tile-collisions.js）
       // 排序看物件原本佔的範圍（樹根還在原地，放大的樹冠不影響前後）；vis＝畫出來實際蓋到的範圍，補畫上層圖時用
       const item = { li, x0, y0, x1: x0 + stampWpx, y1: y0 + stampHpx, vis: stampHasTransform(s) ? stampVisualBox(s, x0, y0, stampWpx, stampHpx) : null,
         sortY: depth == null ? null : chair ? depth : t.baseHp ? y0 + depth * CELL : stampDepthY(s, y0, stampHpx, depth * CELL), fixedDepth: depth != null, kind: 'stamp', stamp: s };

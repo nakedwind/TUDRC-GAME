@@ -1200,6 +1200,8 @@ function draw() {
   }
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
+  // 素材碰撞方框（物件編輯器「🧱 素材碰撞」設定，js/tile-collisions.js）：顯示紅格時畫成橘色，同一張素材貼幾個都一樣
+  if ((showSolid || brush.mode === 'solidnudge') && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
@@ -1289,12 +1291,13 @@ function draw() {
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
       ctx.fillText('深度線 ' + depth, x + 5, y - 4);
     } else if (s && t && (Number.isFinite(s.sortDepth) || (!t.flat && (s.layer || 'top') !== 'top' && (stampH(s, t) > 1 || /^object\d*$/.test(s.layer || '') || s.layer === 'overlay')))) {
-      const depth = Number.isFinite(s.sortDepth) ? s.sortDepth : stampH(s, t);
+      const autoPx = !Number.isFinite(s.sortDepth) && typeof tileCollisionDepthPx === 'function' ? tileCollisionDepthPx(s, tileW(t) * CELL, tileH(t) * CELL) : null;   // 素材有設人物遮擋線、或有碰撞方框（自動用方框的中間）
+      const depth = Number.isFinite(s.sortDepth) ? s.sortDepth : autoPx != null ? Math.round(autoPx / CELL * 100) / 100 : stampH(s, t);
       const x = OX + s.c * CELL + (s.ox || 0), y = stampDepthY(s, OY + s.r * CELL + (s.oy || 0), stampH(s, t) * CELL, depth * CELL);
       ctx.strokeStyle = '#55d9ff'; ctx.lineWidth = 3; ctx.setLineDash([9, 5]);
       ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + stampW(s, t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-      ctx.fillText('人物遮擋線 ' + depth, x + 5, y - 4);
+      ctx.fillText('人物遮擋線 ' + depth + (autoPx != null ? (typeof tileManualDepth === 'function' && tileManualDepth(s.id) != null ? '（素材設定）' : '（碰撞方框自動）') : ''), x + 5, y - 4);
     }
   }
   drawLocateFlash();   // 從圖層物件清單選取時，物件周圍閃一個圈
