@@ -11,18 +11,19 @@ function battleGot(name, image, n = 1) {
 }
 // 作戰時間：每幀累加（戰鬥中、沒暫停時）
 function battleTick(dt) { if (G && G.battle && G.running && !G.over && !MAP_SAFE) G.battle.time += dt; }
+// 秒數 → 「分:秒」（例：125 秒 → 2:05）
+function battleTimeText(sec) { sec = Math.max(0, sec || 0); return Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0'); }
 
 function appendBattleResult() {
   const box = document.getElementById('ov-text'); if (!box || !G || !G.battle) return;
   const b = G.battle, esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const kills = Object.entries(b.kills).sort((x, y) => y[1] - x[1]);
   const totalKills = kills.reduce((s, [, n]) => s + n, 0);
-  const mm = Math.floor(b.time / 60), ss = Math.floor(b.time % 60);
   const stat = (cls, label, val) => '<div class="br-stat ' + cls + '"><small>' + label + '</small><b>' + val + '</b></div>';
   const chips = (list, empty) => list.length ? '<div class="br-list">' + list.join('') + '</div>' : '<span class="br-empty">' + empty + '</span>';
   // 精簡版：上面一排數字，下面左右兩欄（打倒的異質體／本次取得）
   box.insertAdjacentHTML('beforeend', '<div class="battle-result">' +
-    '<div class="br-row">' + stat('', '作戰時間', mm + ':' + String(ss).padStart(2, '0')) + stat('', '打倒異質體', totalKills) +
+    '<div class="br-row">' + stat('', '作戰時間', battleTimeText(b.time)) + stat('', '打倒異質體', totalKills) +
       stat('', '異質核心', b.cores) + stat('crystal', '異質碎片', '+' + b.crystals) + stat('money', '剩下經費', '$' + Math.floor(G.money)) + '</div>' +
     '<div class="br-cols">' +
       '<div class="br-block"><h4>打倒的異質體</h4>' + chips(kills.map(([name, n]) => '<span class="br-chip">' + esc(name) + ' <em>×' + n + '</em></span>'), '沒有打倒異質體') + '</div>' +
