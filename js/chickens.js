@@ -1,6 +1,6 @@
 /* ===== 森林的雞、鳥巢、雞蛋（數值在 data/chickens.js 的 CHICKEN_CONFIG）=====
    ・鳥巢：地圖上照一般物件擺的鳥巢圖（有蛋／空巢都算，藍森林版也算）自動變成鳥巢。
-     有蛋時靠近按空白鍵「撿雞蛋」→ 拿到一顆雞蛋，巢換成空巢的圖；空巢過 nestRespawn 秒長回一顆蛋。
+     有蛋時靠近按空白鍵「撿雞蛋」→ 一次拿到 nestEggs 顆雞蛋（拿不下的放在巢前面地上），巢換成空巢的圖；空巢過 nestRespawn 秒長回蛋。
    ・雞：每個鳥巢旁邊生 chickensPerNest 隻。在巢附近 range 格內閒晃（走一段、停一下，隨機 8 個方向；
      走太遠就往巢的方向走回去）。閒晃的寫法照《苦艾與甘露》的雞移植過來。
      每 layEvery 秒在腳邊下一顆蛋（播 POP），蛋就是地上的道具：走過去撿、用火烤會變烤雞蛋（js/food.js）。
@@ -156,9 +156,11 @@ function useChickenNearPlayer() {
   const q = chickenTarget(); if (!q) return false;
   if (q.kind === 'drop') return dropChicken(false);
   if (q.kind === 'nest') {
-    if (!supplyGain('egg', 1)) return true;   // 拿不下（supplyGain 會跳提示）：蛋留在巢裡
+    const want = CHICKEN_CONFIG.nestEggs, got = supplyGain('egg', want);   // 一次拿 nestEggs 顆
+    if (!got) return true;   // 一顆都拿不下（supplyGain 會跳提示）：蛋留在巢裡
+    if (got < want) { G.groundItems = G.groundItems || []; G.groundItems.push({ id: 'egg', qty: want - got, x: q.nest.x, y: q.nest.y + 14, at: chickenNow(), floor: q.nest.floor }); }   // 拿不下的放在巢前面的地上
     q.nest.egg = false; q.nest.t = CHICKEN_CONFIG.nestRespawn;
-    sfx('itemPickup'); if (typeof showItemPickupNotice === 'function') showItemPickupNotice('egg', 1);
+    sfx('itemPickup'); if (typeof showItemPickupNotice === 'function') showItemPickupNotice('egg', got);
     updateHUD(); if (typeof saveGame === 'function') saveGame();
     return true;
   }
@@ -196,7 +198,9 @@ function chickenSortables(list) {
     ch.faceLeft = p.dir === 'left' ? true : p.dir === 'right' ? false : ch.faceLeft;
     ch.x = p.x; ch.y = p.y;
     // 正面、側面：排在溫特後面一點點（畫在溫特身上）；背面：排在溫特前面一點點（先畫雞，被溫特的背擋住）
-    list.push({ floor: visualFloor(p), y: p.y + (back ? 15.5 : 16.5), draw: () => drawChicken(ctx, ch, p.x + H * C.carryDx, p.y + 18 - H * C.carryLift) });
+    // 側面：朝右往右多偏 carrySide 像素；朝左整個鏡射（往左偏）
+    const dx = p.dir === 'right' ? H * C.carryDx + C.carrySide : p.dir === 'left' ? -(H * C.carryDx + C.carrySide) : H * C.carryDx;
+    list.push({ floor: visualFloor(p), y: p.y + (back ? 15.5 : 16.5), draw: () => drawChicken(ctx, ch, p.x + dx, p.y + 18 - H * C.carryLift + C.carryDown) });
   }
 }
 // 畫一隻雞：fx, fy＝腳底中央
