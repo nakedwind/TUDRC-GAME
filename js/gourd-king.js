@@ -31,8 +31,8 @@ const GOURD_KING = {
       'tile_mrt_room_highwallx6_crack_large02', 'tile_mrt_room_highwallx6_breached'],
   },
   knock: {                       // 撞牆演出（index 0＝第 1 下 …… 3＝第 4 下撞破）
-    delay: 1.4,                  // 核心醒來後幾秒開始撞第 1 下
-    gaps: [2.4, 2.0, 1.6],       // 第 1→2、2→3、3→4 下之間隔幾秒（越撞越急）
+    delay: 2.2,                  // 核心醒來後幾秒開始撞第 1 下
+    gaps: [3.4, 2.9, 2.4],       // 第 1→2、2→3、3→4 下之間隔幾秒（越撞越急）
     shake: [12, 15, 18, 24],     // 畫面搖晃強度（像素；一般攻擊最多 16，這裡可以更大）
     rumble: [.55, .7, .9, 1.6],  // 搖晃持續幾秒（慢慢變小；撞破那下最久）
     hitstop: [.03, .05, .07, .09],   // 撞到的瞬間畫面頓一下（秒，最多 .09）
@@ -57,7 +57,12 @@ const GOURD_KING = {
     smoke: 22,                   // 落地四周捲起的大煙霧
     bursts: 3,                   // 額外噴出幾團碎石
   },
-  emerge: { start: 3, land: 3.5 },   // 撞破後：從洞裡第幾排起跳、跳到牆腳下面幾格的地方砸下來
+  emerge: {                      // 撞破後：先停一下（煙霧瀰漫、牆後傳來吼聲），再從洞裡跳出來
+    wait: 1.8,                   // 撞破後等幾秒才跳出來
+    growl: .9,                   // 等待中第幾秒傳來吼聲
+    start: 3, land: 3.5,         // 從洞裡第幾排起跳、跳到牆腳下面幾格的地方砸下來
+    rise: 1.1, hang: .8, drop: .2, height: 240,   // 跳出來那一下：升空、在空中停住、砸下來都比平常慢，跳得更高
+  },
   // ---- 巨型泰山壓頂：蓋過一般葫蘆猴的 GOURD 數值（沒寫的照 GOURD）----
   slam: {
     noticeRange: 14, loseRange: 40, hunt: true,   // hunt：看不到人時也會朝溫特拖過去（BOSS 知道你在哪）
@@ -117,7 +122,8 @@ function gourdKingWallSpec(s) {
 // 葫蘆猴王壓頂用的數值：一般葫蘆猴的 GOURD 蓋上 slam；暴怒連跳的小壓頂再蓋上 combo
 const GK_SLAM = Object.assign({}, GOURD, GOURD_KING.slam);
 const GK_SLAM_QUICK = Object.assign({}, GK_SLAM, { crouch: GOURD_KING.combo.crouch, rise: GOURD_KING.combo.rise, hang: GOURD_KING.combo.hang, height: GOURD_KING.combo.height });
-function gourdKingCfg(e) { return e.gm && e.gm.slam && e.gm.slam.quick ? GK_SLAM_QUICK : GK_SLAM; }
+const GK_SLAM_EMERGE = Object.assign({}, GK_SLAM, { rise: GOURD_KING.emerge.rise, hang: GOURD_KING.emerge.hang, drop: GOURD_KING.emerge.drop, height: GOURD_KING.emerge.height });
+function gourdKingCfg(e) { const s = e.gm && e.gm.slam; return s && s.emerge ? GK_SLAM_EMERGE : s && s.quick ? GK_SLAM_QUICK : GK_SLAM; }
 const gkRand = (a, b) => a + Math.random() * (b - a);
 const gkAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
 function gkWallStamp() {
@@ -131,7 +137,7 @@ function gkWallBox(s) {
 }
 
 // ---- 開場（game.js 在 newGame 裡呼叫，要在 setupBreakableWalls 之後）----
-// G.gourdKing：{ stamp, phase: 'sleep'｜'knock'｜'out'｜'dead', t, hits, e }
+// G.gourdKing：{ stamp, phase: 'sleep'｜'knock'｜'breach'（撞破了、還沒跳出來）｜'out'｜'dead', t, hits, e }
 function seedGourdKing() {
   G.gourdKing = null; G.gkRocks = []; G.gkSift = [];
   if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
@@ -159,8 +165,20 @@ function updateGourdKing(dt) {
     if (K.t > 0) return;
     K.hits++;
     gkWallHit(K, K.hits);
-    if (K.hits >= GOURD_KING.wall.stages.length) { K.phase = 'out'; gkEmerge(K); }
+    if (K.hits >= GOURD_KING.wall.stages.length) { K.phase = 'breach'; K.t = GOURD_KING.emerge.wait; K.growled = false; }   // 撞破了：先停一下才跳出來
     else K.t = GOURD_KING.knock.gaps[K.hits - 1] ?? 1.5;
+    return;
+  }
+  if (K.phase === 'breach') {   // 煙霧瀰漫，牆後傳來吼聲，地面微微震著
+    K.t -= dt;
+    const box = gkWallBox(K.stamp), E = GOURD_KING.emerge;
+    if (!K.growled && K.t <= E.wait - E.growl) {
+      K.growled = true;
+      gkSound('gourdLaugh', box.cx, box.bottom, 1.1);
+      gkRumble(box.cx, box.bottom, 7, .8);
+      for (let k = 0; k < 6; k++) gkPebble(box.cx + gkRand(-3, 3) * CELL, box.bottom + gkRand(0, 3) * CELL, gkRand(200, 320), .9);
+    }
+    if (K.t <= 0) { K.phase = 'out'; gkEmerge(K); }
   }
 }
 
