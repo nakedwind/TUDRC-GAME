@@ -3,7 +3,8 @@
    - 觸發：地圖上任何一顆異質核心被喚醒 → 牆後開始傳來撞擊聲：
        第 1 下：小裂縫 → 第 2 下：大裂縫 → 第 3 下：大裂縫02 → 第 4 下：撞破（全破的圖），隱藏區顯現。
        每一下：畫面搖晃（越撞越大）、牆本身抖一下、牆面掉碎石、沿著牆面灑下粉塵、牆腳揚起灰塵、天花板也掉小碎石。
-   - 撞破那一下：葫蘆猴王從破洞跳出來，泰山壓頂砸在牆前面（會壓到人、把人震飛），BOSS 血條＋中BOSS 音樂開始。
+   - 撞破後：停一下（煙霧、吼聲），葫蘆猴王踏出來站在破洞門口亮相，「葫蘆猴王現身」橫幅播完才開始攻擊（亮相時不會受傷），
+     接著 BOSS 血條＋中BOSS 音樂開始。
    - BOSS 牆：用一般的「捷運高牆X6（可炸開・隱藏區）」，在下面 GOURD_KING.maps 寫上牆的位置就會變成 BOSS 牆。
        BOSS 牆不會被炸彈炸開（只會被葫蘆猴王撞開），球球也不會在上面標腳印。
    - 戰鬥（預設的發想，數值都在下面，可以再調）：
@@ -48,20 +49,20 @@ const GOURD_KING = {
   breach: {                      // 撞破那一下的額外演出
     bursts: 5,                   // 洞口噴出幾團碎石
     smoke: 34,                   // 洞口冒出幾團大煙霧（會停留一陣子才散）
-    smokeLife: [2.4, 3.8],       // 煙霧停留幾秒
+    smokeLife: [1.6, 2.6],       // 煙霧停留幾秒（短一點：葫蘆猴王踏出來亮相時要看得清楚）
     pebbles: 26,                 // 天花板跟著掉下來的碎石
     flash: .35,                  // 畫面泛起一層土色閃光（秒）
   },
-  landing: {                     // 葫蘆猴王跳出來落地那一下的額外演出
+  landing: {                     // 葫蘆猴王踏出來亮相那一下的額外演出
     shake: 22, rumble: 1.1,      // 搖晃強度、持續幾秒
     smoke: 22,                   // 落地四周捲起的大煙霧
     bursts: 3,                   // 額外噴出幾團碎石
   },
-  emerge: {                      // 撞破後：先停一下（煙霧瀰漫、牆後傳來吼聲），再從洞裡跳出來
-    wait: 1.8,                   // 撞破後等幾秒才跳出來
+  emerge: {                      // 撞破後：先停一下（煙霧瀰漫、牆後傳來吼聲），再踏出來站在破洞門口亮相
+    wait: 1.8,                   // 撞破後等幾秒才踏出來
     growl: .9,                   // 等待中第幾秒傳來吼聲
-    start: 3, land: 3.5,         // 從洞裡第幾排起跳、跳到牆腳下面幾格的地方砸下來
-    rise: 1.1, hang: .8, drop: .2, height: 240,   // 跳出來那一下：升空、在空中停住、砸下來都比平常慢，跳得更高
+    hold: .4,                    // 「葫蘆猴王現身」橫幅消失後，再多站幾秒才開始攻擊
+    // 亮相這段時間不會受傷（讓玩家看清楚長相；隊友先開槍也打不痛）
   },
   // ---- 巨型泰山壓頂：蓋過一般葫蘆猴的 GOURD 數值（沒寫的照 GOURD）----
   slam: {
@@ -122,8 +123,7 @@ function gourdKingWallSpec(s) {
 // 葫蘆猴王壓頂用的數值：一般葫蘆猴的 GOURD 蓋上 slam；暴怒連跳的小壓頂再蓋上 combo
 const GK_SLAM = Object.assign({}, GOURD, GOURD_KING.slam);
 const GK_SLAM_QUICK = Object.assign({}, GK_SLAM, { crouch: GOURD_KING.combo.crouch, rise: GOURD_KING.combo.rise, hang: GOURD_KING.combo.hang, height: GOURD_KING.combo.height });
-const GK_SLAM_EMERGE = Object.assign({}, GK_SLAM, { rise: GOURD_KING.emerge.rise, hang: GOURD_KING.emerge.hang, drop: GOURD_KING.emerge.drop, height: GOURD_KING.emerge.height });
-function gourdKingCfg(e) { const s = e.gm && e.gm.slam; return s && s.emerge ? GK_SLAM_EMERGE : s && s.quick ? GK_SLAM_QUICK : GK_SLAM; }
+function gourdKingCfg(e) { return e.gm && e.gm.slam && e.gm.slam.quick ? GK_SLAM_QUICK : GK_SLAM; }
 const gkRand = (a, b) => a + Math.random() * (b - a);
 const gkAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
 function gkWallStamp() {
@@ -137,14 +137,14 @@ function gkWallBox(s) {
 }
 
 // ---- 開場（game.js 在 newGame 裡呼叫，要在 setupBreakableWalls 之後）----
-// G.gourdKing：{ stamp, phase: 'sleep'｜'knock'｜'breach'（撞破了、還沒跳出來）｜'out'｜'dead', t, hits, e }
+// G.gourdKing：{ stamp, phase: 'sleep'｜'knock'｜'breach'（撞破了、還沒踏出來）｜'out'｜'dead', t, hits, e }
 function seedGourdKing() {
   G.gourdKing = null; G.gkRocks = []; G.gkSift = [];
   if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const s = gkWallStamp(); if (!s) return;
   G.gourdKing = { stamp: s, phase: 'sleep', t: 0, hits: 0, e: null, jitter: 0, jitterT: 0 };
   const base = ACTIVE_MONSTERS.find(m => m.id === 'gourd_monkey');
-  if (base) [base.sprite, GOURD.art.squash, GOURD.art.tall].forEach(monsterImage);   // 先載好圖，跳出來那一下才不會閃空白
+  if (base) [base.sprite, GOURD.art.squash, GOURD.art.tall].forEach(monsterImage);   // 先載好圖，踏出來那一下才不會閃空白
   GOURD_KING.wall.stages.forEach(id => { const t = mapTileById(id); if (t && typeof tileImage === 'function') tileImage(t); });
 }
 
@@ -165,7 +165,7 @@ function updateGourdKing(dt) {
     if (K.t > 0) return;
     K.hits++;
     gkWallHit(K, K.hits);
-    if (K.hits >= GOURD_KING.wall.stages.length) { K.phase = 'breach'; K.t = GOURD_KING.emerge.wait; K.growled = false; }   // 撞破了：先停一下才跳出來
+    if (K.hits >= GOURD_KING.wall.stages.length) { K.phase = 'breach'; K.t = GOURD_KING.emerge.wait; K.growled = false; }   // 撞破了：先停一下才踏出來
     else K.t = GOURD_KING.knock.gaps[K.hits - 1] ?? 1.5;
     return;
   }
@@ -264,11 +264,11 @@ function gourdKingWallJitter(s) {
   return [(Math.random() * 2 - 1) * a, (Math.random() * 2 - 1) * a * .5];
 }
 
-// ---- 撞破：葫蘆猴王從洞裡跳出來，泰山壓頂砸在牆前面 ----
+// ---- 撞破：葫蘆猴王踏出來，站在破洞門口亮相；「現身」橫幅播完才開始攻擊 ----
 function gkEmerge(K) {
   const B = GOURD_KING, base = ACTIVE_MONSTERS.find(m => m.id === 'gourd_monkey'); if (!base) return;
   const box = gkWallBox(K.stamp);
-  const sx = box.cx, sy = OY + (box.r0 + B.emerge.start + .5) * CELL;
+  const sx = box.cx, sy = OY + (box.r0 + 5.5) * CELL;   // 破洞最下排（牆腳）：整隻站在牆前面，看得清楚
   const e = createMonster(base, sx, sy);
   e.gourdKing = true; e.eliteName = B.name; e.eliteAwake = false;
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * B.hp);
@@ -279,13 +279,18 @@ function gkEmerge(K) {
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true; e.noStun = true;
   e.alertT = typeof ENEMY_ALERT_TIME !== 'undefined' ? ENEMY_ALERT_TIME : 1;
   e.faceRight = !!(G.player && G.player.x > sx);
-  // 直接進到「升空」：從洞裡往前飛出來，落在牆腳下面
   e.gm = { cd: 0, wait: 0, pulse: 0, laughCd: 0 };
-  const land = gkFreeSpot(box.cx, box.bottom + B.emerge.land * CELL) || { x: box.cx, y: box.bottom + B.emerge.land * CELL };
-  e.gm.slam = { phase: 'rise', t: 0, target: null, from: { x: sx, y: sy }, liftFrom: { x: sx, y: sy }, spot: land, emerge: true };
-  e.forceFrame = GOURD.art.tall;
+  e.forceFrame = null;   // 正面站姿
+  e.gkIntroT = (typeof CORE_FRENZY !== 'undefined' ? CORE_FRENZY.banner : 3.2) + B.emerge.hold;   // 亮相幾秒（橫幅播完＋hold）
+  e.gkIntroHp = e.hp;
   G.enemies.push(e);
   K.e = e;
+  // 踏出來那一下：重震、捲起煙霧和碎石、吼叫，大橫幅「葫蘆猴王現身」
+  gkLandingFx(e);
+  gkSound('gourdLandCry', e.x, e.y, 1.1);
+  if (typeof coreBanner === 'function') coreBanner(B.name + '現身', '撞破牆壁衝出來了！', '#e8c27a');
+  systemNotice('⚠ ' + B.name + '撞破牆壁衝出來了！', true);
+  e.gkLaughT = 1.2;   // 踏出來後幾秒得意地笑一聲
 }
 // 附近一格怪物站得下的地方（要夠寬）
 function gkFreeSpot(x, y) {
@@ -303,7 +308,13 @@ function gkFreeSpot(x, y) {
 // ---- 行為（enemy-ai.js 的 stepEnemy 呼叫）：基本上就是一般葫蘆猴（數值換成 GK_SLAM），加上暴怒連跳 ----
 function stepGourdKing(e, dt) {
   const B = GOURD_KING, g = e.gm;
-  if (!e.eliteAwake) { stepGourdEnemy(e, dt); return; }   // 還在跳出來的途中
+  if (e.gkIntroT > 0) {   // 亮相中：站在門口不動、不會受傷，面向溫特
+    e.gkIntroT -= dt; e.hp = Math.max(e.hp, e.gkIntroHp); e.moving = false; e.forceFrame = null;
+    if (e.gkLaughT > 0 && (e.gkLaughT -= dt) <= 0 && typeof gourdLaugh === 'function') gourdLaugh(e, true);
+    if (G.player) e.faceRight = G.player.x > e.x;
+    if (e.gkIntroT <= 0) gkWake(e);
+    return;
+  }
   if (!e.gkEnraged && e.hp <= e.maxhp * B.enrageAt) gkEnrage(e);
   if (g && g.comboLeft > 0 && !g.slam && !(g.recover > 0)) {   // 暴怒連跳：落地喘一下就追著人再跳
     const t = gkComboTarget(e);
@@ -320,7 +331,6 @@ function gkComboTarget(e) {
 // gourd-monkey.js 的 gourdImpact 最後呼叫：每次砸下來之後
 function gourdKingImpact(e, quick) {
   const B = GOURD_KING, g = e.gm;
-  if (!e.eliteAwake) { gkWake(e); gkLandingFx(e); }   // 第一下（從牆裡跳出來）落地：BOSS 戰開始、更大的震動和煙霧
   gkCrushOres(e);
   gkDropRocks(e, quick ? B.rocks.quick : B.rocks.count);
   if (!e.gkEnraged) return;
@@ -340,11 +350,11 @@ function gkLandingFx(e) {
   }
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 20, r2: 340, life: .7, life0: .7, color: '#8f7b56' });
 }
+// 亮相結束：BOSS 戰開始（血條、音樂），馬上可以壓頂
 function gkWake(e) {
-  e.eliteAwake = true;
-  if (typeof coreBanner === 'function') coreBanner(GOURD_KING.name + '現身', '撞破牆壁衝出來了！', '#e8c27a');
-  systemNotice('⚠ ' + GOURD_KING.name + '撞破牆壁衝出來了！', true);
-  e.gm.laughAt = .5; e.gm.laughCd = 0;
+  e.eliteAwake = true; e.gkIntroT = 0;
+  e.gm.cd = 0; e.gm.laughCd = 0;
+  if (typeof gourdLaugh === 'function') gourdLaugh(e, true);
 }
 function gkEnrage(e) {
   e.gkEnraged = true;
