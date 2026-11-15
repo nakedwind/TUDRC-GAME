@@ -33,6 +33,7 @@ const GOURD = {
   hitMonsters: true,    // 壓頂也會打到其他怪物（不分敵我；葫蘆猴王也是）
   monsterDamageMul: 0.3,   // 打到怪物的傷害：打隊友傷害的幾成（0.3＝3 成）
   knockMonsters: true,  // 震波範圍內的怪物也會被震飛（推不動的怪，例如其他葫蘆猴、BOSS，只受傷不會飛）
+  shakeOutMice: true,   // 鑽在地底的花蓮老鼠會被震出地面、暈眩（跟被爆炸炸出來一樣）
   shockBuildingDamage: 15,   // 震波範圍內（沒被壓到）的建築受到的傷害：只晃一下、不會飛
   hopMax: 18,           // 震波範圍內的建築原地彈起來多高（像素）：最靠近葫蘆猴的
   hopMin: 7,            // 震波邊緣的建築彈多高（像素）
@@ -330,7 +331,7 @@ function gourdHitSentry(e, t) {
 // 壓頂打到其他怪物：落點圈裡的扣血（打隊友傷害 × monsterDamageMul），震波範圍內的往外震飛（推不動的不飛）
 function gourdHitMonsters(e, x, y, R, C) {
   const dmg = Math.max(1, Math.round((e.sentryDamage ?? 28) * C.monsterDamageMul));
-  for (const m of G.enemies) {
+  for (const m of [...G.enemies]) {
     if (m === e || m.dead || m.hp <= 0) continue;
     if (typeof blastHits === 'function' && !blastHits(m)) continue;   // 不同樓層打不到（js/pathfinding.js）
     if (typeof burrowUnderground === 'function' && burrowUnderground(m)) continue;   // 鑽在地底的老鼠壓不到
@@ -350,6 +351,9 @@ function gourdHitMonsters(e, x, y, R, C) {
     m.gourdToss = { t: 0, h: (C.tossHeight + (C.tossMinHeight - C.tossHeight) * k) * Math.min(1, mul), side: Math.cos(ang) >= 0 ? 1 : -1, bounced: false };   // 飛起來再落地
     if (typeof resetEnemyNavigation === 'function') resetEnemyNavigation(m);
   }
+  // 鑽在地底的花蓮老鼠：跟被爆炸炸到一樣，震出地面、暈眩（js/burrowing-mouse.js；範圍是壓頂範圍的 2 倍或再多 3 格，壓頂範圍內才扣血）
+  // 放在最後：剛被震出來的老鼠不會再被上面算一次傷害
+  if (C.shakeOutMice && typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, dmg);
 }
 function gourdCrushObstacle(e, o, dmg) {   // 跟 enemyAttackObstacle 一樣扣血，只是不揮手、一次壓一下；hitT 會讓建築閃紅、晃一下（js/render.js）
   if (o.type === 'camping_lights') return;
