@@ -958,6 +958,7 @@ function drawPlayer(p) {
     if (typeof applySlipTransform === 'function') applySlipTransform(ctx, p);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
     if (typeof applyWetWobble === 'function') applyWetWobble(ctx, p);   // 濕地板小滑：晃一下（js/wet-floor.js）
     if (typeof applyGourdTossTransform === 'function') applyGourdTossTransform(ctx, p);   // 被葫蘆猴震飛：飛起來（js/gourd-monkey.js）
+    if (typeof applyPoolJumpTransform === 'function') applyPoolJumpTransform(ctx, p);   // 從抽水機平台跳下去、摔在地上（js/pool-platform.js）
     if (typeof applyMothSleepTransform === 'function') applyMothSleepTransform(ctx, p);   // 人面蝶的睡眠鱗粉：搖晃、倒在地上（js/human-face-butterfly.js）
     ctx.imageSmoothingEnabled = false;
     const hitK = p.hitT > 0 ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出
@@ -1061,7 +1062,7 @@ function draw() {
   const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色
   // 🙈 完全遮住區（js/hide-zones.js）：腳踩進去就不畫，靠近邊緣慢慢淡出
-  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a); wadeDraw0(a, kind, fn); ctx.restore(); };
+  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a, kind) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a); wadeDraw0(a, kind, fn); ctx.restore(); };
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ floor: stampDrawFloor(d.stamp), y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
@@ -1185,6 +1186,8 @@ function draw() {
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (typeof ladderNearPlayer === 'function' && ladderNearPlayer()) { const l = ladderNearPlayer(); drawInteractPrompt(l.x, l.topY - 6, LADDER.prompt); }   // 坐救生圈到梯子底下：「爬梯子」（js/swim-ring.js）
     else if (typeof poolPlatformNearPlayer === 'function' && poolPlatformNearPlayer()) { const q = poolPlatformNearPlayer(); drawInteractPrompt(q.x, q.y - 6, POOL_PLATFORM.prompt); }   // 坐救生圈到抽水機平台旁邊：「上岸」（js/pool-platform.js）
+    else if (typeof poolPlatformJumpSpot === 'function' && poolPlatformJumpSpot()) { const q = poolPlatformJumpSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.jump.prompt); }   // 站在抽乾的平台邊上：跳下去（js/pool-platform.js）
+    else if (typeof swimRingShoreSpot === 'function' && swimRingShoreSpot()) { const q = swimRingShoreSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, SWIM_RING.shorePrompt); }   // 坐救生圈划到深水區邊上：收起泳圈（js/swim-ring.js）
     else if (typeof poolPlatformLeaveSpot === 'function' && poolPlatformLeaveSpot()) { const q = poolPlatformLeaveSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.leavePrompt); }   // 站在救生台上靠近深水：「下水」（按空白鍵坐救生圈離開；js/pool-platform.js）
     else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, near.portal.locked ? '鎖住了' : near.portal.at ? '進入' : '進入 ' + portalTargetName(near.portal));   // at＝同地圖傳送點：不顯示地圖名稱
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
@@ -1263,6 +1266,7 @@ function draw() {
   if (typeof drawFogV2Glow === 'function') drawFogV2Glow(ctx);   // 起霧 V2 的螢火蟲（黑幕上面才看得到）（js/fog-fx-v2.js）
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
+  if (typeof drawPoolJumpStars === 'function') drawPoolJumpStars(ctx);   // 從抽水機平台跳下來摔暈的星星（js/pool-platform.js）
   if (typeof drawSlipDizzyStars === 'function') drawSlipDizzyStars(ctx);   // 踩香蕉皮撞到東西頭暈的星星（js/golden-banana-king.js）
   if (typeof drawLootV2KeyBeams === 'function') drawLootV2KeyBeams(ctx);   // V2：地上鑰匙／碎片腳下的光柱（js/loot-fx-v2.js）
   if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）

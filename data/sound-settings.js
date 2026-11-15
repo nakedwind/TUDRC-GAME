@@ -135,6 +135,8 @@ const SOUND_SETTINGS = {
     "extras": {
       "TryingToOpenDoor": "打不開門_未剪輯.mp3",
       "WalkOnWater": "走在水中.mp3",
+      "StepEcho": "腳步回音.mp3",
+      "Jumpscare": "Jumpscare - Sound Effect_320k.mp3",
       "FootstepEcho": "腳步回音.mp3"
     },
     "meta": {
@@ -146,6 +148,14 @@ const SOUND_SETTINGS = {
         "label": "走在水中",
         "group": "其他"
       },
+      "StepEcho": {
+        "label": "腳步回音",
+        "group": "其他"
+      },
+      "Jumpscare": {
+        "label": "Jumpscare",
+        "group": "其他"
+      },
       "FootstepEcho": {
         "label": "腳步回音（池核走路）",
         "group": "溫特"
@@ -153,6 +163,10 @@ const SOUND_SETTINGS = {
     }
   },
   "clips": {
+    "Jumpscare": {
+      "from": 2763,
+      "to": 3361
+    },
     "TryingToOpenDoor": {
       "from": 113,
       "to": 732

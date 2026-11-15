@@ -460,6 +460,7 @@ function updateBlink(who, dt) {
 const TWO_FRAME_WALK = new Set(['ball']);   // 走路只輪流用 Walking01、02（不夾站立圖）的角色
 function pickCharacterFrame(set, who) {
   if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
+  if (who.poolDownT > 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 從抽水機平台跳下來摔在地上（js/pool-platform.js）
   const mothFrame = (who.mothSleep || who.mothWakeT > 0) && typeof mothSleepFrame === 'function' ? mothSleepFrame(set, who) : null;   // 吸了人面蝶的睡眠鱗粉：半閉眼 → 閉眼（js/human-face-butterfly.js）
   if (mothFrame) return mothFrame;
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
@@ -639,7 +640,9 @@ window.addEventListener('keydown', e => {
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else if (typeof useLadderNearPlayer === 'function' && useLadderNearPlayer()) {}   // 坐救生圈到梯子底下：收起救生圈爬上去（js/swim-ring.js）
+    else if (typeof usePoolPlatformJump === 'function' && usePoolPlatformJump()) {}   // 站在抽乾的平台邊上：跳下去（js/pool-platform.js）
     else if (typeof usePoolPlatformNearPlayer === 'function' && usePoolPlatformNearPlayer()) {}   // 坐救生圈到抽水機平台旁邊（深水時）：上岸（js/pool-platform.js）
+    else if (typeof useSwimRingShore === 'function' && useSwimRingShore()) {}   // 坐救生圈划到深水區邊上：收起泳圈、站到岸上（js/swim-ring.js）
     else if (typeof useSwimRingNearPlayer === 'function' && useSwimRingNearPlayer()) {}   // 深水區岸邊：坐上救生圈下水（js/swim-ring.js）
     else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
@@ -1590,6 +1593,7 @@ function updatePlayer(dt) {
     if (!anyMoveKey()) { p.moving = false; p.anim = 0; updateBlink(p, dt); return; }
     standUp();
   }
+  if (typeof poolJumpUpdate === 'function' && poolJumpUpdate(p, dt)) { p.moving = false; p.anim = 0; return; }   // 從抽水機平台跳下去、摔在地上頭暈（js/pool-platform.js）
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
   // 被撞飛、滑倒的滑行：碰撞優先——跟走路一樣，除了「這個位置有沒有被擋」，也檢查有沒有穿過邊緣碰撞（薄牆）
@@ -1615,9 +1619,11 @@ function updatePlayer(dt) {
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   const pushing = typeof bigPearlPlayerPush === 'function' && bigPearlPlayerPush(p, nx, ny, dx / len, dy / len);   // 頂到大珍珠：往前推，不自動往旁邊滑開（js/pearl-elder.js）
   // edgeWallCrossed：一步走太遠（衝刺、畫面卡一下）時，不會直接跳過薄牆（js/pathfinding.js）
+  const px0 = p.x, py0 = p.y;   // 走之前的位置（看有沒有被擋住，js/pool-platform.js 的「跳下去」）
   if (!playerBlocked(nx, p.y) && !edgeWallCrossed(p.x, p.y, nx, p.y, PLAYER.r)) p.x = nx; else if (!dy && !pushing) slideIntoGap(p, 'x', nx - p.x, step);
   if (!playerBlocked(p.x, ny) && !edgeWallCrossed(p.x, p.y, p.x, ny, PLAYER.r)) p.y = ny; else if (!dx && !pushing) slideIntoGap(p, 'y', ny - p.y, step);
   if (typeof swimRingAfterMove === 'function') swimRingAfterMove(p, dx, dy);   // 撞到深水跳提示、划上岸收起救生圈（js/swim-ring.js）
+  if (typeof poolPlatformAfterMove === 'function') poolPlatformAfterMove(p, dx, dy, px0, py0);   // 抽乾的平台上往邊上走被擋住：出現「跳下去」（js/pool-platform.js）
   if (p.dashPart > 0) {   // 衝刺中：身後留殘影（js/render.js 的 drawDashTrail）
     const now = performance.now() / 1000, tr = p.dashTrail || (p.dashTrail = []);
     if (!tr.length || now - tr[tr.length - 1].t >= DASH.trailGap) tr.push({ x: p.x, y: p.y, t: now });
@@ -1985,7 +1991,7 @@ function updatePlayerAttack(dt) {
   }
   updateAmmoHud();
   const queued = performance.now() - shotQueuedAt < SHOT_QUEUE * 1000;   // 剛點了一下（已經放開也算）
-  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.mothWakeT > 0 || p.slipDizzyT > 0 || p.vineCap || p.vineDazeT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中、被藤蔓吊走不開槍
+  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.mothWakeT > 0 || p.slipDizzyT > 0 || p.poolJump || p.poolDownT > 0 || p.vineCap || p.vineDazeT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中、被藤蔓吊走不開槍
   if (canFire) shotQueuedAt = -Infinity;   // 這一下開了：用掉
   if (wid === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈（js/flare.js）
   if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
