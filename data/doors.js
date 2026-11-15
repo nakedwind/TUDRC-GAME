@@ -25,6 +25,16 @@ const DOOR_MODES = {
 };
 // 上鎖的門要什麼鑰匙（物品 id，data/items.js）；random：隨機開關的門每隔幾秒（最短～最長）動一次
 const DOOR_LOCKS = { key: 'backroom-door-key', chain: 'anomaly-key' };
+// 捷運站的封鎖入口也算門：地圖編輯器選取後，「🚪 門」下拉選單改成選「要什麼才能解封」（存在 stamp.lockItem；遊戲在 js/mrt-locks.js）
+// MRT_EXIT_TILES＝哪些素材是封鎖入口；MRT_EXIT_KEYS＝可以選的道具（物品 id → 選單文字），解封時用掉；none＝不用鑰匙、一開始就開著
+const MRT_EXIT_TILES = ['tile_mrt_exit_2_sealed', 'tile_mwgnngo0'];   // 原版、池核版（Poolcore_mrt-exit-2-sealed）
+const MRT_EXIT_KEYS = {
+  'anomaly-key': '要異質鑰匙（預設，用掉一把）',
+  'backroom-door-key': '要後室門鑰匙（用掉一把）',
+  'storage-locker-key': '要置物櫃鑰匙（用掉一把）',
+  'youyou-card': '要好遊卡（用掉一張）',
+  none: '不用鑰匙（一開始就開著）',
+};
 const DOOR_RANDOM = { every: [10, 30] };
 // 應變中心的房門（只是圖，不會開關）：門前沒有出入口的＝鎖住，按空白鍵時溫特會說一句話（js/locked-doors.js）
 // 每扇門的台詞可以在地圖編輯器另外寫；沒寫就用 LOCKED_DOOR_TEXT（\n＝換下一句）

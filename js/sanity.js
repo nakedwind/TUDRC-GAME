@@ -1,7 +1,7 @@
 // ============================================================
 //  溫特的 SP＝理智
 //  ・SP 不會自己恢復，只有喝杏仁水（背包／E 鍵）才會恢復。換地圖、重新整理也不會補滿（會記住剩多少）。
-//  ・SP 低於 grayFrom（80）開始，SP 越低遊戲畫面越灰、越暗（只有地圖畫面，介面不會變灰）。
+//  ・SP 低於 grayFrom（80）開始，SP 越低遊戲畫面越灰、越暗（只有地圖畫面，介面不會變灰；角色頭上的對話泡泡、互動提示也不會變灰）。
 //  ・SP 低於 heartbeatBelow（60）時，聽得到自己的心跳聲；SP 越低越大聲。
 //  ・SP 低於 weirdBelow（50）時，偶爾有怪聲；SP 越低越大聲、越頻繁。
 //  ・SP 低於 swayBelow（40）時開始頭暈：視線不規則地繞圈飄。越低越嚴重。
@@ -115,13 +115,32 @@ function sanityAfterDraw() {
   const g = sanityGhostCv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height); g.drawImage(cv, 0, 0);
 }
 
-// 每一幀：變灰、記住 SP、低理智提示
+// 現在要灰、暗到什麼程度（CSS 濾鏡字串；不用變灰＝空字串）
+function sanityGrayFilter() {
+  if (typeof G === 'undefined' || !G) return '';
+  const loss = (SANITY.grayFrom > 0 ? Math.max(0, Math.min(1, (SANITY.grayFrom - G.guide) / SANITY.grayFrom)) : 0) * sanityCalm();
+  return loss > .005 ? `grayscale(${(loss * SANITY.grayMax).toFixed(3)}) brightness(${(1 - loss * SANITY.dimMax).toFixed(3)})` : '';
+}
+// 遊戲世界畫完、還沒畫頭上的泡泡和互動提示之前呼叫（js/render.js）：只把已經畫好的地圖、角色變灰變暗。
+// 之後才畫的對話泡泡、提示框維持原本的顏色，在池核（SP 會掉）跟在應變中心看起來一樣
+let sanityGrayCv = null;
+function sanityGrayWorld(ctx) {
+  const filter = sanityGrayFilter(); if (!filter || !('filter' in ctx)) return;
+  const cv = ctx.canvas;
+  const tmp = sanityGrayCv || (sanityGrayCv = document.createElement('canvas'));
+  if (tmp.width !== cv.width || tmp.height !== cv.height) { tmp.width = cv.width; tmp.height = cv.height; }
+  const g = tmp.getContext('2d'); g.clearRect(0, 0, tmp.width, tmp.height); g.drawImage(cv, 0, 0);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'copy'; ctx.filter = filter;
+  ctx.drawImage(tmp, 0, 0);
+  ctx.restore();
+}
+
+// 每一幀：記住 SP、低理智提示（變灰在 sanityGrayWorld）
 (function sanityLoop() {
   requestAnimationFrame(sanityLoop);
   const cv = document.getElementById('cv'); if (!cv || typeof G === 'undefined' || !G) return;
-  const sp = G.guide, loss = (SANITY.grayFrom > 0 ? Math.max(0, Math.min(1, (SANITY.grayFrom - sp) / SANITY.grayFrom)) : 0) * sanityCalm();
-  const filter = loss > .005 ? `grayscale(${(loss * SANITY.grayMax).toFixed(3)}) brightness(${(1 - loss * SANITY.dimMax).toFixed(3)})` : '';
-  if (cv.style.filter !== filter) cv.style.filter = filter;
+  const sp = G.guide;
+  if (cv.style.filter) cv.style.filter = '';   // 變灰改在畫面裡做（sanityGrayWorld），不再整張畫布套濾鏡：頭上的泡泡、互動提示才不會一起變灰
   const spWho = spOwner();
   if (spWho) { if (guideSPRecords[spWho] !== sp) { guideSPRecords[spWho] = sp; if (performance.now() - sanitySavedAt > 1000) { sanitySavedAt = performance.now(); if (typeof saveGuideSP === 'function') saveGuideSP(); } } }
   else if (sanitySP !== sp) {

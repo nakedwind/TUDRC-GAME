@@ -21,6 +21,7 @@ const SWIM_RING = {
   reach: 12,           // 離深水區幾點以內算「在岸邊」（可以按空白鍵下水）
   shorePrompt: '收起泳圈',   // 溫特坐救生圈划到深水區邊上時的提示（按空白鍵收起救生圈、站到岸上）
   shoreReach: 24,      // 划到邊上時，岸上離救生圈多遠以內有站得住的地方才出現提示（點）
+  shoreNear: .75,      // 溫特離「不是深水的地方」幾格內，才會出現「收起泳圈」
   speed: 60,           // 划水速度＝平常走路的幾 %（地圖沒設定時用這個）
   image: 'images/Poolcore/Poolcore_swimring.png',
   ringW: 29,           // 救生圈畫多寬（點）：跟角色圖同比例（64 點的角色坐得進去）
@@ -73,11 +74,12 @@ const swimMover = () => swimCurActor || (typeof G !== 'undefined' && G ? G.playe
 function deepWaterBlocksAlly(x, y) { return !(swimCurActor && (swimCurActor.swimRing || swimCurActor.drowning)) && deepWaterAtPoint(x, y); }   // 溺水中的隊友（js/pool-tide.js）可以自己游出來
 // 怪物尋路、建築放置用：這格是深水（不管有沒有人坐救生圈，怪物和建築都不能進去）
 function deepWaterBlocksCell(c, r) { return isDeepWaterCell(c, r); }
-// 溫特的碰撞（js/game.js 的 playerBlocked）：沒坐救生圈就不能踩進深水；
+// 溫特的碰撞（js/game.js 的 playerBlocked）：沒坐救生圈就不能從岸上踩進深水；
+// 已經泡在深水裡（水漲回來時人在深水區＝溺水，js/pool-tide.js）就不擋：原地不動、可以自己走回岸上，但走上岸之後就下不去了。
 // 坐救生圈時反過來：划不出深水區（停在邊上，要按「收起泳圈」才上岸）。溫特腳下已經不是深水（例如水剛被抽乾）就不擋，讓他可以自動收起
 function deepWaterBlocksPlayer(x, y) {
-  if (!riding()) return deepWaterAtPoint(x, y);
   const p = G.player;
+  if (!riding()) return deepWaterAtPoint(x, y) && !deepWaterAtPoint(p.x, p.y);
   return deepWaterAtPoint(p.x, p.y) && !deepWaterAtPoint(x, y);
 }
 // 划水速度（給 js/build.js 的 slowFactorAt）
@@ -115,7 +117,7 @@ function swimRingAfterMove(p, dx, dy) {
     if (!inDeep) p.swimRing = false;   // 整個人都不在深水裡了（水被抽乾）：收起救生圈。平常划到邊上會被擋住，要自己按「收起泳圈」
     return;
   }
-  if (!(dx || dy) || !deepWaterCells().size) return;
+  if (!(dx || dy) || !deepWaterCells().size || p.drowning) return;   // 溺水中：頭上已經在喊要救生圈（js/pool-tide.js），不再跳這個提示
   const len = Math.hypot(dx, dy), ahead = PLAYER.r + 6;
   if (deepWaterAtPoint(p.x + dx / len * ahead, p.y + dy / len * ahead)) p.swimHintAt = performance.now();   // 往深水走：頭上跳提示
 }
@@ -124,6 +126,12 @@ function swimRingAfterMove(p, dx, dy) {
 function swimRingShoreSpot() {
   const p = typeof G !== 'undefined' && G && G.player;
   if (!p || !p.swimRing || p.hp <= 0 || !deepWaterAtPoint(p.x, p.y)) return null;
+  // 先看溫特離「不是深水的地方」夠不夠近（SWIM_RING.shoreNear 格內），太遠就不出現提示
+  const near = SWIM_RING.shoreNear * CELL;
+  let close = false;
+  for (let d = 2; d <= near && !close; d += 2)
+    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; if (!deepWaterAtPoint(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d)) { close = true; break; } }
+  if (!close) return null;
   const r = PLAYER.r; let best = null;
   p.swimRing = false;   // 先當作收起救生圈，看岸上那個點站不站得住
   try {
@@ -149,6 +157,12 @@ function useSwimRingShore() {
 // ---- 空白鍵：在岸邊 → 坐上救生圈下水（js/game.js 的互動鍵）----
 function useSwimRingNearPlayer() {
   const p = G && G.player; if (!p || p.sitting) return false;
+  if (p.drowning) {   // 溺水中（js/pool-tide.js）：原地坐上救生圈，位置不變
+    if (!hasSwimRing()) { sfx('error'); systemNotice(SWIM_RING.noRingText, true); return true; }
+    p.swimRing = true; p.drowning = false; p.swimHintAt = 0;
+    swimAllyNextAt = performance.now() + swimAllyDelay();
+    return true;
+  }
   const spot = deepWaterNearPlayer(); if (!spot) return false;
   if (!hasSwimRing()) { sfx('error'); systemNotice(SWIM_RING.noRingText, true); return true; }
   const keepX = p.x, keepY = p.y;

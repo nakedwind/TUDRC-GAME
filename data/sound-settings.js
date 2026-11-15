@@ -66,6 +66,7 @@ const SOUND_SETTINGS = {
     "pearlHit": 1.7,
     "pearlHurt": 1.85,
     "pearlShot": 1.45,
+    "poolDrownMate": 0.6,
     "powerOn": 1.4,
     "rangedShot": 1.75,
     "reload": 0.8,

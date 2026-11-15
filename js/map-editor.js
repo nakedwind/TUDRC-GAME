@@ -3205,20 +3205,27 @@ function refreshBaseCollisionPanel() {
   }
 }
 // ---- 門：選到一扇門時，可以設定手動門／自動門 ----
+// 捷運站的封鎖入口（data/doors.js 的 MRT_EXIT_TILES）也算門：同一個下拉選單改成選「要什麼才能解封」（stamp.lockItem，遊戲在 js/mrt-locks.js）
+const isMrtExitStamp = s => !!s && typeof MRT_EXIT_TILES !== 'undefined' && MRT_EXIT_TILES.includes(s.id);
 function selectedDoorStamp() {
   if (typeof DOOR_TILES === 'undefined' || selections.length !== 1 || selections[0].type !== 'stamp') return null;
   const s = curMap().stamps[selections[0].index];
-  return s && DOOR_TILES[s.id] ? s : null;
+  return s && (DOOR_TILES[s.id] || isMrtExitStamp(s)) ? s : null;
 }
 function refreshDoorControl() {
   const box = document.getElementById('selDoorControl'), select = document.getElementById('selDoorMode');
   const s = selectedDoorStamp();
   box.classList.toggle('hidden', !s);
   if (!s) return;
-  if (!select.options.length) for (const [value, label] of Object.entries(DOOR_MODES)) {
-    const o = document.createElement('option'); o.value = value; o.textContent = label; select.appendChild(o);
+  const mrt = isMrtExitStamp(s), kind = mrt ? 'mrt' : 'door';
+  if (select.dataset.kind !== kind) {   // 一般的門和捷運入口用不同的選項：換了種類就重排
+    select.dataset.kind = kind; select.innerHTML = '';
+    for (const [value, label] of Object.entries(mrt ? MRT_EXIT_KEYS : DOOR_MODES)) {
+      const o = document.createElement('option'); o.value = value; o.textContent = label; select.appendChild(o);
+    }
   }
-  select.value = DOOR_MODES[s.doorMode] ? s.doorMode : 'manual';
+  if (mrt) select.value = MRT_EXIT_KEYS[s.lockItem] ? s.lockItem : 'anomaly-key';
+  else select.value = DOOR_MODES[s.doorMode] ? s.doorMode : 'manual';
   if (typeof refreshMemoryDoorFields === 'function') refreshMemoryDoorFields(s, (field, value) => {   // 記憶之門：鑰匙、劇情（js/memory-door-editor.js）
     pushUndo();
     if (value) s[field] = value; else delete s[field];
@@ -3229,6 +3236,12 @@ function refreshDoorControl() {
 document.getElementById('selDoorMode').addEventListener('change', e => {
   const s = selectedDoorStamp(); if (!s) return;
   pushUndo();
+  if (isMrtExitStamp(s)) {   // 捷運入口：要什麼才能解封（異質鑰匙是預設，不另外存）
+    if (e.target.value !== 'anomaly-key') s.lockItem = e.target.value; else delete s.lockItem;
+    saveMaps(); draw(); refreshDoorControl();
+    setStatus('捷運入口：' + MRT_EXIT_KEYS[e.target.value], '#7ee0c0');
+    return;
+  }
   if (e.target.value !== 'manual') s.doorMode = e.target.value; else delete s.doorMode;   // 自由開關是預設，不另外存
   saveMaps(); draw(); refreshDoorControl();
   setStatus('已設為「' + DOOR_MODES[e.target.value] + '」', '#7ee0c0');

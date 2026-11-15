@@ -1062,7 +1062,7 @@ function draw() {
   const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色
   // 🙈 完全遮住區（js/hide-zones.js）：腳踩進去就不畫，靠近邊緣慢慢淡出
-  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a, kind) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a); wadeDraw0(a, kind, fn); ctx.restore(); };
+  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a, kind) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a, kind); wadeDraw0(a, kind, fn); ctx.restore(); };
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ floor: stampDrawFloor(d.stamp), y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
@@ -1181,7 +1181,8 @@ function draw() {
     if (typeof drawPoolTideBubble === 'function') drawPoolTideBubble();   // 水漲回來：溫特「一定有開關可以把這些水抽走。」（js/pool-tide.js）   // 想走進深水區：溫特頭上「好像可以拿救生圈做點什麼……」（js/swim-ring.js）
     if (mate) drawTowerPrompts(mate, mate.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
     if (G.running && typeof drawRepairPrompt === 'function' && !(typeof playerChannel !== 'undefined' && playerChannel)) drawRepairPrompt();   // 身上有工具箱、旁邊有受損的建築：「R 修理」（js/equipment.js）
-    if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
+    if (typeof poolPlayerDrowning === 'function' && poolPlayerDrowning()) drawInteractPrompt(G.player.x, G.player.y + 50, POOL_TIDE.ringPrompt);   // 溺水中：腳下「空白鍵／使用救生圈」（js/pool-tide.js），最優先
+    else if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (typeof ladderNearPlayer === 'function' && ladderNearPlayer()) { const l = ladderNearPlayer(); drawInteractPrompt(l.x, l.topY - 6, LADDER.prompt); }   // 坐救生圈到梯子底下：「爬梯子」（js/swim-ring.js）
@@ -1283,6 +1284,7 @@ function draw() {
   if (typeof drawCooking === 'function') drawCooking(ctx);
   if (typeof drawMealFx === 'function') drawMealFx(ctx);   // 餐廳：正在吃的餐盤冒熱氣（js/meal.js）   // 爐灶：爐火、鍋上的食物、蒸氣、進度圈（js/cooking.js）
   if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
+  if (typeof sanityGrayWorld === 'function') sanityGrayWorld(ctx);   // SP 低：到這裡為止畫好的遊戲畫面變灰變暗；下面的泡泡、提示不變灰（js/sanity.js）
   // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
   drawInteractionPrompts();   // 互動提示（開門、對話、拾取…）：黑幕之上，暗處也看得到
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
@@ -1375,6 +1377,7 @@ function draw() {
   if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
   drawBaseHpTopBar(ctx, cv);   // 戰鬥區域：畫面最上方的基地血條
   if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
+  if (typeof drawPoolTideNotice === 'function') drawPoolTideNotice(ctx, cv);   // 池核：「水位即將上升／下降……」（js/pool-tide.js）
   drawFieldMemberLocator();
 }
 // 戰鬥區域：畫面最上方（離上緣 2px）的基地血條。規則跟基地身上的血條一樣（目前血量 / 總血量，依剩餘 HP 變色）

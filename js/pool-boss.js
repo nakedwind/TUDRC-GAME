@@ -119,7 +119,7 @@ function poolBossLeap(pb, dt) {
   // 前面一段往上跳，跳到最高再一頭栽下去，最後沉到水面下
   e.slimeLift = p < D.splashAt ? Math.sin(Math.PI * p / D.splashAt) * h * D.height : -Math.min(1, (p - D.splashAt) / (1 - D.splashAt)) * h * D.sink;
   e.forceFrame = art.air || null;
-  if (!L.splashed && p >= D.splashAt) { L.splashed = true; poolBossSplash(e, 'dive'); }   // 入水的那一刻：大水花
+  if (!L.splashed && p >= D.splashAt) { L.splashed = true; poolBossSplash(e, 'dive'); if (typeof sfxAt === 'function') sfxAt('poolBossDive', e.x, e.y, 1, 'pool-boss-dive'); }   // 入水聲：音效編輯器的 poolBossDive   // 入水的那一刻：大水花
   if (p >= 1) {   // 整隻沉下去了：變成水裡的影子（打不到）
     pb.leap = null; e.slimeLift = 0; e.forceFrame = null;
     pb.sub = true; pb.t = poolBossRand(P.dive); poolBossShow(pb, false);

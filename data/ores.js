@@ -30,6 +30,10 @@ const ORE_TYPES = {
       [
         0,
         1
+      ],
+      [
+        1,
+        1
       ]
     ],
     "blasts": 1

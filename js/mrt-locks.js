@@ -5,13 +5,20 @@
 //  ・入口（exit）：封鎖時最下面一排擋路；用掉一把異質鑰匙解封，圖換成沒封鎖的出口（解封是永久的，存在 MRT_STORE）。
 //    入口裡面如果有出入口（通往捷運地圖），封鎖時不會作用。
 //    地圖可以設 "mrtExitKeys": 數字（data/maps.js）：這張地圖的封鎖入口要幾把異質鑰匙才解得開（沒寫＝1 把）。
+//    每個入口要什麼才能解封，可以在地圖編輯器選取後用「🚪 門」下拉選單改（stamp.lockItem，選項在 data/doors.js 的 MRT_EXIT_KEYS；
+//    'none'＝不用鑰匙、一開始就開著）。沒設＝照下面 MRT_LOCKS 的 item（異質鑰匙）。
 // ============================================================
+const MRT_EXIT_SEALED = { kind: 'exit', item: 'anomaly-key', consume: true, unit: '把', done: '封鎖解開了，可以進去了', sound: 'mrtUnlock' };   // 提示文字照要的道具組（mrtLockedText、mrtLockPrompt）
 const MRT_LOCKS = {
   tile_mrt_ticket_gate: { kind: 'gate', item: 'youyou-card', consume: true, unit: '張', open: [1], hole: [26 / 120, 0, 68 / 120, 1],   // 門翼完整範圍：原圖 x=26～94，涵蓋整張高度，避免殘留紅邊。
     locked: '閘門關著（需要好遊卡）', use: '刷好遊卡', done: '嗶！閘門打開了', sound: 'mrtGate' },   // sound：音效編輯器裡的名稱
-  tile_mrt_exit_2_sealed: { kind: 'exit', item: 'anomaly-key', consume: true, unit: '把', openTile: 'tile_mrt_exit_2',
-    locked: '入口被封鎖了（需要異質鑰匙）', use: '用異質鑰匙解開封鎖', done: '封鎖解開了，可以進去了', sound: 'mrtUnlock' },
+  tile_mrt_exit_2_sealed: { ...MRT_EXIT_SEALED, openTile: 'tile_mrt_exit_2' },
+  tile_mwgnngo0: { ...MRT_EXIT_SEALED, openTile: 'tile_mwgdrgpy' },   // 池核版：Poolcore_mrt-exit-2-sealed.png，解封後換成 Poolcore_mrt-exit-2.png
 };
+// 這個鎖要什麼道具：封鎖的入口照地圖編輯器的設定（stamp.lockItem），沒設或不認得就用 MRT_LOCKS 的 item
+const mrtLockItem = l => l.cfg.kind === 'exit' && l.stamp.lockItem && l.stamp.lockItem !== 'none' && typeof MRT_EXIT_KEYS !== 'undefined' && MRT_EXIT_KEYS[l.stamp.lockItem] ? l.stamp.lockItem : l.cfg.item;
+const mrtLockUnit = l => mrtLockItem(l) === l.cfg.item ? (l.cfg.unit || '支') : mrtLockItem(l) === 'youyou-card' ? '張' : '把';
+const mrtLockItemName = l => (itemById(mrtLockItem(l)) || {}).name || '鑰匙';
 const MRT_GATE_OPEN_SECONDS = .5;
 const MRT_STORE = 'tudrc_mrt_unlocked_v1';   // 永久解封的入口（地圖 id → [位置…]）
 const MRT_YOUYOU_CHANCE = .3;               // 打開置物櫃找到好遊卡的機率
@@ -45,7 +52,7 @@ function setupMrtLocks() {
     const t = mapTileById(s.id); if (!t) continue;
     const o = stampSolidOrigin(s), w = mapTileW(t), h = mapTileH(t), row = o.r + h - 1;   // 擋路格照像素微調對齊圖片（js/maploader.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
-    const lock = { stamp: s, cfg, open: cfg.kind === 'exit' && perm.includes(mrtToken(s)), cells: [], added: [],
+    const lock = { stamp: s, cfg, open: cfg.kind === 'exit' && (perm.includes(mrtToken(s)) || s.lockItem === 'none'), cells: [], added: [],   // none：編輯器設成「不用鑰匙」
       x: x0 + w * CELL / 2, top: y0, bottom: y0 + h * CELL, c0: o.c, c1: o.c + w - 1, r0: o.r, r1: row };
     for (let dc = 0; dc < w; dc++) lock.cells.push({ key: (o.c + dc) + ',' + row, dc, off: o.off });
     G.mrtLocks.push(lock);
@@ -91,7 +98,7 @@ function mrtStampHole(s) {
   return lock && lock.open ? cfg.hole : null;
 }
 // 捷運入口裡面的出入口：走進去播下樓梯的腳步聲（js/game.js 的 enterPortal）
-const MRT_STAIR_TILES = ['tile_mrt_exit_2', 'tile_mrt_exit_2_sealed'];
+const MRT_STAIR_TILES = ['tile_mrt_exit_2', 'tile_mrt_exit_2_sealed', 'tile_mwgdrgpy', 'tile_mwgnngo0'];   // 後兩個是池核版
 function mrtStairPortal(pt) {
   return !!MAP && (MAP.stamps || []).some(s => {
     if (!MRT_STAIR_TILES.includes(s.id)) return false;
@@ -126,15 +133,15 @@ function mrtLockNearPlayer() {
 const mrtLabelY = l => Math.max(l.top, l.bottom - 2 * CELL) - 4;
 // 要幾個道具：封鎖的入口照地圖的 mrtExitKeys（沒寫＝1）
 const mrtLockNeed = l => l.cfg.kind === 'exit' ? Math.max(1, Math.floor(Number(MAP && MAP.mrtExitKeys) || 1)) : 1;
-const mrtLockedText = l => mrtLockNeed(l) > 1 ? '入口被封鎖了（需要 ' + mrtLockNeed(l) + ' 把異質鑰匙）' : l.cfg.locked;
+const mrtLockedText = l => l.cfg.kind !== 'exit' ? l.cfg.locked : '入口被封鎖了（需要' + (mrtLockNeed(l) > 1 ? ' ' + mrtLockNeed(l) + ' ' + mrtLockUnit(l) : '') + mrtLockItemName(l) + '）';
 function mrtLockPrompt(l) {
-  const n = supplyInventory.get(l.cfg.item) || 0, need = mrtLockNeed(l);
-  if (n >= need) return need > 1 ? '用 ' + need + ' 把異質鑰匙解開封鎖' : l.cfg.use;
-  return n > 0 ? mrtLockedText(l) + '，還差 ' + (need - n) + ' 把' : mrtLockedText(l);
+  const n = supplyInventory.get(mrtLockItem(l)) || 0, need = mrtLockNeed(l);
+  if (n >= need) return l.cfg.kind !== 'exit' ? l.cfg.use : '用' + (need > 1 ? ' ' + need + ' ' + mrtLockUnit(l) : '') + mrtLockItemName(l) + '解開封鎖';
+  return n > 0 ? mrtLockedText(l) + '，還差 ' + (need - n) + ' ' + mrtLockUnit(l) : mrtLockedText(l);
 }
 function useMrtLockNearPlayer() {
   const l = mrtLockNearPlayer(); if (!l) return false;
-  const n = supplyInventory.get(l.cfg.item) || 0, need = mrtLockNeed(l);
+  const item = mrtLockItem(l), n = supplyInventory.get(item) || 0, need = mrtLockNeed(l);
   if (n > 0 && n < need) {   // 鑰匙不夠（例如要 2 把只有 1 把）：飄字說還差幾把
     sfx('error'); flash(mrtLockPrompt(l), l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
   }
@@ -142,7 +149,7 @@ function useMrtLockNearPlayer() {
     if (typeof winterSay === 'function' && winterSay(lockedNeedKeyText())) return true;
     sfx('error'); flash(mrtLockedText(l), l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
   }
-  if (l.cfg.consume) { if (n <= need) supplyInventory.delete(l.cfg.item); else supplyInventory.set(l.cfg.item, n - need); }
+  if (l.cfg.consume) { if (n <= need) supplyInventory.delete(item); else supplyInventory.set(item, n - need); }
   l.open = true;
   if(l.cfg.kind==='gate'){l.opening=true;l.openProgress=0;}
   applyMrtLock(l);
@@ -152,7 +159,7 @@ function useMrtLockNearPlayer() {
   }
   if (typeof sfxAt === 'function') sfxAt(l.cfg.sound, l.x, l.bottom, .7, 'mrt-lock');
   flash(l.cfg.done, l.x, mrtLabelY(l), '#9ff0c0', 2);
-  if (l.cfg.consume) systemNotice('消耗 ' + need + ' ' + (l.cfg.unit || '支') + itemById(l.cfg.item).name);
+  if (l.cfg.consume) systemNotice('消耗 ' + need + ' ' + mrtLockUnit(l) + mrtLockItemName(l));
   for (const a of [...G.towers, ...G.npcs]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
   if (typeof updateHUD === 'function') updateHUD();
   if (typeof saveGame === 'function') saveGame();

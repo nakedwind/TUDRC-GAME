@@ -1035,6 +1035,7 @@ function buildLayerOverdraw(items) {
   // 同一個圖層裡的物件：編輯器的物件清單可以拖曳排前後（m.stamps 越後面＝越前面）；格子圖算在同一層物件的下面
   const sub = it => it.kind === 'stamp' ? (MAP.stamps || []).indexOf(it.stamp) : -1;
   const higher = (a, x) => a.li > x.li || (a.li === x.li && sub(a) > sub(x));
+  const groupLayers = mapGroupLayerBoxes();
   for (const x of items) {
     x.overdraw = [];
     for (const a of [...items, ...flats]) {
@@ -1046,8 +1047,38 @@ function buildLayerOverdraw(items) {
       if (cx1 <= cx0 || cy1 <= cy0) continue;
       x.overdraw.push({ a, clip: [cx0, cy0, cx1 - cx0, cy1 - cy0] });
     }
-    x.overdraw.sort((p, q) => p.a.li - q.a.li || sub(p.a) - sub(q.a) || order.get(p.a) - order.get(q.a));   // 依編輯器圖層（同層照前後）由下往上補畫
+    // 整層混合的圖層（例如池核深水區用「色彩增值」疊上去的水）：地面那一輪就整層畫掉了，
+    // 但立體物（例如抽水機平台的方塊）是之後才跟角色一起排序畫的，會蓋在水上面、看起來沒被淹到。
+    // 所以「圖層比這個立體物高」的混合圖層，也要在這個立體物身上用同樣的混合模式再補一次（跟編輯器的疊法一樣）。
+    if (!itemOn2F(x)) {
+      const xb = x.vis || x;
+      for (const g of groupLayers) {
+        if (g.li <= x.li) continue;
+        const list = []; let gx0 = Infinity, gy0 = Infinity, gx1 = -Infinity, gy1 = -Infinity;
+        for (const b of g.boxes) {
+          if (b.x1 <= xb.x0 || b.x0 >= xb.x1 || b.y1 <= xb.y0 || b.y0 >= xb.y1) continue;
+          list.push(b.s); gx0 = Math.min(gx0, b.x0); gy0 = Math.min(gy0, b.y0); gx1 = Math.max(gx1, b.x1); gy1 = Math.max(gy1, b.y1);
+        }
+        if (!list.length) continue;
+        const cx0 = Math.max(gx0, xb.x0), cy0 = Math.max(gy0, xb.y0), cx1 = Math.min(gx1, xb.x1), cy1 = Math.min(gy1, xb.y1);
+        x.overdraw.push({ a: { li: g.li, group: g.lid }, list, clip: [cx0, cy0, cx1 - cx0, cy1 - cy0] });
+      }
+    }
+    x.overdraw.sort((p, q) => p.a.li - q.a.li || (p.a.group ? 1 : 0) - (q.a.group ? 1 : 0) || sub(p.a) - sub(q.a) || (order.get(p.a) ?? 0) - (order.get(q.a) ?? 0));   // 依編輯器圖層（同層照前後）由下往上補畫
   }
+}
+// 整層混合的圖層裡每張圖蓋到的範圍（給上面的「補一次混合圖層」用）
+function mapGroupLayerBoxes() {
+  const out = [];
+  for (const [lid, list] of mapStampGroups().grouped) {
+    const boxes = list.map(s => {
+      const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
+      const fw = mapStampW(s, t) * CELL, fh = mapStampH(s, t) * CELL, v = stampHasTransform(s) ? stampVisualBox(s, x0, y0, fw, fh) : null;
+      return v ? { s, x0: v.x0, y0: v.y0, x1: v.x1, y1: v.y1 } : { s, x0, y0, x1: x0 + fw, y1: y0 + fh };
+    });
+    out.push({ lid, li: MAP_LAYER_ORDER.indexOf(lid), boxes });
+  }
+  return out;
 }
 function drawOccluderItem(ctx, it) {
   if (it.kind === 'cell') {
@@ -1107,7 +1138,32 @@ function occluderImageReady(x) {
   if (shown === false) return true;
   return !!tileImage(shown || mapTileById(id));   // 開啟圖尚未載好時，下一幀繼續重建，避免快取空白。
 }
+// 混合圖層補在立體物身上：小畫布畫那幾張水的圖，再用立體物的形狀裁切，最後用圖層的混合模式（例如色彩增值）貼回畫面
+function drawGroupOverPatch(ctx, it, od) {
+  const [cx, cy, cw, ch] = od.clip, lid = od.a.group;
+  const alpha = typeof poolLayerAlpha === 'function' ? poolLayerAlpha(lid) : 1;   // 池核的水位：水退掉時這層變淡、消失
+  if (alpha <= 0) return;
+  const sig = occluderStateSig(it) + '|' + Math.round(alpha * 20);
+  if (!od.patch || !od.ready || od.sig !== sig) {
+    const c = od.patch || (od.patch = document.createElement('canvas'));
+    c.width = Math.max(1, Math.ceil(cw)); c.height = Math.max(1, Math.ceil(ch));
+    const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+    g.save(); g.translate(-(OX + cx), -(OY + cy));
+    mapBlendSuspend = true;
+    try {
+      for (const s of od.list) if (!(G.mapDestroyed && G.mapDestroyed.has(s))) drawMapStampImg(g, s);
+      g.globalCompositeOperation = 'destination-in';
+      drawOccluderItem(g, it);                       // 只留立體物有畫東西的地方
+    } finally { mapBlendSuspend = false; }
+    g.restore();
+    od.ready = occluderImageReady(it) && od.list.every(s => !!tileImage(mapTileById(s.id)));   // 圖還沒載完：下一幀再做一次
+    od.sig = sig;
+  }
+  ctx.save(); ctx.globalCompositeOperation = mapLayerBlend(lid) || 'source-over'; ctx.globalAlpha *= alpha;   // 跟地面那一輪整層畫的時候一樣
+  ctx.drawImage(od.patch, OX + cx, OY + cy); ctx.restore();
+}
 function drawOverdrawPatch(ctx, it, od) {
+  if (od.a.group) { drawGroupOverPatch(ctx, it, od); return; }
   const [cx, cy, cw, ch] = od.clip;
   const sig = occluderStateSig(it) + '|' + occluderStateSig(od.a);
   if (!od.patch || !od.ready || od.sig !== sig) {

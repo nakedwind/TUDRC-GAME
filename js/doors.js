@@ -137,14 +137,18 @@ function doorWallBottom(R) {
   doorWallBotCache.set(R.s, { occ, bot });
   return bot;
 }
-function doorActorClip(ctx, a) {
+// kind：'char'（溫特、隊員、NPC）或 'enemy'（怪物）；看的是「腳底」的位置（跟 js/render.js 排前後用的腳底一樣），
+// 不是身體中心：不然站在門口、腳已經在牆下緣前面的人，身體中心還在牆下緣上面，會被當成在門裡面、整個被牆蓋掉
+const DOOR_ACTOR_FOOT = { char: 16, enemy: 13 };
+function doorActorClip(ctx, a, kind = 'char') {
   if (!a || !Number.isFinite(a.x)) return false;
   const half = ((typeof PLAYER !== 'undefined' && PLAYER.drawSize) || 64) / 2;
+  const foot = a.y + (DOOR_ACTOR_FOOT[kind] ?? DOOR_ACTOR_FOOT.char);
   for (const R of openCutoutDoors()) {
     const o = R.outer, i = R.inner;
-    if (a.x < o.x - half || a.x > o.x + o.w + half || a.y < o.y) continue;   // 角色圖跟門左右重疊、腳在門頂以下
+    if (a.x < o.x - half || a.x > o.x + o.w + half || foot < o.y) continue;   // 角色圖跟門左右重疊、腳在門頂以下
     const bot = doorWallBottom(R);
-    if (a.y >= bot) continue;   // 已經走出牆的下緣（站在牆前面）：照常畫
+    if (foot >= bot) continue;   // 腳已經走出牆的下緣（站在牆前面）：照常畫
     ctx.beginPath(); ctx.rect(i.x, o.y, i.w, bot - o.y); ctx.rect(-1e5, bot, 2e5, 1e5); ctx.clip();
     return true;
   }

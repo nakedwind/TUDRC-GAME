@@ -1,13 +1,13 @@
 // ============================================================
-//  背景音樂：安全區（基地）放基地音樂；戰鬥地圖目前不放（BOSS 音樂另外在 js/boss-music.js）；換地圖時淡出淡入。
-//  音檔、這首自己的音量在「音效編輯器」的「音樂」分類（baseMusic）調整；
+//  背景音樂：安全區（基地）放基地音樂；戰鬥地圖放戰鬥地圖音樂（battleMusic，無限循環；BOSS 音樂另外在 js/boss-music.js，會疊在上面一起播）；換地圖時淡出淡入。
+//  音檔、這首自己的音量在「音效編輯器」的「音樂」分類（baseMusic、battleMusic）調整；
 //  整體音量在設定選單調整（MUSIC.volume，0～1）。設定裡勾選靜音時音樂也一起靜音。
 //  瀏覽器規定要先有點擊或按鍵才能播放聲音，所以第一次操作後才會開始播。
 // ============================================================
 const MUSIC = (() => {
   const ENABLED = true;
   // 每個場景用哪個音效名稱（js/sfx.js；檔案和音量在音效編輯器換）；沒寫的場景不放音樂
-  const SOUNDS = { safe: 'baseMusic' };
+  const SOUNDS = { safe: 'baseMusic', battle: 'battleMusic' };   // battle＝所有戰鬥地圖共用同一首
   const fileOf = name => { const it = typeof SFX !== 'undefined' && SFX.list().find(x => x.name === name); return it && typeof it.file === 'string' ? 'Sound effects/' + it.file : null; };
   // 基地音樂也可以由玩家在 2F應變中心的電腦「音樂播放器」換（js/pc-desktop.js）：記住的是 music/基地音樂/ 裡的檔名，存在瀏覽器
   // 沒選＝照音效編輯器的設定；設定的檔案找不到（被搬走、刪掉）時，改放基地音樂資料夾的 BASE_FALLBACK

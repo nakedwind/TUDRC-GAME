@@ -5,7 +5,11 @@
       坐救生圈的人自動收起救生圈。抽水機打開後就關不掉（按了沒效果）
    ③ 第一次抽乾後過 3 分鐘：水漲回來（2 秒），深水區又變回深水
    ④ 水漲起來時：打開「抽水閥」（地圖編輯器選電源開關 → 勾「抽水閥」）→ 1.5 秒抽乾深水區；之後每 45 秒漲一次（第一次 90 秒）
+   ・水要漲、要退之前 3 秒（POOL_TIDE.notice）：畫面中上方出現「水位即將上升……」「水位即將下降……」，開始漲／退就消失。
+     所以打開抽水機、抽水閥之後，會先倒數 3 秒才開始退水（phase 'drainSoon'）
    ⑤ 水漲起來時還在深水區的隊友（沒坐救生圈）會溺水：每秒扣 1 HP，畫面上方中間跳「快打開抽水閥！」
+      溫特也一樣：原地溺水（位置不變）、每秒扣 1 HP，頭上喊「溺水了！需要救生圈！」、腳下出現「空白鍵／使用救生圈」；
+      可以自己走回岸上（走上岸就下不去了），或按空白鍵原地坐上救生圈（js/swim-ring.js）
       深水區裡沒有隊友：溫特頭上冒泡泡「一定有開關可以把這些水抽走。」
    畫面怎麼跟著變：圖層名稱裡寫這些字（地圖編輯器圖層列的「改名」），那層就照水位淡入淡出
      「抽水後消失」：淺水區的水（抽水機打開後消失）　「抽水後出現」：淺水區抽乾後的地面
@@ -18,6 +22,9 @@ const POOL_TIDE = {
   drainSecs: 1.5,       // 抽乾要幾秒
   drownDps: 1,          // 溺水每秒扣幾 HP
   drownTalkSecs: [6, 10],   // 溺水的隊友每隔幾秒喊一句（data/dialogues.js 的 drown）
+  drownSay: '溺水了！需要救生圈！',   // 溫特開始溺水的那一刻說的話（頭上的泡泡）
+  drownSaySecs: 2.6,   // 上面那句在頭上停幾秒
+  ringPrompt: '空白鍵／使用救生圈',   // 溫特溺水時腳下的互動提示（js/render.js）
   warnText: '快打開抽水閥！',
   winterText: '一定有開關可以把這些水抽走。',
   winterSecs: 3.5,      // 溫特的泡泡停多久
@@ -25,6 +32,8 @@ const POOL_TIDE = {
   valveNoPowerText: '沒有什麼反應……',   // 兩台抽水機（發電機）還沒都啟動時按抽水閥
   valveSaySecs: 2.2,   // 上面那句在溫特頭上的泡泡停幾秒
   valveLowText: '水已經抽掉了。',
+  valveBusyText: '抽水閥已經打開了。',   // 倒數中、正在退水時再按
+  notice: { secs: 3, rise: '水位即將上升……', drain: '水位即將下降……', y: .2 },   // 漲退水前幾秒提醒、文字、在畫面高度的哪裡（.2＝從上面算 20%）
   marks: { shallowGone: '抽水後消失', shallowDry: '抽水後出現', deep: '深水時顯現', deepShallow: '淺水時顯現' },
 };
 
@@ -68,26 +77,32 @@ function poolPumpLocked() { return poolTideActive() && poolTide().pumped; }
 function poolPumpCheck() {
   if (!poolTideActive() || typeof dynamosAllOn !== 'function' || !dynamosAllOn()) return;
   const s = poolTide(); if (s.pumped) return;
-  s.pumped = true; s.phase = 'draining'; s.firstDrain = true;
+  s.pumped = true; s.firstDrain = true; poolDrainSoon(s);
   if (typeof systemNotice === 'function') systemNotice('抽水機啟動了，水正在退去……');
 }
 // ---- 抽水閥（地圖編輯器勾了「抽水閥」的電源開關）----
 function usePoolValve() {
   const s = poolTideActive() ? poolTide() : null;
   if (!s || !s.pumped) { sfx('error'); if (G && G.player) G.player.poolSay = { text: POOL_TIDE.valveNoPowerText, until: performance.now() + POOL_TIDE.valveSaySecs * 1000 }; return; }   // 溫特頭上的泡泡（drawPoolTideBubble）
+  if (s.phase === 'drainSoon' || s.phase === 'draining') { sfx('switch'); systemNotice(POOL_TIDE.valveBusyText); return; }
   if (s.phase !== 'high' && s.phase !== 'rising') { sfx('switch'); systemNotice(POOL_TIDE.valveLowText); return; }
-  s.phase = 'draining'; s.firstDrain = false; sfx('powerOn');
+  s.firstDrain = false; poolDrainSoon(s); sfx('powerOn');
 }
+// 要退水了：先倒數 POOL_TIDE.notice.secs 秒（畫面中上方「水位即將下降……」）才開始退；水正在漲的話，倒數時照樣漲
+function poolDrainSoon(s) { s.drainFromRise = s.phase === 'rising'; s.phase = 'drainSoon'; s.drainAt = s.t + POOL_TIDE.notice.secs; }
 // 抽水閥的開關圖：水抽掉的時候是「開」，漲起來是「關」
 const poolValveShowsOn = () => { const s = poolTideActive() ? poolTide() : null; return !!(s && s.pumped && s.deep < .5); };
 
 // ---- 每一幀（js/game.js 的 update 呼叫）----
 let poolDeepWas = true;
 function updatePoolTide(dt) {
-  if (!poolTideActive()) { poolWarnShow(false); return; }
+  if (!poolTideActive()) { poolWarnShow(false); if (G && G.player) G.player.drowning = false; if (poolFlowOn) { poolFlowOn = false; SFX.fadeOut('poolWaterFlow', POOL_TIDE.flowSoundFade); } return; }   // 離開池核：流水聲也淡掉
   if (typeof updatePoolBoss === 'function') updatePoolBoss(dt);   // 池核 BOSS：游泳、潛水、擱淺（js/pool-boss.js）
   const s = poolTide(); s.t += dt;
-  if (s.phase === 'draining') {
+  if (s.phase === 'drainSoon') {
+    if (s.drainFromRise) s.deep = Math.min(1, s.deep + dt / POOL_TIDE.riseSecs);
+    if (s.t >= s.drainAt) s.phase = 'draining';
+  } else if (s.phase === 'draining') {
     const k = dt / POOL_TIDE.drainSecs;
     s.deep = Math.max(0, s.deep - k); s.shallow = Math.max(0, s.shallow - k);
     if (s.deep <= 0 && s.shallow <= 0) { s.phase = 'low'; s.riseAt = s.t + (s.firstDrain ? POOL_TIDE.firstHoldSecs : POOL_TIDE.holdSecs); }
@@ -99,6 +114,8 @@ function updatePoolTide(dt) {
     s.deep = Math.min(1, s.deep + dt / POOL_TIDE.riseSecs);
     if (s.deep >= 1) s.phase = 'high';
   }
+  updatePoolTideNotice(s, dt);
+  poolWaterFlowSound(s);
   // 深水 ↔ 淺水 換過去的那一刻：坐救生圈的人收起來、怪物重新找路
   const deepNow = s.deep >= .5;
   if (deepNow !== poolDeepWas) {
@@ -109,7 +126,11 @@ function updatePoolTide(dt) {
   }
   // 溺水：深水時，還在深水區、沒坐救生圈的隊友每秒扣血
   const drowning = deepNow && s.pumped ? poolMatesInDeep() : [];
-  for (const t of G.towers || []) t.drowning = drowning.includes(t);
+  for (const t of G.towers || []) {
+    const now = drowning.includes(t);
+    if (now && !t.drowning) poolDrownSound('poolDrownMate', t.id ?? t.type);   // 剛開始溺水：冒泡泡的聲音
+    t.drowning = now;
+  }
   for (const t of drowning) {
     t.hp = Math.max(0, t.hp - POOL_TIDE.drownDps * dt);
     t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#6fb7ff';
@@ -120,7 +141,71 @@ function updatePoolTide(dt) {
     }
     if (t.hp <= 0) { t.target = null; if (typeof sentryStatus === 'function') sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
+  updateWinterDrown(dt, deepNow && s.pumped);
   poolWarnShow(drowning.length > 0 && G.running && !G.over);
+}
+// 溫特溺水：跟隊友一樣，水漲起來時還在深水區、沒坐救生圈就原地溺水，每秒扣 drownDps
+function updateWinterDrown(dt, deep) {
+  const p = G.player; if (!p) return;
+  const was = !!p.drowning;
+  p.drowning = deep && p.hp > 0 && !p.swimRing && !p.sitting && poolPointInDeepZone(p.x, p.y)
+    && !(typeof poolPlatformStandingAny === 'function' && poolPlatformStandingAny());
+  if (!p.drowning) return;
+  if (!was) {   // 開始溺水的那一刻：喊一聲（蓋掉「一定有開關可以把這些水抽走。」）
+    poolDrownSound('poolDrownSelf', 'winter');   // 冒泡泡的聲音
+    p.poolSay = { text: POOL_TIDE.drownSay, until: performance.now() + POOL_TIDE.drownSaySecs * 1000 };
+    poolTide().winterUntil = 0; p.swimHintAt = 0;
+  }
+  const before = Math.ceil(p.hp);
+  p.hp = Math.max(0, p.hp - POOL_TIDE.drownDps * dt);
+  p.hitT = Math.max(p.hitT || 0, .12);
+  if (Math.ceil(p.hp) !== before && typeof updateHUD === 'function') updateHUD();   // 每少 1 點更新一次畫面
+  if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '溺水'); }
+}
+// ---- 池核的水聲 ----
+// 溺水的泡泡聲：開始溺水時播一次，播 drownSoundSecs 秒後用 drownSoundFade 秒淡出（音檔、音量在音效編輯器：隊友 poolDrownMate、溫特 poolDrownSelf）
+POOL_TIDE.drownSoundSecs = 2; POOL_TIDE.drownSoundFade = 1;
+function poolDrownSound(name, who) {
+  if (typeof SFX === 'undefined') return;
+  const key = name + ':' + who;   // 每個人各自一個，淡出時不會把別人的也一起關掉
+  SFX.play(name, 1, key);
+  setTimeout(() => SFX.fadeOut(key, POOL_TIDE.drownSoundFade), POOL_TIDE.drownSoundSecs * 1000);
+}
+// 流水聲：水位開始上升或下降時播，水漲滿（或退乾）的那一刻用 flowSoundFade 秒淡出（音效編輯器的 poolWaterFlow）
+POOL_TIDE.flowSoundFade = 1;
+let poolFlowOn = false;
+function poolWaterFlowSound(s) {
+  const moving = s.phase === 'rising' || s.phase === 'draining' || (s.phase === 'drainSoon' && s.drainFromRise && s.deep < 1);
+  if (moving === poolFlowOn || typeof SFX === 'undefined') return;
+  poolFlowOn = moving;
+  if (moving) SFX.play('poolWaterFlow', 1, 'poolWaterFlow');
+  else SFX.fadeOut('poolWaterFlow', POOL_TIDE.flowSoundFade);
+}
+const poolPlayerDrowning = () => !!(typeof G !== 'undefined' && G && G.player && G.player.drowning);
+// 「水位即將上升／下降……」：漲水前最後幾秒、退水倒數中顯示；開始漲／退就淡出（s.notice＝{ kind, t, out }）
+function updatePoolTideNotice(s, dt) {
+  const want = s.phase === 'low' && s.riseAt - s.t <= POOL_TIDE.notice.secs ? 'rise' : s.phase === 'drainSoon' ? 'drain' : null;
+  if (want) { if (!s.notice || s.notice.kind !== want || s.notice.out) s.notice = { kind: want, t: 0 }; s.notice.t += dt; }
+  else if (s.notice) { s.notice.out = (s.notice.out || 0) + dt; if (s.notice.out > .35) s.notice = null; }
+}
+// 畫面中上方的提醒（js/render.js 在異質核心的大橫幅之後呼叫）：照 js/core-frenzy.js 的甦醒大橫幅，小一號、顏色淡一些
+function drawPoolTideNotice(ctx, cv) {
+  const n = typeof G !== 'undefined' && G && !G.over && G.poolTide && G.poolTide.map === MAP ? G.poolTide.notice : null; if (!n) return;
+  const inT = .35, outT = .35;
+  const k = n.out ? Math.max(0, 1 - n.out / outT) : Math.min(1, n.t / inT);
+  const ease = 1 - (1 - k) * (1 - k), cy = cv.height * POOL_TIDE.notice.y, bh = 52 * ease;
+  ctx.save();
+  const band = ctx.createLinearGradient(0, 0, cv.width, 0);   // 左右淡出的深藍底
+  band.addColorStop(0, 'rgba(6,18,30,0)'); band.addColorStop(.3, 'rgba(6,18,30,.55)'); band.addColorStop(.7, 'rgba(6,18,30,.55)'); band.addColorStop(1, 'rgba(6,18,30,0)');
+  ctx.fillStyle = band; ctx.fillRect(0, cy - bh / 2, cv.width, bh);
+  const edge = ctx.createLinearGradient(cv.width * .25, 0, cv.width * .75, 0);   // 上下兩條淡藍細線
+  edge.addColorStop(0, 'transparent'); edge.addColorStop(.2, 'rgba(150,210,255,.55)'); edge.addColorStop(.8, 'rgba(150,210,255,.55)'); edge.addColorStop(1, 'transparent');
+  ctx.globalAlpha = ease; ctx.fillStyle = edge;
+  ctx.fillRect(cv.width * .25, cy - bh / 2, cv.width * .5, 1); ctx.fillRect(cv.width * .25, cy + bh / 2 - 1, cv.width * .5, 1);
+  ctx.globalAlpha = ease * (.78 + .22 * Math.sin(n.t * 6));   // 字輕輕一明一暗
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 26px "Microsoft JhengHei", sans-serif';
+  ctx.fillStyle = '#d4ecff'; ctx.fillText(POOL_TIDE.notice[n.kind], cv.width / 2 + (1 - ease) * 40, cy + 1);
+  ctx.restore();
 }
 // 在深水區裡、沒坐救生圈、還站得起來的隊友
 function poolMatesInDeep() {

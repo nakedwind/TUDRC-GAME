@@ -232,6 +232,10 @@ const SFX = (() => {
     poolPaddle: '划水聲.mp3',
     wetSlip: '環境/水滴聲.mp3',   // 池核濕地板滑倒（js/wet-floor.js）
     poolBossSplash: '怪物/魚頭君/噴水攻擊.mp3',   // 池核 BOSS 浮上來、潛下去（js/pool-boss.js）
+    poolBossDive: '環境/跳到水裡.mp3',   // 池核 BOSS 高高跳起、栽進水裡的那一刻（跟上面的水花聲一起播，js/pool-boss.js）
+    poolDrownMate: '環境/淹水泡泡.mp3',   // 池核：隊友開始溺水（播 2 秒後 1 秒淡出，js/pool-tide.js；音量 60% 在音效編輯器調）
+    poolDrownSelf: '環境/淹水泡泡.mp3',   // 池核：溫特開始溺水（播 2 秒後 1 秒淡出，js/pool-tide.js）
+    poolWaterFlow: '環境/潺潺流水聲.mp3',   // 池核：水位上升／下降中（水漲滿或退乾的那一刻 1 秒淡出，js/pool-tide.js）
     poolLightDouse: '怪物/魚頭君/火被澆熄.mp3',   // 池核水漲回深水：深水區裡的燈熄滅（js/pool-tide.js）
     fieldGenRadio: ['無線電雜音.mp3', '無線電.mp3'],   // 池核的力場產生器：溫特第一次走近（兩個一起播，js/field-generator.js）
     fieldGenPopper: 'party-popper.wav',                  // 池核的力場產生器：跟無線電同時播
@@ -250,6 +254,7 @@ const SFX = (() => {
     capKingDeath: '怪物/夯吉寶/夯吉死掉.mp3',          // 大夯吉寶死掉：跟夯吉寶同一個音檔，開大聲、加回音（SOUND_ECHO）
     radio: ['無線電.mp3', '無線電雜音.mp3'],   // 無線電接起來／掛斷：兩個一起播（新手區開場希奧妮的無線電，js/tutorial.js）
     baseMusic: '../music/基地音樂.mp3',      // 基地（安全區）背景音樂（js/music.js）；檔案在 music/ 資料夾
+    battleMusic: '../music/戰鬥地圖音樂/dkfilms-horror-dark-silence-ambience-383321.mp3',   // 戰鬥地圖的背景音樂：每張戰鬥地圖都一直循環（js/music.js）
     // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
     weirdNoise: '玩家/怪聲.mp3',
   };

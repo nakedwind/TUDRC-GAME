@@ -627,7 +627,8 @@ window.addEventListener('keydown', e => {
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
     // 互動優先順序：① 拾取（異質碎片、地上的道具）→ ② 地圖物件（電梯、門、置物櫃…）
     // 隊員的疏導改成 C、急救是 F（js/equipment.js、js/shop.js），空白鍵不會再撿東西撿到一半變成疏導
-    if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
+    if (typeof poolPlayerDrowning === 'function' && poolPlayerDrowning() && useSwimRingNearPlayer()) {}   // 溺水中：空白鍵＝原地坐上救生圈（js/pool-tide.js、js/swim-ring.js），最優先
+    else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer() && useStoragePropNearPlayer(isPickupProp)) {}   // 拾取地上的道具（js/storage-lockers.js）
     else if (typeof useMealNearPlayer === 'function' && useMealNearPlayer()) {}   // 餐廳：拿餐盤、裝菜、坐下用餐、吃、回收（js/meal.js）
     else if (elevator) {
