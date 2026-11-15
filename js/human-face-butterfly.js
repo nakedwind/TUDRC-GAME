@@ -419,11 +419,11 @@ function mothAfflict(a, kind) {
   }
 }
 // 被麻醉彈打中的隊員（js/special-guns.js 的 tranqHit 呼叫）：借用睡眠鱗粉的睡覺動畫。
-// 睡多久照麻醉彈的秒數（sleepT 已經在 tranqHit 設好），規則照麻醉彈原本的：被打也不會醒、不能開槍叫醒，時間到才醒
+// 睡多久照麻醉彈的秒數（sleepT 已經在 tranqHit 設好）；跟鱗粉一樣，被打到、或被溫特開槍打中就會醒
 function mothTranqSleep(a) {
   const already = a.mothSleep && a.sleepT > 0;
   a.mothSleep = true; a.mothSleepHp = a.hp;
-  if (!already) a.tranqSleep = true;   // 原本就吸了鱗粉睡著的，照鱗粉的規則（被打會醒）
+  if (!already) a.tranqSleep = true;   // 只用來在時間到自然醒來時跳「醒來了」
   if (already) return;   // 已經睡著：只延長時間，不要重播倒下動畫
   a.mothSleepAge = 0; a.mothWakeT = 0; a.mothFallSide = Math.random() < .5 ? -1 : 1;
   a.say = null;   // 睡著：頭上的對話泡泡收掉
@@ -459,7 +459,7 @@ function mothStatuses(dt) {
     if (a.mothSleep) {
       if (a.hp <= 0) { a.mothSleep = false; a.mothSleepHp = null; a.tranqSleep = false; if (isPlayer) a.sleepT = 0; continue; }
       a.mothSleepAge = (a.mothSleepAge || 0) + dt;
-      if (a.sleepT > 0 && a.hp < a.mothSleepHp - .01 && !a.tranqSleep) a.sleepT = 0;   // 被打醒（被麻醉彈打睡的不會）
+      if (a.sleepT > 0 && a.hp < a.mothSleepHp - .01) { a.sleepT = 0; a.tranqSleep = false; }   // 被打醒
       else {
         a.mothSleepHp = a.hp;
         if (isPlayer) a.sleepT = Math.max(0, a.sleepT - dt);
@@ -476,7 +476,7 @@ function mothStatuses(dt) {
 // 游標點在哪位睡著的隊友身上：站著時是一個人高的範圍；倒在地上時身體橫躺在腳底往旁邊那一側
 function mothSleepMateAt(x, y) {
   return G.towers.find(t => {
-    if (!(t.mothSleep && t.sleepT > 0) || t.tranqSleep || t.hp <= 0 || t.eatenBy || t.grabbed) return false;   // 被麻醉彈打睡的叫不醒
+    if (!(t.mothSleep && t.sleepT > 0) || t.hp <= 0 || t.eatenBy || t.grabbed) return false;   // 吸了鱗粉、被麻醉彈打睡的都算
     const pose = mothSleepPose(t);
     if (pose && pose.lying) { const side = t.mothFallSide || 1, x0 = Math.min(t.x, t.x + side * 58), x1 = Math.max(t.x, t.x + side * 58); return x >= x0 - 6 && x <= x1 + 6 && Math.abs(y - (t.y + 6)) <= 22; }
     return Math.abs(x - t.x) <= 20 && y >= t.y - 44 && y <= t.y + 18;
