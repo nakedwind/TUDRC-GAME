@@ -810,6 +810,7 @@ function updateSentryMain(t, dt) {
   if (t.rootT > 0) { t.moving = false; t.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
   if (stepActorKnock(t, dt, sentryBlocked)) { t.moving = false; return; }   // 被鳥頭人撞飛：滑行中（js/bird-head.js）
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
+  if (t.drowning && typeof poolDrownFlee === 'function' && poolDrownFlee(t, dt)) return;   // 溺水：用 3 成的速度往岸上逃，不攻擊（js/pool-tide.js）
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
   if (t.mothConfuseT > 0) { t.target = null; return; }   // 人面蝶的混亂鱗粉：走路由 mothConfusedSentry 處理（js/human-face-butterfly.js）

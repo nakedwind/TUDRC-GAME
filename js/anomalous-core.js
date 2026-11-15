@@ -128,7 +128,8 @@ function spawnCoreGroup(core) {
   for (let i = 0; i < count; i++) {
     const index = Math.floor(Math.random() * cells.length), [c, r] = cells.splice(index, 1)[0];
     const [x, y] = center(c, r);
-    const spec = chooseMonster(MAP, ACTIVE_MONSTERS);
+    let spec = chooseMonster(MAP, ACTIVE_MONSTERS);
+    if (typeof poolBossSpawnSpec === 'function') spec = poolBossSpawnSpec(spec, x, y);   // 池核 BOSS 開戰後：牠附近 8 成生小丑魚幼體（js/pool-boss.js）
     const spot = spec.behavior === 'burrow' ? burrowMouseSpawnPosition(x, y) : { x, y };
     if (!spot) continue;
     const m = createMonster(spec, spot.x, spot.y);

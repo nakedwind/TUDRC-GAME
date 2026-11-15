@@ -22,7 +22,7 @@ const POOL_TIDE = {
   winterText: '一定有開關可以把這些水抽走。',
   winterSecs: 3.5,      // 溫特的泡泡停多久
   pumpedText: '抽水機已經在運轉了。',   // 抽水機打開後再按
-  valveNoPowerText: '抽水機還沒啟動，抽水閥沒有反應。',
+  valveNoPowerText: '沒有什麼反應……',   // 兩台抽水機（發電機）還沒都啟動時按抽水閥
   valveLowText: '水已經抽掉了。',
   marks: { shallowGone: '抽水後消失', shallowDry: '抽水後出現', deep: '深水時顯現', deepShallow: '淺水時顯現' },
 };
@@ -84,6 +84,7 @@ const poolValveShowsOn = () => { const s = poolTideActive() ? poolTide() : null;
 let poolDeepWas = true;
 function updatePoolTide(dt) {
   if (!poolTideActive()) { poolWarnShow(false); return; }
+  if (typeof updatePoolBoss === 'function') updatePoolBoss(dt);   // 池核 BOSS：游泳、潛水、擱淺（js/pool-boss.js）
   const s = poolTide(); s.t += dt;
   if (s.phase === 'draining') {
     const k = dt / POOL_TIDE.drainSecs;
@@ -128,7 +129,7 @@ function poolMatesInDeep() {
 function poolPointInDeepZone(x, y) {
   const list = MAP && MAP.deepWater; if (!Array.isArray(list) || !list.length) return false;
   if (poolZoneCache.list !== list) poolZoneCache = { list, set: new Set(list) };
-  return poolZoneCache.set.has(cellAt(x, y).join(','));
+  return typeof deepCellsHavePoint === 'function' ? deepCellsHavePoint(poolZoneCache.set, x, y) : poolZoneCache.set.has(cellAt(x, y).join(','));   // 有微調過的深水格照微調後的位置（js/swim-ring.js）
 }
 let poolZoneCache = { list: null, set: null };
 
@@ -151,6 +152,59 @@ function poolWarnShow(on) {
     document.body.appendChild(poolWarnEl);
   }
   const cv = document.getElementById('cv'), r = cv ? cv.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth };
-  poolWarnEl.style.left = (r.left + r.width / 2) + 'px'; poolWarnEl.style.top = (r.top + 56) + 'px';
+  poolWarnEl.style.left = (r.left + r.width / 2) + 'px'; poolWarnEl.style.top = (r.top + r.height * .26) + 'px';   // 在 BOSS 血條下面
   poolWarnEl.style.display = 'block';
+}
+
+// ---- 溺水的隊友往岸上逃（js/sentry.js 的 updateSentryMain 呼叫；回傳 true＝這一幀由這裡移動，隊員不攻擊）----
+// 用隊員自己走路速度的 POOL_TIDE.drownFleeMul 倍，沿著深水區的格子游到最近的岸邊
+POOL_TIDE.drownFleeMul = .3;   // 溺水時逃上岸的速度＝自己走路速度的幾倍
+function poolDrownFlee(t, dt) {
+  if (!t.drowning) return false;
+  const now = performance.now();
+  if (!t.drownPath || !t.drownPath.length || now > (t.drownPathAt || 0) + 1000) { t.drownPath = poolShorePath(t); t.drownPathAt = now; }
+  t.target = null; t.navPath = null;
+  const path = t.drownPath; if (!path || !path.length) { t.moving = false; return true; }
+  const [gx, gy] = path[0], dx = gx - t.x, dy = gy - t.y, d = Math.hypot(dx, dy);
+  const speed = ((typeof TYPES !== 'undefined' && TYPES[t.type] && TYPES[t.type].walkSpeed) || 80) * POOL_TIDE.drownFleeMul;
+  const step = Math.min(d, speed * dt);
+  if (d > .5) {
+    const nx = t.x + dx / d * step, ny = t.y + dy / d * step;
+    t.x = nx; t.y = ny;
+    if (Math.abs(dx) > Math.abs(dy)) t.dir = dx < 0 ? 'left' : 'right'; else t.dir = dy < 0 ? 'back' : 'front';
+  }
+  if (d <= 4) path.shift();
+  t.moving = true;
+  return true;
+}
+// 從隊員站的格子，沿著深水區的格子找最近的岸邊（不是深水區、走得到的格子），回傳一路上每格中心
+function poolShorePath(t) {
+  const [c0, r0] = cellAt(t.x, t.y), seen = new Map([[c0 + ',' + r0, null]]), q = [[c0, r0]];
+  const inZone = (c, r) => poolPointInDeepZone(...center(c, r));
+  for (let h = 0; h < q.length && h < 4000; h++) {
+    const [c, r] = q[h];
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
+      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr)) continue;
+      seen.set(k, c + ',' + r);
+      if (!inZone(nc, nr)) {   // 找到岸邊：倒回去組出路線
+        const out = []; let cur = k;
+        while (cur) { const [cc, rr] = cur.split(',').map(Number); out.unshift(center(cc, rr)); cur = seen.get(cur); }
+        out.shift();   // 第一格是自己站的
+        return out;
+      }
+      q.push([nc, nr]);
+    }
+  }
+  return [];
+}
+
+// ---- 這個電源開關是不是抽水閥：地圖編輯器勾了「抽水閥」，或放在名稱有「抽水閥」的圖層（取消勾選的＝valve: false，不算）----
+function poolIsValve(stamp) {
+  if (!stamp) return false;
+  if (stamp.valve === true) return true;
+  if (stamp.valve === false) return false;
+  const list = typeof MAP !== 'undefined' && MAP && Array.isArray(MAP.layerOrder) ? MAP.layerOrder : [];
+  const l = list.find(x => x.id === (stamp.layer || 'top'));
+  return !!(l && String(l.name || '').includes('抽水閥'));
 }

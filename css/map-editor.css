@@ -227,7 +227,7 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .tool-more > summary { list-style: none; user-select: none; }
 .tool-more > summary::-webkit-details-marker { display: none; }
 .tool-more[open] > summary { border-color: #8fd3ff; }
-.tool-more-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; display: grid; gap: 6px; min-width: 200px; padding: 8px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.tool-more-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; display: grid; gap: 6px; min-width: 200px; padding: 8px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); max-height: calc(100vh - 140px); overflow-y: auto; overscroll-behavior: contain; }   /* 選單太長：超過視窗高度就在選單裡捲動（不然下面的「🛟 深水區」等按鈕會跑到畫面外） */
 .tool-more-menu .btn { text-align: left; }
 /* 選單太長（地圖機關很多）：最高只到視窗底部，超過的用滾輪捲；實際高度由 js/map-editor.js 打開選單時照位置算（fitToolMoreMenu），這裡的 70vh 是預設 */
 .tool-more-menu { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #8fd3ff #1d222b; }

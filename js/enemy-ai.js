@@ -539,6 +539,7 @@ function stepEnemy(e, dt) {
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信
+  if (e.poolBoss) { stepPoolBoss(e, dt); return; }   // 池核的巨大比基尼小丑魚：游泳、潛水、擱淺都由 js/pool-boss.js 自己管
   if ((e.confuseT > 0 || e.brawlT > 0) && stepConfusedEnemy(e, dt)) return;   // 混亂（混亂彈、會混亂的隊員）：改打其他怪物；被混亂的怪物打到：回手打牠
   if (e.behavior === 'moth') { stepMothEnemy(e, dt); return; }   // 人面蝶：在空中飛（飛得過牆，不用下面的卡牆檢查）、撒鱗粉、趨光（js/human-face-butterfly.js）
   const blocked = (x, y) => enemyBlocked(x, y, e);

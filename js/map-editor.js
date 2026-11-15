@@ -760,17 +760,19 @@ window.addEventListener('keydown', e => {
     const size = { '[': -step, '{': -step, ']': step, '}': step }[e.key];
     if (size) { e.preventDefault(); setPortalNudge(p, { radius: (p.radius || PORTAL_RADIUS_DEFAULT) + size }); return; }
   }
-  if (!inField && brush.mode === 'solidnudge' && (solidNudgeCells.size || solidNudgeEdges.size)) {
+  if (!inField && brush.mode === 'solidnudge' && (solidNudgeCells.size || solidNudgeEdges.size || solidNudgeDeep.size)) {
     const m = curMap();
+    for (const k of [...solidNudgeDeep]) if (!(m.deepWater || []).includes(k)) solidNudgeDeep.delete(k);   // 已經不是深水區的不算
     for (const k of [...solidNudgeCells]) if (m.solid.indexOf(k) < 0) solidNudgeCells.delete(k);   // 回復（Ctrl+Z）後已經不是紅格的不算
     for (const k of [...solidNudgeEdges]) if (!(m.edges || []).includes(k)) solidNudgeEdges.delete(k);   // 邊緣碰撞線也一樣
-    const n = solidNudgeCells.size + solidNudgeEdges.size;
-    if (n && e.key === 'Escape') { e.preventDefault(); solidNudgeCells.clear(); solidNudgeEdges.clear(); draw(); setStatus('已取消選取', '#9aa4b2'); return; }
+    const n = solidNudgeCells.size + solidNudgeEdges.size + solidNudgeDeep.size;
+    if (n && e.key === 'Escape') { e.preventDefault(); solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear(); draw(); setStatus('已取消選取', '#9aa4b2'); return; }
     if (n && (e.key === 'Delete' || e.key === 'Backspace')) {
       e.preventDefault(); pushUndo();
       for (const k of solidNudgeCells) delete m.solidOffsets[k];
       for (const k of solidNudgeEdges) if (m.edgeOffsets) delete m.edgeOffsets[k];
       if (m.edgeOffsets && !Object.keys(m.edgeOffsets).length) delete m.edgeOffsets;
+      for (const k of solidNudgeDeep) setDeepOffset(m, k, [0, 0]);   // 🛟 深水區
       saveMaps(); draw(); setStatus((n > 1 ? '選中的 ' + n + ' 個' : '這個') + '碰撞範圍已歸零（回到對齊格線）', '#7ee0c0');
       return;
     }
@@ -791,6 +793,7 @@ window.addEventListener('keydown', e => {
         if (next[0] === 0 && next[1] === 0) removeEdgeOffset(m, k), solidNudgeEdges.add(k);   // 歸零就不存（但還是選著）
         else (m.edgeOffsets || (m.edgeOffsets = {}))[k] = next;
       }
+      for (const k of solidNudgeDeep) { const off = deepOffsetOf(m, k); setDeepOffset(m, k, [clamp(off[0] + dx), clamp(off[1] + dy)]); }   // 🛟 深水區：跟紅格一樣最多將近一格
       saveMaps(); draw();
       setStatus(solidNudgeStatus(m), '#ffd479');
       return;
@@ -1272,12 +1275,29 @@ function drawEdgeLine(c, r, axis, color, width, off = [0, 0]) {
   ctx.lineCap = 'butt';
 }
 const solidNudgeEdges = new Set();   // 目前用「碰撞微調」選中的邊緣碰撞線（'c,r,R'／'c,r,B'）
-let nudgeDragKind = 'cell';          // 這次拖曳選的是紅格（cell）還是邊緣碰撞線（edge）：按下時點到什麼就是什麼
+let nudgeDragKind = 'cell';          // 這次拖曳選的是紅格（cell）、邊緣碰撞線（edge）還是深水區（deep）：按下時點到什麼就是什麼
+// 🛟 深水區的微調：m.deepWaterOffsets = { 'c,r': [dx, dy] }＝那格深水整格平移幾像素（最多將近一格；遊戲裡 js/swim-ring.js 的 deepWaterAtPoint 照這個判斷）
+const solidNudgeDeep = new Set();    // 目前用「碰撞微調」選中的深水格（'c,r'）
+const deepOffsetOf = (m, k) => (m.deepWaterOffsets && m.deepWaterOffsets[k]) || [0, 0];
+function setDeepOffset(m, k, off) {
+  if (off[0] || off[1]) (m.deepWaterOffsets || (m.deepWaterOffsets = {}))[k] = off;
+  else if (m.deepWaterOffsets) { delete m.deepWaterOffsets[k]; if (!Object.keys(m.deepWaterOffsets).length) delete m.deepWaterOffsets; }
+}
+// 滑鼠點到哪一格深水（照微調後畫出來的位置；沒有微調的格子就是原本那格）
+function deepHitAtPx(m, x, y) {
+  const list = m.deepWater || []; if (!list.length) return null;
+  for (const k of list) {
+    const [c, r] = k.split(',').map(Number), off = deepOffsetOf(m, k);
+    const x0 = OX + c * CELL + off[0], y0 = OY + r * CELL + off[1];
+    if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return k;
+  }
+  return null;
+}
 // 狀態列：選了幾格／幾條、目前偏移（偏移不一樣就不列數字）
 function solidNudgeStatus(m) {
-  const offs = [...[...solidNudgeCells].map(k => m.solidOffsets[k] || [0, 0]), ...[...solidNudgeEdges].map(k => edgeOffsetOf(m, k))].map(o => o.join(', '));
-  const same = offs.every(o => o === offs[0]), nc = solidNudgeCells.size, ne = solidNudgeEdges.size;
-  const what = [nc ? nc + ' 格紅格' : '', ne ? ne + ' 條邊緣碰撞' : ''].filter(Boolean).join('＋');
+  const offs = [...[...solidNudgeCells].map(k => m.solidOffsets[k] || [0, 0]), ...[...solidNudgeEdges].map(k => edgeOffsetOf(m, k)), ...[...solidNudgeDeep].map(k => deepOffsetOf(m, k))].map(o => o.join(', '));
+  const same = offs.every(o => o === offs[0]), nc = solidNudgeCells.size, ne = solidNudgeEdges.size, nd = solidNudgeDeep.size;
+  const what = [nc ? nc + ' 格紅格' : '', ne ? ne + ' 條邊緣碰撞' : '', nd ? nd + ' 格深水區' : ''].filter(Boolean).join('＋');
   return '已選 ' + what + (same ? '（目前偏移 ' + offs[0] + '）' : '（各自偏移不同，會一起移動）') +
     '：按住選中的拖曳、或用方向鍵移動（Shift 移多一點）、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取' + (ne ? '（邊緣碰撞最多移將近一格）' : '');
 }
@@ -1288,6 +1308,8 @@ function nudgeHitSelected(m) {
   if (!pointerPx) return false;
   const line = edgeHitAtPx(m, pointerPx.x, pointerPx.y);
   if (line && solidNudgeEdges.has(line)) return true;
+  const deep = deepHitAtPx(m, pointerPx.x, pointerPx.y);
+  if (deep && solidNudgeDeep.has(deep)) return true;
   for (const k of solidNudgeCells) {
     const [c, r] = k.split(',').map(Number), off = m.solidOffsets[k] || [0, 0];
     const x = OX + c * CELL + off[0], y = OY + r * CELL + off[1];
@@ -1299,10 +1321,12 @@ function beginNudgeDrag() {
   const m = curMap();
   for (const k of [...solidNudgeCells]) if (m.solid.indexOf(k) < 0) solidNudgeCells.delete(k);   // 已經不是紅格的不算
   for (const k of [...solidNudgeEdges]) if (!(m.edges || []).includes(k)) solidNudgeEdges.delete(k);
+  for (const k of [...solidNudgeDeep]) if (!(m.deepWater || []).includes(k)) solidNudgeDeep.delete(k);
   if (!nudgeHitSelected(m)) return false;
   nudgeDrag = { start: { ...pointerPx }, moved: false,
     cells: [...solidNudgeCells].map(k => [k, (m.solidOffsets[k] || [0, 0]).slice()]),
-    edges: [...solidNudgeEdges].map(k => [k, edgeOffsetOf(m, k).slice()]) };
+    edges: [...solidNudgeEdges].map(k => [k, edgeOffsetOf(m, k).slice()]),
+    deep: [...solidNudgeDeep].map(k => [k, deepOffsetOf(m, k).slice()]) };
   return true;
 }
 function dragNudgeTo() {
@@ -1321,6 +1345,7 @@ function dragNudgeTo() {
     if (next[0] === 0 && next[1] === 0) { removeEdgeOffset(m, k); solidNudgeEdges.add(k); }
     else (m.edgeOffsets || (m.edgeOffsets = {}))[k] = next;
   }
+  for (const [k, o] of d.deep || []) setDeepOffset(m, k, [clamp(o[0] + dx), clamp(o[1] + dy)]);   // 🛟 深水區
   draw(); setStatus(solidNudgeStatus(m), '#ffd479');
 }
 // 🌲 霧樹：樹的位置＋（選了霧樹工具時）每棵樹負責的區域
@@ -1469,12 +1494,21 @@ function draw() {
       ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6); ctx.setLineDash([]);
     }
-    if ((showSolid || brush.mode === 'deepwater') && deepSet.has(key)) {   // 🛟 深水區（深藍色斜線框）：沒坐救生圈走不進去
-      ctx.fillStyle = 'rgba(30,110,230,.30)'; ctx.fillRect(x, y, CELL, CELL);
+    if ((showSolid || brush.mode === 'deepwater') && deepSet.has(key)) {   // 🛟 深水區（深藍色斜線框）：沒坐救生圈走不進去；有微調就畫在微調後的位置
+      const off = deepOffsetOf(m, key), dx2 = x + off[0], dy2 = y + off[1];
+      ctx.fillStyle = 'rgba(30,110,230,.30)'; ctx.fillRect(dx2, dy2, CELL, CELL);
       ctx.strokeStyle = 'rgba(110,190,255,.9)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 3]);
-      ctx.strokeRect(x + 2.5, y + 2.5, CELL - 5, CELL - 5); ctx.setLineDash([]);
+      ctx.strokeRect(dx2 + 2.5, dy2 + 2.5, CELL - 5, CELL - 5); ctx.setLineDash([]);
+      if (off[0] || off[1]) {   // 有微調：虛線標出原本的格子
+        ctx.strokeStyle = 'rgba(140,200,255,.4)'; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+        ctx.strokeRect(x + .5, y + .5, CELL - 1, CELL - 1); ctx.setLineDash([]);
+      }
+      if (solidNudgeDeep.has(key)) {   // 目前選中的深水格
+        ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 2; ctx.setLineDash([6, 3]);
+        ctx.strokeRect(dx2 + 1, dy2 + 1, CELL - 2, CELL - 2); ctx.setLineDash([]);
+      }
       ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('🛟', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
+      ctx.fillText('🛟', dx2 + CELL / 2, dy2 + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
     }
     if (showSolid && spawnZone.has(key)) {   // 怪物出生區與紅格共用顯示開關
       ctx.fillStyle = 'rgba(80,220,120,.22)'; ctx.fillRect(x, y, CELL, CELL);
@@ -1540,7 +1574,7 @@ function draw() {
   // 電路編號（開關、電燈右上角的紅色小圓牌，1～5，沒設定的算 1）：選起來在上方的「電路編號」設定
   for (const s of (m.stamps || [])) {
     const t = tileById(s.id);
-    if ((!s.circuit && !isCircuitTile(t)) || s.valve) continue;   // 抽水閥沒有電路編號
+    if ((!s.circuit && !isCircuitTile(t)) || stampIsValve(curMap(), s)) continue;   // 抽水閥沒有電路編號
     const x = OX + s.c * CELL + (s.ox || 0) + stampW(s, t || {}) * CELL - 6, y = OY + s.r * CELL + (s.oy || 0) + 6;
     ctx.fillStyle = '#e8312f'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -1834,18 +1868,21 @@ function paintCell(c, r, isDown, additiveSelect = false) {
   } else if (brush.mode === 'solidnudge') {
     // 點一下＝只選這格；Shift＋點＝加選／減選；按著拖曳＝把經過的紅格一起選進來（Shift 拖曳從已選的格子開始＝減選）
     // 點在紅色的邊緣碰撞細線上：選的是那條線（拖曳＝把經過的線一起選進來）；按下時點到什麼，這次拖曳就選什麼
+    // 🛟 深水區：點在深水格上（照微調後的位置）＝選那格深水；紅格優先
     const lineKey = pointerPx ? edgeHitAtPx(m, pointerPx.x, pointerPx.y) : null;
+    const deepKey = !lineKey && m.solid.indexOf(key) < 0 && pointerPx ? deepHitAtPx(m, pointerPx.x, pointerPx.y) : null;
     if (isDown) {
-      if (!additiveSelect) { solidNudgeCells.clear(); solidNudgeEdges.clear(); }
-      nudgeDragKind = lineKey ? 'edge' : 'cell';
-      solidNudgeAdd = !(additiveSelect && (lineKey ? solidNudgeEdges.has(lineKey) : solidNudgeCells.has(key)));
+      if (!additiveSelect) { solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear(); }
+      nudgeDragKind = lineKey ? 'edge' : deepKey ? 'deep' : 'cell';
+      solidNudgeAdd = !(additiveSelect && (lineKey ? solidNudgeEdges.has(lineKey) : deepKey ? solidNudgeDeep.has(deepKey) : solidNudgeCells.has(key)));
     }
     if (nudgeDragKind === 'edge') { if (lineKey) { if (solidNudgeAdd) solidNudgeEdges.add(lineKey); else solidNudgeEdges.delete(lineKey); } }
+    else if (nudgeDragKind === 'deep') { if (deepKey) { if (solidNudgeAdd) solidNudgeDeep.add(deepKey); else solidNudgeDeep.delete(deepKey); } }
     else if (m.solid.indexOf(key) >= 0) { if (solidNudgeAdd) solidNudgeCells.add(key); else solidNudgeCells.delete(key); }
-    else if (isDown && !additiveSelect) { draw(); setStatus('這格不是「不可穿透」，先用 🧱 畫上紅格（或 📏 畫邊緣碰撞）再微調', '#ffd24a'); return; }
+    else if (isDown && !additiveSelect) { draw(); setStatus('這格不是「不可穿透」，先用 🧱 畫上紅格（或 📏 畫邊緣碰撞、🛟 畫深水區）再微調', '#ffd24a'); return; }
     draw();
-    if (solidNudgeCells.size || solidNudgeEdges.size) setStatus(solidNudgeStatus(m), '#ffd479');
-    else if (isDown) setStatus('沒有選中的紅格或邊緣碰撞', '#9aa4b2');
+    if (solidNudgeCells.size || solidNudgeEdges.size || solidNudgeDeep.size) setStatus(solidNudgeStatus(m), '#ffd479');
+    else if (isDown) setStatus('沒有選中的紅格、邊緣碰撞或深水區', '#9aa4b2');
     return;
   } else if (brush.mode === 'edge') {
     // 📏 邊緣碰撞：點格線（靠近哪條邊就是哪條）＝加上／拿掉薄牆；按著沿格線拖曳＝連續畫（或連續擦）
@@ -1872,7 +1909,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
   } else if (brush.mode === 'deepwater') {   // 🛟 深水區：拖曳畫一片、再畫一次＝擦掉
     const list = m.deepWater || (m.deepWater = []);
     if (isDown) deckPaintAdd = !list.includes(key);
-    if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
+    if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else { removeFrom(list, key); setDeepOffset(m, key, [0, 0]); solidNudgeDeep.delete(key); }   // 擦掉時微調一起清
     if (!list.length) delete m.deepWater;
   } else if (brush.mode === 'spawn') {
     m.spawnZone = m.spawnZone || [];
@@ -3061,6 +3098,11 @@ function updateToolUI() {
   const more = document.querySelector('#mapbar .tool-more'), picked = more && more.querySelector('.tool.sel');
   if (more) { more.classList.toggle('has-sel', !!picked); more.querySelector('summary').textContent = picked ? '⋯ ' + picked.textContent.trim() : '⋯ 更多'; }
 }
+// 「⋯ 更多」選單太長：打開時照它實際的位置算最多多高，超過就在選單裡捲動（工具列換行變高時也對得上）
+document.querySelectorAll('#mapbar .tool-more').forEach(more => {
+  const fit = () => { const menu = more.querySelector('.tool-more-menu'); if (!more.open || !menu) return; menu.style.maxHeight = Math.max(160, innerHeight - menu.getBoundingClientRect().top - 12) + 'px'; };
+  more.addEventListener('toggle', fit); window.addEventListener('resize', fit);
+});
 document.querySelectorAll('.tool').forEach(btn => {
   btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn); });
 });
@@ -3484,12 +3526,15 @@ function refreshCircuitControl() {
       saveMaps(); refreshSelPanel(); draw(); setStatus('電路編號設為 ' + n + '：只跟同編號的開關／電燈連動', '#7ee0c0');
     });
   }
-  const picked = selectedCircuitThing(); box.classList.toggle('hidden', !picked || !!picked.s?.valve);   // 抽水閥沒有電路編號
+  const picked = selectedCircuitThing(); box.classList.toggle('hidden', !picked || stampIsValve(curMap(), picked.s));   // 抽水閥沒有電路編號
   if (picked) document.getElementById('circuitNumber').value = String(picked.s?.circuit || 1);
   refreshValveControl();
 }
 // 電源開關勾「抽水閥」：變成池核的抽水閥（js/pool-tide.js），不再控制電燈、沒有電路編號
 const isPowerSwitchTile = t => !!t && (/power-switch-(on|off)\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || /^tile_interactive_power_switch/.test(t.id));
+// 抽水閥：勾了「抽水閥」，或放在名稱有「抽水閥」的圖層（遊戲裡的判斷在 js/pool-tide.js 的 poolIsValve，兩邊要一致）
+const valveLayerOf = (m, s) => !!s && (m.layerOrder || []).some(l => l.id === (s.layer || 'top') && String(l.name || '').includes('抽水閥'));
+const stampIsValve = (m, s) => !!s && (s.valve === true || (s.valve !== false && valveLayerOf(m, s)));
 function refreshValveControl() {
   let box = document.getElementById('valveControl');
   if (!box) {
@@ -3507,13 +3552,13 @@ function refreshValveControl() {
         delete curMap().layers[picked.sel.layer][picked.sel.key]; curMap().stamps.push(s);
         selections = [{ type: 'stamp', index: curMap().stamps.length - 1 }]; selection = selections[0];
       }
-      if (input.checked) { s.valve = true; delete s.circuit; } else delete s.valve;
+      if (input.checked) { s.valve = true; delete s.circuit; } else if (valveLayerOf(curMap(), s)) s.valve = false; else delete s.valve;   // 放在「抽水閥」圖層的：取消勾選要記成 false 才不算
       saveMaps(); refreshSelPanel(); draw(); setStatus(input.checked ? '這個開關是抽水閥了：水漲回來時按它把深水區抽乾（沒有電路編號）' : '改回一般電源開關', '#7ee0c0');
     });
   }
   const picked = selectedCircuitThing(), ok = !!picked && isPowerSwitchTile(tileById(picked.id));
   box.classList.toggle('hidden', !ok);
-  if (ok) document.getElementById('valveCheck').checked = !!picked.s?.valve;
+  if (ok) document.getElementById('valveCheck').checked = stampIsValve(curMap(), picked.s);
 }
 // 物件名稱太長會截成「…」，好讓選取列擠得進工具那一排；
 // 但如果怎麼擠都會換到下一排（例如門、置物箱、電源開關有額外設定），就不截、直接顯示全名。
@@ -3895,13 +3940,13 @@ document.getElementById('clearSolid')?.addEventListener('click', () => {
   if (!n) { setStatus('這張地圖沒有碰撞可以刪', '#9aa4b2'); return; }
   if (!confirm('確定刪除「' + m.name + '」全部的碰撞？\n（' + (m.solid || []).length + ' 格紅格、' + (m.edges || []).length + ' 條邊緣碰撞，連同微調一起刪；基地自己的碰撞格不動。刪錯可以按 Ctrl+Z 復原）')) return;
   pushUndo();
-  m.solid = []; m.solidOffsets = {}; delete m.solid2; delete m.edges; delete m.edgeOffsets; solidNudgeCells.clear(); solidNudgeEdges.clear(); checkResult = null;
+  m.solid = []; m.solidOffsets = {}; delete m.solid2; delete m.edges; delete m.edgeOffsets; solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear(); checkResult = null;
   saveMaps(); draw(); setStatus('已刪除這張地圖全部的碰撞（Ctrl+Z 可以復原）', '#ffd24a');
 });
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.solid2; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear();
+  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.solid2; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear();
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -3924,7 +3969,7 @@ function refreshMapSelect() {
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], spawnZone: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], camp: [], rules: {} }); }
-function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; solidNudgeCells.clear(); solidNudgeEdges.clear(); applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
+function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear(); applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
 
 mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
 document.getElementById('newMap').addEventListener('click', () => {
@@ -4035,6 +4080,8 @@ function shiftMapContent(m, dc, dr) {
   if (m.solid2) m.solid2 = m.solid2.map(shiftKey);
   if (m.only2) m.only2 = m.only2.map(shiftKey);
   if (m.deepWater) m.deepWater = m.deepWater.map(shiftKey);
+  if (m.deepWaterOffsets) { const o = {}; for (const k in m.deepWaterOffsets) o[shiftKey(k)] = m.deepWaterOffsets[k]; m.deepWaterOffsets = o; }
+  if (solidNudgeDeep.size) { const moved = [...solidNudgeDeep].map(shiftKey); solidNudgeDeep.clear(); moved.forEach(k => solidNudgeDeep.add(k)); }
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -4072,6 +4119,8 @@ function dropOutsideContent(m) {
   if (m.solid2) { m.solid2 = m.solid2.filter(insideKey); if (!m.solid2.length) delete m.solid2; }
   if (m.only2) m.only2 = m.only2.filter(insideKey);
   if (m.deepWater) { m.deepWater = m.deepWater.filter(insideKey); if (!m.deepWater.length) delete m.deepWater; }
+  if (m.deepWaterOffsets) { for (const k in m.deepWaterOffsets) if (!insideKey(k)) delete m.deepWaterOffsets[k]; if (!Object.keys(m.deepWaterOffsets).length) delete m.deepWaterOffsets; }
+  for (const k of [...solidNudgeDeep]) if (!insideKey(k)) solidNudgeDeep.delete(k);
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;

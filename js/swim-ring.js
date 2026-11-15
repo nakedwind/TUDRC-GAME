@@ -40,7 +40,21 @@ function deepWaterCells() {
   return deepCache.cells;
 }
 const isDeepWaterCell = (c, r) => deepWaterCells().has(c + ',' + r);
-const deepWaterAtPoint = (x, y) => { const cells = deepWaterCells(); return cells.size > 0 && cells.has(cellAt(x, y).join(',')); };
+// 這個點在不在深水區：有用地圖編輯器「🎯 碰撞微調」移過的深水格（MAP.deepWaterOffsets），照移過去的位置算（跟紅格的微調一樣，最多將近一格）
+function deepCellsHavePoint(cells, x, y) {
+  if (!cells || !cells.size) return false;
+  const offs = typeof MAP !== 'undefined' && MAP && MAP.deepWaterOffsets, [c, r] = cellAt(x, y), k = c + ',' + r;
+  if (!offs) return cells.has(k);
+  if (cells.has(k) && !offs[k]) return true;   // 沒微調過的：整格都是
+  for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {   // 微調過的：看旁邊移過來的格子有沒有蓋到這個點
+    const kk = (c + dc) + ',' + (r + dr), o = offs[kk];
+    if (!o || !cells.has(kk)) continue;
+    const x0 = OX + (c + dc) * CELL + o[0], y0 = OY + (r + dr) * CELL + o[1];
+    if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return true;
+  }
+  return false;
+}
+const deepWaterAtPoint = (x, y) => deepCellsHavePoint(deepWaterCells(), x, y);
 const riding = () => !!(typeof G !== 'undefined' && G && G.player && G.player.swimRing);
 // 現在在更新哪個隊員（js/sentry.js 的 updateSentry 設定）：隊員坐救生圈時深水不擋、划水變慢
 let swimCurActor = null;
@@ -209,3 +223,8 @@ function drawSwimRinged(a, drawFn) {
     else if (want <= 0 && audio.volume <= 0 && !audio.paused) audio.pause();   // 停下來就停，下次接著播
   }, 100);
 })();
+
+// 救生圈外面的一圈水波紋（js/water.js 的 drawWaded 呼叫；跟泡在水裡的波紋同一套，走動時往外擴散）
+function swimRingRippleInfo(a) {
+  return { w: { depth: 0, see: 1 }, bottom: a.y + SWIM_RING.ringDy + 2, height: 1, width: SWIM_RING.ringW * 1.35 };
+}
