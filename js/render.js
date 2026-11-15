@@ -620,8 +620,9 @@ function drawSpeechBubble(cx, bottomY, text, col) {
   const c = !col ? BUBBLE_DEFAULT : typeof col === 'string' ? { ...BUBBLE_DEFAULT, bd: col } : col, tail = 6, rad = 9;   // 只給一個色碼：當作框的顏色
   ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   const lines = wrapBubbleText(text), lineH = 18;
-  const tw = Math.max(...lines.map(l => ctx.measureText(l).width)), w = tw + 24, h = 8 + lines.length * lineH;
-  const x = Math.round(cx - w / 2), y = Math.round(bottomY - tail - h);
+  cx = Math.round(cx);   // 中心對齊整數像素、寬度取偶數：框的正中間和下面的小三角形才會剛好對齊（不然會差半格看起來歪一邊）
+  const tw = Math.max(...lines.map(l => ctx.measureText(l).width)), w = Math.ceil((tw + 24) / 2) * 2, h = 8 + lines.length * lineH;
+  const x = cx - w / 2, y = Math.round(bottomY - tail - h);
   ctx.fillStyle = c.bg; roundRect(x, y, w, h, rad); ctx.fill();
   ctx.strokeStyle = c.bd; ctx.lineWidth = 1.2; roundRect(x, y, w, h, rad); ctx.stroke();
   ctx.fillStyle = c.bd;                                       // 向下小三角尾巴（同邊框色）

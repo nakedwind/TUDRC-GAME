@@ -14,9 +14,7 @@
 */
 const FIRST_HINT_KEY = 'tudrc_first_hints_v1';
 const FIRST_HINT_STYLE = {
-  bg: '#9fe0ff',        // 框的底色（淡藍：跟作戰桌的黃色「作戰」分開）
-  edge: 'rgba(16,40,60,.85)',
-  text: '#0d2a3d',
+  color: null,          // 泡泡顏色：null＝跟隊友頭上的對話泡泡一樣（js/render.js 的 BUBBLE_DEFAULT）；要換色就寫 { bg: 底色, bd: 邊框和小三角形, tx: 字 }
   hideNear: 64,         // 溫特離物件幾像素內就先不畫（那時候會出現互動提示）
   screenTop: 40,        // 提示最高只到畫面頂端往下幾像素（遊戲座標），免得跑出畫面或被「目前任務」那行字蓋住
   merge: 60,           // 同一種東西靠得很近（例如並排的 3 個衣櫃）：左右幾像素內合成一個提示，不要擠成一排
@@ -34,7 +32,7 @@ const FIRST_HINTS = {
   workshop: { label: '開發工坊', spots: () => {   // 諾亞頭上（名字的上方），跟他對話就能打開開發工坊
     const n = (G.npcs || []).find(a => a && a.id === 'noah');
     if (!n || n.hp <= 0) return [];
-    return [{ x: n.x, y: n.y - 70 + (NPC_LABEL_DY[n.id] || 0), near: { left: n.x, right: n.x, top: n.y, bottom: n.y } }];
+    return [{ x: n.x, y: n.y - 80 + (NPC_LABEL_DY[n.id] || 0), near: { left: n.x, right: n.x, top: n.y, bottom: n.y } }];
   } },
   cabinet: { label: '置物櫃', spots: () => boxHintSpots('cabinet') },
   armor: { label: '防具箱', spots: () => boxHintSpots('armor') },
@@ -88,7 +86,6 @@ function drawFirstHints(ctx) {
   if (!ids.length) return;
   const p = G.player, now = performance.now() / 1000;
   ctx.save();
-  ctx.font = 'bold 14px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ids.forEach((id, k) => {
     const hint = FIRST_HINTS[id];
     for (const s of mergeHintSpots(hint.spots(), hint.merge)) {
@@ -98,13 +95,7 @@ function drawFirstHints(ctx) {
       const top = typeof cam !== 'undefined' ? cam.y + FIRST_HINT_STYLE.screenTop : -Infinity;
       const baseY = Math.min(Math.max(s.y, top), b.bottom - 14);
       const y = Math.round(baseY + Math.sin(now * 3 + k) * 2.5);   // 上下輕輕飄（每一項錯開一點）
-      const w = ctx.measureText(hint.label).width + 16, h = 22;
-      ctx.fillStyle = FIRST_HINT_STYLE.bg; ctx.strokeStyle = FIRST_HINT_STYLE.edge; ctx.lineWidth = 1.5;
-      roundRect(Math.round(s.x - w / 2), y - h / 2, w, h, 11); ctx.fill(); ctx.stroke();
-      // 下面的小三角形，指向物件
-      ctx.beginPath(); ctx.moveTo(s.x - 5, y + h / 2 - 1); ctx.lineTo(s.x + 5, y + h / 2 - 1); ctx.lineTo(s.x, y + h / 2 + 6); ctx.closePath();
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = FIRST_HINT_STYLE.text; ctx.fillText(hint.label, s.x, y + 1);
+      drawSpeechBubble(s.x, y + 17, hint.label, FIRST_HINT_STYLE.color);   // 跟隊友的對話泡泡同一個畫法；y＝泡泡中間，y+17＝下面小三角形的尖端
     }
   });
   ctx.restore();

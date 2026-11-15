@@ -171,11 +171,13 @@ function useNpcChatNearPlayer() {
 function drawNpcChatMarks(ctx) {
   const st = G && G.npcChat; if (!st || st.phase !== 'wait') return;
   const mid = npcChatMid(st); if (!mid) return;
-  const now = performance.now() / 1000, x = mid.x, y = mid.y - 92 + Math.sin(now * 2.2) * 2.5;   // 在名字上面，不蓋住名字
+  const now = performance.now() / 1000, x = Math.round(mid.x), y = Math.round(mid.y - 92 + Math.sin(now * 2.2) * 2.5);   // 在名字上面，不蓋住名字；取整數像素，框和小三角形才對得齊
+  // 樣式跟角色頭上的對話泡泡一樣（js/render.js 的 drawSpeechBubble）：淺底、細邊框，下面的小三角形用邊框色填滿（不描邊，免得在框底多一條線）
+  const c = typeof BUBBLE_DEFAULT !== 'undefined' ? BUBBLE_DEFAULT : { bg: '#eef2f7', bd: '#5a6a86' };
   ctx.save();
-  ctx.fillStyle = 'rgba(248,250,252,.95)'; ctx.strokeStyle = 'rgba(70,86,110,.9)'; ctx.lineWidth = 1.5;
-  roundRect(x - 21, y - 12, 42, 22, 11); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x - 4, y + 10); ctx.lineTo(x + 4, y + 10); ctx.lineTo(x, y + 16); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = c.bg; roundRect(x - 21, y - 12, 42, 22, 9); ctx.fill();
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1.2; roundRect(x - 21, y - 12, 42, 22, 9); ctx.stroke();
+  ctx.fillStyle = c.bd; ctx.beginPath(); ctx.moveTo(x - 5, y + 10); ctx.lineTo(x + 5, y + 10); ctx.lineTo(x, y + 16); ctx.closePath(); ctx.fill();
   for (let i = 0; i < 3; i++) {   // 三個點輪流跳起來
     const k = Math.max(0, Math.sin(now * 6 - i * .9));
     ctx.fillStyle = '#5a6a86'; ctx.beginPath(); ctx.arc(x - 10 + i * 10, y - 1 - k * 3, 3, 0, Math.PI * 2); ctx.fill();
