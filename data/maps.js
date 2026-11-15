@@ -58312,7 +58312,9 @@ const BATTLE_MAPS = [
         "60,42": "tile_mr4czvpx",
         "60,41": "tile_mr4czvpx",
         "60,40": "tile_mr4czvpx",
-        "60,39": "tile_mr4czvpx"
+        "60,39": "tile_mr4czvpx",
+        "60,90": "tile_obstacle_camping_lights",
+        "64,86": "tile_obstacle_camping_lights"
       },
       "object": {
         "47,79": "tile_mr4czvpx",
@@ -77799,7 +77801,9 @@ const BATTLE_MAPS = [
       "object6": {},
       "object7": {},
       "object8": {},
-      "object9": {},
+      "object9": {
+        "73,72": "tile_interactive_power_switch_off"
+      },
       "object10": {
         "79,82": "tile_containment_wall_top_straight",
         "79,81": "tile_containment_wall_top_straight",
@@ -77942,7 +77946,8 @@ const BATTLE_MAPS = [
         "46,9": "tile_obstacle_ore_small",
         "43,11": "tile_obstacle_ore_small"
       },
-      "object13": {}
+      "object13": {},
+      "object14": {}
     },
     "stamps": [
       {
@@ -86815,7 +86820,7 @@ const BATTLE_MAPS = [
         "id": "tile_field_ammo_crate",
         "c": 52,
         "r": 120,
-        "layer": "object9",
+        "layer": "ground3",
         "ox": 20,
         "oy": 10,
         "fx": true,
@@ -86825,7 +86830,7 @@ const BATTLE_MAPS = [
         "id": "tile_field_ammo_crate",
         "c": 69,
         "r": 120,
-        "layer": "object9",
+        "layer": "ground3",
         "ox": 20,
         "oy": 20,
         "fx": true,
@@ -87861,9 +87866,235 @@ const BATTLE_MAPS = [
         "c": 41,
         "r": 45,
         "layer": "object9",
-        "oy": 11.333333,
+        "oy": 10.666667,
         "sortDepth": 2.25,
-        "level": 2
+        "level": 2,
+        "ox": 28
+      },
+      {
+        "id": "tile_obstacle_searchlight_h",
+        "c": 70,
+        "r": 119,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 59,
+        "r": 91,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 64,
+        "r": 86,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 40,
+        "r": 77,
+        "layer": "object14"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 22,
+        "r": 73,
+        "layer": "object14"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 31,
+        "r": 73,
+        "layer": "object14"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 48,
+        "r": 73,
+        "layer": "object14"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 70,
+        "r": 71,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 66,
+        "r": 71,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 77,
+        "r": 80,
+        "layer": "object9",
+        "ox": 18.666667,
+        "oy": 15.333333,
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 68,
+        "r": 71,
+        "layer": "object9",
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 77,
+        "r": 59,
+        "layer": "object9",
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 74,
+        "r": 59,
+        "layer": "object9",
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 26,
+        "r": 73,
+        "layer": "object14",
+        "circuit": 3
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 20,
+        "r": 73,
+        "layer": "object14",
+        "circuit": 3
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 15,
+        "r": 71,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20,
+        "circuit": 3
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 9,
+        "r": 71,
+        "layer": "object9",
+        "oy": 20,
+        "circuit": 3
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 19,
+        "r": 59,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10,
+        "circuit": 3
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 11,
+        "r": 59,
+        "layer": "object9",
+        "circuit": 3
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 36,
+        "r": 67,
+        "layer": "object14",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 43,
+        "r": 64,
+        "layer": "object14"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 36,
+        "r": 58,
+        "layer": "object14",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 43,
+        "r": 58,
+        "layer": "object14",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 36,
+        "r": 56,
+        "layer": "object14",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 43,
+        "r": 56,
+        "layer": "object14",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 11,
+        "r": 41,
+        "layer": "object9",
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_power_switch_off",
+        "c": 28,
+        "r": 74,
+        "layer": "object14",
+        "circuit": 3
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 24,
+        "r": 45,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 35,
+        "r": 45,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 49,
+        "r": 45,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 58,
+        "r": 45,
+        "layer": "object9",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_poster_moon_lake",
+        "c": 37,
+        "r": 45,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20
       }
     ],
     "solid": [
@@ -95990,6 +96221,10 @@ const BATTLE_MAPS = [
         "name": "🚧 物件 4"
       },
       {
+        "id": "object14",
+        "name": "燈"
+      },
+      {
         "id": "overlay",
         "name": "🎯 物件裝飾"
       },
@@ -99098,7 +99333,10 @@ const BATTLE_MAPS = [
         "41,31": "tile_forest_group_8_copy_2",
         "37,37": "tile_forest_group_8_copy_2"
       },
-      "ground3": {},
+      "ground3": {
+        "122,92": "tile_obstacle_camping_lights",
+        "128,92": "tile_obstacle_camping_lights"
+      },
       "object": {
         "84,84": "tile_mr4czvpx",
         "103,87": "tile_mr4czvpx",
