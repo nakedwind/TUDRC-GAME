@@ -7,8 +7,10 @@ const resultOverlay = document.getElementById('overlay');
 const resultCard = resultOverlay.querySelector('.overlay-card');
 const resultOvBtn = document.getElementById('ov-btn');
 const resultBtnHome = { parent: resultOvBtn.parentNode, next: resultOvBtn.nextSibling };   // 大按鈕原本的位置
-function enterResultMode() {
+// lose＝true 時是打輸的畫面：多加 .result-lose，讓標題、文字、按鈕都置中（css/style.css）
+function enterResultMode(lose) {
   resultOverlay.classList.add('result');
+  resultOverlay.classList.toggle('result-lose', !!lose);
   let actions = resultCard.querySelector('.result-actions');
   if (!actions) { actions = document.createElement('div'); actions.className = 'result-actions'; resultCard.appendChild(actions); }
   actions.prepend(resultOvBtn);
@@ -16,7 +18,7 @@ function enterResultMode() {
 }
 function exitResultMode() {
   if (!resultOverlay.classList.contains('result')) return;
-  resultOverlay.classList.remove('result');
+  resultOverlay.classList.remove('result', 'result-lose');
   resultBtnHome.parent.insertBefore(resultOvBtn, resultBtnHome.next);
   resultCard.querySelector('.result-actions')?.remove();
 }
@@ -26,4 +28,4 @@ showOverlay = function (...args) { exitResultMode(); return resultBaseShowOverla
 const resultBaseWinOverlay = winOverlay;
 winOverlay = function (...args) { const r = resultBaseWinOverlay.apply(this, args); enterResultMode(); return r; };
 const resultBaseLoseOverlay = loseOverlay;
-loseOverlay = function (...args) { const r = resultBaseLoseOverlay.apply(this, args); enterResultMode(); return r; };
+loseOverlay = function (...args) { const r = resultBaseLoseOverlay.apply(this, args); enterResultMode(true); return r; };
