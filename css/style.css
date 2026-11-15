@@ -118,6 +118,23 @@ canvas {
 .system-notice.warning { color: #ffe1ca; }
 .system-notice.leaving { opacity: 0; transition: opacity .3s ease; }
 @keyframes system-notice-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+/* 作戰經費提示卡（js/fund-card.js）：第一次到達戰鬥地圖時從右邊滑出；位置、大小可在 UI編輯器調（fundCard） */
+#fundCard {
+  position: absolute; right: 22px; top: 34%; z-index: 13;
+  width: min(300px, calc(100% - 44px)); padding: 13px 16px 12px;
+  border: 1px solid rgba(255, 212, 121, .42); border-left: 4px solid #ffd479; border-radius: 10px;
+  background: linear-gradient(135deg, rgba(38, 32, 18, .94), rgba(16, 19, 25, .94));
+  box-shadow: 0 10px 28px rgba(0,0,0,.45), 0 0 18px rgba(255, 212, 121, .14);
+  color: #e8eef5; cursor: pointer; pointer-events: auto;
+  opacity: 0; transform: translateX(40px); transition: opacity .35s ease, transform .35s ease;
+}
+#fundCard.hidden { display: none; }
+#fundCard.show { opacity: 1; transform: translateX(0); }
+#fundCard.leaving { opacity: 0; transform: translateX(40px); }
+#fundCard .fund-card-title { display: block; color: #ffd479; font-size: 19px; line-height: 1.3; letter-spacing: .5px; }
+#fundCard .fund-card-body { margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: #e8eef5; }
+#fundCard .fund-card-note { display: block; margin-top: 6px; font-size: 12px; color: #b9a986; }
+#fundCard .fund-card-note[hidden] { display: none; }
 #mapTransition {
   position: absolute; inset: 0; z-index: 30; border-radius: 18px;
   background: #000; opacity: 0; visibility: hidden; pointer-events: none;
@@ -2428,6 +2445,10 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #overlay.result .result-actions { justify-content: flex-end; margin-top: 16px; padding: 12px 20px; border-top: 1px solid rgba(143,211,255,.14); background: rgba(7,12,18,.4); }
 #overlay.result .result-actions button { padding: 9px 22px; border-radius: 9px; font: 800 15px "Microsoft JhengHei", sans-serif; box-shadow: none; }
 #overlay.result .result-actions #ov-btn { border: 1px solid #e9bd62; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
+/* 打輸的結算畫面（部隊長倒下、營地被摧毀）：標題、說明文字、按鈕全部置中（js/result-screen.js 加 .result-lose） */
+#overlay.result-lose .overlay-card, #overlay.result-lose h2, #overlay.result-lose #ov-text { text-align: center; }
+#overlay.result-lose h2 { background: linear-gradient(90deg, transparent, rgba(143,211,255,.08), transparent); }
+#overlay.result-lose .result-actions { justify-content: center; }
 #overlay.result .result-actions #coreStay { order: -1; border: 1px solid rgba(143,211,255,.35); background: rgba(23,32,42,.8); color: #d8ecff; }
 
 /* 查看海報的對話框（js/posters.js）：左邊放整張海報，不裁成半身像 */

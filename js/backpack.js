@@ -280,6 +280,7 @@ function useArmorChestNearPlayer() { if (!armorChestNearPlayer()) return false; 
 function openArmorPanel(selection) {
   if (!G?.player || G.over || !armorChestNearPlayer()) return;
   closeBackpack(true);
+  if (typeof firstHintDone === 'function') firstHintDone('armor');   // 防具箱的首次提示不再飄（js/first-hints.js）
   campArmorOpen = true; backpackTab = GEAR_TAB.id; backpackSel = null; armorWho = 'winter'; armorSlotPick = null;
   openBackpack({ camp: true });
   if (!backpackOpen) { campArmorOpen = false; backpackTab = 'consumable'; return; }

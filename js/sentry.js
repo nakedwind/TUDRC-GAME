@@ -404,6 +404,17 @@ function escapeDarkness(actor, dt) {
   if (actor.summonDark) return false;
   // 跟著溫特走的隊員待在溫特身邊（FOLLOW_PLAYER），或嚮導正在撿溫特丟在地上的東西：不怕黑
   if (actor.groundTrip || nearFollowedPlayer(actor)) return false;
+  // 被叫來跟隨護衛、而且找得到路過去：中間暗也照走（不然走進暗處就逃回燈下、再往前又逃回來，看起來像站在原地不動）
+  // 每秒重新確認一次「找得到路」（穿過黑暗也算），路被擋住時才照舊躲回燈下
+  if (actor.mode === 'escort' && G && G.player && !MAP_SAFE) {
+    actor.escortRouteT = (actor.escortRouteT || 0) - dt;
+    if (actor.escortRouteT <= 0) {
+      actor.escortRouteT = 1;
+      actor.escortRouteOk = buildSentryPath(actor, G.player.x, G.player.y, true, hasFloors ? actorFloor(G.player) : null) !== null;
+    }
+    if (actor.escortRouteOk) return false;
+    if (typeof watchSentryProgress === 'function' && !personnelInLight(actor.x, actor.y)) watchSentryProgress(actor, dt, leaderLabel(), () => sentryLeaderBlockReason(actor));   // 過不去又待在暗處：一樣說出原因（js/sentry-blocked.js）
+  }
   if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
     if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
     if (actor.escapePath) {
@@ -888,8 +899,12 @@ function updateSentryMain(t, dt) {
     if (moveSentryWithPath(t, t.target.x, t.target.y, speed, dt)) {
       t.target = null; t.navPath = null; t.navGoal = null;
       t.mode = 'hold'; t.anchor = { x: t.x, y: t.y };
+      if (typeof resetSentryProgress === 'function') resetSentryProgress(t);
       flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3);
       systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏');
+    } else if (typeof watchSentryProgress === 'function') {   // 走不過去、站著不動：說出原因（js/sentry-blocked.js）
+      const goal = t.target;
+      watchSentryProgress(t, dt, '巡邏點', () => sentryBlockReason(t, goal.x, goal.y, { dark: !!(t.summonDark || t.followDark), where: '巡邏點' }));
     }
     return;
   }
@@ -903,8 +918,10 @@ function updateSentryMain(t, dt) {
       t.target = null; t.waitT = 0;
       t.followDark = companion.anchor === G.player;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）
       followTarget(t, companion.anchor, { dist: companion.radius * .82, speed: companion.speed }, dt);
+      if (t.mode === 'escort' && typeof watchSentryProgress === 'function') watchSentryProgress(t, dt, leaderLabel(), () => sentryLeaderBlockReason(t));   // 叫來護衛卻過不來：說出原因（js/sentry-blocked.js）
       return;
     }
+    if (typeof resetSentryProgress === 'function') resetSentryProgress(t);   // 已經在身邊了
     if (t.target && Math.hypot(t.target.x - companion.anchor.x, t.target.y - companion.anchor.y) > companion.radius) {
       t.target = null; t.navPath = null;
     }
@@ -1175,6 +1192,9 @@ function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden
 function setSentryEscort(t) {
   t.mode = 'escort'; t.guardSummoned = false; t.guardBase = null;
   t.target = null; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
+  t.navFailed = false; t.escortRouteT = 0;   // 重新找路（上次失敗的記號不要留著）
+  const reason = typeof sentryLeaderBlockReason === 'function' ? sentryLeaderBlockReason(t) : null;   // 現在就過不去：直接說原因，不要假裝在路上（js/sentry-blocked.js）
+  if (reason) { sayBlocked(t, leaderLabel(), reason); return; }   // 一樣維持護衛模式：路通了（例如門打開）就會自己過去
   sentryStatus(t, '跟隨護衛');
 }
 function sentryMenuAct(act) {

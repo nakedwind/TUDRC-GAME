@@ -44,7 +44,8 @@ const bestiarySpots = () => (!BESTIARY_COMPUTER.maps.length || (MAP && BESTIARY_
   ? costumeSpots(id => BESTIARY_COMPUTER.tiles.includes(id)) : [];
 const bestiaryNearPlayer = () => costumeSpotNearPlayer(bestiarySpots());
 // 電腦打開的是桌面（js/pc-desktop.js），圖鑑在桌面上的「怪物圖鑑」圖示；沒載入桌面時直接開圖鑑
-function useBestiaryNearPlayer() { if (!bestiaryNearPlayer()) return false; if (typeof openPcDesktop === 'function') openPcDesktop(); else openBestiary(); return true; }
+function useBestiaryNearPlayer() { if (!bestiaryNearPlayer()) return false; if (typeof firstHintDone === 'function') firstHintDone('computer');   // 電腦的首次提示不再飄（js/first-hints.js）
+  if (typeof openPcDesktop === 'function') openPcDesktop(); else openBestiary(); return true; }
 
 function buildBestiary() {
   const el = bst.el = document.createElement('div');

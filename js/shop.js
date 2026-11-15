@@ -13,6 +13,7 @@
 //  ・後室商店也賣全部的零食、飲料
 //  ・後室商店：地圖編輯器「後室便利商店櫃台」靠近按 Spacenter。賣 BACKROOM_SHOP.stock（杏仁水只有這裡買得到），
 //    也可以把背包裡的東西賣掉換錢（賣到的錢算進作戰經費，回基地時一起帶回去）
+//  ・賣出：便利商店、飲料店、後室商店都收（販賣機不收）；身上的特殊子彈也能一發一發賣，賣價＝開發工坊子彈價的一半
 // ============================================================
 const supplyShop = document.getElementById('supplyShop');
 const supplyShopList = document.getElementById('supplyShopList');
@@ -38,10 +39,10 @@ let backroomMode = false, backroomTab = 'buy';   // backroomTab：buy 購買／s
 const shopCanSell = () => !vendingMode;
 const backroomCart = new Map();
 // 暫時開放後室商店購買全部特殊子彈；一般子彈本來就是無限。
-const BACKROOM_BULLET_PRICE = 10;   // 每發售價
+// 價錢跟諾亞開發工坊的「彈藥」頁同一份：data/equipment.js 的 BULLET_PRICE（開發工坊編輯器可以改，js/workshop-config.js 的 bulletPrice）
 function backroomBulletStock() {
   return Object.entries(BULLETS).filter(([id, b]) => id !== 'pistol' && !b.removed).map(([id, b]) => ({
-    id: 'shop-bullet:' + id, bullet: id, name: b.name, image: b.image, kind: 'ammo', price: BACKROOM_BULLET_PRICE,
+    id: 'shop-bullet:' + id, bullet: id, name: b.name, image: b.image, kind: 'ammo', price: bulletPrice(id),
     effect: '每份 1 發・持有 ' + bulletCount(id) + ' 發',
   }));
 }
@@ -101,8 +102,15 @@ const shopItems = () => backroomMode ? [...backroomStock().filter(item => item.k
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
 // 賣掉一個能拿多少錢（0＝不能賣：重要物品、回憶碎片這類 noDrop 的、沒有價錢的）
 const CRYSTAL_SELL_ITEM = {id:'anomalous-crystals',name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png'};
+// 賣子彈：身上的特殊子彈（一般子彈無限，不能賣）一次賣 1 發，賣價＝開發工坊的子彈價錢 × sellRate（跟其他東西一樣拿回一半），至少 $1
+const SELL_BULLET = 'sell-bullet:';   // 賣出清單裡子彈的代號前綴，例如 sell-bullet:tranq
+const sellBulletItem = id => ({ id: SELL_BULLET + id, bullet: id, name: BULLETS[id].name, image: BULLETS[id].image });
+function sellableBullets() {   // 身上有、能賣的子彈：[子彈 id, 幾發]
+  return Object.keys(BULLETS).filter(id => id !== 'pistol' && !BULLETS[id].removed && bulletOwned(id) && bulletCount(id) > 0).map(id => [id, bulletCount(id)]);
+}
 function sellPriceOf(item) {
   if(item?.id===CRYSTAL_SELL_ITEM.id)return backroomMode?BACKROOM_SHOP.crystalSellPrice:0;
+  if (item?.bullet) return Math.max(1, Math.floor(bulletPrice(item.bullet) * BACKROOM_SHOP.sellRate));
   if (!item || item.noDrop || item.category === 'key') return 0;
   if (BACKROOM_SHOP.sellPrice[item.id] != null) return BACKROOM_SHOP.sellPrice[item.id];
   const sup = supplyById(item.id);
@@ -204,7 +212,7 @@ function renderBackroomTabs() {
     nav = document.createElement('nav'); nav.className = 'supply-shop-tabs backroom-tabs'; nav.setAttribute('role', 'tablist');
     supplyShop.querySelector('.supply-shop-tabs').before(nav);
   }
-  const sellable = [...supplyInventory.entries()].filter(([id, n]) => n > 0 && sellPriceOf(typeof itemById === 'function' ? itemById(id) : null) > 0).length + (backroomMode && training.crystals > 0 ? 1 : 0);
+  const sellable = [...supplyInventory.entries()].filter(([id, n]) => n > 0 && sellPriceOf(typeof itemById === 'function' ? itemById(id) : null) > 0).length + (backroomMode && training.crystals > 0 ? 1 : 0) + sellableBullets().length;
   nav.innerHTML = '<button type="button" role="tab" data-backroom-tab="buy" class="' + (backroomTab === 'buy' ? 'active' : '') + '">🛒 購買</button>' +
     '<button type="button" role="tab" data-backroom-tab="sell" class="' + (backroomTab === 'sell' ? 'active' : '') + '">💰 賣出 <em>' + sellable + '</em></button>';
 }
@@ -213,12 +221,13 @@ function renderSellList() {
   const rows = [...supplyInventory.entries()].map(([id, n]) => ({ item: typeof itemById === 'function' ? itemById(id) : null, n }))
     .filter(r => r.item && r.n > 0 && sellPriceOf(r.item) > 0);
   if(backroomMode && training.crystals>0)rows.unshift({item:CRYSTAL_SELL_ITEM,n:training.crystals});
+  for (const [id, n] of sellableBullets()) rows.push({ item: sellBulletItem(id), n });   // 特殊子彈排在最後面
   supplyShopList.innerHTML = rows.length ? rows.map(({ item, n }) => `<article class="shop-item sell" data-item="${item.id}">
       <span class="shop-owned" title="背包裡有 ${n} 個">×${n}</span>
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
       <span class="shop-effect">賣一個 $${sellPriceOf(item)}</span>
       <button class="shop-buy sell-btn" type="button" data-sell-item="${item.id}" aria-label="賣掉一個 ${item.name}，$${sellPriceOf(item)}"><span>賣出</span><b>+$${sellPriceOf(item)}</b></button>
-    </article>`).join('') : '<p class="supply-empty" style="grid-column:1/-1">背包裡沒有可以賣的東西（重要物品、回憶碎片不能賣）</p>';
+    </article>`).join('') : '<p class="supply-empty" style="grid-column:1/-1">背包裡沒有可以賣的東西（重要物品、回憶碎片、一般子彈不能賣）</p>';
 }
 function sellItem(id) {
   if(id===CRYSTAL_SELL_ITEM.id){
@@ -228,6 +237,17 @@ function sellItem(id) {
     if(G.battle&&!MAP_SAFE)G.battle.sold=(G.battle.sold||0)+price;
     SFX.play('shopCheckout',.5,'shop-sell');updateHUD();renderSupplyShop();
     supplyShopList.querySelector('[data-sell-item="anomalous-crystals"]')?.focus();
+    return;
+  }
+  if (String(id).startsWith(SELL_BULLET)) {   // 賣一發特殊子彈
+    const bid = id.slice(SELL_BULLET.length), b = BULLETS[bid];
+    if (!G || !shopCanSell() || !b || bid === 'pistol' || b.removed || bulletCount(bid) < 1) { sfx('error'); return; }
+    const price = sellPriceOf(sellBulletItem(bid));
+    bulletState().n[bid] = bulletCount(bid) - 1; bulletSave();   // 用光了還是算「拿到過」，彈藥包留一格空的（跟打光一樣）
+    G.money += price;
+    if (G.battle && !MAP_SAFE) G.battle.sold = (G.battle.sold || 0) + price;
+    SFX.play('shopCheckout', .5, 'shop-sell'); updateHUD(); renderSupplyShop();
+    supplyShopList.querySelector(`[data-sell-item="${id}"]`)?.focus();
     return;
   }
   const item = typeof itemById === 'function' ? itemById(id) : null, price = sellPriceOf(item), n = supplyInventory.get(id) || 0;
@@ -262,6 +282,7 @@ function openSupplyShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
   if (!MAP_SAFE) return openBackroomShop();   // 在後室（戰鬥地圖）裡的便利商店櫃台＝後室商店
   setShopMode('store');
+  if (typeof firstHintDone === 'function') firstHintDone('shop');   // 基地商店的首次提示不再飄（js/first-hints.js）
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopEnter', .7, 'shop-enter'); document.getElementById('supplyShopClose').focus();   // 全家便利商店進門聲
@@ -270,6 +291,7 @@ function openVendingMachine() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
   const near = vendingNearPlayer(); vendingColor = near ? vendingColorOf(near.id) : null;   // 哪一台（2F應變中心：紅＝零食、綠＝飲料）
   setShopMode('vending');
+  if (vendingColor !== 'purple') if (typeof firstHintDone === 'function') firstHintDone('vending');   // 販賣機的首次提示不再飄（js/first-hints.js）   // 後室的紫色販賣機不算
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('vendingOpen', .7, 'vending-open'); document.getElementById('supplyShopClose').focus();
@@ -285,6 +307,7 @@ function backroomShopNearPlayer() { return shopStampNearPlayer(BACKROOM_SHOP); }
 function openDrinkShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
   setShopMode('drinkshop');
+  if (typeof firstHintDone === 'function') firstHintDone('drinkshop');   // 飲料店的首次提示不再飄（js/first-hints.js）
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); sfx('menu'); document.getElementById('supplyShopClose').focus();

@@ -191,7 +191,8 @@ function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼
   const mine = mealTrays().filter(t => t.owner === 'player').find(t => Math.hypot(t.x - p.x, t.y - p.y) < 80 || (t.seat && Math.hypot(t.seat.x - p.x, t.seat.y - p.y) < 90));   // 離餐盤夠近，或站在自己剛剛坐的位子旁（餐盤可能放得比較遠）
   if (mine) return { label: mine.dirty ? '收髒盤' : '拿起餐盤', x: mine.x, y: mine.y - 22, run: () => { mealTrays().splice(mealTrays().indexOf(mine), 1); p.tray = { foods: mine.foods, left: mine.left, dirty: mine.dirty, eatT: mine.eatT }; sfx('switch'); } };
   const stack = mealNear(MEAL.trayTiles, p.x, p.y, MEAL.trayReach);
-  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof winterSay === 'function') winterSay(MEAL.takeLine); systemNotice('不想吃了：回到餐盤架可以放回去（裡面有菜要先倒進垃圾桶）'); } };
+  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof firstHintDone === 'function') firstHintDone('meal');   // 餐廳的首次提示不再飄（js/first-hints.js）
+     if (typeof winterSay === 'function') winterSay(MEAL.takeLine); systemNotice('不想吃了：回到餐盤架可以放回去（裡面有菜要先倒進垃圾桶）'); } };
   return null;
 }
 const mealPrompt = () => mealPlayerAction(true);

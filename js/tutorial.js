@@ -9,6 +9,7 @@
    ・動畫教學（艾德林說完話才開始）：遊戲暫停、畫面變暗，只有要操作的東西發光，旁邊的卡片播操作動畫；
      玩家照做才恢復（其他按鍵、點擊都沒反應）。「按 Space 知道了」的只是告訴玩家，不用照做。
        HP 掉到 TUTORIAL.hpAt 以下 → 快捷欄的醫療包；第一次疏導完（SP 變少）→ 杏仁水
+       SP 掉到 TUTORIAL.spLowAt 以下 → 提醒喝杏仁水（身上沒有就先叫玩家去營地物資箱拿，物資箱浮出 Space 鍵；拿到了才教）
        第一次站在暗處 → 滾輪換照明彈、朝暗處開槍；照亮之後 → 把探照燈拖到發光的格子 → 示範右鍵抓建築
        第一次看到怪物 → 右鍵點隊員 → 指派位置巡邏 → 點地圖 → 示範右鍵抓隊員
        隊員汙染升高／受傷 → 先用箭頭帶玩家走過去（不暫停），走到旁邊才暫停教 C 疏導／F 急救
@@ -24,6 +25,7 @@ const TUTORIAL = {
   enemyCells: 8,              // 怪物在溫特幾格內、看得到，才算「第一次看到怪物」
   taintAt: 40,                // 隊員汙染到多少跳「疏導」提示
   hpAt: .7,                   // 溫特 HP 掉到幾成以下跳「醫療包」教學
+  spLowAt: .5,                // 溫特 SP 掉到幾成以下跳「SP 偏低，喝杏仁水」提醒
   aidAt: .7,                  // 隊員 HP 掉到幾成以下跳「急救包」教學
   coreCells: 7,               // 核心在溫特幾格內、看得到，才跳「異質核心」提示
   coreDarkCells: 4,           // 核心在暗處：走到幾格內也算看到（核心很大顆）
@@ -76,6 +78,15 @@ const TUTORIAL = {
     almond: [
       '疏導會用掉 SP。SP 太低會頭暈，還會聽到奇怪的聲音。',
       '喝杏仁水可以把 SP 補回來。',
+    ],
+    spLow: [   // SP 偏低、身上有杏仁水
+      '隊長，你的臉色不太好……SP 剩不多了。',
+      'SP 太低會頭暈、看到殘影，還會聽到奇怪的聲音。站在全黑的地方、幫隊員疏導，都會用掉 SP。',
+      '趁現在喝一瓶杏仁水，把 SP 補回來。',
+    ],
+    spLowNone: [   // SP 偏低、身上沒有杏仁水
+      '隊長，你的臉色不太好……SP 剩不多了。',
+      '身上沒有杏仁水了，回營地的物資箱拿幾瓶吧，拿到就喝一瓶。',
     ],
     dark: [
       '前面太暗了，我們在黑暗裡看不到怪物，也沒辦法過去巡邏。',
@@ -506,6 +517,8 @@ function ensureTutMarksEl() {
   return tutMarksEl;
 }
 const TUT_BOX_KINDS = ['supply', 'armor', 'refill'];
+// SP 偏低的提醒說過了、還沒教喝杏仁水、身上也還沒有杏仁水：等玩家去物資箱拿
+const tutSpLowWaiting = () => tutorialSeen('spLow') && !tutLessonSeen('spLow') && !tutQuickSlotFor('sp');
 function tutBoxDone(kind) {
   if (kind === 'armor') return typeof equipState !== 'undefined' && (NEWBIE_START.gear || []).every(id => isEquipped(id));   // 頭盔穿上了
   return !!tutorialState.boxes[kind];
@@ -523,7 +536,7 @@ function drawTutMarks(show) {
   // 箱子：還沒打開過就浮一顆 Space 鍵（站在能打開的距離內會變大、變亮）
   const bubbles = el.querySelector('.tm-bubbles'), list = [];
   if (typeof mapBoxes === 'function' && G.tutorialWave && G.tutorialWave.done) for (const b of mapBoxes()) {
-    if (!TUT_BOX_KINDS.includes(b.kind) || tutBoxDone(b.kind)) continue;
+    if (!TUT_BOX_KINDS.includes(b.kind) || (tutBoxDone(b.kind) && !(b.kind === 'supply' && tutSpLowWaiting()))) continue;   // SP 偏低、身上沒杏仁水：物資箱打開過也再浮出來
     const cx = (b.left + b.right) / 2, d = Math.hypot(Math.max(b.left - p.x, 0, p.x - b.right), Math.max(b.top - p.y, 0, p.y - b.bottom));
     if (d > tutorialCells(TUTORIAL.boxCells)) continue;
     list.push({ at: tutW2C(cx, b.top - 4), near: d <= MAP_BOX.reach + 10 });
@@ -634,16 +647,17 @@ function tutQuickSlotFor(use) {
   return null;
 }
 const tutQuickEl = k => document.querySelector('#quickSupplies [data-qs-slot="' + k + '"]');
-function startSupplyLesson(id, use) {
+// id＝教學的名字（記成看過用）；card＝卡片上的字用哪一句（不寫＝跟 id 一樣）；onEnd＝教完要做的事
+function startSupplyLesson(id, use, card = id, onEnd = null) {
   const k = tutQuickSlotFor(use); if (!k) return false;
   const treat = use === 'hp';   // 醫療包要包紮 2 秒：包紮完才恢復遊戲（杏仁水是馬上喝）
   const steps = [{
     spots: () => [tutElRect(tutQuickEl(k))],
-    demo: tutKeyDemo(k), text: tutCard(id, { key: k }),
+    demo: tutKeyDemo(k), text: tutCard(card, { key: k }),
     allow: e => tutKey(e, k) || ((e.type === 'mousedown' || e.type === 'click') && e.button === 0 && tutIn(e, tutQuickEl(k))) ? 'done' : false,
   }];
   if (treat) steps.push(tutTreatStep(() => [tutMateRect(G.player)], 0));
-  startTutorialLesson(id, steps);
+  startTutorialLesson(id, steps, {}, onEnd);
   return true;
 }
 
@@ -777,6 +791,14 @@ function updateTutorial(dt) {
   if (!tutLessonSeen('medkit') && !busy && p.hp < p.maxhp * TUTORIAL.hpAt && tutQuickSlotFor('hp')) { tutorialSay('hp'); tutQueued = () => startSupplyLesson('medkit', 'hp'); return; }
   // 疏導完、SP 變少：杏仁水
   if (!tutLessonSeen('almond') && tutLessonSeen('soothe') && !busy && G.guide < G.guideMax && tutQuickSlotFor('sp')) { tutorialSay('almond'); tutQueued = () => startSupplyLesson('almond', 'sp'); return; }
+  // SP 偏低：提醒喝杏仁水（身上沒有就先叫玩家去物資箱拿）；只說一次
+  if (!tutorialSeen('spLow') && !busy && G.guide < G.guideMax * TUTORIAL.spLowAt) {
+    if (tutQuickSlotFor('sp')) { if (tutorialSay('spLow')) return; }
+    else if (tutorialSay('spLowNone')) { tutorialState.seen.push('spLow'); tutorialSave(); return; }
+  }
+  // 提醒過了、身上有杏仁水（一開始就有，或剛去物資箱拿到）、SP 還沒滿：教按快捷鍵喝（教完也算教過「杏仁水」那段）
+  if (tutorialSeen('spLow') && !tutLessonSeen('spLow') && !busy && G.guide < G.guideMax && tutQuickSlotFor('sp')
+    && startSupplyLesson('spLow', 'sp', 'almond', () => { if (!tutLessonSeen('almond')) { tutorialState.seen.push('L:almond'); tutorialSave(); } })) return;
   // 營地的箱子
   if (typeof mapBoxes === 'function') {   // 箱子擠在一起時 mapBoxNearPlayer 只認最近的那個，這裡每一種各自量
     const boxNear = kind => mapBoxes().some(b => b.kind === kind && Math.hypot(Math.max(b.left - p.x, 0, p.x - b.right), Math.max(b.top - p.y, 0, p.y - b.bottom)) <= MAP_BOX.reach + 10);

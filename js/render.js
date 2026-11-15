@@ -621,8 +621,9 @@ function drawSpeechBubble(cx, bottomY, text, col) {
   const c = !col ? BUBBLE_DEFAULT : typeof col === 'string' ? { ...BUBBLE_DEFAULT, bd: col } : col, tail = 6, rad = 9;   // 只給一個色碼：當作框的顏色
   ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   const lines = wrapBubbleText(text), lineH = 18;
-  const tw = Math.max(...lines.map(l => ctx.measureText(l).width)), w = tw + 24, h = 8 + lines.length * lineH;
-  const x = Math.round(cx - w / 2), y = Math.round(bottomY - tail - h);
+  cx = Math.round(cx);   // 中心對齊整數像素、寬度取偶數：框的正中間和下面的小三角形才會剛好對齊（不然會差半格看起來歪一邊）
+  const tw = Math.max(...lines.map(l => ctx.measureText(l).width)), w = Math.ceil((tw + 24) / 2) * 2, h = 8 + lines.length * lineH;
+  const x = cx - w / 2, y = Math.round(bottomY - tail - h);
   ctx.fillStyle = c.bg; roundRect(x, y, w, h, rad); ctx.fill();
   ctx.strokeStyle = c.bd; ctx.lineWidth = 1.2; roundRect(x, y, w, h, rad); ctx.stroke();
   ctx.fillStyle = c.bd;                                       // 向下小三角尾巴（同邊框色）
@@ -1070,6 +1071,7 @@ function draw() {
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
   if (typeof leafPileSortables === 'function') leafPileSortables(sortables);   // 樹葉堆（js/leaf-piles.js）
+  if (typeof chickenSortables === 'function') chickenSortables(sortables);   // 森林的雞（含溫特抱著的；js/chickens.js）
   for (const o of G.obstacles) if (!o.trap) sortables.push({ floor: looseFloor(o), y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -1184,6 +1186,7 @@ function draw() {
     if (typeof poolPlayerDrowning === 'function' && poolPlayerDrowning()) drawInteractPrompt(G.player.x, G.player.y + 50, POOL_TIDE.ringPrompt);   // 溺水中：腳下「空白鍵／使用救生圈」（js/pool-tide.js），最優先
     else if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
+    else if (typeof chickenPrompt === 'function' && chickenPrompt()) { const q = chickenPrompt(); drawInteractPrompt(q.x, q.y, q.label); }   // 放下雞／撿雞蛋／抱起雞（js/chickens.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (typeof ladderNearPlayer === 'function' && ladderNearPlayer()) { const l = ladderNearPlayer(); drawInteractPrompt(l.x, l.topY - 6, LADDER.prompt); }   // 坐救生圈到梯子底下：「爬梯子」（js/swim-ring.js）
     else if (typeof poolPlatformNearPlayer === 'function' && poolPlatformNearPlayer()) { const q = poolPlatformNearPlayer(); drawInteractPrompt(q.x, q.y - 6, POOL_PLATFORM.prompt); }   // 坐救生圈到抽水機平台旁邊：「上岸」（js/pool-platform.js）
@@ -1289,6 +1292,7 @@ function draw() {
   drawInteractionPrompts();   // 互動提示（開門、對話、拾取…）：黑幕之上，暗處也看得到
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
   if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
+  if (typeof drawFirstHints === 'function') drawFirstHints(ctx);   // 首次遊玩：諾亞、置物櫃、衣櫃、防具箱頭上飄名字（js/first-hints.js）
   flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
   if (typeof drawNpcChatMarks === 'function') drawNpcChatMarks(ctx);   // 有人在閒聊、等溫特來聽：中間的「● ● ●」（js/npc-chats.js）
   drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面

@@ -70,6 +70,7 @@ function targetTableNearPlayer() {
 }
 function useTargetTableNearPlayer() {
   if (!targetTableNearPlayer()) return false;
+  if (typeof firstHintDone === 'function') firstHintDone('target');   // 射擊練習的首次提示不再飄（js/first-hints.js）
   openTargetPractice();
   return true;
 }

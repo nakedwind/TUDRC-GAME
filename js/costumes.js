@@ -292,6 +292,7 @@ function openWardrobe(who = 'winter') {
   if (wardrobeOpen || !CHARACTERS[who]) return;
   if (!wd.el) buildWardrobe();
   wardrobeOpen = true; wd.t0 = performance.now(); wd.who = who;
+  if (who === 'winter' && typeof firstHintDone === 'function') firstHintDone('wardrobe');   // 溫特自己的衣櫃：首次提示不再飄（js/first-hints.js）
   wd.mode = costumeModeNow();   // 不分基地／戰鬥：顯示、換的都是「現在」身上穿的那套（衣櫃在基地＝基地那套；出勤時另外照出勤的設定）
   wd.draft = Object.assign({}, costumeState.equip[who] || {});   // 試穿從身上這套開始；沒按「確定更換」就關掉＝不換
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });

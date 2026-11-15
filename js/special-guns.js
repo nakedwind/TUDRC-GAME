@@ -126,6 +126,7 @@ function tranqHit(o, lv) {
     if (wasBerserk) { o.berserk = false; o.taint = Math.min(o.taint, 55); }
     o.sleepT = Math.max(o.sleepT || 0, lv.sleep);
     o.meleeSwing = null; o.gunSwing = null; o.target = null; o.moving = false;
+    if (typeof mothTranqSleep === 'function') mothTranqSleep(o);   // 播跟睡眠鱗粉一樣的睡覺動畫：搖晃、閉眼、倒在地上、醒來爬起來（js/human-face-butterfly.js）
     flash('💤', o.x, o.y - 44, '#b9a7ff', 1);   // 不設 hitT：隊員的 hitT＝被怪物打（行軍床、反擊都看它）
     sentryStatus(o, wasBerserk ? '睡著了…' : '被麻醉針打中，睡著了…', '#b9a7ff');
     return true;

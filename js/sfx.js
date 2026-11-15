@@ -212,6 +212,11 @@ const SFX = (() => {
     fogLeaves: '環境/樹葉風聲.mp3',             // 森林起風：同時播的樹葉沙沙聲（js/fog.js）
     bananaSlip: '環境/踩到香蕉.mp3',   // 踩到香蕉皮滑倒（js/golden-banana-king.js 的 bkSlip）
     pop: 'pop.mp3',
+    // 森林的雞（js/chickens.js）：下蛋＝POP、咯咯叫（3 種隨機）、被抱起來、被放下
+    chickenLay: 'pop.mp3',
+    chickenCluck: { mode: 'random', files: ['雞/雞1聲.mp3', '雞/雞2聲.mp3', '雞/雞3聲.mp3'] },
+    chickenPickup: '雞/雞2聲.mp3',
+    chickenDrop: '雞/雞1聲.mp3',
     ballBark: { mode: 'random', files: ['狗/叫1聲.mp3', '狗/叫2聲.mp3'] },   // 球球叫：叫 1 聲或叫 2 聲隨機（js/ball-poses.js 的 updateBallBark）
     milkfishGulp: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吞下隊友（js/milkfish-kid.js）
     milkfishChew: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吃掉一格的物品

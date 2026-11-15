@@ -630,6 +630,7 @@ window.addEventListener('keydown', e => {
     if (typeof poolPlayerDrowning === 'function' && poolPlayerDrowning() && useSwimRingNearPlayer()) {}   // 溺水中：空白鍵＝原地坐上救生圈（js/pool-tide.js、js/swim-ring.js），最優先
     else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer() && useStoragePropNearPlayer(isPickupProp)) {}   // 拾取地上的道具（js/storage-lockers.js）
+    else if (typeof useChickenNearPlayer === 'function' && useChickenNearPlayer()) {}   // 放下雞／撿鳥巢的蛋／抱起雞（js/chickens.js）
     else if (typeof useMealNearPlayer === 'function' && useMealNearPlayer()) {}   // 餐廳：拿餐盤、裝菜、坐下用餐、吃、回收（js/meal.js）
     else if (elevator) {
       if (elevator.mode === 'closed') {
@@ -915,6 +916,8 @@ function assignSentryToGround(t, guard = false) {
   if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '暴走中', x, y, '#ff8f8f'); return; }
   if (!isLit(x, y)) { sfx('error'); flash('太黑了', x, y, '#ffd24a'); return; }
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('不能巡邏', x, y, '#ff8f8f'); return; }
+  const blocked = typeof sentryBlockReason === 'function' && sentryBlockReason(t, x, y, { dark: true, where: '巡邏點' });   // 走不到：說原因，不要寫「正前往」（js/sentry-blocked.js）
+  if (blocked) { sfx('error'); sayBlocked(t, '巡邏點', blocked); return; }
   if (typeof leaveCampBed === 'function') leaveCampBed(t);   // 正在走去／躺在行軍床上：先下床（js/camp-beds.js）
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   t.summonDark = true;   // 召喚：途中遇到黑暗也照走（js/sentry.js 的 escapeDarkness）
@@ -1351,6 +1354,7 @@ function newGame() {
   if (typeof seedFogTrees === 'function') seedFogTrees();   // 霧樹：燒掉就散掉那一區的霧（js/fog.js）
   if (typeof seedVines === 'function') seedVines();   // 森林的垂吊藤蔓（js/vines.js）
   if (typeof seedLeafPiles === 'function') seedLeafPiles();   // 森林的樹葉堆：燒掉露出道具或小史萊姆（js/leaf-piles.js）
+  if (typeof seedChickens === 'function') seedChickens();   // 森林的鳥巢和雞（js/chickens.js）
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
@@ -1756,6 +1760,8 @@ function handleMapClick(e, isLeft) {
     const t = assigning;
     if (!isLit(x, y)) { sfx('error'); flash('太黑了', x, y, '#ffd24a'); return false; }
     if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('不能巡邏', x, y, '#ff8f8f'); return false; }
+    const blocked = typeof sentryBlockReason === 'function' && sentryBlockReason(t, x, y, { dark: !!(t.summonDark || t.followDark), where: '巡邏點' });   // 走不到：說原因（js/sentry-blocked.js）
+    if (blocked) { sfx('error'); assigning = null; sayBlocked(t, '巡邏點', blocked); return false; }
     t.mode = 'goto'; t.guardSummoned = false; t.guardBase = null; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
     sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff', 3); systemNotice(TYPES[t.type].name + '正前往巡邏點');
     return false;
@@ -2664,6 +2670,7 @@ function update(dt) {
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   if (typeof updateFogTrees === 'function') updateFogTrees(dt);   // 霧樹被火燒、火海周圍暫時散霧（js/fog.js）
   if (typeof updateLeafPiles === 'function') updateLeafPiles(dt);   // 樹葉堆被火燒（js/leaf-piles.js）
+  if (typeof updateChickens === 'function') updateChickens(dt);   // 雞閒晃、下蛋，鳥巢長蛋（js/chickens.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
   if (typeof updateNpcChats === 'function') updateNpcChats(dt);   // 基地裡的 NPC 閒聊小表演（js/npc-chats.js）
   if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）
@@ -2804,7 +2811,7 @@ function loseOverlay(reason, cause) {
   let [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base;
   if (reason === 'player' && PLAYER_CHARACTER !== 'winter') { title = '💀 隊長倒下'; text = text.replace('溫特', playerName()); }   // 艾德林帶隊
   const causeLine = cause ? '<span class="lose-cause">倒下原因：<b>' + cause + '</b></span>' : '';
-  showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
+  showOverlay(title, causeLine + text, typeof missionLoseButton === 'function' ? missionLoseButton() : '重新部署');   // 有應變中心可回時，大按鈕＝撤退回應變中心（js/missions.js）
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
 function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.poolBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
@@ -2821,7 +2828,7 @@ function prepareMonsterPreview() {
   if (note) note.textContent = '🔍 ' + (spec?.name || '怪物') + '測試場 · WASD 移動，滑鼠射擊；不會寫入正式存檔';
   updateCamera(); updateHUD();
 }
-function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); if (typeof markMissionMapReached === 'function' && !PREVIEW) markMissionMapReached(MAP && MAP.id); if (typeof mealBuffOnMap === 'function' && !PREVIEW) mealBuffOnMap();   /* 飯後加成：真的進到戰鬥地圖才開始用、出勤完回基地就結束（js/meal.js）；開始畫面背景載入的地圖不算 */ prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
+function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!(typeof restoreSlotScene === 'function' && restoreSlotScene()) && !restoreCombatProgress()) newGame();   /* 讀存檔欄位：先放回存檔當下的現場（js/combat-progress.js） */ const fundFirst = typeof fundCardDue === 'function' && fundCardDue();   /* 第一次到達：等一下右邊跳作戰經費提示卡（js/fund-card.js），要在記下「給過了」之前問 */ if (typeof markMissionMapReached === 'function' && !PREVIEW) markMissionMapReached(MAP && MAP.id); if (fundFirst) showFundCard(START.money); if (typeof mealBuffOnMap === 'function' && !PREVIEW) mealBuffOnMap();   /* 飯後加成：真的進到戰鬥地圖才開始用、出勤完回基地就結束（js/meal.js）；開始畫面背景載入的地圖不算 */ prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); achieveOnBattleEnd('win'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;

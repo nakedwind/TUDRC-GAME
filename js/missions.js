@@ -267,16 +267,19 @@ function missionWinOverlay() {
     (first && next ? '<br>新區域開放：<b>' + next.name + '</b>' : ''), '返回應變中心');
   return true;
 }
-function missionLoseExtra() {
-  return MAP && !MAP_SAFE && mapIndexOf(MISSION_BASE.map) >= 0 ? '<br><button type="button" id="missionRetreat" class="mission-retreat">撤退回應變中心（戰場暫停，之後接續）</button>' : '';
+// 戰敗時能不能撤退回應變中心（有基地地圖、而且不是在安全區域）
+const missionCanRetreat = () => !!MAP && !MAP_SAFE && mapIndexOf(MISSION_BASE.map) >= 0;
+// 戰敗結算畫面大按鈕上的字：能撤退就一定要撤退回應變中心（不能當場重新部署，js/game.js 的 loseOverlay）
+function missionLoseButton() {
+  return missionCanRetreat() ? '撤退回應變中心（戰場暫停，之後接續）' : '重新部署';
 }
 // 結算畫面的大按鈕：打贏了就回基地（回傳 true＝這裡處理掉了）
 function onOverlayButton() {
   if (G && G.over && G.won && !MAP_SAFE && missionOfMap(MAP && MAP.id)) { sfx('button'); returnToBase(); return true; }
-  if (G && G.over && !G.won && !MAP_SAFE && MAP) { redeployCombat(MAP.id); keepBattleMoney(); }   // 戰敗的「重新部署」：一切重來（js/combat-progress.js）
+  if (G && G.over && !G.won && missionCanRetreat()) { sfx('button'); suspendDefeatedBattle(); returnToBase(); return true; }   // 戰敗：強制撤退回應變中心，戰場暫停（之後從作戰桌接續或重新部署）
+  if (G && G.over && !G.won && !MAP_SAFE && MAP) { redeployCombat(MAP.id); keepBattleMoney(); }   // 沒有應變中心可回（例如測試地圖）：才當場重新部署，一切重來（js/combat-progress.js）
   return false;
 }
-document.getElementById('ov-text').addEventListener('click', e => { if (e.target.closest('#missionRetreat')) { sfx('button'); suspendDefeatedBattle(); returnToBase(); } });
 
 // ---- 作戰桌面板（外觀和商店、出勤配置同一套）----
 let missionBoard = null, missionBoardOpen = false, missionSel = null, boardTab = 'main';   // boardTab：main 主線／side 支線（js/quests.js）

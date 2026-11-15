@@ -698,6 +698,7 @@ function drawMapStampPlain(ctx, s) {
   if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
   if (typeof mrtDisplayTile === 'function') t = mrtDisplayTile(s, t);   // 解封的捷運入口換圖（js/mrt-locks.js）
   if (typeof fogTreeDisplayTile === 'function') t = fogTreeDisplayTile(s, t);   // 霧樹的水晶打破了：換成沒有水晶的樹（js/fog.js）
+  if (typeof nestDisplayTile === 'function') t = nestDisplayTile(s, t);   // 鳥巢：有蛋／空巢換圖（js/chickens.js）
   const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(s.id,s.c,s.r,s.layer||'top',s):null;
   if(display===false)return;
   if(display)t=display;
@@ -944,6 +945,17 @@ function drawMapTop(ctx) {
 let occCache = null, occCacheFor = null, stairUpperRects = [];
 // 側面的手扶梯（b.side）不算：它上半段的長方形還包含手扶梯後面的一樓地面，站在那裡的人不能被當成 2 樓（會畫到圍欄前面）；
 // 真的站在手扶梯上的人由 js/escalators.js 的 escalatorRiderKey 自己決定畫在哪。燈光（js/lighting.js）還是整塊都算
+// 這張圖有沒有自己的擋路格：置物箱（擋路格在 data/storage-boxes.js）、其他物件（data/prop-collisions.js），都是在物件編輯器設定的。
+// 回傳一個「問某張圖」的小函式；物件編輯器的設定只讀一次，整張地圖共用
+function stampOwnSolidChecker() {
+  const propTiles = new Set();
+  if (typeof propCollisionList === 'function') for (const o of propCollisionList()) if (o && o.tile && o.h && (o.h.solid || []).length) propTiles.add(o.tile);
+  return s => {
+    if (propTiles.has(s.id)) return true;
+    const kind = typeof storagePropKindCached === 'function' ? storagePropKindCached(s.id) : null;
+    return kind === 'closed' || kind === 'open';   // 置物箱（關著、打開的）
+  };
+}
 function inStairUpper(x, y) { if (hasFloors && MAP) mapOccluders(); for (const b of stairUpperRects) if (!b.side && x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1) return true; return false; }
 function mapOccluders() {
   if (occCache && occCacheFor === MAP) return occCache;
@@ -983,9 +995,13 @@ function mapOccluders() {
   });
   // items 已依圖層由下往上排好，所以下層的 y 一定先算完；
   // 這裡直接取下層「算完的 y」，疊好幾層也能接力（櫃子 → 咖啡機 → 杯子）。
+  const ownSolid = stampOwnSolidChecker();
   for (const it of items) {
     it.y = it.fixedDepth ? it.sortY : it.y1;
     if (it.fixedDepth) continue;
+    // 有自己擋路格的物件（置物箱、販賣機、營地的箱子…）是「站在地上」的，不是貼在牆上：前後一律只看自己的底部。
+    // 不然放在一面比較長的牆前面，就會借到牆的底部，人物明明站在它前面卻被它蓋住（森林營地上面的置物箱就是這樣）
+    if (it.kind === 'stamp' && ownSolid(it.stamp)) continue;
     for (const other of items) {                    // 找它底下那層、又跟它重疊的東西（牆、櫃子…）
       if (other.li >= it.li || other.y <= it.y) continue;
       if (itemOn2F(other) !== itemOn2F(it)) continue;    // 1 樓的東西（例如柱子）不能拿來當 2 樓牆壁的深度，不然 2 樓的牆會蓋住 2 樓的人
@@ -1126,6 +1142,7 @@ function occluderStateSig(x) {
     + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
     + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '')
     + (typeof fogTreeStampBroken === 'function' && fogTreeStampBroken(s) ? 'f' : '')   // 霧樹水晶破了：換圖（js/fog.js）
+    + (typeof nestStampSig === 'function' ? nestStampSig(s) : '')   // 鳥巢有蛋／空巢：換圖（js/chickens.js）
     + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '')   // 隱藏區圖層淡入中：補畫也要跟著重做
     + (typeof doorCutoutSig === 'function' ? doorCutoutSig(s) : '')   // 疊在這張圖上的挖空門開了／關了：門洞也要挖進補畫裡（js/doors.js）
     + (typeof escalatorAnimSig === 'function' ? escalatorAnimSig(s) : '');   // 會動的手扶梯：階梯捲到下一格，補畫也要跟著重做（不然疊在牆上的那一塊階梯不會動，js/escalators.js）

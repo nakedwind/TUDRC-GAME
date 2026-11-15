@@ -33,6 +33,18 @@ function eachPropSolidCell(fn) {
     }
   }
 }
+// 某個地圖物件「如果換成 tileId 那張圖」會擋哪幾格（'c,r' 字串的陣列；翻轉、微調照算）。
+// 可炸開的森林樹根（js/breakable-walls.js）用：炸開前用完整那張的格子、炸開後換成破洞那張的格子
+function propCellsOfStamp(s, tileId) {
+  const cfg = propCollisionList().find(o => o.tile === tileId), v = cfg && cfg.h; if (!v) return [];
+  const ox = s.ox || 0, oy = s.oy || 0, c0 = s.c + Math.round(ox / CELL), r0 = s.r + Math.round(oy / CELL), out = [];
+  for (const [dc, dr] of v.solid || []) {
+    if (dc < 0 || dr < 0 || dc >= v.w || dr >= v.h) continue;
+    const c = c0 + (s.fx ? v.w - 1 - dc : dc), r = r0 + (s.fy ? v.h - 1 - dr : dr);
+    if (inGrid(c, r)) out.push(c + ',' + r);
+  }
+  return out;
+}
 function setupPropCollisions() {
   if (!MAP) return;
   if (propWallMap === MAP) {

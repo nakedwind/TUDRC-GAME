@@ -418,6 +418,16 @@ function mothAfflict(a, kind) {
     else { a.anim = 0; a.dashT = 0; a.gunT = 0; mothDropBuildSelection(); }
   }
 }
+// 被麻醉彈打中的隊員（js/special-guns.js 的 tranqHit 呼叫）：借用睡眠鱗粉的睡覺動畫。
+// 睡多久照麻醉彈的秒數（sleepT 已經在 tranqHit 設好）；跟鱗粉一樣，被打到、或被溫特開槍打中就會醒
+function mothTranqSleep(a) {
+  const already = a.mothSleep && a.sleepT > 0;
+  a.mothSleep = true; a.mothSleepHp = a.hp;
+  if (!already) a.tranqSleep = true;   // 只用來在時間到自然醒來時跳「醒來了」
+  if (already) return;   // 已經睡著：只延長時間，不要重播倒下動畫
+  a.mothSleepAge = 0; a.mothWakeT = 0; a.mothFallSide = Math.random() < .5 ? -1 : 1;
+  a.say = null;   // 睡著：頭上的對話泡泡收掉
+}
 // 溫特睡著：手上拿著的建築、拆除模式放掉（js/build.js）
 function mothDropBuildSelection() {
   if (G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish') && typeof closeBuildMenu === 'function') closeBuildMenu();
@@ -447,14 +457,17 @@ function mothStatuses(dt) {
     }
     // 睡眠：被打到（血變少）就醒；隊員的 sleepT 由 game.js 倒數，溫特的在這裡倒數
     if (a.mothSleep) {
-      if (a.hp <= 0) { a.mothSleep = false; a.mothSleepHp = null; if (isPlayer) a.sleepT = 0; continue; }
+      if (a.hp <= 0) { a.mothSleep = false; a.mothSleepHp = null; a.tranqSleep = false; if (isPlayer) a.sleepT = 0; continue; }
       a.mothSleepAge = (a.mothSleepAge || 0) + dt;
-      if (a.sleepT > 0 && a.hp < a.mothSleepHp - .01) a.sleepT = 0;   // 被打醒
+      if (a.sleepT > 0 && a.hp < a.mothSleepHp - .01) { a.sleepT = 0; a.tranqSleep = false; }   // 被打醒
       else {
         a.mothSleepHp = a.hp;
         if (isPlayer) a.sleepT = Math.max(0, a.sleepT - dt);
       }
-      if (!(a.sleepT > 0)) mothWake(a);
+      if (!(a.sleepT > 0)) {
+        if (a.tranqSleep && !isPlayer) sentryStatus(a, '醒來了', '#9ff0c0');   // 麻醉退了（原本 game.js 顯示的，睡覺動畫接手後改在這裡）
+        mothWake(a);
+      }
     }
   }
   if (document.body) document.body.classList.toggle('moth-asleep', !!(p && p.mothSleep && p.sleepT > 0));   // 溫特睡著：建築欄、快捷欄不能點
@@ -463,7 +476,7 @@ function mothStatuses(dt) {
 // 游標點在哪位睡著的隊友身上：站著時是一個人高的範圍；倒在地上時身體橫躺在腳底往旁邊那一側
 function mothSleepMateAt(x, y) {
   return G.towers.find(t => {
-    if (!(t.mothSleep && t.sleepT > 0) || t.hp <= 0 || t.eatenBy || t.grabbed) return false;
+    if (!(t.mothSleep && t.sleepT > 0) || t.hp <= 0 || t.eatenBy || t.grabbed) return false;   // 吸了鱗粉、被麻醉彈打睡的都算
     const pose = mothSleepPose(t);
     if (pose && pose.lying) { const side = t.mothFallSide || 1, x0 = Math.min(t.x, t.x + side * 58), x1 = Math.max(t.x, t.x + side * 58); return x >= x0 - 6 && x <= x1 + 6 && Math.abs(y - (t.y + 6)) <= 22; }
     return Math.abs(x - t.x) <= 20 && y >= t.y - 44 && y <= t.y + 18;
@@ -490,7 +503,7 @@ function shootWakeMate(p, t, aim, aimAng) {   // 彈匣已經在 game.js 扣過�
 // 醒來：先張大眼睛驚醒，再半閉著眼慢慢爬起來（還沒倒下的：驚一下、半閉眼回神）；這段時間不能動、不能攻擊
 function mothWake(a) {
   const A = MOTH_SLEEP_ANIM, fallen = (a.mothSleepAge || 0) > A.sway + A.close;
-  a.mothSleep = false; a.mothSleepHp = null; a.sleepT = 0;
+  a.mothSleep = false; a.mothSleepHp = null; a.sleepT = 0; a.tranqSleep = false;
   a.mothWakeFell = fallen;
   a.mothWakeLen = a.mothWakeT = fallen ? A.startle + A.rise + A.settle : A.standStartle + A.standDaze;
 }
