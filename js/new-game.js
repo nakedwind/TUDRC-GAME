@@ -182,6 +182,7 @@
         const index = MAPS_DEFAULT.findIndex(m => m.id === resumeScene.mapId);
         if (index >= 0) { switchMap(index); const pick = document.getElementById('mapPick'); if (pick) pick.value = index; }
       }
+      if (resumeScene?.battle && typeof queueSlotScene === 'function') queueSlotScene(resumeScene.battle);   // 存檔欄位記了當下的現場：進場時整份放回去
       if (typeof begin === 'function') begin(false);
       if (window.TEST_MODE) {
         G.money = Math.max(G.money, 99999);

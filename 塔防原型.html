@@ -25,7 +25,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
-<script src="js/new-game.js?v=previewall-20261114"></script>
+<script src="js/new-game.js?v=slotscene-20261115"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
 <link rel="stylesheet" href="css/style.css?v=restore-20261114">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
@@ -415,7 +415,7 @@
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
   <script src="js/missions.js?v=noredeploy-20261115"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
-  <script src="js/save.js?v=onepen-20261107"></script> <!-- 9k. 存檔、設定選單 -->
+  <script src="js/save.js?v=slotscene-20261115"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/boss-music.js?v=poolboss-20261115"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=merge-20261115"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/map-ambient.js?v=ambmulti-20261115"></script> <!-- 9k3. 地圖專屬環境背景音：池核的滴水聲 -->
@@ -425,7 +425,7 @@
   <script src="js/gear-v2.js?v=previewall-20261114"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
   <script src="js/special-guns.js?v=tranqsleep-20261115"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=previewall-20261114"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
-  <script src="js/combat-progress.js?v=floorfix-20261115"></script>
+  <script src="js/combat-progress.js?v=slotscene-20261115"></script>
   <script src="js/camp-interactions.js?v=trialammo-20261110"></script>
   <script src="js/camp-supply.js?v=cabicon2-20261110"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
@@ -439,7 +439,7 @@
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=mmdrag-20261109"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/save-restore.js?v=restore2-20261114"></script>   <!-- 設定→存檔：匯出／匯入存檔、找回進度 -->
-  <script src="js/game.js?v=noredeploy-20261115"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=slotscene2-20261115"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->

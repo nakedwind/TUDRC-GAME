@@ -113,6 +113,8 @@ function storeSaveSlot(n) {
     for (const fn of [saveEquipment, saveQuests, saveMissions, saveSortie]) fn();
     const values = Object.fromEntries(window.GAME_PROGRESS_KEYS.map(key => [key, localStorage.getItem(key)]));
     const scene = { mapId: MAP?.id, mapName: MAP?.name, x: G.player?.x, y: G.player?.y };
+    try { scene.battle = typeof snapshotSceneForSlot === 'function' ? snapshotSceneForSlot() : null; }   // 現場整份（怪物、建築、隊友位置…，js/combat-progress.js）
+    catch (error) { console.warn('記錄現場失敗', error); }
     localStorage.setItem(saveSlotKey(n), JSON.stringify({ v: 1, at: Date.now(), values, scene }));
     systemNotice('已存入存檔 ' + n); sfx('button'); renderSaveSlots();
   } catch (_) { systemNotice('存檔失敗：儲存空間不足或無法使用', true); }

@@ -179,6 +179,40 @@ function restoreCombatProgress() {
     clearCombatProgress(MAP.id); systemNotice('已接續上次保留的作戰進度'); return true;
   } catch (error) { systemNotice('無法接續作戰，將重新部署', true); return false; }
 }
+// ---- 存檔欄位（設定 → 存檔 1～6）：像時間停止一樣，把「現在這張地圖」整份記下來 ----
+// 存的東西跟「保留進度」一樣：溫特在哪、HP、怪物、核心、蓋的建築、隊友位置和狀態、計時、牆、門、電源、電梯…（G 整份）。
+// 讀檔時直接把這份放回去，不跑 newGame：不會重新部署、不會再吃一次補給、不會把經費重給一次。
+// 地圖後來被編輯器改過（擋路格或物件變了）就放不回去，改成照舊從地圖起點開始。
+function snapshotSceneForSlot() {
+  if (!MAP || !G || !G.player || G.over || window.STORY_MODE || window.STORY_PREVIEW) return null;   // 戰敗畫面、回憶劇情中：不記現場
+  const state = { ...G, effects: [] };   // 爆炸、閃光之類一下就消失的特效不用記
+  COMBAT_SKIP_CACHES.forEach(k => delete state[k]);
+  return { mapId: MAP.id, signature: combatMapSignature(), graph: combatGraphEncode({
+    state, walls: mapWalls, doors: mapDoors, doorWalls: doorAddedWalls,
+    offsets: mapSolidOffsets, power: [...mapPowerOn], elevator: openElevatorStamp,
+  }, MAP.stamps || []) };
+}
+// 讀存檔欄位時（js/new-game.js）先把現場放這裡，等 begin 進場時由 restoreSlotScene 放回去
+let pendingSlotScene = null;
+function queueSlotScene(saved) { pendingSlotScene = saved || null; }
+function restoreSlotScene() {
+  const saved = pendingSlotScene; pendingSlotScene = null;
+  if (!saved || !saved.graph || !MAP || saved.mapId !== MAP.id) return false;
+  if (saved.signature !== combatMapSignature()) { systemNotice('地圖已更新，存檔當下的現場無法還原，改從地圖起點開始'); return false; }
+  try {
+    const data = combatGraphDecode(saved.graph, MAP.stamps || []);
+    if (!data.state?.player || !(data.walls instanceof Set)) throw new Error('現場資料不完整');
+    G = data.state; mapWalls = data.walls; mapDoors = data.doors; doorAddedWalls = data.doorWalls; mapSolidOffsets = data.offsets;
+    poweredMap = MAP; mapPowerOn = new Set(Array.isArray(data.power) ? data.power : []);
+    openElevatorStamp = data.elevator || null;
+    sortieLastSafe = MAP_SAFE;   // 跟存檔當下一樣：在基地就是在基地、在戰場就是出勤中（補給已經吃過，不會再吃一次）
+    reclaimAddedWalls();
+    applyOutfits(); if (typeof syncSanitySP === 'function') syncSanitySP(); else sanitySP = G.guide; rememberGuideSP(); occCache = null; occCacheFor = null;
+    computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
+    systemNotice('已回到存檔當下的狀態');
+    return true;
+  } catch (error) { console.warn('存檔現場還原失敗', error); systemNotice('存檔當下的現場無法還原，改從地圖起點開始', true); return false; }
+}
 function executeCampPlan(action) {
   if (!['abort', 'preserve', 'restart'].includes(action)) return false;
   if (action !== 'restart' && mapIndexOf(MISSION_BASE.map) < 0) { systemNotice('找不到應變中心地圖', true); return; }
