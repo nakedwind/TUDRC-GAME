@@ -386,7 +386,7 @@
   <script src="js/smiler.js?v=levels3-20261115"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=floorfix3-20261115"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=floorfix2-20261115"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=sellbullet-20261115"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
+  <script src="js/shop.js?v=firsthint3-20261115"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
   <script src="js/backpack.js?v=firsthint-20261115"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/storage-cabinet.js?v=firsthint-20261115"></script> <!-- 置物櫃：指定的櫃子打開放東西（借用物資箱視窗） -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
@@ -409,12 +409,12 @@
   <script src="js/ground-items.js?v=placefloor-20261115"></script>   <!-- 背包裡的東西放在地上、撿回來；嚮導撿、球球叼急救包和杏仁水 -->
   <script src="js/food.js?v=floorfix2-20261115"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/cooking.js?v=wspages-20261109"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
-  <script src="js/meal.js?v=tray-20261112"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
+  <script src="js/meal.js?v=firsthint3-20261115"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
   <script src="js/meal-invite.js?v=merge-20261110"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
   <script src="js/base-follow.js?v=rooms2f-20261104"></script>   <!-- 雷德在基地裡跟著溫特換地圖（不進溫特辦公室、別人寢室） -->
   <script src="js/ball-poses.js?v=ballsit-20261109"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
-  <script src="js/first-hints.js?v=firsthint2-20261115"></script> <!-- 首次遊玩：基地裡諾亞、置物櫃、衣櫃、防具箱頭上飄提示，用過就不再出現 -->
+  <script src="js/first-hints.js?v=firsthint6-20261115"></script> <!-- 首次遊玩：基地裡諾亞、置物櫃、衣櫃、防具箱頭上飄提示，用過就不再出現 -->
   <script src="js/missions.js?v=noredeploy-20261115"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
   <script src="js/save.js?v=slotscene-20261115"></script> <!-- 9k. 存檔、設定選單 -->
@@ -456,7 +456,7 @@
   <script src="js/posters.js?v=achv4-20261023"></script>   <!-- 查看海報 -->
   <script>document.write('<script src="data/bestiary.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器）；每次都讀最新的 -->
   <script src="js/bestiary-config.js?v=bosses-20261115"></script>   <!-- 怪物圖鑑的畫面（跟怪物圖鑑編輯器共用） -->
-  <script src="js/bestiary.js?v=bosses-20261115"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
+  <script src="js/bestiary.js?v=firsthint3-20261115"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
   <script src="js/pc-desktop.js?v=basemusic-20261110"></script>   <!-- 2F應變中心的電腦桌面：換基地音樂、踩地雷、新接龍、連環新接龍、五子棋、貪食蛇、俄羅斯方塊、彈珠檯、給JJ的禮物、遊戲紀錄、怪物圖鑑（必須在 bestiary.js 之後） -->
   <script src="js/pc-freecell.js?v=notext-20261109"></script>   <!-- 2F應變中心電腦的新接龍（FreeCell） -->
   <script src="data/pc-spider-deals.js?v=solvable-20261109"></script>   <!-- 連環新接龍：確定解得開的牌局編號（tools/spider-deals.js 產生） -->
@@ -466,7 +466,7 @@
   <script src="js/pc-pinball.js?v=pinball3-20261109"></script>   <!-- 2F應變中心電腦的彈珠檯（要在 pc-arcade.js 之後） -->
   <script src="js/pc-stats.js?v=flycards-20261109"></script>   <!-- 電腦的遊戲紀錄：每款小遊戲的局數、時間 -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->
-  <script src="js/target-practice.js?v=gamestats-20261107"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
+  <script src="js/target-practice.js?v=firsthint3-20261115"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
   <script src="js/locked-doors.js?v=twosquad2-20261103"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->

@@ -282,6 +282,7 @@ function openSupplyShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
   if (!MAP_SAFE) return openBackroomShop();   // 在後室（戰鬥地圖）裡的便利商店櫃台＝後室商店
   setShopMode('store');
+  if (typeof firstHintDone === 'function') firstHintDone('shop');   // 基地商店的首次提示不再飄（js/first-hints.js）
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopEnter', .7, 'shop-enter'); document.getElementById('supplyShopClose').focus();   // 全家便利商店進門聲
@@ -290,6 +291,7 @@ function openVendingMachine() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
   const near = vendingNearPlayer(); vendingColor = near ? vendingColorOf(near.id) : null;   // 哪一台（2F應變中心：紅＝零食、綠＝飲料）
   setShopMode('vending');
+  if (vendingColor !== 'purple') if (typeof firstHintDone === 'function') firstHintDone('vending');   // 販賣機的首次提示不再飄（js/first-hints.js）   // 後室的紫色販賣機不算
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('vendingOpen', .7, 'vending-open'); document.getElementById('supplyShopClose').focus();
@@ -305,6 +307,7 @@ function backroomShopNearPlayer() { return shopStampNearPlayer(BACKROOM_SHOP); }
 function openDrinkShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
   setShopMode('drinkshop');
+  if (typeof firstHintDone === 'function') firstHintDone('drinkshop');   // 飲料店的首次提示不再飄（js/first-hints.js）
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); sfx('menu'); document.getElementById('supplyShopClose').focus();
