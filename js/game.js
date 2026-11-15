@@ -908,6 +908,8 @@ function assignSentryToGround(t, guard = false) {
   if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '暴走中', x, y, '#ff8f8f'); return; }
   if (!isLit(x, y)) { sfx('error'); flash('太黑了', x, y, '#ffd24a'); return; }
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('不能巡邏', x, y, '#ff8f8f'); return; }
+  const blocked = typeof sentryBlockReason === 'function' && sentryBlockReason(t, x, y, { dark: true, where: '巡邏點' });   // 走不到：說原因，不要寫「正前往」（js/sentry-blocked.js）
+  if (blocked) { sfx('error'); sayBlocked(t, '巡邏點', blocked); return; }
   if (typeof leaveCampBed === 'function') leaveCampBed(t);   // 正在走去／躺在行軍床上：先下床（js/camp-beds.js）
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   t.summonDark = true;   // 召喚：途中遇到黑暗也照走（js/sentry.js 的 escapeDarkness）
@@ -1726,6 +1728,8 @@ function handleMapClick(e, isLeft) {
     const t = assigning;
     if (!isLit(x, y)) { sfx('error'); flash('太黑了', x, y, '#ffd24a'); return false; }
     if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('不能巡邏', x, y, '#ff8f8f'); return false; }
+    const blocked = typeof sentryBlockReason === 'function' && sentryBlockReason(t, x, y, { dark: !!(t.summonDark || t.followDark), where: '巡邏點' });   // 走不到：說原因（js/sentry-blocked.js）
+    if (blocked) { sfx('error'); assigning = null; sayBlocked(t, '巡邏點', blocked); return false; }
     t.mode = 'goto'; t.guardSummoned = false; t.guardBase = null; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
     sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff', 3); systemNotice(TYPES[t.type].name + '正前往巡邏點');
     return false;
