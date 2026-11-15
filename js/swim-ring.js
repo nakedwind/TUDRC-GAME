@@ -126,6 +126,9 @@ function swimRingAfterMove(p, dx, dy) {
 function swimRingShoreSpot() {
   const p = typeof G !== 'undefined' && G && G.player;
   if (!p || !p.swimRing || p.hp <= 0 || !deepWaterAtPoint(p.x, p.y)) return null;
+  // 旁邊就是電燈開關（電源、抽水閥）：讓給開關，不然「收起泳圈」會蓋掉開關、按空白鍵也只會上岸（js/storage-lockers.js）
+  // 想上岸：離開關遠一點就會再出現「收起泳圈」
+  if (typeof storagePropNearPlayer === 'function' && storagePropNearPlayer(prop => prop.kind === 'power')) return null;
   // 先看溫特離「不是深水的地方」夠不夠近（SWIM_RING.shoreNear 格內），太遠就不出現提示
   const near = SWIM_RING.shoreNear * CELL;
   let close = false;

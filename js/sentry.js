@@ -338,7 +338,9 @@ function spawnWanderers(only = null) {   // only：只生這幾位（接續戰�
 // ---- 哨兵移動 AI（哨兵是「人」：在亮處走動巡邏）----
 // 模式：free=自由走動（亮處隨便逛）/ hold=在錨點附近小範圍巡邏 / goto=走去指派位置後轉 hold
 function sentryBlocked(x, y) {
-  const r = 12;
+  // 碰撞方框半寬 12（少 0.001：剛好貼著牆邊不算撞到。走路的小數誤差會讓位置差 0.0000000001 像素，
+  // 例如一格寬的門兩旁的牆往下微調 8 像素，站在門下那格正中間時方框上緣剛好貼著牆底，誤差一點就被當成卡住）
+  const r = 11.999;
   if (typeof escalatorSideBlocks === 'function' && escalatorSideBlocks(x, y + ESCALATOR.footDy)) return true;   // 側面手扶梯的扶手、外殼（看腳的位置，js/escalators.js）
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
@@ -402,6 +404,7 @@ function escapeDarkness(actor, dt) {
   // 被召喚（summonDark）：召喚的優先順序比「怕黑」高，途中穿過黑暗也照走；到了、或改成別的命令就恢復怕黑
   if (actor.summonDark && actor.mode !== 'goto') actor.summonDark = false;
   if (actor.summonDark) return false;
+  if (actor.leftBehind) return false;   // 部隊長傳送到跟不過去的地方，在原地等他回來：不逃回燈下、不說去不了
   // 跟著溫特走的隊員待在溫特身邊（FOLLOW_PLAYER），或嚮導正在撿溫特丟在地上的東西：不怕黑
   if (actor.groundTrip || nearFollowedPlayer(actor)) return false;
   // 被叫來跟隨護衛、而且找得到路過去：中間暗也照走（不然走進暗處就逃回燈下、再往前又逃回來，看起來像站在原地不動）
@@ -681,6 +684,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   while (t.navPath.length) {
     const [wx, wy] = center(t.navPath[0].c, t.navPath[0].r);
     if (Math.hypot(wx - t.x, wy - t.y) > 1) break;
+    if (!sentryBlocked(wx, wy)) { t.x = wx; t.y = wy; }   // 到了這一格：站到正中間（不留小數誤差，轉彎時才不會擦到牆角）
     t.navPath.shift();
   }
   const waypoint = t.navPath && t.navPath[0];
@@ -702,7 +706,18 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   const oldX = t.x, oldY = t.y;
   if (personnelStepAllowed(t.x, t.y, nx, t.y, dark)) t.x = nx;
   if (personnelStepAllowed(t.x, t.y, t.x, ny, dark)) t.y = ny;
-  const moved = Math.hypot(t.x - oldX, t.y - oldY) > .001;
+  let moved = Math.hypot(t.x - oldX, t.y - oldY) > .001;
+  // 卡在牆角（例如只有一格寬的門：兩旁的牆往下微調過，人站得偏一點就轉不了彎）：先往這一格的正中間靠，再從中間轉彎
+  // （路是照格子中心找的，從格子中間一定轉得過去；不然會一直站著、頭上說「被卡住了，走不出去」）
+  if (!moved && distance > 2) {
+    const [cx, cy] = center(...cellAt(t.x, t.y)), ox = cx - t.x, oy = cy - t.y, od = Math.hypot(ox, oy);
+    if (od > .01) {
+      const k = Math.min(1, step / od), sx = t.x + ox * k, sy = t.y + oy * k;
+      if (personnelStepAllowed(t.x, t.y, sx, t.y, dark)) t.x = sx;
+      if (personnelStepAllowed(t.x, t.y, t.x, sy, dark)) t.y = sy;
+      moved = Math.hypot(t.x - oldX, t.y - oldY) > .001;
+    }
+  }
   t.navStall = Math.hypot(dx, dy) > 2 && !moved ? (t.navStall || 0) + dt : 0;
   if (t.navStall > .8) { t.navTimer = 0; t.navFailed = true; }
   return false;
@@ -914,10 +929,18 @@ function updateSentryMain(t, dt) {
   if (companion && !hasAggroTarget(t)) {   // 有敵可打時交給接敵邏輯，護衛圈先讓位（避免圈邊抖動）
     const companionDistance = Math.hypot(companion.anchor.x - t.x, companion.anchor.y - t.y);
     const otherFloor = hasFloors && actorFloor(companion.anchor) !== actorFloor(t);   // 跟隨的人在另一層（例如溫特上了 2 樓）：再近也要跟過去
-    if (companionDistance > companion.radius || otherFloor || onMovingEscalator(t)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
+    // 站在打開的門裡（門口只有一格寬）：就算已經在身邊也不要停在門裡，再往跟隨的人靠近一點、走出門口（不然會把後面的人堵住）
+    const inDoorway = typeof mapDoors !== 'undefined' && mapDoors.some(d => d.open && d.cells.includes(cellAt(t.x, t.y).join(',')));
+    // 部隊長傳送到隊員跟不過去的地方（例如池核泳池中間的祕密小島）時被留下來的隊員（js/game.js 的 teleportInMap）：
+    // 站在原地安靜等（看到怪照樣打），不一直說去不了；每秒看一次，部隊長回到走得到的地方就恢復跟隨
+    if (t.leftBehind && t.mode === 'escort') {
+      t.leftBehindT = (t.leftBehindT || 0) - dt;
+      if (t.leftBehindT <= 0) { t.leftBehindT = 1; if (buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, hasFloors ? actorFloor(companion.anchor) : null) !== null) t.leftBehind = false; }
+    } else t.leftBehind = false;
+    if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
       t.target = null; t.waitT = 0;
       t.followDark = companion.anchor === G.player;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）
-      followTarget(t, companion.anchor, { dist: companion.radius * .82, speed: companion.speed }, dt);
+      followTarget(t, companion.anchor, { dist: inDoorway && companionDistance <= companion.radius ? CELL * .9 : companion.radius * .82, speed: companion.speed }, dt);
       if (t.mode === 'escort' && typeof watchSentryProgress === 'function') watchSentryProgress(t, dt, leaderLabel(), () => sentryLeaderBlockReason(t));   // 叫來護衛卻過不來：說出原因（js/sentry-blocked.js）
       return;
     }
@@ -1190,7 +1213,7 @@ function openSentryMenu(t, silent) {
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
 // 跟隨護衛：持續跟在部隊長身邊，看到附近的怪會出手（哨兵選單與左上角頭像選單共用）
 function setSentryEscort(t) {
-  t.mode = 'escort'; t.guardSummoned = false; t.guardBase = null;
+  t.mode = 'escort'; t.guardSummoned = false; t.guardBase = null; t.leftBehind = false;
   t.target = null; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   t.navFailed = false; t.escortRouteT = 0;   // 重新找路（上次失敗的記號不要留著）
   const reason = typeof sentryLeaderBlockReason === 'function' ? sentryLeaderBlockReason(t) : null;   // 現在就過不去：直接說原因，不要假裝在路上（js/sentry-blocked.js）
