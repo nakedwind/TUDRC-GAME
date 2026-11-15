@@ -33826,6 +33826,15 @@ const BATTLE_MAPS = [
         "ox": 3
       },
       {
+        "c": 57,
+        "r": 66,
+        "to": "map_mv1bzur4",
+        "at": [
+          28,
+          42
+        ]
+      },
+      {
         "c": 56,
         "r": 4,
         "to": "map_mvxz356e",

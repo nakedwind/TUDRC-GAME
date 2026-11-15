@@ -207,11 +207,22 @@ function enemyBarrierAt(c, r) {
   const o = barrierAt(c, r);
   return o && !o.ore ? o : null;
 }
+// ---- 怪物的身體：走路時不只看中心一個點，身體四個角也不能撞到牆（跟溫特、隊員一樣），身體才不會一半卡進牆裡 ----
+// 半徑＝怪物圖寬（drawWidth×sizeMul）的 k 倍，最小 min、最大 max（一格寬的走道 40 像素，16 還走得過去）
+// enabled：false＝回到舊的只看中心點
+const ENEMY_BODY = { enabled: true, k: .28, min: 6, max: 16 };
+function enemyBodyR(e) {
+  if (!ENEMY_BODY.enabled || !e || e.behavior === 'moth') return 0;   // 會飛的人面蝶不撞牆
+  const w = (e.drawWidth || 42) * (e.sizeMul || 1);
+  return Math.max(ENEMY_BODY.min, Math.min(ENEMY_BODY.max, Math.round(w * ENEMY_BODY.k)));
+}
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
   if (!inGrid(c, r) || enemyWallPoint(x, y) || !!gridBlockAtPoint(x, y, enemyBarrierAt) ||   // 建築：微調過位置的照微調後的範圍（js/build.js）
       (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 牆吃像素微調（js/pathfinding.js）；順順宮帽也擋路（js/hangi-bao.js）
   if (edgeWallBlocksPoint(x, y)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）
+  const br = actor ? enemyBodyR(actor) : 0;   // 只有怪物自己在走路時才看身體；找落點、子彈這類只看一個點
+  if (br) for (const [sx, sy] of [[-br, -br], [br, -br], [-br, br], [br, br]]) if (enemyWallPoint(x + sx, y + sy) || edgeWallBlocksPoint(x + sx, y + sy)) return true;
   if (typeof deepWaterBlocksCell === 'function' && !(actor && (actor.behavior === 'moth' || (typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(actor.x, actor.y)))) && deepWaterBlocksCell(c, r)) return true;   // 深水區：地面怪物進不去，會飛的人面蝶照樣飛（js/swim-ring.js）
   if (typeof escalatorSideBlocks === 'function' && !(actor && actor.behavior === 'moth') && escalatorSideBlocks(x, y + ESCALATOR.enemyFootDy)) return true;   // 側面手扶梯的扶手、外殼（js/escalators.js）
   return !!(actor && actor.wide && !enemyWideAt(c, r) && enemyWideAt(...cellAt(actor.x, actor.y)));   // 大體型：從寬的地方擠不進一格的窄道（已經在窄道裡就可以走出來）

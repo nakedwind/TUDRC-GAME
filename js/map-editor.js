@@ -1614,6 +1614,7 @@ function draw() {
     ctx.fillStyle = warp ? '#a8f4f4' : '#d9c6ff'; ctx.fillText('→' + target, x + CELL / 2, y + CELL + 1);
   }
   drawPortalNudge(m); syncPortalNudgePanel(m);   // 🎯 出入口微調：判定範圍的圓圈、數字欄
+  if (typeof drawOcclusionCheck === 'function') drawOcclusionCheck();   // 🔍 遮擋檢查：框出遮擋線跟擋路對不起來的圖（js/map-editor-occlusion.js）
   // 正在設傳送點：第一格閃黃框，等著點第二格
   if (portalLinkFrom && portalLinkFrom.mapId === m.id && brush.mode === 'portal') {
     const x = OX + portalLinkFrom.c * CELL, y = OY + portalLinkFrom.r * CELL;
@@ -4000,7 +4001,7 @@ function refreshMapSelect() {
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], spawnZone: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], camp: [], rules: {} }); }
-function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear(); applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
+function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear(); applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); if (typeof occCheckOn !== 'undefined' && occCheckOn) runOcclusionCheck(); draw(); }   // 遮擋檢查開著：換地圖就重新檢查
 
 mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
 document.getElementById('newMap').addEventListener('click', () => {

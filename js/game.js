@@ -792,18 +792,26 @@ function teleportInMap(pt) {
     setTimeout(() => {
       // 這個傳送點設了 🦶 落地點（從送到的那格中心算起）：站在那裡；沒設：照舊站在那格（或那格的出入口）前面
       placePlayerNearPortal(Array.isArray(pt.land) ? { c: tc, r: tr, land: pt.land } : mapPortals.find(q => q.c === tc && q.r === tr) || { c: tc, r: tr });
-      // 隊員排在溫特身邊的空格（由近到遠找，一人一格）
-      const [pc, pr] = cellAt(p.x, p.y), used = new Set([pc + ',' + pr]);
-      for (const t of followers) {
-        let spot = null;
-        for (let radius = 1; radius <= 4 && !spot; radius++) {
-          for (let dr = -radius; dr <= radius && !spot; dr++) for (let dc = -radius; dc <= radius && !spot; dc++) {
-            if (Math.max(Math.abs(dc), Math.abs(dr)) !== radius) continue;
-            const c = pc + dc, r = pr + dr;
-            if (!used.has(c + ',' + r) && sentryCellWalkable(c, r, true, true)) { used.add(c + ',' + r); spot = center(c, r); }
-          }
+      // 隊員排在溫特身邊的空格（一人一格）：從溫特站的格子沿著「走得過去」的格子往外找，
+      // 不會被放到水的另一邊、牆後面這種跟溫特不通的地方（不然隊員一落地就說去不了部隊長身邊）
+      const [pc, pr] = cellAt(p.x, p.y), spots = [], seen = new Set([pc + ',' + pr]), queue = [[pc, pr, 0]];
+      for (let head = 0; head < queue.length && spots.length < followers.length; head++) {
+        const [c, r, steps] = queue[head];
+        if (steps >= 6) continue;   // 最多往外找 6 步
+        for (const [dc, dr] of [[0, 1], [-1, 0], [1, 0], [0, -1]]) {
+          const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
+          if (seen.has(key) || !sentryCellWalkable(nc, nr, true, true) || edgeBetween(c, r, nc, nr)) continue;
+          seen.add(key); queue.push([nc, nr, steps + 1]); spots.push(center(nc, nr));
         }
-        if (!spot) continue;   // 對面太擠：這位隊員留在原地
+      }
+      for (const t of followers) {
+        const spot = spots.shift();
+        if (!spot) {   // 對面太擠（例如池核泳池中間的祕密小島，只站得下一個人）：這位隊員留在原地，安靜等部隊長回來（js/sentry.js 的 leftBehind）
+          t.leftBehind = true; t.leftBehindT = 0; t.navPath = null; t.navGoal = null;
+          if (typeof sentryStatus === 'function') sentryStatus(t, '在這裡等' + (typeof leaderLabel === 'function' ? leaderLabel().replace('身邊', '') : '部隊長') + '回來');
+          continue;
+        }
+        t.leftBehind = false;
         t.x = spot[0]; t.y = spot[1]; t.navPath = null; t.navGoal = null;
         if (t.mode === 'goto') t.target = null;
       }
