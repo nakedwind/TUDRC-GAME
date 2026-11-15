@@ -191,10 +191,12 @@ function chickenSortables(list) {
     list.push({ floor: looseFloor(ch), y: ch.y + 12, draw: () => drawChicken(ctx, ch, ch.x, ch.y + 12) });
   }
   const ch = G.carriedChicken, p = G.player;
-  if (ch && p) {   // 抱在胸前：排在溫特後面一點點，畫在溫特身上
+  if (ch && p) {   // 抱在身前（位置照《苦艾與甘露》：雞的腳在溫特腳底往上 carryLift 倍身高的地方）
+    const C = CHICKEN_CONFIG, H = PLAYER.drawSize, back = p.dir === 'back';
     ch.faceLeft = p.dir === 'left' ? true : p.dir === 'right' ? false : ch.faceLeft;
     ch.x = p.x; ch.y = p.y;
-    list.push({ floor: visualFloor(p), y: p.y + 16.5, draw: () => drawChicken(ctx, ch, p.x + (ch.faceLeft ? -2 : 2), p.y + 18 - PLAYER.drawSize * .22) });
+    // 正面、側面：排在溫特後面一點點（畫在溫特身上）；背面：排在溫特前面一點點（先畫雞，被溫特的背擋住）
+    list.push({ floor: visualFloor(p), y: p.y + (back ? 15.5 : 16.5), draw: () => drawChicken(ctx, ch, p.x + H * C.carryDx, p.y + 18 - H * C.carryLift) });
   }
 }
 // 畫一隻雞：fx, fy＝腳底中央
