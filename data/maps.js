@@ -30371,6 +30371,7 @@ const BATTLE_MAPS = [
       "57,14"
     ],
     "coreCount": 1,
+    "difficulty": 3,
     "monsterMix": [
       {
         "id": "slime",
