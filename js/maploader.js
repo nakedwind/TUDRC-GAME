@@ -1204,12 +1204,16 @@ function drawOverdrawPatch(ctx, it, od) {
   else ctx.drawImage(od.patch, OX + cx, OY + cy);
 }
 // only：只畫這一台（劇情播放器要把每台電梯各自跟角色排前後，js/story-scene.js）；沒給＝全部都畫
-function drawElevators(ctx, only) {
+// part（劇情用，js/story-scene.js）：'base'＝只畫電梯本體（開著＝開門的圖，不畫滑動中的門片）、'doors'＝只畫滑動中的兩片門；
+// 中間可以畫站在電梯裡的人，人就會在電梯上面、門片裡面。沒給＝整台一起畫（遊戲裡照舊）
+const elevatorIsOpen = stamp => (stamp === openElevatorStamp || elevatorOpenAnim?.stamp === stamp) && elevatorOpenImage.complete && elevatorOpenImage.naturalWidth;
+function drawElevators(ctx, only, part) {
   for (const stamp of elevatorStamps()) {   // 只翻電梯（快取），不用每幀掃全部物件
     if (only && stamp !== only) continue;
-    if ((stamp === openElevatorStamp || elevatorOpenAnim?.stamp === stamp) && elevatorOpenImage.complete && elevatorOpenImage.naturalWidth) {
+    if (elevatorIsOpen(stamp)) {
       const x = OX + stamp.c * CELL + (stamp.ox || 0), y = OY + stamp.r * CELL + (stamp.oy || 0);
-      ctx.drawImage(elevatorOpenImage, x, y, mapTileW(mapTileById(stamp.id)) * CELL, mapTileH(mapTileById(stamp.id)) * CELL);
+      if (part !== 'doors') ctx.drawImage(elevatorOpenImage, x, y, mapTileW(mapTileById(stamp.id)) * CELL, mapTileH(mapTileById(stamp.id)) * CELL);
+      if (part === 'base') continue;
       const animation = elevatorOpenAnim?.stamp === stamp ? elevatorOpenAnim : elevatorCloseAnim?.stamp === stamp ? elevatorCloseAnim : null;
       if (animation) {
         const closed = tileImage(mapTileById(stamp.id));
@@ -1224,7 +1228,7 @@ function drawElevators(ctx, only) {
           ctx.restore();
         }
       }
-    } else drawMapStampImg(ctx, stamp);
+    } else if (part !== 'doors') drawMapStampImg(ctx, stamp);
   }
 }
 

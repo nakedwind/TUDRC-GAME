@@ -1614,8 +1614,19 @@ const StoryScene = (() => {
     drawDoor();   // 自動門畫在地面這層：從門裡走出來、走進去的人都在門前面
     const sortables = []; collectMapOccluders(ctx, sortables);
     // 電梯（關著／開著／開關門動畫，js/maploader.js）：排在它後面那面牆的前面、站在電梯門口的人後面
-    if (typeof drawElevators === 'function') for (const s of elevatorStamps()) sortables.push({ y: (s.r + mapTileH(mapTileById(s.id))) * CELL + (s.oy || 0) + 8, draw: () => drawElevators(ctx, s) });
-    for (const a of state.actors) if (!a.hidden && !a.onTop) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
+    // 站在電梯裡的人（腳在電梯圖範圍內）：跟電梯一起畫——電梯開著＝本體 → 人 → 滑動中的門片（人在門片裡面、電梯上面）；關著＝人被門擋住
+    const inLift = new Set();
+    if (typeof drawElevators === 'function') for (const s of elevatorStamps()) {
+      const t = mapTileById(s.id), x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0), x1 = x0 + mapTileW(t) * CELL, y1 = y0 + mapTileH(t) * CELL;
+      const inside = state.actors.filter(a => !a.hidden && !a.onTop && !a.sitting && a.x > x0 && a.x < x1 && a.y > y0 && a.y < y1);
+      inside.forEach(a => inLift.add(a));
+      sortables.push({ y: y1 + 8, draw: () => {
+        if (!inside.length) { drawElevators(ctx, s); return; }
+        if (!elevatorIsOpen(s)) { inside.forEach(drawActor); drawElevators(ctx, s); return; }
+        drawElevators(ctx, s, 'base'); inside.forEach(drawActor); drawElevators(ctx, s, 'doors');
+      } });
+    }
+    for (const a of state.actors) if (!a.hidden && !a.onTop && !inLift.has(a)) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
     for (const a of state.actors) if (a.tray && !a.hidden) pushActorTray(a, sortables);
     const drawFried = e => {   // 被雷劈：焦黑；倒下時以腳底為軸往後轉 90 度，躺在地上
       const k = Math.max(0, Math.min(1, (e.friedT - THUNDER.fry) / THUNDER.fall)), fy = e.y + 13;
