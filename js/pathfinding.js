@@ -215,26 +215,34 @@ const sameFloor = (a, b) => actorFloor(a) === actorFloor(b);
 // 微調：MAP.edgeOffsets = { 'c,r,R': [dx, dy] }＝這條線整段平移幾像素（地圖編輯器「🎯 碰撞微調」，最多將近一格；找路 edgeBetween 還是看原本的格線）
 const EDGE_WALL = { half: 5 };   // 薄牆的厚度一半（像素）：角色身體離線這麼近就算撞到
 let edgeSetMap = null, edgeSet = new Set(), edgeSegs = [];
-// 程式動態加的薄牆（停靠的捷運列車，js/mrt-train.js）：不存進地圖資料，換了就重建
-let edgeExtra = new Set(), edgeExtraVer = 0, edgeBuiltVer = -1;
-function setExtraEdges(set) { edgeExtra = set; edgeExtraVer++; }
+// 2 樓的薄牆：目前只有停在 2 樓的捷運列車（js/mrt-train.js）會加，只擋 2 樓的人；地圖編輯器畫的薄牆照舊只擋一樓
+let edgeSet2 = new Set(), edgeSegs2 = [];
+// 程式動態加的薄牆（停靠的捷運列車，js/mrt-train.js）：不存進地圖資料，換了就重建。set＝擋一樓、set2＝擋 2 樓
+let edgeExtra = new Set(), edgeExtra2 = new Set(), edgeExtraVer = 0, edgeBuiltVer = -1;
+function setExtraEdges(set, set2) { edgeExtra = set; edgeExtra2 = set2 || new Set(); edgeExtraVer++; }
 function mapEdgeSet() {   // 跟著目前的地圖重建（換地圖、從劇情地圖回到暫停的戰場都會自動對上）
   const m = typeof MAP !== 'undefined' ? MAP : null;
   if (edgeSetMap !== m || edgeBuiltVer !== edgeExtraVer) {
-    edgeSetMap = m; edgeBuiltVer = edgeExtraVer; edgeSet = new Set([...((m && m.edges) || []), ...edgeExtra]);
+    edgeSetMap = m; edgeBuiltVer = edgeExtraVer; edgeSet = new Set([...((m && m.edges) || []), ...edgeExtra]); edgeSet2 = new Set(edgeExtra2);
     const offs = (m && m.edgeOffsets) || {};
     // 每條線換算成地圖上的線段（相對 OX、OY）：直線 x 固定、從 y0 到 y1；橫線 y 固定、從 x0 到 x1
-    edgeSegs = [...edgeSet].map(k => {
+    const segs = set => [...set].map(k => {
       const [c, r, axis] = k.split(','), [dx, dy] = offs[k] || [0, 0];
       return axis === 'R' ? { v: true, x: (+c + 1) * CELL + dx, a: +r * CELL + dy, b: (+r + 1) * CELL + dy }
         : { v: false, y: (+r + 1) * CELL + dy, a: +c * CELL + dx, b: (+c + 1) * CELL + dx };
     });
+    edgeSegs = segs(edgeSet); edgeSegs2 = segs(edgeSet2);
   }
   return edgeSet;
 }
+// 現在處理的人在幾樓，就用那一層的薄牆：[格線的集合, 線段]
+function edgesNow() {
+  mapEdgeSet();
+  return floorCtx === 2 ? [edgeSet2, edgeSegs2] : [edgeSet, edgeSegs];
+}
 // 相鄰兩格之間有沒有薄牆（尋路用；斜走不算）
 function edgeBetween(c, r, nc, nr) {
-  const E = mapEdgeSet(); if (!E.size) return false; if (!floorScoped) floorUnscoped(); if (floorCtx === 2) return false;   // 薄牆只擋一樓
+  const [E] = edgesNow(); if (!E.size) return false; if (!floorScoped) floorUnscoped();   // 1 樓的人看 1 樓的薄牆、2 樓的人看 2 樓的
   if (nr === r && nc === c + 1) return E.has(c + ',' + r + ',R');
   if (nr === r && nc === c - 1) return E.has(nc + ',' + r + ',R');
   if (nc === c && nr === r + 1) return E.has(c + ',' + r + ',B');
@@ -244,9 +252,9 @@ function edgeBetween(c, r, nc, nr) {
 // 這個點有沒有碰到薄牆（線的兩側各 EDGE_WALL.half 像素；兩端也多延伸一點，轉角接得起來）
 // 一張地圖的薄牆通常只有幾十條，直接每條檢查
 function edgeWallBlocksPoint(x, y) {
-  const E = mapEdgeSet(); if (!E.size) return false; if (!floorScoped) floorUnscoped(); if (floorCtx === 2) return false;
+  const [E, segs] = edgesNow(); if (!E.size) return false; if (!floorScoped) floorUnscoped();
   const lx = x - OX, ly = y - OY, H = EDGE_WALL.half;
-  for (const s of edgeSegs) {
+  for (const s of segs) {
     if (s.v ? (Math.abs(lx - s.x) <= H && ly >= s.a - H && ly <= s.b + H)
             : (Math.abs(ly - s.y) <= H && lx >= s.a - H && lx <= s.b + H)) return true;
   }
@@ -255,10 +263,10 @@ function edgeWallBlocksPoint(x, y) {
 // 身體（半徑 r 的方塊）從 (x0,y0) 直直移到 (x1,y1) 會不會穿過薄牆：一次走很遠（衝刺、卡頓）也不會直接跳過去
 // 只處理水平或垂直的移動（溫特的移動是 x、y 分開判斷）
 function edgeWallCrossed(x0, y0, x1, y1, r) {
-  const E = mapEdgeSet(); if (!E.size) return false; if (!floorScoped) floorUnscoped(); if (floorCtx === 2) return false;
+  const [E, segs] = edgesNow(); if (!E.size) return false; if (!floorScoped) floorUnscoped();
   const passes = (line, a, b) => a < b ? line > a && line <= b : line < a && line >= b;   // 身體前緣從 a 移到 b，有沒有越過 line
   const lx0 = x0 - OX, ly0 = y0 - OY, lx1 = x1 - OX, ly1 = y1 - OY;
-  for (const s of edgeSegs) {
+  for (const s of segs) {
     if (s.v && lx1 !== lx0) {
       const k = Math.sign(lx1 - lx0);
       if (ly0 + r > s.a && ly0 - r < s.b && passes(s.x, lx0 + k * r, lx1 + k * r)) return true;

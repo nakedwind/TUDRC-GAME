@@ -17,6 +17,7 @@ const SOUND_SETTINGS = {
     "clownfishHop2": 1.45,
     "clownfishHurt": 1.5,
     "dryFire": 1.35,
+    "dynamoStart": 2,
     "eggSquish": 1.3,
     "elevator": 1.85,
     "eliteStep": 2.45,

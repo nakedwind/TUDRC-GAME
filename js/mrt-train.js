@@ -55,6 +55,8 @@ const MRT_TRAIN = {
   rideTime: 6,          // 溫特搭車：開進隧道後畫面黑幾秒才開進站（要比 arriveSoundLead 長，到站音樂才會先響）
   rideFadeCells: 5,     // 溫特離軌道盡頭（隧道口）幾格時畫面開始變黑；進站時進到軌道幾格才亮回來
   rideShake: 1.6,       // 搭車時畫面搖晃的強度
+  powerOnShake: 4,      // 捷運站發電機全部打開那一刻，畫面震一下的強度（js/storage-lockers.js 呼叫 mrtPowerOnFx）
+  powerOnHumDelay: 1.5, // 全部打開後幾秒播「台北捷運(白噪音) 02」（音效編輯器裡的 mrtPowerHum；先讓發電機發動聲響一下）
   doorPassAt: .7,       // 車門開到幾成才走得過去
   sounds: { arrive: 'mrtArrive', open: 'mrtDoorOpen', departWarn: 'mrtDepartWarn', warn: 'mrtDoorWarn', close: 'mrtDoorClose', depart: 'mrtDepart' },   // 音效編輯器裡的名稱
   soundGain: .55,
@@ -79,15 +81,22 @@ function mrtTrainImg(file) {
 // ---- 碰撞：列車加進固定牆的格子、薄牆（每班車自己記 tr.walls、tr.edges；總表給換地圖、重開時整個還原）----
 // tr.cleared：地圖本來就是牆（軌道上畫的碰撞格）、但列車停著時是車內地板的格子，暫時拿掉，列車沒停好就擋回去
 let mrtTrainWalls = new Set();
+// 列車在幾樓：照車頭那張圖的樓層（地圖編輯器選物件的「🏢 樓層」，或放在 2 樓圖層）。
+// 擋路格加在一樓的牆裡，停在 2 樓時靠 js/maploader.js 的 objectWallOn2F 擋 2 樓的人；薄牆照樓層分開（js/pathfinding.js 的 setExtraEdges）
+const mrtTrainFloor = tr => tr && tr.cars && tr.cars[0] && typeof stampDrawFloor === 'function' ? stampDrawFloor(tr.cars[0].stamp) : 1;
 function mrtTrainRestoreCleared(tr) {
   const solid = new Set((MAP && MAP.solid) || []);
   for (const k of tr.cleared || []) if (solid.has(k)) mapWalls.add(k);   // 只放回這張地圖本來畫的牆
   tr.cleared = [];
+  // 2 樓的列車：軌道用「🚧 2樓碰撞」擋（MAP.solid2），列車停著時拿掉的那幾格放回去
+  const solid2 = new Set((MAP && MAP.solid2) || []);
+  for (const k of tr.cleared2 || []) if (solid2.has(k) && typeof floor2Solid !== 'undefined') floor2Solid.add(k);
+  tr.cleared2 = [];
 }
 function mrtTrainApplyEdges() {
-  const all = new Set();
-  for (const tr of (G && G.mrtTrains) || []) for (const k of tr.edges || []) all.add(k);
-  if (typeof setExtraEdges === 'function') setExtraEdges(all);
+  const all = new Set(), up = new Set();   // all：擋一樓的人；up：停在 2 樓的列車（例如 B56 上面那班），只擋 2 樓的人
+  for (const tr of (G && G.mrtTrains) || []) for (const k of tr.edges || []) (mrtTrainFloor(tr) === 2 ? up : all).add(k);
+  if (typeof setExtraEdges === 'function') setExtraEdges(all, up);
 }
 
 // 每局開始（js/game.js 的 newGame）：找出地圖上的車廂，同一排的組成一班列車
@@ -145,10 +154,20 @@ function mrtPowered() {
   const [on, total] = dynamoCount();
   return total === 0 || on === total;
 }
+// 捷運站的發電機「最後一台」打開的那一刻（js/storage-lockers.js 呼叫；發動聲 dynamoStart 由那邊播）：
+// 畫面稍微震一下，過 powerOnHumDelay 秒再播一次「台北捷運(白噪音) 02」（mrtPowerHum，不循環）。
+// 強度、秒數在 data/mrt-train.js（powerOnShake、powerOnHumDelay）；音量在音效編輯器調
+function mrtPowerOnFx() {
+  const T = MRT_TRAIN;
+  if (typeof addShake === 'function' && T.powerOnShake > 0) addShake(T.powerOnShake);
+  const mapId = MAP && MAP.id;
+  setTimeout(() => { if (MAP && MAP.id === mapId) sfx('mrtPowerHum'); }, Math.max(0, Number(T.powerOnHumDelay) || 0) * 1000);   // 這段時間換了地圖就不播
+}
 // 接續「保留進度」、劇情看完回原地圖（mapWalls 整份換回來，js/combat-progress.js 的 reclaimAddedWalls）：照每班車記的格子湊回總表
 function restoreMrtTrains() {
   mrtTrainWalls = new Set();
   for (const tr of (G && G.mrtTrains) || []) for (const k of tr.walls || []) mrtTrainWalls.add(k);   // 閘門：下一幀照列車現在的狀態重新開關
+  if (typeof floor2Solid !== 'undefined') for (const tr of (G && G.mrtTrains) || []) for (const k of tr.cleared2 || []) floor2Solid.delete(k);   // 停在 2 樓的列車：車廂底下的 2 樓碰撞照舊拿掉
   mrtTrainApplyEdges();
 }
 
@@ -298,7 +317,7 @@ function mrtTrainUpdateSolid(tr) {
   mrtTrainRestoreCleared(tr);
   tr.walls = []; tr.edges = []; tr.floor = [];
   if (key) {
-    const open = key === 'open', far = open && tr.bothDoors;
+    const open = key === 'open', far = open && tr.bothDoors, up = mrtTrainFloor(tr) === 2 && typeof floor2Solid !== 'undefined';
     const type = new Map();
     let rMax = -Infinity, rMin = Infinity;
     // 超出軌道範圍（隧道裡、畫面上看不到）的車廂格子不算：不然看不到的車廂會在旁邊的手扶梯上造出看不見的牆和地板
@@ -313,6 +332,7 @@ function mrtTrainUpdateSolid(tr) {
       if (!pass(t)) { if (inGrid(c, r) && !mapWalls.has(k)) { mapWalls.add(k); mrtTrainWalls.add(k); tr.walls.push(k); } continue; }
       tr.floor.push(k);
       if (mapWalls.has(k)) { mapWalls.delete(k); tr.cleared.push(k); }   // 軌道上的碰撞格：列車停著時是車內地板
+      if (up && floor2Solid.has(k)) { floor2Solid.delete(k); (tr.cleared2 ||= []).push(k); }   // 2 樓的列車：軌道上的 2 樓碰撞也一樣
       // 走得進去的格子跟車外之間放薄牆：外側門口往下、對面通道往上，門開著時不擋
       const out = (cc, rr) => !type.has(cc + ',' + rr);
       if (out(c, r + 1) && !(t === 'D' && open)) tr.edges.push(c + ',' + r + ',B');
@@ -688,7 +708,7 @@ function updateMrtTrains(dt) {
 function mrtTrainSortables(list) {
   for (const tr of G.mrtTrains || []) {
     if (tr.state === 'away') continue;
-    const floor = tr.cars && tr.cars[0] ? stampDrawFloor(tr.cars[0].stamp) : 1;   // 列車在幾樓：照車頭那張圖的樓層
+    const floor = mrtTrainFloor(tr);   // 列車在幾樓：照車頭那張圖的樓層
     list.push({ floor, y: tr.top, draw: () => drawMrtTrain(ctx, tr, 'back') });
     list.push({ floor, y: tr.bottom + MRT_TRAIN.frontSortDy, draw: () => drawMrtTrain(ctx, tr, 'front') });
     list.push({ floor, y: tr.bottom + MRT_TRAIN.doorSortDy, draw: () => drawMrtTrain(ctx, tr, 'frontDoor') });

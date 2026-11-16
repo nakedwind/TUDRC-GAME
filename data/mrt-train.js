@@ -21,6 +21,8 @@ const MRT_TRAIN_SETTINGS = {
   "rideTime": 6,
   "rideFadeCells": 5,
   "rideShake": 1.6,
+  "powerOnShake": 4,
+  "powerOnHumDelay": 1.5,
   "doorPassAt": 0.7,
   "frontSortDy": 10,
   "doorSortDy": -3,
