@@ -6,6 +6,8 @@
 const StoryScene = (() => {
   let state = null, ui = null, sceneCache = null;
   let forcedId = null, resume = null;   // 從遊戲裡的記憶之門進來：播哪段、看完要回去的地圖與戰場（playFromGame）
+  // 接著播（劇情設定 next）：chainHead＝這一串的第一段（重新播放從那裡開始）、carryBgm＝兩段用同一首音樂時，接著播不中斷
+  let chainHead = null, carryBgm = null;
   const DRAFT_KEY = 'tudrc_story_scenes_v1';   // 劇情編輯器的暫存
   const params = new URLSearchParams(location.search);
   function scenes() {
@@ -63,6 +65,7 @@ const StoryScene = (() => {
   }
   const extraImages = {};
   const imageOnce = src => extraImages[src] || (extraImages[src] = image(src));
+  const ropeImg = () => imageOnce('images/回憶場景/rope_tied.png');   // 綁人的繩子（tools/draw-rope.py 畫的，64×64 跟角色圖對齊）
   function ensureUI() {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
@@ -101,7 +104,8 @@ const StoryScene = (() => {
     box().classList.toggle('story-flip', !!beat.portraitFlip);
     const dark = Math.max(0, Math.min(1, Number(beat.portraitDark) || 0));
     el('dialoguePortrait').style.filter = dark ? 'brightness(' + (1 - dark) + ')' : '';
-    el('dialogueName').textContent = beat.speaker || '';
+    // radio：用無線電說話——名字後面加「（無線電）」（跟新手區希奧妮的無線電一樣），頭像照樣用這個人的
+    el('dialogueName').textContent = (beat.speaker || '') + (beat.speaker && beat.radio ? '（無線電）' : '');
     if (sprite) {
       const who = state.actors.find(a => a.name === beat.speaker && a.sprite === sprite);
       const set = who ? who.set : sprites(sprite);   // 頭像一律用一般正面圖（雷德舉盾時頭像也不拿盾）
@@ -674,7 +678,35 @@ const StoryScene = (() => {
   function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
     showCard(null);
     if (state.bannerAt) { showBanner(state.bannerAt.text); state.bannerAt = null; }   // 大字還沒壓出來就按結束：直接出來
-    state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(secOr(state.cfg.bgmFadeOut, 5));   // 劇情結束：音樂花幾秒淡出（劇情設定 bgmFadeOut，空白＝5 秒）
+    state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false);
+    if (!keepBgmForNext()) stopBgm(secOr(state.cfg.bgmFadeOut, 5));   // 劇情結束：音樂花幾秒淡出（劇情設定 bgmFadeOut，空白＝5 秒）；接著播的下一段用同一首就不停
+  }
+  // ---- 接著播（劇情設定 next＝下一段劇情的 id）：這段變黑後直接換到下一段（可以換地圖），不出現結束畫面 ----
+  const nextScene = () => { const id = state?.cfg.next, s = id && scenes()[id]; return s && s.map ? { id, s } : null; };
+  // 兩段的 BGM 一樣、這段中途也沒換過歌：音樂繼續播，不淡出再重來
+  const keepBgmForNext = () => { const n = nextScene(); return !!n && !!state.cfg.bgm && JSON.stringify(n.s.bgm) === JSON.stringify(state.cfg.bgm) && !state.cfg.beats.some(b => 'bgm' in b); };
+  function gotoScene(id) {   // 換到另一段劇情（可能在別張地圖）並從頭播
+    const s = scenes()[id]; if (!s) return false;
+    const m = typeof PREVIEW !== 'undefined' && PREVIEW && typeof MAP_DATA_STORY !== 'undefined' ? MAP_DATA_STORY.find(x => x.id === s.map) : null;
+    const index = m ? 0 : mapList().findIndex(x => x.id === s.map);
+    if (index < 0) return false;
+    if (m) PREVIEW.map = m;   // 預覽模式：地圖清單只有一張，換成那段的地圖
+    leave(); forcedId = id;
+    MAP_INDEX = index; initMap();
+    start();
+    return true;
+  }
+  function playNext() {
+    const n = nextScene(); if (!n) return false;
+    chainHead = chainHead || forcedId || Object.keys(scenes()).find(k => scenes()[k] === state.cfg) || null;
+    const keep = keepBgmForNext() ? bgm : null;
+    if (keep) { carryBgm = keep; bgm = null; }   // 先把音樂拿在手上，換地圖時不會被停掉
+    if (gotoScene(n.id)) return true;
+    if (keep) { bgm = keep; carryBgm = null; }
+    return false;
+  }
+  function replay() {   // 重新播放：接著播的一串，從第一段開始
+    if (chainHead && forcedId !== chainHead && scenes()[chainHead]) gotoScene(chainHead); else start();
   }
   function makeMonster(m) {
     const spec = ACTIVE_MONSTERS.find(s => s.id === (m.type || 'lifeform'));
@@ -749,12 +781,14 @@ const StoryScene = (() => {
   function start() {
     prepare(); hideOverlay(); ui.hidden = false;
     state.playing = true; G.phase = 'story';
-    state.waitingForSound = !!state.cfg.opening && navigator.userActivation?.hasBeenActive === false;
+    const chained = !!chainHead && forcedId !== chainHead;   // 上一段演完接過來的（不是這一串的第一段）
+    state.waitingForSound = !chained && !!state.cfg.opening && navigator.userActivation?.hasBeenActive === false;
     el('storyAudioStart').hidden = !state.waitingForSound;
-    if (!state.waitingForSound) startBgm();
+    if (carryBgm) { bgm = carryBgm; carryBgm = null; }   // 上一段的音樂接著播
+    else if (!state.waitingForSound) startBgm();
     // G.running 保持 false：成就、自動存檔與戰鬥的外掛不會把演員視作真正隊伍。
-    // &storyFrom=N：前面幾頁的走位、轉向一次做完，直接從第 N 頁開始（劇情編輯器調整用）
-    const from = Math.min(state.cfg.beats.length, Math.max(1, Number(params.get('storyFrom')) || 1)) - 1;
+    // &storyFrom=N：前面幾頁的走位、轉向一次做完，直接從第 N 頁開始（劇情編輯器調整用；只套用在一開始那段）
+    const from = chained ? 0 : Math.min(state.cfg.beats.length, Math.max(1, Number(params.get('storyFrom')) || 1)) - 1;
     if (from) { fastForward(0, from); state.time = state.openingBlack + state.openingFade; }
     setBeat(from);
   }
@@ -838,6 +872,11 @@ const StoryScene = (() => {
       else { stopBgm(secOr(beat.bgmFadeOut, .4)); state.nextBgm = beat.bgm ? { src: beat.bgm, at: state.time + (Number(beat.bgmDelay) || 0), fadeIn: secOr(beat.bgmFadeIn, 1.5) } : null; }
     }
     if (beat.sfx && typeof SFX !== 'undefined' && !state.skipping) SFX.play(beat.sfx, Number(beat.sfxVolume) > 0 ? Number(beat.sfxVolume) : 1, beat.sfx + ':story-beat');
+    // 無線電：換一個人接起無線電時「嗶—沙沙」一聲（同一個人連著講好幾頁只響第一頁；音效名稱 radio，音效編輯器可以換）
+    const prevBeat = state.cfg.beats[index - 1];
+    if (beat.radio && !(prevBeat?.radio && prevBeat.speaker === beat.speaker) && typeof SFX !== 'undefined' && !state.skipping) SFX.play('radio', .8, 'radio:story-beat');
+    // 綁繩子（每頁 tie: { 角色id: true 綁起來／false 鬆綁 }）
+    for (const [id, v] of Object.entries(beat.tie || {})) { const a = actor(id); if (a) a.tied = !!v; }
     const show = a => { if (a.hidden) { a.hidden = false; a.alpha = 0; } a.fading = false; };   // 先隱藏的人：淡入出現
     for (const id of Object.keys(beat.hide || {})) { const a = actor(id); if (a) { a.hidden = true; a.target = null; a.path = []; a.exiting = a.fading = false; } }
     // 出現（每頁 show: { 角色id: true }）：先隱藏的人在原地淡入出現；坐著的照樣坐著（走位／瞬移會讓人站起來，這個不會）
@@ -1136,6 +1175,7 @@ const StoryScene = (() => {
       if (state.nextBgm && state.time >= state.nextBgm.at && !state.ending) { const { src, fadeIn } = state.nextBgm; state.nextBgm = null; startBgm(src, fadeIn); }
       if (state.ending) {
         el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
+        if (state.beatTime >= state.endDelay + 1.8 && nextScene() && playNext()) return;   // 設了「接著播」：變黑後直接換到下一段
         if (state.beatTime >= state.endDelay + 1.8 && state.cfg.autoExit && resume) { backToGame(); return; }   // 開場這類：變黑後直接回遊戲
         if (state.beatTime >= state.endDelay + 1.8) {
           state.playing = false; state.ended = true; G.phase = 'story-ended';
@@ -1481,7 +1521,13 @@ const StoryScene = (() => {
       ctx.drawImage(img, 0, py, iw, ih - py, -w / 2, top + py * k, w, (ih - py) * k);
       ctx.save(); ctx.translate(-w / 2 + px * k, top + py * k); ctx.rotate(a.swA);
       ctx.drawImage(img, 0, 0, iw, py + 1, -px * k, -py * k, w, (py + 1) * k); ctx.restore();   // 多畫一像素蓋住接縫
-    } else { if (!a.set.single) drawEquip(a, size, 'behind'); ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt); if (!a.set.single) drawEquip(a, size, 'front'); }
+    } else {
+      if (!a.set.single) drawEquip(a, size, 'behind');
+      ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt);
+      // 被繩子綁著（角色欄位 tied、每頁 tie）：繩子圖跟角色圖一樣是 64×64，一格一格對齊身體疊上去；只有面向前面時畫
+      if (a.tied && !a.set.single && a.dir === 'front' && readyImage(ropeImg())) ctx.drawImage(ropeImg(), -size / 2, size / 2 - size, size, size);
+      if (!a.set.single) drawEquip(a, size, 'front');
+    }
     drawPartyProps(a, size);
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
     // 背對鏡頭：小道具（紙袋、紅豆餅…）拿在身體旁邊照樣畫；大東西（遺物箱…）被身體擋住不畫
@@ -1631,7 +1677,7 @@ const StoryScene = (() => {
     if (index < 0) return false;
     resume = { index: MAP_INDEX, G, walls: mapWalls, doors: mapDoors, doorWalls: doorAddedWalls, offsets: mapSolidOffsets,
       power: new Set(mapPowerOn), elevator: openElevatorStamp, onDone };
-    forcedId = id;
+    forcedId = id; chainHead = null; carryBgm = null;
     clearInput();
     MAP_INDEX = index; initMap();   // window.STORY_MODE 會在這裡打開
     start();
@@ -1640,7 +1686,7 @@ const StoryScene = (() => {
   function backToGame() {
     const r = resume; if (!r) return;
     const outcome = state?.outcome || null;   // 選項選了什麼（沒選就跳過劇情＝null）
-    leave(); forcedId = null; resume = null;
+    leave(); forcedId = null; resume = null; chainHead = null; carryBgm = null;
     MAP_INDEX = r.index; initMap();
     G = r.G; mapWalls = r.walls; mapDoors = r.doors; doorAddedWalls = r.doorWalls; mapSolidOffsets = r.offsets;
     poweredMap = MAP; mapPowerOn = r.power; openElevatorStamp = r.elevator;
@@ -1649,7 +1695,7 @@ const StoryScene = (() => {
     computeFlow(); updateCamera(); updateHUD();
     r.onDone?.(outcome);
   }
-  function action(name) { if (name === 'opening') { wakeSound(); return; } if (name.startsWith('choose:')) { choose(Number(name.slice(7))); return; } if (name === 'exit') exit(); else if (name === 'replay') start(); else if (name === 'next') next(); }
+  function action(name) { if (name === 'opening') { wakeSound(); return; } if (name.startsWith('choose:')) { choose(Number(name.slice(7))); return; } if (name === 'exit') exit(); else if (name === 'replay') replay(); else if (name === 'next') next(); }
   // 最早註冊的 capture 擋住所有遊戲快捷鍵與滑鼠操作。只接受劇情介面的動作。
   // 擋住之後 js/sfx.js 收不到「第一次按鍵／點擊」，所以這裡替它喚醒音效引擎
   const wakeSound = () => {

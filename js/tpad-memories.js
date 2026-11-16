@@ -2,6 +2,8 @@
    ・每一把回憶鑰匙（data/items.js 的 MEMORY_KEYS）＝一個人的回憶；地圖上每一扇設定了劇情的記憶之門＝一段可以看的回憶。
    ・解開過的記憶之門（js/memory-doors.js 記在存檔）＝可以觀看：點進去按「▶ 播放」就直接播（看完回到原本的地方）。
    ・還沒解開的不暴露劇情名稱，只顯示是誰的回憶、碎片收集進度、鑰匙拼好了沒、門在哪張地圖。
+   ・2F應變中心電腦桌面上的禮物（js/pc-spider.js 的 PC_GIFTS，例如給Zukaa的禮物＝塔納的生日）：打開過就列在這裡可以重看；
+     沒打開的顯示「禮物還沒打開」和怎麼打開（不暴露劇情名稱）。
    版面沿用任務 App 的 .aa／.ma（css/style.css），回憶的配色在 css/memory-doors.css。
    必須在 js/quests.js、js/memory-doors.js 之後載入。
 */
@@ -12,6 +14,7 @@ const MM_STATE = {   // 狀態 → 標籤文字、顏色
   shards: ['收集碎片中', 'blue'],
   none:   ['未發現', 'gray'],
   closed: ['尚未開放', 'gray'],
+  gift:   ['禮物還沒打開', 'orange'],
 };
 // 所有地圖上設定了劇情的記憶之門
 function memoryDoorList() {
@@ -38,9 +41,16 @@ function memoryEntries() {
   // 同一段劇情在好幾扇門：只要解開過一扇就算可以看，清單裡只留一筆
   const seen = new Map();
   for (const e of list) { const k = e.scene || e.id, old = seen.get(k); if (!old || (e.state === 'open' && old.state !== 'open')) seen.set(k, e); }
-  return [...seen.values()];
+  return [...seen.values(), ...giftEntries()];
 }
-const mmName = e => e.state === 'open' ? e.data.title || e.scene : '？？？';
+// 電腦桌面上的禮物（只列有「限時／指定色數」說明、而且劇情存在的；給JJ的禮物照舊只在電腦上看）
+function giftEntries() {
+  if (typeof PC_GIFTS === 'undefined') return [];
+  const opened = typeof pcGiftsOpened === 'function' ? pcGiftsOpened() : new Set();
+  return Object.entries(PC_GIFTS).filter(([id, g]) => id !== 'jj' && memorySceneData(g.scene)).map(([id, g]) => ({
+    id: 'g:' + id, gift: g, owner: g.owner, scene: g.scene, data: memorySceneData(g.scene), title: g.memTitle, state: opened.has(id) ? 'open' : 'gift' }));
+}
+const mmName = e => e.state === 'open' ? e.title || e.data.title || e.scene : '？？？';
 const mmFace = (e, big) => {
   const face = charFace(e.owner);
   return face ? '<span class="ma-face' + (big ? ' big' : '') + (e.state === 'none' || e.state === 'closed' ? ' mm-unknown' : '') + '"><img src="' + face + '" alt=""></span>' : mappIco('key', 'gray');
@@ -50,6 +60,7 @@ function mmSub(e) {
   if (e.state === 'key') return e.noDoor ? '鑰匙已拼好・記憶之門還沒開放' : '到「' + mappEsc(e.mapName) + '」找記憶之門';
   if (e.state === 'shards') return '回憶碎片 ' + e.have + ' / ' + e.mk.need;
   if (e.state === 'closed') return '這段回憶還沒有開放';
+  if (e.state === 'gift') return '2F應變中心的電腦上有一份「' + mappEsc(e.gift.name) + '」';
   return '還沒找到回憶碎片';
 }
 
@@ -77,17 +88,23 @@ function mmList(list) {
   return '<h2 class="aa-title">' + title + '</h2><p class="aa-sub">用回憶鑰匙打開記憶之門，看過的回憶都可以在這裡重看</p>' +
     (list.length ? '<div class="aa-list">' + list.map(e => {
       const [label, cls] = MM_STATE[e.state];
-      return mappRow(e.id, mmFace(e), '<small class="mm-who">' + mappEsc(charName(e.owner)) + '篇</small>' + mappEsc(mmName(e)), mmSub(e),
+      return mappRow(e.id, mmFace(e), '<small class="mm-who">' + mappEsc(e.gift ? '🎁 禮物' : charName(e.owner) + '篇') + '</small>' + mappEsc(mmName(e)), mmSub(e),
         e.state === 'open' ? '<em class="ma-pill green">▶ 播放</em>' : '<em class="ma-pill ' + cls + '">' + label + '</em>');
     }).join('') + '</div>'
       : mappNote(mmTab === 'open' ? '還沒有解開任何記憶之門。' : '全部的回憶都解鎖了！'));
 }
 function mmDetail(e) {
   if (!e) return mappBack('回憶') + mappNote('找不到這段回憶。');
-  const [label, cls] = MM_STATE[e.state], shard = itemById(e.mk.shard), key = itemById(e.mk.key);
-  const hero = '<div class="ma-hero">' + mmFace(e, true) + '<div><em class="ma-pill ' + cls + '">' + mappEsc(charName(e.owner)) + '篇・' + label + '</em><h2 class="aa-title">' + mappEsc(mmName(e)) + '</h2>' +
-    (e.state === 'open' && e.data.subtitle ? '<p class="aa-sub">' + mappEsc(e.data.subtitle) + '</p>' : '') + '</div></div>';
+  const [label, cls] = MM_STATE[e.state], shard = e.mk && itemById(e.mk.shard), key = e.mk && itemById(e.mk.key);   // 禮物沒有回憶鑰匙
+  const hero = '<div class="ma-hero">' + mmFace(e, true) + '<div><em class="ma-pill ' + cls + '">' + mappEsc(e.gift ? '🎁 禮物' : charName(e.owner) + '篇') + '・' + label + '</em><h2 class="aa-title">' + mappEsc(mmName(e)) + '</h2>' +
+    (e.state === 'open' && !e.gift && e.data.subtitle ? '<p class="aa-sub">' + mappEsc(e.data.subtitle) + '</p>' : '') + '</div></div>';
+  if (e.gift && e.state !== 'open') {   // 電腦桌面上的禮物：還沒打開
+    const how = (e.gift.limit ? Math.round(e.gift.limit / 60) + ' 分鐘內' : '') + '贏一局' + (typeof PCS_LEVELS !== 'undefined' ? PCS_LEVELS[e.gift.suits] || '' : '') + '連環新接龍';
+    return mappBack('回憶') + hero + '<div class="ma-card"><p>2F應變中心的電腦桌面上，有一份「' + mappEsc(e.gift.name) + '」。<br>' + how + '，就能打開禮物。</p></div>';
+  }
   if (e.state === 'open') {
+    if (e.gift) return mappBack('回憶') + hero +
+      '<button type="button" class="mm-play" data-mm-play="' + mappEsc(e.scene) + '">▶ 播放這段回憶</button>' + mappNote('看完會回到現在的位置。');
     return mappBack('回憶') + hero +
       (e.data.endTitle || e.data.endText ? '<div class="ma-card mm-quote"><b>' + mappEsc(e.data.endTitle || '') + '</b>' + (e.data.endText ? '<p>' + mappEsc(e.data.endText) + '</p>' : '') + '</div>' : '') +
       '<button type="button" class="mm-play" data-mm-play="' + mappEsc(e.scene) + '">▶ 播放這段回憶</button>' +

@@ -448,7 +448,9 @@ function renderScenes() {
       doorBox(s),
       explosionBox(s)),
     group('bgm', '🎵 背景音樂', s.bgm ? (Array.isArray(s.bgm) ? s.bgm.length + ' 首' : String(s.bgm).split('/').pop()) : '沒有', bgmBox(s)),
-    group('end', '結尾', s.autoExit ? '從遊戲播：看完直接回遊戲' : '出現結束畫面',
+    group('end', '結尾', s.next ? '演完接著播「' + (data[s.next]?.title || s.next) + '」' : s.autoExit ? '從遊戲播：看完直接回遊戲' : '出現結束畫面',
+      // next：這段演完變黑後，直接接著播下一段（可以在別張地圖）；兩段的 BGM 一樣就不中斷
+      field('演完接著播（選了就不出現結束畫面，直接換到那段；兩段音樂一樣會接著播不中斷）', choose(s, 'next', [['', '不接'], ...Object.keys(data).filter(id => id !== sceneId).map(id => [id, (data[id].title || id) + '（' + id + '）'])], { optional: true })),
       chk(s, 'autoExit', '從遊戲裡播的時候，看完直接回遊戲（不出現結束畫面；上面的按鈕變「跳過劇情」）'),
       field('結尾標題', txt(s, 'endTitle', { optional: true, placeholder: '沒填就用標題' })),
       field('結尾說明', txt(s, 'endText', { optional: true }))),
@@ -503,6 +505,7 @@ function renameScene(id) {
   if (!/^[A-Za-z0-9_-]+$/.test(id)) { status('劇情 id 只能用英文、數字、底線、減號。', true); renderScenes(); return; }
   if (data[id]) { status('已經有叫 ' + id + ' 的劇情了。', true); renderScenes(); return; }
   const next = {}; for (const [k, v] of Object.entries(data)) next[k === sceneId ? id : k] = v;
+  for (const v of Object.values(next)) if (v.next === sceneId) v.next = id;   // 別段「演完接著播」指到這段的，跟著改名
   data = next; sceneId = id; commit();
 }
 $('sceneIdInput').onchange = e => renameScene(e.target.value.trim());
@@ -630,6 +633,7 @@ function renderObj() {
       ac.sprite && equipField(ac, 'face', '臉上戴的配件'),
       chk(ac, 'popper', '手上拿著拉炮（演出「拉炮」時拉下去）'),
       chk(ac, 'horn', '嘴上咬著生日吹笛（演出「吹生日吹笛」時吹一下；背對鏡頭看不到）'),
+      ac.sprite && chk(ac, 'tied', '一開始就被繩子綁著（面向前面時看得到；演出「綁繩子」可以中途綁／鬆綁）'),
       field('位置', choose(posMode, 'mode', [['', '站著（自己選格子）'], ...beds], { parse: v => { if (v) { ac.bed = v.split(',').map(Number); delete ac.at; } else { delete ac.bed; ac.at = ac.at || [r1(curMap().cols / 2), r1(curMap().rows / 2)]; } return v; } })),
       !ac.bed && field('站的格子', xy(ac, 'at', '選' + (ac.name || '角色') + '站的位置')),
       ac.bed && field('坐的位置微調（像素；往右／往下是正數，往左／往上填負數）', h('span', { class: 'row' }, '往右', num(ac, 'seatDx', { optional: true, step: 1, placeholder: '0' }), '往下', num(ac, 'seatDy', { optional: true, step: 1, placeholder: '0' }))),
@@ -715,12 +719,12 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'show', 'trail', 'holdAt', 'face', 'eyes', 'speed', 'moveDelay', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'show', 'trail', 'holdAt', 'face', 'eyes', 'speed', 'moveDelay', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug', 'tie'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
 const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.show && '✨', b.trail && '👣', b.moveDelay && '⏱', b.holdAt && '⏳', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.pop && '🎉', b.blow && '🎺', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
-  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.bubble && '💭', b.tug && '✊', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
+  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.tie && '🪢', b.radio && '📻', b.emote && '💢', b.bubble && '💭', b.tug && '✊', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
   b.bgmLevel && '🔉', 'confetti' in b && '🎊', b.banner && '🅰', b.caption && '🎬', 'meter' in b && '📊', 'records' in b && '📋', 'filter' in b && '🎞', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number(b.shake) > 0 && '📳', b.elevator && '🛗', 'follow' in b && '🎯', 'auto' in b && '⏩', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
@@ -737,15 +741,15 @@ function renderBeats() {
 // 每頁的演出：只列出這頁有用到的；要加新的從「＋ 加演出」選單挑（照類別分好，順序也是畫面上列出來的順序）
 const ACT_MENU = [
   ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['show', '出現'], ['trail', '跟在後面'], ['holdAt', '等他走到才能翻頁'], ['speed', '速度'], ['moveDelay', '晚幾秒才走']]],
-  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['pop', '拉炮'], ['blow', '吹生日吹笛'], ['emote', '情緒符號'], ['bubble', '泡泡框'], ['tug', '扯呆毛'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
+  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['pop', '拉炮'], ['blow', '吹生日吹笛'], ['emote', '情緒符號'], ['bubble', '泡泡框'], ['tug', '扯呆毛'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架'], ['tie', '綁繩子']]],
   ['怪物', [['monsterMove', '怪物走位'], ['monsterPose', '怪物姿勢'], ['monsterWander', '繞著人走'], ['swallow', '吞人'], ['preyKick', '嘴裡的人抽一下'], ['spit', '吐出來'], ['thunder', '巨雷']]],
   ['畫面', [['camera', '換鏡頭'], ['follow', '鏡頭跟著人'], ['screen', '黑幕'], ['shake', '鏡頭晃一下'], ['card', '介紹卡'], ['door', '自動門'], ['elevator', '電梯門'], ['heal', '治療光'], ['confetti', '彩帶飄落'], ['banner', '中間壓大字'], ['caption', '過場字卡（同一時間）'], ['meter', '數值條（負荷率）'], ['records', '紀錄表'], ['filter', '回想濾鏡']]],
   ['聲音', [['sfx', '音效'], ['exitSfx', '離場音效（走進門那一刻）'],['bgm', '音樂'], ['bgmLevel', '音樂音量'], ['hush', '槍聲']]],
-  ['對話框', [['portrait', '頭像情緒']]],
+  ['對話框', [['portrait', '頭像情緒'], ['radio', '無線電']]],
   ['流程', [['label', '分支名字'], ['choices', '選項'], ['auto', '自動翻頁（點了也不翻）'], ['end', '自動結束']]],
 ];
 // 新增時的預設值（走位類要先在地圖上點位置，見 PICK_ACTS）
-const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, show: true, trail: '', speed: 60, moveDelay: 1, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger', bubble: '……', tug: '',
+const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, show: true, trail: '', speed: 60, moveDelay: 1, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, tie: true, emote: 'anger', bubble: '……', tug: '',
   monsterPose: 'smile', preyKick: true, spit: true };
 const PICK_ACTS = { holdAt: '走到哪才能翻頁', move: '走到哪', exit: '走到哪後消失', place: '瞬移到哪', monsterMove: '走到哪' };
 // 這頁有沒有這個演出（大部分看欄位在不在；頭像情緒、分支是好幾個欄位合成一列）
@@ -810,6 +814,9 @@ function beatBody(s, b, i) {
     shout: () => many('shout', '大喊', () => h('small', {}, '台詞出現時這個人頓一下，對話框也震一下')),
     hop: () => many('hop', '小跳', () => h('small', {}, '台詞出現時驚訝地輕輕跳一下（對話框不震）')),
     tremble: () => many('tremble', '顫抖', id => onOff(b.tremble, id, '開始顫抖', '停止顫抖')),
+    tie: () => many('tie', '綁繩子', id => onOff(b.tie, id, '綁起來（面向前面時看得到繩子）', '鬆綁')),
+    // 無線電：對話框名字後面加「（無線電）」；換人接起無線電時有「嗶—沙沙」一聲（音效 radio）
+    radio: () => one('📻 無線電', ['radio'], h('small', {}, '名字後面加「（無線電）」，換人說話時有無線電聲')),
     // 出拳：一直揮拳直到「停止出拳」；要有 xxx_0007_right-side-punch.png／punch02.png 的角色才看得到（目前只有溫特）
     punch: () => many('punch', '出拳', id => onOff(b.punch, id, '開始出拳', '停止出拳')),
     // 沙包破掉漏沙：只對沙包圖有用（js/story-scene.js 的 BAGS）；換成破掉的圖、破口一直漏沙
@@ -969,7 +976,7 @@ function addActMenu(s, b, i) {
     else ({
       thunder: () => { b.thunder = true; }, camera: () => { b.camera = beatCamera(i); }, screen: () => { b.screen = 'black'; }, shake: () => { b.shake = 4; },
       card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, elevator: () => { b.elevator = 'open'; }, follow: () => { b.follow = s.actors[0]?.id || ''; }, confetti: () => { b.confetti = true; }, banner: () => { b.banner = ''; }, caption: () => { b.caption = ['同一時間', '']; }, meter: () => { b.meter = { label: '負荷率', value: 50, line: 80 }; }, records: () => { b.records = { title: '', rows: [] }; }, filter: () => { b.filter = 'memory'; }, heal: () => { b.heal = healPair(s); },
-      sfx: () => { b.sfx = ''; }, exitSfx: () => { b.exitSfx = 'door'; }, bgm: () => { b.bgm = 'music/'; }, bgmLevel: () => { b.bgmLevel = { vol: .3, secs: 1 }; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; },
+      sfx: () => { b.sfx = ''; }, exitSfx: () => { b.exitSfx = 'door'; }, bgm: () => { b.bgm = 'music/'; }, bgmLevel: () => { b.bgmLevel = { vol: .3, secs: 1 }; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; }, radio: () => { b.radio = true; },
       label: () => { b.label = ''; }, choices: () => { b.choices = [{ text: '' }]; }, auto: () => { b.auto = 1.5; }, end: () => { b.end = 2; },
     })[key]();
     commit();
@@ -1025,6 +1032,7 @@ function problems() {
   s.actors.forEach((a, i) => { if (!a.bed && !a.sprite && !a.image) out.push([(a.name || a.id) + '沒有角色圖資料夾，也沒有單張圖', 'actor:' + i]); });
   if (s.explosions && !(s.explosions.max >= s.explosions.min)) out.push(['遠處爆炸的秒數：後面的數字要比前面大', null]);
   if (!s.beats.length) out.push(['至少要有一頁對話', null]);
+  if (s.next && !data[s.next]) out.push(['演完要接著播的「' + s.next + '」不存在', null]);
   s.beats.forEach((b, i) => {
     const at = '第' + (i + 1) + '頁：', key = 'beat:' + i;
     if (b.camera && !s.cameras[b.camera]) out.push([at + '鏡頭「' + b.camera + '」不存在', key]);

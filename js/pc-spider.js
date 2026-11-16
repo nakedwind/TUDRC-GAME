@@ -12,8 +12,10 @@
    ・分數跟 Windows 一樣：開局 500，每走一步 −1，收走一組 +100
    ・收走一組時，13 張牌從 A 開始一張一張飛到左下角（pcsFlyRuns），飛完再放慶祝特效
    ・收走一組、破關時有慶祝特效（js/pc-desktop.js 的 pcCelebrate）和音效（pcCardRun、pcCardWin，在音效編輯器可以換）
-   ・🎁 給JJ的禮物（桌面圖示，js/pc-desktop.js）：用這個視窗玩單色版（g.gift＝true，上面多一條禮物說明），
-     贏了就出現「觀看朔的生日」按鈕，播 data/story-scenes.js 的 saku_birthday；中途換成雙色／四色就回到一般的連環新接龍
+   ・🎁 桌面上的禮物（PC_GIFTS，桌面圖示在 js/pc-desktop.js）：用這個視窗玩指定色數（g.gift＝禮物 id，上面多一條禮物說明），
+     贏了就出現看劇情的按鈕；中途換成別的色數就回到一般的連環新接龍
+     ・給JJ的禮物：單色、不限時 → 朔的生日（saku_birthday）
+     ・給Zukaa的禮物：雙色、10 分鐘內（時間跟右上角一樣，電腦關著或視窗縮小時不算）→ 塔納的生日（tana_birthday_01 開始，一段接一段播）
 */
 const PCS_LEVELS = { 1: '單色', 2: '雙色', 4: '四色' };
 const PCS_SUIT_SETS = { 1: [3, 3, 3, 3, 3, 3, 3, 3], 2: [3, 2, 3, 2, 3, 2, 3, 2], 4: [3, 2, 1, 0, 3, 2, 1, 0] };   // 8 組各 13 張的花色（號碼跟新接龍的 PCF_SUITS 一樣）
@@ -37,7 +39,7 @@ function initPcSpider(body) {
     '<div class="pcd-sp-gift hidden"></div><div class="pcd-fc-table"></div><div class="pcd-fc-msg"></div></div>';
   body.querySelector('.pcd-sp').addEventListener('click', e => {   // 上方按鈕列和「這局輸了」提示裡的按鈕都走這裡
     const g = pcd.sp, lv = e.target.closest('[data-suits]'), b = e.target.closest('[data-sp]');
-    if (e.target.closest('[data-gift-play]')) { playJJGiftStory(); return; }
+    const play = e.target.closest('[data-gift-play]'); if (play) { playPcGiftStory(play.dataset.giftPlay); return; }
     if (lv) { newPcSpider(+lv.dataset.suits); sfx('button'); return; }
     if (!b) return;
     if (b.dataset.sp === 'new') { newPcSpider(g.suits); sfx('button'); }
@@ -52,7 +54,8 @@ function initPcSpider(body) {
 function newPcSpider(suits, no) {
   const g = pcd.sp;
   clearInterval(g.timer); clearTimeout(g.hintTimer);
-  if (suits !== 1) g.gift = false;   // 禮物只算單色版：換成雙色／四色就變回一般的連環新接龍
+  if (g.gift && PC_GIFTS[g.gift]?.suits !== suits) g.gift = false;   // 禮物要照指定的色數玩：換成別的色數就變回一般的連環新接龍
+  g.giftSaved = false;
   if (!no) {   // 新牌局：從「確定解得開」的清單裡挑一個（跟現在這局不一樣的）；清單沒載入才完全隨機
     const list = (typeof PCS_SOLVABLE !== 'undefined' && PCS_SOLVABLE[suits]) || [];
     const pick = list.filter(n => n !== g.no);
@@ -134,7 +137,7 @@ function pcsAfter(g) {   // 走完一步：湊齊 K→A 的收走、最下面蓋
 }
 function pcsTick(g) {
   const w = pcd.wins.spider;
-  if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; minigameSecond('spider'); renderPcsInfo(g); }
+  if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; minigameSecond('spider'); renderPcsInfo(g); if (g.gift && PC_GIFTS[g.gift]?.limit) renderJJGift(g); }   // 限時的禮物：倒數每秒更新
 }
 // 第 a 排從第 i 張開始的牌搬到第 b 排之後，上面露出來的那疊（同花色連著的）能不能接到別排去
 // 那疊本身也是放在大 1 的別花色牌上的話，要換到同花色的牌上才算（不然只是換個地方，沒有進展）
@@ -406,28 +409,52 @@ function renderPcsInfo(g) {
   g.body.querySelector('.pcd-fc-info').textContent = '分數 ' + g.score + '　步數 ' + g.moves + '　時間 ' + pcfTime(g.time);
 }
 
-// ---- 🎁 給JJ的禮物：贏一局單色連環新接龍，就能看朔的生日劇情 ----
-const JJ_GIFT_SCENE = 'saku_birthday';   // 劇情 id（data/story-scenes.js，🎬 劇情編輯器可以改內容）
-function openJJGift() {   // 桌面點「給JJ的禮物」：打開連環新接龍視窗，換成禮物模式、單色、發一局新的
+// ---- 🎁 桌面上的禮物：贏一局連環新接龍，就能看生日劇情 ----
+// 每份禮物：suits＝要玩幾色、limit＝要在幾秒內贏（沒寫＝不限時間）、scene＝劇情 id（data/story-scenes.js，🎬 劇情編輯器可以改內容）
+// 打開過的禮物記在這台瀏覽器（PC_GIFT_STORE），T-Pad「回憶」App 會列出來可以重看（js/tpad-memories.js）
+const PC_GIFTS = {
+  jj:    { name: '給JJ的禮物',    suits: 1, scene: 'saku_birthday',    play: '🎂 觀看朔的生日', done: '🎂 生日快樂！', owner: 'saku',  memTitle: '朔的生日' },
+  zukaa: { name: '給Zukaa的禮物', suits: 2, limit: 600, scene: 'tana_birthday_01', play: '🎁 打開禮物', done: '🎂 塔納，生日快樂！', owner: 'taana', memTitle: '塔納的生日' },
+};
+const JJ_GIFT_SCENE = PC_GIFTS.jj.scene;
+const PC_GIFT_STORE = 'tudrc_pc_gifts_v1';
+function pcGiftsOpened() { try { return new Set(JSON.parse(localStorage.getItem(PC_GIFT_STORE) || '[]')); } catch (_) { return new Set(); } }
+function rememberPcGift(id) { const set = pcGiftsOpened(); set.add(id); try { localStorage.setItem(PC_GIFT_STORE, JSON.stringify([...set])); } catch (_) {} }
+const pcGiftMinutes = gift => gift.limit ? Math.round(gift.limit / 60) + ' 分鐘' : '';
+const pcGiftLimitText = gift => gift.limit ? pcGiftMinutes(gift) + '內' : '';
+const pcGiftLevel = gift => PCS_LEVELS[gift.suits] || '';
+function openPcGift(id) {   // 桌面點禮物：打開連環新接龍視窗，換成禮物模式、照禮物要的色數發一局新的
+  const gift = PC_GIFTS[id]; if (!gift) return;
   openPcApp('spider');
   const g = pcd.sp;
-  g.gift = true;
-  newPcSpider(1);
+  g.gift = id;
+  newPcSpider(gift.suits);
 }
-function renderJJGift(g) {
-  const bar = g.body.querySelector('.pcd-sp-gift'), w = pcd.wins.spider;
-  bar.classList.toggle('hidden', !g.gift);
-  if (w) w.querySelector('.pcd-ttext').textContent = g.gift ? '給JJ的禮物－連環新接龍（單色）' : '連環新接龍';
-  if (!g.gift) return;
-  const html = g.won
-    ? '<span>🎉 禮物打開了！</span><button type="button" data-gift-play="1">🎂 觀看朔的生日</button>'
-    : '<span>🎁 給JJ的禮物：贏一局單色連環新接龍，就能打開禮物！</span>';
+const openJJGift = () => openPcGift('jj');
+const openZukaaGift = () => openPcGift('zukaa');
+// 這局贏了算不算打開禮物：色數對、在時間內
+const pcGiftWon = (g, gift) => g.won && g.suits === gift.suits && (!gift.limit || g.time <= gift.limit);
+function renderJJGift(g) {   // 禮物說明列（名字沿用舊的：每份禮物都用這個）
+  const bar = g.body.querySelector('.pcd-sp-gift'), w = pcd.wins.spider, gift = PC_GIFTS[g.gift];
+  bar.classList.toggle('hidden', !gift);
+  if (w) w.querySelector('.pcd-ttext').textContent = gift ? gift.name + '－連環新接龍（' + pcGiftLevel(gift) + '）' : '連環新接龍';
+  if (!gift) return;
+  const over = gift.limit && g.time > gift.limit;
+  if (pcGiftWon(g, gift) && !g.giftSaved) { g.giftSaved = true; rememberPcGift(g.gift); }   // 打開過的記下來（T-Pad 回憶可以重看）
+  const html = pcGiftWon(g, gift)
+    ? '<span>🎉 禮物打開了！</span><button type="button" data-gift-play="' + g.gift + '">' + gift.play + '</button>'
+    : g.won && over ? '<span>⏰ 贏了，可是超過 ' + pcGiftMinutes(gift) + '了……按「新牌局」再挑戰一次！</span>'
+    : over ? '<span>⏰ 已經超過 ' + pcGiftMinutes(gift) + '了，這局打不開禮物。按「新牌局」再挑戰一次！</span>'
+    : '<span>🎁 ' + gift.name + '：' + pcGiftLimitText(gift) + '贏一局' + pcGiftLevel(gift) + '連環新接龍，就能打開禮物！' +
+      (gift.limit ? '（剩 ' + pcfTime(Math.max(0, gift.limit - g.time)) + '）' : '') + '</span>';
   if (bar.innerHTML !== html) bar.innerHTML = html;
 }
-function playJJGiftStory() {   // 關掉電腦、先存檔（劇情播放中不存檔），再播生日劇情；看完回到應變中心
+function playPcGiftStory(id) {   // 關掉電腦、先存檔（劇情播放中不存檔），再播生日劇情；看完回到應變中心
+  const gift = PC_GIFTS[id] || PC_GIFTS.jj;
   if (window.STORY_MODE) return;
   sfx('button');
   closePcDesktop();
   if (typeof saveGame === 'function') saveGame();
-  if (!StoryScene.playFromGame(JJ_GIFT_SCENE, () => systemNotice('🎂 生日快樂！'))) systemNotice('禮物打不開…找不到朔的生日劇情', true);
+  if (!StoryScene.playFromGame(gift.scene, () => systemNotice(gift.done))) systemNotice('禮物打不開…找不到劇情「' + gift.scene + '」', true);
 }
+const playJJGiftStory = () => playPcGiftStory('jj');

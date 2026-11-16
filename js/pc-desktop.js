@@ -8,7 +8,8 @@
        ⚫ 五子棋：對電腦或兩人對下，棋局在 js/pc-gomoku.js
        🐍 貪食蛇、🧱 俄羅斯方塊：用鍵盤玩（手機有方向按鈕），遊戲在 js/pc-arcade.js
        🎱 彈珠檯：Z／／ 控制擋板、空白鍵發射，遊戲在 js/pc-pinball.js
-       🎁 給JJ的禮物：玩單色連環新接龍，贏了可以看朔的生日劇情（js/pc-spider.js 的 openJJGift）
+       🎁 給JJ的禮物：玩單色連環新接龍，贏了可以看朔的生日劇情（js/pc-spider.js 的 PC_GIFTS）
+       🎁 給Zukaa的禮物：10 分鐘內贏一局雙色連環新接龍，可以看塔納的生日劇情（同上）
        📊 遊戲紀錄：每款小遊戲玩了幾局、花了多少時間，在 js/pc-stats.js
        📕 怪物圖鑑：打開原本的圖鑑視窗（js/bestiary.js 的 openBestiary）
    ・左下「開始」選單、右下的電源按鈕都可以關機
@@ -26,6 +27,7 @@ const PCD_APPS = [
   { id: 'tetris', name: '俄羅斯方塊', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/tetris.png" srcset="images/ui/desktop-icons/96/tetris.png 2x" alt="" draggable="false">', title: '俄羅斯方塊' },
   { id: 'pinball', name: '彈珠檯', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/pinball.png" srcset="images/ui/desktop-icons/96/pinball.png 2x" alt="" draggable="false">', title: '彈珠檯' },
   { id: 'jjgift', name: '給JJ的禮物', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/gift.png" srcset="images/ui/desktop-icons/96/gift.png 2x" alt="" draggable="false">' },   // 沒有自己的視窗：用連環新接龍的視窗玩單色版（js/pc-spider.js 的 openJJGift）
+  { id: 'zukaagift', name: '給Zukaa的禮物', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/gift.png" srcset="images/ui/desktop-icons/96/gift.png 2x" alt="" draggable="false">' },   // 同上：雙色、10 分鐘內贏（js/pc-spider.js 的 openZukaaGift）
   { id: 'stats', name: '遊戲紀錄', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/game-records.png" srcset="images/ui/desktop-icons/96/game-records.png 2x" alt="" draggable="false">', title: '遊戲紀錄' },
   { id: 'bestiary', name: '怪物圖鑑', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/monster-book.png" srcset="images/ui/desktop-icons/96/monster-book.png 2x" alt="" draggable="false">' },
 ];
@@ -146,7 +148,8 @@ function selectPcIcon(id) {
 function openPcApp(id) {
   selectPcIcon(null);
   if (id === 'bestiary') { openBestiary(); return; }
-  if (id === 'jjgift') { openJJGift(); return; }   // 圖鑑用原本的視窗（蓋在桌面上，關掉回到桌面）
+  if (id === 'jjgift') { openJJGift(); return; }
+  if (id === 'zukaagift') { openZukaaGift(); return; }   // 圖鑑用原本的視窗（蓋在桌面上，關掉回到桌面）
   const app = PCD_APPS.find(a => a.id === id); if (!app) return;
   let w = pcd.wins[id];
   if (!w) {
