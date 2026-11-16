@@ -14,8 +14,14 @@ const sameMapId = (a, b) => !!a && !!b && String(a).toLowerCase() === String(b).
 const mapIndexOf = id => mapList().findIndex(m => m && sameMapId(m.id, id));
 const missionOfMap = mapId => MISSIONS.find(m => sameMapId(m.map, mapId)) || null;
 // 後面的區域已經控制了，前面的也算（舊存檔：後來才在前面插進新的區域，例如新手區 Y25區入口）
-const missionCleared = m => missionState.cleared.includes(m.id) || MISSIONS.some(x => x.after.includes(m.id) && missionCleared(x));
-const missionOpen = m => missionState.reached.includes(m.id) || m.after.every(id => missionCleared(missionById(id) || { id }));   // 前面的區域都控制了，或已經進去過（戰敗回來才能再出發）
+//   只看「前面只有一區」的：前面有兩條路的（例如池核＝Y25 或 R89），打完它不代表兩條路都走過
+const missionCleared = m => missionState.cleared.includes(m.id) || MISSIONS.some(x => x.after.length === 1 && x.after[0] === m.id && missionCleared(x));
+// 開放了沒：已經進去過（戰敗回來才能再出發、或從捷運搭過去），或前面連過來的區域「任一個」控制了
+//   locked: true＝路線圖上單獨的點，還沒決定怎麼解鎖；after 是空的＝一開始就開放（新手區）
+const missionOpen = m => missionState.reached.includes(m.id) ||
+  (!m.locked && (!m.after.length || m.after.some(id => missionCleared(missionById(id) || { id }))));
+// 顯示用的名字：hidden 的區域鎖著時顯示「？？？」
+const missionName = m => m.hidden && missionStatus(m) === 'locked' ? '？？？' : m.name;
 // 進入戰鬥（game.js 的 begin 呼叫）：開始畫面的地圖選單可以跳過前面的區域直接進來，記下來之後作戰桌才選得到
 function markMissionMapReached(mapId) {
   const m = missionOfMap(mapId);
@@ -312,7 +318,7 @@ function renderMissionBoard() {
   const nodes = MISSIONS.map(m => {
     const s = missionStatus(m);
     return '<button type="button" class="mission-node ' + s + (m.boss ? ' boss' : '') + (m.id === sel.id ? ' sel' : '') + '" data-mission="' + m.id + '" style="left:' + m.x + '%;top:' + m.y + '%">' +
-      '<i>' + (m.boss ? '⚠' : s === 'cleared' ? '✓' : s === 'available' ? '!' : '') + '</i><span>' + m.name + '</span>' +
+      '<i>' + (m.boss ? '⚠' : s === 'cleared' ? '✓' : s === 'available' ? '!' : '') + '</i><span>' + missionName(m) + '</span>' +
       (twoSquads() && m.squad && m.squad !== 'winter' && SQUADS[m.squad] ? '<em class="squad">' + SQUADS[m.squad].name + '</em>' : '') + '</button>';   // 兵分兩路：不是溫特隊去的區域標上隊名
   }).join('');
   const squad = squadOfMission(sel), lead = SQUADS[squad].leader, split = twoSquads();
@@ -334,7 +340,7 @@ function renderMissionBoard() {
           '<span class="mission-progress"><small>主線進度</small><b>' + cleared + ' / ' + MISSIONS.length + '</b></span></div>' +   // 主線進度：放在地圖左上角
         '<aside class="mission-detail">' +
           '<div class="mission-detail-main"><em class="mission-status ' + st + '">' + (sel.boss ? '⚠ BOSS 反應・' : '') + STATUS_TEXT[st] + '</em>' +
-            '<h3>' + sel.name + '</h3><p>' + (st === 'locked' ? '先控制前面的區域，才能前往這裡。' : sel.desc) + '</p>' + (paused ? '<p class="mission-paused">⏸ 戰場暫停中：門、核心、建築都跟離開時一樣。</p>' : '') + '</div>' +
+            '<h3>' + missionName(sel) + '</h3><p>' + (st === 'locked' ? '先控制前面的區域，才能前往這裡。' : sel.desc) + '</p>' + (paused ? '<p class="mission-paused">⏸ 戰場暫停中：門、核心、建築都跟離開時一樣。</p>' : '') + '</div>' +
           '<div class="mission-team-row"><span>' + (split ? SQUADS[squad].name + (lead !== 'winter' ? '・隊長 ' + teamProfile(lead).name : '') + '<br>' : '') + '出勤人員 ' + team.length + ' 位</span><div class="mission-faces">' + (teamFaces || '<small>尚未編入</small>') + '</div>' +
             '<button type="button" class="mission-team">🧑‍🤝‍🧑 出勤配置</button></div>' +
           (paused ? '<button type="button" class="mission-redeploy">↺ 重新部署</button>' : '') +

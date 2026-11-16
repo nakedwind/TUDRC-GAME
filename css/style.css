@@ -1561,28 +1561,34 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   background: radial-gradient(circle at 85% 12%, rgba(255,80,80,.16), transparent 32%), repeating-linear-gradient(0deg, rgba(143,211,255,.05) 0 1px, transparent 1px 28px), repeating-linear-gradient(90deg, rgba(143,211,255,.05) 0 1px, transparent 1px 28px), rgba(7,12,18,.55); }
 .mission-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .mission-map line { stroke: rgba(255,255,255,.18); stroke-width: 2; stroke-dasharray: 6 5; vector-effect: non-scaling-stroke; }
-.mission-map line.done { stroke: rgba(121,219,173,.6); stroke-dasharray: none; }
+.mission-map line.done { stroke: rgba(110,176,255,.6); stroke-dasharray: none; }   /* 已控制的區域連出去的線：藍色實線 */
 .mission-node { position: absolute; translate: -50% -50%;   /* 用 translate（不是 transform）置中：按下時的縮小效果才不會讓地點跳開、點不到 */ display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: #c9d2db; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
 .mission-node i { display: grid; place-items: center; width: 34px; height: 34px; border: 2px solid rgba(255,255,255,.25); border-radius: 50%; background: #1d2530; color: #fff; font-size: 15px; font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,.4); transition: transform .12s; }
 .mission-node span { padding: 2px 8px; border-radius: 99px; background: rgba(0,0,0,.45); white-space: nowrap; }
 .mission-node:hover i { transform: scale(1.1); }
-.mission-node.cleared i { border-color: #79dbad; background: #1f4a3a; color: #9ff0c8; }
-.mission-node.available i { border-color: #ffd479; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; animation: mission-pulse 1.4s ease-in-out infinite; }
-.mission-node.available span { color: #ffe3a1; }
-.mission-node.locked, .mission-node.soon { opacity: .55; }
-.mission-node.boss i { border-color: #ff6b6b; background: #4a1d22; color: #ff9d8f; }
+/* 地點的三種狀態：灰＝還沒開放；紅圈＋紅光暈呼吸＝已開放、還沒攻略（危險）；藍圈＝已控制 */
+.mission-node.boss i { border-color: #ff6b6b; background: #4a1d22; color: #ff9d8f; }   /* BOSS 地點鎖著時的樣子（開放、控制後照下面的紅／藍） */
 .mission-node.boss span { color: #ff9d8f; }
-.mission-node.sel i { box-shadow: 0 0 0 4px rgba(255,212,121,.35), 0 4px 12px rgba(0,0,0,.4); }
-.mission-node.sel span { background: rgba(255,212,121,.2); color: #fff8e7; }
-@keyframes mission-pulse { 50% { box-shadow: 0 0 0 7px rgba(255,212,121,.18), 0 4px 12px rgba(0,0,0,.4); } }
+.mission-node.available i, .mission-node.soon i { border-color: #ff5a5a; background: radial-gradient(circle at 50% 40%, #7a1f24, #3a1014); color: #ffd2cc; animation: mission-pulse 1.8s ease-in-out infinite; }
+.mission-node.available span, .mission-node.soon span { color: #ffb3aa; }
+.mission-node.soon { opacity: .8; }   /* soon＝開放了但地圖還沒做好：紅圈稍微淡一點 */
+.mission-node.cleared i { border-color: #6eb0ff; background: #1b3352; color: #b9dbff; }
+.mission-node.cleared span { color: #b9dbff; }
+.mission-node.locked { opacity: .55; }
+.mission-node.sel i { box-shadow: 0 0 0 4px rgba(255,255,255,.28), 0 4px 12px rgba(0,0,0,.4); }   /* 選中的地點：外面一圈白框 */
+.mission-node.sel span { background: rgba(255,255,255,.16); color: #fff8e7; }
+/* 紅光暈呼吸：光暈一亮一暗（選中時外圈白框也一起保留） */
+@keyframes mission-pulse { 0%, 100% { box-shadow: 0 0 6px 1px rgba(255,70,70,.35), 0 4px 12px rgba(0,0,0,.4); } 50% { box-shadow: 0 0 18px 6px rgba(255,70,70,.6), 0 4px 12px rgba(0,0,0,.4); } }
+.mission-node.sel.available i, .mission-node.sel.soon i { animation-name: mission-pulse-sel; }
+@keyframes mission-pulse-sel { 0%, 100% { box-shadow: 0 0 0 4px rgba(255,255,255,.28), 0 0 6px 5px rgba(255,70,70,.35), 0 4px 12px rgba(0,0,0,.4); } 50% { box-shadow: 0 0 0 4px rgba(255,255,255,.28), 0 0 20px 10px rgba(255,70,70,.6), 0 4px 12px rgba(0,0,0,.4); } }
 /* 右：區域說明、出勤人員、出擊 */
 .mission-detail { min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px 14px 14px; border-left: 1px solid rgba(255,255,255,.08); background: rgba(7,12,18,.4); }
 .mission-detail-main { flex: 1; min-height: 0; overflow-y: auto; }
 .mission-detail h3 { margin: 8px 0 6px; color: #fff8e7; font-size: 20px; }
 .mission-detail p { margin: 0; color: #aab5c1; font-size: 13px; line-height: 1.7; }
 .mission-status { display: inline-block; padding: 1px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; font-style: normal; background: rgba(255,255,255,.08); color: #c9d2db; }
-.mission-status.available { background: rgba(255,212,121,.15); color: #ffd479; }
-.mission-status.cleared { background: rgba(121,219,173,.12); color: #79dbad; }
+.mission-status.available { background: rgba(255,90,90,.15); color: #ff8a80; }   /* 跟地圖上的紅圈一樣 */
+.mission-status.cleared { background: rgba(110,176,255,.14); color: #8cc2ff; }   /* 跟地圖上的藍圈一樣 */
 .mission-team-row { display: grid; gap: 7px; padding: 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(37,43,51,.45); }
 .mission-team-row > span { color: #d8ae5d; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
 /* 出勤人員：4 格胸像平均分配整排寬度（左右兩端跟下面的「出勤配置」按鈕對齊）；裁切比例跟 Y102隊員面板的 .squad-portrait 一樣 */
@@ -1609,7 +1615,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   .mission-detail { border-left: 0; border-top: 1px solid rgba(255,255,255,.08); }
   .mission-title p, .mission-progress small { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { #missionBoard, .mission-card, .mission-node.available i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #missionBoard, .mission-card, .mission-node.available i, .mission-node.soon i { animation: none; } }
 /* 作戰桌：主線／支線分頁（js/missions.js、js/quests.js） */
 .board-tabs { display: flex; gap: 6px; flex: none; }
 .board-tabs button { position: relative; padding: 6px 16px; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; background: transparent; color: #8e9aa7; cursor: pointer; font: 700 13px "Microsoft JhengHei", sans-serif; }

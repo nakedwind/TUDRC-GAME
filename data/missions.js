@@ -1,6 +1,9 @@
 /* 任務資料（作戰桌的 Y 區地圖）
    ・回到應變中心後，艾德林（通訊員）會來報告下一個任務；走到 2F 中間的會議桌（作戰桌）按 Space 選任務出擊。
-   ・主線＝依序攻略這 5 區（暫定）；打贏一張地圖＝那一區「已控制」，after 裡的區域都控制了，下一區才會開放。
+   ・主線＝依序攻略這幾區（暫定）；打贏一張地圖＝那一區「已控制」，after 裡的區域「任一個」控制了，下一區就會開放。
+     作戰地圖上的連線也是照 after 畫的（after 裡的每一區各連一條線過來）。
+   ・locked: true＝路線圖上單獨的點，還沒決定怎麼解鎖，先鎖著（進去過一次就會開放，例如從 R89 搭捷運到 B56）。
+   ・hidden: true＝鎖著的時候名字顯示成「？？？」，開放後才露出真名。
    ・支線（角色委託）在 data/quests.js。
    ・map＝地圖 id（地圖編輯器裡看得到）；map: null＝還沒做好的地圖，會顯示「尚未開放」。
    ・x / y＝在作戰地圖上的位置（0～100，左上角是 0,0）。
@@ -21,8 +24,8 @@ const MISSION_BASE = {
 };
 
 // ★ 兵分兩路（艾德林當隊長）的總開關：false＝先不實裝（功能都做好了，只是關著）；改成 true 就打開
-//   關著的時候：只有溫特一隊、Z62 也由溫特去、池核只要台北車站大廳控制就開放、溫特的補血疏導照原本的速度和量
-//   打開的時候：下面 SQUADS 的設定、池核要兩邊都控制、data/balance.js 的 CARE_STYLE 都會生效
+//   關著的時候：只有溫特一隊、Z62 也由溫特去、溫特的補血疏導照原本的速度和量
+//   打開的時候：下面 SQUADS 的設定、data/balance.js 的 CARE_STYLE 都會生效
 const TWO_SQUADS_ENABLED = false;
 // 兵分兩路：溫特和艾德林各帶一隊（js/team.js）
 //   任務寫 squad: 'eldrin'＝那一區固定由艾德林隊去（出擊時玩家改操作艾德林，溫特不在場）；沒寫＝溫特隊。
@@ -45,40 +48,50 @@ const BOSS_BOUNTIES = [
 const MISSIONS = [
   {
     // 新手區：打贏，或走出入口看完救援劇情（不管留下還是撤退，js/story-triggers.js）都算控制了
-    id: 'y25_entry', map: 'map_a46c5e1a-9802-4db5-a3b9-486b4649c206', name: 'Y25區入口', x: 11, y: 82, after: [],
+    id: 'y25_entry', map: 'map_a46c5e1a-9802-4db5-a3b9-486b4649c206', name: 'Y25區入口', x: 11, y: 83, after: [],
     desc: 'Y 區的入口。異質體從四處的黑暗角落湧出，先在這裡站穩腳步。',
   },
   {
-    id: 'y1', map: 'map_mvtnqrs7', name: 'Y25區地下街', x: 26, y: 69, after: ['y25_entry'],   // id 維持 y1（存檔的進度、艾德林的報告台詞 brief_y1 都用這個）
+    id: 'y1', map: 'map_mvtnqrs7', name: 'Y25區地下街', x: 26, y: 73, after: ['y25_entry'],   // id 維持 y1（存檔的進度、艾德林的報告台詞 brief_y1 都用這個）
     desc: '入口往下的地下街，雷德小隊就是在這裡遇上虱目魚小子。異質體聚集得比平常多。',
   },
   {
-    id: 'k56', map: 'map_mvvdbiyx', name: 'Z62區地下街', x: 27, y: 44, after: ['y1'], squad: 'eldrin',   // 路線圖上 Y25區地下街往上的下一區；分岔：由艾德林隊去
+    id: 'k56', map: 'map_mvvdbiyx', name: 'Z62區地下街', x: 27, y: 55, after: ['y1'], squad: 'eldrin',   // 路線圖上 Y25區地下街往上的下一區；分岔：由艾德林隊去
     desc: 'Y25區地下街再過去的另一段地下街。路邊的機車、腳踏車會突然暴衝，深處還有很強的異質反應。',
   },
   {
     // Z62區地下街再分岔出去的兩區：Z62 控制了，這兩區就同時開放（跟 Z62 一樣歸艾德林隊）
-    id: 'f307', map: 'map_mw2dn6re', name: 'F307區森林', x: 11, y: 30, after: ['k56'], squad: 'eldrin',
+    id: 'f307', map: 'map_mw2dn6re', name: 'F307區森林', x: 34, y: 37, after: ['k56'], squad: 'eldrin',
     desc: 'Z62區地下街往外延伸出去的森林區，農田和大草地長滿了異常的植物。',
   },
   {
-    id: 'r89', map: 'map_mvxz356e', name: 'R89區捷運站', x: 40, y: 24, after: ['k56'], squad: 'eldrin',
+    id: 'r89', map: 'map_mvxz356e', name: 'R89區捷運站', x: 46, y: 49, after: ['k56'], squad: 'eldrin',
     desc: 'Z62區地下街連過去的捷運站，月台和軌道深處有異質體出沒。',
   },
   {
-    id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 42, y: 58, after: ['y1'], squad: 'winter',   // 分岔的另一邊：溫特隊
-    desc: '地下街後方的大廳，空間開闊，異質體容易從各個方向包夾。',
-  },
-  {
-    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 58, y: 44, after: TWO_SQUADS_ENABLED ? ['station', 'k56'] : ['station'],   // 兵分兩路打開時：分岔兩邊（台北車站大廳、Z62區地下街）都控制了才開放
+    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 44, y: 67, after: ['y1', 'r89'],   // Y25區地下街、R89區捷運站任一個控制了就開放（兩條路都通往池核）
     desc: '大廳更深處的異質反應源，核心的反應特別強烈。',
   },
   {
-    id: 'zone4', map: null, name: '？？？', x: 74, y: 28, after: ['pool'],   // 第 4 區：地圖做好後填上 map 和名稱
+    id: 'zone4', map: null, name: '？？？', x: 65, y: 60, after: ['pool'],   // 池核右邊的區域：地圖做好後填上 map 和名稱
     desc: '池核更深處的區域。應變中心還在收集情報。',
   },
   {
-    id: 'deep', map: null, name: 'Y 區最深處', x: 88, y: 12, after: ['zone4'], boss: true,
+    // B56 藍線捷運站：路線圖上單獨一個點（還沒決定從哪裡解鎖，先鎖著；從 R89 搭捷運進去過就會開放）
+    id: 'b56', map: 'map_mwizzi7s', name: 'B56區捷運站', x: 58, y: 31, after: [], locked: true,
+    desc: '藍線的捷運站，跟 R89 之間有捷運互通。',
+  },
+  {
+    id: 'zone5', map: null, name: '？？？', x: 76, y: 47, after: [], locked: true,   // B56 右下方單獨的區域：還沒決定，先鎖著
+    desc: '應變中心還在收集情報。',
+  },
+  {
+    // 右上角兩個互連的「？」的第一個；鎖著的時候名字顯示成「？？？」（hidden）
+    id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 76, y: 27, after: [], locked: true, hidden: true, squad: 'winter',
+    desc: '地下街後方的大廳，空間開闊，異質體容易從各個方向包夾。',
+  },
+  {
+    id: 'deep', map: null, name: 'Y 區最深處', x: 89, y: 12, after: ['station'], boss: true,
     desc: '應變中心預測會出現 BOSS 級異質體的地方。控制整個 Y 區之後才能前往。',
   },
 ];
