@@ -784,7 +784,7 @@ function campAttackerFor(t, maxDistance = Infinity) {
   if (!base || base.hp <= 0 || !G.obstacles.includes(base)) return null;
   let closest = null, bestDistance = maxDistance;
   for (const e of G.enemies) {
-    if (e.dead || e.hp <= 0 || e.attackingObstacle !== base) continue;
+    if (e.dead || e.hp <= 0 || e.attackingObstacle !== base || !sameFloor(e, t)) continue;   // 不同樓層的打不到
     if (LIGHT.enabled && !isLit(e.x, e.y)) continue;
     const distance = Math.hypot(e.x - t.x, e.y - t.y);
     if (distance <= bestDistance) { closest = e; bestDistance = distance; }

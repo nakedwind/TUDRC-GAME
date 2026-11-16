@@ -46,6 +46,10 @@ const SFX = (() => {
     mrtGate: '環境/門與機關/剪票口.mp3',      // 捷運閘門刷好遊卡（js/mrt-locks.js）
     mrtUnlock: '設施/打磨.mp3',               // 用異質鑰匙解封捷運入口（js/mrt-locks.js）
     mrtArrive: '環境/門與機關/板南線-藍線.mp3',               // 捷運列車：到站音樂（響 5 秒後列車才出現，js/mrt-train.js）
+    mrtArriveRed: '環境/門與機關/淡水信義線-紅線.mp3',        // 捷運列車：紅線車站（R89）的到站音樂（哪個車站用哪首在 data/mrt-train.js 的 stations）
+    mrtArriveBlue: '環境/門與機關/板南線-藍線.mp3',           // 捷運列車：藍線車站（B56）的到站音樂
+    dynamoStart: '設施/發電機發動.mp3',        // 發電機全部打開：發動（只播一次，js/storage-lockers.js）
+    dynamoLoop: '設施/發電機loop.mp3',         // 開著的發電機運轉聲：靠近才聽得到，越近越大聲（一直循環，js/dynamo-sound.js）
     mrtDoorOpen: '環境/門與機關/台北捷運開門聲.mp3',          // 捷運列車：車門打開
     mrtDepartWarn: '環境/門與機關/臺北捷運標準離站警示音.mp3', // 捷運列車：門開好 5 秒後的離站警示音
     mrtDoorWarn: '環境/門與機關/車門即將關閉.mp3',            // 捷運列車：「車門即將關閉」

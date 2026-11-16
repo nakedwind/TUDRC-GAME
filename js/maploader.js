@@ -419,7 +419,8 @@ function actorFloorNear(x, y) {
 let losNoFloors = false;   // 算光照時設成 true：光照自己管樓層，不用每條線都找人
 function hasLineOfSight(x0, y0, x1, y1) {
   if (hasFloors && !losNoFloors && typeof G !== 'undefined' && G && G.towers) {
-    const fa = actorFloorNear(x0, y0), fb = actorFloorNear(x1, y1);
+    // 正在算爆炸（withBlastFloor）：爆炸點就是爆炸那一層，不看旁邊站的人（不然另一層的人剛好站在爆炸點上，會照錯的那層算牆）
+    const fa = (typeof blastFloor !== 'undefined' && blastFloor) || actorFloorNear(x0, y0), fb = actorFloorNear(x1, y1);
     if (fa && fb && fa !== fb) return false;   // 一個在陸橋上、一個在下面：互相看不到、打不到
     return onFloorDo(fa || fb || floorCtx, () => lineOfSightRaw(x0, y0, x1, y1));   // 照這一層的牆算視線
   }

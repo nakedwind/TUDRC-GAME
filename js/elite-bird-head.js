@@ -284,9 +284,9 @@ function eliteBirdCheckHits(e) {
   const E = ELITE_BIRD, dir = e.eb.dir, hit = e.eb.hit;
   const reach = E.hitWidth + 12;
   const p = G.player;
-  if (p && p.hp > 0 && !hit.has(p) && eliteDist(p, e) <= reach) { hit.add(p); e.eb.hitAny = true; eliteBirdHitPlayer(e, p); }
+  if (p && p.hp > 0 && !hit.has(p) && sameFloor(e, p) && eliteDist(p, e) <= reach) { hit.add(p); e.eb.hitAny = true; eliteBirdHitPlayer(e, p); }   // 不同樓層（陸橋上／下）的撞不到
   for (const t of G.towers) {
-    if (t.hp <= 0 || t.berserk || hit.has(t) || eliteDist(t, e) > reach) continue;
+    if (t.hp <= 0 || t.berserk || hit.has(t) || !sameFloor(e, t) || eliteDist(t, e) > reach) continue;
     hit.add(t); e.eb.hitAny = true;
     spawnChargeImpact(e, t);
     const braced = t.type === 'red' && t.shieldMode && !t.eatenBy && !(t.sleepT > 0);   // 雷德舉盾頂住：傷害減半、只被推開一點，大隊長被拖慢一下但不會停

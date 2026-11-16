@@ -199,7 +199,7 @@ let groundFxPass = 0;
 const fxSkip = f => !!groundFxPass && (groundFxPass === 2) !== (f === 2);
 // ---- 畫面的前後順序（js/render.js）----
 // 每個要畫的東西都標明 floor（第幾樓）、band（哪一層）、y（同一層裡照底部 Y 排前後）。先畫完整個 1 樓，再畫 2 樓；
-// 每一樓裡依序：ground 地板 → groundFx 地上特效 → onGround 貼著地板的（快到 2 樓的手扶梯乘客）→ obj 物件和人 → top 永遠在最上面（2 樓上層的屋簷）
+// 每一樓裡依序：ground 地板 → groundFx 地上特效 → onGround 貼著地板的（目前沒用到）→ obj 物件和人 → top 永遠在最上面（2 樓上層的屋簷）
 const DRAW_BAND = { ground: 0, groundFx: 1, onGround: 1.5, obj: 2, top: 3 };
 const drawOrder = (a, b) => ((a.floor || 1) - (b.floor || 1)) || ((a.band ?? DRAW_BAND.obj) - (b.band ?? DRAW_BAND.obj)) || (a.y - b.y);
 // 畫面上看起來在幾樓：真的在 2 樓，或站在樓梯／手扶梯靠 2 樓的那一半 → 2。排畫面、蓋建築、身上的燈用這個

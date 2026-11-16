@@ -20,9 +20,16 @@
    圖層：①② 跟車廂上緣一起排（在車內的人畫在內部圖上面），③④ 排在車廂下緣再往下一點（蓋住車內的人，月台上的人照樣在前面）。
      ③④ 裡外側門口那幾欄另外排、排得比較前面（doorSortDy）：站在門口、腳還在門檻外的人不會被車殼蓋住。
    關門時溫特在車上 → 搭車：車上的人（溫特、隊員、怪物）跟著列車一起開走，快開進隧道時畫面才變黑；
-     在隧道裡黑一陣子、搖晃（rideTime），再載著大家開進站、停好開門（之後可以改成送到別張地圖）。搭車時車上的人不能動。
+     在隧道裡黑一陣子、搖晃（rideTime），再載著大家開進站、停好開門。搭車時車上的人不能動。
+     互通的捷運站（data/mrt-train.js 的 stations）：從其中一站搭車，會隨機開到「另一個」車站（換地圖，車上的隊員一起過去）；
+       不在名單裡的地圖照舊開回同一站。每站的到站音樂也在 stations 設（arrive）。
+     沒搭上車的隊員：留在原本那站，nextTrainTime 秒（預設 2 分鐘）後搭下一班車到溫特這站（隊員欄顯示「正在搭下班車」倒數）。
+     溫特沒上車、隊員不小心留在車上：隊員跟著列車開走，nextTrainTime 秒後搭車回站（隊員欄顯示「不小心搭上車」倒數）。
+       時間到了以後，等下一班車進站時從車上走下來；在沒有捷運的地圖就直接回到營地；回應變中心就全員歸隊。
+     發電機：捷運站裡的發電機（js/storage-lockers.js 的 dynamo）全部打開之前，列車停在月台、車門關著不動（狀態 idle）；
+       全部打開後開門、照常一班一班來（mrtPowered）。溫特還在車上時不會關門停住（避免被關在車裡出不去）。地圖上沒放發電機就不用開。
    車廂裡蓋的建築（燈、路障…，地雷除外）：列車開走時跟著車廂一起走（燈光也跟著動），下次停好時放回原本的格子。
-     溫特不在車上 → 留在車上的隊員、怪物先被請下車（放到門外月台），列車才開走。
+     溫特不在車上 → 留在車上的怪物、場景 NPC 先被請下車（放到門外月台），列車才開走；隊員會被載走（見上面）。
    （數值在物件編輯器的「🚇 捷運列車」調，存在 data/mrt-train.js；下面 MRT_TRAIN 是沒有設定檔時的預設）
 */
 const MRT_TRAIN = {
@@ -51,6 +58,8 @@ const MRT_TRAIN = {
   doorPassAt: .7,       // 車門開到幾成才走得過去
   sounds: { arrive: 'mrtArrive', open: 'mrtDoorOpen', departWarn: 'mrtDepartWarn', warn: 'mrtDoorWarn', close: 'mrtDoorClose', depart: 'mrtDepart' },   // 音效編輯器裡的名稱
   soundGain: .55,
+  stations: [],         // 互通的捷運站 [{ map: 地圖 id, name: 名稱（只是方便看）, arrive: 這站的到站音樂（音效編輯器裡的名稱） }]
+  nextTrainTime: 120,   // 沒搭上車／不小心搭上車的隊員，幾秒後搭下一班車到站
   frontSortDy: 10,      // 前層（外殼）排在車廂下緣往下幾像素：車內的人畫在兩層中間、月台上的人在最前面
   doorSortDy: -3,       // 外側門口那幾欄的外殼另外排，排在車廂下緣往下幾像素（負的＝往上）：站在門口、腳還沒跨進車裡的人畫在前面
 };
@@ -129,6 +138,12 @@ function setupMrtTrains() {
       walls: [], edges: [], cleared: [], solidKey: '' });
   }
   setupMrtGates();
+}
+// 這站的列車能不能開：捷運站裡放了發電機，就要全部打開（js/storage-lockers.js）；沒放發電機、或不是捷運站的地圖一律可以
+function mrtPowered() {
+  if (!MAP || typeof dynamoCount !== 'function' || typeof dynamoStationMap !== 'function' || !dynamoStationMap(MAP)) return true;
+  const [on, total] = dynamoCount();
+  return total === 0 || on === total;
 }
 // 接續「保留進度」、劇情看完回原地圖（mapWalls 整份換回來，js/combat-progress.js 的 reclaimAddedWalls）：照每班車記的格子湊回總表
 function restoreMrtTrains() {
@@ -349,13 +364,17 @@ function mrtTrainClearSill(tr, type) {
     a.navPath = null; a.navGoal = null;
   }
 }
-// 列車開走前：還在車上的隊員、怪物請下車（放到列車正下方的月台）
+// 列車開走前（溫特不在車上）：還在車上的怪物、場景 NPC 請下車（放到列車正下方的月台）；隊員不請下車，會被列車載走（mrtTrainBoard）
 function mrtTrainUnload(tr) {
   const platformY = OY + (tr.bottomRow + 1.5) * CELL;
-  for (const a of mrtTrainActors()) if (a !== G.player && mrtOnTrain(tr, a)) { a.y = platformY; a.navPath = null; a.navGoal = null; }
+  for (const a of mrtTrainActors()) if (a !== G.player && (!G.towers.includes(a) || a.mrtArrivedOn === tr.soundId) && mrtOnTrain(tr, a)) { a.y = platformY; a.navPath = null; a.navGoal = null; }   // 坐這班車來、還沒走下車的隊員也請下車
+  for (const t of G.towers) if (t.mrtArrivedOn === tr.soundId) delete t.mrtArrivedOn;
 }
+// 溫特在不在這班車上（tr.riders 也可能只有不小心搭上車的隊員、或搭下班車回來的隊員）
+const mrtPlayerAboard = tr => !!(tr.riders && G.player && tr.riders.some(r => r.a === G.player));
 // ---- 搭車：車上的人跟著列車一起動（a.mrtRide＝搭車中，溫特、隊員、怪物這時不自己動：js/game.js、js/sentry.js、js/enemy-ai.js）----
 function mrtTrainBoard(tr) {
+  for (const t of G.towers) if (t.mrtArrivedOn === tr.soundId) delete t.mrtArrivedOn;   // 跟溫特一起搭車：不用再請下車
   tr.riders = mrtTrainActors().filter(a => mrtOnTrain(tr, a)).map(a => {
     a.mrtRide = true; a.navPath = null; a.navGoal = null; a.moving = false;
     return { a, x: a.x - tr.off * tr.dir };
@@ -365,7 +384,11 @@ function mrtTrainMoveRiders(tr) {
   for (const r of tr.riders || []) r.a.x = r.x + tr.off * tr.dir;
 }
 function mrtTrainGetOff(tr) {
-  for (const r of tr.riders || []) { r.a.mrtRide = false; r.a.navPath = null; r.a.navGoal = null; }
+  for (const r of tr.riders || []) {
+    r.a.mrtRide = false; r.a.navPath = null; r.a.navGoal = null;
+    // 坐這班車來的隊員：記下來（開走前還在車上就請下車，不會又被載走），改成跟隨護衛部隊長，自己走下車
+    if (r.a !== G.player && G.towers.includes(r.a)) { r.a.mrtArrivedOn = tr.soundId; if (typeof setSentryEscort === 'function' && !r.a.berserk && r.a.hp > 0) setSentryEscort(r.a); }
+  }
   tr.riders = null;
   if (mrtRiding) mrtRideFade(false);
 }
@@ -433,8 +456,141 @@ function mrtRideFade(on) {
   if (el) el.classList.toggle('visible', on);
 }
 
+// ===== 捷運站互通、搭下班車的隊員 =====
+const mrtStationOf = id => (MRT_TRAIN.stations || []).find(st => st && st.map === id) || null;
+// 這站的到站音樂（stations 沒設就用音效編輯器的「捷運列車：到站音樂」）
+function mrtArriveSound() { const st = MAP && mrtStationOf(MAP.id); return (st && st.arrive) || MRT_TRAIN.sounds.arrive; }
+// 溫特搭車要開去哪：互通車站裡隨機一站（不是現在這站、地圖要存在）；現在這站不在名單裡、或沒有別站 → null（開回同一站）
+function mrtPickDestination() {
+  if ((typeof PREVIEW !== 'undefined' && PREVIEW) || !MAP || !mrtStationOf(MAP.id)) return null;
+  const list = (MRT_TRAIN.stations || []).filter(st => st && st.map !== MAP.id && mapIndexById(st.map) >= 0);
+  return list.length ? list[Math.floor(Math.random() * list.length)].map : null;
+}
+// 不在溫特身邊的隊員：{ type, t: 還要幾秒, why: 'missed'＝沒搭上車（搭下班車到站）| 'rode'＝不小心搭上車（搭車回站） }
+// 換地圖也記得（不放在 G 裡）；回應變中心就清空（全員歸隊）。隊員欄（js/team.js 的 renderFieldSquadHud）照這份顯示倒數
+let mrtAway = [];
+function mrtAwayList() { return mrtAway; }
+function mrtSendAway(t, why) {
+  if (!t || !TYPES[t.type] || t.type === PLAYER_CHARACTER || mrtAway.some(m => m.type === t.type)) return;
+  if (typeof vitalsMate === 'function') { const m = vitalsMate(t.type); m.hp = t.hp; m.taint = t.taint || 0; m.berserk = !!t.berserk; }   // HP、負荷照現在的帶走（回來時 spawnSentries 會套回去）
+  mrtAway.push({ type: t.type, t: Math.max(1, +MRT_TRAIN.nextTrainTime || 120), why });
+}
+function updateMrtAway(dt) {
+  if (!mrtAway.length || !G || G.over) return;
+  for (const m of mrtAway) m.t = Math.max(0, m.t - dt);
+  // 時間到了：這張地圖有捷運 → 等下一班車進站時從車上下來（mrtTrainBringBack）；沒有捷運的戰鬥地圖 → 直接回到營地
+  if (!(G.mrtTrains && G.mrtTrains.length) && !MAP_SAFE) {
+    const due = mrtAway.filter(m => m.t <= 0);
+    if (!due.length) return;
+    mrtAway = mrtAway.filter(m => m.t > 0);
+    const back = mrtRejoin(due.map(m => m.type));
+    if (back.length) systemNotice(back.map(t => TYPES[t.type].name).join('、') + '回到隊伍了');
+  }
+}
+// 隊員回到隊伍：照出勤的方式生出來（HP、負荷用記下來的，js/vitals.js），回傳生出來的隊員
+function mrtRejoin(types) {
+  const have = new Set(G.towers.map(t => t.type)), team = typeof getTeam === 'function' ? getTeam() : types;
+  const list = types.filter(id => TYPES[id] && !have.has(id) && team.includes(id) && id !== PLAYER_CHARACTER);
+  if (!list.length) return [];
+  const before = G.towers.length;
+  spawnSentries(list);
+  return G.towers.slice(before);
+}
+// 列車停在原位時車內地板（.）的格子中心：軌道看得到的範圍裡，離列車中間近的排前面
+function mrtTrainSeats(tr) {
+  const seats = [];
+  for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
+    const cx = OX + x.c * CELL;
+    if (x.t !== '.' || cx < tr.clipL || cx + CELL > tr.clipR) continue;
+    seats.push(center(x.c, x.r));
+  }
+  const xs = seats.map(p => p[0]), mid = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : tr.x;
+  return seats.sort((a, b) => Math.abs(a[0] - mid) - Math.abs(b[0] - mid) || b[1] - a[1]);
+}
+// 把這些人放上車（搭車中，跟著列車動）
+function mrtTrainSeatRiders(tr, actors) {
+  const seats = mrtTrainSeats(tr);
+  tr.riders = tr.riders || [];
+  actors.forEach((a, i) => {
+    const [x, y] = seats[i % Math.max(1, seats.length)] || [tr.x, tr.bottom - CELL / 2];
+    Object.assign(a, { mrtRide: true, navPath: null, navGoal: null, moving: false, y, x: x + tr.off * tr.dir });
+    if (a !== G.player) a.target = null;
+    tr.riders.push({ a, x });
+  });
+}
+// 列車進站前：搭下班車的隊員時間到了，就坐這班車來（停好開門後走下車）
+function mrtTrainBringBack(tr) {
+  if (MAP_SAFE || !mrtAway.some(m => m.t <= 0)) return;
+  const due = mrtAway.filter(m => m.t <= 0);
+  mrtAway = mrtAway.filter(m => m.t > 0);
+  const back = mrtRejoin(due.map(m => m.type));
+  if (!back.length) return;
+  mrtTrainSeatRiders(tr, back);
+  systemNotice(back.map(t => TYPES[t.type].name).join('、') + '搭的列車進站了');
+}
+// 溫特沒上車：留在車上的隊員跟著列車開走了 → 從隊伍裡拿掉，nextTrainTime 秒後搭車回站
+function mrtTrainCarryAway(tr) {
+  const gone = [];
+  for (const r of tr.riders || []) {
+    const t = r.a; t.mrtRide = false;
+    if (!G.towers.includes(t)) continue;
+    mrtSendAway(t, 'rode'); gone.push(t);
+  }
+  tr.riders = null;
+  if (!gone.length) return;
+  G.towers = G.towers.filter(t => !gone.includes(t));
+  for (const t of gone) t.hp = 0;   // 怪物還瞄著他的話，當作不在了（HP 已經記下來，回來時照記下來的）
+  const mins = Math.round((+MRT_TRAIN.nextTrainTime || 120) / 60);
+  systemNotice(gone.map(t => TYPES[t.type].name).join('、') + '不小心搭上捷運了，約 ' + mins + ' 分鐘後回站', true);
+}
+// 溫特搭車開到另一站：沒搭上的隊員留下（搭下班車）、這張地圖的列車回到等車的樣子，換地圖後載著車上的隊員進站
+function mrtRideToStation(tr, dest) {
+  const riders = (tr.riders || []).map(r => r.a);
+  const mates = riders.filter(a => G.towers.includes(a) && TYPES[a.type]).map(a => a.type);
+  for (const t of G.towers) if (!riders.includes(t)) mrtSendAway(t, 'missed');
+  // 這張地圖的列車整理好（之後走回來接續戰場時才正常）：車上的人放回月台、車廂裡的建築放回去、列車回到隧道裡等下一班
+  const platformY = OY + ((tr.bottomRow != null ? tr.bottomRow : Math.round((tr.bottom - OY) / CELL) - 1) + 1.5) * CELL;
+  for (const r of tr.riders || []) Object.assign(r.a, { mrtRide: false, x: r.x, y: platformY, navPath: null, navGoal: null });
+  tr.riders = null;
+  mrtTrainUnloadCargo(tr);
+  Object.assign(tr, { state: 'away', t: MRT_TRAIN.waitMin + Math.random() * (MRT_TRAIN.waitMax - MRT_TRAIN.waitMin), off: -tr.inDist, door: 0, chimed: false, fadeT: 0 });
+  mrtRideFade(true);
+  mapTransitioning = true;
+  Object.keys(keys).forEach(k => { keys[k] = false; });
+  setTimeout(() => {
+    if (typeof suspendLeavingBattle === 'function') suspendLeavingBattle();   // 這裡的戰場暫停，走回來接著打（js/combat-progress.js）
+    if (!resumePausedBattle(dest)) { switchMap(mapIndexById(dest)); begin(false); }
+    mrtArriveAtStation(mates);
+    setTimeout(() => { mapTransitioning = false; }, 300);
+  }, 400);
+}
+// 換到新車站之後：隨機一班列車載著溫特和同車的隊員，在隧道裡黑一陣子再進站
+function mrtArriveAtStation(mates) {
+  const trains = G.mrtTrains || [];
+  for (const a of mrtTrainActors()) a.mrtRide = false;
+  if (!trains.length) { mrtRideFade(false); return; }
+  if (mates.length) mrtRejoin(mates);   // 接續的戰場裡沒有這位隊員：補上
+  const crew = [G.player, ...mates.map(id => G.towers.find(t => t.type === id)).filter(Boolean)];
+  const dog = (G.npcs || []).find(n => n.id === 'ball');   // 球球跟著部隊一起來
+  if (dog) crew.push(dog);
+  const tr = trains[Math.floor(Math.random() * trains.length)];
+  Object.assign(tr, { riders: [], state: 'tunnel', off: -tr.inDist, door: 0, chimed: false, fadeT: 0,
+    t: Math.max(MRT_TRAIN.arriveSoundLead + 1, MRT_TRAIN.rideTime * .6) });
+  mrtTrainSeatRiders(tr, crew);
+  mrtTrainUpdateSolid(tr);
+  mrtRideFade(true);
+  if (typeof updateCamera === 'function') updateCamera();
+}
+// 每次開始一張地圖（js/game.js 的 begin）：回應變中心＝全員歸隊；其他地圖：不在身邊的隊員先不出現
+function mrtAwayOnBegin() {
+  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { mrtAway = []; if (typeof dynamoForget === 'function') dynamoForget(); return; }   // 捷運站的發電機也全部關回去
+  if (!mrtAway.length || !G || !Array.isArray(G.towers)) return;
+  const away = new Set(mrtAway.map(m => m.type));
+  G.towers = G.towers.filter(t => !away.has(t.type));
+}
+
 function mrtTrainSound(tr, key) {
-  const name = MRT_TRAIN.sounds[key], p = G.player;
+  const name = key === 'arrive' ? mrtArriveSound() : MRT_TRAIN.sounds[key], p = G.player;
   if (!name || typeof SFX === 'undefined' || !p) return;
   // 整個月台都聽得到：用列車上離溫特最近的點算距離
   const x = Math.max(tr.clipL, Math.min(tr.clipR, p.x)), y = Math.max(tr.top, Math.min(tr.bottom, p.y));
@@ -444,22 +600,28 @@ function mrtTrainSound(tr, key) {
 // 狀態：away（看不到，等下一班）→ arrive（減速進站）→ opening → dwell（門開著）→ departWarn（離站警示音）→ warn（車門即將關閉）
 //      → closing → closed → depart（加速離站）→ away
 function updateMrtTrains(dt) {
+  updateMrtAway(dt);   // 沒搭上車／不小心搭上車的隊員：倒數
   if (!G.mrtTrains || !G.mrtTrains.length) return;
   const T = MRT_TRAIN;
   for (const tr of G.mrtTrains) {
     updateMrtGates(tr);   // 月台閘門：每幀先對一次（車還沒來的時候也要擋；下面等車的時候會直接跳過）
     tr.t -= dt;
-    if (tr.state === 'away') {
+    if (tr.state === 'away' && !mrtPowered()) { tr.state = 'idle'; tr.off = 0; tr.door = 0; tr.chimed = false; }   // 還在等車時發現沒電（剛進地圖）：直接停在月台
+    if (tr.state === 'idle') {   // 沒電：停在月台、門關著；發電機全部打開就開門，之後照常
+      tr.off = 0; tr.door = 0;
+      if (mrtPowered()) { tr.state = 'opening'; tr.t = T.doorTime; mrtTrainSound(tr, 'open'); }
+    } else if (tr.state === 'away') {
       tr.off = -tr.inDist; tr.door = 0;
       if (tr.t <= T.arriveSoundLead && !tr.chimed) { tr.chimed = true; mrtTrainSound(tr, 'arrive'); }
       if (tr.t > 0) continue;
+      mrtTrainBringBack(tr);   // 搭下班車的隊員時間到了：坐這班車進站
       // 等減速：v0²＝2aD，整段 D 剛好停在原位
       tr.state = 'arrive'; tr.v = Math.sqrt(2 * T.arriveDecel * tr.inDist);
     } else if (tr.state === 'arrive') {
       tr.v = Math.max(0, tr.v - T.arriveDecel * dt);
       tr.off = Math.min(0, tr.off + tr.v * dt);
       mrtTrainMoveRiders(tr);
-      if (tr.riders && mrtRiding && mrtPlayerInTunnel(tr, 'in')) mrtRideFade(false);   // 載著溫特進站：進到軌道範圍才亮回來
+      if (mrtPlayerAboard(tr) && mrtRiding && mrtPlayerInTunnel(tr, 'in')) mrtRideFade(false);   // 載著溫特進站：進到軌道範圍才亮回來
       if (tr.off >= -.5 || tr.v <= 0) { tr.off = 0; mrtTrainMoveRiders(tr); mrtTrainGetOff(tr); mrtTrainUnloadCargo(tr); tr.state = 'opening'; tr.t = T.doorTime; mrtTrainSound(tr, 'open'); }
     } else if (tr.state === 'opening') {
       tr.door = 1 - Math.max(0, tr.t) / T.doorTime;
@@ -474,10 +636,13 @@ function updateMrtTrains(dt) {
       tr.door = Math.max(0, tr.t) / T.doorTime;
       if (tr.t <= 0) { tr.door = 0; tr.state = 'closed'; tr.t = T.afterClose; }
     } else if (tr.state === 'closed') {
-      if (tr.t <= 0) {
+      if (tr.t <= 0 && !mrtPowered()) {   // 沒電開不走：停在月台；溫特在車上就重新開門讓他下車
+        if (mrtOnTrain(tr, G.player)) { tr.state = 'opening'; tr.t = T.doorTime; mrtTrainSound(tr, 'open'); }
+        else tr.state = 'idle';
+      } else if (tr.t <= 0) {
         mrtTrainSound(tr, 'depart');
         if (mrtOnTrain(tr, G.player)) mrtTrainBoard(tr);   // 溫特在車上：車上的人跟著列車開走（搭車）
-        else mrtTrainUnload(tr);
+        else { mrtTrainUnload(tr); mrtTrainBoard(tr); if (!tr.riders.length) tr.riders = null; }   // 溫特不在車上：怪物請下車，留在車上的隊員被載走
         mrtTrainLoadCargo(tr);   // 車廂裡蓋的建築跟著走
         tr.state = 'depart'; tr.v = 0;
       }
@@ -495,15 +660,21 @@ function updateMrtTrains(dt) {
       tr.v += T.departAccel * dt;
       tr.off += tr.v * dt;
       mrtTrainMoveRiders(tr);
-      if (tr.riders && !mrtRiding && mrtPlayerInTunnel(tr, 'out')) { mrtRideFade(true); tr.fadeT = 0; }   // 快開進隧道：畫面變黑
-      if (tr.riders && mrtRiding) tr.fadeT = (tr.fadeT || 0) + dt;
-      if (tr.off >= tr.outDist || (tr.riders && tr.fadeT > .6)) {   // 載著溫特：畫面黑了就直接算進隧道
+      const aboard = mrtPlayerAboard(tr);
+      if (aboard && !mrtRiding && mrtPlayerInTunnel(tr, 'out')) { mrtRideFade(true); tr.fadeT = 0; }   // 快開進隧道：畫面變黑
+      if (aboard && mrtRiding) tr.fadeT = (tr.fadeT || 0) + dt;
+      if (tr.off >= tr.outDist || (aboard && tr.fadeT > .6)) {   // 載著溫特：畫面黑了就直接算進隧道
         tr.chimed = false;
-        if (tr.riders) { tr.state = 'tunnel'; tr.t = T.rideTime; tr.fadeT = 0; mrtRideFade(true); }
-        else { tr.state = 'away'; tr.t = T.waitMin + Math.random() * (T.waitMax - T.waitMin); tr.off = -tr.inDist; }
+        const dest = aboard ? mrtPickDestination() : null;
+        if (dest) { mrtRideToStation(tr, dest); return; }   // 互通的捷運站：開到另一站（換地圖，這一幀後面的列車不用再更新）
+        if (aboard) { tr.state = 'tunnel'; tr.t = T.rideTime; tr.fadeT = 0; mrtRideFade(true); }
+        else {
+          mrtTrainCarryAway(tr);   // 不小心搭上車的隊員：跟著列車走了，過一陣子才回站
+          tr.state = 'away'; tr.t = T.waitMin + Math.random() * (T.waitMax - T.waitMin); tr.off = -tr.inDist;
+        }
       }
     }
-    if (tr.riders && typeof addShake === 'function' && (tr.state === 'depart' || tr.state === 'arrive')) addShake(T.rideShake * .35);   // 坐在車上：輕輕晃
+    if (mrtPlayerAboard(tr) && typeof addShake === 'function' && (tr.state === 'depart' || tr.state === 'arrive')) addShake(T.rideShake * .35);   // 坐在車上：輕輕晃
     if (tr.cargo) mrtTrainMoveCargo(tr);
     updateMrtGates(tr);   // 月台閘門：列車剛停好時先讓位
     mrtTrainUpdateSolid(tr);

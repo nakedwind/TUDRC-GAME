@@ -161,8 +161,8 @@ function removeFishEgg(egg) {
 }
 function fishEggVictim(egg) {
   const r = CLOWNFISH.eggTrigger * CELL, p = G.player;
-  if (p && p.hp > 0 && Math.hypot(p.x - egg.x, p.y - egg.y) <= r) return p;
-  for (const t of G.towers) if (t.hp > 0 && Math.hypot(t.x - egg.x, t.y - egg.y) <= r) return t;
+  if (p && p.hp > 0 && fieldHits(egg.floor, p) && Math.hypot(p.x - egg.x, p.y - egg.y) <= r) return p;   // 不同樓層的人踩不到
+  for (const t of G.towers) if (t.hp > 0 && fieldHits(egg.floor, t) && Math.hypot(t.x - egg.x, t.y - egg.y) <= r) return t;
   return null;   // 怪物自己踩不會爆
 }
 

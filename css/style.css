@@ -368,6 +368,10 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .field-member + .field-member { margin-top: 3px; }
 /* 倒下：頭像與資訊變灰變淡（橫幅本身不淡化，才看得清楚） */
 .field-member.down > .field-member-avatar, .field-member.down > .field-member-status { opacity: .42; filter: grayscale(.8); }
+/* 搭捷運還沒到的隊員（js/team.js 的 fieldAwayCard）：頭像變灰，血條那一塊換成兩行說明＋倒數 */
+.field-member.mrt-away > .field-member-avatar { opacity: .5; filter: grayscale(.9); cursor: default; }
+.field-away-note { margin: 0; color: #9fd2ff; font-size: 8px; line-height: 1.45; white-space: nowrap; }
+.field-away-note em { color: #ffe08a; font-size: 9px; }
 .field-down-banner {
   position: absolute; left: 4px; right: 4px; top: 50%; transform: translateY(-50%) rotate(-2deg);
   padding: 4px 6px; text-align: center; pointer-events: none;
