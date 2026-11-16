@@ -61,7 +61,7 @@ async function listMusic(dir, depth) {
   }
   return out;
 }
-listMusic('music/', 0).then(list => { BGM_FILES = list; if (typeof renderBeats === 'function' && data) renderBeats(); }).catch(() => {});
+listMusic('music/', 0).then(list => { BGM_FILES = list; if (typeof renderBeats === 'function' && data) { renderBeats(); renderScenes(); } }).catch(() => {});   // 讀到清單：每頁的音樂選單、劇情設定的選歌都重畫
 let pageBgmTest = null;   // 「▶ 試聽」正在播的音樂（再按一次停掉）
 function testPageBgm(src) {
   if (pageBgmTest) { pageBgmTest.pause(); const same = pageBgmTest.dataset.src === src; pageBgmTest = null; if (same) { status('停止試聽'); return; } }
@@ -477,6 +477,25 @@ function bgmList(s, stopTest) {   // 一首＝存成字串；好幾首＝存成�
   area.value = list.join('\n');
   return area;
 }
+// 🎵 選歌：從 music/ 資料夾裡實際有的音樂挑（清單跟每頁「音樂」的選單同一份 BGM_FILES）
+// 下拉選一首＝整段換成這首；「＋ 接在後面」＝加到清單最後（照順序播，最後一首一直循環）
+function bgmChooser(s, stopTest) {
+  const list = Array.isArray(s.bgm) ? s.bgm : s.bgm ? [s.bgm] : [];
+  const missing = BGM_FILES ? list.filter(f => !BGM_FILES.includes(f)) : [];
+  const warn = missing.length && h('small', { style: 'flex-basis:100%;color:#ff8a80' }, '找不到：' + missing.join('、') + '（請用上面的選單重新選）');
+  if (!BGM_FILES) return h('small', { style: 'color:#8c98a6' }, '要用選單挑歌，請用小幫手（本機伺服器）打開編輯器；讀不到資料夾時只能自己打檔名。');
+  const pick = { v: list.length === 1 && BGM_FILES.includes(list[0]) ? list[0] : '' };
+  const sel = h('select', { style: 'max-width:280px', onchange: e => {
+    const v = e.target.value; if (!v) return;
+    s.bgm = v; stopTest(); commit();
+  } }, [h('option', { value: '' }, list.length > 1 ? '— 換成一首（目前 ' + list.length + ' 首）—' : '— 選一首 —'),
+    ...BGM_FILES.map(f => h('option', { value: f, ...(f === pick.v ? { selected: true } : {}) }, f.replace(/^music\//, '')))]);
+  const add = h('button', { type: 'button', class: 'small', title: '把選單裡的這首加到清單最後面（播完前一首接著播）', onclick: () => {
+    const v = sel.value; if (!v) { status('先在選單選一首。', true); return; }
+    s.bgm = list.length ? [...list, v] : v; stopTest(); commit();
+  } }, '＋ 接在後面');
+  return h('div', { class: 'row', style: 'font-size:12px;margin:4px 0;flex-wrap:wrap;gap:6px' }, '🎵 選歌', sel, add, warn);
+}
 function bgmBox(s) {
   const stopTest = () => { if (bgmTest) { bgmTest.pause(); bgmTest = null; } };
   const test = h('button', { type: 'button', class: 'small', onclick: e => {
@@ -488,6 +507,7 @@ function bgmBox(s) {
   } }, bgmTest ? '■ 停止' : '▶ 試聽');
   return h('div', {},
     field('BGM（音樂檔，放在 music/ 資料夾；一行一首，照順序播放，最後一首一直循環；空白＝沒有音樂）', bgmList(s, stopTest)),
+    bgmChooser(s, stopTest),
     s.bgm && h('div', { class: 'row', style: 'font-size:12px' }, '音量', num(s, 'bgmVolume', { min: 0, step: .05, optional: true, placeholder: '0.5' }), h('small', { style: 'color:#8c98a6' }, '（0～1）'), test),
     // 整段劇情的淡入淡出：開頭音樂花幾秒淡入（空白＝1.5）、劇情結束時花幾秒淡出（空白＝5；每頁換的音樂結束時也照這個）
     h('div', { class: 'row', style: 'font-size:12px' }, '開頭花', num(s, 'bgmFadeIn', { min: 0, step: .1, optional: true, placeholder: '1.5' }), '秒淡入，劇情結束時花', num(s, 'bgmFadeOut', { min: 0, step: .1, optional: true, placeholder: '5' }), '秒淡出'));
