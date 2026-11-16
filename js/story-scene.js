@@ -36,10 +36,11 @@ const StoryScene = (() => {
   // 實際的找路在 js/story-route.js（劇情編輯器也用同一份，畫出來的走位虛線＝這裡真的會走的路）
   const findRoute = (x, y, tx, ty) => StoryRoute.find(x, y, tx, ty, open, cellAt, CELL);
   // 走到 p；via＝路上要先依序經過的點（[[x, y], …]，劇情編輯器的「經過點」），每一段都自己找路繞開牆
-  function walkTo(a, p, via) {
+  // straight＝直直走：照經過點走直線，不繞開擋路的東西（例如鑽過辦公桌之間；每頁 straight: { 角色id: true }）
+  function walkTo(a, p, via, straight) {
     a.path = [];
     let x = a.x, y = a.y;
-    for (const q of [...(Array.isArray(via) ? via : []), p]) { const seg = findRoute(x, y, q[0] * CELL, q[1] * CELL); a.path.push(...seg); [x, y] = seg[seg.length - 1]; }
+    for (const q of [...(Array.isArray(via) ? via : []), p]) { const seg = straight ? [[q[0] * CELL, q[1] * CELL]] : findRoute(x, y, q[0] * CELL, q[1] * CELL); a.path.push(...seg); [x, y] = seg[seg.length - 1]; }
     a.target = a.path.shift();
   }
   // 路人哨兵的持槍圖、受傷躺床圖（檔名跟主角的 _withgun 不同，另外載入）
@@ -926,9 +927,9 @@ const StoryScene = (() => {
     for (const id of [...Object.keys(beat.move || {}), ...Object.keys(beat.exit || {}), ...Object.keys(beat.place || {})]) { const a = actor(id); if (a?.trail && !(beat.trail && id in beat.trail)) stopTrail(a); }   // 自己走位／離場／瞬移：不再跟著別人
     // 晚幾秒才走（每頁 moveDelay: { 角色id: 幾秒 }）：這頁的走位／離場先在原地等這麼多秒才起步（例如一個人先跑、另一個慢一拍才追）
     const walkHold = id => state.skipping ? 0 : Math.max(0, Number(beat.moveDelay?.[id]) || 0);
-    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; a.walkHold = walkHold(id); walkTo(a, p, beat.via?.[id]); }
+    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; a.walkHold = walkHold(id); walkTo(a, p, beat.via?.[id], beat.straight?.[id]); }
     // exitSfx（離場音效）：這頁離場的人真的走到、開始淡出的那一刻才播（例如關門聲）——人還在路上就翻頁也不會先響
-    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; a.walkHold = walkHold(id); a.exitSfx = beat.exitSfx || ''; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
+    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; a.walkHold = walkHold(id); a.exitSfx = beat.exitSfx || ''; walkTo(a, p, beat.via?.[id], beat.straight?.[id]); }   // 走到那裡後淡出消失（走進門裡）
     for (const [id, who] of Object.entries(beat.trail || {})) {   // 跟在後面：先隱藏的人會淡入出現；空白＝不跟了，停在原地
       const a = actor(id); if (!a) continue;
       if (a.trail) stopTrail(a);

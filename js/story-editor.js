@@ -195,8 +195,8 @@ function routePoints(m, a, b) {   // a、b、回傳的點都是「格」為單�
   const cellAt = (x, y) => [Math.floor(x / G), Math.floor(y / G)];
   return StoryRoute.find(a[0] * G, a[1] * G, b[0] * G, b[1] * G, open, cellAt, G).map(p => [p[0] / G, p[1] / G]);
 }
-function routeArrow(m, a, b, color) {   // 一段走位：中間轉彎的地方畫虛線，最後一段畫箭頭
-  const pts = [a, ...routePoints(m, a, b)];
+function routeArrow(m, a, b, color, straight) {   // 一段走位：中間轉彎的地方畫虛線，最後一段畫箭頭；straight＝直直走（不繞路）
+  const pts = [a, ...(straight ? [b] : routePoints(m, a, b))];
   ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash([6, 5]);
   for (let i = 1; i < pts.length - 1; i++) { ctx.beginPath(); ctx.moveTo(pts[i - 1][0] * C, pts[i - 1][1] * C); ctx.lineTo(pts[i][0] * C, pts[i][1] * C); ctx.stroke(); }
   ctx.restore();
@@ -317,7 +317,7 @@ function drawMap() {
     const via = kind !== 'place' && Array.isArray(beat.via?.[id]) ? beat.via[id] : [];
     let last = from;
     via.forEach((v, k) => {
-      if (last) routeArrow(m, last, v, color);
+      if (last) routeArrow(m, last, v, color, beat.straight?.[id]);
       const vk = 'via:' + beatSel + ':' + id + ':' + k;
       ctx.fillStyle = '#10151c'; ctx.strokeStyle = selKey() === vk ? '#ffd479' : color; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.arc(v[0] * C, v[1] * C, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -325,7 +325,7 @@ function drawMap() {
       handle(vk, v, 12, p => { via[k] = p; });
       last = v;
     });
-    if (last && kind !== 'place') routeArrow(m, last, q, color);
+    if (last && kind !== 'place') routeArrow(m, last, q, color, beat.straight?.[id]);
     ctx.fillStyle = color; ctx.strokeStyle = selKey() === key ? '#ffd479' : '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(q[0] * C, q[1] * C, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     label('第' + (beatSel + 1) + '頁：' + actorName(id) + text, q[0] * C, q[1] * C - 12, color);
@@ -739,7 +739,7 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'show', 'trail', 'holdAt', 'face', 'eyes', 'speed', 'moveDelay', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug', 'tie'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'straight', 'hide', 'show', 'trail', 'holdAt', 'face', 'eyes', 'speed', 'moveDelay', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug', 'tie'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
@@ -791,13 +791,15 @@ function beatBody(s, b, i) {
   const swap = (map, id, v, name) => { if (map[v] !== undefined) { status(name + '這頁已經有了。', true); return false; } const n = {}; for (const [k, x] of Object.entries(map)) n[k === id ? v : k] = x; for (const k of Object.keys(map)) delete map[k]; Object.assign(map, n); commit(); return true; };
   const whoSelect = (map, id) => h('select', { onchange: e => { const v = e.target.value; const hasVia = (map === b.move || map === b.exit) && b.via?.[id];
       if (!swap(map, id, v, actorName(v))) { e.target.value = id; return; }
-      if (hasVia && !b.via[v]) { b.via[v] = b.via[id]; delete b.via[id]; commit(); } } },
+      if (hasVia && !b.via[v]) { b.via[v] = b.via[id]; delete b.via[id]; commit(); }
+      if ((map === b.move || map === b.exit) && b.straight?.[id] && !b.straight[v]) { b.straight[v] = true; delete b.straight[id]; commit(); } } },
     s.actors.map(a => h('option', { value: a.id, ...(a.id === id ? { selected: true } : {}) }, a.name || a.id)));
   const monSelect = (map, id) => h('select', { onchange: e => { if (!swap(map, id, e.target.value, e.target.value)) e.target.value = id; } },
     s.monsters.map(m => h('option', { value: m.id, ...(m.id === id ? { selected: true } : {}) }, m.id)));
   const many = (key, title, make, sel = whoSelect) => { for (const id of Object.keys(b[key] || {})) acts.append(h('div', { class: 'act' }, h('b', {}, title), sel(b[key], id), make(id),
     xBtn(() => { delete b[key][id]; if (!Object.keys(b[key]).length) delete b[key];
-      if ((key === 'move' || key === 'exit') && b.via?.[id] && !b.move?.[id] && !b.exit?.[id]) { delete b.via[id]; if (!Object.keys(b.via).length) delete b.via; } }))); };
+      if ((key === 'move' || key === 'exit') && b.via?.[id] && !b.move?.[id] && !b.exit?.[id]) { delete b.via[id]; if (!Object.keys(b.via).length) delete b.via; }
+      if ((key === 'move' || key === 'exit') && b.straight?.[id] && !b.move?.[id] && !b.exit?.[id]) { delete b.straight[id]; if (!Object.keys(b.straight).length) delete b.straight; } }))); };
   // 走位／離場的經過點：角色會先依序走過這些點，最後才到終點（不是只能兩點一線）
   const viaRows = (id, kind) => {
     const list = b.via?.[id] || [], out = [];
@@ -809,7 +811,11 @@ function beatBody(s, b, i) {
       h('button', { type: 'button', class: 'small', title: '在終點前面多加一個要先經過的點（到地圖上點）',
         onclick: () => setPick({ label: actorName(id) + '在第 ' + (i + 1) + ' 頁' + (kind === 'exit' ? '離場' : '走位') + '途中經過的第 ' + (list.length + 1) + ' 個點',
           fn: q => { ((b.via = b.via || {})[id] = b.via[id] || []).push(q); } }) }, '＋ 加經過點'),
-      h('small', {}, list.length ? '依序走過 ' + list.length + ' 個點後才到終點' : '加了就不是直直走過去，會照順序繞過去')));
+      h('small', {}, list.length ? '依序走過 ' + list.length + ' 個點後才到終點' : '加了就不是直直走過去，會照順序繞過去')),
+      // 直直走：照經過點走直線，不自動繞開不可穿透的格子（要鑽過桌子、櫃子之間時用）
+      h('label', { class: 'row', style: 'flex-basis:100%;padding-left:62px;order:1;font-size:12px' }, h('input', { type: 'checkbox', checked: !!b.straight?.[id],
+        onchange: e => { if (e.target.checked) (b.straight = b.straight || {})[id] = true; else if (b.straight) { delete b.straight[id]; if (!Object.keys(b.straight).length) delete b.straight; } commit(); } }),
+        '直直走（照經過點走直線，不自動繞開擋路的東西）')));
     return out;
   };
   const mon = (key, title, make) => many(key, title, make, monSelect);
