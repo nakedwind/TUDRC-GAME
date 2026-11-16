@@ -118,7 +118,7 @@ function spawnChargeImpact(e, target) {
 // 衝撞途中撞到人：玩家或任何活著的哨兵／嚮導
 function chargerHitSomeone(e, dt) {
   const p = G.player, dir = e.ch.dir;
-  if (p && p.hp > 0 && Math.hypot(p.x - e.x, p.y - e.y) <= 30) {
+  if (p && p.hp > 0 && sameFloor(e, p) && Math.hypot(p.x - e.x, p.y - e.y) <= 30) {   // 不同樓層（陸橋上／下）的撞不到
     spawnChargeImpact(e, p);
     e.playerTouchCd = 0;
     enemyAttackPlayer(e, dt);
@@ -126,7 +126,7 @@ function chargerHitSomeone(e, dt) {
     return true;
   }
   for (const t of G.towers) {
-    if (t.hp <= 0 || t.berserk || Math.hypot(t.x - e.x, t.y - e.y) > 26) continue;
+    if (t.hp <= 0 || t.berserk || !sameFloor(e, t) || Math.hypot(t.x - e.x, t.y - e.y) > 26) continue;
     spawnChargeImpact(e, t);
     e.atkCd = 0;
     enemyAttackSentry(e, t, dt);

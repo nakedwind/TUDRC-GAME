@@ -28,7 +28,7 @@ function storagePropKind(id){
   if(file.endsWith('/items/battery.png'))return 'battery';
   if(file.endsWith('/items/almond-water-large.png')||file.endsWith('/items/almond-water-small.png'))return 'almond';
   if(/power-switch-(on|off)\.png$/.test(file))return 'power';   // 後室的開關，和池核的 Poolcore_power-switch-on／off 都算
-  if(/\/dynamo-(open|close)\.png$/.test(file)&&DYNAMO_MAPS.includes(MAP?.id))return 'dynamo';   // 發電機（dynamo-open／dynamo-close）：只有 DYNAMO_MAPS 裡的地圖能按空白鍵開關（其他地圖只是裝飾）
+  if(/\/dynamo-(open|close)\.png$/.test(file)&&dynamoInteractiveMap(MAP))return 'dynamo';   // 發電機（dynamo-open／dynamo-close）：只有 DYNAMO_MAPS 和捷運站的地圖能按空白鍵開關（其他地圖只是裝飾）
   if(file.endsWith('/storage-locker-open.png'))return 'open';
   if(file.endsWith('/storage-locker-closed.png'))return 'closed';
   return null;
@@ -136,9 +136,13 @@ function useStoragePropNearPlayer(filter){
     const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice(mapPowerIsOn(n)?'電源已開啟':'電源已關閉');
   }else if(prop.kind==='dynamo'){
     if(typeof poolPumpLocked==='function'&&poolPumpLocked()){sfx('switch');systemNotice(POOL_TIDE.pumpedText);return true;}   // 抽水機打開過就關不掉（js/pool-tide.js）
+    if(dynamoStationMap(MAP)&&dynamosAllOn()){sfx('switch');systemNotice('發電機運轉中，捷運已恢復運行');return true;}   // 捷運站：全部打開之後就關不掉（不然開到一半的列車會卡住）
     toggleDynamo(prop.token);sfx('powerOn');
     const [on,total]=dynamoCount();
-    systemNotice(dynamoIsOn(prop.token)?'發電機已啟動（'+on+'／'+total+'）':'發電機已關閉（'+on+'／'+total+'）');
+    if(dynamosAllOn()){
+      sfx('dynamoStart');   // 全部打開：發電機發動的聲音（只播一次；之後靠近開著的發電機會一直聽到運轉聲，js/dynamo-sound.js）
+      systemNotice(dynamoStationMap(MAP)?'發電機全部啟動，捷運恢復運行':'發電機全部啟動（'+on+'／'+total+'）');
+    }else systemNotice(dynamoIsOn(prop.token)?'發電機已啟動（'+on+'／'+total+'）':'發電機已關閉（'+on+'／'+total+'）');
     if(typeof poolPumpCheck==='function')poolPumpCheck();   // 全部打開：開始抽水
   }else if(prop.open){
     flash('置物箱已打開',prop.x,prop.top-8,'#dce6ed',1.2);
@@ -229,12 +233,25 @@ function powerSwitchTileFor(id,on){
   const pair=powerSwitchSwap.get(id);return (on?pair.on:pair.off)||null;
 }
 // ---- 發電機（dynamo-close＝關、dynamo-open＝開）----
-// 能互動的地圖（地圖 id）：現在只有池核；其他地圖（例如 R89區-捷運站）放的發電機只是裝飾。要加地圖就把 id 加進來
+// 能互動的地圖（地圖 id）：池核，加上捷運站（data/mrt-train.js 的 stations，全部打開捷運才會開，js/mrt-train.js 的 mrtPowered）；
+// 其他地圖放的發電機只是裝飾。要加地圖就把 id 加進來
 const DYNAMO_MAPS = ['map_mv1bzur4'];   // 04. 池核
-// 每一台各自開關（不分電路）。一進地圖全部是關的（地圖上放的是 open 圖也一樣當關的），玩家要自己去把它們打開；換地圖再回來會重新關掉。
+const dynamoStationMap=m=>!!(m&&typeof mrtStationOf==='function'&&mrtStationOf(m.id));
+const dynamoInteractiveMap=m=>!!(m&&(DYNAMO_MAPS.includes(m.id)||dynamoStationMap(m)));
+// 每一台各自開關（不分電路）。一進地圖全部是關的（地圖上放的是 open 圖也一樣當關的），玩家要自己去把它們打開。
+// 池核：換地圖再回來會重新關掉。捷運站：這次出勤打開過的會一直開著（搭捷運來回不用重開），回應變中心才全部關掉（dynamoForget）。
 // 其他程式要知道「是不是全部打開了」：dynamoCount() 回傳 [開著幾台, 總共幾台]、dynamosAllOn()。
-let dynamoMap=null;const dynamoOnSet=new Set();   // 開著的發電機（storagePropToken）
-function dynamoState(){if(dynamoMap!==MAP){dynamoMap=MAP;dynamoOnSet.clear();}return dynamoOnSet;}
+let dynamoMap=null,dynamoOnSet=new Set();   // 開著的發電機（storagePropToken）
+const dynamoKeep=new Map();   // 捷運站：地圖 id → 開著的發電機
+function dynamoState(){
+  if(dynamoMap!==MAP){
+    dynamoMap=MAP;
+    if(dynamoStationMap(MAP)){if(!dynamoKeep.has(MAP.id))dynamoKeep.set(MAP.id,new Set());dynamoOnSet=dynamoKeep.get(MAP.id);}
+    else dynamoOnSet=new Set();
+  }
+  return dynamoOnSet;
+}
+function dynamoForget(){dynamoKeep.clear();dynamoMap=null;}   // 回應變中心（js/mrt-train.js 的 mrtAwayOnBegin）
 const dynamoIsOn=token=>dynamoState().has(token);
 function toggleDynamo(token){const s=dynamoState();if(s.has(token))s.delete(token);else s.add(token);}
 function dynamoCount(){

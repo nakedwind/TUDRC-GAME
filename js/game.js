@@ -1392,7 +1392,7 @@ function newGame() {
 // ---- 「▶ 預覽遊戲」的出生點（只在地圖編輯器的預覽裡，正式遊戲不受影響）：方便測試某個區域 ----
 // 地圖名稱 → { to: 通往哪張地圖的出入口 }：有好幾格的出入口就站中間那格旁邊（跟從那張地圖走過來一樣）
 const PREVIEW_SPAWN = {
-  '04. 池核': { to: 'R89區-捷運站' },   // 地圖最右上方的捷運站出入口
+  '04. 池核': { to: 'R89區-紅線捷運站' },   // 地圖最右上方的捷運站出入口
 };
 function placePreviewSpawn() {
   const cfg = MAP && PREVIEW_SPAWN[MAP.name]; if (!cfg || typeof mapPortals === 'undefined') return;
@@ -1831,7 +1831,7 @@ const CORE_HIT_PAD = 36;
 function pickSentryTarget(t, R) {
   const p = G.player;
   const marked = typeof paintTarget === 'function' && paintTarget();   // 被漆彈標記的怪物：射程內看得到就先打牠（js/special-guns.js）
-  if (marked && Math.hypot(marked.x - t.x, marked.y - t.y) <= R && hasLineOfSight(t.x, t.y, marked.x, marked.y)) return marked;
+  if (marked && sameFloor(marked, t) && Math.hypot(marked.x - t.x, marked.y - t.y) <= R && hasLineOfSight(t.x, t.y, marked.x, marked.y)) return marked;
   let best = null, bestScore = Infinity;
   for (const e of G.enemies) {
     if (e.dead || !sameFloor(e, t)) continue;   // 不同樓層的打不到（js/pathfinding.js）
@@ -2363,7 +2363,7 @@ function update(dt) {
   for (const t of G.towers) {
     if (t.type !== 'red' || !t.shieldMode || t.ramCd > 0 || t.hp <= 0 || t.berserk || t.eatenBy || t.sleepT > 0) continue;
     const foe = t.ramTarget;
-    if (foe && !foe.dead && Math.hypot(foe.x - t.x, foe.y - t.y) <= CELL * 1.1) {
+    if (foe && !foe.dead && sameFloor(foe, t) && Math.hypot(foe.x - t.x, foe.y - t.y) <= CELL * 1.1) {   // 不同樓層的撞不到
       const spec = TYPES.red, ramDmg = Math.max(1, Math.round(spec.dmg * 0.4));
       foe.hp -= ramDmg;
       aggroOnSentry(foe, t);
@@ -2475,7 +2475,7 @@ function update(dt) {
       if (!swing.hit && swing.age >= swing.impact) {
         swing.hit = true;
         const foe = swing.target;
-        if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) swingTarget = foe;
+        if (foe && !foe.dead && foe.hp > 0 && (!G.enemies.includes(foe) || sameFloor(foe, t)) && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) swingTarget = foe;   // 揮到時怪物已經換樓層：打空
       }
       if (swing.age >= swing.duration) t.meleeSwing = null;
       if (!swingTarget) continue;
@@ -2488,7 +2488,7 @@ function update(dt) {
         if (GUIDE_GUN_TYPES.has(t.type)) spawnGuideGunshot(t, sw);
         else { playSentryAttackSound(t); spawnSentryShotVisual(t, sw, spec); }
         const foe = sw.target;
-        if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) swingTarget = foe;
+        if (foe && !foe.dead && foe.hp > 0 && (!G.enemies.includes(foe) || sameFloor(foe, t)) && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) swingTarget = foe;   // 開槍時怪物已經換樓層：打空
       }
       if (sw.age >= sw.duration) t.gunSwing = null;
       if (!swingTarget) continue;
@@ -2500,6 +2500,7 @@ function update(dt) {
     if (target && target !== swingTarget && !hasLineOfSight(t.x, t.y, target.x, target.y)) target = null;   // 隔牆看不到
     const attacker = !target && t.type === 'red' ? redAttacker() : null;
     if (attacker && Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R && hasLineOfSight(t.x, t.y, attacker.x, attacker.y)) target = attacker;
+    if (target && G.enemies.includes(target) && !sameFloor(target, t)) target = null;   // 保險：不同樓層（陸橋上／下）的怪物打不到（不管是怎麼選到的）
     if (!target) target = pickSentryTarget(t, R);
     if (target) {
       if (!swingTarget) t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')) * (t.taint > 85 && !t.berserk ? 0.5 : 1));   // 瀕臨暴走：攻速減半
@@ -2836,7 +2837,7 @@ function prepareMonsterPreview() {
   if (note) note.textContent = '🔍 ' + (spec?.name || '怪物') + '測試場 · WASD 移動，滑鼠射擊；不會寫入正式存檔';
   updateCamera(); updateHUD();
 }
-function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!(typeof restoreSlotScene === 'function' && restoreSlotScene()) && !restoreCombatProgress()) newGame();   /* 讀存檔欄位：先放回存檔當下的現場（js/combat-progress.js） */ const fundFirst = typeof fundCardDue === 'function' && fundCardDue();   /* 第一次到達：等一下右邊跳作戰經費提示卡（js/fund-card.js），要在記下「給過了」之前問 */ if (typeof markMissionMapReached === 'function' && !PREVIEW) markMissionMapReached(MAP && MAP.id); if (fundFirst) showFundCard(START.money); if (typeof mealBuffOnMap === 'function' && !PREVIEW) mealBuffOnMap();   /* 飯後加成：真的進到戰鬥地圖才開始用、出勤完回基地就結束（js/meal.js）；開始畫面背景載入的地圖不算 */ prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
+function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!(typeof restoreSlotScene === 'function' && restoreSlotScene()) && !restoreCombatProgress()) newGame();   /* 讀存檔欄位：先放回存檔當下的現場（js/combat-progress.js） */ const fundFirst = typeof fundCardDue === 'function' && fundCardDue();   /* 第一次到達：等一下右邊跳作戰經費提示卡（js/fund-card.js），要在記下「給過了」之前問 */ if (typeof markMissionMapReached === 'function' && !PREVIEW) markMissionMapReached(MAP && MAP.id); if (fundFirst) showFundCard(START.money); if (typeof mealBuffOnMap === 'function' && !PREVIEW) mealBuffOnMap();   /* 飯後加成：真的進到戰鬥地圖才開始用、出勤完回基地就結束（js/meal.js）；開始畫面背景載入的地圖不算 */ if (typeof mrtAwayOnBegin === 'function') mrtAwayOnBegin();   /* 搭下班車、不小心搭上捷運的隊員先不出現；回應變中心全員歸隊（js/mrt-train.js） */ prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); achieveOnBattleEnd('win'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;

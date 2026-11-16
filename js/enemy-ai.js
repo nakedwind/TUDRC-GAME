@@ -78,6 +78,7 @@ function sweepAttack(e, target, dt) {
   const R = sweepReach(e) + 8, half = e.sweep.arc / 2 * Math.PI / 180;
   const aim = Math.atan2(target.y - e.y, target.x - e.x);
   const inArc = o => {
+    if (!sameFloor(e, o)) return false;   // 不同樓層（陸橋上／下）的掃不到
     const d = Math.hypot(o.x - e.x, o.y - e.y);
     if (o !== target && (d > R || !hasLineOfSight(e.x, e.y, o.x, o.y))) return false;
     let da = Math.abs(Math.atan2(o.y - e.y, o.x - e.x) - aim); if (da > Math.PI) da = 2 * Math.PI - da;
@@ -102,6 +103,7 @@ function parryMiss(target, isPlayer) {
   return false;
 }
 function enemyAttackSentry(e, target, dt) {
+  if (target && !sameFloor(e, target)) return;   // 保險：不同樓層（陸橋上／下）的都打不到隊員
   e.atkCd = (e.atkCd || 0) - dt;
   if (target) monsterSwingCue(e, e.atkCd, target.x, target.y);
   if (e.atkCd > 0 || !target || target.hp <= 0) return;
@@ -124,6 +126,7 @@ function enemyAttackSentry(e, target, dt) {
 function enemyAttackPlayer(e, dt) {
   const p = G.player;
   if (!p || p.hp <= 0) return;
+  if (!sameFloor(e, p)) return;   // 保險：不管哪一種攻擊，不同樓層（陸橋上／下）的都打不到溫特
   monsterSwingCue(e, e.playerTouchCd || 0, p.x, p.y);
   if ((e.playerTouchCd || 0) > 0) return;
   e.playerTouchCd = 1;

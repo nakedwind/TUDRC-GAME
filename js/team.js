@@ -129,6 +129,7 @@ function ensureTeamUI() {
       const avatar = e.target.closest('.field-member-avatar');
       if (avatar) {
         e.preventDefault(); e.stopPropagation();
+        if (avatar.dataset.away) return;   // 搭捷運還沒到的隊員：不能下命令
         if (typeof firstAid !== 'undefined' && firstAid.picking) {   // 正在用急救包選隊員（js/equipment.js）：左鍵＝治療這位，右鍵＝取消
           if (e.button === 0) firstAidPickMember(avatar.dataset.type); else cancelFirstAidPick();
           return;
@@ -419,10 +420,21 @@ function renderFieldSquadHud() {
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
         '</article>';
-    }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>') +
+    }).join('') : (fieldAwayMembers().length ? '' : '<p class="field-squad-empty">尚無出勤隊員</p>')) +
+    fieldAwayMembers().map(fieldAwayCard).join('') +
     ((G.npcs || []).some(npc => npc.id === 'ball') && getTeam().includes('ball')
       ? '<article class="field-member field-member-support" data-type="ball"><span class="field-member-avatar" data-char="ball" style="cursor:pointer" title="選球球要跟誰"><img src="' + memberPortraitPath(CHARACTERS.ball) + '" alt="球球"></span><div class="field-member-status"><b>球球</b><span>搜救犬・跟著' + dogFollowName(dogFollowAnchor()) + '</span></div></article>' : ''));
   fieldSquadHud.classList.remove('hidden');
+}
+// 搭捷運還沒到的隊員（js/mrt-train.js 的 mrtAway）：血條那一塊先藏起來，改寫兩行說明＋倒數
+const fieldAwayMembers = () => (typeof mrtAwayList === 'function' ? mrtAwayList() : []).filter(m => TYPES[m.type]);
+function fieldAwayCard(m) {
+  const spec = TYPES[m.type], s = Math.ceil(m.t), time = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  const line1 = m.why === 'rode' ? '不小心搭上車' : '正在搭下班車';
+  const stopped = typeof mrtPowered === 'function' && G && G.mrtTrains && G.mrtTrains.length && !mrtPowered();   // 這站的發電機還沒全開：列車不會來
+  const line2 = m.t > 0 ? time + (m.why === 'rode' ? ' 後回站' : ' 後到站') : stopped ? '列車暫停中' : '列車即將進站';
+  return '<article class="field-member mrt-away" data-type="' + m.type + '"><span class="field-member-avatar" data-away="1" title="' + spec.name + '：' + line1 + '"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></span>' +
+    '<div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + '</b><p class="field-away-note">' + line1 + '<br><em>' + line2 + '</em></p></div></article>';
 }
 // 嚮導身上還有幾個急救包、杏仁水：顯示在 SP 條下面、置中（基地裡用不到，不顯示；js/camp-supply.js 的 guideKit）
 function guideKitHudHtml(member, spec) {

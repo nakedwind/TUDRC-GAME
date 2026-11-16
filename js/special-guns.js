@@ -156,6 +156,7 @@ function lineHit(p, ang, maxD, cands, hitR) {
   let target = null, d = maxD;
   if (typeof mothPlayerMisses === 'function' && mothPlayerMisses(p)) return { target, d };   // 吸了人面蝶的混亂鱗粉：八成打偏（js/human-face-butterfly.js）
   for (const o of cands) {
+    if (!G.cores.includes(o) && !onFloor(actorFloor(p), o)) continue;   // 特殊彈只打得到同一層的（陸橋上／下打不到）；核心照原本
     const b = typeof targetBodyBox === 'function' && G.enemies.includes(o) ? targetBodyBox(o) : { cx: o.x, cy: o.y - 20 };
     for (const [px, py] of [[o.x, o.y], [b.cx, b.cy]]) {
       const along = (px - p.x) * Math.cos(ang) + (py - p.y) * Math.sin(ang);
@@ -266,7 +267,7 @@ function fireShock(p, aim, b) {
     const hits = [r.target];
     for (let k = 0; k < b.chain; k++) {   // 跳到離上一隻最近、還沒被電到的怪物
       const cur = hits[hits.length - 1]; let next = null, nd = b.chainR * CELL;
-      for (const e of liveEnemies()) { if (hits.includes(e)) continue; const d = Math.hypot(e.x - cur.x, e.y - cur.y); if (d < nd) { nd = d; next = e; } }
+      for (const e of liveEnemies()) { if (hits.includes(e) || !sameFloor(e, cur)) continue; const d = Math.hypot(e.x - cur.x, e.y - cur.y); if (d < nd) { nd = d; next = e; } }
       if (!next) break;
       const a = bodyPoint(cur), c = bodyPoint(next);
       G.effects.push({ bullet: true, x1: a.x, y1: a.y, x2: c.x, y2: c.y, life: .18, life0: .18, color: '#d8f4ff' });
@@ -280,7 +281,7 @@ function fireShock(p, aim, b) {
     });
   } else struck.push({ x: end.x, y: end.y });
   for (const t of G.towers) {   // 波及隊員：離被電到的地方一格內
-    if (t.hp <= 0 || !struck.some(o => Math.hypot(t.x - o.x, t.y - o.y) <= CELL * 1.1)) continue;
+    if (t.hp <= 0 || !onFloor(actorFloor(p), t) || !struck.some(o => Math.hypot(t.x - o.x, t.y - o.y) <= CELL * 1.1)) continue;   // 不同樓層電不到
     bulletHurtTower(t, b.dmg * .6, b.color); t.dazeT = Math.max(t.dazeT || 0, .6);
     sentryStatus(t, '被電到了！', b.color);
   }
@@ -336,7 +337,7 @@ function glueLand(s) {
 function glueSlowAt(x, y, actor) {
   const pools = typeof G !== 'undefined' && G && G.gluePools; if (!pools || !pools.length) return 1;
   if (actor && (actor.flying || (typeof burrowUnderground === 'function' && burrowUnderground(actor)))) return 1;
-  if (!pools.some(g => inGlue(g, x, y))) return 1;
+  if (!pools.some(g => (!actor || fieldHits(g.floor, actor)) && inGlue(g, x, y))) return 1;   // 不同樓層的黏膠黏不到
   const foe = actor && G.enemies && G.enemies.includes(actor);
   return foe ? BULLETS.sticky.slow / foeMul(1) : BULLETS.sticky.slow;   // 怪物變更慢（剩下的速度除以倍率）；溫特、隊員照原本
 }

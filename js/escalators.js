@@ -277,8 +277,16 @@ function rideSideEscalator(a, footDy, dt, blocked) {
 function escalatorRiderKey(a, y) {
   const L = a && a.escSide;
   if (!L || L.map !== MAP) return { floor: visualFloor(a), band: DRAW_BAND.obj, y };
-  if (escalatorRiderHigh(a, L)) return { floor: 2, band: DRAW_BAND.onGround, y: L.sortY + a.y * 1e-7 };   // 1e-7：一定排在上半段扶手外殼（L.sortY + .5）之前   // 快到 2 樓：畫在 2 樓地板之上、2 樓的牆和人之下
+  // 快到 2 樓：畫在 2 樓地板之上，跟 2 樓的牆、人一樣照腳底 Y 排前後。
+  // （以前一律排在 2 樓的牆底下：手扶梯頂端貼著 2 樓的牆時，頭超過牆底那條線就會被牆切掉）
+  if (escalatorRiderHigh(a, L)) return { floor: 2, band: DRAW_BAND.obj, y: escalatorRiderSortY(a, L, y) };
   return { floor: visualFloor(a), band: DRAW_BAND.obj, y: L.sortY + a.y * 1e-4 };
+}
+// 快到 2 樓的乘客排前後用的 Y：至少算到「走道前緣」（前面扶手那條線）。
+// 手扶梯頂端常常緊貼著 2 樓的牆、柱子，牆底那條線會比走道後半段還低幾個像素；
+// 只看腳的位置的話，站在走道後半段的人會被當成「在牆後面」，整個人被牆蓋掉
+function escalatorRiderSortY(a, L, y) {
+  return Math.max(y, escalatorSideTopY(L, a.x) + L.spec.band[1] * L.k);
 }
 // ---- 接到 2 樓的側面手扶梯：人走到上半段（靠 2 樓那頭）時，畫面上改排在 2 樓地板的圖之上 ----
 // 不然還沒踩到 2 樓出入口的格子前，人都算一樓、會被 2 樓地板的圖蓋住。
@@ -337,8 +345,9 @@ function escalatorSortables(out) {
     out.push({ floor: 1, y: L.sortY + 1, draw: drawCover });   // 側面手扶梯的外殼：從一樓立起來（快到 2 樓的乘客另外在下面補畫）
     // 有乘客排到 2 樓地板之上時：扶手外殼再畫一次，蓋在他身上（外殼圖只有全透明和不透明，重畫不會變深）。
     // 只畫「前面扶手那條線」以上（沿著斜坡）：站在手扶梯前面的一樓的人不會被蓋到
-    const riders = [G.player, ...(G.towers || []), ...(G.npcs || []), ...(G.enemies || [])];
-    if (riders.some(a => a && a.escSide === L && escalatorRiderHigh(a, L))) out.push({ floor: 2, band: DRAW_BAND.onGround, y: L.sortY + .5, draw: () => {
+    // 排在最靠前（腳底 Y 最大）的那個乘客後面一點點，才蓋得到所有乘客
+    const riders = [G.player, ...(G.towers || []), ...(G.npcs || []), ...(G.enemies || [])].filter(a => a && a.escSide === L && escalatorRiderHigh(a, L));
+    if (riders.length) out.push({ floor: 2, band: DRAW_BAND.obj, y: Math.max(...riders.map(a => escalatorRiderSortY(a, L, a.y + 17))) + .01, draw: () => {
       ctx.save(); ctx.beginPath(); ctx.moveTo(L.x, L.y);
       for (let x = L.x; x <= L.x + L.w + .1; x += 4) ctx.lineTo(x, escalatorSideTopY(L, Math.min(x, L.x + L.w - .01)) + (L.spec.band[1] + 16) * L.k);   // 前面扶手下緣
       ctx.lineTo(L.x + L.w, L.y); ctx.closePath(); ctx.clip(); drawCover(); ctx.restore();
