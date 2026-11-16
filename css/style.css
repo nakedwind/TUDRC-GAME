@@ -1566,7 +1566,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .mission-map line.done { stroke: rgba(110,176,255,.6); stroke-dasharray: none; }   /* 已控制的區域連出去的線：藍色實線 */
 .mission-node { position: absolute; translate: -50% -50%;   /* 用 translate（不是 transform）置中：按下時的縮小效果才不會讓地點跳開、點不到 */ display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: #c9d2db; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
 .mission-node i { display: grid; place-items: center; width: 34px; height: 34px; border: 2px solid rgba(255,255,255,.25); border-radius: 50%; background: #1d2530; color: #fff; font-size: 15px; font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,.4); transition: transform .12s; }
-.mission-node span { padding: 2px 8px; border-radius: 99px; background: rgba(0,0,0,.45); white-space: nowrap; }
+.mission-node span { position: absolute; top: calc(100% + 5px); left: 50%; translate: -50% 0; padding: 2px 8px; border-radius: 99px; background: rgba(0,0,0,.45); white-space: nowrap; }   /* 名字掛在圓圈下面、不算進按鈕大小：這樣按鈕置中＝圓圈中心剛好在座標上，連線才會對準圓心 */
 .mission-node:hover i { transform: scale(1.1); }
 /* 地點的三種狀態：灰＝還沒開放；紅圈＋紅光暈呼吸＝已開放、還沒攻略（危險）；藍圈＝已控制 */
 .mission-node.boss i { border-color: #ff6b6b; background: #4a1d22; color: #ff9d8f; }   /* BOSS 地點鎖著時的樣子（開放、控制後照下面的紅／藍） */
