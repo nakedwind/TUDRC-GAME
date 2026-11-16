@@ -815,7 +815,7 @@ function beatBody(s, b, i) {
       // 直直走：照經過點走直線，不自動繞開不可穿透的格子（要鑽過桌子、櫃子之間時用）
       h('label', { class: 'row', style: 'flex-basis:100%;padding-left:62px;order:1;font-size:12px' }, h('input', { type: 'checkbox', checked: !!b.straight?.[id],
         onchange: e => { if (e.target.checked) (b.straight = b.straight || {})[id] = true; else if (b.straight) { delete b.straight[id]; if (!Object.keys(b.straight).length) delete b.straight; } commit(); } }),
-        '直直走（照經過點走直線，不自動繞開擋路的東西）')));
+        '直直走（照經過點走直線，不自動繞開擋路的東西）'));
     return out;
   };
   const mon = (key, title, make) => many(key, title, make, monSelect);
