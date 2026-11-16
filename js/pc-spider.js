@@ -15,7 +15,7 @@
    ・🎁 桌面上的禮物（PC_GIFTS，桌面圖示在 js/pc-desktop.js）：用這個視窗玩指定色數（g.gift＝禮物 id，上面多一條禮物說明），
      贏了就出現看劇情的按鈕；中途換成別的色數就回到一般的連環新接龍
      ・給JJ的禮物：單色、不限時 → 朔的生日（saku_birthday）
-     ・給Zukaa的禮物：雙色、10 分鐘內（時間跟右上角一樣，電腦關著或視窗縮小時不算）→ 塔納的生日（tana_birthday_01 開始，一段接一段播）
+     ・給Zukaa的禮物：雙色、15 分鐘內（時間跟右上角一樣，電腦關著或視窗縮小時不算）→ 塔納的生日（tana_birthday_01 開始，一段接一段播）
 */
 const PCS_LEVELS = { 1: '單色', 2: '雙色', 4: '四色' };
 const PCS_SUIT_SETS = { 1: [3, 3, 3, 3, 3, 3, 3, 3], 2: [3, 2, 3, 2, 3, 2, 3, 2], 4: [3, 2, 1, 0, 3, 2, 1, 0] };   // 8 組各 13 張的花色（號碼跟新接龍的 PCF_SUITS 一樣）
@@ -414,7 +414,7 @@ function renderPcsInfo(g) {
 // 打開過的禮物記在這台瀏覽器（PC_GIFT_STORE），T-Pad「回憶」App 會列出來可以重看（js/tpad-memories.js）
 const PC_GIFTS = {
   jj:    { name: '給JJ的禮物',    suits: 1, scene: 'saku_birthday',    play: '🎂 觀看朔的生日', done: '🎂 生日快樂！', owner: 'saku',  memTitle: '朔的生日' },
-  zukaa: { name: '給Zukaa的禮物', suits: 2, limit: 600, scene: 'tana_birthday_01', play: '🎁 打開禮物', done: '🎂 塔納，生日快樂！', owner: 'taana', memTitle: '塔納的生日' },
+  zukaa: { name: '給Zukaa的禮物', suits: 2, limit: 900, scene: 'tana_birthday_01', play: '🎁 打開禮物', done: '🎂 塔納，生日快樂！', owner: 'taana', memTitle: '塔納的生日' },
 };
 const JJ_GIFT_SCENE = PC_GIFTS.jj.scene;
 const PC_GIFT_STORE = 'tudrc_pc_gifts_v1';
