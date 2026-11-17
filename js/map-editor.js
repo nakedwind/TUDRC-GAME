@@ -4333,7 +4333,7 @@ function fillUnderMapField(m) {
   [...maps].sort(compareMapNames).forEach(o => { if (o.id === m.id) return; const opt = document.createElement('option'); opt.value = o.id; opt.textContent = o.name; sel.appendChild(opt); });
   sel.value = u.map && maps.some(o => o.id === u.map) ? u.map : '';
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
-  set('f_underDark', u.dark); set('f_underBlur', u.blur); set('f_underDx', u.dx); set('f_underDy', u.dy);
+  set('f_underDark', u.dark); set('f_underScale', u.scale); set('f_underBlur', u.blur); set('f_underDx', u.dx); set('f_underDy', u.dy);
   const above = document.getElementById('f_underAboveDark'); if (above) above.checked = u.aboveDark === false;
   const opts = sel.parentNode.parentNode.querySelector('.under-map-opts'); if (opts) opts.style.display = sel.value ? '' : 'none';
 }
@@ -4344,6 +4344,8 @@ function onUnderMapField() {
   else {
     const num = id => { const v = parseFloat(document.getElementById(id).value); return Number.isFinite(v) ? v : null; };
     const u = { map: mapId };
+    const scale = num('f_underScale');
+    if (scale != null) u.scale = Math.max(10, Math.min(300, Math.round(scale)));
     const dark = num('f_underDark'), blur = num('f_underBlur'), dx = num('f_underDx'), dy = num('f_underDy');
     if (dark != null) u.dark = Math.max(0, Math.min(100, Math.round(dark)));
     if (blur != null) u.blur = Math.max(0, Math.min(30, blur));
@@ -4356,7 +4358,7 @@ function onUnderMapField() {
   const name = mapId && (maps.find(o => o.id === mapId) || {}).name;
   setStatus(name ? '這張地圖黑色的地方會透出「' + name + '」' : '這張地圖底下沒有透出別的地圖了', '#8fd3ff');
 }
-['f_underMap', 'f_underDark', 'f_underBlur', 'f_underDx', 'f_underDy', 'f_underAboveDark'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', onUnderMapField); });
+['f_underMap', 'f_underDark', 'f_underScale', 'f_underBlur', 'f_underDx', 'f_underDy', 'f_underAboveDark'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', onUnderMapField); });
 const deepSpeedInput = document.getElementById('f_deepWaterSpeed');
 if (deepSpeedInput) deepSpeedInput.addEventListener('change', e => {
   const v = parseFloat(e.target.value);

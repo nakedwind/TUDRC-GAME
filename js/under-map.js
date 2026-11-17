@@ -4,6 +4,7 @@
      map  ＝底下要透出來的地圖 id
      dark ＝底下那張壓暗幾 %（60＝只剩 40% 亮度）
      blur ＝模糊多少（像素，越大越糊）
+     scale＝底下那張畫多大（%，80＝縮成 8 成大；沒寫＝100）
      dx、dy＝底下那張往右、往下移幾格（沒寫＝兩張地圖中心對齊）
      aboveDark＝false 的話戰場的黑幕也會蓋住它（沒寫＝不管燈亮不亮都看得到，只畫在完全沒鋪東西的格子）
    這個檔案前半段是遊戲和地圖編輯器共用的畫法（編輯器看到的就是遊戲裡的樣子），後半段是遊戲專用。 */
@@ -19,17 +20,18 @@ function underMapSettings(m) {
   return {
     map: u.map,
     dark: Math.max(0, Math.min(100, num(u.dark, UNDER_MAP_DEFAULT.dark))),
+    scale: Math.max(10, Math.min(300, num(u.scale, 100))) / 100,
     blur: Math.max(0, num(u.blur, UNDER_MAP_DEFAULT.blur)),
     dx: Number.isFinite(u.dx) ? u.dx : null, dy: Number.isFinite(u.dy) ? u.dy : null,
     aboveDark: u.aboveDark !== false,
   };
 }
-// 底下那張要往右、往下移幾格（沒設定＝兩張中心對齊）
+// 底下那張要畫在哪、畫多大：ucols、urows＝縮放後佔幾格寬高；dx、dy＝左上角往右、往下移幾格（沒設定＝兩張中心對齊）
 function underMapOffset(cfg, under, cols, rows) {
-  const ucols = under.cols || cols, urows = under.rows || rows;
+  const k = cfg.scale || 1, ucols = (under.cols || cols) * k, urows = (under.rows || rows) * k;
   return { ucols, urows,
-    dx: cfg.dx != null ? cfg.dx : Math.floor((cols - ucols) / 2),
-    dy: cfg.dy != null ? cfg.dy : Math.floor((rows - urows) / 2) };
+    dx: cfg.dx != null ? cfg.dx : (cols - ucols) / 2,
+    dy: cfg.dy != null ? cfg.dy : (rows - urows) / 2 };
 }
 // 把底下那張地圖整張畫成一張小圖（壓暗、模糊也一起做好）
 //   tileOf(id) → 素材資料（w、h、color）；imgOf(素材) → 已經下載好的圖（還沒好＝null）
