@@ -628,6 +628,7 @@ document.getElementById('expandEditor')?.addEventListener('click', () => {
 });
 // 地圖暫存放在瀏覽器資料庫（js/map-editor-store.js）；寫入失敗要大聲提醒
 function saveMaps() {
+  auto1FCache = null;   // 地圖改了：1 樓自動擋住的格子下次重算
   if (typeof MapLevels !== 'undefined') { const m = curMap(); if (m && MapLevels.syncDeck(m, tileById) && typeof levelCache !== 'undefined') levelCache = null; }   // 2 樓地面自動模式：搬了圖、改了圖層就重算（js/map-levels.js）
   saveDeletedMaps();   // 刪掉的地圖記下來；復原回來的拿掉記號
   EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps)).catch(e => setStatus('⚠️ 自動存檔失敗（' + (e && e.name || e) + '）：請馬上按「💾 存到專案」或「下載」保存！', '#ff8f8f'));
@@ -928,6 +929,7 @@ function roundRect(x, y, w, h, r) {
   ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
+let auto1FCache = null;   // 有 2 樓的地圖：1 樓自動擋住的格子（draw 用，saveMaps 時清掉）
 // 🚇 底下透出的地圖：用遊戲的同一套程式（js/under-map.js）畫成壓暗、模糊的底圖，貼在黑底上、所有圖層下面
 // 換地圖就重畫（底下那張剛被改過也會跟著更新）；圖片還沒下載完會過一下再補畫
 const editorUnderCache = {};
@@ -1495,6 +1497,24 @@ function draw() {
     if (op < 100) { ctx.save(); ctx.globalAlpha = op / 100; }
     paint();
     if (op < 100) ctx.restore();
+  }
+  // 有 2 樓的地圖：1 樓的人自動擋住的格子（黑色沒鋪東西、只有 2 樓、牆面、只有牆蓋著的地方；js/map-levels.js 的 auto1FWalls）
+  // 開著紅格時畫成紅色斜線，跟手畫的紅格分開（不用另外畫，遊戲裡就會擋 1 樓的人）
+  let auto1F = null;
+  if (showSolid && typeof MapLevels !== 'undefined' && MapLevels.auto1FWalls) {   // 算一次要 20 毫秒：存檔（地圖有改）或換地圖才重算
+    if (!auto1FCache || auto1FCache.m !== m) auto1FCache = { m, cells: MapLevels.auto1FWalls(m, tileById) };
+    auto1F = auto1FCache.cells;
+  }
+  if (auto1F && auto1F.size) {
+    ctx.save(); ctx.strokeStyle = 'rgba(255,90,90,.45)'; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (const key of auto1F) {
+      if (solid.has(key)) continue;
+      const [c, r] = key.split(',').map(Number), x = OX + c * CELL, y = OY + r * CELL;
+      ctx.moveTo(x, y + CELL / 2); ctx.lineTo(x + CELL / 2, y);
+      ctx.moveTo(x, y + CELL); ctx.lineTo(x + CELL, y);
+      ctx.moveTo(x + CELL / 2, y + CELL); ctx.lineTo(x + CELL, y + CELL / 2);
+    }
+    ctx.stroke(); ctx.restore();
   }
   // 效果層 + 格線（畫在圖片之上）
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {

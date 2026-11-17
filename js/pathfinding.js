@@ -34,6 +34,11 @@ const solid2OffsetAt = (c, r) => floor2SolidOffsets[c + ',' + r];
 // 平台邊緣那排牆的牆面（js/map-levels.js 的 wallFaceCells）：就算地圖上畫成 2 樓地面，2 樓的人也走不進去，不會站到牆面上
 let floor2WallFace = new Set();
 function setMapWallFaces(cells) { floor2WallFace = new Set(cells || []); }
+// 1 樓的人自動擋住的格子（黑色沒鋪東西的地方、只有 2 樓的格子、平台邊緣的牆面；js/map-levels.js 的 auto1FWalls）：
+// 只擋 1 樓的人，跟一樓紅格 mapWalls 分開放（不然 2 樓的物件牆判定、燈光都會被影響）
+let floor1Auto = new Set();
+function setMapFloor1Auto(cells) { floor1Auto = new Set(cells || []); }
+const wall1F = k => mapWalls.has(k) || floor1Auto.has(k);
 const deckBlocked = k => floor2Solid.has(k) || floor2WallFace.has(k) || (mapWalls.has(k) && typeof objectWallOn2F === 'function' && objectWallOn2F(k));
 function setMapFloors(deck, ramps, solid2) {
   floor2SolidOffsets = {};
@@ -44,7 +49,7 @@ const wallAt = (f, c, r) => hasFloors ? wallOnFloor(f, c, r) : mapWalls.has(c + 
 function wallOnFloor(f, c, r) {
   const k = c + ',' + r;
   if (rampCells.has(k)) return mapWalls.has(k);
-  if (f !== 2) return mapWalls.has(k);
+  if (f !== 2) return wall1F(k);
   return !deckCells.has(k) || deckBlocked(k);
 }
 // 站在樓層出入口上的人，走出去的格子照「走出去之後在哪一層」判斷：走到 2 樓地面不管一樓有沒有牆都走得過去，走到一般格子照一樓的牆
@@ -74,8 +79,8 @@ function wallNow(c, r) {
   if (!floorScoped) floorUnscoped();
   const k = c + ',' + r;
   if (rampCells.has(k)) return mapWalls.has(k) || (floorCtx !== 2 && !floorOnRamp && floorOnDeck);   // 一樓的人站在 2 樓地面的格子上：不能從這邊走進手扶梯（只能從一樓那頭上去）
-  if (floorOnRamp) return deckCells.has(k) ? deckBlocked(k) : mapWalls.has(k);
-  return floorCtx === 2 ? !deckCells.has(k) || deckBlocked(k) : mapWalls.has(k);
+  if (floorOnRamp) return deckCells.has(k) ? deckBlocked(k) : wall1F(k);
+  return floorCtx === 2 ? !deckCells.has(k) || deckBlocked(k) : wall1F(k);
 }
 const isWall = (c, r) => hasFloors ? wallNow(c, r) : mapWalls.has(c + ',' + r);
 // 處理某個角色之前先呼叫：設好「他在幾樓、是不是站在樓層出入口上」（算完用 clearFloorCtx 還原）
