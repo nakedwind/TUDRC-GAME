@@ -488,7 +488,16 @@ function unwedgeSentry(t) {
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
 // goalFloor：目的地在幾樓（有陸橋的地圖才用；沒給＝照那一格：只有 2 樓的＝2、只有 1 樓的＝1、陸橋上照隊員自己）
 function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.followDark), goalFloor = null) {   // allowDark：找一條可以穿過黑暗的路（召喚時、跟著溫特走時、去撿地上的東西時）
-  if (hasFloors) return buildSentryPathFloors(t, targetX, targetY, allowDark, goalFloor || placeFloorAt(targetX, targetY, t));
+  if (hasFloors) {
+    // 走不到的地方：同一個起點、同一個目的地 2 秒內不再重找（兩層一起找路走不到時會搜到上限 6000 格，一次要好幾百毫秒，
+    // 隊員每隔一下就重找一次，遊戲會一頓一頓的）
+    const gf = goalFloor || placeFloorAt(targetX, targetY, t), now = performance.now();
+    const failKey = cellAt(t.x, t.y).join(',') + ',' + actorFloor(t) + '>' + cellAt(targetX, targetY).join(',') + ',' + gf + (allowDark ? 'd' : '');
+    if (t._pathFail && t._pathFail.key === failKey && now < t._pathFail.until) return null;
+    const path = buildSentryPathFloors(t, targetX, targetY, allowDark, gf);
+    t._pathFail = path == null ? { key: failKey, until: now + SENTRY_PATH_FAIL_WAIT } : null;
+    return path;
+  }
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
   const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return null;
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
@@ -518,6 +527,7 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.f
 // 優先走順向的手扶梯，只有逆向的到得了才走逆向
 const SENTRY_ESC_HURRY = 2.2;   // 逆著側面手扶梯走時，隊員的腳步加快幾倍（不然會被階梯帶回去）
 const SENTRY_ESC_AGAINST = 400, SENTRY_ESC_WITH = .7;
+const SENTRY_PATH_FAIL_WAIT = 2000;   // 找不到路之後，同一段路隔多久（毫秒）才再找一次
 const SENTRY_PATH_MAX = 6000;   // 一次找路最多搜幾格（兩層加起來）   // 逆向每格加 400：只要有順向的路（再遠也一樣）就走順向，真的只有逆向到得了才走逆向
 // 側面的手扶梯是斜的：斜坡上能站的格子排成一條斜線，上下左右一格一格接不起來。
 // 所以每座當成一條「低的那頭 ↔ 高的那頭」的通道：走的時候只管左右走，高度由手扶梯自己跟著斜坡調（js/escalators.js 的 rideSideEscalator）。

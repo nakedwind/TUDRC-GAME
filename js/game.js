@@ -2285,6 +2285,10 @@ function frame(ts) {
   if (menuOpen && G.cameraShakeT) G.cameraShakeT = 0;   // 暫停中（教學、對話、選單…）：被打到的鏡頭震動倒數在 update 裡跑、不會減少，不歸零畫面會一直抖
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
   if (!menuOpen && !frozen && typeof updateBallBark === 'function') updateBallBark(dt);   // 球球偶爾叫一下（js/ball-poses.js）
+  // 剛出現、還沒決定在幾樓的人（剛進地圖的溫特、隊員、NPC）：先照站的格子決定樓層，才開始走路、檢查有沒有卡在牆裡。
+  // 不然第一幀會照 1 樓的規則判斷：站在只有 2 樓的地板上＝卡在牆裡，被推到最近的 1 樓空格（樓梯旁的洞、柱子裡、黑色的地方），
+  // 之後一直找不到路回 2 樓，每次找路都把整張地圖搜一遍，遊戲就會一頓一頓的（B56 出過）
+  if (hasFloors) for (const a of [G.player, ...(G.towers || []), ...(G.npcs || [])]) if (a && a.floor == null) updateActorFloor(a);
   if (!menuOpen && !frozen) { setFloorCtx(G.player); updatePlayer(sdt); updateActorFloor(G.player); clearFloorCtx(); autoStairTravel(); holdPickupTick(dt); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓；按住空白鍵連續拾取
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
