@@ -944,6 +944,8 @@ function drawMapTop(ctx) {
 // 這樣它會緊接在那張圖之後畫出來，跟編輯器看到的上下關係一致。
 // 重疊用「實際像素範圍」判斷（含方向鍵微調的 ox/oy），因為常常是靠微調才疊在一起、格子並沒有交集。
 let occCache = null, occCacheFor = null, stairUpperRects = [];
+// 平台邊緣、跨樓層的牆「下半段」的範圍（x, y, 寬, 高）：2 樓的東西不能畫在這裡（js/render.js 畫 2 樓時用 clipOutEdgeWallFaces 挖掉）
+let edgeLowerRects = [];
 // 側面的手扶梯（b.side）不算：它上半段的長方形還包含手扶梯後面的一樓地面，站在那裡的人不能被當成 2 樓（會畫到圍欄前面）；
 // 真的站在手扶梯上的人由 js/escalators.js 的 escalatorRiderKey 自己決定畫在哪。燈光（js/lighting.js）還是整塊都算
 // 這張圖有沒有自己的擋路格：置物箱（擋路格在 data/storage-boxes.js）、其他物件（data/prop-collisions.js），都是在物件編輯器設定的。
@@ -1037,6 +1039,13 @@ function mapOccluders() {
     if (it.kind !== 'stamp' || !edgeWalls.has(it.stamp) || it.floor !== 2 || it.band !== DRAW_BAND.obj) continue;
     it.y = it.y1;
   }
+  // 這種牆拆成上下兩半畫：下半段算 1 樓，在整個 2 樓之前就畫完了。2 樓的人、影子、建築只要有一點超過分界線往下，
+  // 就會被畫在牆的下半段上面，看起來穿過牆（影子露出來、旁邊的燈蓋在牆上）。2 樓的東西本來就不可能在這面牆前面，
+  // 所以畫 2 樓時把這些下半段整塊挖掉，什麼都畫不上去
+  edgeLowerRects = items.filter(it => it.part === 'lower' && edgeWalls.has(it.stamp)).map(it => {
+    const b = it.vis || it;
+    return [OX + b.x0, OY + it.splitY, b.x1 - b.x0, b.y1 - it.splitY];
+  }).filter(r => r[2] > 0 && r[3] > 0);
   // 2 樓的地板圖不畫在「牆面」的格子上（js/map-levels.js 的 wallFaceCells，跟擋路用同一份）：
   // 跨樓層的牆下半段算一樓、先畫，2 樓的地板在一樓全部畫完之後才畫；地板圖如果鋪到牆底下，就會把牆的下半段蓋掉，
   // 看起來牆面中間偏下那段變成地板（B56、R89 出過）。所以地板圖在牆面格子挖洞，讓底下的牆露出來
@@ -1138,6 +1147,20 @@ function withPartClip(ctx, it, fn) {
   const x = OX + it.x0 - CELL * 6, w = it.x1 - it.x0 + CELL * 12, my = OY + it.splitY;
   if (it.part === 'lower') ctx.rect(x, my, w, CELL * 40); else ctx.rect(x, my - CELL * 40, w, CELL * 40);
   ctx.clip(); fn(); ctx.restore();
+}
+// 開始畫 2 樓時呼叫（js/render.js）：把平台邊緣牆的下半段挖掉，之後畫的 2 樓東西都畫不到那裡。有挖就回傳 true（畫完要 ctx.restore()）
+function clipOutEdgeWallFaces(ctx) {
+  if (!MAP) return false;
+  mapOccluders();
+  if (!edgeLowerRects.length) return false;
+  const v = mapDrawRect, BIG = 1e6;
+  ctx.save();
+  for (const [x, y, w, h] of edgeLowerRects) {
+    if (v && (x + w < v.x0 || x > v.x1 || y + h < v.y0 || y > v.y1)) continue;   // 畫面外的不用挖
+    const p = new Path2D(); p.rect(-BIG, -BIG, 2 * BIG, 2 * BIG); p.rect(x, y, w, h);
+    ctx.clip(p, 'evenodd');   // 每挖一塊都跟前面的範圍取交集＝所有下半段都挖掉
+  }
+  return true;
 }
 function collectMapOccluders(ctx, out) {
   if (!MAP) return;

@@ -1135,7 +1135,12 @@ function draw() {
     if (!drawFloorWarned.has(who)) { drawFloorWarned.add(who); console.warn('[樓層體檢] 畫面上有東西沒標樓層（當成 1 樓）：' + who); }
   }
   sortables.sort(drawOrder);   // 先比樓層、再比層、最後照底部 Y（js/pathfinding.js）
-  for (const it of sortables) it.draw();
+  let edgeClipped = false;   // 畫到 2 樓時：平台邊緣牆的下半段挖掉，2 樓的人、影子、建築都不會畫到牆上（js/maploader.js 的 clipOutEdgeWallFaces）
+  for (const it of sortables) {
+    if (!edgeClipped && it.floor === 2 && hasFloors && typeof clipOutEdgeWallFaces === 'function') edgeClipped = clipOutEdgeWallFaces(ctx) || null;
+    it.draw();
+  }
+  if (edgeClipped) ctx.restore();
   if (typeof drawDoorLocks === 'function') drawDoorLocks(ctx);   // 解開時掉下來的鎖鏈（js/doors.js）
   drawCoreShards(ctx);         // 異質核心碎片
   drawFlareShots(ctx);         // 飛行中的照明彈
