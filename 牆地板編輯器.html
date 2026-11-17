@@ -33,6 +33,9 @@
   .st-card b { font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
   .st-tag { font-size:12px; color:var(--tag); font-weight:700 }
   .st-card small { font-size:11px; color:#8fa2b5 }
+  .st-thumb { position:relative }
+  .st-top { position:absolute; height:0; border-top:2px dashed #ffe14d; pointer-events:none }
+  .st-top-row button { margin-left:3px }
   .help { color:#8fa2b5; font-size:13px }
   @media (max-width:700px) { body { padding:12px } #stSearch { width:100% } }
 </style>
@@ -44,6 +47,7 @@
     <p class="help">
       🧱 牆＝牆、柱子這類立起來的東西：放在 2 樓平台邊緣時，牆面那幾格不能當 2 樓地面走，2 樓地板圖也不會畫在牆面上；也不算 2 樓地板。<br>
       🟫 地板＝可以站上去的地面：2 樓地面自動從圖層算的地圖，放在 2 樓（任何圖層）就算 2 樓地面。<br>
+      牆頂幾列：標成牆的素材，縮圖上的<b style="color:#ffe14d">黃色虛線</b>以上是牆頂（2 樓平台邊緣時 2 樓的人可以走到這裡），以下是牆面（走不進去）。照圖上牆頂真正的高度選，沒設＝1 列。<br>
       ⚪ 不是牆＝門、閘門、欄杆、手扶梯…：不會被當成平台邊緣的牆；算不算地板照圖層。<br>
       沒標＝照圖層：2 樓的地板類圖層（不是物件圖層、名稱沒有「牆」）＝地板，其他不算；不會被當成牆。
     </p>
@@ -68,6 +72,7 @@
       <button class="st-act" data-tag="floor">🟫 設成地板 <kbd>2</kbd></button>
       <button class="st-act" data-tag="none">⚪ 設成不是牆 <kbd>3</kbd></button>
       <button class="st-act" data-tag="">拿掉標記 <kbd>0</kbd></button>
+      <span class="st-top-row">牆頂：<button class="st-top-act" data-top="0">0 列</button><button class="st-top-act" data-top="1">1 列</button><button class="st-top-act" data-top="2">2 列</button><button class="st-top-act" data-top="3">3 列</button></span>
       <button id="stSelAll">全選看得到的 <kbd>Ctrl+A</kbd></button>
       <button id="stSelNone">取消選取 <kbd>Esc</kbd></button>
     </div>
@@ -84,11 +89,11 @@
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script src="data/tiles.js?v=merge-20261115c"></script>        <!-- 素材庫 -->
   <script src="data/maps.js?v=undermap-20261118"></script>       <!-- 戰鬥地圖（算每張素材用在幾張地圖） -->
-  <script src="data/surface-tags.js?v=surftag-20261117"></script>  <!-- 牆／地板標記 -->
-  <script src="js/surface-tags.js?v=floorclean-20261117"></script>
+  <script src="data/surface-tags.js?v=walltop-20261118"></script>  <!-- 牆／地板標記 -->
+  <script src="js/surface-tags.js?v=walltop-20261118"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
-  <script src="js/surface-tag-editor.js?v=surftag-20261117"></script>
+  <script src="js/surface-tag-editor.js?v=walltop-20261118"></script>
   <script>ProjectSave.attach({
     after: ['stExport'],
     files: [{ path: 'data/surface-tags.js', label: '牆地板標記', text: () => SurfaceTagEditor.source() }],

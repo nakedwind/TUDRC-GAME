@@ -69,7 +69,10 @@ const MapLevels = (() => {
   //   ・樓層是 2 樓、但牆腳那一列不在 2 樓地面上（牆不是站在 2 樓走道上，而是平台的邊）。
   // 站在 2 樓走道上的牆（牆腳踩在 2 樓地面上）不算：那種是 2 樓房間的後牆，人本來就可以走到它後面。
   // 回傳牆面蓋到的格子。2 樓地面自動算時扣掉（syncDeck）；遊戲（js/maploader.js）另外拿來擋 2 樓的人、讓 2 樓地板圖不畫在牆面上；編輯器的 🏢 筆刷不能畫在牆面上。
-  const WALL_TOP_ROWS = 2;   // 平台邊緣的牆：最上面幾列算牆頂（2 樓的人可以走），下面才是牆面
+  // 平台邊緣的牆：最上面幾列算牆頂（2 樓的人可以走），下面才是牆面。
+  // 每張牆的圖牆頂高度不一樣（捷運的牆頂不到 1 列、大柱子快 2 列），在 🧱 牆地板編輯器 每張素材設「牆頂幾列」（js/surface-tags.js 的 surfaceWallTopOf，沒設＝1 列）。
+  // 以前一律 2 列：牆頂只有 1 列的牆，第 2 列其實是牆面，人卻走得上去，看起來就像站在牆上（B56 有的牆擋得住、有的擋不住就是這樣）
+  const wallTopRowsOf = id => typeof surfaceWallTopOf === 'function' ? surfaceWallTopOf(id) : 1;
   // tops（可以不給）：Map，記每一欄牆頂第一列 → 下面也算牆頂的那幾列（2 樓地面自動算時，牆頂第一列能走，下面幾列也跟著能走）
   function wallFaceCells(m, tileOf, tops) {
     const out = new Set();
@@ -85,7 +88,7 @@ const MapLevels = (() => {
       const cols = []; for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) cols.push(c);
       const top = Math.ceil(r0 - .5), bottom = Math.ceil(r0 + h - .5) - 1;   // 牆頂那列、牆腳那列
       if (lv !== 'span' && cols.some(c => deck.has(c + ',' + bottom))) continue;   // 站在 2 樓走道上的牆
-      const walk = Math.max(1, Math.min(WALL_TOP_ROWS, bottom - top));   // 牆頂可以走幾列（矮牆至少留最下面一列當牆面）
+      const walk = Math.max(0, Math.min(wallTopRowsOf(s.id), bottom - top));   // 牆頂可以走幾列（至少留最下面一列當牆面）
       for (const c of cols) for (let r = top + walk; r <= bottom; r++) out.add(c + ',' + r);
       if (tops) for (const c of cols) for (let r = top + 1; r < top + walk; r++) { const k = c + ',' + top, a = tops.get(k) || []; a.push(c + ',' + r); tops.set(k, a); }
     }
