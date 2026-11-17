@@ -38,22 +38,3 @@ function surfaceTagGuess(t) {
   if (/floor|地板|地面|ground|tile_floor|磁磚/i.test(name)) return 'floor';
   return null;
 }
-
-// ---- 牆頂幾列（只對標成「牆」的素材有用）----
-// 平台邊緣的牆：圖最上面幾列是牆頂（2 樓的人可以走），下面是牆面（走不進去）。每張牆的圖牆頂高度不一樣，所以每張素材自己設。
-// 資料：data/surface-tags.js 的 SURFACE_WALL_TOP＝{ 素材 id: 列數 }，沒列＝SURFACE_WALL_TOP_DEFAULT（1 列）
-// 編輯器還沒存到專案的修改一樣先存在這個瀏覽器（SURFACE_WALL_TOP_DRAFT，null＝回到預設）
-const SURFACE_WALL_TOP_DRAFT = 'tudrc_surface_walltop_draft_v1';
-const SURFACE_WALL_TOP_DEFAULT = 1;
-let surfaceWallTopCache = { raw: undefined, data: {} };
-function surfaceWallTopData() {
-  let raw = null; try { raw = localStorage.getItem(SURFACE_WALL_TOP_DRAFT); } catch (_) {}
-  if (raw === surfaceWallTopCache.raw) return surfaceWallTopCache.data;
-  const data = { ...(typeof SURFACE_WALL_TOP !== 'undefined' ? SURFACE_WALL_TOP : {}) };
-  let draft = null; try { draft = raw ? JSON.parse(raw) : null; } catch (_) {}
-  if (draft && typeof draft === 'object') for (const [id, v] of Object.entries(draft)) { if (Number.isFinite(v)) data[id] = v; else delete data[id]; }
-  surfaceWallTopCache = { raw, data };
-  return data;
-}
-// 這張牆的牆頂有幾列（0＝整張都是牆面，2 樓的人完全走不上去）
-function surfaceWallTopOf(id) { const v = surfaceWallTopData()[id]; return Number.isFinite(v) ? Math.max(0, Math.round(v)) : SURFACE_WALL_TOP_DEFAULT; }
