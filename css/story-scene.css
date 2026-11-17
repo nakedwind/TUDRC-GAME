@@ -114,12 +114,19 @@ body.story-scene #dialogueBox.story-anger #storyPortraitEmote {
 #storyBanner.rainbow .big::after { content:attr(data-text); position:absolute; inset:0; pointer-events:none; color:transparent; -webkit-text-stroke:0; text-shadow:none;
   background:linear-gradient(110deg, transparent 0 40%, rgba(255,255,255,.95) 47%, #fff 50%, rgba(255,255,255,.95) 53%, transparent 60% 100%) no-repeat;
   background-size:250% 100%; -webkit-background-clip:text; background-clip:text; animation: rb-shine 2.2s ease-in-out infinite; }
+/* 背後的旋轉放射光：跟轉蛋抽到 SSR 的彩虹光一樣（css/style.css 的 #gacha .gc-stage.rainbow .gc-rays），粉／藍／黃光條、中間亮往外淡掉，放大一圈慢慢轉 */
+#storyBanner.rainbow { overflow:hidden; }   /* 放射光只畫在遊戲畫面裡，不超出去 */
+#storyBanner.rainbow::before { content:''; position:absolute; left:50%; top:50%; width:150vmin; height:150vmin; margin:-75vmin 0 0 -75vmin; z-index:-1; border-radius:50%; pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,122,217,.45) 0deg 6deg,transparent 6deg 15deg,rgba(122,215,255,.45) 15deg 21deg,transparent 21deg 30deg,rgba(255,227,110,.45) 30deg 36deg,transparent 36deg 45deg);
+  -webkit-mask:radial-gradient(circle,#000 12%,transparent 62%); mask:radial-gradient(circle,#000 12%,transparent 62%); animation: rb-rays-in .8s ease-out both, rb-spin 9s linear infinite; }
+@keyframes rb-rays-in { from { opacity:0; } to { opacity:1; } }
+@keyframes rb-spin { to { rotate:360deg; } }
 @keyframes rb-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.12); } }
 @keyframes rb-shine { 0% { background-position:150% 0; } 70%,100% { background-position:-60% 0; } }
 #storyBanner.rainbow .small { font-style:italic; transform:skewX(-12deg); text-shadow:none; }
 #storyBanner.rainbow .small span { display:inline-block; background:linear-gradient(90deg,var(--rb-0),var(--rb-1),var(--rb-2),var(--rb-3),var(--rb-4),var(--rb-5),var(--rb-6)); background-size:700% 100%;
   background-position:calc(var(--k) * 16.6%) 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-stroke:1.5px #fff; filter:drop-shadow(2px 2px 0 #1b0a6e); }
-@media (prefers-reduced-motion: reduce) { #storyBanner.in, #storyBanner.rainbow .big, #storyBanner.rainbow .big::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #storyBanner.in, #storyBanner.rainbow .big, #storyBanner.rainbow .big::after, #storyBanner.rainbow::before { animation: none; } }
 /* 回想濾鏡（每頁 filter: 'memory'）：畫面泛黃、顏色變淡，四邊一圈柔柔的亮邊；慢慢淡入淡出（對話框不受影響） */
 #storyFilter { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity 1s ease; }
 #storyFilter.on { opacity:1; }
