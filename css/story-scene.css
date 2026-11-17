@@ -98,23 +98,28 @@ body.story-scene #dialogueBox.story-anger #storyPortraitEmote {
   text-shadow:-3px -3px 0 #3a1f3d, 3px -3px 0 #3a1f3d, -3px 3px 0 #3a1f3d, 3px 3px 0 #3a1f3d, 6px 7px 0 #ff5a7a, 0 0 22px rgba(255,210,63,.55); }
 #storyBanner.in { animation: story-banner-in .55s cubic-bezier(.2,.9,.3,1.25) both; }
 @keyframes story-banner-in { 0% { opacity:0; transform:scale(2.4) rotate(-6deg); } 60% { opacity:1; transform:scale(.94) rotate(1deg); } 100% { opacity:1; transform:scale(1) rotate(0); } }
-/* 彩虹字（每頁 bannerStyle: 'rainbow'）：故意做得很俗的文字藝術風——每個字輪流換彩虹色、深藍粗外框、往右下疊好幾層的立體陰影、
-   字一個一個上下跳、左右歪來歪去；上面那行小字是彩虹漸層＋斜體。顏色順序在 --rb-* 這幾個變數 */
+/* 彩虹字（每頁 bannerStyle: 'rainbow'）：故意做得很俗的文字藝術風——每個字輪流換彩虹色、加粗、深藍粗外框、往右下疊好幾層的立體陰影；
+   整行一下放大一下縮小，再有一道白光從左掃到右；上面那行小字是彩虹漸層＋斜體。顏色順序在 --rb-* 這幾個變數 */
 #storyBanner.rainbow { --rb-0:#ff2a2a; --rb-1:#ff9900; --rb-2:#ffee00; --rb-3:#33dd33; --rb-4:#00ccff; --rb-5:#3355ff; --rb-6:#cc33ff; }
-#storyBanner.rainbow .big, #storyBanner.rainbow .small { font-family:"Comic Sans MS","Microsoft JhengHei","PingFang TC",sans-serif; }
-#storyBanner.rainbow .big { text-shadow:none; }
-#storyBanner.rainbow .big span { display:inline-block; color:var(--rb-0); -webkit-text-stroke:3px #1b0a6e; paint-order:stroke fill;
-  text-shadow:1px 1px 0 #6a1b9a, 2px 2px 0 #6a1b9a, 3px 3px 0 #6a1b9a, 4px 4px 0 #4a148c, 5px 5px 0 #4a148c, 6px 6px 0 #4a148c, 7px 7px 0 #2a0a5e, 9px 10px 6px rgba(0,0,0,.6), 0 0 18px #fff700;
-  animation: rb-bob 1.1s ease-in-out infinite; animation-delay: calc(var(--k) * -.14s); }
+#storyBanner.rainbow .big, #storyBanner.rainbow .small { font-family:"Comic Sans MS","Microsoft JhengHei","PingFang TC",sans-serif; font-weight:900; }
+#storyBanner.rainbow .big { position:relative; text-shadow:none; animation: rb-pulse 1.6s ease-in-out infinite; }
+/* 加粗：先用同色往四周多描 2 像素（字變胖），外面再包深藍外框，最後是立體陰影和黃色光暈 */
+#storyBanner.rainbow .big span { color:var(--rb-0); -webkit-text-stroke:4px #1b0a6e; paint-order:stroke fill;
+  text-shadow:2px 0 0 currentColor, -2px 0 0 currentColor, 0 2px 0 currentColor, 0 -2px 0 currentColor, 2px 2px 0 currentColor, -2px -2px 0 currentColor,
+    4px 4px 0 #6a1b9a, 5px 5px 0 #6a1b9a, 6px 6px 0 #4a148c, 7px 7px 0 #4a148c, 8px 8px 0 #2a0a5e, 9px 9px 0 #2a0a5e, 11px 12px 6px rgba(0,0,0,.6), 0 0 20px #fff700; }
 #storyBanner.rainbow .big span:nth-child(7n+2) { color:var(--rb-1); } #storyBanner.rainbow .big span:nth-child(7n+3) { color:var(--rb-2); }
 #storyBanner.rainbow .big span:nth-child(7n+4) { color:var(--rb-3); } #storyBanner.rainbow .big span:nth-child(7n+5) { color:var(--rb-4); }
 #storyBanner.rainbow .big span:nth-child(7n+6) { color:var(--rb-5); } #storyBanner.rainbow .big span:nth-child(7n) { color:var(--rb-6); }
-#storyBanner.rainbow .big span:nth-child(odd) { --tilt:-7deg; } #storyBanner.rainbow .big span:nth-child(even) { --tilt:6deg; }
-@keyframes rb-bob { 0%,100% { transform:translateY(0) rotate(var(--tilt,0deg)); } 50% { transform:translateY(-12px) rotate(calc(var(--tilt,0deg) * -1)); } }
+/* 掃光：同一行字疊在上面，只有字的形狀裡面有一條斜斜的白光從左掃到右 */
+#storyBanner.rainbow .big::after { content:attr(data-text); position:absolute; inset:0; pointer-events:none; color:transparent; -webkit-text-stroke:0; text-shadow:none;
+  background:linear-gradient(110deg, transparent 0 40%, rgba(255,255,255,.95) 47%, #fff 50%, rgba(255,255,255,.95) 53%, transparent 60% 100%) no-repeat;
+  background-size:250% 100%; -webkit-background-clip:text; background-clip:text; animation: rb-shine 2.2s ease-in-out infinite; }
+@keyframes rb-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.12); } }
+@keyframes rb-shine { 0% { background-position:150% 0; } 70%,100% { background-position:-60% 0; } }
 #storyBanner.rainbow .small { font-style:italic; transform:skewX(-12deg); text-shadow:none; }
 #storyBanner.rainbow .small span { display:inline-block; background:linear-gradient(90deg,var(--rb-0),var(--rb-1),var(--rb-2),var(--rb-3),var(--rb-4),var(--rb-5),var(--rb-6)); background-size:700% 100%;
   background-position:calc(var(--k) * 16.6%) 0; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-stroke:1.5px #fff; filter:drop-shadow(2px 2px 0 #1b0a6e); }
-@media (prefers-reduced-motion: reduce) { #storyBanner.in, #storyBanner.rainbow .big span { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #storyBanner.in, #storyBanner.rainbow .big, #storyBanner.rainbow .big::after { animation: none; } }
 /* 回想濾鏡（每頁 filter: 'memory'）：畫面泛黃、顏色變淡，四邊一圈柔柔的亮邊；慢慢淡入淡出（對話框不受影響） */
 #storyFilter { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity 1s ease; }
 #storyFilter.on { opacity:1; }

@@ -86,7 +86,10 @@ const StoryScene = (() => {
     b.classList.toggle('rainbow', style === 'rainbow');
     b.replaceChildren(...String(text).split('\n').map((line, i, all) => {
       const d = document.createElement('div'); d.className = i === all.length - 1 ? 'big' : 'small';
-      if (style === 'rainbow') [...line].forEach((ch, k) => { const s = document.createElement('span'); s.textContent = ch; s.style.setProperty('--k', k); d.appendChild(s); });   // 一個字一個 span：顏色、跳動各自錯開
+      if (style === 'rainbow') {
+        [...line].forEach((ch, k) => { const s = document.createElement('span'); s.textContent = ch; s.style.setProperty('--k', k); d.appendChild(s); });   // 一個字一個 span：每個字不同顏色
+        d.dataset.text = line;   // 掃光那層（css 的 ::after）用同一行字疊在上面
+      }
       else d.textContent = line;
       return d;
     }));
