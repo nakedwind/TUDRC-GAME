@@ -124,7 +124,9 @@ function openLevelKindMenu(btn) {
   }
   menu.addEventListener('mouseenter', () => clearTimeout(levelMenuTimer));
   menu.addEventListener('mouseleave', closeLevelKindMenuSoon);
-  document.body.appendChild(menu);
+  // 放在「⋯ 更多」選單裡面（跟 🌲 森林機關的子選單一樣）：放在外面的話，按下種類的那一刻「⋯ 更多」會當成點到外面而收起來，
+  // 子選單跟著被拿掉，點擊就沒作用（js/map-editor-save.js 的「點外面收起來」）
+  (btn.closest('.tool-more-menu') || btn.closest('.tool-more') || document.body).appendChild(menu);
   const rc = btn.getBoundingClientRect(), mr = menu.getBoundingClientRect();
   let left = rc.right + 2, top = rc.top - 7;                                   // 貼在按鈕右邊，第一項跟按鈕對齊
   if (left + mr.width > window.innerWidth - 4) left = Math.max(4, rc.left - mr.width - 2);   // 右邊放不下：改到左邊
