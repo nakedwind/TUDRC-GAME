@@ -1051,6 +1051,7 @@ function draw() {
   ctx.imageSmoothingEnabled = false;   // 放大時保持像素銳利
   // 底色＝純黑：沒有鋪任何素材的格子就是黑的（跟地圖編輯器看到的一致）
   ctx.fillStyle = '#000'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
+  if (typeof drawUnderMap === 'function') drawUnderMap(ctx);   // 黑色的地方透出底下另一張地圖（例如藍線站底下的紅線站，js/under-map.js）
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
   if (typeof drawPoolBossUnderwater === 'function') drawPoolBossUnderwater(ctx);   // 池核 BOSS 潛在水裡的影子（js/pool-boss.js）
@@ -1258,6 +1259,7 @@ function draw() {
   if (typeof drawFog === 'function') drawFog(ctx);   // 起霧：蓋在所有東西上、黑幕之下（js/fog.js）
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
+  if (typeof drawUnderMap === 'function') drawUnderMap(ctx, 'above');   // 有黑幕的地圖：底下透出的另一張地圖畫在黑幕上面（只畫在沒鋪東西的格子，js/under-map.js）
   if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
   for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);
