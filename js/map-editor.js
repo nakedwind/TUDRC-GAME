@@ -1498,7 +1498,7 @@ function draw() {
     paint();
     if (op < 100) ctx.restore();
   }
-  // 有 2 樓的地圖：1 樓的人自動擋住的格子（黑色沒鋪東西、只有 2 樓、牆面、只有牆蓋著的地方；js/map-levels.js 的 auto1FWalls）
+  // 有 2 樓的地圖：1 樓的人自動擋住的格子（只有 2 樓的格子；js/map-levels.js 的 auto1FWalls）
   // 開著紅格時畫成紅色斜線，跟手畫的紅格分開（不用另外畫，遊戲裡就會擋 1 樓的人）
   let auto1F = null;
   if (showSolid && typeof MapLevels !== 'undefined' && MapLevels.auto1FWalls) {   // 算一次要 20 毫秒：存檔（地圖有改）或換地圖才重算

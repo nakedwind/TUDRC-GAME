@@ -98,34 +98,15 @@ const MapLevels = (() => {
   }
 
   // ---- 1 樓的人自動擋住的格子（有 2 樓的地圖才算）----
-  // 有 2 樓的地圖，1 樓的紅格常常沒畫齊（B56 一格都沒有），1 樓的人就會走進黑色的地方、走上平台邊緣的牆面，
-  // 甚至走進「只有 2 樓」的格子被當成 2 樓的人，看起來就是穿牆、層級跑掉。所以這三種格子一律擋 1 樓的人（不用另外畫紅格）：
-  //   ・黑色的地方：所有圖層都沒鋪東西（沒有格子圖、也沒有任何圖蓋到）
-  //   ・只有 2 樓的格子（only2Cells）：底下沒有 1 樓，1 樓的人不可能站在那裡
-  //   ・平台邊緣的牆面（wallFaceCells）：從 1 樓看就是一面牆
-  //   ・只有「牆」蓋著的格子：蓋在上面的圖都是 🧱 牆地板編輯器標成「牆」的素材，底下沒有任何地板（地板類圖層上沒標成牆的圖）
+  // 只有一種：「只有 2 樓」的格子（only2Cells，底下沒有 1 樓）。1 樓的人不可能站在那裡；
+  // 不擋的話 1 樓的人走進去會直接被當成 2 樓的人（js/pathfinding.js 的 updateActorFloor），看起來就是穿牆、層級跑掉。
+  // 其他地方（黑色沒鋪東西的地方、牆面、牆）不自動擋：要擋 1 樓的人就自己畫紅格，要擋 2 樓的人用「🚧 2樓碰撞」。
   // 樓層出入口（樓梯、手扶梯）不擋。只擋 1 樓的人，2 樓照舊；遊戲在 js/pathfinding.js 的 floor1Auto 用，編輯器開紅格時畫成斜線讓人看得到。
   function auto1FWalls(m, tileOf) {
     const out = new Set();
     if (!m || !(m.deck || []).length || !(m.ramps || []).length) return out;   // 要有 2 樓地面和樓層出入口（遊戲才會分樓層）
-    const has = new Set(), wallArt = new Set(), floorArt = new Set(), ramps = new Set(m.ramps || []);
-    const floorLayer = lid => !isOccLayer(lid) && lid !== 'top';   // 地板類圖層（地板、地面裝飾、2 樓地板…）
-    for (const lid in (m.layers || {})) for (const k in m.layers[lid]) {
-      const id = m.layers[lid][k]; if (!id) continue;
-      has.add(k);
-      if (tagOf(id) === 'wall') wallArt.add(k); else if (floorLayer(lid)) floorArt.add(k);
-    }
-    for (const s of m.stamps || []) {
-      const t = tileOf(s.id); if (!t) continue;
-      cover(s, t, has);
-      if (tagOf(s.id) === 'wall') cover(s, t, wallArt); else if (floorLayer(s.layer || 'top')) cover(s, t, floorArt);
-    }
-    for (const k of wallArt) if (!floorArt.has(k)) out.add(k);
-    const cols = m.cols || 32, rows = m.rows || 18;
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) { const k = c + ',' + r; if (!has.has(k)) out.add(k); }
-    for (const k of only2Cells(m)) out.add(k);
-    for (const k of wallFaceCells(m, tileOf)) out.add(k);
-    for (const k of ramps) out.delete(k);
+    const ramps = new Set(m.ramps || []);
+    for (const k of only2Cells(m)) if (!ramps.has(k)) out.add(k);
     return out;
   }
 

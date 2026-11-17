@@ -34,7 +34,7 @@ const solid2OffsetAt = (c, r) => floor2SolidOffsets[c + ',' + r];
 // 平台邊緣那排牆的牆面（js/map-levels.js 的 wallFaceCells）：就算地圖上畫成 2 樓地面，2 樓的人也走不進去，不會站到牆面上
 let floor2WallFace = new Set();
 function setMapWallFaces(cells) { floor2WallFace = new Set(cells || []); }
-// 1 樓的人自動擋住的格子（黑色沒鋪東西的地方、只有 2 樓的格子、平台邊緣的牆面；js/map-levels.js 的 auto1FWalls）：
+// 1 樓的人自動擋住的格子（只有 2 樓的格子；js/map-levels.js 的 auto1FWalls）：
 // 只擋 1 樓的人，跟一樓紅格 mapWalls 分開放（不然 2 樓的物件牆判定、燈光都會被影響）
 let floor1Auto = new Set();
 function setMapFloor1Auto(cells) { floor1Auto = new Set(cells || []); }

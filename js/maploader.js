@@ -269,7 +269,7 @@ function initMap() {
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
   setMapFloors(MAP.deck, MAP.ramps, MAP.solid2);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
   setMapWallFaces(MapLevels.wallFaceCells(MAP, mapTileById));                         // 平台邊緣的牆面：2 樓的人不能走上去（js/map-levels.js）
-  setMapFloor1Auto(MapLevels.auto1FWalls(MAP, mapTileById));                         // 黑色沒鋪東西的地方、只有 2 樓的格子、牆面：1 樓的人走不進去（js/map-levels.js）
+  setMapFloor1Auto(MapLevels.auto1FWalls(MAP, mapTileById));                         // 只有 2 樓的格子：1 樓的人走不進去（js/map-levels.js）
   // 牆格整組重建了：上一張地圖的門、捷運閘門、可炸牆、置物箱「加進去的格子」不能再拿來刪
   // （不然上一張地圖剛好在同一格有門，就會把這張地圖本來畫好的牆刪掉，人可以穿牆）
   if (typeof doorAddedWalls !== 'undefined') doorAddedWalls = new Set();
