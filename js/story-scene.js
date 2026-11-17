@@ -79,10 +79,17 @@ const StoryScene = (() => {
     if (pic && pic.parentNode.id === 'dialoguePortraitFrame') { const wrap = document.createElement('span'); wrap.id = 'storyPortraitFlip'; pic.before(wrap); wrap.appendChild(pic); }
     if (pic && !el('storyPortraitEmote')) { const mark = document.createElement('span'); mark.id = 'storyPortraitEmote'; mark.setAttribute('aria-hidden', 'true'); el('dialoguePortraitFrame').appendChild(mark); }   // 頭像上的生氣符號（css/story-scene.css）
   }
-  function showBanner(text) {
+  // style（每頁 bannerStyle）：''＝一般（黃字粉影）、'rainbow'＝彩虹字（每個字不同顏色、粗外框、立體陰影、一跳一跳，故意做得很俗的文字藝術風）
+  function showBanner(text, style) {
     const b = el('storyBanner'); if (!b) return;
     if (!text) { b.hidden = true; return; }
-    b.replaceChildren(...String(text).split('\n').map((line, i, all) => { const d = document.createElement('div'); d.textContent = line; d.className = i === all.length - 1 ? 'big' : 'small'; return d; }));
+    b.classList.toggle('rainbow', style === 'rainbow');
+    b.replaceChildren(...String(text).split('\n').map((line, i, all) => {
+      const d = document.createElement('div'); d.className = i === all.length - 1 ? 'big' : 'small';
+      if (style === 'rainbow') [...line].forEach((ch, k) => { const s = document.createElement('span'); s.textContent = ch; s.style.setProperty('--k', k); d.appendChild(s); });   // 一個字一個 span：顏色、跳動各自錯開
+      else d.textContent = line;
+      return d;
+    }));
     b.hidden = false; b.classList.remove('in'); void b.offsetWidth; b.classList.add('in');   // 每次都重播蓋章動畫
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
@@ -678,7 +685,7 @@ const StoryScene = (() => {
   const screenBusy = () => !!state.screen && !state.screen.free && state.screen.t < state.screen.dur;
   function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
     showCard(null);
-    if (state.bannerAt) { showBanner(state.bannerAt.text); state.bannerAt = null; }   // 大字還沒壓出來就按結束：直接出來
+    if (state.bannerAt) { showBanner(state.bannerAt.text, state.bannerAt.style); state.bannerAt = null; }   // 大字還沒壓出來就按結束：直接出來
     state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false);
     if (!keepBgmForNext()) stopBgm(secOr(state.cfg.bgmFadeOut, 5));   // 劇情結束：音樂花幾秒淡出（劇情設定 bgmFadeOut，空白＝5 秒）；接著播的下一段用同一首就不停
   }
@@ -913,8 +920,8 @@ const StoryScene = (() => {
     state.bannerAt = null;
     if ('banner' in beat) {
       const wait = Number(beat.bannerDelay) || 0;
-      if (state.skipping || !beat.banner || wait <= 0) showBanner(state.skipping ? '' : beat.banner);
-      else state.bannerAt = { text: beat.banner, at: state.time + wait };
+      if (state.skipping || !beat.banner || wait <= 0) showBanner(state.skipping ? '' : beat.banner, beat.bannerStyle);
+      else state.bannerAt = { text: beat.banner, at: state.time + wait, style: beat.bannerStyle };
     }
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     for (const [id, v] of Object.entries(beat.bubble || {})) { const a = actor(id); if (a) { if ((v || '') !== (a.bubble || '')) a.bubbleT = 0; a.bubble = v || ''; } }   // 頭上的泡泡框（心裡話）：一直留到清空
@@ -1172,7 +1179,7 @@ const StoryScene = (() => {
       const beat = state.cfg.beats[state.index];
       if (state.screen) state.screen.t += dt;
       if (state.flash) state.flash.t += dt;
-      if (state.bannerAt && state.time >= state.bannerAt.at) { showBanner(state.bannerAt.text); state.bannerAt = null; }
+      if (state.bannerAt && state.time >= state.bannerAt.at) { showBanner(state.bannerAt.text, state.bannerAt.style); state.bannerAt = null; }
       if (state.nextBgm && state.time >= state.nextBgm.at && !state.ending) { const { src, fadeIn } = state.nextBgm; state.nextBgm = null; startBgm(src, fadeIn); }
       if (state.ending) {
         el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
