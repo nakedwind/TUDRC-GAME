@@ -19,9 +19,15 @@ function levelInfo(m) {
   const L = MapLevels.floor2Layers(m);
   levelCache = { m, L, deck: new Set(m.deck || []), ramps: new Set(m.ramps || []), only2: MapLevels.only2Cells(m, tileById), art: null };
   levelCache.ctx = { L, deck: levelCache.deck, get art() { return levelCache.art || (levelCache.art = MapLevels.floorArtCells(m, tileById, L)); } };
+  // 平台邊緣那排牆的牆面（js/map-levels.js 的 wallFaceCells）：不能畫成 2 樓地面，畫了遊戲也會擋住
+  let faceSet = null;
+  Object.defineProperty(levelCache, 'face', { get: () => faceSet || (faceSet = MapLevels.wallFaceCells(m, tileById)) });
   queueMicrotask(() => { levelCache = null; });
   return levelCache;
 }
+// 這格是不是牆面（不能當 2 樓地面）
+const levelIsWallFace = (m, key) => levelInfo(m).face.has(key);
+const WALL_FACE_TIP = '這格是 2 樓平台邊緣的牆面，不能畫成 2 樓地面（人會站到牆面上、牆和地板融在一起）。真的要讓 2 樓的人走到這裡，請把那張牆往下移，或把它的「🏢 樓層」改掉';
 const stampLevelOf = s => { const m = curMap(); const info = levelInfo(m); return MapLevels.stampLevel(s, m, tileById, info.ctx); };
 
 // ---- 只看 1 樓／2 樓（js/map-editor.js 的 draw 呼叫）----
@@ -50,6 +56,12 @@ function drawLevelCell(x, y, key) {
     }
     ctx.strokeStyle = st[1]; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]); ctx.strokeRect(x + 2.5, y + 2.5, CELL - 5, CELL - 5); ctx.setLineDash([]);
     if (st[2]) { ctx.globalAlpha = .8; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText(st[2], x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1; }
+    if (kind !== 'r' && info.face.has(key)) {   // 牆面被畫成 2 樓地面：紅色斜線（遊戲會擋住，🔍 樓層檢查會列出來）
+      ctx.save(); ctx.beginPath(); ctx.rect(x, y, CELL, CELL); ctx.clip(); ctx.fillStyle = 'rgba(255,60,60,.25)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = 'rgba(255,90,90,.9)'; ctx.lineWidth = 2;
+      for (let d = -CELL; d < CELL; d += 8) { ctx.beginPath(); ctx.moveTo(x + d, y); ctx.lineTo(x + d + CELL, y + CELL); ctx.stroke(); }
+      ctx.restore();
+    }
   }
   if (key === levelFocusKey) { ctx.save(); ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3; ctx.strokeRect(x + 1.5, y + 1.5, CELL - 3, CELL - 3); ctx.restore(); }
 }
@@ -68,8 +80,9 @@ function paintLevelCell(m, key, isDown) {
     convertLevels(m, true);
   }
   const list = f => m[f] || (m[f] = []), add = (f, k) => { const a = list(f); if (!a.includes(k)) a.push(k); }, del = (f, k) => { if (m[f]) removeFrom(m[f], k); };
-  levelCache = null;   // 地圖改了：樓層資料要重算
   const k = levelKind;
+  if ((k === '2' || k === 'b') && levelIsWallFace(m, key)) { setStatus(WALL_FACE_TIP, '#ff8f8f'); return false; }   // 牆面不能畫成 2 樓地面
+  levelCache = null;   // 地圖改了：樓層資料要重算
   if (k === '1') { del('deck', key); del('ramps', key); del('only2', key); }
   else if (k === '2') { add('deck', key); add('only2', key); del('ramps', key); }
   else if (k === 'b') { add('deck', key); del('only2', key); del('ramps', key); }
@@ -106,6 +119,13 @@ function runLevelCheck() {
   const again = document.createElement('button'); again.className = 'btn'; again.textContent = '重新檢查'; again.onclick = runLevelCheck;
   const close = document.createElement('button'); close.className = 'btn'; close.textContent = '✕'; close.title = '關掉';
   close.onclick = () => { panel.remove(); levelFocusKey = null; levelCheckList = null; draw(); };
+  const faceN = MapLevels.wallFaceOnDeck(m, tileById).length;
+  if (faceN) {   // 牆面被畫成 2 樓地面：一次清掉
+    const fix = document.createElement('button'); fix.className = 'btn'; fix.textContent = '🧹 牆面不算 2 樓地面（' + faceN + ' 格）';
+    fix.title = '把 2 樓平台邊緣那排牆的牆面，從 2 樓地面（只有 2 樓／陸橋）拿掉。Ctrl+Z 可以復原';
+    fix.onclick = () => { pushUndo(); const n = MapLevels.stripWallFaces(m, tileById); levelCache = null; saveMaps(); runLevelCheck(); draw(); setStatus('已把 ' + n + ' 格牆面從 2 樓地面拿掉（Ctrl+Z 可以復原）', '#7ee0c0'); };
+    head.appendChild(fix);
+  }
   head.append(again, close); panel.appendChild(head);
   const ul = document.createElement('div'); ul.className = 'level-check-list';
   for (const it of levelCheckList) {

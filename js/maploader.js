@@ -268,6 +268,7 @@ function initMap() {
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
   setMapFloors(MAP.deck, MAP.ramps, MAP.solid2);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
+  setMapWallFaces(MapLevels.wallFaceCells(MAP, mapTileById));                         // 平台邊緣的牆面：2 樓的人不能走上去（js/map-levels.js）
   // 牆格整組重建了：上一張地圖的門、捷運閘門、可炸牆、置物箱「加進去的格子」不能再拿來刪
   // （不然上一張地圖剛好在同一格有門，就會把這張地圖本來畫好的牆刪掉，人可以穿牆）
   if (typeof doorAddedWalls !== 'undefined') doorAddedWalls = new Set();
@@ -1028,6 +1029,20 @@ function mapOccluders() {
     if (flat || (!isOccLayer(lid) && !MAP_FLOOR2_TOP.has(lid))) { it.band = DRAW_BAND.ground; it.y = it.li; }
     else if (MAP_FLOOR2_TOP.has(lid)) { it.band = DRAW_BAND.top; it.y = it.li; }
   }
+  // 2 樓的地板圖不畫在「牆面」的格子上（js/map-levels.js 的 wallFaceCells，跟擋路用同一份）：
+  // 跨樓層的牆下半段算一樓、先畫，2 樓的地板在一樓全部畫完之後才畫；地板圖如果鋪到牆底下，就會把牆的下半段蓋掉，
+  // 看起來牆面中間偏下那段變成地板（B56、R89 出過）。所以地板圖在牆面格子挖洞，讓底下的牆露出來
+  const faces = typeof floor2WallFace !== 'undefined' ? floor2WallFace : null;
+  if (faces && faces.size) for (const it of items) {
+    if (it.part || it.floor !== 2 || it.band !== DRAW_BAND.ground) continue;
+    const b = it.vis || it, holes = [];
+    for (let c = Math.floor(b.x0 / CELL); c * CELL < b.x1; c++) for (let r = Math.floor(b.y0 / CELL); r * CELL < b.y1; r++) {
+      if (!faces.has(c + ',' + r)) continue;
+      const x0 = Math.max(b.x0, c * CELL), y0 = Math.max(b.y0, r * CELL), x1 = Math.min(b.x1, (c + 1) * CELL), y1 = Math.min(b.y1, (r + 1) * CELL);
+      if (x1 > x0 && y1 > y0) holes.push([x0, y0, x1 - x0, y1 - y0]);
+    }
+    if (holes.length) it.faceHoles = { box: [b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0], holes };
+  }
   // 樓梯（平貼、連接 1、2 樓的圖）的上半段範圍：站在裡面的人畫面上算 2 樓（js/pathfinding.js 的 visualFloor）
   stairUpperRects = items.filter(it => it.part === 'upper' && stampIsStairs(it.stamp)).map(it => ({ x0: OX + it.x0, x1: OX + it.x1, y0: OY + it.y0, y1: OY + it.splitY, side: typeof escalatorSideUsable === 'function' && escalatorSideUsable(it.stamp) }));
   buildLayerOverdraw(items);
@@ -1104,6 +1119,12 @@ function drawOccluderItem(ctx, it) {
 }
 // 連接 1、2 樓的柱子：只畫自己那一半（下半段／上半段，分界在 it.splitY）
 function withPartClip(ctx, it, fn) {
+  if (it.faceHoles) {   // 2 樓地板圖：牆面那幾格挖掉不畫（上面 mapOccluders 算好的洞）
+    const { box, holes } = it.faceHoles;
+    ctx.save(); ctx.beginPath(); ctx.rect(OX + box[0], OY + box[1], box[2], box[3]);
+    for (const h of holes) ctx.rect(OX + h[0], OY + h[1], h[2], h[3]);
+    ctx.clip('evenodd'); fn(); ctx.restore(); return;
+  }
   if (!it.part) { fn(); return; }
   ctx.save(); ctx.beginPath();
   const x = OX + it.x0 - CELL * 6, w = it.x1 - it.x0 + CELL * 12, my = OY + it.splitY;

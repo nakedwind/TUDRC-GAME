@@ -1909,6 +1909,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
   } else if (brush.mode === 'deck' || brush.mode === 'ramp' || brush.mode === 'solid2') {   // 🌉 2樓地面／🛗 樓層出入口／🚧 2樓碰撞：拖曳畫一片、再畫一次＝擦掉（各自一組格子）
     const f = brush.mode === 'deck' ? 'deck' : brush.mode === 'ramp' ? 'ramps' : 'solid2', list = m[f] || (m[f] = []);
     if (isDown) deckPaintAdd = !list.includes(key);
+    if (deckPaintAdd && f === 'deck' && !list.includes(key) && typeof levelIsWallFace === 'function' && levelIsWallFace(m, key)) { setStatus(WALL_FACE_TIP, '#ff8f8f'); if (!list.length) delete m[f]; return; }   // 牆面不能畫成 2 樓地面（js/map-editor-levels.js）
     if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
     if (!list.length) delete m[f];
   } else if (brush.mode === 'deepkeep') {   // 🔒 永遠深水：拖曳畫一片、再畫一次＝擦掉（跟深水區分開存，MAP.deepWaterKeep）
@@ -4254,6 +4255,7 @@ function generateDeckFromLayers() {
   const before = deck.size; let added = 0, removed = 0;
   if (addFloor) for (const k of floor) { const [c, r] = k.split(',').map(Number); if (!inGrid(c, r) || walls.has(k) || (m.ramps || []).includes(k)) continue; if (!deck.has(k)) { deck.add(k); added++; } }
   for (const k of walls) if (deck.delete(k)) removed++;
+  if (typeof MapLevels !== 'undefined') for (const k of MapLevels.wallFaceCells(m, tileById)) if (!(m.ramps || []).includes(k) && deck.delete(k)) removed++;   // 平台邊緣那排牆的牆面也拿掉（js/map-levels.js）
   if (!added && !removed) { setStatus('沒有要改的格子（2 樓地面沒有畫在 2 樓牆壁的圖裡面' + (addFloor ? '，地板圖層也沒有新的格子' : '') + '）', '#9aa4b2'); return; }
   pushUndo();
   if (deck.size) m.deck = [...deck]; else delete m.deck;

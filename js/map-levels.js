@@ -64,6 +64,49 @@ const MapLevels = (() => {
     return floor;
   }
 
+  // ---- 牆面不是 2 樓地板 ----
+  // 2 樓平台邊緣的牆（從一樓立上來的牆、柱子）：圖最上面那列是牆頂（平台的邊），下面幾列是往下的牆面。
+  // 牆面那幾列不能當 2 樓地面走，不然人會站到牆面上、被畫在牆前面，看起來牆和地板融在一起（B56、R89 出過這個問題）。
+  // 算「平台邊緣的牆」：牆、柱子類的圖（不含門、閘門、欄杆、手扶梯），而且
+  //   ・樓層設成「跨樓層」（span），或
+  //   ・樓層是 2 樓、但牆腳那一列不在 2 樓地面上（牆不是站在 2 樓走道上，而是平台的邊）。
+  // 站在 2 樓走道上的牆（牆腳踩在 2 樓地面上）不算：那種是 2 樓房間的後牆，人本來就可以走到它後面。
+  // 回傳牆面蓋到的格子（不管有沒有畫成 2 樓地面）。遊戲（js/maploader.js 讀地圖時）擋 2 樓的人、編輯器標紅色斜線和檢查都用這一份。
+  const WALL_NAME = /wall|牆|pillar|柱/i, NOT_WALL = /gate|door|閘門|門|railing|欄|escalator|手扶梯/i;
+  function wallFaceCells(m, tileOf) {
+    const out = new Set();
+    if (!m || !(m.deck || []).length) return out;
+    const deck = new Set(m.deck || []), L = floor2Layers(m), C = cellSize();
+    for (const s of m.stamps || []) {
+      const t = tileOf(s.id); if (!t || t.flat) continue;
+      const name = String(s.id) + String(t.name || '') + String(t.file || '');
+      if (!WALL_NAME.test(name) || NOT_WALL.test(name)) continue;
+      const lv = s.level != null ? s.level : (L.all.has(s.layer || 'top') ? 2 : 1);
+      if (lv === 1 || L.top.has(s.layer || 'top')) continue;   // 一樓的牆、2 樓上層（屋簷）不算
+      const w = stampW(s, t), h = stampH(s, t); if (h < 2) continue;
+      const c0 = s.c + (s.ox || 0) / C, r0 = s.r + (s.oy || 0) / C;
+      const cols = []; for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) cols.push(c);
+      const top = Math.ceil(r0 - .5), bottom = Math.ceil(r0 + h - .5) - 1;   // 牆頂那列、牆腳那列
+      if (lv !== 'span' && cols.some(c => deck.has(c + ',' + bottom))) continue;   // 站在 2 樓走道上的牆
+      for (const c of cols) for (let r = top + 1; r <= bottom; r++) out.add(c + ',' + r);
+    }
+    return out;
+  }
+  // 畫成 2 樓地面、但其實是牆面的格子（樓層出入口不算）
+  function wallFaceOnDeck(m, tileOf) {
+    const deck = new Set(m.deck || []), ramps = new Set(m.ramps || []);
+    return [...wallFaceCells(m, tileOf)].filter(k => deck.has(k) && !ramps.has(k));
+  }
+  // 把牆面從 2 樓地面拿掉（編輯器的「🧹 牆面不算 2 樓地面」按鈕）：回傳拿掉幾格
+  function stripWallFaces(m, tileOf) {
+    const bad = new Set(wallFaceOnDeck(m, tileOf));
+    if (!bad.size) return 0;
+    m.deck = (m.deck || []).filter(k => !bad.has(k));
+    if (m.only2) m.only2 = m.only2.filter(k => !bad.has(k));
+    if (!m.deck.length) delete m.deck;
+    return bad.size;
+  }
+
   // ---- 舊規則：只給「🏢 產生樓層資料」算初版、「🔍 樓層檢查」提建議用（遊戲不用）----
   const legacyLayers = m => {   // 名稱有「2樓」的圖層；名稱還有「上層」的＝2 樓上層
     const all = new Set(), top = new Set();
@@ -192,6 +235,16 @@ const MapLevels = (() => {
         if (walk2(top) && wall2(below) && deck.has(top)) { add('warn', '2 樓的牆圖最上面那列可以走：人走到邊上會被牆頂蓋住（在這列畫 🚧 2樓碰撞，或幫這張圖設排序深度）', top); break; }
       }
     }
+    // 3b. 平台邊緣的牆面被畫成 2 樓地面（人會走到牆面上，牆和地板融在一起）：每一段連在一起的列出一次
+    {
+      const bad = new Set(wallFaceOnDeck(m, tileOf)), seen = new Set();
+      for (const k of [...bad].sort((a, b) => { const [ac, ar] = a.split(',').map(Number), [bc, br] = b.split(',').map(Number); return ar - br || ac - bc; })) {
+        if (seen.has(k)) continue;
+        let n = 0; const q = [k]; seen.add(k);
+        while (q.length) { const g = q.pop(); n++; const [c, r] = g.split(',').map(Number); for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nk = (c + dc) + ',' + (r + dr); if (bad.has(nk) && !seen.has(nk)) { seen.add(nk); q.push(nk); } } }
+        add('warn', '牆面被畫成 2 樓地面（' + n + ' 格，紅色斜線）：人會走到牆面上，看起來牆和地板融在一起。遊戲會自動擋住；按上面的「🧹 牆面不算 2 樓地面」可以一次清掉', k);
+      }
+    }
     // 4. 物件（障礙物、礦物）踩在 2 樓地面的邊緣
     for (const s of m.stamps || []) {
       const t = tileOf(s.id); if (!t || !(t.baseHp || /ore|礦/.test(String(s.id)))) continue;
@@ -214,5 +267,5 @@ const MapLevels = (() => {
     return out;
   }
 
-  return { VERSION, floor2Layers, floorArtCells, stampOn2F, stampLevel, only2Cells, cellKind, convert, prepare, normalize, check, isOccLayer };
+  return { VERSION, floor2Layers, floorArtCells, stampOn2F, stampLevel, only2Cells, cellKind, convert, prepare, normalize, check, isOccLayer, wallFaceCells, wallFaceOnDeck, stripWallFaces };
 })();

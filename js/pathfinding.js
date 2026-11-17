@@ -31,7 +31,10 @@ let floor2Solid = new Set();
 let floor2SolidOffsets = {};
 const solid2OffsetAt = (c, r) => floor2SolidOffsets[c + ',' + r];
 // 2 樓的人還會被「2 樓的物件加的牆」擋住（置物箱、候車椅、門…這些程式都是把擋路格加進一樓的牆 mapWalls）：js/maploader.js 的 objectWallOn2F
-const deckBlocked = k => floor2Solid.has(k) || (mapWalls.has(k) && typeof objectWallOn2F === 'function' && objectWallOn2F(k));
+// 平台邊緣那排牆的牆面（js/map-levels.js 的 wallFaceCells）：就算地圖上畫成 2 樓地面，2 樓的人也走不進去，不會站到牆面上
+let floor2WallFace = new Set();
+function setMapWallFaces(cells) { floor2WallFace = new Set(cells || []); }
+const deckBlocked = k => floor2Solid.has(k) || floor2WallFace.has(k) || (mapWalls.has(k) && typeof objectWallOn2F === 'function' && objectWallOn2F(k));
 function setMapFloors(deck, ramps, solid2) {
   floor2SolidOffsets = {};
   deckCells = new Set(deck || []); floor2Solid = new Set(solid2 || []); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
