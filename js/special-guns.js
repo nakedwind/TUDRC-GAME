@@ -28,12 +28,13 @@ function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; if (w && w.removed) re
   return !w || !w.field || (typeof equipState !== 'undefined' && (equipState.weapons[id] || 0) > 0); }
 
 // ---- 取得：上鎖的置物箱打開時（js/storage-lockers.js 呼叫）----
-function tryGunFind(x, y) {
-  if (MAP_SAFE || Math.random() >= GUN_FINDS.ammo) return;
+// chance：找到的機率（沒給＝置物櫃的 GUN_FINDS.ammo；彈藥箱傳 AMMO_CRATE_LOOT.ammo）；where：飄字說在哪裡找到
+function tryGunFind(x, y, chance = GUN_FINDS.ammo, where = '置物箱') {
+  if (MAP_SAFE || Math.random() >= chance) return;
   const kinds = GUN_FINDS.kinds.filter(id => BULLETS[id] && !BULLETS[id].removed && bulletRoom(id) > 0);   // 彈藥包放不下的不會再找到
   if (!kinds.length) return;
   const id = kinds[Math.floor(Math.random() * kinds.length)];
-  grantBullets(id, GUN_FINDS.ammoFind[id] || 1, '在置物箱裡找到', x, y);
+  grantBullets(id, GUN_FINDS.ammoFind[id] || 1, '在' + where + '裡找到', x, y);
 }
 // 拿到子彈：第一次拿到跳說明；回傳加了幾發
 function grantBullets(id, n, how, x, y) {

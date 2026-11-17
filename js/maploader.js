@@ -793,7 +793,7 @@ let floor2OnlyCache = null;
 function floor2OnlyCells() {
   const n = (MAP.stamps || []).length;
   if (floor2OnlyCache && floor2OnlyCache.map === MAP && floor2OnlyCache.n === n && floor2OnlyCache.deck === deckCells) return floor2OnlyCache.cells;
-  // 照地圖寫明的 MAP.only2（js/map-levels.js；地圖編輯器的「🏢 樓層種類」筆刷畫的）
+  // 2 樓地面裡，不是出入口、也沒用「🏢 樓層種類」筆刷刷成陸橋（MAP.bridge）的格子（js/map-levels.js）
   const cells = MapLevels.only2Cells(MAP, mapTileById);
   floor2OnlyCache = { map: MAP, n, deck: deckCells, cells };
   return cells;

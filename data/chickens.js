@@ -19,10 +19,10 @@ const CHICKEN_CONFIG = {
   speed: 36,                // 走路速度（像素／秒）
   walkTime: [1, 3.5],       // 每走一段（或停一下）持續幾秒（最短、最長）
   stopChance: .27,          // 換方向時，停下來發呆的機率
-  layEvery: 300,            // 雞多久下一次蛋（5 分鐘）；下蛋時播 chickenLay（POP）
+  layEvery: 600,            // 雞多久下一次蛋（10 分鐘）；下蛋時播 chickenLay（POP）
   maxGroundEggs: 3,         // 鳥巢附近地上已經有這麼多顆蛋沒撿：雞就先不下（免得放著不管越生越多）
   nestEggs: 2,              // 鳥巢裡撿一次拿到幾顆蛋
-  nestRespawn: 900,        // 空巢多久長回一顆蛋（15 分鐘）
+  nestRespawn: 1200,       // 空巢多久長回一顆蛋（20 分鐘）
   pickRange: 48,            // 離雞、鳥巢多近可以按空白鍵（像素）
   carryLift: .14,           // 抱著時雞的腳在溫特腳底往上幾倍身高（照《苦艾與甘露》：身高 45 時往上 6 像素）
   carryDown: 5,             // 再往下幾像素（試玩後調整）

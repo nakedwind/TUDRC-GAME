@@ -461,6 +461,7 @@ function mothStatuses(dt) {
       a.mothSleepAge = (a.mothSleepAge || 0) + dt;
       if (a.sleepT > 0 && a.hp < a.mothSleepHp - .01) { a.sleepT = 0; a.tranqSleep = false; }   // 被打醒
       else {
+        mothSleepHeal(a, isPlayer, dt);   // 睡著順便回血（跟躺行軍床一樣快）
         a.mothSleepHp = a.hp;
         if (isPlayer) a.sleepT = Math.max(0, a.sleepT - dt);
       }
@@ -471,6 +472,15 @@ function mothStatuses(dt) {
     }
   }
   if (document.body) document.body.classList.toggle('moth-asleep', !!(p && p.mothSleep && p.sleepT > 0));   // 溫特睡著：建築欄、快捷欄不能點
+}
+// 被睡眠鱗粉、麻醉針弄睡的時候回血：速度跟躺行軍床一樣（js/camp-beds.js 的 CAMP_BED）
+// 隊友每秒回 CAMP_BED.regen、溫特每秒回 CAMP_BED.winterRegen；隊友頭旁一樣跳「+數字 HP」
+// 回完血才記下現在的血量，所以補血不會被當成「被打到」而醒來
+function mothSleepHeal(a, isPlayer, dt) {
+  if (typeof CAMP_BED === 'undefined' || !(a.sleepT > 0) || a.hp <= 0 || a.hp >= a.maxhp) return;
+  const hp0 = a.hp;
+  a.hp = Math.min(a.maxhp, a.hp + (isPlayer ? CAMP_BED.winterRegen : CAMP_BED.regen) * dt);
+  if (!isPlayer && typeof campBedHealPop === 'function') campBedHealPop(a, a.sleepHealPop = a.sleepHealPop || {}, a.hp - hp0, dt);
 }
 // ---- 開槍把睡著的隊友打醒（js/game.js 的 updatePlayerAttack 呼叫）：不扣血，子彈打在身上就醒 ----
 // 游標點在哪位睡著的隊友身上：站著時是一個人高的範圍；倒在地上時身體橫躺在腳底往旁邊那一側

@@ -73,18 +73,78 @@ function levelCountText(m) {
 }
 
 // ---- 🏢 樓層種類筆刷（js/map-editor.js 的 paintCell 呼叫）：回傳 false＝這次不畫 ----
+// 跟其他筆刷一樣「再刷一次＝擦掉」：按下去那格已經是選的種類，這一筆就是擦掉
+//   陸橋 → 變回只有 2 樓；只有 2 樓 → 變成只有 1 樓；樓層出入口 → 拿掉出入口
+const LEVEL_KINDS = [
+  { v: '2', name: '只有 2 樓', color: 'rgba(70,150,255,.75)', desc: '2 樓地面，底下沒有 1 樓' },
+  { v: 'b', name: '陸橋（上下都有）', color: 'rgba(40,210,210,.75)', desc: '2 樓地面，1 樓的人可以從底下走過去' },
+  { v: 'r', name: '樓層出入口', color: 'rgba(255,160,40,.85)', desc: '樓梯、手扶梯：走到這裡就換樓層' },
+  { v: '1', name: '只有 1 樓（擦掉）', color: 'rgba(150,160,175,.6)', desc: '拿掉 2 樓地面、陸橋、出入口' },
+];
+const levelKindName = v => (LEVEL_KINDS.find(o => o.v === v) || {}).name || v;
+let levelErase = false;   // 這一筆是不是「擦掉」（按下去那格決定）
 function paintLevelCell(m, key, isDown) {
   const list = f => m[f] || (m[f] = []), add = (f, k) => { const a = list(f); if (!a.includes(k)) a.push(k); }, del = (f, k) => { if (m[f]) removeFrom(m[f], k); };
-  const k = levelKind;
+  const info = levelInfo(m), now = MapLevels.cellKind(key, info.deck, info.ramps, info.only2);
+  if (isDown) levelErase = levelKind !== '1' && now === levelKind;
+  const k = levelErase ? ({ b: '2', '2': '1', r: 'r-' }[levelKind]) : levelKind;
+  if (k === now || (k === 'r-' && now !== 'r')) return false;   // 已經是這種了
   if ((k === '2' || k === 'b') && levelIsWallFace(m, key)) { setStatus(WALL_FACE_TIP, '#ff8f8f'); return false; }   // 牆面不能畫成 2 樓地面
   levelCache = null;   // 地圖改了：樓層資料要重算
-  if (k === '1') { del('deck', key); del('ramps', key); del('only2', key); MapLevels.noteDeckEdit(m, key, false); }
-  else if (k === '2') { add('deck', key); add('only2', key); del('ramps', key); MapLevels.noteDeckEdit(m, key, true); }
-  else if (k === 'b') { add('deck', key); del('only2', key); del('ramps', key); MapLevels.noteDeckEdit(m, key, true); }   // noteDeckEdit：2 樓地面自動模式時記成筆刷例外
-  else if (k === 'r') { add('ramps', key); del('only2', key); }
-  for (const f of ['deck', 'ramps']) if (m[f] && !m[f].length) delete m[f];
+  MapLevels.normalize(m);   // 舊資料（only2）先換成陸橋清單（bridge）
+  // noteDeckEdit：2 樓地面自動算的地圖，筆刷改的記成例外（＋／－），重算時才不會被蓋回去
+  if (k === '1') { del('deck', key); del('ramps', key); del('bridge', key); MapLevels.noteDeckEdit(m, key, false); }
+  else if (k === '2') { add('deck', key); del('bridge', key); del('ramps', key); MapLevels.noteDeckEdit(m, key, true); }
+  else if (k === 'b') { add('deck', key); add('bridge', key); del('ramps', key); MapLevels.noteDeckEdit(m, key, true); }   // 陸橋只有這樣刷的才算（不會自動判定）
+  else if (k === 'r') { add('ramps', key); del('bridge', key); }
+  else if (k === 'r-') del('ramps', key);
+  for (const f of ['deck', 'ramps', 'bridge']) if (m[f] && !m[f].length) delete m[f];
+  if (isDown) setStatus('🏢 ' + (levelErase ? '擦掉「' + levelKindName(levelKind) + '」' : '畫成「' + levelKindName(levelKind) + '」') + '（按著拖曳可以連續' + (levelErase ? '擦' : '畫') + '；在已經是這種的格子上按下去＝擦掉）', '#8fc8ff');
   return true;
 }
+// ---- 「🏢 樓層種類筆刷 ＞」：像一般程式的子選單 ----
+// 滑鼠移到按鈕上（或點一下）→ 右邊展開種類清單；「⋯ 更多」選單不會收起來。點清單裡的種類＝選好筆刷，兩層選單一起收起來
+let levelMenuTimer = null;
+function openLevelKindMenu(btn) {
+  clearTimeout(levelMenuTimer);
+  if (document.getElementById('levelKindMenu')) return;
+  if (typeof closeAllToolSubs === 'function') closeAllToolSubs();   // 別的子選單（🌲 森林機關…）先收起來
+  const menu = document.createElement('div'); menu.className = 'level-kind-menu'; menu.id = 'levelKindMenu';
+  for (const o of LEVEL_KINDS) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'level-kind-item' + (o.v === levelKind && brush.mode === 'level' ? ' sel' : '');
+    b.innerHTML = '<i></i><span><b></b><small></small></span>';
+    b.querySelector('i').style.background = o.color; b.querySelector('b').textContent = o.name; b.querySelector('small').textContent = o.desc;
+    b.addEventListener('click', () => {
+      levelKind = o.v; closeLevelKindMenu();
+      brush = { mode: 'level', tile: brush.tile }; if (typeof clearSelection === 'function') clearSelection(); updateToolUI(); renderPalette();
+      document.querySelectorAll('.tool-more[open]').forEach(d => { d.open = false; });
+      setStatus('🏢 樓層種類筆刷：畫成「' + o.name + '」（拖曳畫一片；在已經是這種的格子上按下去＝擦掉）', '#8fc8ff'); draw();
+    });
+    menu.appendChild(b);
+  }
+  menu.addEventListener('mouseenter', () => clearTimeout(levelMenuTimer));
+  menu.addEventListener('mouseleave', closeLevelKindMenuSoon);
+  document.body.appendChild(menu);
+  const rc = btn.getBoundingClientRect(), mr = menu.getBoundingClientRect();
+  let left = rc.right + 2, top = rc.top - 7;                                   // 貼在按鈕右邊，第一項跟按鈕對齊
+  if (left + mr.width > window.innerWidth - 4) left = Math.max(4, rc.left - mr.width - 2);   // 右邊放不下：改到左邊
+  if (top + mr.height > window.innerHeight - 4) top = Math.max(4, window.innerHeight - 4 - mr.height);   // 下面放不下：往上移
+  menu.style.left = left + 'px'; menu.style.top = top + 'px';
+}
+function closeLevelKindMenu() { clearTimeout(levelMenuTimer); const old = document.getElementById('levelKindMenu'); if (old) old.remove(); }
+function closeLevelKindMenuSoon() { clearTimeout(levelMenuTimer); levelMenuTimer = setTimeout(closeLevelKindMenu, 300); }   // 滑鼠移開一下下才收（斜著移到子選單途中不會不見）
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#levelKindMenu, .tool[data-mode="level"]')) closeLevelKindMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLevelKindMenu(); });
+// 點按鈕本身：只展開子選單（不切換工具、不收起「⋯ 更多」；在最外層先攔下來，一般工具按鈕的點擊不會執行）
+document.addEventListener('click', e => {
+  const btn = e.target.closest && e.target.closest('.tool[data-mode="level"]'); if (!btn) return;
+  e.stopPropagation(); e.preventDefault(); openLevelKindMenu(btn);
+}, true);
+document.querySelectorAll('.tool[data-mode="level"]').forEach(btn => {
+  btn.addEventListener('mouseenter', () => openLevelKindMenu(btn));
+  btn.addEventListener('mouseleave', closeLevelKindMenuSoon);
+});
+document.querySelectorAll('.tool-more').forEach(d => d.addEventListener('toggle', () => { if (!d.open) closeLevelKindMenu(); }));   // 「⋯ 更多」收起來：子選單也收
 
 // ---- 🔍 樓層檢查面板 ----
 function runLevelCheck() {
@@ -128,12 +188,6 @@ function levelJumpTo(c, r) {
 
 // ---- 按鈕 ----
 (() => {
-  const kindSel = document.getElementById('levelKind');
-  if (kindSel) kindSel.addEventListener('change', () => {
-    levelKind = kindSel.value;
-    const btn = document.querySelector('.tool[data-mode="level"]'); if (btn && brush.mode !== 'level') btn.click();
-    setStatus('🏢 樓層種類筆刷：畫成「' + kindSel.options[kindSel.selectedIndex].text + '」（拖曳畫一片）', '#8fc8ff');
-  });
   const viewSel = document.getElementById('levelView');
   if (viewSel) viewSel.addEventListener('change', () => { levelView = viewSel.value; draw(); });
   document.getElementById('levelCheck')?.addEventListener('click', runLevelCheck);

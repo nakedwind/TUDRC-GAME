@@ -5,6 +5,7 @@
      躺滿起床後 CAMP_BED.cooldown 秒內不會再去躺（就算 HP 還是不到一半）；躺到一半被打斷的不算。
      走過去的路上、躺著的時候被打：馬上起來應戰。走過去的路上 HP 被補到 CAMP_BED.healedStop（60%）以上：不去躺了。
    ・溫特自己躺（靠近行軍床按 Space）：身為主管正大光明睡覺不可取，每 2 秒只回 1 HP（CAMP_BED.winterRegen），一樣躺 10 秒自動起來。
+   ・被麻醉針、人面蝶的睡眠鱗粉弄睡時，也照這兩個速度回血（regen／winterRegen，程式在 js/human-face-butterfly.js 的 mothSleepHeal）。
    ・「脫離戰鬥」＝沒被打、沒在攻擊（附近有怪物但沒在打他、他也沒在打怪，一樣算）。
    必須在 js/game.js 之前載入（game.js 的 update 會呼叫這裡）。
 */

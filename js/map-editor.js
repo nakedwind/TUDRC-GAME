@@ -525,7 +525,7 @@ function fixMap(m) {
   if (typeof MapLevels !== 'undefined' && typeof tileById === 'function') MapLevels.syncDeck(m, tileById);   // 2 樓地面自動從圖層算的地圖：照現在的圖層、牆地板標記重算（js/map-levels.js）
   if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;
   if (Array.isArray(m.solid2) && m.solid2.length) m.solid2 = [...new Set(m.solid2)]; else delete m.solid2;
-  if (typeof MapLevels !== 'undefined') MapLevels.normalize(m);   // 🏢 樓層資料：only2（只有 2 樓的格子）一定在 2 樓地面上、不是出入口（js/map-levels.js）
+  if (typeof MapLevels !== 'undefined') MapLevels.normalize(m);   // 🏢 樓層資料：陸橋（bridge）一定在 2 樓地面上、不是出入口；舊的 only2 換成 bridge（js/map-levels.js）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
@@ -3107,6 +3107,7 @@ function updateToolUI() {
   if (solidBtn) solidBtn.textContent = solidBtn.textContent.replace(/^🧱[²³]?/u, '🧱' + ['', '', '²', '³'][solidSize]);   // 只換開頭的磚塊（劇情地圖編輯器的按鈕後面還有字）
   // 收在「⋯ 更多」裡的地圖機關工具：選到時按鈕上直接寫出目前是哪個工具（不用打開選單才知道）
   const more = document.querySelector('#mapbar .tool-more'), picked = more && more.querySelector('.tool.sel');
+  document.querySelectorAll('.tool-sub').forEach(sub => sub.classList.toggle('has-sel', !!sub.querySelector('.tool.sel')));   // 子選單裡的工具被選到：子選單的按鈕也標亮
   if (more) { more.classList.toggle('has-sel', !!picked); more.querySelector('summary').textContent = picked ? '⋯ ' + picked.textContent.trim() : '⋯ 更多'; }
 }
 // 「⋯ 更多」選單太長：打開時照它實際的位置算最多多高，超過就在選單裡捲動（工具列換行變高時也對得上）
@@ -3117,6 +3118,36 @@ document.querySelectorAll('#mapbar .tool-more').forEach(more => {
 document.querySelectorAll('.tool').forEach(btn => {
   btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn); });
 });
+// ---- 「⋯ 更多」裡的子選單（🌲 森林機關 ＞ 這種，HTML 寫成 .tool-sub）----
+// 像一般程式的選單：滑鼠移到按鈕上（或點一下）→ 旁邊展開裡面的工具；「⋯ 更多」不會收起來。選了裡面的工具＝兩層一起收起來
+const toolSubTimers = new WeakMap();
+function closeToolSub(sub) { clearTimeout(toolSubTimers.get(sub)); sub.classList.remove('open'); }
+function closeAllToolSubs() { document.querySelectorAll('.tool-sub.open').forEach(closeToolSub); }
+function openToolSub(sub) {
+  clearTimeout(toolSubTimers.get(sub));
+  if (sub.classList.contains('open')) return;
+  closeAllToolSubs();
+  if (typeof closeLevelKindMenu === 'function') closeLevelKindMenu();   // 🏢 樓層種類的子選單也收起來
+  sub.classList.add('open');
+  const head = sub.querySelector('.tool-sub-head'), menu = sub.querySelector('.tool-sub-menu');
+  const rc = head.getBoundingClientRect(), mr = menu.getBoundingClientRect();
+  let left = rc.right + 2, top = rc.top - 8;                                   // 貼在按鈕右邊，第一項跟按鈕對齊
+  if (left + mr.width > window.innerWidth - 4) left = Math.max(4, rc.left - mr.width - 2);   // 右邊放不下：改到左邊
+  if (top + mr.height > window.innerHeight - 4) top = Math.max(4, window.innerHeight - 4 - mr.height);   // 下面放不下：往上移
+  menu.style.left = left + 'px'; menu.style.top = top + 'px';
+}
+const closeToolSubSoon = sub => { clearTimeout(toolSubTimers.get(sub)); toolSubTimers.set(sub, setTimeout(() => closeToolSub(sub), 300)); };   // 滑鼠移開一下下才收（斜著移到子選單途中不會不見）
+document.querySelectorAll('.tool-sub').forEach(sub => {
+  const head = sub.querySelector('.tool-sub-head'), menu = sub.querySelector('.tool-sub-menu');
+  if (!head || !menu) return;
+  head.addEventListener('mouseenter', () => openToolSub(sub));
+  head.addEventListener('mouseleave', () => closeToolSubSoon(sub));
+  menu.addEventListener('mouseenter', () => clearTimeout(toolSubTimers.get(sub)));
+  menu.addEventListener('mouseleave', () => closeToolSubSoon(sub));
+  head.addEventListener('click', e => { e.stopPropagation(); openToolSub(sub); });   // 點按鈕本身：只展開，「⋯ 更多」不收起來
+});
+document.querySelectorAll('.tool-more').forEach(d => d.addEventListener('toggle', () => { if (!d.open) closeAllToolSubs(); }));   // 「⋯ 更多」收起來：子選單也收
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllToolSubs(); });
 // 🧱 不可穿透：按下去在按鈕下面跳出小選單，選筆刷大小 1×1／2×2／3×3（點選單外面或按 Esc 就關掉，大小照舊）
 function openSolidSizeMenu(btn) {
   closeSolidSizeMenu();
@@ -3480,11 +3511,10 @@ function refreshLockerControl() {
   if (!picked) return;
   const loot = picked.s?.lockerLoot;
   const select = document.getElementById('lockerLootItem'), qty = document.getElementById('lockerLootQty');
-  // 彈藥箱沒指定內容＝空箱，不另外給「空櫃」選項
+  // 彈藥箱、置物櫃一樣：沒指定內容＝隨機掉落（彈藥箱的特殊子彈機率比較高），「空箱／空櫃」＝什麼都沒有
   document.getElementById('lockerLootTitle').textContent = picked.ammo ? '彈藥箱內容：' : '置物櫃內容：';
-  select.options[0].textContent = picked.ammo ? '空箱（原設定）' : '隨機掉落（原設定）';
-  select.options[1].hidden = !!picked.ammo;
-  if (picked.ammo && loot?.kind === 'empty') select.value = 'random';
+  select.options[0].textContent = picked.ammo ? '隨機掉落（原設定，子彈比較多）' : '隨機掉落（原設定）';
+  select.options[1].textContent = picked.ammo ? '空箱' : '空櫃';
   select.value = loot ? loot.kind === 'empty' ? 'empty' : loot.kind + ':' + loot.id : 'random';
   select.querySelectorAll('option[data-story]').forEach(o => { o.hidden = o.value !== select.value; });   // 劇情道具、零食、飲料：只有本來就設成它的櫃子看得到
   qty.value = loot?.qty || 1; qty.disabled = !select.value.startsWith('item:');
@@ -4115,7 +4145,8 @@ function shiftMapContent(m, dc, dr) {
   if (m.deckDel) m.deckDel = m.deckDel.map(shiftKey);
   if (m.ramps) m.ramps = m.ramps.map(shiftKey);
   if (m.solid2) m.solid2 = m.solid2.map(shiftKey);
-  if (m.only2) m.only2 = m.only2.map(shiftKey);
+  if (m.only2) m.only2 = m.only2.map(shiftKey);   // 舊資料
+  if (m.bridge) m.bridge = m.bridge.map(shiftKey);   // 🌉 陸橋（筆刷刷的）
   if (m.deepWater) m.deepWater = m.deepWater.map(shiftKey);
   if (m.deepWaterKeep) m.deepWaterKeep = m.deepWaterKeep.map(shiftKey);
   if (m.deepWaterOffsets) { const o = {}; for (const k in m.deepWaterOffsets) o[shiftKey(k)] = m.deepWaterOffsets[k]; m.deepWaterOffsets = o; }
@@ -4156,7 +4187,8 @@ function dropOutsideContent(m) {
   for (const f of ['deckAdd', 'deckDel']) if (m[f]) { m[f] = m[f].filter(insideKey); if (!m[f].length) delete m[f]; }   // 2 樓地面自動模式的例外
   if (m.ramps) { m.ramps = m.ramps.filter(insideKey); if (!m.ramps.length) delete m.ramps; }
   if (m.solid2) { m.solid2 = m.solid2.filter(insideKey); if (!m.solid2.length) delete m.solid2; }
-  if (m.only2) m.only2 = m.only2.filter(insideKey);
+  if (m.only2) m.only2 = m.only2.filter(insideKey);   // 舊資料
+  if (m.bridge) { m.bridge = m.bridge.filter(insideKey); if (!m.bridge.length) delete m.bridge; }
   if (m.deepWater) { m.deepWater = m.deepWater.filter(insideKey); if (!m.deepWater.length) delete m.deepWater; }
   if (m.deepWaterKeep) { m.deepWaterKeep = m.deepWaterKeep.filter(insideKey); if (!m.deepWaterKeep.length) delete m.deepWaterKeep; }
   if (m.deepWaterOffsets) { for (const k in m.deepWaterOffsets) if (!insideKey(k)) delete m.deepWaterOffsets[k]; if (!Object.keys(m.deepWaterOffsets).length) delete m.deepWaterOffsets; }

@@ -6,7 +6,8 @@
    ・有設 2 樓圖層的地圖：2 樓地面自動從 2 樓圖層的地板算（下面的 autoDeckCells），deckAdd／deckDel＝筆刷加的、拿掉的例外；
              deck 是算好的結果（遊戲讀地圖、編輯器存檔時用 syncDeck 重算）；deckAuto＝已經換成自動。沒有 2 樓圖層的地圖照舊：deck 全部靠筆刷畫
    ・ramps  ＝樓層出入口（樓梯、手扶梯）
-   ・only2  ＝「只有 2 樓、底下沒有 1 樓」的格子（一定也在 deck 裡）。陸橋＝在 deck 裡、但不在 only2 裡
+   ・bridge ＝陸橋（2 樓地面、底下還有 1 樓）的格子：只有用 🏢 樓層筆刷「陸橋」刷的才算，不會自動判定。
+             其他 2 樓地面（不是出入口）一律是「只有 2 樓、底下沒有 1 樓」（only2Cells）。舊資料的 only2 讀入時換成 bridge
    ・圖層（layerOrder 裡）的 level：2＝2 樓的圖層（沒寫＝1 樓）；top2：true＝「2 樓上層」，永遠蓋在 2 樓的人上面（像屋簷）
    ・每張圖（stamp）的 level：1、2，或 'span'（從一樓立到二樓的柱子／牆，上下兩半各算一層）。沒寫＝跟著所在圖層的樓層
    tileOf：用素材 id 找素材（遊戲傳 mapTileById、編輯器傳 tileById），要有 w、h（格數）。
@@ -34,10 +35,16 @@ const MapLevels = (() => {
     return L.all.has((s && s.layer) || 'top') ? 2 : 1;
   }
   const stampOn2F = (s, L) => s && s.level != null ? s.level !== 1 : L.all.has((s && s.layer) || 'top');
-  // 「只有 2 樓」的格子（照 only2；一定在 2 樓地面上、不是出入口）
+  // 「只有 2 樓」的格子：2 樓地面裡，不是樓層出入口、也不是用筆刷刷成陸橋的
   function only2Cells(m) {
-    const deck = new Set(m.deck || []), ramps = new Set(m.ramps || []);
-    return new Set((m.only2 || []).filter(k => deck.has(k) && !ramps.has(k)));
+    const deck = new Set(m.deck || []), ramps = new Set(m.ramps || []), bridge = bridgeSet(m);
+    return new Set([...deck].filter(k => !ramps.has(k) && !bridge.has(k)));
+  }
+  // 陸橋的格子（筆刷刷的 bridge）；還沒換過的舊資料（只有 only2）：2 樓地面裡不在 only2、不是出入口的＝陸橋
+  function bridgeSet(m) {
+    if (Array.isArray(m.bridge) || !Array.isArray(m.only2)) return new Set(m.bridge || []);
+    const only2 = new Set(m.only2), ramps = new Set(m.ramps || []);
+    return new Set((m.deck || []).filter(k => !only2.has(k) && !ramps.has(k)));
   }
   // 一格是哪一種：'1'＝只有 1 樓、'2'＝只有 2 樓、'b'＝陸橋（上下都有）、'r'＝樓層出入口
   function cellKind(k, deck, ramps, only2) {
@@ -121,7 +128,8 @@ const MapLevels = (() => {
       m.deckAuto = true;
     }
     const auto = autoDeckCells(m, tileOf);
-    const add = (m.deckAdd || []).filter(k => !auto.has(k)), del = (m.deckDel || []).filter(k => auto.has(k));   // 已經跟自動一樣的例外拿掉
+    const topRows = new Set(); { const t = new Map(); wallFaceCells(m, tileOf, t); for (const rs of t.values()) for (const r of rs) topRows.add(r); }   // 牆頂第二列（自動跟著第一列算的）
+    const add = (m.deckAdd || []).filter(k => !auto.has(k)), del = (m.deckDel || []).filter(k => auto.has(k) || topRows.has(k));   // 已經跟自動一樣的例外拿掉（牆頂第二列擦掉的要留著，不然會被加回去）
     const base = new Set([...auto, ...add]); for (const k of del) base.delete(k);
     // 扣掉牆面：哪些是牆面要看牆腳踩不踩在 2 樓地面上，而扣掉之後又可能變，所以從上一次算好的 2 樓地面開始，重複算到不再變（最多 6 次）
     let deck = new Set(m.deck || []);
@@ -158,12 +166,14 @@ const MapLevels = (() => {
     return { auto: auto.size, add: (m.deckAdd || []).length, del: (m.deckDel || []).length, same: now.size === stored.size && [...now].every(k => stored.has(k)) };
   }
 
-  // 存檔前整理：only2 一定是 2 樓地面、不是出入口；舊版留下的 levels（樓層資料版本）拿掉
+  // 存檔前整理：陸橋一定是 2 樓地面、不是出入口；舊資料的 only2 換成 bridge；舊版留下的 levels（樓層資料版本）拿掉
   function normalize(m) {
     if (!m) return;
     delete m.levels;
     const deck = new Set(m.deck || []), ramps = new Set(m.ramps || []);
-    m.only2 = [...new Set((m.only2 || []).filter(k => deck.has(k) && !ramps.has(k)))];
+    const bridge = [...bridgeSet(m)].filter(k => deck.has(k) && !ramps.has(k));
+    delete m.only2;
+    if (bridge.length) m.bridge = bridge; else delete m.bridge;
   }
 
   // ---- 🔍 樓層檢查：列出可疑的地方 {kind, text, c, r} ----
@@ -211,15 +221,15 @@ const MapLevels = (() => {
       const mid = cells.slice().sort((x, y) => +x.split(',')[0] - +y.split(',')[0])[Math.floor((cells.length - 1) / 2)];   // 底部中間那格（擋路格通常在這裡）
       if (on && on < cells.length && !(deck.has(mid) && !ramps.has(mid))) add('warn', '可破壞物件（' + (t.name || s.id) + '）踩在 2 樓地面的邊緣：一半在 2 樓地面上、一半不在，會被當成 1 樓的東西', s.c + ',' + s.r);
     }
-    // 5. 只有 2 樓的格子上鋪了一樓的地板圖：可能 only2 畫錯，或那張圖應該設成 2 樓
+    // 5. 只有 2 樓的格子上鋪了一樓的地板圖：可能要刷成陸橋，或那張圖應該設成 2 樓
     const under = new Set();
     for (const l of order(m)) if (!L.all.has(l.id) && !isOccLayer(l.id) && l.id !== 'top') for (const k in ((m.layers || {})[l.id] || {})) under.add(k);
     for (const s of m.stamps || []) { if (stampOn2F(s, L)) continue; const t = tileOf(s.id); if (!t || t.flat) continue; if (!isOccLayer(s.layer || 'top')) cover(s, t, under); }
     let n = 0;
-    for (const k of only2) if (under.has(k) && n < 30) { add('info', '「只有 2 樓」的格子上鋪著一樓的地板圖：這格到底有沒有 1 樓？', k); n++; }
+    for (const k of only2) if (under.has(k) && n < 30) { add('info', '「只有 2 樓」的格子上鋪著一樓的地板圖：底下有 1 樓的話，用 🏢 筆刷刷成「陸橋」', k); n++; }
     return out;
   }
 
-  return { floor2Layers, stampOn2F, stampLevel, only2Cells, cellKind, normalize, check, isOccLayer, wallFaceCells,
+  return { floor2Layers, stampOn2F, stampLevel, only2Cells, bridgeSet, cellKind, normalize, check, isOccLayer, wallFaceCells,
     isAutoDeck, autoDeckCells, syncDeck, noteDeckEdit };
 })();

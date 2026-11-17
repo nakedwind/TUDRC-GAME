@@ -162,20 +162,23 @@ function useStoragePropNearPlayer(filter){
     if(typeof itemIntroFromLocker!=='undefined')itemIntroFromLocker=true;
     try{
       if(loot)grantLockerLoot(loot);
-      else{
-        if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);
-        if(typeof tryEquipDrop==='function')tryEquipDrop('adrenaline',prop.x,prop.top);   // 腎上腺素（機率在 data/equipment.js 的 ITEM_DROPS）
-        if(typeof tryEquipDrop==='function')tryEquipDrop('anomaly-firstaid',prop.x,prop.top);   // 異質急救包：只有置物櫃找得到
-        if(typeof tryEquipDrop==='function')tryEquipDrop('toolbox',prop.x,prop.top);   // 工具箱（機率在 data/equipment.js 的 ITEM_DROPS）
-        if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);
-        if(typeof tryGraffitiPenFind==='function')tryGraffitiPenFind(prop.x,prop.top);   // 塗鴉筆（js/graffiti.js）
-        if(typeof tryYouyouCardFind==='function')tryYouyouCardFind();   // 好遊卡（js/mrt-locks.js）
-      }
+      else rollRandomContainerLoot(prop.x,prop.top,'置物箱');
     }finally{if(typeof itemIntroFromLocker!=='undefined')itemIntroFromLocker=false;}
     if(typeof itemIntroCount!=='undefined'&&itemIntroCount===before)flash('空的',prop.x,prop.top-8,'#dce6ed',1.6);
     updateHUD();saveGame();
   }
   return true;
+}
+// 沒指定內容物的置物櫃、彈藥箱：隨機開出東西（每一樣各自抽，機率在 data/equipment.js 的 ITEM_DROPS、GUN_FINDS）
+// ammoChance：開出特殊子彈的機率（置物櫃 GUN_FINDS.ammo；彈藥箱傳 AMMO_CRATE_LOOT.ammo，比較高）
+function rollRandomContainerLoot(x,y,where,ammoChance){
+  if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',x,y);
+  if(typeof tryEquipDrop==='function')tryEquipDrop('adrenaline',x,y);   // 腎上腺素
+  if(typeof tryEquipDrop==='function')tryEquipDrop('anomaly-firstaid',x,y);   // 異質急救包
+  if(typeof tryEquipDrop==='function')tryEquipDrop('toolbox',x,y);   // 工具箱
+  if(typeof tryGunFind==='function')tryGunFind(x,y,ammoChance??GUN_FINDS.ammo,where);   // 特殊子彈（js/special-guns.js）
+  if(typeof tryGraffitiPenFind==='function')tryGraffitiPenFind(x,y);   // 塗鴉筆（js/graffiti.js）
+  if(typeof tryYouyouCardFind==='function')tryYouyouCardFind();   // 好遊卡（js/mrt-locks.js）
 }
 // 背包滿了：開箱前先看放不放得下。放不下＝跳視窗、箱子蓋回去（不算開過），東西留在箱子裡，整理背包後再來開
 // loot：地圖編輯器指定的內容物；沒指定＝隨機，開得出來的都是「物品」分類，那一類格子滿了就算滿

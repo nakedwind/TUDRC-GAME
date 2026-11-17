@@ -283,8 +283,8 @@
   <script src="data/gifts.js?v=devotion-20261103"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=swimring-20261113"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=egg3-20261115"></script>   <!-- 溫特可購買、使用的個人補給 -->
-  <script src="data/chickens.js?v=nest2-20261115"></script>   <!-- 森林的雞、鳥巢、雞蛋：數值設定 -->
-  <script src="data/equipment.js?v=gearinst-20261112"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/chickens.js?v=egg10-20261117"></script>   <!-- 森林的雞、鳥巢、雞蛋：數值設定 -->
+  <script src="data/equipment.js?v=crateloot2-20261117"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=bldabout-20261109"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
   <script src="js/backpack-layout.js?v=gearinst-20261112"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
@@ -302,7 +302,7 @@
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
-  <script src="data/maps.js?v=floorclean-20261117"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
+  <script src="data/maps.js?v=bridge-20261117"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=lockleft-20261110"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=cat-20261112"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
@@ -319,8 +319,8 @@
   <script src="js/hide-zones.js?v=nofade-20261115"></script>   <!-- 🙈 完全遮住區：腳踩進去的角色不畫 -->
   <script src="data/surface-tags.js?v=surftag-20261117"></script>   <!-- 素材的牆／地板標記（🧱 牆地板編輯器匯出） -->
   <script src="js/surface-tags.js?v=floorclean-20261117"></script>   <!-- 牆／地板標記：讀標記（含編輯器還沒存的修改） -->
-  <script src="js/map-levels.js?v=floorclean-20261117"></script>   <!-- 地圖的樓層資料規則（地圖編輯器共用） -->
-  <script src="js/maploader.js?v=floorclean-20261117"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/map-levels.js?v=levelmenu-20261117"></script>   <!-- 地圖的樓層資料規則（地圖編輯器共用） -->
+  <script src="js/maploader.js?v=bridge-20261117"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=merge4-20261115"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/pits.js?v=pit-20261114"></script>   <!-- 6b. 坑洞：走過會變慢（hole01、hole02 等）；哪些素材是坑洞在地圖／基地編輯器勾 -->
   <script src="js/swim-ring.js?v=shorenear-switch-20261116"></script>   <!-- 6b. 深水區＋救生圈：坐救生圈才能下深水、划水聲 -->
@@ -367,7 +367,7 @@
   <script src="js/golden-banana-king.js?v=merge-20261115c"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
   <script src="js/gourd-monkey.js?v=merge-20261115c"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/gourd-king.js?v=20261116mrt1"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
-  <script src="js/human-face-butterfly.js?v=merge-20261115c"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
+  <script src="js/human-face-butterfly.js?v=sleepheal-20261117"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=merge-20261115c"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
   <script src="js/render.js?v=merge-20261115c"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
@@ -387,7 +387,7 @@
   <script src="js/oil-barrels.js?v=poolfix2-20261115"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=ledflicker-20261113"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/fog.js?v=sentryfloor-20261115"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
-  <script src="js/vines.js?v=throwwall-20261109"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
+  <script src="js/vines.js?v=vine30-20261117"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
   <script src="js/loofah-queen.js?v=corestalk-20261109"></script> <!-- 9n4. 菁英絲瓜小姐「絲瓜女王」：踏地垂下藤蔓、核心吊在頭上、農田長藤蔓 -->
   <script src="js/banana-emperor.js?v=groundvine-20261109"></script> <!-- 9n5. 菁英金蕉王「金蕉大王」：守核心、舉杖敲地施法（補血／加攻／加防／加速／香蕉皮雨）、大隻隊員 -->
   <script src="js/leaf-piles.js?v=leafpile4-20261106"></script> <!-- 9n4. 森林的樹葉堆：燒掉露出道具或小史萊姆（地圖編輯器擺放） -->
@@ -410,7 +410,7 @@
   <script src="js/claw-machine.js?v=clawreach-20261115"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
   <script src="js/sortie-supply.js?v=sortiebal-20261106"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=merge4-20261115"></script>
-  <script src="js/storage-lockers.js?v=20261116gen1"></script>
+  <script src="js/storage-lockers.js?v=crateloot2-20261117"></script>
   <script src="data/prop-collisions.js?v=forestroot-20261115"></script>   <!-- 販賣機、營地箱子自帶的擋路格（物件編輯器設定） -->
   <script src="js/prop-collisions.js?v=forestroot-20261115"></script>
   <script src="js/escalators.js?v=rider-head2-20261116"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
@@ -433,10 +433,10 @@
   <script src="js/map-ambient.js?v=ambmulti-20261115"></script> <!-- 9k3. 地圖專屬環境背景音：池核的滴水聲 -->
   <script src="js/dynamo-sound.js?v=20261116dyn1"></script> <!-- 發電機運轉聲：靠近開著的發電機才聽得到 -->
   <script src="js/sanity.js?v=graybubble-20261115"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=floorfix2-20261115"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/flare.js?v=crateloot2-20261117"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=firsthint-20261115"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/gear-v2.js?v=previewall-20261114"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
-  <script src="js/special-guns.js?v=floorhit-20261116"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/special-guns.js?v=crateloot2-20261117"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=previewall-20261114"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=slotscene-20261115"></script>
   <script src="js/camp-interactions.js?v=trialammo-20261110"></script>
@@ -444,7 +444,7 @@
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
   <script src="js/guide-skills.js?v=say-20261106"></script>   <!-- 嚮導技能：戰鬥中自動發動（群體補血、增益、大招…） -->
   <script src="js/vitals.js?v=midreturn-20261103"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
-  <script src="js/camp-beds.js?v=vinemates-20261105"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
+  <script src="js/camp-beds.js?v=sleepheal-20261117"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
   <script src="js/mrt-locks.js?v=mrtkey-20261115"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script src="data/mrt-train.js?v=20261116gen1"></script>   <!-- 捷運列車的設定（物件編輯器匯出） -->
