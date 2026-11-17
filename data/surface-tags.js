@@ -166,3 +166,10 @@ const SURFACE_TAGS = {
   "tile_station_hall_wall02": "wall",
   "tile_station_hall_wall03": "wall"
 };
+// 牆頂幾列：標成「牆」的素材，從圖最上面往下幾列是牆頂（2 樓平台邊緣時，2 樓的人可以走到這幾列；再下面是牆面，走不進去）。
+// 沒列出來的＝1 列。由 🧱 牆地板編輯器 匯出。
+const SURFACE_WALL_TOP = {
+  "tile_mrt_pillar_a02": 2,
+  "tile_mrt_pillar_large": 2,
+  "tile_mrt_pillar_large_route_map": 2
+};
