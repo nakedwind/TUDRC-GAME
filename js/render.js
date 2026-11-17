@@ -1135,12 +1135,15 @@ function draw() {
     if (!drawFloorWarned.has(who)) { drawFloorWarned.add(who); console.warn('[樓層體檢] 畫面上有東西沒標樓層（當成 1 樓）：' + who); }
   }
   sortables.sort(drawOrder);   // 先比樓層、再比層、最後照底部 Y（js/pathfinding.js）
-  let edgeClipped = false;   // 畫到 2 樓時：平台邊緣牆的下半段挖掉，2 樓的人、影子、建築都不會畫到牆上（js/maploader.js 的 clipOutEdgeWallFaces）
+  // 畫到 2 樓時：平台邊緣牆的下半段挖掉，2 樓的人、影子、建築都不會畫到牆上（js/maploader.js 的 clipOutEdgeWallFaces）。
+  // 「2 樓上層」圖層（band top，像屋簷）不受影響：輪到它時先把挖掉的範圍還原（排序上它一定在 2 樓其他東西之後）
+  let edgeClip = 'none';   // none＝還沒挖、on＝挖著、done＝已經還原
   for (const it of sortables) {
-    if (!edgeClipped && it.floor === 2 && hasFloors && typeof clipOutEdgeWallFaces === 'function') edgeClipped = clipOutEdgeWallFaces(ctx) || null;
+    if (edgeClip === 'on' && (it.floor !== 2 || it.band === DRAW_BAND.top)) { ctx.restore(); edgeClip = 'done'; }
+    if (edgeClip === 'none' && it.floor === 2 && it.band !== DRAW_BAND.top && hasFloors && typeof clipOutEdgeWallFaces === 'function' && clipOutEdgeWallFaces(ctx)) edgeClip = 'on';
     it.draw();
   }
-  if (edgeClipped) ctx.restore();
+  if (edgeClip === 'on') ctx.restore();
   if (typeof drawDoorLocks === 'function') drawDoorLocks(ctx);   // 解開時掉下來的鎖鏈（js/doors.js）
   drawCoreShards(ctx);         // 異質核心碎片
   drawFlareShots(ctx);         // 飛行中的照明彈
