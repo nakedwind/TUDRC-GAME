@@ -1661,13 +1661,13 @@ const STORY_SCENES = {
     "beats": [
       { "speaker": "", "text": "噠、噠、噠、噠——", "wait": 0.4, "camera": "走廊", "move": { "taana": [14.3, 21] }, "via": { "taana": [[17.5, 21.8]] } },
       { "speaker": "", "text": "B1 訓練室外的走廊，一陣急促的腳步聲由遠而近。", "wait": 1.2 },
-      { "speaker": "塔納", "text": "……呼……呼……", "wait": 0.3, "emote": { "taana": "sweat" } },
-      { "speaker": "塔納", "text": "……甩掉了嗎。", "wait": 0.3, "face": { "taana": "right" } },
-      { "speaker": "塔納", "text": "從早上開始，大家看我的眼神就怪怪的……", "wait": 0.3, "face": { "taana": "front" }, "emote": { "taana": "" } },
-      { "speaker": "塔納", "text": "……絕對有鬼。", "wait": 0.3, "emote": { "taana": "shade" } },
+      { "speaker": "塔納", "text": "……呼……", "wait": 0.3, "emote": { "taana": "sweat" } },
+      { "speaker": "塔納", "text": "……甩掉了吧。", "wait": 0.3, "face": { "taana": "right" } },
+      { "speaker": "塔納", "text": "從早上開始，大家看我的眼神都很可疑……", "wait": 0.3, "face": { "taana": "front" }, "emote": { "taana": "" } },
+      { "speaker": "塔納", "text": "絕對有鬼。", "wait": 0.3, "emote": { "taana": "shade" } },
       { "speaker": "雷德", "text": "這裡雷德。B1 走廊沒看到人，大家那邊呢？", "wait": 0.6, "radio": true, "emote": { "taana": "" } },
       { "speaker": "柯林", "text": "一樓沒有！廚房沒有！冰箱裡也沒有！", "wait": 0.3, "radio": true },
-      { "speaker": "塔納", "text": "……雷德的聲音？", "wait": 0.3, "emote": { "taana": "drop" } },
+      { "speaker": "塔納", "text": "（……雷德的聲音？）", "wait": 0.3, "emote": { "taana": "drop" } },
       {
         "speaker": "",
         "text": "走廊另一頭的樓梯，傳來了腳步聲。",
@@ -1677,7 +1677,7 @@ const STORY_SCENES = {
         "move": { "red": [24.5, 21.5] },
         "face": { "taana": "right" }
       },
-      { "speaker": "塔納", "text": "……！", "wait": 0.2, "camera": "走廊", "hop": { "taana": true }, "emote": { "taana": "shade+drop" } },
+      { "speaker": "塔納", "text": "！", "wait": 0.2, "camera": "走廊", "hop": { "taana": true }, "emote": { "taana": "shade+drop" } },
       {
         "speaker": "",
         "text": "塔納想也沒想，一頭鑽進了訓練室。",
@@ -1699,9 +1699,9 @@ const STORY_SCENES = {
         "shout": { "red": true },
         "hop": { "taana": true }
       },
-      { "speaker": "塔納", "text": "……雷德。", "wait": 0.3, "face": { "taana": "red" } },
+      { "speaker": "塔納", "text": "……什麼事？", "wait": 0.3, "face": { "taana": "red" } },
       { "speaker": "雷德", "text": "我就知道你又會躲在這裡！\n部隊長有事情要找你喔！麻煩跟我過來一趟吧～", "wait": 0.3, "emote": { "red": "sparkle", "taana": "" } },
-      { "speaker": "塔納", "text": "少在那邊裝了......你騙誰啊？", "wait": 0.3 },
+      { "speaker": "塔納", "text": "我看起來像很好騙的樣子嗎？", "wait": 0.3 },
       { "speaker": "雷德", "text": "哈哈哈，被發現啦！那就沒辦法了～\n塔納，乖乖跟我走吧！", "wait": 0.3, "hop": { "red": true } },
       { "speaker": "塔納", "text": "……不要。", "wait": 0.3, "emote": { "taana": "shade" } },
       {
@@ -1757,7 +1757,7 @@ const STORY_SCENES = {
         "move": { "taana": [8.2, 11.7] },
         "via": { "taana": [[6.6, 8.9], [6.4, 10.5]] }
       },
-      { "speaker": "塔納", "text": "……呼……這裡人多，總不會在這裡動手吧？", "wait": 0.3, "face": { "taana": "right" }, "emote": { "taana": "sweat" } },
+      { "speaker": "塔納", "text": "……呼……總不會在這麼多人的地方正大光明動手吧？", "wait": 0.3, "face": { "taana": "right" }, "emote": { "taana": "sweat" } },
       {
         "speaker": "赫真",
         "text": "啊！塔納前輩！",
@@ -1768,11 +1768,11 @@ const STORY_SCENES = {
         "shout": { "kakuma": true },
         "emote": { "taana": "" }
       },
-      { "speaker": "塔納", "text": "……赫真。早。", "wait": 0.6, "emote": { "taana": "drop" } },
+      { "speaker": "塔納", "text": "……早。", "wait": 0.6, "emote": { "taana": "drop" } },
       { "speaker": "赫真", "text": "早安！前輩，可以請你跟我走一趟嗎？", "wait": 0.3, "emote": { "kakuma": "sparkle", "taana": "" } },
-      { "speaker": "塔納", "text": "去哪。", "wait": 0.3 },
+      { "speaker": "塔納", "text": "走去哪？", "wait": 0.3 },
       { "speaker": "赫真", "text": "這個……是秘密！", "wait": 0.3, "hop": { "kakuma": true }, "emote": { "kakuma": "flower" } },
-      { "speaker": "塔納", "text": "……那不要。", "wait": 0.3, "face": { "taana": "left" }, "emote": { "kakuma": "" } },
+      { "speaker": "塔納", "text": "……那你永遠保密吧。", "wait": 0.3, "face": { "taana": "left" }, "emote": { "kakuma": "" } },
       {
         "speaker": "諾亞",
         "text": "嗨！塔納！",
@@ -1784,10 +1784,10 @@ const STORY_SCENES = {
       },
       { "speaker": "塔納", "text": "……諾亞。", "wait": 0.3, "face": { "taana": "noah" }, "emote": { "taana": "shade" } },
       { "speaker": "諾亞", "text": "跟我們走一趟吧！", "wait": 0.3 },
-      { "speaker": "塔納", "text": "……你們為什麼要這樣對我！", "wait": 0.3, "emote": { "taana": "" } },
+      { "speaker": "塔納", "text": "……你們到底想對我做什麼？", "wait": 0.3, "emote": { "taana": "" } },
       { "speaker": "諾亞", "text": "幹嘛把我們講的好像要做什麼壞事啊？", "wait": 0.3 },
       { "speaker": "赫真", "text": "前輩，投降吧！掙扎只是浪費時間！", "wait": 0.3, "camera": "走廊", "move": { "kakuma": [10.5, 11.5] } },
-      { "speaker": "塔納", "text": "不要...！才不要！", "wait": 0.3, "face": { "taana": "kakuma" }, "emote": { "taana": "sweat" } },
+      { "speaker": "塔納", "text": "我有說過我討厭浪費時間嗎？", "wait": 0.3, "face": { "taana": "kakuma" }, "emote": { "taana": "sweat" } },
       {
         "speaker": "",
         "text": "兩人一左一右慢慢逼近——塔納突然壓低身子，鑽進了應變中心的辦公區。",
@@ -1856,8 +1856,8 @@ const STORY_SCENES = {
     ],
     "beats": [
       { "speaker": "", "text": "1F 大廳。", "wait": 0.6, "camera": "大廳", "move": { "taana": [19.6, 8.8] } },
-      { "speaker": "塔納", "text": "……這裡...沒人吧？", "wait": 0.3, "face": { "taana": "left" } },
-      { "speaker": "塔納", "text": "總覺得有不好的預感……", "wait": 0.3, "emote": { "taana": "sweat" } },
+      { "speaker": "塔納", "text": "……這裡沒人吧。", "wait": 0.3, "face": { "taana": "left" } },
+      { "speaker": "塔納", "text": "有不好的預感……", "wait": 0.3, "emote": { "taana": "sweat" } },
       {
         "speaker": "柯林",
         "text": "抓到了——！！",
@@ -1868,8 +1868,8 @@ const STORY_SCENES = {
         "hop": { "taana": true },
         "emote": { "taana": "shade+drop" }
       },
-      { "speaker": "塔納", "text": "……柯林。等一下。我們好好談。", "wait": 0.4, "emote": { "taana": "drop" } },
-      { "speaker": "柯林", "text": "好哇，跟我過來好好談談吧！", "wait": 0.3, "hop": { "colyn": true }, "emote": { "colyn": "sparkle" } },
+      { "speaker": "塔納", "text": "……別碰我，用說的。", "wait": 0.4, "emote": { "taana": "drop" } },
+      { "speaker": "柯林", "text": "好哇，跟我過來好好聊聊吧！", "wait": 0.3, "hop": { "colyn": true }, "emote": { "colyn": "sparkle" } },
       {
         "speaker": "塔納",
         "text": "……電梯。",
@@ -1890,7 +1890,7 @@ const STORY_SCENES = {
       },
       { "speaker": "塔納", "text": "…………", "wait": 0.3, "emote": { "taana": "shade" } },
       { "speaker": "艾德林", "text": "一大早就在大樓裡跑上跑下，很累吧？", "wait": 0.3, "emote": { "eldrin": "" } },
-      { "speaker": "塔納", "text": "……知道我很累，就放過我。", "wait": 0.3 },
+      { "speaker": "塔納", "text": "……你也知道？", "wait": 0.3 },
       { "speaker": "艾德林", "text": "跟我們來一趟吧，會讓你好好休息的！", "wait": 0.3, "emote": { "eldrin": "flower" } },
       {
         "speaker": "雷德",
@@ -1904,10 +1904,10 @@ const STORY_SCENES = {
       },
       { "speaker": "赫真", "text": "前輩！你已經無路可逃了！", "wait": 0.6, "hop": { "kakuma": true } },
       { "speaker": "諾亞", "text": "哈哈哈你被包圍了，認命吧。", "wait": 0.3, "emote": { "red": "" } },
-      { "speaker": "塔納", "text": "……我罪不至此！！！", "wait": 0.3, "gloom": true },
+      { "speaker": "塔納", "text": "我……罪不至此……", "wait": 0.3, "gloom": true },
       {
         "speaker": "柯林",
-        "text": "放心！我們不會對你怎樣的！過來吧！",
+        "text": "放心！你不會後悔的！過來吧！",
         "wait": 0.2,
         "shout": { "colyn": true },
         "speed": { "colyn": 120 },
@@ -1915,7 +1915,7 @@ const STORY_SCENES = {
         "screen": "black",
         "screenFade": 0.6
       },
-      { "speaker": "塔納", "text": "等一下……柯林，放我下來——！", "wait": 0.4, "sweat": true }
+      { "speaker": "塔納", "text": "喂！放我下來——", "wait": 0.4, "sweat": true }
     ],
     "vignette": 0.25
   },
@@ -1972,12 +1972,12 @@ const STORY_SCENES = {
       { "speaker": "", "text": "長桌的正中間，塔納被繩子一圈一圈地綁在椅子上。", "wait": 0.6 },
       { "speaker": "", "text": "頭上戴著尖尖的紙帽，臉上掛著一副大大的眼鏡。", "wait": 0.4 },
       { "speaker": "塔納", "text": "…………", "wait": 0.4, "camera": "塔納", "gloom": true },
-      { "speaker": "塔納", "text": "……放我走。", "wait": 0.3, "gloom": true },
+      { "speaker": "塔納", "text": "……沒人跟我說過工作有包含這個。", "wait": 0.3, "gloom": true },
       { "speaker": "赫真", "text": "帽子跟眼鏡都是我幫前輩戴的喔！", "wait": 0.3, "hop": { "kakuma": true }, "emote": { "kakuma": "sparkle" } },
       { "speaker": "朔", "text": "……很適合你。", "wait": 0.3, "emote": { "kakuma": "" } },
-      { "speaker": "塔納", "text": "……居然讓我戴這麼蠢的東西。", "wait": 0.3, "emote": { "taana": "anger" } },
+      { "speaker": "塔納", "text": "……這個福氣給你，你要不要啊？", "wait": 0.3, "emote": { "taana": "anger" } },
       { "speaker": "雷德", "text": "太好了～主角終於就位了！大家，拉炮拿好——", "wait": 0.4, "camera": "全景", "emote": { "taana": "" } },
-      { "speaker": "塔納", "text": "什麼？！不要...拜託不要！", "wait": 0.3, "sweat": true },
+      { "speaker": "塔納", "text": "拜託，不要是我想的那樣。", "wait": 0.3, "sweat": true },
       { "speaker": "溫特", "text": "數到三。", "wait": 0.3 },
       { "speaker": "溫特", "text": "一、二——", "wait": 0.3 },
       {
@@ -1991,19 +1991,19 @@ const STORY_SCENES = {
       },
       { "speaker": "赫真", "text": "噗噗——！前輩生日快樂！！", "wait": 0.3, "blow": { "kakuma": true, "colyn": true, "eldrin": true } },
       { "speaker": "塔納", "text": "…………", "wait": 0.4, "camera": "塔納", "sweat": true, "emote": { "taana": "drop" } },
-      { "speaker": "塔納", "text": "……我要瘋了。", "wait": 0.3 },
+      { "speaker": "塔納", "text": "……我要瘋了。這算職業傷害嗎？", "wait": 0.3 },
       { "speaker": "諾亞", "text": "生日快樂啊！笑一個嘛！", "wait": 0.3, "emote": { "taana": "" } },
-      { "speaker": "塔納", "text": "……有必要做到這種程度嗎？ ", "wait": 0.3, "gloom": true },
+      { "speaker": "塔納", "text": "哈、哈、哈。", "wait": 0.3, "gloom": true },
       { "speaker": "雷德", "text": "不覺得很好玩嗎？這也是一種腳程訓練吧！", "wait": 0.3, "camera": "全景" },
-      { "speaker": "塔納", "text": "……我下次絕對要申請外出。", "wait": 0.3 },
+      { "speaker": "塔納", "text": "……我要求公傷病假。", "wait": 0.3 },
       { "speaker": "艾德林", "text": "塔納～別那麼害羞嘛！今天你生日要開心一點啊～", "wait": 0.3, "emote": { "eldrin": "flower" } },
       { "speaker": "", "text": "阿瓦倫看了艾德林一眼，才小聲開口。", "wait": 0.4 },
       { "speaker": "阿瓦倫", "text": "……生日快樂。", "wait": 0.3, "blow": { "avaren": true } },
       { "speaker": "柯林", "text": "生日快樂！和我們一起吃蛋糕吧！", "wait": 0.3, "blow": { "colyn": true }, "emote": { "eldrin": "" } },
       { "speaker": "赫真", "text": "前輩生日快樂！明年也要讓我們抓喔！", "wait": 0.3, "blow": { "kakuma": true } },
-      { "speaker": "塔納", "text": "……明年你們沒有機會的。", "wait": 0.3 },
+      { "speaker": "塔納", "text": "我寧可被絲瓜小姐抓走。", "wait": 0.3 },
       { "speaker": "伊德", "text": "生日快樂！今天的主角是你！", "wait": 0.3 },
-      { "speaker": "塔納", "text": "……我有說我想要當這種主角嗎？", "wait": 0.3 },
+      { "speaker": "塔納", "text": "你不說，我還看不出來呢。", "wait": 0.3 },
       { "speaker": "薩冷", "text": "生日快樂，願你新的一歲平安順利。", "wait": 0.3 },
       { "speaker": "凱爾", "text": "生日快樂。羅恩，你也說一句吧。", "wait": 0.3 },
       { "speaker": "羅恩", "text": "……生日快樂。", "wait": 0.4 },
