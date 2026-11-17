@@ -3408,7 +3408,8 @@ function refreshDeck2Control() {
       pushUndo();
       const v = e.target.value;
       for (const s of list) {
-        if (v === 'auto') delete s.level;   // 跟著圖層 else s.level = v === 'span' ? 'span' : Number(v);
+        if (v === 'auto') delete s.level;   // 跟著圖層：不寫 level
+        else s.level = v === 'span' ? 'span' : Number(v);   // 1 樓、2 樓、跨樓層
       }
       if (typeof levelCache !== 'undefined') levelCache = null;
       saveMaps(); draw(); refreshSelPanel();
