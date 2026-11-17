@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>牆地板編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  :root { color-scheme:dark; font-family:system-ui,'Microsoft JhengHei',sans-serif; background:#10151c; color:#e8edf5; --st-size:110px }
+  * { box-sizing:border-box } body { max-width:1400px; margin:0 auto; padding:24px }
+  h1 { font-size:25px; margin:0 0 6px } p { color:#aabacc; line-height:1.55; margin:0 0 6px }
+  .panel { background:#1b2530; border:1px solid #3a4d60; border-radius:13px; padding:14px 16px; margin-bottom:12px }
+  button { cursor:pointer; font:inherit; color:#eaf4ff; background:#2a3c50; border:1px solid #57718b; border-radius:8px; padding:7px 11px }
+  button:hover:not(:disabled) { background:#345169 } button:disabled { opacity:.45; cursor:default }
+  button.primary, .btn.primary { background:#236b79; border-color:#69b9c1 }
+  input { background:#101923; border:1px solid #536b80; border-radius:7px; color:#edf5ff; font:inherit; padding:7px 9px }
+  input[type=checkbox] { accent-color:#6bdbbd } input[type=range] { padding:0; vertical-align:middle }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center } .row + .row { margin-top:10px }
+  #stSearch { width:260px }
+  .st-filter button { border-radius:999px; padding:5px 12px; background:#16212c }
+  .st-filter button.on { background:#2b526b; border-color:#8fd3ff }
+  .st-filter i { font-style:normal; color:#9fb1c2; margin-left:4px; font-size:12px }
+  .st-act[data-tag=wall] { border-color:#ff7a5c } .st-act[data-tag=floor] { border-color:#6fd08c } .st-act[data-tag=none] { border-color:#9aa4b2 }
+  kbd { font:11px monospace; background:#0e1721; border:1px solid #445a6e; border-radius:4px; padding:0 4px; color:#cfe3f5 }
+  #stSelN { color:#ffe3a1; font-weight:600 }
+  .status { min-height:1.4em; color:#7ee0c0; margin-top:8px }
+  #stGrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(var(--st-size), 1fr)); gap:8px }
+  .st-card { display:flex; flex-direction:column; gap:3px; align-items:stretch; text-align:left; padding:6px; background:#15202b; border:2px solid var(--tag); border-radius:10px; min-width:0 }
+  .st-card.sel { background:#24465c; box-shadow:0 0 0 2px #ffe3a1 }
+  .st-card.changed { border-style:dashed }
+  .st-thumb { height:var(--st-size); display:flex; align-items:center; justify-content:center; background:repeating-conic-gradient(#18202b 0 25%, #141b24 0 50%) 0 0/16px 16px; border-radius:6px; overflow:hidden }
+  .st-thumb img { max-width:100%; max-height:100%; object-fit:contain; image-rendering:pixelated }
+  .st-card b { font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .st-tag { font-size:12px; color:var(--tag); font-weight:700 }
+  .st-card small { font-size:11px; color:#8fa2b5 }
+  .help { color:#8fa2b5; font-size:13px }
+  @media (max-width:700px) { body { padding:12px } #stSearch { width:100% } }
+</style>
+</head>
+<body>
+  <h1>🧱 牆地板編輯器</h1>
+  <div class="panel">
+    <p>每張素材標一次「這是牆」或「這是地板」，地圖上這張素材貼幾個都照這個算。遊戲和地圖編輯器判斷牆和地板時看這份標記，<b>不再看素材的名字猜</b>。</p>
+    <p class="help">
+      🧱 牆＝牆、柱子這類立起來的東西：放在 2 樓平台邊緣時，牆面那幾格不能當 2 樓地面走，2 樓地板圖也不會畫在牆面上；也不算 2 樓地板。<br>
+      🟫 地板＝可以站上去的地面：2 樓地面自動從圖層算的地圖，放在 2 樓（任何圖層）就算 2 樓地面。<br>
+      ⚪ 不是牆＝門、閘門、欄杆、手扶梯…：不會被當成平台邊緣的牆；算不算地板照圖層。<br>
+      沒標＝照圖層：2 樓的地板類圖層（不是物件圖層、名稱沒有「牆」）＝地板，其他不算；不會被當成牆。
+    </p>
+  </div>
+  <div class="panel">
+    <div class="row">
+      <input id="stSearch" placeholder="搜尋素材名稱、id、檔名…">
+      <span class="row st-filter">
+        <button data-f="all">全部<i></i></button>
+        <button data-f="untagged">沒標<i></i></button>
+        <button data-f="wall">🧱 牆<i></i></button>
+        <button data-f="floor">🟫 地板<i></i></button>
+        <button data-f="none">⚪ 不是牆<i></i></button>
+        <button data-f="changed">✏️ 還沒存的<i></i></button>
+      </span>
+      <label><input type="checkbox" id="stOnlyUsed"> 只看戰鬥地圖有用到的</label>
+      <label>縮圖 <input type="range" id="stSize" min="70" max="220" value="110"></label>
+    </div>
+    <div class="row">
+      <span id="stSelN"></span>
+      <button class="st-act" data-tag="wall">🧱 設成牆 <kbd>1</kbd></button>
+      <button class="st-act" data-tag="floor">🟫 設成地板 <kbd>2</kbd></button>
+      <button class="st-act" data-tag="none">⚪ 設成不是牆 <kbd>3</kbd></button>
+      <button class="st-act" data-tag="">拿掉標記 <kbd>0</kbd></button>
+      <button id="stSelAll">全選看得到的 <kbd>Ctrl+A</kbd></button>
+      <button id="stSelNone">取消選取 <kbd>Esc</kbd></button>
+    </div>
+    <div class="row">
+      <button id="stGuess" title="只填還沒標的素材；遊戲不會照名字猜，這只是幫你先填一個起點">🔮 依名字預填沒標的</button>
+      <button id="stExport" class="btn primary" style="display:none"></button>
+      <button id="stReset">丟掉還沒存的修改</button>
+      <span class="help">點一張＝選它；Ctrl＋點＝多選；Shift＋點＝選一整段。改了會先存在這個瀏覽器（遊戲、地圖編輯器重新整理就套用），按「💾 存到專案」寫進 data/surface-tags.js。虛線框＝還沒存。</span>
+    </div>
+    <div id="stStatus" class="status"></div>
+  </div>
+  <div id="stGrid"></div>
+
+  <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
+  <script src="data/tiles.js?v=merge-20261115c"></script>        <!-- 素材庫 -->
+  <script src="data/maps.js?v=floorclean-20261117"></script>       <!-- 戰鬥地圖（算每張素材用在幾張地圖） -->
+  <script src="data/surface-tags.js?v=surftag-20261117"></script>  <!-- 牆／地板標記 -->
+  <script src="js/surface-tags.js?v=floorclean-20261117"></script>
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
+  <script src="js/surface-tag-editor.js?v=surftag-20261117"></script>
+  <script>ProjectSave.attach({
+    after: ['stExport'],
+    files: [{ path: 'data/surface-tags.js', label: '牆地板標記', text: () => SurfaceTagEditor.source() }],
+    status: (m, e) => { const s = document.getElementById('stStatus'); s.textContent = m; s.style.color = e ? '#ff8f8f' : ''; },
+  });</script>
+  <script src="js/editor-nav.js?v=surftag-20261117"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+</body>
+</html>

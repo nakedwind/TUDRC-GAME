@@ -256,6 +256,7 @@
     <a href="角色資料頁.html">🪪 角色資料頁</a>
     <a href="對話編輯器.html">💬 對話編輯器</a>
     <a href="椅子編輯器.html">🪑 椅子編輯器</a>
+    <a href="牆地板編輯器.html">🧱 牆地板編輯器</a>
     <a href="服裝編輯器.html">👗 服裝編輯器</a>
     <a href="閒聊編輯器.html">🗨️ 閒聊編輯器</a>
     <a href="精靈圖切割器.html">✂️ 精靈圖切割器</a>
@@ -301,7 +302,7 @@
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
-  <script src="data/maps.js?v=wallface-20261117"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
+  <script src="data/maps.js?v=floorclean-20261117"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=lockleft-20261110"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=cat-20261112"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
@@ -316,8 +317,10 @@
   <script src="data/tile-collisions.js?v=tiledepth2-20261115"></script>   <!-- 素材碰撞方框（物件編輯器「🧱 素材碰撞」匯出） -->
   <script src="js/tile-collisions.js?v=merge4-20261115"></script>   <!-- 素材碰撞方框：擋路、自動人物遮擋線 -->
   <script src="js/hide-zones.js?v=nofade-20261115"></script>   <!-- 🙈 完全遮住區：腳踩進去的角色不畫 -->
-  <script src="js/map-levels.js?v=wallface-20261117"></script>   <!-- 地圖的樓層資料規則（地圖編輯器共用） -->
-  <script src="js/maploader.js?v=wallface2-20261117"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="data/surface-tags.js?v=surftag-20261117"></script>   <!-- 素材的牆／地板標記（🧱 牆地板編輯器匯出） -->
+  <script src="js/surface-tags.js?v=floorclean-20261117"></script>   <!-- 牆／地板標記：讀標記（含編輯器還沒存的修改） -->
+  <script src="js/map-levels.js?v=floorclean-20261117"></script>   <!-- 地圖的樓層資料規則（地圖編輯器共用） -->
+  <script src="js/maploader.js?v=floorclean-20261117"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=merge4-20261115"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/pits.js?v=pit-20261114"></script>   <!-- 6b. 坑洞：走過會變慢（hole01、hole02 等）；哪些素材是坑洞在地圖／基地編輯器勾 -->
   <script src="js/swim-ring.js?v=shorenear-switch-20261116"></script>   <!-- 6b. 深水區＋救生圈：坐救生圈才能下深水、划水聲 -->

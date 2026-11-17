@@ -26,9 +26,9 @@ window.runFloorTests = async function (report) {
   const tower = () => { const t = G.towers[0]; t.frozenT = 999; t.hurtGraceT = 0; return t; };
   const putTower = (x, y, floor) => { const t = tower(); t.x = x; t.y = y; t.floor = floor; t._fk = cellAt(x, y).join(','); t.hp = t.maxhp; return t; };
 
-  await test('地圖的樓層資料是明寫的（新格式）', () => ({
-    ok: MAP.levels === MapLevels.VERSION && only.size > 0 && (MAP.layerOrder || []).some(l => l.level === 2),
-    note: '版本 ' + MAP.levels + '、只有 2 樓 ' + only.size + ' 格、陸橋 ' + bridge.length + ' 格、2 樓圖層 ' + (MAP.layerOrder || []).filter(l => l.level === 2).length + ' 層' }));
+  await test('地圖的樓層資料是明寫的（2 樓圖層、只有 2 樓的格子）', () => ({
+    ok: only.size > 0 && (MAP.layerOrder || []).some(l => l.level === 2),
+    note: '只有 2 樓 ' + only.size + ' 格、陸橋 ' + bridge.length + ' 格、2 樓圖層 ' + (MAP.layerOrder || []).filter(l => l.level === 2).length + ' 層' }));
 
   await test('珍珠：2 樓的會撞 2 樓的牆停下，1 樓的照常飛過去', () => {
     let pick = null;

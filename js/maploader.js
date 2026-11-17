@@ -230,7 +230,7 @@ function initMap() {
   MAP = next;
   window.STORY_MODE = !!StoryScene.config();
   MAP_LAYER_ORDER = mapLayerOrderOf(MAP);   // 這張地圖自己的圖層
-  MapLevels.prepare(MAP, mapTileById, true);   // 舊格式的樓層資料升級成現在的格式（沒產生過的先暫時產生一份，js/map-levels.js）
+  MapLevels.syncDeck(MAP, mapTileById);        // 2 樓地面自動從圖層算的地圖：照現在的圖層、牆地板標記重算一次（js/map-levels.js）
   computeFloor2Layers(MAP);                 // 設成 2 樓的圖層＝陸橋
   if(typeof resetMapPower==='function')resetMapPower();
   preloadMapTiles(MAP);
@@ -771,20 +771,19 @@ const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物
 const stampOn2F = s => s && s.level != null ? s.level !== 1 : MAP_FLOOR2_LAYERS.has((s && s.layer) || 'top');
 // 地圖上的物件變成會動的東西（門、腳踏車、捷運列車…）時畫在幾樓：2 樓的圖＝2，其他（1 樓、跨樓層）＝1
 const stampDrawFloor = s => hasFloors && s && stampOn2F(s) && s.level !== 'span' ? 2 : 1;
-// 2 樓「地板類」圖層（名稱有 2樓、不是物件／上層類）的圖蓋到哪些格子；all＝所有 2 樓的圖蓋到的格子（連接柱只算上半段）。換地圖、物件數量變了才重算
+// 所有 2 樓的圖蓋到的格子（跨樓層的圖只算上半段）：燈光用（js/lighting.js，2 樓的圖照 2 樓的亮度）。換地圖、物件數量變了就重算
 let floor2CellsCache = null;
 function floor2ArtCells() {
   const n = (MAP.stamps || []).length;
   if (floor2CellsCache && floor2CellsCache.map === MAP && floor2CellsCache.n === n) return floor2CellsCache;
-  const floor = new Set(), all = new Set();
+  const all = new Set();
   const cover = (s, out, half) => {
     const t = mapTileById(s.id); if (!t) return;
     const w = mapStampW(s, t), h = mapStampH(s, t), c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL, r1 = half ? r0 + h / 2 : r0 + h;
     for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r1; r++) out.add(c + ',' + r);
   };
-  for (const lid of MAP_FLOOR2_LAYERS) for (const k of Object.keys((MAP.layers || {})[lid] || {})) { all.add(k); if (!isOccLayer(lid) && lid !== 'top') floor.add(k); }
-  for (const s of MAP.stamps || []) if (stampOn2F(s) && !isOccLayer(s.layer || 'top') && (s.layer || 'top') !== 'top') cover(s, floor, false);
-  floor2CellsCache = { map: MAP, n, floor, all };
+  for (const lid of MAP_FLOOR2_LAYERS) for (const k of Object.keys((MAP.layers || {})[lid] || {})) all.add(k);
+  floor2CellsCache = { map: MAP, n, all };
   for (const s of MAP.stamps || []) if (stampOn2F(s)) cover(s, all, stampConnects(s));
   return floor2CellsCache;
 }
@@ -829,7 +828,6 @@ function setMapObstacleFloor(o) {
   const only = floor2OnlyCells();
   if (on2F || cells.every(k => only.has(k))) o.floor = 2;
 }
-// 連接 1、2 樓的東西（從一樓立到二樓的柱子、牆）：2 樓物件圖層裡的圖，底部沒有踩在 2 樓的地板上（底下那格不是 2 樓地面、也沒有 2 樓地板的圖）、高 2 格以上。
 // 這種圖從圖片一半的高度分成上下兩段：下半段算一樓的東西（跟一樓的人照底部排前後），上半段算二樓的（蓋在一樓的人上面、跟二樓的人排前後）。
 // 跨樓層的圖（從一樓立到二樓的柱子、牆、側面手扶梯）：地圖裡寫明 level＝'span' 的才算，上下兩半各算一層
 function stampConnects(s) {
