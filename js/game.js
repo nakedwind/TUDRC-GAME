@@ -1420,15 +1420,17 @@ function playerSpawnPos() {
     }
   }
   const camp = typeof campSpawnCells === 'function' ? campSpawnCells() : [];   // 有營地：站在營地裡（js/sentry.js），有燈照到的優先
-  const campOk = camp.filter(([c, r]) => !playerBlocked(...center(c, r)));
+  // 照那一格「站上去會在幾樓」判斷擋不擋（營地在 2 樓的地圖，用 1 樓的規則看會整片被擋，就跑去站地圖中間了）
+  const spawnBlocked = (c, r) => { const [x, y] = center(c, r); return playerBlocked(x, y, { x, y, floor: spawnFloorAt(c, r) }); };
+  const campOk = camp.filter(([c, r]) => !spawnBlocked(c, r));
   const campPick = campOk.find(([c, r]) => typeof isLit !== 'function' || isLit(...center(c, r))) || campOk[0];
   if (campPick) return center(...campPick);
-  for (const k of campCells) { const [c, r] = k.split(',').map(Number); if (inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r)) return center(c, r); }
-  const start = typeof boxStartCells === 'function' ? boxStartCells().find(([c, r]) => !playerBlocked(...center(c, r))) : null;   // 沒營地的地圖：站在營地箱子前面（js/sentry.js）
+  for (const k of campCells) { const [c, r] = k.split(',').map(Number); if (inGrid(c, r) && !spawnWallAt(c, r) && !isEntrance(c, r)) return center(c, r); }
+  const start = typeof boxStartCells === 'function' ? boxStartCells().find(([c, r]) => !spawnBlocked(c, r)) : null;   // 沒營地的地圖：站在營地箱子前面（js/sentry.js）
   if (start) return center(...start);
   // 沒有指定出生點、也沒有營地（例如基地編輯器預覽餐廳）：只站在「有畫地板」的格子上，
   // 地圖外圍沒畫東西、又沒標成牆的黑色空地不算（以前會從左下角那格出生，跑到地圖外面）
-  const ok = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && groundDrawnAt(c, r) && !playerBlocked(...center(c, r));
+  const ok = (c, r) => inGrid(c, r) && !spawnWallAt(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && groundDrawnAt(c, r) && !spawnBlocked(c, r);
   const nearest = (c0, r0, list) => list.slice().sort((a, b) => Math.hypot(a[0] - c0, a[1] - r0) - Math.hypot(b[0] - c0, b[1] - r0))[0];
   const cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (ok(c, r)) cells.push([c, r]);
   if (cells.length) {
