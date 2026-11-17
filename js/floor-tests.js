@@ -214,9 +214,13 @@ window.runFloorTests = async function (report) {
       const upTo = (deckCells.has((ln.b[0] + 2) + ',' + ln.b[1]) ? [ln.b[0] + 2, ln.b[1]] : ln.b);
       [p.x, p.y] = center(...upTo); p.floor = 2; p._fk = null;
       let upT = null; for (let i = 0; i < 30 * 30; i++) { update(1 / 30); if (G.towers.every(t => t.floor === 2 && !onMovingEscalator(t))) { upT = i / 30; break; } if (i % 300 === 0) await wait(0); }
+      // 沒到齊的隊員停在哪裡（失敗時寫在說明裡，方便查）
+      const stuck = want => G.towers.filter(t => !(t.floor === want && !onMovingEscalator(t))).map(t => (t.type || '?') + '@' + cellAt(t.x, t.y).join(',') + ' ' + t.floor + '樓' + (onMovingEscalator(t) ? '(手扶梯上)' : '') + (t.frozenT > 0 ? '(定住)' : '') + (t.mode && t.mode !== 'free' ? '(' + t.mode + ')' : '')).join('、');
+      const upStuck = upT == null ? stuck(2) : '';
       p.x = lx; p.y = ly + CELL; p.floor = 1; p._fk = null;
       let downT = null; for (let i = 0; i < 30 * 40; i++) { update(1 / 30); if (G.towers.every(t => t.floor === 1 && !onMovingEscalator(t))) { downT = i / 30; break; } if (i % 300 === 0) await wait(0); }
-      return { ok: upT != null && downT != null, note: '上樓 ' + (upT != null ? upT.toFixed(1) + ' 秒全員到齊' : '30 秒內沒到齊') + '；下樓 ' + (downT != null ? downT.toFixed(1) + ' 秒' : '40 秒內沒到齊') };
+      const downStuck = downT == null ? stuck(1) : '';
+      return { ok: upT != null && downT != null, note: '上樓 ' + (upT != null ? upT.toFixed(1) + ' 秒全員到齊' : '30 秒內沒到齊（' + upStuck + '）') + '；下樓 ' + (downT != null ? downT.toFixed(1) + ' 秒' : '40 秒內沒到齊（' + downStuck + '）') };
     } finally { LIGHT.enabled = keep.light; }
   });
 

@@ -576,6 +576,14 @@ function buildSentryPathFloors(t, targetX, targetY, allowDark, goalFloor) {
   const onSlope = !!t.escSide && onMovingEscalator(t);
   const walkCache = new Map();   // 同一次找路裡，同一格同一層只判斷一次走不走得過
   const walkable = (c, r, f) => { const k = c + ',' + r + ',' + f; if (!walkCache.has(k)) walkCache.set(k, onFloorDo(f, () => sentryCellWalkable(c, r, false, allowDark))); return walkCache.get(k); };
+  // 兩格中間會不會穿過側面手扶梯的扶手、外殼：格子本身都能站，但直直走過去會撞到（例如從手扶梯正下方往上走進下面那頭，
+  // 只能從旁邊的平台上去）。扶手是照像素擋的，格子的牆看不出來，不檢查的話隊員會一直往扶手上頂、走不上去
+  const escCross = (c, r, nc, nr) => {
+    if (typeof escalatorSideBlocks !== 'function') return false;
+    const [x0, y0] = center(c, r), [x1, y1] = center(nc, nr);
+    for (const k of [.25, .5, .75]) if (escalatorSideBlocks(x0 + (x1 - x0) * k, y0 + (y1 - y0) * k + ESCALATOR.footDy)) return true;
+    return false;
+  };
   let pops = 0; const closed = new Set();
   // 側面手扶梯的通道：從一頭的格子可以直接到另一頭（經過的格子當成一步，成本照長度、順逆向算）
   const links = new Map();
@@ -607,7 +615,7 @@ function buildSentryPathFloors(t, targetX, targetY, allowDark, goalFloor) {
       else wall = f === 2 ? (!deckCells.has(nk) || deckBlocked(nk)) : mapWalls.has(nk);
       if (wall) continue;
       const nf = onRamp && !rampCells.has(nk) ? (deckCells.has(nk) ? 2 : 1) : f;   // 走出樓層出入口：換樓層
-      if (!walkable(nc, nr, nf) || onFloorDo(nf, () => edgeBetween(c, r, nc, nr))) continue;
+      if (!walkable(nc, nr, nf) || onFloorDo(nf, () => edgeBetween(c, r, nc, nr)) || escCross(c, r, nc, nr)) continue;
       const fl = flowAt(nc, nr) || flowAt(c, r), along = fl ? dc * fl[0] + dr * fl[1] : 0;
       const nd = d + (along > 0 ? SENTRY_ESC_WITH : along < 0 ? 1 + SENTRY_ESC_AGAINST : 1);
       const nKey = nk + ',' + nf;
