@@ -3139,7 +3139,10 @@ document.querySelectorAll('#mapbar .tool-more').forEach(more => {
   more.addEventListener('toggle', fit); window.addEventListener('resize', fit);
 });
 document.querySelectorAll('.tool').forEach(btn => {
-  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn); });
+  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn);
+    // 選了要畫紅格、綠格、邊緣碰撞的筆刷，但「紅綠格」顯示關著：自動打開（不然畫上去看不到，像是畫不了）
+    if (['solid', 'solidnudge', 'edge', 'spawn'].includes(btn.dataset.mode) && !showSolid) document.getElementById('solidToggle')?.click();
+  });
 });
 // ---- 「⋯ 更多」裡的子選單（🌲 森林機關 ＞ 這種，HTML 寫成 .tool-sub）----
 // 像一般程式的選單：滑鼠移到按鈕上（或點一下）→ 旁邊展開裡面的工具；「⋯ 更多」不會收起來。選了裡面的工具＝兩層一起收起來
