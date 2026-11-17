@@ -136256,6 +136256,11 @@ const BATTLE_MAPS = [
     "id": "map_mwizzi7s",
     "name": "B56區-藍線捷運站",
     "desc": "",
+    "underMap": {
+      "map": "map_mvxz356e",
+      "dark": 60,
+      "blur": 3
+    },
     "layers": {
       "floor": {},
       "ground": {},

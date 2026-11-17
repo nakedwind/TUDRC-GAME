@@ -539,6 +539,7 @@ function fixMap(m) {
   Object.keys(m.solidOffsets).forEach(k => { if (m.solid.indexOf(k) < 0) delete m.solidOffsets[k]; });   // 沒有紅格就不留微調
   m.safe = !!m.safe;   // 安全場景：遊戲裡不生怪、不套黑幕
   m.npcs = !!m.npcs;   // 場景 NPC：這張地圖會不會出現克莉思、路德等人
+  if (!(m.underMap && m.underMap.map)) delete m.underMap;   // 🚇 底下透出的地圖：{ map, dark, blur, dx, dy, aboveDark }（js/under-map.js）
   if (m.story) m.story = true; else delete m.story;   // 劇情地圖（時間暫停）：只有溫特一個人進來看劇情（js/maploader.js 的 MAP_STORY）
   m.portals = Array.isArray(m.portals) ? m.portals : [];   // 出入口：[{c,r,to:目標地圖id, hidden?:隱藏地道（球球找到才出現）, at?:[欄,列]＝同地圖傳送點要送到哪一格}]
   m.hiddenPickups = Array.isArray(m.hiddenPickups) ? m.hiddenPickups : [];   // 隱藏的拾取物（沒有亮點）：['圖層:c,r'…]（大圖用左上角那一格）
@@ -926,6 +927,27 @@ function roundRect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y);
   ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+// 🚇 底下透出的地圖：用遊戲的同一套程式（js/under-map.js）畫成壓暗、模糊的底圖，貼在黑底上、所有圖層下面
+// 換地圖就重畫（底下那張剛被改過也會跟著更新）；圖片還沒下載完會過一下再補畫
+const editorUnderCache = {};
+let editorUnderFor = null, editorUnderRetry = null;
+function drawEditorUnderMap(m) {
+  if (typeof underMapSettings !== 'function') return;
+  const cfg = underMapSettings(m); if (!cfg) return;
+  const under = maps.find(o => o.id === cfg.map); if (!under) return;
+  if (editorUnderFor !== curId) { editorUnderFor = curId; editorUnderCache.key = null; }
+  const key = m.id + '>' + under.id + '|' + cfg.dark + '|' + cfg.blur + '|' + (under.stamps || []).length;
+  const cv = underMapCached(editorUnderCache, key, () => buildUnderMapCanvas(cfg, under, tileById,
+    t => { const rec = ensureTileImg(t); return rec && rec.loaded ? rec.img : null; }, CELL));
+  if (!editorUnderCache.ready && editorUnderCache.tries < 30 && !editorUnderRetry) editorUnderRetry = setTimeout(() => { editorUnderRetry = null; draw(); }, 600);
+  if (!cv) return;
+  const { dx, dy, ucols, urows } = underMapOffset(cfg, under, COLS, ROWS);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(OX, OY, COLS * CELL, ROWS * CELL); ctx.clip();
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(cv, OX + dx * CELL, OY + dy * CELL, ucols * CELL, urows * CELL);
+  ctx.restore();
 }
 // 格子底：沒放素材的地方＝純黑
 function drawCellBase(x, y) {
@@ -1458,6 +1480,7 @@ function draw() {
   ctx.clearRect(0, 0, COLS * CELL, ROWS * CELL);
   // 每格先鋪棋盤底
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) drawCellBase(OX + c * CELL, OY + r * CELL);
+  drawEditorUnderMap(m);   // 🚇 黑色的地方透出底下另一張地圖（跟遊戲同一套畫法，js/under-map.js）
   // 由下往上：每層先畫小圖、再畫「屬於這層」的大圖
   for (const l of LAYERS) {
     if (hiddenLayers.has(l.id)) continue;
@@ -4101,6 +4124,7 @@ function loadRules() {
   const wetField = document.getElementById('f_wetFloor'), wetRangeField = document.getElementById('f_wetRange');   // 💦 濕地板（js/wet-floor.js）：沒設定過的地圖顯示預設
   if (wetField) wetField.checked = typeof wetFloorOn === 'function' ? wetFloorOn(m) : !!m.wetFloor;
   if (wetRangeField) wetRangeField.value = m.wetRange ?? '';
+  fillUnderMapField(m);
   const deepSpeedField = document.getElementById('f_deepWaterSpeed');
   if (deepSpeedField) deepSpeedField.value = m.deepWaterSpeed ?? '';
   document.getElementById('f_coreCount').value = m.coreCount;
@@ -4278,6 +4302,38 @@ if (wetRangeInput) wetRangeInput.addEventListener('change', e => {
   pushUndo(); if (Number.isFinite(v) && v >= 1) { curMap().wetRange = Math.min(20, Math.round(v)); e.target.value = curMap().wetRange; } else { delete curMap().wetRange; e.target.value = ''; }
   saveMaps(); setStatus('濕地板範圍：離水 ' + (curMap().wetRange || '（預設）6') + ' 格內', '#8fd3ff');
 });
+// 🚇 底下透出的地圖（js/under-map.js）：選單列出其他地圖；選「沒有」就把整個設定拿掉
+function fillUnderMapField(m) {
+  const sel = document.getElementById('f_underMap'); if (!sel) return;
+  const u = m.underMap || {};
+  sel.innerHTML = '<option value="">沒有</option>';
+  [...maps].sort(compareMapNames).forEach(o => { if (o.id === m.id) return; const opt = document.createElement('option'); opt.value = o.id; opt.textContent = o.name; sel.appendChild(opt); });
+  sel.value = u.map && maps.some(o => o.id === u.map) ? u.map : '';
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+  set('f_underDark', u.dark); set('f_underBlur', u.blur); set('f_underDx', u.dx); set('f_underDy', u.dy);
+  const above = document.getElementById('f_underAboveDark'); if (above) above.checked = u.aboveDark === false;
+  const opts = sel.parentNode.parentNode.querySelector('.under-map-opts'); if (opts) opts.style.display = sel.value ? '' : 'none';
+}
+function onUnderMapField() {
+  const m = curMap(), mapId = document.getElementById('f_underMap').value;
+  pushUndo();
+  if (!mapId) { delete m.underMap; }
+  else {
+    const num = id => { const v = parseFloat(document.getElementById(id).value); return Number.isFinite(v) ? v : null; };
+    const u = { map: mapId };
+    const dark = num('f_underDark'), blur = num('f_underBlur'), dx = num('f_underDx'), dy = num('f_underDy');
+    if (dark != null) u.dark = Math.max(0, Math.min(100, Math.round(dark)));
+    if (blur != null) u.blur = Math.max(0, Math.min(30, blur));
+    if (dx != null) u.dx = Math.round(dx);
+    if (dy != null) u.dy = Math.round(dy);
+    if (document.getElementById('f_underAboveDark').checked) u.aboveDark = false;
+    m.underMap = u;
+  }
+  saveMaps(); fillUnderMapField(m); draw();
+  const name = mapId && (maps.find(o => o.id === mapId) || {}).name;
+  setStatus(name ? '這張地圖黑色的地方會透出「' + name + '」' : '這張地圖底下沒有透出別的地圖了', '#8fd3ff');
+}
+['f_underMap', 'f_underDark', 'f_underBlur', 'f_underDx', 'f_underDy', 'f_underAboveDark'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', onUnderMapField); });
 const deepSpeedInput = document.getElementById('f_deepWaterSpeed');
 if (deepSpeedInput) deepSpeedInput.addEventListener('change', e => {
   const v = parseFloat(e.target.value);
