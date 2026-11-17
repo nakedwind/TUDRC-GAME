@@ -74,7 +74,8 @@ const MapLevels = (() => {
   // 以前一律 2 列：牆頂只有 1 列的牆，第 2 列其實是牆面，人卻走得上去，看起來就像站在牆上（B56 有的牆擋得住、有的擋不住就是這樣）
   const wallTopRowsOf = id => typeof surfaceWallTopOf === 'function' ? surfaceWallTopOf(id) : 1;
   // tops（可以不給）：Map，記每一欄牆頂第一列 → 下面也算牆頂的那幾列（2 樓地面自動算時，牆頂第一列能走，下面幾列也跟著能走）
-  function wallFaceCells(m, tileOf, tops) {
+  // edges（可以不給）：Set，把算進來的「平台邊緣的牆」本身放進去（遊戲排前後用，js/maploader.js 的 mapOccluders）
+  function wallFaceCells(m, tileOf, tops, edges) {
     const out = new Set();
     if (!m || !(m.deck || []).length) return out;
     const deck = new Set(m.deck || []), L = floor2Layers(m), C = cellSize();
@@ -89,6 +90,7 @@ const MapLevels = (() => {
       const top = Math.ceil(r0 - .5), bottom = Math.ceil(r0 + h - .5) - 1;   // 牆頂那列、牆腳那列
       if (lv !== 'span' && cols.some(c => deck.has(c + ',' + bottom))) continue;   // 站在 2 樓走道上的牆
       const walk = Math.max(0, Math.min(wallTopRowsOf(s.id), bottom - top));   // 牆頂可以走幾列（至少留最下面一列當牆面）
+      if (edges) edges.add(s);
       for (const c of cols) for (let r = top + walk; r <= bottom; r++) out.add(c + ',' + r);
       if (tops) for (const c of cols) for (let r = top + 1; r < top + walk; r++) { const k = c + ',' + top, a = tops.get(k) || []; a.push(c + ',' + r); tops.set(k, a); }
     }

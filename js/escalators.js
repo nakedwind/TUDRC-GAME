@@ -182,7 +182,7 @@ function updateEscalators(dt) {
   for (const t of [...(G.towers || []), ...(G.npcs || [])]) if (!still(t)) ride(t, ESCALATOR.footDy, sentryBlocked);
   for (const e of G.enemies || []) {
     if (e.dead || e.hp <= 0 || e.behavior === 'moth' || still(e)) continue;   // 人面蝶飛在空中
-    ride(e, ESCALATOR.enemyFootDy, (x, y) => enemyBlocked(x, y, e));
+    ride(e, ESCALATOR.enemyFootDy, (x, y) => onFloorDo(e, () => enemyBlocked(x, y, e)));   // 照這隻怪物在幾樓查牆（沒指定會照一樓算）
   }
 }
 

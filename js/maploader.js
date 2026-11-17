@@ -1028,6 +1028,15 @@ function mapOccluders() {
     if (flat || (!isOccLayer(lid) && !MAP_FLOOR2_TOP.has(lid))) { it.band = DRAW_BAND.ground; it.y = it.li; }
     else if (MAP_FLOOR2_TOP.has(lid)) { it.band = DRAW_BAND.top; it.y = it.li; }
   }
+  // 平台邊緣的牆（js/map-levels.js 的 wallFaceCells 算進來的那些）：2 樓的人只走得到牆頂、走不到牆面，
+  // 所以只要腳踩到牆的上緣，就一律畫在這面牆前面。以前跨樓層的牆上半段照「圖片正中間那條線」排：
+  // 人走到牆頂中間、腳超過那條線就突然跳到牆上面；腳還沒超過時，反而被牆頂那條邊蓋住腳（B56 出過）
+  const edgeWalls = new Set();
+  MapLevels.wallFaceCells(MAP, mapTileById, null, edgeWalls);
+  for (const it of items) {
+    if (it.kind !== 'stamp' || !edgeWalls.has(it.stamp) || it.floor !== 2 || it.band !== DRAW_BAND.obj) continue;
+    it.y = it.y0;   // 從牆的上緣起算：腳在上緣以下（站在牆頂上）＝畫在牆前面；在上緣以上（平台上）身體也碰不到這面牆
+  }
   // 2 樓的地板圖不畫在「牆面」的格子上（js/map-levels.js 的 wallFaceCells，跟擋路用同一份）：
   // 跨樓層的牆下半段算一樓、先畫，2 樓的地板在一樓全部畫完之後才畫；地板圖如果鋪到牆底下，就會把牆的下半段蓋掉，
   // 看起來牆面中間偏下那段變成地板（B56、R89 出過）。所以地板圖在牆面格子挖洞，讓底下的牆露出來
