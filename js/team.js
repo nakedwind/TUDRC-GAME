@@ -412,7 +412,9 @@ function renderFieldSquadHud() {
       const aidCls = aidPick && aid.hover === member.type ? ' aid-hover' : '';
       const aidFx = aidPick ? '<span class="aid-glow" style="--aid-sync:-' + (nowS % 3.2).toFixed(2) + 's"><i class="s"></i><i class="m"></i></span><span class="aid-arrow"></span>' : '';
       return '<article class="field-member' + (hp <= 0 ? ' down' : '') + (member.eatenBy || member.vineCap ? ' eaten' : '') + (lowSP ? ' sp-low' : '') + taintCls + hpLowCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
-        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + stateLabel + '</b>' +
+        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing +
+          (member.ownRing && typeof SWIM_RING !== 'undefined' ? '<img class="field-ring-badge" src="' + SWIM_RING.image + '" alt="游泳圈" title="有游泳圈（溫特下水時會跟著下水）" style="position:absolute;right:-3px;bottom:-3px;width:16px;height:auto;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 0 1px #000)">' : '') +   // 有自己的游泳圈（js/swim-ring.js）
+          '</button><div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + stateLabel + '</b>' +
         // 嚮導顯示 SP；哨兵顯示精神負荷。
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +
         '<div><i class="' + (spec.guide ? 'field-sp' : 'field-load') + '" aria-label="' + (spec.guide ? 'SP' : '精神負荷') + '"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? sp + '/' + guideSPMax(member.type) : taint + '/100') + '</span></div>' +

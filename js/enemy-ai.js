@@ -24,7 +24,7 @@ function commitNext(e) {
     if (fd < bestd) { bestd = fd; best = [nc, nr]; }
   }
   if (!best) { e.stuck = true; e.hasTarget = true; e.tcell = null; return; }
-  e.tcell = best; [e.tx, e.ty] = center(best[0], best[1]);
+  e.tcell = best; [e.tx, e.ty] = cellStandPoint(best[0], best[1]);   // 沒對齊格子的門洞：走門洞正中線（js/pathfinding.js）
   e.hasTarget = true; e.stuck = false; e.exiting = false;
 }
 function enemyAttackObstacle(e, o, dt) {
@@ -402,17 +402,19 @@ function closestObstacleCell(e, o) {
   }
   return best;
 }
+const ENEMY_ROUTE_FAIL_WAIT = 2;   // 找不到路之後，隔幾秒才再找一次（同一個目標）
 function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
   const [startC, startR] = cellAt(e.x, e.y);
   if (!inGrid(goalC, goalR) || enemyWallCell(goalC, goalR)) return null;
   const startKey = startC + ',' + startR, goalKey = goalC + ',' + goalR;
   const queue = [[startC, startR]], cameFrom = new Map([[startKey, null]]);
+  const wallMemo = new Map(), wall = (c, r, key) => { let v = wallMemo.get(key); if (v === undefined) { v = enemyWallCell(c, r); wallMemo.set(key, v); } return v; };   // 這次找路裡，每一格是不是牆只算一次（同一格會被旁邊四格問）
   for (let qi = 0; qi < queue.length; qi++) {
     const [c, r] = queue[qi];
     if (c === goalC && r === goalR) break;
     for (const [dc, dr] of ENEMY_NEIGHBORS) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (!inGrid(nc, nr) || enemyWallCell(nc, nr) || cameFrom.has(key) || edgeBetween(c, r, nc, nr)) continue;   // edgeBetween：兩格中間有薄牆就繞路
+      if (cameFrom.has(key) || !inGrid(nc, nr) || wall(nc, nr, key) || edgeBetween(c, r, nc, nr)) continue;   // edgeBetween：兩格中間有薄牆就繞路
       if (enemyBarrierAt(nc, nr) && !canBreakBuildings) continue;
       if (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr)) continue;   // 繞過順順宮帽
       cameFrom.set(key, [c, r]); queue.push([nc, nr]);
@@ -430,17 +432,21 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
 function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   e.aiRouteTimer = (e.aiRouteTimer || 0) - moveDt;
   const goal = goalC + ',' + goalR;
-  if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || !e.aiPath || !e.aiPath.length) {
+  const failedHere = !e.aiPath && e.aiRouteFailed && e.aiRouteKey === routeKey && e.aiGoal === goal;   // 剛剛才找過、同一個目標走不到：等 aiRouteTimer 到了再找，不要每一幀都重找
+  if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || (!e.aiPath && !failedHere) || (e.aiPath && !e.aiPath.length)) {
     if (e.wide) {   // 大體型：只走寬的路，過不去就停在離目標最近的地方
       const around = canBreakBuildings === 'detour' ? wideEnemyRoute(e, goalC, goalR, false) : null;
       e.aiPath = around && around.reached ? around.path : wideEnemyRoute(e, goalC, goalR, !!canBreakBuildings).path;
     } else e.aiPath = (canBreakBuildings === 'detour' && buildEnemyRoute(e, goalC, goalR, false)) || buildEnemyRoute(e, goalC, goalR, !!canBreakBuildings);
     e.aiRouteKey = routeKey; e.aiGoal = goal; e.aiRouteTimer = .65 + Math.random() * .35;
+    // 走不到（例如目標在深水區裡）：找一次要把整張地圖搜完，很花時間，晚一點再找（ENEMY_ROUTE_FAIL_WAIT 秒）
+    e.aiRouteFailed = !e.aiPath;
+    if (!e.aiPath) e.aiRouteTimer = ENEMY_ROUTE_FAIL_WAIT;
   }
   if (!e.aiPath || !e.aiPath.length) return { reached: true };
   const [nc, nr] = e.aiPath[0], blocker = enemyBarrierAt(nc, nr);
   if (blocker) return { blocker };
-  const [tx, ty] = center(nc, nr), d = Math.hypot(tx - e.x, ty - e.y);
+  const [tx, ty] = cellStandPoint(nc, nr), d = Math.hypot(tx - e.x, ty - e.y);   // 沒對齊格子的門洞：走門洞正中線（js/pathfinding.js）
   if (d <= Math.max(2, e.speed * moveDt)) {
     e.x = tx; e.y = ty; e.aiPath.shift();
     return { reached: !e.aiPath.length };

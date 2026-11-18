@@ -74,6 +74,32 @@ function tileCollisionDepthPx(s, tw, th) {
   return (y0 + y1) / 2;
 }
 
+// ---- 門口：牆的方框在門的地方留一條通道 ----
+// 池核的門是直接貼在整排牆上的（打開時挖空門洞，data/doors.js 的 cutout），牆本身是連著的。
+// 所以跟門重疊的牆方框，在門的左右範圍裡（直的門；橫的門＝上下範圍）整條都不擋，門口照原本的紅格和門自己的開關擋路（js/doors.js）。
+// stamps＝地圖上的物件；sizeOf(s)＝那個物件畫出來的 [寬, 高]（像素）；回傳每扇門的 [x0, y0, x1, y1]
+function tileDoorRects(stamps, sizeOf) {
+  const C = typeof CELL !== 'undefined' ? CELL : TILE_COLLISION_CELL, out = [];
+  for (const s of stamps || []) {
+    const isDoor = (typeof DOOR_TILES !== 'undefined' && DOOR_TILES[s.id]) || (typeof MRT_EXIT_TILES !== 'undefined' && MRT_EXIT_TILES.includes(s.id));
+    if (!isDoor) continue;
+    const size = sizeOf(s); if (!size) continue;
+    const x = OX + s.c * C + (s.ox || 0), y = OY + s.r * C + (s.oy || 0);
+    out.push([x, y, x + size[0], y + size[1]]);
+  }
+  return out;
+}
+// 這個方框 [x0, y0, x1, y1] 要在哪些地方留通道（給 tileBoxInHole 用）；沒碰到門＝null
+function tileBoxHoles(x0, y0, x1, y1, doors) {
+  const holes = [];
+  for (const [a, b, c, d] of doors) {
+    if (a >= x1 || c <= x0 || b >= y1 || d <= y0) continue;   // 沒碰到這扇門
+    holes.push(d - b >= c - a ? [a, -Infinity, c, Infinity] : [-Infinity, b, Infinity, d]);
+  }
+  return holes.length ? holes : null;
+}
+const tileBoxInHole = (b, x, y) => !!b.holes && b.holes.some(h => x >= h[0] && x < h[2] && y >= h[1] && y < h[3]);
+
 // ---- 遊戲：這張地圖上所有素材方框（照格子分好，查得快）----
 let tileBoxIndex = { map: null, n: -1, raw: undefined, grid: new Map() };
 function tileBoxGrid() {
@@ -82,12 +108,13 @@ function tileBoxGrid() {
   tileCollisionData();
   if (tileBoxIndex.map === MAP && tileBoxIndex.n === stamps.length && tileBoxIndex.raw === tileCollisionCache.raw) return tileBoxIndex.grid;
   const grid = new Map(), C = typeof CELL !== 'undefined' ? CELL : TILE_COLLISION_CELL;
+  const doors = tileDoorRects(stamps, s => { const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null; return t ? [mapStampW(s, t) * C, mapStampH(s, t) * C] : null; });
   for (const s of stamps) {
     const boxes = tileCollisionBoxes(s.id); if (!boxes) continue;
     const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null; if (!t) continue;
     const f2 = typeof stampOn2F === 'function' && typeof hasFloors !== 'undefined' && hasFloors && stampOn2F(s);
     for (const [x0, y0, x1, y1] of tileCollisionPlace(boxes, s, mapTileW(t) * C, mapTileH(t) * C, OX + s.c * C + (s.ox || 0), OY + s.r * C + (s.oy || 0))) {
-      const box = { x0, y0, x1, y1, s, f2 };
+      const box = { x0, y0, x1, y1, s, f2, holes: tileBoxHoles(x0, y0, x1, y1, doors) };
       for (let c = Math.floor((x0 - OX) / C); c * C + OX < x1; c++) for (let r = Math.floor((y0 - OY) / C); r * C + OY < y1; r++) {
         const key = c + ',' + r; if (!grid.has(key)) grid.set(key, []); grid.get(key).push(box);
       }
@@ -103,7 +130,7 @@ const tileBoxActive = b => !(typeof G !== 'undefined' && G && G.mapDestroyed && 
 function tileBoxBlocksPoint(x, y) {
   const grid = tileBoxGrid(); if (!grid || !grid.size) return false;
   const C = CELL, list = grid.get(Math.floor((x - OX) / C) + ',' + Math.floor((y - OY) / C)); if (!list) return false;
-  for (const b of list) if (x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1 && tileBoxActive(b)) return true;
+  for (const b of list) if (x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1 && !tileBoxInHole(b, x, y) && tileBoxActive(b)) return true;
   return false;
 }
 // 這一格能不能蓋建築：格子中心在方框裡就不行

@@ -1,6 +1,20 @@
 /* 素材碰撞方框：由物件編輯器「🧱 素材碰撞」匯出（說明見 js/tile-collisions.js）。
    { 素材 id: [[x, y, 寬, 高], …] }，像素，以沒翻轉、沒轉向的素材左上角為原點（素材寬 w 格＝w × 40 像素）。 */
-const TILE_COLLISIONS = {};
+const TILE_COLLISIONS = {
+  "tile_mvoa0cqd": [[20,0,40,80]],
+  "tile_mvocpp0c": [[0,52,80,94]],
+  "tile_mvoddiqi": [[0,52,80,94]],
+  "tile_mvodgug9": [[0,52,80,94]],
+  "tile_mvxgf9gt": [[20,54,40,26]],
+  "tile_mvybeuxg": [[40,15,40,77],[0,92,80,94]],
+  "tile_mvzbgmzf": [[20,0,40,80]],
+  "tile_mvzbmx47": [[20,0,40,80]],
+  "tile_mvzbn4vv": [[20,0,40,80]],
+  "tile_mvzbna04": [[20,0,40,80]],
+  "tile_mvzbolt4": [[20,0,40,80]],
+  "tile_mvzbvnsy": [[40,13,40,94]],
+  "tile_mvzc5x73": [[40,0,40,80]]
+};
 /* 人物遮擋線（同一頁的「人物遮擋線」）：{ 素材 id: 離圖片頂端幾像素 }。有設的素材優先用這個，沒設才用碰撞方框的中間。 */
 const TILE_DEPTHS = {
   "tile_mvofs5nu": 0,

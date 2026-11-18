@@ -30,12 +30,24 @@ const MAP_BOX = { reach: 30, kinds: [
   { kind: 'stove', safe: true, match: id => typeof COOKING !== 'undefined' && COOKING.tiles.includes(id), art: { tile_restaurant_kitchen_workstation: [8, 40, 112, 118, 280, 120], tile_mw5jkg1u: [4, 40, 108, 118, 112, 120] } },   // 廚房工作台左邊的爐灶：烹飪（js/cooking.js）
   { kind: 'cabinet', safe: true, match: (id, t, s) => typeof cabinetDefFor === 'function' && !!cabinetDefFor(s), art: {} },   // 置物櫃（js/storage-cabinet.js 的 STORAGE_CABINETS）
 ] };
+// 地圖上哪些物件是箱子（換地圖、物件數量變了才重找）：溫特每一幀都要問好幾次「旁邊有沒有箱子」，不用每次把整張地圖的物件掃一遍
+let mapBoxStampsCache = null, mapBoxStampsFor = null, mapBoxStampsOf = null, mapBoxStampsLen = -1;
+function mapBoxStamps() {
+  const stamps = (MAP && MAP.stamps) || [];
+  if (mapBoxStampsCache && mapBoxStampsFor === MAP && mapBoxStampsOf === stamps && mapBoxStampsLen === stamps.length) return mapBoxStampsCache;
+  mapBoxStampsFor = MAP; mapBoxStampsOf = stamps; mapBoxStampsLen = stamps.length;
+  mapBoxStampsCache = [];
+  for (const s of stamps) {
+    const t = mapTileById(s.id); if (!t) continue;
+    const k = MAP_BOX.kinds.find(k => k.match(s.id, t, s)); if (k) mapBoxStampsCache.push({ s, t, k });
+  }
+  return mapBoxStampsCache;
+}
 function mapBoxes() {
   if (!MAP) return [];
   const list = [];
-  for (const s of MAP.stamps || []) {
-    const t = mapTileById(s.id); if (!t) continue;
-    const k = MAP_BOX.kinds.find(k => k.match(s.id, t, s)); if (!k || (MAP_SAFE && !k.safe && !(k.kind === 'refill' && typeof isPracticeMap === 'function' && isPracticeMap()))) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用（safe＝基地裡也能用：裝備箱；訓練室的補彈藥箱也能用＝試用彈藥、置物櫃）
+  for (const { s, t, k } of mapBoxStamps()) {
+    if (MAP_SAFE && !k.safe && !(k.kind === 'refill' && typeof isPracticeMap === 'function' && isPracticeMap())) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用（safe＝基地裡也能用：裝備箱；訓練室的補彈藥箱也能用＝試用彈藥、置物櫃）
     if (k.kind === 'ammo' && typeof ammoCrateLooted === 'function' && ammoCrateLooted(s)) continue;   // 開過的彈藥箱：不能再開（js/flare.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     const a = k.art[s.id] || [0, 0, 1, 1, 1, 1], fx = u => s.fx ? w - u : u;   // 左右翻轉的箱子：範圍也翻過去

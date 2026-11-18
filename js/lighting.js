@@ -51,6 +51,7 @@ function refreshLightWalls() {
   if (lightWalls.length !== COLS * ROWS) lightWalls = new Uint8Array(COLS * ROWS);
   if (lightWallKeyCols !== COLS || lightWallKeyRows !== ROWS) { lightWallKeyIdx = new Map(); lightWallKeyCols = COLS; lightWallKeyRows = ROWS; }
   lightWalls.fill(0);
+  let sig = 0, n = 0;
   for (const k of mapWalls) {
     let i = lightWallKeyIdx.get(k);
     if (i === undefined) {
@@ -58,9 +59,15 @@ function refreshLightWalls() {
       i = inGrid(c, r) ? r * COLS + c : -1;   // 地圖外的格子不用記
       lightWallKeyIdx.set(k, i);
     }
-    if (i >= 0) lightWalls[i] = 1;
+    if (i >= 0) { lightWalls[i] = 1; sig = (sig + Math.imul(i + 1, 2654435761)) | 0; n++; }
   }
+  lightWallsSig = sig + ':' + n + ':' + COLS + 'x' + ROWS;   // 牆有沒有變（門開關、炸牆）：燈光的記憶（LIGHT_CACHE）照這個判斷要不要重算
 }
+// ---- 燈光記憶：大部分的燈不會動，牆也沒變，就直接用上一次算好的光（不用每一幀重新擴散）----
+// 會動的燈（溫特的燈、照明彈、手電筒…）位置一變就重算。enabled：false＝回到每一幀全部重算
+const LIGHT_CACHE = { enabled: true, max: 400 };
+let lightWallsSig = '';
+const lightSpreadMemo = new Map();
 // 陸橋用：lightSurf＝每一格最上面是哪一層（0 一樓、1 二樓地面、2 樓層出入口：兩層都算）；lightWalls2＝二樓的人看到的牆（不是 2 樓地面的格子都算牆）
 let beamNoLos = false;
 let lightSurf = new Uint8Array(COLS * ROWS), lightWalls2 = new Uint8Array(COLS * ROWS), lightSkipSurf = -1;
@@ -147,6 +154,23 @@ function markBeamMask(l) {
 // 從一個光源沿格子擴散，對每個被照到的格子呼叫 onCell(格子編號, 亮度 0～1)
 // 只處理光走得到的格子（記在 q 裡），不掃整張地圖：大地圖、燈又多的時候每幀省很多時間。
 function spreadLight(l, onCell) {
+  // 同一盞燈、同一個位置、牆也沒變：照上一次的結果（哪幾格、多亮）再給一次，不用重新擴散（LIGHT_CACHE）
+  // 有陸橋的地圖（兩層樓分開擴散）不記，照舊每次算
+  if (LIGHT_CACHE.enabled && !hasFloors && lightWallsSig) {
+    const key = l.x + ',' + l.y + ',' + l.r + (l.cone ? ',' + l.cone.ang + ',' + l.cone.half : '') + '|' + lightWallsSig;
+    let hit = lightSpreadMemo.get(key);
+    if (!hit) {
+      const cells = [];
+      spreadLightNow(l, (i, b) => { cells.push(i, b); });
+      if (lightSpreadMemo.size >= LIGHT_CACHE.max) lightSpreadMemo.clear();   // 記太多（燈一直在動）：清掉重來
+      lightSpreadMemo.set(key, hit = cells);
+    }
+    for (let k = 0; k < hit.length; k += 2) onCell(hit[k], hit[k + 1]);
+    return;
+  }
+  spreadLightNow(l, onCell);
+}
+function spreadLightNow(l, onCell) {
   {
     const steps = l.r / CELL;                          // 這盞燈的光能走幾格
     const [sc, sr] = cellAt(l.x, l.y);

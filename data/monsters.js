@@ -243,6 +243,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "fish_head",
     "name": "魚頭君",
+    "element": "water",
     "sprite": "images/monster/fish-head/fish-head-front.png",
     "hp": 110,
     "speed": 70,
@@ -305,6 +306,7 @@ const MONSTERS_DEFAULT = [
     "id": "milkfish_kid",
     "wide": true,
     "name": "虱目魚小子",
+    "element": "water",
     "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
     "hp": 160,
     "speed": 45,
@@ -333,6 +335,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "milkfish_kid_small",
     "name": "小虱目魚小子",
+    "element": "water",
     "sprite": "images/monster/milkfish-kid-small/milkfish-kid-small-front.png",
     "hp": 60,
     "speed": 55,
@@ -409,6 +412,7 @@ const MONSTERS_DEFAULT = [
     "id": "clownfish",
     "wide": true,
     "name": "比基尼小丑魚",
+    "element": "water",
     "sprite": "images/monster/clownfish/clownfish-front.png",
     "hp": 120,
     "speed": 75,
@@ -444,6 +448,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "clownfish_small",
     "name": "小丑魚幼體",
+    "element": "water",
     "sprite": "images/monster/clownfish/clownfish-small-front.png",
     "hp": 35,
     "speed": 120,

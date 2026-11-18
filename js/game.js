@@ -2557,18 +2557,20 @@ function update(dt) {
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
         const atkDmg = spec.dmg * (U ? U.dmgMul * (1 + (spec.ultDmgBonus || 0)) : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
-        target.hp -= atkDmg;
+        // 屬性相剋：火系角色打水系怪物 −20%（data/balance.js 的 ELEMENT_RULES；範圍波及、燃燒也一樣）
+        const elemMul = e => typeof elementDamageMul === 'function' ? elementDamageMul(spec, e) : 1;
+        target.hp -= atkDmg * elemMul(target);
         if (spec.ability === '火焰' && typeof addFlameMark === 'function') addFlameMark(impactPoint.x, impactPoint.y, (atkSplash || 0) * CELL);   // 希奧妮：打中的地方短暫算有火（絲瓜藤怕火，js/oil-barrels.js）
         onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);
         if (typeof sentryHitOre === 'function') sentryHitOre(t, impactPoint, (atkSplash || 0) * CELL);   // 路德：拳頭剛好波及礦物（js/ore.js）   // 安柏／希奧妮：不小心波及附近的油桶、油汙
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
-        if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && sameFloor(e, target) && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
+        if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && sameFloor(e, target) && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6 * elemMul(e); affected.push(e); }
         for (const e of affected) {
           if (spec.ability === '火焰' || spec.ability === '雷電') {   // 記下屬性傷害（魚頭君抗火、怕電；js/fish-head.js）
-            const amt = e === target ? atkDmg : atkDmg * .6;
+            const amt = (e === target ? atkDmg : atkDmg * .6) * elemMul(e);
             if (spec.ability === '火焰') e.fireDmg = (e.fireDmg || 0) + amt; else e.shockDmg = (e.shockDmg || 0) + amt;
           }
-          if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
+          if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=Math.max(1, Math.round(spec.burn.damage * elemMul(e))); e.burnTick=1; }   // 水系怪物：燃燒每秒的傷害也 −20%
           if (spec.stun && !e.noStun && !(spec.ability === '雷電' && e.shockResist != null)) {   // noStun 的怪物（生命體）不會被停住；不怕電的（小丑魚）不會被雷擊麻痺
             e.stunT=Math.max(e.stunT||0,spec.stun);
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）

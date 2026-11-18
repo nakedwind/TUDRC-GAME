@@ -32,11 +32,13 @@ function occBlockedFn(m) {
       : { v: false, y: OY + (R + 1) * CELL + o[1], a: OX + C * CELL + o[0], b: OX + (C + 1) * CELL + o[0] };
   });
   const boxGrid = new Map();   // 素材碰撞方框（物件編輯器設的），照格子分好查得快
+  const doors = typeof tileDoorRects === 'function' ? tileDoorRects(m.stamps, s => { const t = tileById(s.id); return t ? [stampW(s, t) * CELL, stampH(s, t) * CELL] : null; }) : [];   // 門口不擋（跟遊戲一樣，js/tile-collisions.js）
   if (typeof tileCollisionBoxes === 'function') for (const s of m.stamps || []) {
     const boxes = tileCollisionBoxes(s.id), t = boxes && tileById(s.id); if (!t) continue;
     for (const [x0, y0, x1, y1] of tileCollisionPlace(boxes, s, tileW(t) * CELL, tileH(t) * CELL, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0))) {
+      const box = [x0, y0, x1, y1]; box.holes = typeof tileBoxHoles === 'function' ? tileBoxHoles(x0, y0, x1, y1, doors) : null;
       for (let c = Math.floor((x0 - OX) / CELL); c * CELL + OX < x1; c++) for (let r = Math.floor((y0 - OY) / CELL); r * CELL + OY < y1; r++) {
-        const key = c + ',' + r; if (!boxGrid.has(key)) boxGrid.set(key, []); boxGrid.get(key).push([x0, y0, x1, y1]);
+        const key = c + ',' + r; if (!boxGrid.has(key)) boxGrid.set(key, []); boxGrid.get(key).push(box);
       }
     }
   }
@@ -48,7 +50,7 @@ function occBlockedFn(m) {
       if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return true;
     }
     for (const s of edges) if (s.v ? Math.abs(x - s.x) <= H && y >= s.a - H && y <= s.b + H : Math.abs(y - s.y) <= H && x >= s.a - H && x <= s.b + H) return true;
-    for (const b of boxGrid.get(c + ',' + r) || []) if (x >= b[0] && x < b[2] && y >= b[1] && y < b[3]) return true;
+    for (const b of boxGrid.get(c + ',' + r) || []) if (x >= b[0] && x < b[2] && y >= b[1] && y < b[3] && !(b.holes && tileBoxInHole(b, x, y))) return true;
     return false;
   };
 }

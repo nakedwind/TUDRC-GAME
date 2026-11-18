@@ -9,8 +9,11 @@
        （隊員照舊：划回不是深水的地方就自動收起救生圈）；水被抽乾、腳下已經不是深水時，溫特也會自動收起
      ・坐進救生圈的畫法（每個角色都通用，不用另外畫圖）：救生圈後半圈 → 角色原本的圖（腳裁掉）→ 救生圈前半圈
        划水時用原本的走路圖，手照樣擺動；腳被救生圈遮住
-   隊員：溫特坐救生圈下水後，每隔 0.6～0.8 秒，讓「離溫特最近、而且正要走進深水區」的隊員拿一個救生圈下水
-     ・救生圈不夠（身上的救生圈數量 − 溫特用的 − 已經在水裡的隊員）：剩下的隊員留在岸上
+   隊員：要有「自己的游泳圈」才能下水（t.ownRing；左邊隊員欄頭像右下角會有游泳圈小圖）
+     ・怎麼給：溫特從背包「放在地上」（或從快捷欄拖到地上）→ 離游泳圈最近、還沒有游泳圈的隊員走過去撿（一堆有幾個就給幾個人）
+     ・溫特下水後，跟著走到池邊、卻沒有游泳圈的隊員，頭上會冒「想要游泳圈」的泡泡
+     ・溫特坐救生圈下水後，每隔 0.6～0.8 秒，讓「離溫特最近、正要走進深水區、有自己游泳圈」的隊員下水
+     ・隊員撿到的游泳圈整趟出勤都帶著（換戰鬥地圖也帶著）；回到基地、隊員離隊、重新整理遊戲時，自動還回溫特的背包（不會弄丟）
      ・坐救生圈的隊員一樣不能攻擊（js/game.js 的哨兵攻擊），划回岸上就自動收起救生圈
      ・划水的時候循環播放划水聲（音效編輯器的 poolPaddle） */
 const SWIM_RING = {
@@ -30,6 +33,11 @@ const SWIM_RING = {
   split: .5,           // 救生圈圖上半部＝後半圈（畫在人後面）、下半部＝前半圈（畫在人前面）
   allyDelay: [.6, .8], // 溫特下水後，隊員隔幾秒拿救生圈下水（每個隊員之間也隔這麼久）
   allyWantSecs: .5,    // 隊員多久以內「想走進深水區」才算（js/sentry.js 的 moveSentryWithPath 記下來）
+  wantText: '我也想要游泳圈……',   // 沒有游泳圈的隊員在池邊冒的泡泡
+  wantSecs: 2.5,       // 泡泡停多久（秒）
+  wantGap: 7,          // 同一個隊員多久才再冒一次（秒）
+  pickReach: 28,       // 隊員走到離地上的游泳圈多近就撿起來（點）
+  lentKey: 'tudrc_swim_ring_lent_v1',   // 隊員手上有幾個游泳圈（重新整理遊戲時還回溫特的背包用）
   paddleSound: 'poolPaddle',
   paddleFade: .3,      // 划水聲淡入淡出幾秒
 };
@@ -216,21 +224,21 @@ function swimRingShoreGoal(t, tx, ty, dark) {
   }
   return null;
 }
-const swimRingsFree = () => swimRingCount() - (riding() ? 1 : 0) - ((G && G.towers) || []).filter(t => t.swimRing).length;
-// 每一幀（js/sentry.js 的 updateSentry 呼叫，同一幀只做一次）：時間到了就挑一個隊員下水
+// 每一幀（js/sentry.js 的 updateSentry 呼叫，同一幀只做一次）：時間到了就挑一個有游泳圈的隊員下水；沒有游泳圈的在池邊冒泡泡
 let swimAllyTickAt = -1;
 function swimRingAllyTick() {
   const now = performance.now(); if (now === swimAllyTickAt) return; swimAllyTickAt = now;
+  swimRingLentSync();
   if (!riding()) { swimAllyNextAt = Infinity; return; }   // 溫特不在水裡：隊員不會自己下水
-  if (now < swimAllyNextAt || swimRingsFree() <= 0) return;
   const p = G.player; let best = null, bd = Infinity;
   for (const t of G.towers || []) {
     if (t.swimRing || t.hp <= 0 || t.sitting || t.eatenBy || t.mrtRide || !(now - (t.swimWantAt || -1e9) <= SWIM_RING.allyWantSecs * 1000)) continue;
     const spot = deepWaterNearActor(t); if (!spot) continue;   // 還沒走到岸邊
+    if (!t.ownRing) { swimRingWantBubble(t, now); continue; }   // 沒有自己的游泳圈：留在岸上，冒泡泡
     const d = Math.hypot(t.x - p.x, t.y - p.y);
     if (d < bd) { bd = d; best = { t, spot }; }
   }
-  if (!best) return;   // 現在沒有人要下水：等有人走到岸邊
+  if (!best || now < swimAllyNextAt) return;   // 現在沒有人要下水，或還沒輪到下一個
   const { t, spot } = best, keepX = t.x, keepY = t.y;
   t.swimRing = true; t.x = spot.x; t.y = spot.y; t.navPath = null; t.navGoal = null;
   if (swimRingWithActor(t, () => sentryBlocked(t.x, t.y))) { t.x = keepX; t.y = keepY; t.swimRing = false; return; }   // 那裡被擋住：下不去
@@ -238,6 +246,73 @@ function swimRingAllyTick() {
   // 隊員坐進救生圈也不播音效
   swimAllyNextAt = now + swimAllyDelay();
 }
+// 沒有游泳圈的隊員走到池邊：頭上冒「想要游泳圈」的泡泡（隔 wantGap 秒才再冒，正在說別的話就不打斷）
+function swimRingWantBubble(t, now) {
+  if (t.say || now < (t.ringWantAt || 0)) return;
+  t.say = { text: SWIM_RING.wantText, life: SWIM_RING.wantSecs };
+  t.ringWantAt = now + SWIM_RING.wantGap * 1000;
+}
+
+// ---- 地上的游泳圈：離它最近、還沒有游泳圈的隊員去撿（js/sentry.js 的 updateSentryMain 呼叫；回傳 true＝這一幀在走去撿）----
+const swimRingCanPick = t => !t.ownRing && !t.swimRing && t.hp > 0 && !t.berserk && !t.sitting && !t.eatenBy && !t.mrtRide && !t.grabbed && !(performance.now() < (t.ringSkipUntil || 0));
+let swimPickPlan = { at: -1, who: new Map() };   // 這一幀誰去撿哪一堆（同一幀只算一次）
+function swimRingPickPlan() {
+  const now = performance.now(); if (swimPickPlan.at === now) return swimPickPlan.who;
+  const who = new Map(), rings = (G.groundItems || []).filter(g => g.id === SWIM_RING.itemId && g.qty > 0);
+  const free = (G.towers || []).filter(swimRingCanPick);
+  for (const g of rings) {   // 一堆有幾個，就分給離它最近的幾個人
+    const near = free.filter(t => !who.has(t)).sort((a, b) => Math.hypot(a.x - g.x, a.y - g.y) - Math.hypot(b.x - g.x, b.y - g.y));
+    for (const t of near.slice(0, g.qty)) who.set(t, g);
+  }
+  swimPickPlan = { at: now, who };
+  return who;
+}
+function swimRingGroundStep(t, dt) {
+  if (!G.groundItems || !G.groundItems.length || !swimRingCanPick(t)) return false;
+  const g = swimRingPickPlan().get(t); if (!g) return false;
+  const take = () => {   // 撿起來
+    removeGroundItem(g, 1); t.ownRing = true; t.navPath = null;
+    if (typeof sentryStatus === 'function') sentryStatus(t, '撿起游泳圈', '#9ff0c0');
+    if (typeof sfxAt === 'function') sfxAt('pop', g.x, g.y, .5, 'ring-pick');
+    swimRingSaveLent(); swimPickPlan.at = -1;
+    if (typeof renderFieldSquadHud === 'function') renderFieldSquadHud();
+  };
+  if (Math.hypot(g.x - t.x, g.y - t.y) <= SWIM_RING.pickReach) { take(); return false; }
+  t.followDark = true;
+  if (moveSentryWithPath(t, g.x, g.y, (TYPES[t.type].walkSpeed || 80) * 1.3, dt)) { take(); return true; }   // 走到了（游泳圈在溫特腳邊時，會停在旁邊一點點）
+  if (t.navFailed) { t.navFailed = false; t.ringSkipUntil = performance.now() + 3000; swimPickPlan.at = -1; return false; }   // 走不到：讓給別人，3 秒後再試
+  t.target = null;
+  return true;
+}
+
+// ---- 隊員手上的游泳圈：回到基地、隊員離隊、重新整理遊戲時，還回溫特的背包 ----
+let swimLentHolders = [], swimLentLoaded = false;
+function swimRingSaveLent() {
+  swimLentHolders = ((G && G.towers) || []).filter(t => t.ownRing);
+  try { if (swimLentHolders.length) localStorage.setItem(SWIM_RING.lentKey, String(swimLentHolders.length)); else localStorage.removeItem(SWIM_RING.lentKey); } catch (_) {}
+}
+function swimRingGiveBack(n) {
+  if (!(n > 0) || typeof supplyInventory === 'undefined') return;
+  supplyInventory.set(SWIM_RING.itemId, (supplyInventory.get(SWIM_RING.itemId) || 0) + n);
+  if (typeof saveGame === 'function') saveGame();
+}
+function swimRingLentSync() {
+  if (!swimLentLoaded) {   // 剛打開遊戲：上次隊員手上的游泳圈還回來
+    swimLentLoaded = true;
+    let n = 0; try { n = +localStorage.getItem(SWIM_RING.lentKey) || 0; localStorage.removeItem(SWIM_RING.lentKey); } catch (_) {}
+    swimRingGiveBack(n);
+  }
+  if (!swimLentHolders.length) return;
+  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) {   // 回到基地＝出勤結束：全部還回來
+    for (const t of swimLentHolders) t.ownRing = false;
+    swimRingGiveBack(swimLentHolders.length); swimRingSaveLent();
+    if (typeof renderFieldSquadHud === 'function') renderFieldSquadHud();
+    return;
+  }
+  const gone = swimLentHolders.filter(t => !((G && G.towers) || []).includes(t));   // 隊員離隊（不在場上了）：他的還回來
+  if (gone.length) { for (const t of gone) t.ownRing = false; swimRingGiveBack(gone.length); swimRingSaveLent(); }
+}
+
 // 隊員更新完（js/sentry.js 的 updateSentry）：整個人都划出深水區就收起救生圈
 function swimRingAllyAfterMove(t) {
   if (!t || !t.swimRing) return;

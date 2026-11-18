@@ -35,6 +35,10 @@ const POOL_TIDE = {
   valveBusyText: '抽水閥已經打開了。',   // 倒數中、正在退水時再按
   notice: { secs: 3, rise: '水位即將上升……', drain: '水位即將下降……', y: .2 },   // 漲退水前幾秒提醒、文字、在畫面高度的哪裡（.2＝從上面算 20%）
   marks: { shallowGone: '抽水後消失', shallowDry: '抽水後出現', deep: '深水時顯現', deepShallow: '淺水時顯現' },
+  // 深水區壓暗：淺水、深水共用同一套水的素材，乍看分不出來 → 在編輯器畫的 🛟 深水區（含 🔒 永遠深水）上面疊一層深藍
+  // color＝疊上去的顏色、alpha＝多深（0～1，越大越暗）；抽成淺水時一般深水區的這層會跟著水位淡掉，永遠深水一直都在
+  // fade＝從淺水交界往深水裡面，花幾格慢慢變深（交界那一格不壓暗，保留素材原本深淺水的漸層；越大漸層越長）
+  deepTint: { color: '#001a33', alpha: .35, fade: 3 },
 };
 
 // ---- 狀態（每一局重來；存在 G 裡，換地圖、重開都會重設）----
@@ -69,6 +73,57 @@ function poolLayerAlpha(lid) {
   const s = poolTideActive() ? poolTide() : null;
   const deep = s ? s.deep : 1, shallow = s ? s.shallow : 1;
   return mark === 'shallowGone' ? shallow : mark === 'shallowDry' ? 1 - shallow : mark === 'deep' ? deep : 1 - deep;
+}
+
+// ---- 深水區壓暗（js/render.js 畫完地面、角色之前呼叫）----
+// 照編輯器的 🛟 深水區格子畫（🎯 碰撞微調只影響判定，這層顏色照原本的格子）。
+// 邊緣要有漸層：每一格先算「離最近的淺水（不是深水區的格子）幾格」，交界那格＝0、往裡面每格加深一點，fade 格之後全深。
+// 做成一張「一格＝一個像素」的小圖，再平滑放大蓋到整張地圖上：格子跟格子中間自然漸變，不會一格一格的
+let poolTintCache = null;
+function poolTintMasks(T) {
+  const list = MAP.deepWater || [], keep = MAP.deepWaterKeep || [];
+  const c = poolTintCache;
+  if (c && c.map === MAP && c.list === list && c.keep === keep && c.color === T.color && c.fade === T.fade && c.cols === COLS && c.rows === ROWS) return c;
+  const keepSet = new Set(keep), all = new Set([...list, ...keep]);
+  // 離淺水幾格（上下左右走幾步）：從所有不是深水的格子同時往外擴
+  const dist = new Array(COLS * ROWS).fill(Infinity), q = [];
+  for (let r = 0; r < ROWS; r++) for (let cc = 0; cc < COLS; cc++) if (!all.has(cc + ',' + r)) { dist[r * COLS + cc] = 0; q.push(r * COLS + cc); }
+  for (let h = 0; h < q.length; h++) {
+    const i = q[h], cc = i % COLS, r = (i - cc) / COLS;
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nc = cc + dc, nr = r + dr, j = nr * COLS + nc;
+      if (nc < 0 || nr < 0 || nc >= COLS || nr >= ROWS || dist[j] <= dist[i] + 1) continue;
+      dist[j] = dist[i] + 1; q.push(j);
+    }
+  }
+  const fade = Math.max(1, T.fade || 1), rgb = (T.color.replace('#', '').match(/../g) || ['00', '00', '00']).map(h => parseInt(h, 16));
+  // only：'all'＝全部深水區、'normal'＝一般深水區、'keep'＝永遠深水
+  const mask = only => {
+    const cv = document.createElement('canvas'); cv.width = COLS; cv.height = ROWS;
+    const g = cv.getContext('2d'), img = g.createImageData(COLS, ROWS);
+    for (let r = 0; r < ROWS; r++) for (let cc = 0; cc < COLS; cc++) {
+      const k = cc + ',' + r, i = r * COLS + cc;
+      if (!all.has(k) || (only === 'normal' && keepSet.has(k)) || (only === 'keep' && !keepSet.has(k))) continue;
+      const v = Math.min(1, Math.max(0, (dist[i] - 1) / fade));   // 交界那格（離淺水 1 格）＝0
+      img.data[i * 4] = rgb[0]; img.data[i * 4 + 1] = rgb[1]; img.data[i * 4 + 2] = rgb[2]; img.data[i * 4 + 3] = Math.round(v * 255);
+    }
+    g.putImageData(img, 0, 0); return cv;
+  };
+  return (poolTintCache = { map: MAP, list, keep, color: T.color, fade: T.fade, cols: COLS, rows: ROWS, all: mask('all'), normal: keep.length ? mask('normal') : null, keepMask: keep.length ? mask('keep') : null });
+}
+function drawPoolDeepTint(ctx) {
+  if (typeof MAP === 'undefined' || !MAP) return;
+  const T = POOL_TIDE.deepTint, keep = MAP.deepWaterKeep || [], list = MAP.deepWater || [];
+  if (!T || !(T.alpha > 0) || (!list.length && !keep.length)) return;
+  const s = poolTideActive() ? poolTide() : null, deep = s ? s.deep : 1;   // 抽成淺水：一般深水區跟著水位淡掉
+  const M = poolTintMasks(T);
+  const put = (cv, a) => {
+    if (!cv || !(a > 0)) return;
+    ctx.save(); ctx.globalAlpha *= a; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';   // 平滑放大＝漸層
+    ctx.drawImage(cv, OX, OY, COLS * CELL, ROWS * CELL); ctx.restore();
+  };
+  if (deep >= .999 || !M.normal) put(M.all, T.alpha);   // 深水時：整張一起畫（一般、永遠深水接縫處不會有一條線）
+  else { put(M.normal, T.alpha * deep); put(M.keepMask, T.alpha); }
 }
 
 // ---- 抽水機（js/storage-lockers.js 的發電機開關呼叫）----

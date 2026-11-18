@@ -452,10 +452,13 @@ function escapeDarkness(actor, dt) {
   if (Math.hypot(actor.x - oldX, actor.y - oldY) < .001) actor.escapeTimer = 0;
   return true;
 }
+// 隊友在這一格要站哪裡：一般是格子正中間；沒對齊格子的門洞＝門洞的正中線（doorLanePoint 在 js/pathfinding.js，怪物也用）
+const sentryCellPos = (c, r) => doorLanePoint(c, r) || center(c, r);
 // ignoreFire：被推出火海時用，只看地形，不把火當成擋路；allowDark：被召喚時，黑暗的格子也能走
 function sentryCellWalkable(c, r, ignoreFire = false, allowDark = false) {
-  if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
-  const [x, y] = center(c, r);
+  const lane = doorLanePoint(c, r);   // 門洞通道上的格子：紅格有微調過、牆只擋門洞旁邊，改看正中線那個點有沒有被擋
+  if (!inGrid(c, r) || (!lane && isWall(c, r)) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
+  const [x, y] = lane || center(c, r);
   if (sentryBlocked(x, y)) return false;
   if (!ignoreFire && typeof oilFireAt === 'function' && oilFireAt(x, y, 6, sentryFireWalker)   // 燒著的火海：找路時繞開（js/oil-barrels.js）；只看同一層的火
       && !(typeof sentryFireTrait === 'function' && sentryFireTrait(sentryFireWalker))) return false;   // 希奧妮、雷德不繞（js/game.js 的 SENTRY_FIRE_TRAITS）
@@ -499,21 +502,27 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.f
     return path;
   }
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
-  const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return null;
+  // 走不到的地方（例如溫特在深水區裡）：同一個起點、同一個目的地 SENTRY_PATH_FAIL_WAIT 內不再重找（找一次要把整張地圖搜完，大地圖會頓一下）
+  const failKey1 = sc + ',' + sr + '>' + rawGc + ',' + rawGr + (allowDark ? 'd' : ''), now1 = performance.now();
+  if (t._pathFail && t._pathFail.key === failKey1 && now1 < t._pathFail.until) return null;
+  const fail = () => { t._pathFail = { key: failKey1, until: now1 + SENTRY_PATH_FAIL_WAIT }; return null; };
+  const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return fail();
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
   if (startKey === goalKey) return [];
-  const queue = [[sc, sr]], cameFrom = new Map([[startKey, null]]);
+  const queue = [[sc, sr]], cameFrom = new Map([[startKey, null]]), blocked = new Set();   // blocked：這次找路已經知道走不了的格子（同一格會被旁邊四格問，只算一次）
   let head = 0;
   while (head < queue.length) {
     const [c, r] = queue[head++];
     if (c === gc && r === gr) break;
     for (const [dc, dr] of [[0,-1],[1,0],[0,1],[-1,0]]) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (cameFrom.has(key) || edgeBetween(c, r, nc, nr) || !sentryCellWalkable(nc, nr, false, allowDark)) continue;   // edgeBetween：兩格中間有薄牆就繞路
+      if (cameFrom.has(key) || blocked.has(key) || edgeBetween(c, r, nc, nr)) continue;   // edgeBetween：兩格中間有薄牆就繞路
+      if (!sentryCellWalkable(nc, nr, false, allowDark)) { blocked.add(key); continue; }
       cameFrom.set(key, c + ',' + r); queue.push([nc, nr]);
     }
   }
-  if (!cameFrom.has(goalKey)) return null;
+  if (!cameFrom.has(goalKey)) return fail();
+  t._pathFail = null;
   const path = []; let key = goalKey;
   while (key && key !== startKey) {
     const [c, r] = key.split(',').map(Number); path.push({ c, r }); key = cameFrom.get(key);
@@ -612,7 +621,7 @@ function buildSentryPathFloors(t, targetX, targetY, allowDark, goalFloor) {
       let wall;   // 跟 wallNow 一樣的規則
       if (rampCells.has(nk)) wall = mapWalls.has(nk) || (f !== 2 && !onRamp && onDeck);
       else if (onRamp) wall = deckCells.has(nk) ? deckBlocked(nk) : mapWalls.has(nk);
-      else wall = f === 2 ? (!deckCells.has(nk) || deckBlocked(nk)) : mapWalls.has(nk);
+      else wall = f === 2 ? (!deckCells.has(nk) || deckBlocked(nk)) : mapWalls.has(nk) && !doorLanePoint(nc, nr);   // 沒對齊格子的門洞通道：交給 walkable 看正中線
       if (wall) continue;
       const nf = onRamp && !rampCells.has(nk) ? (deckCells.has(nk) ? 2 : 1) : f;   // 走出樓層出入口：換樓層
       if (!walkable(nc, nr, nf) || onFloorDo(nf, () => edgeBetween(c, r, nc, nr)) || escCross(c, r, nc, nr)) continue;
@@ -700,7 +709,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   }
   // 必須到達轉彎格中心，不能剛跨入格子就跳過路點，否則會切角卡牆。
   while (t.navPath.length) {
-    const [wx, wy] = center(t.navPath[0].c, t.navPath[0].r);
+    const [wx, wy] = sentryCellPos(t.navPath[0].c, t.navPath[0].r);   // 沒對齊格子的門洞：走到門洞正中線
     if (Math.hypot(wx - t.x, wy - t.y) > 1) break;
     if (!sentryBlocked(wx, wy)) { t.x = wx; t.y = wy; }   // 到了這一格：站到正中間（不留小數誤差，轉彎時才不會擦到牆角）
     t.navPath.shift();
@@ -710,9 +719,9 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   if (!waypoint && (sentryBlocked(moveX, moveY) || (!dark && !personnelInLight(moveX, moveY)))) {
     const goal = nearestSentryGoal(goalC, goalR, dark);
     if (!goal) { t.navFailed = true; return false; }
-    [moveX, moveY] = center(...goal);
+    [moveX, moveY] = sentryCellPos(...goal);
   }
-  if (waypoint) [moveX, moveY] = center(waypoint.c, waypoint.r);
+  if (waypoint) [moveX, moveY] = sentryCellPos(waypoint.c, waypoint.r);
   const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally') : 1);   // 走在鐵絲網上變慢
   if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY, dark)) {
     t.x = moveX; t.y = moveY;
@@ -728,7 +737,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   // 卡在牆角（例如只有一格寬的門：兩旁的牆往下微調過，人站得偏一點就轉不了彎）：先往這一格的正中間靠，再從中間轉彎
   // （路是照格子中心找的，從格子中間一定轉得過去；不然會一直站著、頭上說「被卡住了，走不出去」）
   if (!moved && distance > 2) {
-    const [cx, cy] = center(...cellAt(t.x, t.y)), ox = cx - t.x, oy = cy - t.y, od = Math.hypot(ox, oy);
+    const [cx, cy] = sentryCellPos(...cellAt(t.x, t.y)), ox = cx - t.x, oy = cy - t.y, od = Math.hypot(ox, oy);
     if (od > .01) {
       const k = Math.min(1, step / od), sx = t.x + ox * k, sy = t.y + oy * k;
       if (personnelStepAllowed(t.x, t.y, sx, t.y, dark)) t.x = sx;
@@ -859,6 +868,8 @@ function updateSentryMain(t, dt) {
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
   if (t.mothConfuseT > 0) { t.target = null; return; }   // 人面蝶的混亂鱗粉：走路由 mothConfusedSentry 處理（js/human-face-butterfly.js）
+  // 地上有溫特丟的游泳圈：離它最近、還沒有游泳圈的隊員走去撿（js/swim-ring.js）。游泳圈在溫特腳邊，站在暗處的隊員也照樣走過去
+  if (typeof swimRingGroundStep === 'function' && swimRingGroundStep(t, dt)) return;
   if (escapeDarkness(t, dt)) return;
   const ownSpec = TYPES[t.type];
   // 召回營地的哨兵抵達後，優先攔截正在破壞營地的怪物。

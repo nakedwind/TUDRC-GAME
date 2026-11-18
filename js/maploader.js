@@ -639,16 +639,36 @@ const mapGroupedLayer = lid => !!mapLayerBlend(lid) && !MAP_FLOOR2_LAYERS.has(li
 // 椅子（要坐）、據點（要打）還是照原本自己排前後，不放進整層一起畫
 const inMapLayerGroup = s => mapGroupedLayer(s.layer || 'top') && !isElevatorStamp(s) && !chairConfig(s.id) && !(mapTileById(s.id) || {}).baseHp;
 let mapGroupCv = null;
+let mapGroupDirty = null;   // 空白畫布上次畫到哪個範圍（畫面像素 [x, y, w, h]）；null＝下次整張清（MAP_FAST.water）
 function drawMapLayerGroup(ctx, lid) {
   const list = mapStampGroups().grouped.get(lid) || [];
   const off = mapGroupCv || (mapGroupCv = document.createElement('canvas'));
-  if (off.width !== ctx.canvas.width || off.height !== ctx.canvas.height) { off.width = ctx.canvas.width; off.height = ctx.canvas.height; }
-  const g = off.getContext('2d');
-  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, off.width, off.height);
-  g.setTransform(ctx.getTransform()); g.imageSmoothingEnabled = ctx.imageSmoothingEnabled; g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
-  drawLayerCellsInView(g, lid);
-  for (const s of list) if (stampInDrawRect(s) && !(G.mapDestroyed && G.mapDestroyed.has(s))) drawMapStampImg(g, s);
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = mapLayerBlend(lid); ctx.globalAlpha *= (typeof poolLayerAlpha === 'function' ? poolLayerAlpha(lid) : 1); ctx.drawImage(off, 0, 0); ctx.restore();
+  if (off.width !== ctx.canvas.width || off.height !== ctx.canvas.height) { off.width = ctx.canvas.width; off.height = ctx.canvas.height; mapGroupDirty = null; }
+  const g = off.getContext('2d'), m = ctx.getTransform(), W = off.width, H = off.height;
+  // 這一幀要畫哪些（畫面外的、被打壞的不畫）；這層有沒有一格一格的小圖
+  const draws = list.filter(s => stampInDrawRect(s) && !(G.mapDestroyed && G.mapDestroyed.has(s)));
+  let hasCells = false; for (const k in ((MAP.layers || {})[lid] || {})) { hasCells = true; break; }
+  // 要處理的範圍（MAP_FAST.water）：只有大圖時＝那些圖的範圍（多留一格）；有小圖、熱身中、畫面有旋轉＝整個畫面
+  let rect = [0, 0, W, H];
+  if (MAP_FAST.water) {
+    if (!draws.length && !hasCells) return;   // 畫面上沒有這層：整個跳過
+    if (!hasCells && mapDrawRect && !m.b && !m.c) {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const s of draws) { const b = stampDrawBox(s); x0 = Math.min(x0, b.x0 - CELL); y0 = Math.min(y0, b.y0 - CELL); x1 = Math.max(x1, b.x1 + CELL); y1 = Math.max(y1, b.y1 + CELL); }
+      const X0 = Math.max(0, Math.floor(m.a * x0 + m.e)), Y0 = Math.max(0, Math.floor(m.d * y0 + m.f)), X1 = Math.min(W, Math.ceil(m.a * x1 + m.e)), Y1 = Math.min(H, Math.ceil(m.d * y1 + m.f));
+      if (X1 <= X0 || Y1 <= Y0) return;
+      rect = [X0, Y0, X1 - X0, Y1 - Y0];
+    }
+  }
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  if (MAP_FAST.water && mapGroupDirty) g.clearRect(...mapGroupDirty); else g.clearRect(0, 0, W, H);   // 只清上次畫過的地方
+  g.setTransform(m); g.imageSmoothingEnabled = ctx.imageSmoothingEnabled; g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  if (hasCells || !MAP_FAST.water) drawLayerCellsInView(g, lid);
+  for (const s of draws) drawMapStampImg(g, s);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = mapLayerBlend(lid); ctx.globalAlpha *= (typeof poolLayerAlpha === 'function' ? poolLayerAlpha(lid) : 1);
+  if (MAP_FAST.water) ctx.drawImage(off, rect[0], rect[1], rect[2], rect[3], rect[0], rect[1], rect[2], rect[3]); else ctx.drawImage(off, 0, 0);
+  ctx.restore();
+  mapGroupDirty = MAP_FAST.water ? rect : null;
 }
 function drawMapStampImg(ctx, s, glowPass = false) {
   if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
@@ -872,17 +892,35 @@ function mapDrawCells() {
   return { c0: Math.max(0, Math.floor((v.x0 - OX) / CELL)), r0: Math.max(0, Math.floor((v.y0 - OY) / CELL)),
     c1: Math.min(COLS - 1, Math.floor((v.x1 - OX) / CELL)), r1: Math.min(ROWS - 1, Math.floor((v.y1 - OY) / CELL)) };
 }
+// ---- 畫面加速（池核這種物件很多、圖層很多的地圖特別需要）：畫出來的畫面完全一樣，只是少做重複的計算 ----
+//   bounds：每張圖佔的範圍算一次就記住（圖沒移動、沒換大小就不重算），不用每一幀每張圖都重算
+//   sig：遮擋補畫的「狀態有沒有變」每一幀每張圖只問一次（同一張圖會被好幾塊補畫問）
+//   water：整層混合的圖層（池核的水）只清理、貼回真的有畫東西的範圍；畫面上沒有這層的圖就整個跳過
+//   任何一個改成 false＝回到原本的做法（畫面出問題時可以先關掉比對）
+const MAP_FAST = { bounds: true, sig: true, water: true };
+let mapDrawFrame = 0;   // 第幾幀（drawMapGround 每一幀最先呼叫時 +1）
+// 一張大圖畫出來大概佔哪個範圍（世界座標像素，寧可大一點）：旋轉、放大過的照畫出來的範圍
+const stampBoxCache = new WeakMap();
+function stampDrawBox(s) {
+  const key = s.id + '|' + s.c + '|' + s.r + '|' + (s.ox || 0) + '|' + (s.oy || 0) + '|' + (s.rot || 0) + '|' + (s.scale || '') + '|' + (s.angle || '');
+  if (MAP_FAST.bounds) { const hit = stampBoxCache.get(s); if (hit && hit.key === key) return hit; }
+  const t = mapTileById(s.id) || {}, w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+  let box;
+  if (stampHasTransform(s)) {   // 放大、轉過的物件：照畫出來的範圍算
+    const b = stampVisualBox(s, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), mapStampW(s, t) * CELL, mapStampH(s, t) * CELL);
+    box = { key, x0: b.x0, y0: b.y0, x1: b.x1, y1: b.y1 };
+  } else {
+    const half = Math.max(w, h) / 2, cx = OX + s.c * CELL + (s.ox || 0) + w / 2, cy = OY + s.r * CELL + (s.oy || 0) + h / 2;
+    box = { key, x0: cx - half, y0: cy - half, x1: cx + half, y1: cy + half };
+  }
+  if (MAP_FAST.bounds) stampBoxCache.set(s, box);
+  return box;
+}
 // 一張大圖有沒有任何一部分在範圍內（旋轉過的圖用比較寬的範圍判斷，寧可多畫不要切掉）
 function stampInDrawRect(s) {
   const v = mapDrawRect; if (!v) return true;
-  const t = mapTileById(s.id) || {}, w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
-  if (stampHasTransform(s)) {   // 放大、轉過的物件：照畫出來的範圍算
-    const b = stampVisualBox(s, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), mapStampW(s, t) * CELL, mapStampH(s, t) * CELL);
-    return b.x1 > v.x0 && b.x0 < v.x1 && b.y1 > v.y0 && b.y0 < v.y1;
-  }
-  const half = Math.max(w, h) / 2;
-  const cx = OX + s.c * CELL + (s.ox || 0) + w / 2, cy = OY + s.r * CELL + (s.oy || 0) + h / 2;
-  return cx + half > v.x0 && cx - half < v.x1 && cy + half > v.y0 && cy - half < v.y1;
+  const b = stampDrawBox(s);
+  return b.x1 > v.x0 && b.x0 < v.x1 && b.y1 > v.y0 && b.y0 < v.y1;
 }
 // 畫某一層範圍內的小圖（格子）
 function drawLayerCellsInView(ctx, lid) {
@@ -920,6 +958,7 @@ function mapStampGroups() {
 function drawMapGround(ctx) {
   if (!MAP) return;
   updateMapDrawRect();   // 每一幀先算一次這一幀要畫的範圍（render.js 的 draw 最先畫地面）
+  mapDrawFrame++;        // 新的一幀：遮擋補畫的狀態要重新問（occluderStateSig）
   const { ground } = mapStampGroups();
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
@@ -1180,7 +1219,17 @@ function collectMapOccluders(ctx, out) {
 // 否則站在兩張圖之間的角色也會被蓋掉（例如坐在餐桌下排椅子上的人，頭被補畫的桌子整塊遮住）。
 // 做法：在小畫布上畫上層圖，再用下層圖的形狀裁切（destination-in，不需要讀像素，雙擊開啟也能用）。
 // 結果存起來重複使用；門開關、彈藥箱打開這類會變圖的，狀態一改就重做。
+// 同一幀裡同一張圖會被好幾塊補畫問（MAP_FAST.sig）：第一次問完就記住，這一幀後面直接用
+let occSigFrame = -1;
+const occSigMemo = new Map();
 function occluderStateSig(x) {
+  if (!MAP_FAST.sig) return occluderStateSigNow(x);
+  if (occSigFrame !== mapDrawFrame) { occSigFrame = mapDrawFrame; occSigMemo.clear(); }
+  let v = occSigMemo.get(x);
+  if (v === undefined) { v = occluderStateSigNow(x); occSigMemo.set(x, v); }
+  return v;
+}
+function occluderStateSigNow(x) {
   if (x.kind === 'cell') {
     const layer = MAP_LAYER_ORDER[x.li], shown = typeof storagePropDisplayTile === 'function' ? storagePropDisplayTile(x.id, x.c, x.r, layer) : null;
     return (G.mapDestroyed.has(layer + ':' + x.c + ',' + x.r) ? 'x' : '') + (shown === false ? 'h' : shown ? (shown.id || 's') : '')   // h＝這格目前不顯示
