@@ -214,7 +214,8 @@ function buildGacha() {
   const el = gc.el = document.createElement('div');
   el.id = 'gacha'; el.className = 'hidden';
   el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '扭蛋機');
-  el.innerHTML = '<section class="gc-card"><header class="gc-head"><div class="gc-icon-box" aria-hidden="true"><img src="images/items/gashapon-capsule.png" alt=""></div><div class="gc-title"><h2>扭蛋機</h2><p>投入異質碎片，轉出服裝和配件。獲得的物品會自動收進旁邊的<em class="gc-hl">衣櫃</em>。</p></div>'
+  el.innerHTML = '<section class="gc-card"><header class="gc-head"><div class="gc-icon-box" aria-hidden="true"><img src="images/items/gashapon-capsule.png" alt=""></div><div class="gc-title"><h2>扭蛋機</h2><p>投入異質碎片，轉出服裝和配件。獲得的物品會自動收進<em class="gc-hl">衣櫃</em>，也可以按「👗 換裝」直接換上。</p></div>'
+    + '<button type="button" class="gc-dress" data-dress title="直接在這裡打開衣櫃換裝">👗 換裝</button>'
     + '<span class="gc-shards"><img src="images/碎片鑰匙/anomalous-shard.png" alt=""><b></b></span>'
     + '<button type="button" class="gc-close" aria-label="關閉（Esc）">×</button></header>'
     + '<div class="gc-body"><div class="gc-machine"><div class="gc-machine-art"><img src="images/street/street-capsule-toy-machines.png" alt=""></div>'
@@ -238,14 +239,22 @@ function buildGacha() {
   el.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.pull) gachaPull(Number(b.dataset.pull), b.dataset.pay);
+    else if ('dress' in b.dataset) gachaDress(b.dataset.dress);   // 換裝：疊一個衣櫃在扭蛋機上面，關掉就回到扭蛋機
     else if (b.dataset.tab) { gc.tab = b.dataset.tab; gc.msg = ''; sfx('switch'); renderGacha(); }
     else gachaBookClick(b, e, el.querySelector('.gc-card'), msg => { gc.msg = msg; renderGacha(); });
   });
+}
+// 換裝：直接打開衣櫃的服裝介面（js/costumes.js，跟衣櫃同一套，不另外做一份）。id＝先試穿這件
+const gachaCanWear = item => item.slot ? costumeCanWear('winter', item.id) : item.char === 'winter' && costumeCanWear('winter', item.id);   // 溫特自己能穿的才給「換上」
+function gachaDress(id) {
+  if (gc.busy || typeof openWardrobe !== 'function') return;
+  openWardrobe('winter', id ? { wear: id } : {});
 }
 function renderGacha() {
   if (!gc.el) return;
   const el = gc.el;
   el.querySelector('.gc-shards b').textContent = training.crystals;
+  el.querySelector('.gc-dress').disabled = gc.busy;
   for (const b of el.querySelectorAll('[data-pull]')) {   // 每顆按鈕一行：「轉 1 次 ◆30」「轉 1 次 $5,000」
     const times = Number(b.dataset.pull), money = b.dataset.pay === 'money', cost = gachaCost(times, b.dataset.pay);
     b.innerHTML = '轉 ' + times + ' 次<small>' + (money ? '$' + cost.toLocaleString() : '<img src="images/碎片鑰匙/anomalous-shard.png" alt="">' + cost) + '</small>';
@@ -260,9 +269,10 @@ function renderGacha() {
   if (gc.tab === 'result') {
     list.className = 'gc-list gc-results';
     if (gc.busy) list.innerHTML = '<p class="gc-wait">轉轉轉……</p>';
-    else if (!gc.results) list.innerHTML = '<p class="gc-wait">投入碎片，轉轉看！<br><small>轉到的服裝到衣櫃就能換上</small></p>';
+    else if (!gc.results) list.innerHTML = '<p class="gc-wait">投入碎片，轉轉看！<br><small>轉到的服裝可以按「換上」直接換裝</small></p>';
     else list.innerHTML = gc.results.map(({ item, isNew }, i) => '<div class="gc-item r-' + rarityOf(item) + '" style="--i:' + i + '">' + gachaArt(item)
-      + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(rarityOf(item)) + (isNew ? '<i class="gc-new">NEW</i>' : '') + '</div>').join('');
+      + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(rarityOf(item)) + (isNew ? '<i class="gc-new">NEW</i>' : '')
+      + (gachaCanWear(item) ? '<button type="button" class="gc-wear" data-dress="' + item.id + '">換上</button>' : '') + '</div>').join('');
   } else {
     list.className = 'gc-list gc-book';
     list.innerHTML = gachaBookHTML();

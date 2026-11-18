@@ -141,6 +141,7 @@ function useStoragePropNearPlayer(filter){
     const [on,total]=dynamoCount();
     if(dynamosAllOn()){
       sfx('dynamoStart');   // 全部打開：發電機發動的聲音（只播一次，比平常大聲：音量在音效編輯器調；之後靠近開著的發電機會一直聽到運轉聲，js/dynamo-sound.js）
+      if(dynamoStationMap(MAP))sfx('mrtPowerSteam');   // 捷運站：最後一台打開時再加一聲發動蒸氣音（音量在音效編輯器調）
       if(dynamoStationMap(MAP)&&typeof mrtPowerOnFx==='function')mrtPowerOnFx();   // 捷運站：畫面震一下，接著播一次捷運站的環境聲（js/mrt-train.js）
       systemNotice(dynamoStationMap(MAP)?'發電機全部啟動，捷運恢復運行':'發電機全部啟動（'+on+'／'+total+'）');
     }else systemNotice(dynamoIsOn(prop.token)?'發電機已啟動（'+on+'／'+total+'）':'發電機已關閉（'+on+'／'+total+'）');
