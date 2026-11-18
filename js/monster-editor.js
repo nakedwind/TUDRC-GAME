@@ -47,6 +47,7 @@ function render() {
   fields.forEach(input => { input.value = monster[input.dataset.field]; });
   document.getElementById('f_behavior').value = monster.behavior || '';
   document.getElementById('f_wide').checked = !!monster.wide;
+  document.getElementById('f_element').value = monster.element || '';
   document.getElementById('deleteMonster').disabled = monsters.length <= 1;
   previewSprite(monster); renderList(); renderBehaviorFields(monster);
 }
@@ -140,6 +141,11 @@ fields.forEach(input => input.addEventListener(input.dataset.field === 'name' ? 
 document.getElementById('f_wide').addEventListener('change', e => {   // 大體型：一格寬的門口擠不過去（js/enemy-ai.js 的 enemyWideAt）
   const monster = currentMonster();
   if (e.target.checked) monster.wide = true; else delete monster.wide;
+  saveMonsters();
+});
+document.getElementById('f_element').addEventListener('change', e => {   // 屬性：水系＝火系角色打牠攻擊力打折（data/balance.js 的 ELEMENT_RULES）
+  const monster = currentMonster();
+  if (e.target.value) monster.element = e.target.value; else delete monster.element;
   saveMonsters();
 });
 function exportText() {

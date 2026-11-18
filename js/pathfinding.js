@@ -302,9 +302,48 @@ function nudgedWallAt(x, y, wall, offFn = null) {
   }
   return false;
 }
-// 怪物尋路、流場看的「這格是不是牆」：格子中心被（微調後的）牆擋住才算。二樓沒有微調，照原本
+// ---- 沒對齊格子的門（編輯器裡往左右微調了半格，例如池核 24,57、8,41 的門）----
+// 門洞剛好跨在兩格中間：兩格的正中間都會撞到門旁邊的牆，照「格子正中間」找路的隊友、怪物會以為過不去。
+// 所以門打開時，門洞上下這幾排、門洞蓋到的格子改成「站在門洞的正中線上」：找路照這個點判斷，走路也走到這個點。
+// 門有對齊格子（正中線就在格子正中間）的照舊用格子正中間，不受影響。隊友見 js/sentry.js 的 sentryCellPos、怪物見 cellStandPoint
+const DOOR_LANE_ROWS = 2;   // 門擋路的那兩排，再往上、往下各多算幾排（穿過牆的那段通道）
+function doorLanePoint(c, r) {
+  if (typeof mapDoors === 'undefined' || !mapDoors.length) return null;   // 門在 js/doors.js
+  const x0 = OX + c * CELL, cx = x0 + CELL / 2;
+  for (const d of mapDoors) {
+    if (!d.open || !d.cells.length) continue;
+    const mid = (d.left + d.right) / 2;
+    if (mid < x0 || mid > x0 + CELL || Math.abs(mid - cx) < 2) continue;   // 正中線不在這一格，或本來就在格子正中間
+    const rows = d.cells.map(k => +k.split(',')[1]), r0 = Math.min(...rows) - DOOR_LANE_ROWS, r1 = Math.max(...rows) + DOOR_LANE_ROWS;
+    if (r < r0 || r > r1) continue;
+    return [doorLaneX(d, mid, r0, r1), OY + r * CELL + CELL / 2];
+  }
+  return null;
+}
+// 門洞通道真正的正中線：門兩旁的紅格各自微調過，空隙不一定正好在門圖的正中間（池核 24,57 差 1 像素，身體寬的鳥頭人就會擦到牆過不去）
+// 在門圖正中線左右 12 像素內找「離兩邊的牆最遠」的那條線；算一次存在門上（換地圖、重開時門會重建，再重算）
+function doorLaneX(d, mid, r0, r1) {
+  if (d.laneX != null && d.laneKey === r0 + ',' + r1) return d.laneX;
+  const wallAt = (x, y) => nudgedWallAt(x, y, (c, r) => mapWalls.has(c + ',' + r));
+  let best = mid, bestGap = -1;
+  for (let dx = 0; dx <= 12; dx = dx > 0 ? -dx : -dx + 1) {   // 0, 1, -1, 2, -2…：一樣寬時選最靠近門圖正中線的
+    const x = mid + dx; let gap = Infinity;
+    for (let r = r0; r <= r1 && gap > bestGap; r++) for (const y of [OY + r * CELL + 4, OY + r * CELL + CELL / 2, OY + r * CELL + CELL - 4]) {
+      let L = 0, R = 0;
+      while (L < 30 && !wallAt(x - L - 1, y)) L++;
+      while (R < 30 && !wallAt(x + R + 1, y)) R++;
+      gap = Math.min(gap, L, R);
+    }
+    if (gap > bestGap) { bestGap = gap; best = x; }
+  }
+  d.laneKey = r0 + ',' + r1;
+  return (d.laneX = best);
+}
+// 怪物在這一格要站哪裡（找路、走路的目標點）：一般是格子正中間；沒對齊格子的門洞＝門洞的正中線
+const cellStandPoint = (c, r) => doorLanePoint(c, r) || center(c, r);
+// 怪物尋路、流場看的「這格是不是牆」：格子中心被（微調後的）牆擋住才算（門洞通道上的格子看門洞正中線）。二樓沒有微調，照原本
 function enemyWallCell(c, r, f = floorCtx) {
-  const [x, y] = center(c, r);
+  const [x, y] = f === 2 ? center(c, r) : cellStandPoint(c, r);
   if (f === 2) return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(2, cc, rr), solid2OffsetAt);   // 2 樓：照 2 樓的像素微調
   return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(1, cc, rr));
 }

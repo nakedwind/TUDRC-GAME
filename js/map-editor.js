@@ -1470,6 +1470,16 @@ function drawLeafPileMarks(m) {
   ctx.fillStyle = '#ffb36b'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('🍂 樹葉堆 ' + piles.length + ' 堆', OX + 6, OY + 88);
 }
+// ⚡ 地圖底圖快取：棋盤底＋所有圖層的圖（大地圖上千個物件，整張重畫要好幾十毫秒）畫好後存一份。
+// 滑鼠只是移動（懸停預覽）時直接貼這份底圖，再畫上面的記號、預覽；其他任何呼叫 draw() 的地方（改地圖、換圖層、選取…）都照常整張重畫並更新底圖。
+let editorBaseCv = null, editorBaseFor = null, editorBaseReuse = false, drawHoverFrame = 0;
+function drawHover() {   // 懸停用：同一幀只畫一次，而且沿用底圖
+  if (drawHoverFrame) return;
+  drawHoverFrame = requestAnimationFrame(() => {
+    drawHoverFrame = 0; editorBaseReuse = true;
+    try { draw(); } finally { editorBaseReuse = false; }
+  });
+}
 function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
@@ -1477,6 +1487,11 @@ function draw() {
   const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []), solid2Set = new Set(m.solid2 || []);   // 陸橋：2樓地面、樓層出入口
   const deepSet = new Set([...(m.deepWater || []), ...(m.deepWaterKeep || [])]), keepSet = new Set(m.deepWaterKeep || []);   // 🛟 深水區、🔒 永遠深水（js/swim-ring.js）
 
+  const baseOk = editorBaseReuse && editorBaseCv && editorBaseFor === curId && editorBaseCv.width === cv.width && editorBaseCv.height === cv.height;
+  if (baseOk) {   // 懸停：貼上次存的底圖就好
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(editorBaseCv, 0, 0);
+    ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0); ctx.imageSmoothingEnabled = false;
+  } else {
   ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0);   // 遊戲畫質：放大畫（座標照舊用一格 40）
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, COLS * CELL, ROWS * CELL);
@@ -1497,6 +1512,13 @@ function draw() {
     if (op < 100) { ctx.save(); ctx.globalAlpha = op / 100; }
     paint();
     if (op < 100) ctx.restore();
+  }
+  // 存一份底圖給懸停用
+  if (!editorBaseCv) editorBaseCv = document.createElement('canvas');
+  if (editorBaseCv.width !== cv.width || editorBaseCv.height !== cv.height) { editorBaseCv.width = cv.width; editorBaseCv.height = cv.height; }
+  const bctx = editorBaseCv.getContext('2d'); bctx.clearRect(0, 0, cv.width, cv.height); bctx.drawImage(cv, 0, 0);
+  editorBaseFor = curId;
+  ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0); ctx.imageSmoothingEnabled = false;
   }
   // 有 2 樓的地圖：1 樓的人自動擋住的格子（只有 2 樓的格子；js/map-levels.js 的 auto1FWalls）
   // 開著紅格時畫成紅色斜線，跟手畫的紅格分開（不用另外畫，遊戲裡就會擋 1 樓的人）
@@ -2268,7 +2290,7 @@ cv.addEventListener('pointermove', e => {
     else if (marquee) updateMarquee();
     else if (selectionDrag) dragSelectionTo(c, r);
     else { const key = c + ',' + r; if (key !== lastPaint) { lastPaint = key; paintCell(c, r, false); } }
-  } else draw();   // 懸停預覽跟著四分之一格移動
+  } else drawHover();   // 懸停預覽跟著四分之一格移動（沿用底圖，同一幀只畫一次）
 });
 cv.addEventListener('pointerup', () => {
   painting = false;

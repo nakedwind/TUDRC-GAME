@@ -267,3 +267,16 @@ const DIFFICULTY = {
   monsterDamage: 1,    // 怪物攻擊力倍率（打玩家、哨兵、建築）
 };
 const difficultyOf = key => (typeof DIFFICULTY !== 'undefined' && Number(DIFFICULTY[key]) > 0) ? Number(DIFFICULTY[key]) : 1;
+
+// ---- 屬性相剋 ----
+// 火系角色（異能力是「火焰」的，例如希奧妮）打水系怪物或 BOSS：攻擊力 ×fireVsWater（0.8＝−20%）
+// 一般攻擊、大招、範圍波及、燃燒每秒的傷害都算
+// 哪些怪物是水系：在「怪物編輯器」每隻怪物的「屬性」選（存在 data/monsters.js 的 element: 'water'）
+//   目前是魚頭君、虱目魚小子（大、小）、比基尼小丑魚（大、小）；池核 BOSS 巨大比基尼小丑魚是用小丑魚做的，也算
+const ELEMENT_RULES = {
+  fireVsWater: 0.8,
+};
+// 這隻怪物的屬性（怪物編輯器設定的；沒設＝null）
+const monsterElement = e => { const m = e && typeof ACTIVE_MONSTERS !== 'undefined' && ACTIVE_MONSTERS.find(x => x.id === e.type); return (m && m.element) || null; };
+// 這個角色打這隻怪物，攻擊力要乘多少（沒有相剋＝1）
+const elementDamageMul = (spec, e) => spec && spec.ability === '火焰' && monsterElement(e) === 'water' ? ELEMENT_RULES.fireVsWater : 1;
