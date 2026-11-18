@@ -49,6 +49,7 @@ const SFX = (() => {
     mrtArriveRed: '環境/門與機關/淡水信義線-紅線.mp3',        // 捷運列車：紅線車站（R89）的到站音樂（哪個車站用哪首在 data/mrt-train.js 的 stations）
     mrtArriveBlue: '環境/門與機關/板南線-藍線.mp3',           // 捷運列車：藍線車站（B56）的到站音樂
     dynamoStart: '設施/發電機發動.mp3',        // 發電機全部打開：發動（只播一次，js/storage-lockers.js；音量在音效編輯器調，預設開大聲 2 倍）
+    mrtPowerSteam: '設施/發動蒸氣音.mp3',      // 捷運站發電機最後一台打開：跟發動聲一起播一次蒸氣聲（js/storage-lockers.js）
     mrtPowerHum: '環境/台北捷運(白噪音) 02.m4a',   // 捷運站發電機全部打開：發動聲之後播一次捷運站的環境聲（不循環，js/mrt-train.js 的 mrtPowerOnFx）
     dynamoLoop: '設施/發電機loop.mp3',         // 開著的發電機運轉聲：靠近才聽得到，越近越大聲（一直循環，js/dynamo-sound.js）
     mrtDoorOpen: '環境/門與機關/台北捷運開門聲.mp3',          // 捷運列車：車門打開

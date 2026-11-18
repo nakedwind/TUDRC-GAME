@@ -27,7 +27,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=firsthint-20261115"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=nodecenter-20261116">
+<link rel="stylesheet" href="css/style.css?v=gctabs-20261118">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
@@ -273,7 +273,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=20261116gen1"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=20261116gen1"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=20261118steam1"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=battlebgm-20261115"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -303,9 +303,9 @@
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
   <script src="data/maps.js?v=undermap-20261118"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
-  <script src="data/base-maps.js?v=lockleft-20261110"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
+  <script src="data/base-maps.js?v=tidy-20261118"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
-  <script src="data/story-maps.js?v=cat-20261112"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
+  <script src="data/story-maps.js?v=tidy-20261118"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
   <script src="js/map-data.js?v=story-20261021"></script>          <!-- 4c. 三份地圖合在一起給遊戲用（MAPS_DEFAULT） -->
   <script src="data/doors.js?v=mrtkey-20261115"></script> <!-- 可開關的門（哪些素材是門）-->
   <script src="data/chairs.js?v=mrtseat-20261115"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
@@ -404,13 +404,13 @@
   <script src="data/costumes.js?v=dismantle-20261109"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=bday-20261108"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=dismantle-20261109"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
-  <script src="js/costumes.js?v=firsthint-20261115"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
-  <script src="js/gacha.js?v=dismantle2-20261109"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
+  <script src="js/costumes.js?v=wdall-20261118"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
+  <script src="js/gacha.js?v=gachadress-20261118"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
   <script src="data/claw-machine.js?v=clawreach-20261115"></script> <!-- 夾娃娃機設定：價錢、獎品、夾力、保夾 -->
   <script src="js/claw-machine.js?v=clawreach-20261115"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
   <script src="js/sortie-supply.js?v=sortiebal-20261106"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=merge4-20261115"></script>
-  <script src="js/storage-lockers.js?v=crateloot2-20261117"></script>
+  <script src="js/storage-lockers.js?v=20261118steam1"></script>
   <script src="data/prop-collisions.js?v=forestroot-20261115"></script>   <!-- 販賣機、營地箱子自帶的擋路格（物件編輯器設定） -->
   <script src="js/prop-collisions.js?v=forestroot-20261115"></script>
   <script src="js/escalators.js?v=edgesort-20261118"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->

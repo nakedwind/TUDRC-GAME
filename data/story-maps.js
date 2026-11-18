@@ -19464,14 +19464,6 @@ const STORY_MAPS = [
         "oy": -28
       },
       {
-        "id": "tile_scene_cabinet_low_02",
-        "c": 27,
-        "r": 4,
-        "layer": "ground2",
-        "ox": -10,
-        "oy": 46
-      },
-      {
         "id": "tile_new_decor_cabinet_low",
         "c": 30,
         "r": 4,
@@ -34530,14 +34522,6 @@ const STORY_MAPS = [
         "oy": -28
       },
       {
-        "id": "tile_scene_cabinet_low_02",
-        "c": 27,
-        "r": 18,
-        "layer": "ground2",
-        "ox": -10,
-        "oy": 46
-      },
-      {
         "id": "tile_new_decor_cabinet_low",
         "c": 30,
         "r": 18,
@@ -38426,14 +38410,6 @@ const STORY_MAPS = [
         "oy": -28
       },
       {
-        "id": "tile_scene_cabinet_low_02",
-        "c": 27,
-        "r": 4,
-        "layer": "ground2",
-        "ox": -10,
-        "oy": 46
-      },
-      {
         "id": "tile_new_decor_cabinet_low",
         "c": 30,
         "r": 4,
@@ -40929,14 +40905,6 @@ const STORY_MAPS = [
         "layer": "object",
         "ox": -20,
         "oy": -14
-      },
-      {
-        "id": "tile_scene_cabinet_low_02",
-        "c": 43,
-        "r": 31,
-        "layer": "object",
-        "ox": 26,
-        "oy": -36
       },
       {
         "id": "tile_eoc_binder_row",

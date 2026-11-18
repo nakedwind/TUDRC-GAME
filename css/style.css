@@ -2702,7 +2702,7 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 #screenShade.player-dying { background-color: rgba(0,0,0,.5); backdrop-filter: grayscale(.85); -webkit-backdrop-filter: grayscale(.85); transition: background-color 1.6s ease-in .4s, backdrop-filter 1.6s ease-in .4s; }
 
 /* 衣櫃的服裝介面（js/costumes.js）：外觀跟背包同一套 */
-#wardrobe { position: absolute; inset: 10px; z-index: 28; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); animation: shop-fade .16s ease-out both; }
+#wardrobe { position: absolute; inset: 10px; z-index: 29; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); animation: shop-fade .16s ease-out both; }
 #wardrobe.hidden { display: none; }
 #wardrobe .wd-card { width: min(1040px, 100%); height: 100%; max-height: 680px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(143,211,255,.35); border-radius: 16px; background: linear-gradient(160deg, rgba(24,33,44,.9), rgba(10,15,22,.94)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); animation: shop-in .2s cubic-bezier(.2,.9,.3,1.15) both; }
 #wardrobe .wd-head { display: flex; align-items: center; gap: 14px; padding: 12px 18px 10px; border-bottom: 1px solid rgba(143,211,255,.13); background: linear-gradient(90deg, rgba(143,211,255,.08), transparent 60%); }
@@ -2745,6 +2745,12 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 #wardrobe .wd-item.wd-off { opacity: .42; cursor: not-allowed; } #wardrobe .wd-item.wd-off:hover { border-color: rgba(255,255,255,.1); }   /* 限定場合：這一邊不能穿 */
 #wardrobe .wd-empty { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; color: #7f91a5; font-size: 15px; text-align: center; white-space: nowrap; pointer-events: none; }   /* 「還沒有這個欄位的配件」：在配件區正中間 */
 #wardrobe .wd-grid { position: relative; }
+/* 「全部」分頁：照欄位分區塊往下排（跟開發工坊一樣：金色小標題＋一排格子），整塊一起捲動 */
+#wardrobe .wd-grid.wd-all { display: block; }
+#wardrobe .wd-sec-title { margin: 10px 0 8px; color: #ffe3a1; font-size: 15px; }
+#wardrobe .wd-sec-title:first-child { margin-top: 4px; }
+#wardrobe .wd-sec { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 6px; }
+#wardrobe .wd-all .wd-empty { position: static; grid-column: span 3; transform: none; align-self: center; white-space: normal; text-align: left; }   /* 這一區還沒有配件：字放在「不戴」旁邊 */
 @media (prefers-reduced-motion: reduce) { #wardrobe, #wardrobe .wd-card { animation: none; } }
 
 /* ===== 稀有度顏色（衣櫃、扭蛋機共用；data/costumes.js 的 COSTUME_RARITIES）===== */
@@ -2813,9 +2819,9 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 /* 右：分頁＋物品格（像背包的格子） */
 #gacha .gc-side { min-height:0; display:flex; flex-direction:column; }
 #gacha .gc-tabs { display:flex; flex-wrap:wrap; gap:6px; padding:10px 18px 4px; }
-#gacha .gc-tabs button { display:flex; align-items:center; gap:6px; padding:6px 15px; border:1px solid rgba(255,255,255,.08); border-radius:999px; background:transparent; color:#8e9aa7; cursor:pointer; font:700 15px "Microsoft JhengHei",sans-serif; }
+#gacha .gc-tabs button { display:flex; align-items:center; gap:4px; padding:5px 9px; border:1px solid rgba(255,255,255,.08); border-radius:999px; background:transparent; color:#8e9aa7; cursor:pointer; font:700 14px "Microsoft JhengHei",sans-serif; white-space:nowrap; transition:background .12s, color .12s, border-color .12s; }   /* 樣式跟背包的分頁一樣（.backpack-tabs） */
 #gacha .gc-tabs button:hover { color:#dfe8ef; }
-#gacha .gc-tabs button.on { border-color:rgba(143,211,255,.45); background:rgba(143,211,255,.12); color:#d8ecff; }
+#gacha .gc-tabs button.on { border-color:#ffd479; background:linear-gradient(180deg,#f7d886,#e6b04a); color:#3b2304; box-shadow:0 0 10px rgba(255,212,121,.35); }
 #gacha .gc-msg { min-height:20px; margin:2px 18px 4px; color:#ffd479; font-size:14px; }
 #gacha .gc-list { flex:1; min-height:0; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); align-content:start; gap:10px; padding:6px 16px 16px 18px; scrollbar-color:#3d5266 transparent; }
 #gacha .gc-wait { grid-column:1 / -1; margin:70px 0 0; color:#8c9aa8; font-size:17px; text-align:center; line-height:1.8; }
@@ -2840,6 +2846,12 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 :is(#gacha, #wardrobe) .gc-locked b { color:#6f7d8a; }
 :is(#gacha, #wardrobe) .gc-dismantle { margin-top:4px; padding:3px 9px; border:1px solid rgba(214,155,255,.4); border-radius:99px; background:transparent; color:#e2c8ff; cursor:pointer; font:700 13px "Microsoft JhengHei",sans-serif; }
 :is(#gacha, #wardrobe) .gc-dismantle:hover { border-color:#d69bff; background:rgba(214,155,255,.1); }
+/* 扭蛋機的換裝：標題列「👗 換裝」、轉到的卡片下面「換上」（打開衣櫃，js/gacha.js 的 gachaDress） */
+#gacha .gc-dress { flex:none; padding:5px 14px; border:1px solid rgba(143,211,255,.45); border-radius:999px; background:rgba(143,211,255,.12); color:#d8ecff; cursor:pointer; font:700 15px "Microsoft JhengHei",sans-serif; }
+#gacha .gc-dress:hover:not(:disabled) { border-color:#8fd3ff; background:rgba(143,211,255,.22); }
+#gacha .gc-dress:disabled { opacity:.45; cursor:default; }
+#gacha .gc-wear { position:relative; z-index:1; margin-top:4px; padding:3px 12px; border:1px solid rgba(143,211,255,.45); border-radius:99px; background:transparent; color:#bfe4ff; cursor:pointer; font:700 13px "Microsoft JhengHei",sans-serif; }
+#gacha .gc-wear:hover { border-color:#8fd3ff; background:rgba(143,211,255,.14); }
 :is(#gacha, #wardrobe) .gc-book-bar { grid-column:1 / -1; display:flex; align-items:center; gap:10px; color:#8c9aa8; font-size:14px; }
 :is(#gacha, #wardrobe) .gc-book-bar button { padding:3px 12px; border:1px solid rgba(214,155,255,.45); border-radius:999px; background:transparent; color:#e2c8ff; cursor:pointer; font:700 14px "Microsoft JhengHei",sans-serif; }
 :is(#gacha, #wardrobe) .gc-book-bar button:hover { background:rgba(214,155,255,.1); }
