@@ -1656,7 +1656,10 @@ const STORY_SCENES = {
     "portraits": { "塔納": "taana_A", "雷德": "red_A", "柯林": "colyn_A", "諾亞": "noah_A", "赫真": "kakuma_C", "艾德林": "eldrin_A" },
     "actors": [
       { "id": "taana", "sprite": "taana_A", "name": "塔納", "at": [28.8, 21.9], "dir": "left", "speed": 120 },
-      { "id": "red", "sprite": "red_A", "name": "雷德", "at": [26, 15], "dir": "front", "speed": 80, "hidden": true }
+      { "id": "red", "sprite": "red_A", "name": "雷德", "at": [26, 15], "dir": "front", "speed": 80, "hidden": true },
+      { "id": "sandbagA", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.468, "name": "沙包A", "at": [14.4, 13.4], "dir": "front" },
+      { "id": "sandbagB", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.468, "name": "沙包B", "at": [15, 15.6], "dir": "front" },
+      { "id": "sandbagC", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.468, "name": "沙包C", "at": [14.5, 17.4], "dir": "front" }
     ],
     "beats": [
       { "speaker": "", "text": "噠、噠、噠、噠——", "wait": 0.4, "camera": "走廊", "move": { "taana": [14.3, 21] }, "via": { "taana": [[17.5, 21.8]] } },
@@ -1709,9 +1712,10 @@ const STORY_SCENES = {
         "text": "雷德撲了過來——塔納往旁邊一閃，繞著訓練場跑了半圈，從他身邊鑽了出去。",
         "wait": 0.2,
         "speed": { "red": 150, "taana": 160 },
-        "move": { "red": [8.7, 10.6], "taana": [12, 20.2] },
-        "via": { "taana": [[5.8, 11.9], [7.4, 14.6], [12, 15.3]] },
-        "emote": { "taana": "" }
+        "move": { "red": [8, 11.3], "taana": [12, 20.2] },
+        "via": { "taana": [[5.8, 11.9], [7.4, 14.6], [12, 15.3]], "red": [[8.9, 10.6]] },
+        "emote": { "taana": "" },
+        "face": { "red": "taana" }
       },
       { "speaker": "雷德", "text": "哇啊！等、等一下！", "wait": 0.6, "shout": { "red": true }, "emote": { "red": "sweat" } },
       {
@@ -1725,7 +1729,7 @@ const STORY_SCENES = {
         "via": { "red": [[9.7, 12.8], [12, 15.6]], "taana": [[18, 21.8], [25.1, 21.2]] }
       },
       { "speaker": "雷德", "text": "這裡雷德！目標從 B1 突破了！往樓梯跑，往上！", "wait": 0.6, "radio": true, "face": { "red": "right" }, "emote": { "red": "" } },
-      { "speaker": "諾亞", "text": "……收到。B1 只有一個出口，你也能讓他跑掉。", "wait": 0.3, "radio": true },
+      { "speaker": "諾亞", "text": "……收到。B1 只有一個出口，你也能讓他跑掉。\n你這個哨兵之恥！", "wait": 0.3, "radio": true },
       { "speaker": "雷德", "text": "呃……他、他今天特別快嘛！", "wait": 0.3, "emote": { "red": "sweat" } },
       { "speaker": "赫真", "text": "收到！我在二樓，交給我吧！", "wait": 0.3, "radio": true },
       { "speaker": "雷德", "text": "……平常連走路都嫌累的人，怎麼跑得那麼快啊。", "wait": 0.4, "emote": { "red": "" } }
@@ -1744,9 +1748,9 @@ const STORY_SCENES = {
     "cameras": { "樓梯口": [9, 10, 2.6], "走廊": [12, 11, 2.5], "辦公區": [19, 15, 2.1], "另一頭": [46, 11, 2.3] },
     "portraits": { "塔納": "taana_A", "雷德": "red_A", "柯林": "colyn_A", "諾亞": "noah_A", "赫真": "kakuma_C", "艾德林": "eldrin_A" },
     "actors": [
-      { "id": "taana", "sprite": "taana_A", "name": "塔納", "at": [7.5, 5.5], "dir": "front", "speed": 120 },
+      { "id": "taana", "sprite": "taana_A", "name": "塔納", "at": [5.7, 7.5], "dir": "front", "speed": 120 },
       { "id": "kakuma", "sprite": "kakuma_C", "name": "赫真", "at": [22, 12], "dir": "left", "speed": 90, "hidden": true },
-      { "id": "noah", "sprite": "noah_A", "name": "諾亞", "at": [7.5, 5.5], "dir": "front", "speed": 50, "hidden": true }
+      { "id": "noah", "sprite": "noah_A", "name": "諾亞", "at": [7.4, 5.8], "dir": "front", "speed": 50, "hidden": true }
     ],
     "beats": [
       {
@@ -1755,7 +1759,7 @@ const STORY_SCENES = {
         "wait": 0.6,
         "camera": "樓梯口",
         "move": { "taana": [8.2, 11.7] },
-        "via": { "taana": [[6.6, 8.9], [6.4, 10.5]] }
+        "via": { "taana": [[6.4, 8.8], [6.4, 10.5]] }
       },
       { "speaker": "塔納", "text": "……呼……總不會在這麼多人的地方正大光明動手吧？", "wait": 0.3, "face": { "taana": "right" }, "emote": { "taana": "sweat" } },
       {
@@ -1769,8 +1773,8 @@ const STORY_SCENES = {
         "emote": { "taana": "" }
       },
       { "speaker": "塔納", "text": "……早。", "wait": 0.6, "emote": { "taana": "drop" } },
-      { "speaker": "赫真", "text": "早安！前輩，可以請你跟我走一趟嗎？", "wait": 0.3, "emote": { "kakuma": "sparkle", "taana": "" } },
-      { "speaker": "塔納", "text": "走去哪？", "wait": 0.3 },
+      { "speaker": "赫真", "text": "早安！前輩，我有事情想要找你一下～", "wait": 0.3, "emote": { "kakuma": "sparkle", "taana": "" } },
+      { "speaker": "塔納", "text": "要幹嘛？", "wait": 0.3 },
       { "speaker": "赫真", "text": "這個……是秘密！", "wait": 0.3, "hop": { "kakuma": true }, "emote": { "kakuma": "flower" } },
       { "speaker": "塔納", "text": "……那你永遠保密吧。", "wait": 0.3, "face": { "taana": "left" }, "emote": { "kakuma": "" } },
       {
@@ -1796,7 +1800,7 @@ const STORY_SCENES = {
         "follow": "taana",
         "speed": { "taana": 150 },
         "move": { "taana": [37.9, 13.2] },
-        "via": { "taana": [[16, 13], [17, 20.7], [17.9, 13], [26.9, 13.5], [28.2, 21.2], [37.5, 21.1]] },
+        "via": { "taana": [[17.8, 13.1], [23.7, 13], [27, 13.9], [27.5, 21.1], [37.5, 21.1]] },
         "straight": { "taana": true },
         "emote": { "taana": "" }
       },
@@ -1805,8 +1809,8 @@ const STORY_SCENES = {
         "text": "啊！鑽進去了！前輩等等我！",
         "wait": 0.3,
         "shout": { "kakuma": true },
-        "move": { "kakuma": [16.9, 17.8] },
-        "via": { "kakuma": [[13, 14.5]] }
+        "move": { "kakuma": [26.9, 18.4] },
+        "via": { "kakuma": [[14.1, 13], [26, 13.3]] }
       },
       {
         "speaker": "",
@@ -1849,7 +1853,7 @@ const STORY_SCENES = {
     "actors": [
       { "id": "taana", "sprite": "taana_A", "name": "塔納", "at": [20.5, 2.5], "dir": "front", "speed": 110 },
       { "id": "colyn", "sprite": "colyn_A", "name": "柯林", "at": [10.5, 8.6], "dir": "right", "speed": 160, "hidden": true },
-      { "id": "eldrin", "sprite": "eldrin_A", "name": "艾德林", "at": [23.9, 6.4], "dir": "front", "speed": 30, "hidden": true },
+      { "id": "eldrin", "sprite": "eldrin_A", "name": "艾德林", "at": [24, 7.3], "dir": "front", "speed": 30, "hidden": true },
       { "id": "red", "sprite": "red_A", "name": "雷德", "at": [20.5, 2.5], "dir": "front", "speed": 90, "hidden": true },
       { "id": "kakuma", "sprite": "kakuma_C", "name": "赫真", "at": [20.5, 2.5], "dir": "front", "speed": 90, "hidden": true },
       { "id": "noah", "sprite": "noah_A", "name": "諾亞", "at": [20.5, 2.5], "dir": "front", "speed": 70, "hidden": true }
@@ -1869,14 +1873,14 @@ const STORY_SCENES = {
         "emote": { "taana": "shade+drop" }
       },
       { "speaker": "塔納", "text": "……別碰我，用說的。", "wait": 0.4, "emote": { "taana": "drop" } },
-      { "speaker": "柯林", "text": "好哇，跟我過來好好聊聊吧！", "wait": 0.3, "hop": { "colyn": true }, "emote": { "colyn": "sparkle" } },
+      { "speaker": "柯林", "text": "好哇，那過來我這裡！", "wait": 0.3, "hop": { "colyn": true }, "emote": { "colyn": "sparkle" } },
       {
         "speaker": "塔納",
-        "text": "……電梯。",
+        "text": "……不...等等，電梯！",
         "wait": 0.3,
         "camera": "電梯",
         "speed": { "taana": 140 },
-        "move": { "taana": [23.9, 9.4], "colyn": [21.4, 9.2] },
+        "move": { "taana": [23.9, 9.4], "colyn": [21.4, 9] },
         "emote": { "taana": "", "colyn": "" }
       },
       { "speaker": "", "text": "叮——", "wait": 0.6, "elevator": "open", "face": { "taana": "back" } },
@@ -1885,26 +1889,26 @@ const STORY_SCENES = {
         "text": "早安，塔納。",
         "wait": 0.4,
         "show": { "eldrin": true },
-        "move": { "eldrin": [23.9, 8.4] },
+        "move": { "eldrin": [24, 8.1] },
         "emote": { "eldrin": "flower" }
       },
       { "speaker": "塔納", "text": "…………", "wait": 0.3, "emote": { "taana": "shade" } },
       { "speaker": "艾德林", "text": "一大早就在大樓裡跑上跑下，很累吧？", "wait": 0.3, "emote": { "eldrin": "" } },
       { "speaker": "塔納", "text": "……你也知道？", "wait": 0.3 },
       { "speaker": "艾德林", "text": "跟我們來一趟吧，會讓你好好休息的！", "wait": 0.3, "emote": { "eldrin": "flower" } },
+      { "speaker": "塔納", "text": "我……罪不至此……", "wait": 0.3, "gloom": true },
       {
         "speaker": "雷德",
         "text": "呼……呼……追、追上了……",
         "wait": 0.4,
         "camera": "大廳",
         "show": { "red": true, "kakuma": true, "noah": true },
-        "move": { "red": [20.2, 8.4], "kakuma": [19.1, 9.4], "noah": [18, 8.6] },
-        "emote": { "red": "sweat", "eldrin": "" },
-        "face": { "taana": "left" }
+        "move": { "red": [20.2, 8.4], "kakuma": [19.1, 9.4], "noah": [17.9, 8.5] },
+        "emote": { "eldrin": "" },
+        "face": { "taana": "left", "noah": "taana" }
       },
-      { "speaker": "赫真", "text": "前輩！你已經無路可逃了！", "wait": 0.6, "hop": { "kakuma": true } },
-      { "speaker": "諾亞", "text": "哈哈哈你被包圍了，認命吧。", "wait": 0.3, "emote": { "red": "" } },
-      { "speaker": "塔納", "text": "我……罪不至此……", "wait": 0.3, "gloom": true },
+      { "speaker": "赫真", "text": "前輩！你已經無路可逃了！", "wait": 0.6, "hop": { "kakuma": true }, "face": { "kakuma": "taana" } },
+      { "speaker": "諾亞", "text": "哈哈哈你被包圍了，認命吧。", "wait": 0.3, "emote": { "noah": "" }, "face": { "noah": "taana" } },
       {
         "speaker": "柯林",
         "text": "放心！你不會後悔的！過來吧！",
@@ -2023,7 +2027,16 @@ const STORY_SCENES = {
         "eyes": { "taana": "closed" },
         "blow": { "colyn": true, "eldrin": true, "avaren": true, "kakuma": true }
       },
-      { "speaker": "", "text": "", "wait": 0.8, "screen": "black", "screenFade": 1.8, "banner": "2026/11/18\nZukaa生日快樂！", "bannerDelay": 2.1 }
+      {
+        "speaker": "",
+        "text": "",
+        "wait": 0.8,
+        "screen": "black",
+        "screenFade": 1.8,
+        "banner": "2026/11/18\nZukaa生日快樂！",
+        "bannerDelay": 2.1,
+        "bannerStyle": "rainbow"
+      }
     ],
     "lights": [[13.9, 18.4, 6.5, "#fe9a9a", 0.55, "overlay"], [14.1, 21.3, 6.5, "#ffc7c7", 0.55, "overlay"]],
     "darkness": true,
