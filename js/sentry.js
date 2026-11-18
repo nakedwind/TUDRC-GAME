@@ -859,6 +859,8 @@ function updateSentryMain(t, dt) {
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
   if (t.mothConfuseT > 0) { t.target = null; return; }   // 人面蝶的混亂鱗粉：走路由 mothConfusedSentry 處理（js/human-face-butterfly.js）
+  // 地上有溫特丟的游泳圈：離它最近、還沒有游泳圈的隊員走去撿（js/swim-ring.js）。游泳圈在溫特腳邊，站在暗處的隊員也照樣走過去
+  if (typeof swimRingGroundStep === 'function' && swimRingGroundStep(t, dt)) return;
   if (escapeDarkness(t, dt)) return;
   const ownSpec = TYPES[t.type];
   // 召回營地的哨兵抵達後，優先攔截正在破壞營地的怪物。

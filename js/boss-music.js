@@ -16,6 +16,9 @@ const BOSS_MUSIC = {
   quiet: .2,            // 「中BOSS」：沒在追打、但 BOSS 血條還在畫面上時，音量降成原本的幾倍（不會完全消失）
   startDelay: 2,        // 每場戰鬥第一次被大隊長盯上：等幾秒才開始播「中BOSS」（之後再被盯上就馬上播；核心甦醒的音樂一律馬上播）
   swell: { low: .6, high: 1.0, period: 7 },   // 核心音樂忽大忽小：最小／最大是原本的幾倍、一輪幾秒
+  // 池核的巨大比基尼小丑魚（js/pool-boss.js）：醒了就一直算「在追打」，所以改看距離——
+  // 溫特離牠 farCells 格以外就淡出（連小聲播著也不要）；走回 nearCells 格以內再淡入（中間留一點，不會在邊界忽大忽小）
+  poolFar: { farCells: 30, nearCells: 28 },
 };
 const BossMusic = (() => {
   const B = BOSS_MUSIC, tracks = {};
@@ -50,21 +53,30 @@ const BossMusic = (() => {
     if (typeof bananaEmperorHunting === 'function' && bananaEmperorHunting()) return true;
     if (typeof gourdKingHunting === 'function' && gourdKingHunting()) return true;   // 葫蘆猴王（js/gourd-king.js）   // 金蕉大王（js/banana-emperor.js）   // 絲瓜女王的 BOSS 戰（js/loofah-queen.js）
     if (typeof pearlBossHunting === 'function' && pearlBossHunting()) return true;
-    if (typeof poolBossHunting === 'function' && poolBossHunting()) return true;   // 池核的巨大比基尼小丑魚（js/pool-boss.js）   // 珍珠大童的 BOSS 戰（js/pearl-elder.js）
+    if (typeof poolBossHunting === 'function' && poolBossHunting() && !poolBossFar) return true;   // 池核的巨大比基尼小丑魚（js/pool-boss.js）；離太遠不算   // 珍珠大童的 BOSS 戰（js/pearl-elder.js）
     if (typeof capKingHunting === 'function' && capKingHunting()) return true;   // 大夯吉寶盯上溫特（js/elite-cap-king.js）
     return (G.enemies || []).some(e => e.elite && e.eliteAwake && e.hp > 0 && !e.dead && e.eb
       && e.eb.state !== 'return' && (e.eb.state !== 'guard' || (typeof eliteBirdTarget === 'function' && eliteBirdTarget(e))));
   }
   const coreAwake = () => (G.cores || []).some(c => c.awake && !c.dead);
+  // 溫特離池核 BOSS 夠不夠遠（tick 每次更新；超過 farCells 才變遠、回到 nearCells 以內才變近）
+  let poolBossFar = false;
+  function updatePoolBossFar() {
+    const pb = typeof poolBossState === 'function' && poolBossState(), p = G && G.player;
+    if (!pb || !pb.e || !p) { poolBossFar = false; return; }
+    const d = Math.hypot(pb.e.x - p.x, pb.e.y - p.y) / CELL;
+    poolBossFar = poolBossFar ? d > B.poolFar.nearCells : d > B.poolFar.farCells;
+  }
   // 畫面上方還有 BOSS 血條（鳥頭大隊長、大夯吉寶、珍珠大童；跟 js/core-frenzy.js 的 drawCoreBossUI 同一份資料）
   const bossBarShown = () => [typeof eliteBossBars === 'function' && eliteBossBars(), typeof capKingBossBars === 'function' && capKingBossBars(),
-    typeof pearlBossBars === 'function' && pearlBossBars(), typeof poolBossBars === 'function' && poolBossBars(), typeof loofahQueenBars === 'function' && loofahQueenBars(), typeof bananaEmperorBars === 'function' && bananaEmperorBars(), typeof gourdKingBars === 'function' && gourdKingBars()].some(bars => bars && bars.length)
+    typeof pearlBossBars === 'function' && pearlBossBars(), !poolBossFar && typeof poolBossBars === 'function' && poolBossBars(), typeof loofahQueenBars === 'function' && loofahQueenBars(), typeof bananaEmperorBars === 'function' && bananaEmperorBars(), typeof gourdKingBars === 'function' && gourdKingBars()].some(bars => bars && bars.length)
     || (typeof capKingMusicHold === 'function' && capKingMusicHold());   // 順順宮主：第一隻大夯吉寶出現後，直到全部（含帽子裡的）打倒都不停（js/elite-cap-king.js）
 
   function tick() {
     const now = performance.now(), dt = Math.min(.5, (now - last) / 1000); last = now;
     if (!unlocked) return;
     const battle = inBattle();
+    if (battle) updatePoolBossFar();
     if (battle && eliteHunting()) eliteHateT = B.loseDelay; else eliteHateT = Math.max(0, eliteHateT - dt);
     if (!battle || G !== battleG) { battleG = battle ? G : null; eliteHeard = false; eliteWaitT = 0; }   // 離開戰鬥、新的一場：重算「第一次」
     const claw = typeof clawOpen !== 'undefined' && clawOpen;   // 夾娃娃機開著：放機台自己的音樂（js/claw-machine.js）

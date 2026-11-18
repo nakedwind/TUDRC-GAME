@@ -35,6 +35,9 @@ const POOL_TIDE = {
   valveBusyText: '抽水閥已經打開了。',   // 倒數中、正在退水時再按
   notice: { secs: 3, rise: '水位即將上升……', drain: '水位即將下降……', y: .2 },   // 漲退水前幾秒提醒、文字、在畫面高度的哪裡（.2＝從上面算 20%）
   marks: { shallowGone: '抽水後消失', shallowDry: '抽水後出現', deep: '深水時顯現', deepShallow: '淺水時顯現' },
+  // 深水區壓暗：淺水、深水共用同一套水的素材，乍看分不出來 → 在編輯器畫的 🛟 深水區（含 🔒 永遠深水）上面疊一層深藍
+  // color＝疊上去的顏色、alpha＝多深（0～1，越大越暗）；抽成淺水時一般深水區的這層會跟著水位淡掉，永遠深水一直都在
+  deepTint: { color: '#001a33', alpha: .35 },
 };
 
 // ---- 狀態（每一局重來；存在 G 裡，換地圖、重開都會重設）----
@@ -69,6 +72,29 @@ function poolLayerAlpha(lid) {
   const s = poolTideActive() ? poolTide() : null;
   const deep = s ? s.deep : 1, shallow = s ? s.shallow : 1;
   return mark === 'shallowGone' ? shallow : mark === 'shallowDry' ? 1 - shallow : mark === 'deep' ? deep : 1 - deep;
+}
+
+// ---- 深水區壓暗（js/render.js 畫完地面、角色之前呼叫）----
+// 照編輯器的 🛟 深水區格子畫，有 🎯 碰撞微調過的格子照移過去的位置畫（跟判定一樣）
+// 所有格子先接成同一條路徑再一次塗：微調後重疊的地方不會變得更暗
+function drawPoolDeepTint(ctx) {
+  if (typeof MAP === 'undefined' || !MAP) return;
+  const T = POOL_TIDE.deepTint, keep = MAP.deepWaterKeep || [], list = MAP.deepWater || [];
+  if (!T || !(T.alpha > 0) || (!list.length && !keep.length)) return;
+  const s = poolTideActive() ? poolTide() : null, deep = s ? s.deep : 1;   // 抽成淺水：一般深水區跟著水位淡掉
+  const offs = MAP.deepWaterOffsets || {};
+  const fill = (keys, a) => {
+    if (!(a > 0) || !keys.length) return;
+    ctx.beginPath();
+    for (const k of keys) {
+      const [c, r] = k.split(',').map(Number), o = offs[k] || [0, 0];
+      ctx.rect(OX + c * CELL + o[0], OY + r * CELL + o[1], CELL, CELL);
+    }
+    ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = T.color; ctx.fill('nonzero'); ctx.restore();
+  };
+  const keepSet = new Set(keep);
+  fill(list.filter(k => !keepSet.has(k)), T.alpha * deep);
+  fill(keep, T.alpha);
 }
 
 // ---- 抽水機（js/storage-lockers.js 的發電機開關呼叫）----

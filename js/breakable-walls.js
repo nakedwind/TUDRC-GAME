@@ -118,6 +118,14 @@ let breakableWallSolid = new Set();   // 牆本身一直擋路的格子（同樣
 
 // BOSS 牆（js/gourd-king.js 的 GOURD_KING.maps 指定的那面牆）用 BOSS 自己的規則：換圖順序、打通的格子不一樣
 const breakableWallSpec = s => (s && BREAKABLE_WALLS[(typeof gourdKingWallSpec === 'function' && gourdKingWallSpec(s)) || s.id]) || null;
+// 這張地圖上所有可炸開的牆（換地圖、物件數量變了才重找）：每一幀畫提示、補亮牆面都要用，不用每次把整張地圖的物件掃一遍
+let breakableStampsCache = null, breakableStampsFor = null, breakableStampsOf = null, breakableStampsLen = -1;
+function breakableWallStamps() {
+  const list = (MAP && MAP.stamps) || [];
+  if (breakableStampsCache && breakableStampsFor === MAP && breakableStampsOf === list && breakableStampsLen === list.length) return breakableStampsCache;
+  breakableStampsFor = MAP; breakableStampsOf = list; breakableStampsLen = list.length;
+  return (breakableStampsCache = list.filter(s => breakableWallSpec(s)));
+}
 function breakableWallStage(s) { return (G && G.wallStage && G.wallStage.get(s)) || 0; }
 // 牆上要通過的那幾格（地圖格座標）
 function breakableWallOpenCells(s) {
@@ -378,7 +386,7 @@ function breakableWallSniffable(s) { const spec = breakableWallSpec(s); return !
 function drawBreakableWallHints(ctx) {
   if (!G || !G.running || MAP_SAFE || !MAP || !(G.wallStage instanceof Map) || typeof dogFoundWall !== 'function') return;
   const now = performance.now() / 1000;
-  for (const s of MAP.stamps || []) {
+  for (const s of breakableWallStamps()) {
     if (!breakableWallSpec(s) || breakableWallOpened(s) || !breakableWallSniffable(s) || !dogFoundWall(s)) continue;
     const [hc, hr] = breakableWallOpenCells(s)[0], [hx, hy] = center(hc, hr);
     if (typeof isVisible === 'function' && !isVisible(hx, hy)) continue;
@@ -412,7 +420,7 @@ function wallRubble(x, y, n) {
 // 這裡讓牆面上半部的亮度跟著同一欄最下排的牆一起（燈照得到牆腳，整面牆就是亮的）；js/lighting.js 算完光之後呼叫
 function lightBreakableWallFaces(fields) {
   if (!MAP || !MAP.stamps) return;
-  for (const s of MAP.stamps) {
+  for (const s of breakableWallStamps()) {
     { const spec = breakableWallSpec(s); if (!spec || spec.prop) continue; }   // 森林樹根在戶外，不用補亮
     const t = mapTileById(s.id); if (!t) continue;
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL), w = mapStampW(s, t), h = mapStampH(s, t);
