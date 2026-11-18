@@ -267,7 +267,7 @@ const dialogueOptions = dialogueBox.querySelector('.dialogue-options');
 function updateDialogueOptions() {
   const shown = dialogueOptions ? [...dialogueOptions.children].filter(b => !b.classList.contains('hidden')).length : 0;
   dialogueBox.classList.toggle('has-options', shown > 0);
-  if (dialogueOptions) dialogueOptions.classList.toggle('two-col', shown > 4);   // 選項超過 4 個（例如諾亞）：分成左右兩排（css/style.css 的 .dialogue-options.two-col）
+  if (dialogueOptions) dialogueOptions.classList.toggle('two-col', shown >= 4);   // 選項有 4 個以上（例如隊友的送禮／穿搭／資訊／吃飯、諾亞）：分成左右兩排，4 個就是上下各兩顆（css/style.css 的 .dialogue-options.two-col）
 }
 if (dialogueOptions) new MutationObserver(updateDialogueOptions).observe(dialogueOptions, { subtree: true, attributes: true, attributeFilter: ['class'] });
 let dialogueTypeTimer = null;
