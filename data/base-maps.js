@@ -14119,9 +14119,9 @@ const BASE_MAPS = [
         "c": 4,
         "r": 17,
         "layer": "object4",
-        "ox": 0,
-        "oy": 4,
-        "sortDepth": 2
+        "oy": 10,
+        "sortDepth": 2,
+        "ox": 0
       },
       {
         "id": "tile_new_decor_coffee_machine",
@@ -14232,7 +14232,7 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "object4",
         "ox": 38,
-        "oy": 4
+        "oy": 10
       },
       {
         "id": "tile_interactive_flare_ammo",
@@ -14431,7 +14431,8 @@ const BASE_MAPS = [
       "2,22",
       "3,22",
       "30,22",
-      "29,22"
+      "29,22",
+      "7,19"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14470,6 +14471,10 @@ const BASE_MAPS = [
       "30,22": [
         0,
         23
+      ],
+      "7,19": [
+        -17,
+        1
       ]
     },
     "safe": true,
