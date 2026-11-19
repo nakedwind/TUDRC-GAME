@@ -2025,6 +2025,9 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* 說明文字太長時：不讓整個說明欄捲動（捲軸會貼在「使用」按鈕右邊），改成說明文字那一格自己縮進剩下的空間、需要時才在文字旁邊出現細捲軸 */
 /* 一般物品：說明文字佔第 3、4 排（第 4 排是背包編輯器設的「剩下的空間」），文字再長也只在這一格裡捲動；裝備、子彈的說明另外排，不套這行 */
 .backpack-detail:not(.gear-detail) > .bag-desc { grid-row:3 / 5; align-self:stretch; }
+/* 保險：整個說明欄就算還是多出一點點，也不顯示捲軸（捲軸會貼在「使用」按鈕右邊，看起來像壞掉）；滑鼠滾輪照樣捲得動 */
+.backpack-body > .backpack-detail { scrollbar-width:none; }
+.backpack-body > .backpack-detail::-webkit-scrollbar { display:none; width:0; height:0; }
 .backpack-detail > .bag-desc { min-height:0; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#536b7c transparent; }
 .backpack-detail > .bag-desc::-webkit-scrollbar { width:6px; }
 .backpack-detail > .bag-desc::-webkit-scrollbar-thumb { background:#536b7c; border-radius:6px; }
