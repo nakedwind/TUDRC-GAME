@@ -125,7 +125,9 @@ const GEAR_V1_SQUAD_MAP = { 'sg-vest': 'vest_light', 'sg-gloves': 'gloves', 'sg-
 // 戰鬥區域掉落的機率（裝備：還沒拿到的時候；拿到之後就不會再掉）
 const EQUIP_DROPS = { detector: .5 };
 // 後室道具掉落的機率（data/supplies.js 的道具，可以重複拿）：平安符＝順順宮帽、保溫杯＝置物櫃、腎上腺素＝置物櫃（打怪不會掉）、異質急救包＝置物櫃
-const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid': .15, toolbox: .25 };   // toolbox：置物櫃、沒指定內容物的彈藥箱都會抽
+const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid': .15, toolbox: .25, 'almond-water': .35, medkit: .3, firstaid: .2, 'eye-drops': .1 };   // charm＝順順宮帽掉的；其他：置物櫃、沒指定內容物的彈藥箱都會抽（一次只開出一樣：先抽子彈，沒中才從這些打亂抽一樣，js/storage-lockers.js）
+// 置物箱（沒指定內容物的）也有機會開到烤熟的食物：chance＝在「沒抽到子彈之後」被抽中的機率（跟上面 ITEM_DROPS 一起打亂抽，一次只給一樣），抽中就從 items 隨機挑一種；彈藥箱不會開到（js/storage-lockers.js）
+const LOCKER_FOOD = { chance: .3, items: ['grilled-banana', 'grilled-milkfish-belly', 'grilled-fish-slice', 'grilled-loofah', 'roasted-egg'] };
 // 工具箱（道具）：走到受損的建築旁邊按 R（或快捷欄、背包使用）。radius＝溫特身邊幾格內的建築才修得到；
 // time＝要站著修幾秒；repair＝範圍內每個受損的建築（營地、溫特蓋的）各修好最大 HP 的幾成；修一次用掉一個
 const TOOLBOX = { repair: .3, radius: 1.5, time: 1.5 };

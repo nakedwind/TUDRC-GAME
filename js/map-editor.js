@@ -4174,7 +4174,7 @@ function loadRules() {
   const deepSpeedField = document.getElementById('f_deepWaterSpeed');
   if (deepSpeedField) deepSpeedField.value = m.deepWaterSpeed ?? '';
   document.getElementById('f_coreCount').value = m.coreCount;
-  document.getElementById('f_difficulty').value = Math.max(1, Math.min(5, Math.floor(Number(m.difficulty) || 1)));   // 核心難度：沒設定過＝1
+  if (document.getElementById('f_difficulty')) document.getElementById('f_difficulty').value = Math.max(1, Math.min(5, Math.floor(Number(m.difficulty) || 1)));   // 核心難度：沒設定過＝1
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
   renderMonsterMix();
 }
@@ -4413,7 +4413,8 @@ document.getElementById('f_coreCount').addEventListener('change', e => {
   saveMaps(); draw();
 });
 // 核心難度（js/anomalous-core.js）：只有核心、菁英王的血量和獎勵乘上這個數字，小怪不變；1＝不寫進地圖資料（跟舊地圖一樣）
-document.getElementById('f_difficulty').addEventListener('change', e => {
+const difficultyField = document.getElementById('f_difficulty');   // 劇情地圖編輯器沒有這一格，沒有就跳過，免得整個編輯器停掉
+if (difficultyField) difficultyField.addEventListener('change', e => {
   const level = Math.max(1, Math.min(5, Math.floor(Number(e.target.value) || 1)));
   pushUndo(); if (level > 1) curMap().difficulty = level; else delete curMap().difficulty; e.target.value = level;
   saveMaps(); draw();

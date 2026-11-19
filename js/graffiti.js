@@ -393,9 +393,10 @@ const graffitiErasing = () => !!graffitiErase;
 
 // ---- 置物櫃：有機會找到塗鴉筆（js/storage-lockers.js 呼叫）----
 function tryGraffitiPenFind(x, y) {
-  if (Math.random() >= GRAFFITI.lockerChance) return;
+  if (Math.random() >= GRAFFITI.lockerChance) return false;
   const id = GRAFFITI_PEN;
-  if (!supplyGain(id, 1)) return;   // 持有上限
+  if (!supplyGain(id, 1)) return false;   // 持有上限
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   if (typeof updateHUD === 'function') updateHUD();
+  return true;   // 真的拿到（置物櫃一次只給一樣）
 }

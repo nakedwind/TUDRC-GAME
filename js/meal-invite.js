@@ -1,5 +1,5 @@
 // ============================================================
-//  邀請隊員、基地的 NPC 一起去餐廳吃飯（基地裡靠近對方按空白鍵打開對話框 → 右邊選項「🍽️ 一起去吃飯」）
+//  邀請隊員、基地的 NPC 一起去餐廳吃飯（基地裡靠近對方按空白鍵打開對話框 → 右邊選項「🍽️ 邀請吃飯」）
 //  ・同時最多邀 MEAL_INVITE.max 人（隊員、NPC 合起來算）；再點一次＝取消邀請
 //  ・跟著溫特：不排隊，一直在溫特周圍 radiusCells 格以內自由走來走去；溫特走開、離超過 radiusCells 格，就挑溫特附近一個點，用自己平常的速度慢慢追過去（不會加速）
 //    換樓層、換地圖也跟著，到了出現在溫特旁邊
@@ -74,7 +74,7 @@ function onDialogueOpenedMealInvite(a) {
   const left = mealGuest(a) ? 0 : inviteCdLeft(inviteId(a));
   if (mealGuest(a)) b.textContent = '🍽️ 不吃了（取消邀請）';
   else if (left) { b.textContent = '🍽️ 剛吃飽（' + Math.ceil(left / 60000) + ' 分鐘後）'; b.style.opacity = '.55'; }   // 冷卻中：按了只會跳提示
-  else b.textContent = '🍽️ 一起去吃飯（' + mealInvite.guests.length + '/' + MEAL_INVITE.max + '）';
+  else b.textContent = '🍽️ 邀請吃飯';   // 邀滿了照樣顯示，按了會跳「最多只能邀 4 人一起吃」
 }
 // 按下對話框的「一起去吃飯」：關掉對話框，邀請（或取消邀請）這個人
 document.getElementById('dialogueMealInvite')?.addEventListener('click', () => {
@@ -92,7 +92,7 @@ function toggleMealInvite(a) {
   if (!canMealInvite(a)) { sfx('error'); return; }
   const left = inviteCdLeft(inviteId(a));
   if (left) { sfx('error'); systemNotice(inviteName(a) + '剛吃飽，' + Math.ceil(left / 60000) + ' 分鐘後才能再邀他吃飯', true); return; }
-  if (mealInvite.guests.length >= MEAL_INVITE.max) { sfx('error'); systemNotice('一次最多邀 ' + MEAL_INVITE.max + ' 個人一起吃飯', true); return; }
+  if (mealInvite.guests.length >= MEAL_INVITE.max) { sfx('error'); systemNotice('最多只能邀 ' + MEAL_INVITE.max + ' 人一起吃', true); return; }
   sfx('button');
   if (a.sitting) npcStandUp(a);
   if (a.meal && !a.meal.tray && a.meal.stage === 'tray') a.meal = null;   // 正要自己去拿餐盤：改成跟溫特一起（端著菜的照樣吃完再說）

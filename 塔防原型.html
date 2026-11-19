@@ -27,7 +27,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=firsthint-20261115"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=gctabs-20261118">
+<link rel="stylesheet" href="css/style.css?v=dlg2x2-20261118">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
@@ -141,7 +141,7 @@
         <button id="dialoguePractice" class="hidden" type="button">🎯 開始訓練</button>
         <button id="dialogueHospital" class="hidden" type="button">🏥 去醫院休息</button>   <!-- 受傷的隊員（js/vitals.js） -->
         <button id="dialogueAshSoothe" class="hidden" type="button">🫶 請亞許疏導</button>   <!-- 疏導室的亞許（js/vitals.js） -->
-        <button id="dialogueMealInvite" class="hidden" type="button">🍽️ 一起去吃飯</button>   <!-- 基地裡：邀請（或取消邀請）一起去餐廳吃飯（js/meal-invite.js） -->
+        <button id="dialogueMealInvite" class="hidden" type="button">🍽️ 邀請吃飯</button>   <!-- 基地裡：邀請（或取消邀請）一起去餐廳吃飯（js/meal-invite.js） -->
       </div>
     </div>
     <!-- 送禮選單（對話中按「送禮」打開） -->
@@ -284,7 +284,7 @@
   <script src="data/items.js?v=swimring-20261113"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=egg3-20261115"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/chickens.js?v=egg10-20261117"></script>   <!-- 森林的雞、鳥巢、雞蛋：數值設定 -->
-  <script src="data/equipment.js?v=crateloot2-20261117"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/equipment.js?v=lockerfood-20261119"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=bldabout-20261109"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
   <script src="js/backpack-layout.js?v=gearinst-20261112"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
@@ -302,7 +302,7 @@
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
-  <script src="data/maps.js?v=valve1-20261119"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
+  <script src="data/maps.js?v=merge-valve-20261119"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=tidy-20261118"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=tidy-20261118"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
@@ -352,7 +352,7 @@
   <script src="js/achievements.js?v=merge4-20261115"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=merge4-20261115"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/burrowing-mouse.js?v=merge4-20261115"></script> <!-- 花蓮版權老鼠：出土與地底手 -->
-  <script src="js/enemy-ai.js?v=doorlane2-20261119"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=widememo-20261119"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=floorhit-20261116"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/elite-bird-head.js?v=20261116fix1"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
   <script src="js/pearl-kid.js?v=placefloor-20261115"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
@@ -361,7 +361,7 @@
   <script src="js/elite-cap-king.js?v=merge-20261115c"></script> <!-- 9f4a. 菁英 BOSS「順順宮主」：核心躲在大宮帽裡、大夯吉寶、蓋杯子洗牌 -->
   <script src="js/street-vehicles.js?v=merge-20261115c"></script> <!-- 9f4b. K56 路邊會暴衝的機車、腳踏車：敵我都撞飛 -->
   <script src="js/fish-head.js?v=merge-20261115c"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/loofah-lady.js?v=merge-20261115c"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
+  <script src="js/loofah-lady.js?v=tuftcache-20261119"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
   <script src="js/clownfish.js?v=eggsort-20261119"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
   <script src="js/pool-boss.js?v=merge-20261115c"></script> <!-- 9f7b. 池核 BOSS：巨大比基尼小丑魚（守核心、深水區游泳潛水、抽水時擱淺） -->
   <script src="js/golden-banana-king.js?v=merge-20261115c"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
@@ -410,7 +410,7 @@
   <script src="js/claw-machine.js?v=clawreach-20261115"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
   <script src="js/sortie-supply.js?v=sortiebal-20261106"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=merge4-20261115"></script>
-  <script src="js/storage-lockers.js?v=20261118steam1"></script>
+  <script src="js/storage-lockers.js?v=lockerfood-20261119"></script>
   <script src="data/prop-collisions.js?v=forestroot-20261115"></script>   <!-- 販賣機、營地箱子自帶的擋路格（物件編輯器設定） -->
   <script src="js/prop-collisions.js?v=forestroot-20261115"></script>
   <script src="js/escalators.js?v=edgesort-20261118"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
@@ -420,7 +420,7 @@
   <script src="js/chickens.js?v=nest2-20261115"></script>   <!-- 森林的雞：閒晃、下蛋、抱起來；鳥巢長蛋（數值在 data/chickens.js） -->
   <script src="js/cooking.js?v=wspages-20261109"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
   <script src="js/meal.js?v=firsthint3-20261115"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
-  <script src="js/meal-invite.js?v=merge-20261110"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
+  <script src="js/meal-invite.js?v=dlg2x2-20261118"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
   <script src="js/base-follow.js?v=rooms2f-20261104"></script>   <!-- 雷德在基地裡跟著溫特換地圖（不進溫特辦公室、別人寢室） -->
   <script src="js/ball-poses.js?v=ballsit-20261109"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
@@ -434,9 +434,9 @@
   <script src="js/dynamo-sound.js?v=20261116dyn1"></script> <!-- 發電機運轉聲：靠近開著的發電機才聽得到 -->
   <script src="js/sanity.js?v=graybubble-20261115"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=crateloot2-20261117"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=firsthint-20261115"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=oneloot-20261119"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/gear-v2.js?v=previewall-20261114"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
-  <script src="js/special-guns.js?v=crateloot2-20261117"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/special-guns.js?v=oneloot-20261119"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=previewall-20261114"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=slotscene-20261115"></script>
   <script src="js/camp-interactions.js?v=perf1-20261119"></script>
@@ -446,7 +446,7 @@
   <script src="js/vitals.js?v=midreturn-20261103"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
   <script src="js/camp-beds.js?v=sleepheal-20261117"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
-  <script src="js/mrt-locks.js?v=mrtkey-20261115"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
+  <script src="js/mrt-locks.js?v=oneloot-20261119"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script src="data/mrt-train.js?v=20261116gen1"></script>   <!-- 捷運列車的設定（物件編輯器匯出） -->
   <script src="js/mrt-train.js?v=20261116gen3"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script src="js/under-map.js?v=underscale-20261118"></script>   <!-- 地圖底下透出另一張地圖：壓暗、模糊後畫在黑色的地方 -->
@@ -454,11 +454,11 @@
   <script src="js/fund-card.js?v=fundcard2-20261115"></script>   <!-- 作戰經費提示卡：第一次到達戰鬥地圖時右邊跳卡 -->
   <script src="js/ui-layout.js?v=fundcard2-20261115"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/save-restore.js?v=restore2-20261114"></script>   <!-- 設定→存檔：匯出／匯入存檔、找回進度 -->
-  <script src="js/game.js?v=rescuepocket-20261119"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=merge-rescue-20261119"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=fulltime-20261115"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
-  <script src="js/graffiti.js?v=levels3-20261115"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
+  <script src="js/graffiti.js?v=oneloot-20261119"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=toolbox15-20261109"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->
   <script src="js/item-intro.js?v=hosprows-20261029"></script>   <!-- 第一次拿到新東西：說明視窗 -->

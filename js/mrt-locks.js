@@ -167,9 +167,10 @@ function useMrtLockNearPlayer() {
 }
 // 置物櫃（沒指定內容的）：有機會找到好遊卡（js/storage-lockers.js 呼叫）
 function tryYouyouCardFind() {
-  if (Math.random() >= MRT_YOUYOU_CHANCE) return;
-  if (!supplyGain('youyou-card', 1)) return;
+  if (Math.random() >= MRT_YOUYOU_CHANCE) return false;
+  if (!supplyGain('youyou-card', 1)) return false;
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice('youyou-card', 1);
+  return true;   // 真的拿到（置物櫃一次只給一樣）
 }
 
 // 門翼向兩側收回，完成後才開放通行。

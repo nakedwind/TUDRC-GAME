@@ -587,25 +587,28 @@ function grantEquipment(id, how, quiet = false) {   // quiet：不播「拿到�
   if (typeof backpackOpen !== 'undefined' && backpackOpen) renderBackpack();
   return true;
 }
-// 戰鬥區域掉落（順順宮帽打開、異質核心碎掉時呼叫）
+// 戰鬥區域掉落（順順宮帽打開、異質核心碎掉時呼叫）；真的拿到回傳 true（置物櫃「一次只給一樣」要用）
 function tryEquipDrop(id, x, y) {
   if (ITEM_DROPS[id] != null) return tryItemDrop(id, x, y);   // 後室道具
-  if (MAP_SAFE || equipState.owned[id] || Math.random() >= (EQUIP_DROPS[id] || 0)) return;
-  if (grantEquipment(id, '撿到了特殊裝備') && typeof flash === 'function') flash(equipDef(id).icon + ' ' + equipDef(id).name, x, y - 40, '#ffd479', 2.5);
+  if (MAP_SAFE || equipState.owned[id] || Math.random() >= (EQUIP_DROPS[id] || 0)) return false;
+  if (!grantEquipment(id, '撿到了特殊裝備')) return false;
+  if (typeof flash === 'function') flash(equipDef(id).icon + ' ' + equipDef(id).name, x, y - 40, '#ffd479', 2.5);
+  return true;
 }
-// 後室道具掉落（平安符：掉在地上走過去撿；其他：直接放進背包）
+// 後室道具掉落（平安符：掉在地上走過去撿；其他：直接放進背包）；真的拿到回傳 true
 function tryItemDrop(id, x, y) {
-  if (MAP_SAFE || Math.random() >= (ITEM_DROPS[id] || 0)) return;
-  const item = itemById(id); if (!item) return;
+  if (MAP_SAFE || Math.random() >= (ITEM_DROPS[id] || 0)) return false;
+  const item = itemById(id); if (!item) return false;
   if (id === 'charm') {
     (G.equipmentDrops = G.equipmentDrops || []).push({ item: id, x, y });
     flash(item.name + '掉落了', x, y - 40, '#ffd479', 2.5);
-    return;
+    return true;
   }
-  if (!supplyGain(id, 1)) return;   // 持有上限
+  if (!supplyGain(id, 1)) return false;   // 持有上限
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   flash('🎁 ' + item.name, x, y - 40, '#ffd479', 2.5);
   SFX.play('favorUp', .8, 'item-get'); if (typeof updateHUD === 'function') updateHUD();
+  return true;
 }
 function drawEquipmentGroundDrops(ctx) {
   for (const drop of G.equipmentDrops || []) {
