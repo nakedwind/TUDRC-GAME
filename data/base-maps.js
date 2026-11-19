@@ -14485,8 +14485,8 @@ const BASE_MAPS = [
         "c": 24,
         "r": 15,
         "to": "map_mvfpx57b",
-        "ox": 11,
-        "oy": -10
+        "ox": 12,
+        "oy": -28
       }
     ],
     "cols": 34,
