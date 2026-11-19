@@ -44955,9 +44955,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_backroom_wall02",
-        "c": 28,
+        "c": 27,
         "r": 64,
-        "layer": "object"
+        "layer": "object",
+        "ox": 30
       },
       {
         "id": "tile_bg_backroom_wall02",
@@ -49864,7 +49865,7 @@ const BATTLE_MAPS = [
         "fx": false,
         "lockerLoot": {
           "kind": "item",
-          "id": "firstaid",
+          "id": "youyou-card",
           "qty": 1
         }
       },
@@ -141504,9 +141505,11 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_storage_locker",
         "c": 48,
-        "r": 51,
+        "r": 50,
         "layer": "object",
-        "fx": true
+        "fx": true,
+        "ox": 30,
+        "oy": 30
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -141526,23 +141529,26 @@ const BATTLE_MAPS = [
       {
         "id": "tile_street_capsule_toy_machines",
         "c": 11,
-        "r": 18,
+        "r": 17,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "oy": 30
       },
       {
         "id": "tile_street_claw_machine",
         "c": 23,
-        "r": 18,
+        "r": 17,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "oy": 20
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 19,
-        "r": 18,
+        "r": 17,
         "layer": "object6",
-        "fx": true
+        "fx": true,
+        "oy": 20
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -141765,10 +141771,12 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_limestone",
-        "c": 36,
-        "r": 51,
+        "c": 35,
+        "r": 50,
         "layer": "ground3",
-        "fx": true
+        "fx": true,
+        "ox": 10,
+        "oy": 30
       },
       {
         "id": "tile_cvs_sign_twelve",
@@ -142504,11 +142512,12 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_interactive_pickup_graffiti",
-        "c": 37,
-        "r": 50,
+        "c": 40,
+        "r": 47,
         "layer": "ground2",
         "fx": true,
-        "ox": 20
+        "ox": 30,
+        "oy": 20
       },
       {
         "id": "tile_mrt_ticket_gate",
@@ -142569,6 +142578,24 @@ const BATTLE_MAPS = [
         "oy": 30
       },
       {
+        "id": "tile_mrt_planter",
+        "c": 35,
+        "r": 68,
+        "layer": "object2",
+        "fx": true,
+        "oy": 33.333333,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 49,
+        "r": 68,
+        "layer": "object2",
+        "fx": true,
+        "oy": 34.666667,
+        "ox": 2
+      },
+      {
         "id": "tile_mrt_waiting_seats",
         "c": 38,
         "r": 68,
@@ -142583,6 +142610,15 @@ const BATTLE_MAPS = [
         "layer": "object2",
         "fx": true,
         "oy": 30
+      },
+      {
+        "id": "tile_mrt_waiting_seats",
+        "c": 47,
+        "r": 68,
+        "layer": "object2",
+        "fx": true,
+        "oy": 30,
+        "ox": 10
       },
       {
         "id": "tile_mrt_room_wallx3_crack_secret",
@@ -143158,6 +143194,14 @@ const BATTLE_MAPS = [
         "r": 78,
         "layer": "top",
         "oy": 28
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 50,
+        "r": 41,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 20
       }
     ],
     "solid": [
@@ -148483,7 +148527,105 @@ const BATTLE_MAPS = [
       "58,40",
       "59,39",
       "60,39",
-      "58,39"
+      "58,39",
+      "52,25",
+      "53,25",
+      "54,25",
+      "55,25",
+      "56,25",
+      "57,25",
+      "58,25",
+      "59,25",
+      "60,25",
+      "61,25",
+      "62,25",
+      "63,25",
+      "35,69",
+      "36,69",
+      "37,69",
+      "38,69",
+      "40,69",
+      "39,69",
+      "35,70",
+      "36,70",
+      "37,70",
+      "47,69",
+      "48,69",
+      "49,69",
+      "50,69",
+      "51,69",
+      "51,70",
+      "49,70",
+      "50,70",
+      "44,27",
+      "44,28",
+      "45,28",
+      "45,27",
+      "45,26",
+      "44,26",
+      "44,25",
+      "45,25",
+      "48,25",
+      "49,25",
+      "50,25",
+      "51,25",
+      "40,25",
+      "39,25",
+      "38,25",
+      "37,25",
+      "41,25",
+      "10,16",
+      "14,16",
+      "19,16",
+      "20,16",
+      "21,16",
+      "23,16",
+      "22,16",
+      "24,17",
+      "23,17",
+      "22,17",
+      "21,17",
+      "20,17",
+      "19,17",
+      "18,17",
+      "17,17",
+      "16,17",
+      "15,17",
+      "14,17",
+      "13,17",
+      "12,17",
+      "11,17",
+      "10,17",
+      "10,18",
+      "11,18",
+      "12,18",
+      "13,18",
+      "14,18",
+      "16,18",
+      "17,18",
+      "18,18",
+      "19,18",
+      "20,18",
+      "21,18",
+      "22,18",
+      "23,18",
+      "24,18",
+      "24,19",
+      "23,19",
+      "22,19",
+      "21,19",
+      "20,19",
+      "19,19",
+      "18,19",
+      "17,19",
+      "16,19",
+      "15,19",
+      "14,19",
+      "13,19",
+      "12,19",
+      "11,19",
+      "10,19",
+      "15,18"
     ],
     "breakable": [],
     "coreSpots": [],
