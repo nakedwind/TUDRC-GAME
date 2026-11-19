@@ -14229,7 +14229,7 @@ const BASE_MAPS = [
       {
         "id": "tile_field_ammo_crate",
         "c": 4,
-        "r": 18,
+        "r": 17,
         "layer": "object4",
         "ox": 38,
         "oy": 4
