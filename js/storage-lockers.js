@@ -181,6 +181,10 @@ function rollRandomContainerLoot(x,y,where,ammoChance){
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('adrenaline',x,y),   // 腎上腺素
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('anomaly-firstaid',x,y),   // 異質急救包
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('toolbox',x,y),   // 工具箱
+    ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('almond-water',x,y),   // 杏仁水
+    ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('medkit',x,y),   // 醫療包
+    ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('firstaid',x,y),   // 急救包
+    ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('eye-drops',x,y),   // 眼藥水
     ()=>typeof tryGraffitiPenFind==='function'&&tryGraffitiPenFind(x,y),   // 塗鴉筆（js/graffiti.js）
     ()=>typeof tryYouyouCardFind==='function'&&tryYouyouCardFind(),   // 好遊卡（js/mrt-locks.js）
   ];
