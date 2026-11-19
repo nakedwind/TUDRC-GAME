@@ -2572,11 +2572,12 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 /* 新版裝備的升級頁：這一件穿在誰身上（左上角小標；在背包裡的不寫） */
 .ws-tile u { position: absolute; top: 6px; left: 6px; max-width: 55%; padding: 0 6px; border-radius: 99px; background: rgba(120,200,255,.9); color: #06202f; font-size: 10px; font-weight: 800; text-decoration: none; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ws-tile em { position: absolute; top: 6px; right: 6px; padding: 0 6px; border-radius: 99px; background: #ffd479; color: #3b2304; font-size: 10px; font-weight: 800; font-style: normal; line-height: 16px; }
-.ws-tile.unowned .ws-tile-icon { opacity: .75; }            /* 還沒開發 */
-.ws-tile.build.unowned { filter: brightness(.35); }   /* 還沒開發的建築：整個格子（圖、字、框）壓黑 65%（亮度剩 35%）（遊戲和開發工坊編輯器的預覽共用） */
-.ws-tile.build.unowned .ws-tile-icon { opacity: 1; }   /* 圖不用再另外變淡 */
-.ws-tile.locked { opacity: .55; }                          /* 只能在戰鬥區域撿到、還沒拿到 */
-.ws-tile.locked .ws-tile-icon { filter: grayscale(1); }
+/* 還沒開發（unowned）、只能在戰鬥區域撿到還沒拿到（locked）：整個格子（圖、字、框）壓黑 65%（亮度剩 35%）、彩度降低 70%（剩 30%）
+   裝備、建築都一樣（遊戲和開發工坊編輯器的預覽共用） */
+.ws-tile.unowned, .ws-tile.locked { filter: brightness(.35) saturate(.3); }
+/* 製作裝備頁：「持有幾件」放右下角（升級裝備頁的「誰穿著」還是在左上角） */
+.ws-tile u.ws-own { top: auto; left: auto; bottom: 5px; right: 5px; }
+.ws-tile:has(u.ws-own) { padding-bottom: 22px; }   /* 下面留位置給「持有」，名稱才不會被蓋住 */
 /* ===== 裝備等級的顏色（全遊戲共用）：Lv1 原本的、Lv2 綠、Lv3 藍、Lv4 紫、Lv5 金 =====
    JS 用 equipTier(等級)（js/equipment.js）加上 tier-N；這裡決定顏色。新的地方要顯示裝備等級：一樣加 equipTier，再把格子的 selector 加進下面的清單。 */
 .tier-2 { --tier: 80,220,120; } .tier-3 { --tier: 80,168,255; } .tier-4 { --tier: 178,107,255; } .tier-5 { --tier: 255,204,77; }

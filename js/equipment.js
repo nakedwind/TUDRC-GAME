@@ -947,7 +947,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   const list = [...weaponList, ...magList, ...bagList, ...ammoList, ...buildEntryList, ...gearList, ...sgearList];   // 隊員裝備排最下面   // 武器、彈匣、背包、子彈排在裝備上面
   if (!list.some(e => e.key === wsPick)) wsPick = list[0] ? list[0].key : null;   // 跟背包一樣：自動選第一格
   const tile = e => '<button type="button" class="ws-tile' + (e.kind === 'build' ? ' build' : '') + (e.kind === 'ammo' ? ' owned' : e.lv ? tier(e.lv) + ' owned' : e.canDev ? ' unowned' : ' locked') + (wsPick === e.key ? ' sel' : '') + '" data-ws-pick="' + e.key + '" aria-pressed="' + (wsPick === e.key) + '">' +
-    '<span class="ws-tile-icon">' + e.icon + '</span><b>' + e.name + '</b>' + (e.kind === 'ammo' ? '<em>' + e.have + ' 發</em>' : e.lv ? '<em>Lv' + e.lv + '</em>' : '') + (e.tileNote ? '<u>' + e.tileNote + '</u>' : '') + '</button>';   // tileNote：新版裝備這一件在誰身上（js/gear-v2.js）   // 子彈：右上角寫身上有幾發
+    '<span class="ws-tile-icon">' + e.icon + '</span><b>' + e.name + '</b>' + (e.kind === 'ammo' ? '<em>' + e.have + ' 發</em>' : e.lv && !e.typeOnly ? '<em>Lv' + e.lv + '</em>' : '') + (e.tileNote ? '<u' + (e.typeOnly ? ' class="ws-own"' : '') + '>' + e.tileNote + '</u>' : '') + '</button>';   // 製作裝備頁（typeOnly）：不寫等級，「持有幾件」放右下角   // tileNote：新版裝備這一件在誰身上（js/gear-v2.js）   // 子彈：右上角寫身上有幾發
   const section = (title, items) => items.length ? '<h3>' + title + '</h3><div class="ws-tiles">' + items.map(tile).join('') + '</div>' : '';
   const empty = WORKSHOP_PAGE_EMPTY[page] || '';
   // 下方說明欄（跟背包的說明欄一樣：大圖｜名稱、說明、數值｜按鈕）
