@@ -1054,7 +1054,6 @@ function draw() {
   if (typeof drawUnderMap === 'function') drawUnderMap(ctx);   // 黑色的地方透出底下另一張地圖（例如藍線站底下的紅線站，js/under-map.js）
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
-  if (typeof drawPoolDeepTint === 'function') drawPoolDeepTint(ctx);   // 池核深水區壓暗一點，跟淺水區分得出來（js/pool-tide.js）
   if (typeof drawPoolBossUnderwater === 'function') drawPoolBossUnderwater(ctx);   // 池核 BOSS 潛在水裡的影子（js/pool-boss.js）
   // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----

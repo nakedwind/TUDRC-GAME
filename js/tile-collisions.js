@@ -6,21 +6,84 @@
      ・地圖編輯器、基地編輯器顯示紅格時，也會畫出這些方框（橘色）
    資料：data/tile-collisions.js 的 TILE_COLLISIONS＝{ 素材 id: [[x, y, 寬, 高], …] }
      x, y, 寬, 高＝像素，以「沒翻轉、沒轉向、沒放大」的素材左上角為原點（素材寬 w 格＝w × 40 像素）。
+   每張地圖也可以有自己的方框（地圖編輯器的 🟧 橘框工具，存在地圖資料 m.tileBoxes）：那張地圖上就照地圖自己的，不用共用的。
    物件編輯器裡還沒存到專案的修改，會先存在這個瀏覽器（TILE_COLLISION_DRAFT，只記改過的素材），遊戲和編輯器都會疊上去，方便邊調邊試。 */
 const TILE_COLLISION_DRAFT = 'tudrc_tile_collisions_draft_v1';
 const TILE_COLLISION_CELL = 40;
-let tileCollisionCache = { raw: undefined, data: {} };
+// ---- 同一張圖片的素材共用一份 ----
+// 素材庫裡有時同一張圖片登記了兩次以上（id 不一樣、圖片檔一樣），看起來是同一張，碰撞和人物遮擋線就該一樣。
+// 讀的時候：其中一個有設、其他沒設，其他的就照著用；改的時候（物件編輯器、地圖編輯器）：同一張圖的素材全部一起改。
+let tileSiblingCache = { n: -1, byId: new Map(), groups: [] };
+function tileSiblingInfo() {
+  const list = typeof SHARED_TILES !== 'undefined' && Array.isArray(SHARED_TILES) ? SHARED_TILES : [];
+  if (tileSiblingCache.n === list.length) return tileSiblingCache;
+  const byFile = new Map();
+  for (const t of list) if (t && t.id && t.file) { if (!byFile.has(t.file)) byFile.set(t.file, []); byFile.get(t.file).push(t.id); }
+  const groups = [...byFile.values()].filter(ids => ids.length > 1), byId = new Map();
+  for (const ids of groups) for (const id of ids) byId.set(id, ids);
+  tileSiblingCache = { n: list.length, byId, groups };
+  return tileSiblingCache;
+}
+const tileSameImageIds = id => tileSiblingInfo().byId.get(id) || [id];   // 跟這張素材同一張圖的所有素材 id（含自己）
+const tileShareSiblings = data => {   // 同一張圖的素材：有一個設了、其他沒設的，照著用
+  for (const ids of tileSiblingInfo().groups) {
+    const has = ids.find(id => data[id] != null); if (has == null) continue;
+    for (const id of ids) if (data[id] == null) data[id] = data[has];
+  }
+  return data;
+};
+let tileCollisionCache = { raw: undefined, n: -1, data: {} };
 function tileCollisionData() {
   let raw = null; try { raw = localStorage.getItem(TILE_COLLISION_DRAFT); } catch (_) {}
-  if (raw === tileCollisionCache.raw) return tileCollisionCache.data;
+  const n = tileSiblingInfo().n;
+  if (raw === tileCollisionCache.raw && n === tileCollisionCache.n) return tileCollisionCache.data;
   const base = typeof TILE_COLLISIONS !== 'undefined' ? TILE_COLLISIONS : {};
   let draft = null; try { draft = raw ? JSON.parse(raw) : null; } catch (_) {}
   const data = { ...base };   // 草稿只記改過的素材（null＝拿掉碰撞），蓋在正式資料上：別人更新了專案檔，沒改過的素材照樣跟著新的
   if (draft && typeof draft === 'object') for (const [id, boxes] of Object.entries(draft)) { if (Array.isArray(boxes) && boxes.length) data[id] = boxes; else delete data[id]; }
-  tileCollisionCache = { raw, data };
+  tileShareSiblings(data);
+  tileCollisionCache = { raw, n, data };
   return data;
 }
-const tileCollisionBoxes = id => { const b = tileCollisionData()[id]; return Array.isArray(b) && b.length ? b : null; };
+// 改某張素材的碰撞方框（物件編輯器、地圖編輯器都用這個）：同一張圖的素材一起改，先存在這個瀏覽器的草稿
+// boxes＝[[x, y, 寬, 高], …]（像素；空陣列＝拿掉碰撞）。回傳還沒存到專案的素材有幾張。
+function tileCollisionSaveBoxes(id, boxes) {
+  let draft = {}; try { draft = JSON.parse(localStorage.getItem(TILE_COLLISION_DRAFT) || '{}') || {}; } catch (_) { draft = {}; }
+  const now = (boxes || []).map(b => b.map(v => Math.round(v))).filter(b => b[2] > 0 && b[3] > 0);
+  for (const sid of tileSameImageIds(id)) {
+    const base = typeof TILE_COLLISIONS !== 'undefined' ? TILE_COLLISIONS[sid] : null;
+    if (JSON.stringify(now) === JSON.stringify(base || [])) delete draft[sid]; else draft[sid] = now.length ? now : null;
+  }
+  try { if (Object.keys(draft).length) localStorage.setItem(TILE_COLLISION_DRAFT, JSON.stringify(draft)); else localStorage.removeItem(TILE_COLLISION_DRAFT); } catch (_) {}
+  return Object.keys(draft).length;
+}
+// 匯出 data/tile-collisions.js 的內容（物件編輯器、地圖編輯器的「💾 存到專案」都用這個）
+function tileCollisionSource() {
+  const data = tileCollisionData(), ids = Object.keys(data).sort();
+  const body = ids.map(id => '  ' + JSON.stringify(id) + ': ' + JSON.stringify(data[id])).join(',\n');
+  const depths = tileDepthData(), dIds = Object.keys(depths).filter(id => Number.isFinite(depths[id])).sort();
+  const dBody = dIds.map(id => '  ' + JSON.stringify(id) + ': ' + Math.round(depths[id])).join(',\n');
+  return '/* 素材碰撞方框：由物件編輯器「🧱 素材碰撞」匯出（說明見 js/tile-collisions.js）。\n   { 素材 id: [[x, y, 寬, 高], …] }，像素，以沒翻轉、沒轉向的素材左上角為原點（素材寬 w 格＝w × 40 像素）。 */\nconst TILE_COLLISIONS = {' + (body ? '\n' + body + '\n' : '') + '};\n'
+    + '/* 人物遮擋線（同一頁的「人物遮擋線」）：{ 素材 id: 離圖片頂端幾像素 }。有設的素材優先用這個，沒設才用碰撞方框的中間。 */\nconst TILE_DEPTHS = {' + (dBody ? '\n' + dBody + '\n' : '') + '};\n';
+}
+// ---- 每張地圖自己的橘框 ----
+// 地圖編輯器的 🟧 橘框工具改的是「這張地圖自己的」設定，存在地圖資料 m.tileBoxes＝{ 素材 id: [[x, y, 寬, 高], …] }（[]＝這張地圖上這張素材不擋路）。
+// 這張地圖有設的素材照地圖自己的；沒設的照物件編輯器「🧱 素材碰撞」的共用預設。
+// 現在是哪張地圖：地圖編輯器＝正在編輯的那張（curMap），遊戲＝正在玩的那張（MAP）；物件編輯器沒有地圖＝只看共用預設。
+const tileBoxMapNow = () => (typeof curMap === 'function' ? curMap() : (typeof MAP !== 'undefined' ? MAP : null)) || null;
+const tileMapBoxesOf = (m, id) => m && m.tileBoxes && Object.prototype.hasOwnProperty.call(m.tileBoxes, id) && Array.isArray(m.tileBoxes[id]) ? m.tileBoxes[id] : undefined;   // undefined＝這張地圖沒有自己設
+const tileCollisionSharedBoxes = id => { const b = tileCollisionData()[id]; return Array.isArray(b) && b.length ? b : null; };   // 共用預設（物件編輯器）
+const tileCollisionBoxes = (id, m = tileBoxMapNow()) => { const own = tileMapBoxesOf(m, id); if (own !== undefined) return own.length ? own : null; return tileCollisionSharedBoxes(id); };
+// 地圖編輯器用：把這張地圖上某張素材的橘框改成 boxes（同一張圖片的素材一起改）；boxes＝null＝改回共用預設
+function tileMapBoxesSet(m, id, boxes) {
+  if (!m) return;
+  const now = boxes == null ? null : boxes.map(b => b.map(v => Math.round(v))).filter(b => b[2] > 0 && b[3] > 0);
+  for (const sid of tileSameImageIds(id)) {
+    if (now == null) { if (m.tileBoxes) delete m.tileBoxes[sid]; }
+    else (m.tileBoxes || (m.tileBoxes = {}))[sid] = now.map(b => b.slice());
+  }
+  if (m.tileBoxes && !Object.keys(m.tileBoxes).length) delete m.tileBoxes;
+}
 
 // 素材本身的方框 → 放在地圖上那個物件的方框（翻轉、轉向 90 度、放大都算進去；斜轉的角度不算）
 // tw, th＝素材沒轉向時的像素寬高；x, y＝物件左上角（含微調）；回傳 [[x0, y0, x1, y1], …]
@@ -46,15 +109,28 @@ function tileCollisionPlace(boxes, s, tw, th, x, y) {
 // 每張素材可以直接指定：離圖片頂端幾像素（沒翻轉、沒放大的素材），不一定要有碰撞方框；有設就優先用，沒設才用方框的中間
 // 資料：data/tile-collisions.js 的 TILE_DEPTHS＝{ 素材 id: 像素 }；還沒存到專案的修改先存在這個瀏覽器（TILE_DEPTH_DRAFT，null＝拿掉）
 const TILE_DEPTH_DRAFT = 'tudrc_tile_depths_draft_v1';
-let tileDepthCache = { raw: undefined, data: {} };
+let tileDepthCache = { raw: undefined, n: -1, data: {} };
 function tileDepthData() {
   let raw = null; try { raw = localStorage.getItem(TILE_DEPTH_DRAFT); } catch (_) {}
-  if (raw === tileDepthCache.raw) return tileDepthCache.data;
+  const n = tileSiblingInfo().n;
+  if (raw === tileDepthCache.raw && n === tileDepthCache.n) return tileDepthCache.data;
   const data = { ...(typeof TILE_DEPTHS !== 'undefined' ? TILE_DEPTHS : {}) };
   let draft = null; try { draft = raw ? JSON.parse(raw) : null; } catch (_) {}
   if (draft && typeof draft === 'object') for (const [id, v] of Object.entries(draft)) { if (Number.isFinite(v)) data[id] = v; else delete data[id]; }
-  tileDepthCache = { raw, data };
+  tileShareSiblings(data);   // 同一張圖的素材共用
+  tileDepthCache = { raw, n, data };
   return data;
+}
+// 改某張素材手動的人物遮擋線（null＝改回自動）：同一張圖的素材一起改，先存在這個瀏覽器的草稿
+function tileDepthSave(id, v) {
+  let draft = {}; try { draft = JSON.parse(localStorage.getItem(TILE_DEPTH_DRAFT) || '{}') || {}; } catch (_) { draft = {}; }
+  const val = Number.isFinite(v) ? v : null;
+  for (const sid of tileSameImageIds(id)) {
+    const base = typeof TILE_DEPTHS !== 'undefined' && Number.isFinite(TILE_DEPTHS[sid]) ? TILE_DEPTHS[sid] : null;
+    if (val === base) delete draft[sid]; else draft[sid] = val;   // null＝拿掉專案檔裡的手動遮擋線
+  }
+  try { if (Object.keys(draft).length) localStorage.setItem(TILE_DEPTH_DRAFT, JSON.stringify(draft)); else localStorage.removeItem(TILE_DEPTH_DRAFT); } catch (_) {}
+  return Object.keys(draft).length;
 }
 const tileManualDepth = id => { const v = tileDepthData()[id]; return Number.isFinite(v) ? v : null; };
 // 人物遮擋線離物件頂端幾像素（沒放大前；給 stampDepthY 用）：手動設的優先，沒有就用碰撞方框（全部合起來）上下的中間；都沒有＝null

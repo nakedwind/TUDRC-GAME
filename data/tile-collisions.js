@@ -5,15 +5,15 @@ const TILE_COLLISIONS = {
   "tile_mvocpp0c": [[0,52,80,94]],
   "tile_mvoddiqi": [[0,52,80,94]],
   "tile_mvodgug9": [[0,52,80,94]],
-  "tile_mvxgf9gt": [[20,54,40,26]],
   "tile_mvybeuxg": [[40,15,40,77],[0,92,80,94]],
-  "tile_mvzbgmzf": [[20,0,40,80]],
-  "tile_mvzbmx47": [[20,0,40,80]],
+  "tile_mvzbgmzf": [[20,37,40,43]],
+  "tile_mvzbmx47": [[20,37,40,43]],
   "tile_mvzbn4vv": [[20,0,40,80]],
-  "tile_mvzbna04": [[20,0,40,80]],
+  "tile_mvzbna04": [[20,52,40,28]],
   "tile_mvzbolt4": [[20,0,40,80]],
   "tile_mvzbvnsy": [[40,13,40,94]],
-  "tile_mvzc5x73": [[40,0,40,80]]
+  "tile_mvzc5x73": [[40,0,40,80]],
+  "tile_poolcore_pillar": [[23,52,36,48],[21,114,40,65]]
 };
 /* 人物遮擋線（同一頁的「人物遮擋線」）：{ 素材 id: 離圖片頂端幾像素 }。有設的素材優先用這個，沒設才用碰撞方框的中間。 */
 const TILE_DEPTHS = {
@@ -56,6 +56,6 @@ const TILE_DEPTHS = {
   "tile_mwgnngo0": 190,
   "tile_poolcore_life_ring_blue": 0,
   "tile_poolcore_life_ring_red": 0,
-  "tile_poolcore_pillar": 0,
+  "tile_poolcore_pillar": 53,
   "tile_poolcore_power_switch_on": 0
 };

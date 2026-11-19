@@ -7414,6 +7414,34 @@ const SHARED_TILES = [
     }
   },
   {
+    "id": "tile_poolwater_dark",
+    "name": "Poolcore_water_dark",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_water_dark.png",
+    "w": 2,
+    "h": 2,
+    "flat": true,
+    "water": {
+      "depth": 20,
+      "speed": 40,
+      "see": 45
+    }
+  },
+  {
+    "id": "tile_poolwater_deep_dark",
+    "name": "Poolcore_water_deep_dark",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_water_deep_dark.png",
+    "w": 2,
+    "h": 2,
+    "flat": true,
+    "water": {
+      "depth": 10,
+      "speed": 40,
+      "see": 45
+    }
+  },
+  {
     "id": "tile_mwgn2tt1",
     "name": "Poolcore_water_S",
     "role": "floor",

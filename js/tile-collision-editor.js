@@ -55,6 +55,7 @@ const TileCollisionEditor = (() => {
         <div class="tc-stage" tabindex="0"><canvas id="tcCanvas"></canvas></div>
         <p class="help">在圖上拖曳＝畫新方框；拖方框＝移動；拖邊、角＝改大小。方向鍵＝移動 1 像素（Shift＝10）；Ctrl＋方向鍵＝改寬高；Delete＝刪掉。
           橘色＝擋路的方框；藍色虛線＝人物遮擋線（人的腳在線上方就被這個物件蓋住）：拖藍線、或 Shift＋點圖片＝手動設在那裡。地圖上個別物件手動設過遮擋線的，照那個物件自己的。
+          這裡設的是所有地圖共用的預設；在地圖編輯器用 🟧 橘框改過的地圖，那張地圖上的這張素材照地圖自己的設定，不會跟著這裡變。
           改了會馬上存在這個瀏覽器（遊戲、地圖編輯器、基地編輯器重新整理就套用）；按 <button id="tcSave" class="btn primary">💾 存到專案</button> 寫進 data/tile-collisions.js。
           <button id="tcReset" class="btn">丟掉還沒存的修改</button></p>
         <div id="tcStatus" class="status"></div>
@@ -88,29 +89,33 @@ const TileCollisionEditor = (() => {
     cur = t; boxes = (tileCollisionBoxes(t.id) || []).map(b => b.slice()); sel = boxes.length ? 0 : -1; manual = tileManualDepth(t.id);
     const [tw, th] = tilePx(t); zoom = Math.max(1, Math.min(8, Math.floor(520 / Math.max(tw, th)) || 1));
     $('tcZoom').value = String([1, 2, 3, 4, 6, 8].reduce((a, z) => z <= zoom ? z : a, 1)); zoom = Number($('tcZoom').value);
-    $('tcName').textContent = (t.name || t.id) + '（' + tw + '×' + th + ' 像素，' + (t.w || 1) + '×' + (t.h || 1) + ' 格）';
+    const same = tileSameImageIds(t.id).length;   // 同一張圖片登記了好幾次：碰撞一起共用
+    $('tcName').textContent = (t.name || t.id) + '（' + tw + '×' + th + ' 像素，' + (t.w || 1) + '×' + (t.h || 1) + ' 格）' + (same > 1 ? '　※ 同一張圖片登記了 ' + same + ' 次，碰撞一起共用' : '');
     renderList(); refresh(); stage.focus();
   }
   // ---- 存檔（只記改過的素材）----
   const norm = bs => bs.map(b => b.map(v => Math.round(v))).filter(b => b[2] > 0 && b[3] > 0);
+  // 存草稿：用 js/tile-collisions.js 的共用寫法（同一張圖的素材一起改；地圖編輯器的「🧱 橘框」也是這樣存）
+  const readDrafts = () => {
+    try { draft = JSON.parse(localStorage.getItem(TILE_COLLISION_DRAFT) || '{}') || {}; } catch (_) { draft = {}; }
+    try { depthDraft = JSON.parse(localStorage.getItem(TILE_DEPTH_DRAFT) || '{}') || {}; } catch (_) { depthDraft = {}; }
+  };
   function commit() {
     if (!cur) return;
-    const base = typeof TILE_COLLISIONS !== 'undefined' ? TILE_COLLISIONS[cur.id] : null, now = norm(boxes);
-    if (JSON.stringify(now) === JSON.stringify(base || [])) delete draft[cur.id]; else draft[cur.id] = now.length ? now : null;
-    try { if (Object.keys(draft).length) localStorage.setItem(TILE_COLLISION_DRAFT, JSON.stringify(draft)); else localStorage.removeItem(TILE_COLLISION_DRAFT); } catch (_) {}
-    const baseD = typeof TILE_DEPTHS !== 'undefined' && Number.isFinite(TILE_DEPTHS[cur.id]) ? TILE_DEPTHS[cur.id] : null;
-    if (manual === baseD) delete depthDraft[cur.id]; else depthDraft[cur.id] = manual;   // null＝拿掉專案檔裡的手動遮擋線
-    saveDepthDraft();
-    const n = new Set([...Object.keys(draft), ...Object.keys(depthDraft)]).size; say(n ? '✓ 已存在這個瀏覽器（' + n + ' 張素材還沒存到專案）' : '✓ 跟專案檔一樣');
+    tileCollisionSaveBoxes(cur.id, norm(boxes));
+    tileDepthSave(cur.id, manual);
+    readDrafts();
+    const same = tileSameImageIds(cur.id).length;
+    const n = new Set([...Object.keys(draft), ...Object.keys(depthDraft)]).size;
+    say((n ? '✓ 已存在這個瀏覽器（' + n + ' 張素材還沒存到專案）' : '✓ 跟專案檔一樣') + (same > 1 ? '；同一張圖片的 ' + same + ' 個素材一起改了' : ''));
   }
-  function source() {
-    const data = tileCollisionData(), ids = Object.keys(data).sort();
-    const body = ids.map(id => '  ' + JSON.stringify(id) + ': ' + JSON.stringify(data[id])).join(',\n');
-    const depths = tileDepthData(), dIds = Object.keys(depths).filter(id => Number.isFinite(depths[id])).sort();
-    const dBody = dIds.map(id => '  ' + JSON.stringify(id) + ': ' + Math.round(depths[id])).join(',\n');
-    return '/* 素材碰撞方框：由物件編輯器「🧱 素材碰撞」匯出（說明見 js/tile-collisions.js）。\n   { 素材 id: [[x, y, 寬, 高], …] }，像素，以沒翻轉、沒轉向的素材左上角為原點（素材寬 w 格＝w × 40 像素）。 */\nconst TILE_COLLISIONS = {' + (body ? '\n' + body + '\n' : '') + '};\n'
-      + '/* 人物遮擋線（同一頁的「人物遮擋線」）：{ 素材 id: 離圖片頂端幾像素 }。有設的素材優先用這個，沒設才用碰撞方框的中間。 */\nconst TILE_DEPTHS = {' + (dBody ? '\n' + dBody + '\n' : '') + '};\n';
-  }
+  // 地圖編輯器（別的分頁）改了橘框：這邊跟著更新（正在拖曳時不打斷）
+  window.addEventListener('storage', e => {
+    if (e.key !== TILE_COLLISION_DRAFT && e.key !== TILE_DEPTH_DRAFT && e.key !== null) return;
+    readDrafts(); renderListSoon();
+    if (cur && !drag) { boxes = (tileCollisionBoxes(cur.id) || []).map(b => b.slice()); sel = Math.min(sel, boxes.length - 1); manual = tileManualDepth(cur.id); refresh(); }
+  });
+  const source = () => tileCollisionSource();   // 匯出內容（js/tile-collisions.js，地圖編輯器存到專案也用同一份）
 
   // ---- 畫 ----
   const autoDepth = () => { if (manual != null) return manual; if (!boxes.length) return null; const y0 = Math.min(...boxes.map(b => b[1])), y1 = Math.max(...boxes.map(b => b[1] + b[3])); return (y0 + y1) / 2; };   // 手動優先

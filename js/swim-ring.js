@@ -150,12 +150,17 @@ function swimRingShoreSpot() {
       for (let i = 0; i < 16; i++) {
         const a = i / 16 * Math.PI * 2, x = p.x + Math.cos(a) * d, y = p.y + Math.sin(a) * d;
         if (deepWaterAtPoint(x, y) || playerBlocked(x, y)) continue;
+        if (swimRingTinyIsland(x, y)) continue;   // 四周一下子就碰到深水的小空格（多半是深水區漏畫的格子）：不算岸邊
         if (typeof edgeWallCrossed === 'function' && edgeWallCrossed(p.x, p.y, x, y, r)) continue;   // 中間隔著邊緣碰撞（薄牆）
         best = { x, y }; break;
       }
     }
   } finally { p.swimRing = true; }
   return best;
+}
+// 這個不是深水的點，往上下左右各走不到 2 格就又碰到深水：是被深水圍住的小空格（例如地圖編輯器漏畫了一格深水），不當作岸邊
+function swimRingTinyIsland(x, y) {
+  return [[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dx, dy]) => { for (let s = 4; s <= 2 * CELL; s += 4) if (deepWaterAtPoint(x + dx * s, y + dy * s)) return true; return false; });
 }
 // 空白鍵：收起救生圈、站到岸上（js/game.js 的互動鍵）
 function useSwimRingShore() {
