@@ -2285,46 +2285,6 @@ const BASE_MAPS = [
         "oy": 10
       },
       {
-        "id": "tile_halloween_bunting",
-        "c": 30,
-        "r": 13,
-        "layer": "overlay",
-        "ox": -60,
-        "oy": -8
-      },
-      {
-        "id": "tile_halloween_bunting",
-        "c": 33,
-        "r": 13,
-        "layer": "overlay",
-        "ox": -22,
-        "oy": -8
-      },
-      {
-        "id": "tile_halloween_pumpkin_pile",
-        "c": 29,
-        "r": 16,
-        "layer": "overlay",
-        "ox": -8,
-        "oy": -32
-      },
-      {
-        "id": "tile_halloween_pumpkin_large",
-        "c": 34,
-        "r": 15,
-        "layer": "overlay",
-        "ox": 10,
-        "oy": 8
-      },
-      {
-        "id": "tile_halloween_pumpkin_large",
-        "c": 23,
-        "r": 14,
-        "layer": "overlay",
-        "ox": -4,
-        "oy": -14
-      },
-      {
         "id": "tile_halloween_pumpkin_medium",
         "c": 31,
         "r": 18,
@@ -2387,15 +2347,6 @@ const BASE_MAPS = [
         "fx": true,
         "ox": 6,
         "oy": -24
-      },
-      {
-        "id": "tile_halloween_pumpkin_pile",
-        "c": 35,
-        "r": 16,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -2,
-        "oy": -10
       },
       {
         "id": "tile_prop_shelf_locker_unit_02",
@@ -2716,7 +2667,8 @@ const BASE_MAPS = [
       "8,19",
       "8,14",
       "8,15",
-      "12,20"
+      "12,20",
+      "2,13"
     ],
     "breakable": [],
     "camp": [
@@ -2889,6 +2841,10 @@ const BASE_MAPS = [
       "20,20": [
         1,
         -10
+      ],
+      "2,13": [
+        -15,
+        -6
       ]
     },
     "coreSpots": [],
@@ -6374,13 +6330,10 @@ const BASE_MAPS = [
       "ground": {},
       "ground2": {},
       "ground3": {
-        "0,9": "tile_new_bg_wall_front_edge",
-        "0,10": "tile_new_bg_wall_front_edge",
         "0,11": "tile_new_bg_wall_front_edge",
         "0,12": "tile_new_bg_wall_front_edge",
         "0,13": "tile_new_bg_wall_front_edge",
-        "0,14": "tile_new_bg_wall_front_edge",
-        "0,8": "tile_new_bg_wall_front_edge"
+        "0,14": "tile_new_bg_wall_front_edge"
       },
       "object": {
         "1,14": "tile_new_decor_box_large",
@@ -6390,7 +6343,11 @@ const BASE_MAPS = [
         "4,9": "tile_eoc_floor_sign_4f",
         "59,9": "tile_eoc_floor_sign_4f"
       },
-      "top": {},
+      "top": {
+        "0,8": "tile_new_bg_wall_front_edge",
+        "0,9": "tile_new_bg_wall_front_edge",
+        "0,10": "tile_new_bg_wall_front_edge"
+      },
       "object2": {
         "63,8": "tile_new_bg_wall_front_edge",
         "63,9": "tile_new_bg_wall_front_edge",
@@ -6697,12 +6654,6 @@ const BASE_MAPS = [
       {
         "id": "tile_new_bg_wall",
         "c": 1,
-        "r": 7,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_new_bg_wall",
-        "c": 0,
         "r": 7,
         "layer": "ground"
       },
@@ -15780,13 +15731,10 @@ const BASE_MAPS = [
       "ground": {},
       "ground2": {},
       "ground3": {
-        "0,9": "tile_new_bg_wall_front_edge",
-        "0,10": "tile_new_bg_wall_front_edge",
         "0,11": "tile_new_bg_wall_front_edge",
         "0,12": "tile_new_bg_wall_front_edge",
         "0,13": "tile_new_bg_wall_front_edge",
-        "0,14": "tile_new_bg_wall_front_edge",
-        "0,8": "tile_new_bg_wall_front_edge"
+        "0,14": "tile_new_bg_wall_front_edge"
       },
       "object": {
         "16,8": "tile_new_decor_exit_sign"
@@ -15794,7 +15742,11 @@ const BASE_MAPS = [
       "overlay": {
         "59,9": "tile_eoc_floor_sign_3f"
       },
-      "top": {},
+      "top": {
+        "0,10": "tile_new_bg_wall_front_edge",
+        "0,9": "tile_new_bg_wall_front_edge",
+        "0,8": "tile_new_bg_wall_front_edge"
+      },
       "object2": {
         "63,8": "tile_new_bg_wall_front_edge",
         "63,9": "tile_new_bg_wall_front_edge",
@@ -16101,12 +16053,6 @@ const BASE_MAPS = [
       {
         "id": "tile_new_bg_wall",
         "c": 1,
-        "r": 7,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_new_bg_wall",
-        "c": 0,
         "r": 7,
         "layer": "ground"
       },

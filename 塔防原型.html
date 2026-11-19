@@ -272,7 +272,7 @@
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
-  <script src="data/sound-settings.js?v=20261119battlevol"></script> <!-- 1a. 音量、替換與自訂音效 -->
+  <script src="data/sound-settings.js?v=20261120basevol"></script> <!-- 1a. 音量、替換與自訂音效 -->
   <script src="js/sfx.js?v=20261118steam1"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=battlebgm-20261115"></script>        <!-- 1c. 背景音樂 -->
@@ -284,7 +284,7 @@
   <script src="data/items.js?v=swimring-20261113"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=egg3-20261115"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/chickens.js?v=egg10-20261117"></script>   <!-- 森林的雞、鳥巢、雞蛋：數值設定 -->
-  <script src="data/equipment.js?v=lockerfood-20261119"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/equipment.js?v=battery-20261120"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=bldabout-20261109"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
   <script src="js/backpack-layout.js?v=gearinst-20261112"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
@@ -320,7 +320,7 @@
   <script src="data/surface-tags.js?v=walltop2-20261118"></script>   <!-- 素材的牆／地板標記（🧱 牆地板編輯器匯出） -->
   <script src="js/surface-tags.js?v=walltop2-20261118"></script>   <!-- 牆／地板標記：讀標記（含編輯器還沒存的修改） -->
   <script src="js/map-levels.js?v=no1fauto-20261118"></script>   <!-- 地圖的樓層資料規則（地圖編輯器共用） -->
-  <script src="js/maploader.js?v=fastdraw-20261119"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=standobst-20261120"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=merge4-20261115"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/pits.js?v=pit-20261114"></script>   <!-- 6b. 坑洞：走過會變慢（hole01、hole02 等）；哪些素材是坑洞在地圖／基地編輯器勾 -->
   <script src="js/swim-ring.js?v=deepfix-20261120"></script>   <!-- 6b. 深水區＋救生圈：坐救生圈才能下深水、划水聲 -->
@@ -410,7 +410,7 @@
   <script src="js/claw-machine.js?v=clawreach-20261115"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
   <script src="js/sortie-supply.js?v=sortiebal-20261106"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=merge4-20261115"></script>
-  <script src="js/storage-lockers.js?v=lockerfood-20261119"></script>
+  <script src="js/storage-lockers.js?v=battery-20261120"></script>
   <script src="data/prop-collisions.js?v=forestroot-20261115"></script>   <!-- 販賣機、營地箱子自帶的擋路格（物件編輯器設定） -->
   <script src="js/prop-collisions.js?v=forestroot-20261115"></script>
   <script src="js/escalators.js?v=edgesort-20261118"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->

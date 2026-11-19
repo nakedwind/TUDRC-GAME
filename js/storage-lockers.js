@@ -185,6 +185,7 @@ function rollRandomContainerLoot(x,y,where,ammoChance){
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('medkit',x,y),   // 醫療包
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('firstaid',x,y),   // 急救包
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('eye-drops',x,y),   // 眼藥水
+    ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('battery',x,y),   // 電池
     ()=>where!=='彈藥箱'&&tryLockerFoodFind(x,y),   // 烤熟的食物（只有置物箱，data/equipment.js 的 LOCKER_FOOD）
     ()=>typeof tryGraffitiPenFind==='function'&&tryGraffitiPenFind(x,y),   // 塗鴉筆（js/graffiti.js）
     ()=>typeof tryYouyouCardFind==='function'&&tryYouyouCardFind(),   // 好遊卡（js/mrt-locks.js）

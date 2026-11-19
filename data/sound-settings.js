@@ -3,6 +3,7 @@ const SOUND_SETTINGS = {
   "gains": {
     "achievement": 1.35,
     "aidStart": 1.7,
+    "baseMusic": 0.5,
     "battleMusic": 3,
     "berserk": 1.2,
     "bigBoom": 1.2,
