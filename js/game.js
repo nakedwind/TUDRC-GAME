@@ -2297,6 +2297,7 @@ function frame(ts) {
     || (typeof clawOpen !== 'undefined' && clawOpen)   // 夾娃娃機（js/claw-machine.js）
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
     || (typeof pcDesktopOpen !== 'undefined' && pcDesktopOpen)   // 2F應變中心的電腦桌面（js/pc-desktop.js）
+    || (typeof workshopOpen !== 'undefined' && workshopOpen)   // 諾亞的開發工坊（js/equipment.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
   if (menuOpen && G.cameraShakeT) G.cameraShakeT = 0;   // 暫停中（教學、對話、選單…）：被打到的鏡頭震動倒數在 update 裡跑、不會減少，不歸零畫面會一直抖
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
@@ -2310,7 +2311,7 @@ function frame(ts) {
   updateCamera();
   if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）
   // 衣櫃／推薦穿搭開著也要停（以前只停住溫特，被換衣服的人會自己走掉）
-  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !(typeof clawOpen !== 'undefined' && clawOpen) && !(typeof gachaOpen !== 'undefined' && gachaOpen) && !(typeof wardrobeOpen !== 'undefined' && wardrobeOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
+  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !(typeof clawOpen !== 'undefined' && clawOpen) && !(typeof gachaOpen !== 'undefined' && gachaOpen) && !(typeof wardrobeOpen !== 'undefined' && wardrobeOpen) && !(typeof workshopOpen !== 'undefined' && workshopOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）

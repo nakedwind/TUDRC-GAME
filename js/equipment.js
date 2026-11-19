@@ -1023,14 +1023,29 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
 }
 function openWorkshopResetScrap() { wsScrapSel = null; wsScrapArmed = false; wsPick = null; }
 // page：要打開哪一頁（'make' 製作裝備／'up' 升級裝備／'ammo' 彈藥／'build' 開發建築物）
+// 從諾亞的對話框打開時：對話不結束，只把對話框先藏起來（對話還在進行＝時間暫停、諾亞不會走掉）；
+// 關掉工坊（× 或 Esc）時對話框再出現，可以接著按別的功能（例如做完裝備再去升級）。
+let wsBackToDialogue = false;   // 這次工坊是不是從對話框打開的（關掉時要回到對話框）
+const wsDialogueBox = () => document.getElementById('dialogueBox');
 function openWorkshop(page) {
   if (typeof page === 'string' && WORKSHOP_PAGES.some(p => p[0] === page)) wsPage = page;
-  ensureWorkshop(); if (typeof closeDialogue === 'function') closeDialogue(true);
+  ensureWorkshop();
+  const box = wsDialogueBox();
+  wsBackToDialogue = !!(typeof dialogueState !== 'undefined' && dialogueState && box && !box.classList.contains('hidden'));
+  if (wsBackToDialogue) box.classList.add('hidden');   // 對話先藏起來，不結束
+  else if (typeof closeDialogue === 'function') closeDialogue(true);
   if (typeof firstHintDone === 'function') firstHintDone('workshop');   // 諾亞頭上的首次提示不再飄（js/first-hints.js）
   workshopOpen = true; openWorkshopResetScrap(); Object.keys(keys).forEach(k => { keys[k] = false; });
   workshopEl.classList.remove('hidden'); renderWorkshop(false); sfx('menu');   // 先顯示再畫，才量得到欄位高度
 }
-function closeWorkshop(silent = false) { if (!workshopOpen) return; workshopOpen = false; workshopEl.classList.add('hidden'); if (!silent) sfx('switch'); }
+function closeWorkshop(silent = false) {
+  if (!workshopOpen) return;
+  workshopOpen = false; workshopEl.classList.add('hidden');
+  const box = wsDialogueBox();
+  if (wsBackToDialogue && typeof dialogueState !== 'undefined' && dialogueState && box) box.classList.remove('hidden');   // 回到跟諾亞的對話
+  wsBackToDialogue = false;
+  if (!silent) sfx('switch');
+}
 window.addEventListener('keydown', e => { if (workshopOpen && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); closeWorkshop(); } }, true);
 // 和諾亞對話時，對話框多四個選項：製作裝備、升級裝備、彈藥、開發建築物（.dialogue-ws，game.js 的 openDialogue／closeDialogue 呼叫）
 function onDialogueOpenedWorkshop(actor) {
