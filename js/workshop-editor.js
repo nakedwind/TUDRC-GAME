@@ -979,7 +979,7 @@ function renderPreview() {
   // 說明欄顯示選的那件；還沒拿到、工坊格子裡沒有的（只能在戰鬥區域拿到的武器、異質探測器…）也照樣顯示，才能調圖片位置、說明
   const noTab = selKey && !isRemoved(selKey) && getDef(selKey) && !pvTabOf(selKey);
   const pick = list.includes(selKey) || noTab ? selKey : list[0];
-  const section = (title, keys) => keys.length ? '<h3>' + title + '</h3><div class="ws-tiles" data-kind="' + (title === '武器' ? 'weapons' : 'gear') + '">' + keys.map(previewTile).join('') + '</div>' : '';
+  const section = (title, keys) => keys.length ? '<h3>' + title + '</h3><div class="ws-tiles" data-kind="' + (title.startsWith('武器') ? 'weapons' : 'gear') + '">' + keys.map(previewTile).join('') + '</div>' : '';
   const count = tab => allKeys().concat(AMMO_KEYS, EXTRA_KEYS).filter(k => pvOnPage(k, tab)).length;
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + workshopTabs(cfg).map(([id, label]) =>
     '<button type="button" role="tab" data-pv-tab="' + id + '" class="' + (pvTab === id ? 'active' : '') + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
@@ -993,7 +993,7 @@ function renderPreview() {
     '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
     '<div class="workshop-main"><div class="workshop-body">' + tabs +
     (ammoShop ? '<div class="ws-scroll ws-ammo-scroll">' + (bullets.length ? '<div class="supply-shop-list ws-ammo-list">' + ammoShop.list + '</div>' : '<p class="ws-empty">' + empty + '</p>') + '</div>' :
-    '<div class="ws-scroll">' + (list.length ? section('武器', weapons) + section('彈匣', mags) + section('背包', bags) + section('子彈', bullets) + section('建築', builds) + WORKSHOP_GEAR_GROUPS.map(([g, title]) => section(title, gear.filter(k => gearKind(k) === g))).join('') + section('隊員裝備', sgear) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
+    '<div class="ws-scroll">' + (list.length ? section('武器・彈匣・背包', weapons.concat(mags, bags)) + section('子彈', bullets) + section('建築', builds) + WORKSHOP_GEAR_GROUPS.map(([g, title]) => section(title, gear.filter(k => gearKind(k) === g))).join('') + section('隊員裝備', sgear) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
     '<div class="ws-info' + (pick ? '' : ' empty') + '">' + (pick ? (isExtra(pick) ? extraPreviewInfo(pick) : isAmmo(pick) ? ammoPreviewInfo(pick) : previewInfo(pick)) : '<div class="bag-detail-empty"><span>🔧</span><p>' + empty + '</p></div>') + '</div>') + '</div>' +
     side + '</div></section></div>';
   const ws = stage.querySelector('#workshop');
@@ -1249,7 +1249,8 @@ previewStageEl.addEventListener('click', e => {
   box.scrollIntoView({ block: 'center', behavior: 'smooth' });
   box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
 });
-const dragOk = r => dragKey && r && r.dataset.key !== dragKey && r.parentElement === previewStageEl.querySelector('.ws-tile[data-key="' + dragKey + '"]')?.parentElement;   // 只能跟同一組的換
+const dragOk = r => dragKey && r && r.dataset.key !== dragKey && r.parentElement === previewStageEl.querySelector('.ws-tile[data-key="' + dragKey + '"]')?.parentElement
+  && !isAmmo(r.dataset.key) && !isExtra(r.dataset.key) && isWeapon(r.dataset.key) === isWeapon(dragKey);   // 只能跟同一組的換；武器跟彈匣、背包排在同一排，但只能跟武器換
 previewStageEl.addEventListener('dragstart', e => {
   const r = e.target.closest && e.target.closest('.ws-tile[data-key]'); if (!r) return;
   if (isAmmo(r.dataset.key) || isExtra(r.dataset.key)) { e.preventDefault(); return; }   // 子彈、彈匣、背包、建築、隊員裝備的順序是遊戲固定的，不能拖
@@ -1267,7 +1268,7 @@ previewStageEl.addEventListener('drop', e => {
   if (!dragOk(r)) return;
   e.preventDefault();
   // 以「畫面上現在看到的順序」為準再互換；這一組沒顯示的（其他組、另一個分頁的、刪掉的）接在後面
-  const w = isWeapon(dragKey), shown = [...r.parentElement.children].map(el => el.dataset.key);
+  const w = isWeapon(dragKey), shown = [...r.parentElement.children].map(el => el.dataset.key).filter(k => k && isWeapon(k) === w && !isAmmo(k) && !isExtra(k));   // 同一排的彈匣、背包不算
   const list = shown.concat((w ? weaponKeys() : gearKeys()).filter(k => !shown.includes(k))), a = list.indexOf(dragKey), b = list.indexOf(r.dataset.key);
   [list[a], list[b]] = [list[b], list[a]];   // 互換
   cfg.order[w ? 'weapons' : 'gear'] = list;
