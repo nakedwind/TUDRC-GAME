@@ -308,9 +308,15 @@ function oreGlowLights() {
 // 地上的碎片（畫在地面層，角色腳下）
 function drawOreShards(ctx) {
   const list = G.oreShards; if (!list || !list.length) return;
+  for (const s of list) if (!fxSkip(s.floor)) drawOreShard(ctx, s);   // 陸橋補畫時跳過橋下的（js/pathfinding.js）
+}
+// 碎片一顆一顆跟人物、物件一起照底部 Y 排前後（js/render.js）：不會被「前後深度 0」的樓梯、柱子蓋住
+function oreShardSortables(out) {
+  for (const s of G.oreShards || []) out.push({ floor: looseFloor(s), y: s.y + 2, draw: () => drawOreShard(ctx, s) });
+}
+function drawOreShard(ctx, s) {
   const now = performance.now() / 1000;
-  for (const s of list) {
-    if (fxSkip(s.floor)) continue;   // 陸橋補畫時跳過橋下的（js/pathfinding.js）
+  {
     const bob = s.z === 0 ? Math.sin(now * 3 + s.spin) * 1.5 : 0;
     const x = s.x, y = s.y - s.z - 6 + bob;
     ctx.save();

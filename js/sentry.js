@@ -959,7 +959,8 @@ function updateSentryMain(t, dt) {
     const companionDistance = Math.hypot(companion.anchor.x - t.x, companion.anchor.y - t.y);
     const otherFloor = hasFloors && actorFloor(companion.anchor) !== actorFloor(t);   // 跟隨的人在另一層（例如溫特上了 2 樓）：再近也要跟過去
     // 站在打開的門裡（門口只有一格寬）：就算已經在身邊也不要停在門裡，再往跟隨的人靠近一點、走出門口（不然會把後面的人堵住）
-    const inDoorway = typeof mapDoors !== 'undefined' && mapDoors.some(d => d.open && d.cells.includes(cellAt(t.x, t.y).join(',')));
+    const inDoorway = (typeof mapDoors !== 'undefined' && mapDoors.some(d => d.open && d.cells.includes(cellAt(t.x, t.y).join(','))))
+      || (!!doorLanePoint(...cellAt(t.x, t.y)) && sentryBlocked(...center(...cellAt(t.x, t.y))));   // 沒對齊格子的門洞通道（格子正中間是牆、只能走門洞正中線的那幾格）也算門口，不要停在裡面（js/pathfinding.js）
     // 部隊長傳送到隊員跟不過去的地方（例如池核泳池中間的祕密小島）時被留下來的隊員（js/game.js 的 teleportInMap）：
     // 站在原地安靜等（看到怪照樣打），不一直說去不了；每秒看一次，部隊長回到走得到的地方就恢復跟隨
     if (t.leftBehind && t.mode === 'escort') {
@@ -968,8 +969,9 @@ function updateSentryMain(t, dt) {
     } else t.leftBehind = false;
     if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
       t.target = null; t.waitT = 0;
-      t.followDark = companion.anchor === G.player;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）
-      followTarget(t, companion.anchor, { dist: inDoorway && companionDistance <= companion.radius ? CELL * .9 : companion.radius * .82, speed: companion.speed }, dt);
+      t.followDark = companion.anchor === G.player || inDoorway;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）；站在門口：門外暗也要走出來，不然會一直堵在門裡
+      // 站在門口、對方就在旁邊：直接走到對方站的地方（對方常常就停在門口外面一格，只靠近到一格內的話會停在門裡）；一走出門口就照平常停下來
+      followTarget(t, companion.anchor, { dist: inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
       if (t.mode === 'escort' && typeof watchSentryProgress === 'function') watchSentryProgress(t, dt, leaderLabel(), () => sentryLeaderBlockReason(t));   // 叫來護衛卻過不來：說出原因（js/sentry-blocked.js）
       return;
     }
@@ -1083,7 +1085,10 @@ function followTarget(mover, target, cfg, dt) {
   const dx = target.x - mover.x, dy = target.y - mover.y, d = Math.hypot(dx, dy);
   if (d <= cfg.dist && (!hasFloors || actorFloor(target) === actorFloor(mover)) && !onMovingEscalator(mover)) return true;   // 夠近了就停（不同樓層不算近：溫特在橋上、自己在橋下時要繞去上面；還站在手扶梯上就先走下來）
   const near = d <= cfg.dist || d < 1;   // 平面上已經很近（只是在另一層）：直接走去對方站的位置那一層
-  const tx = near ? target.x : target.x - dx / d * cfg.dist, ty = near ? target.y : target.y - dy / d * cfg.dist;
+  let tx = near ? target.x : target.x - dx / d * cfg.dist, ty = near ? target.y : target.y - dy / d * cfg.dist;
+  // 停的點是照直線算的，隔著牆時常常落在牆裡（例如溫特穿過門走到斜上方的走廊）：
+  // 這時改成直接朝對方走，走到夠近（上面的 cfg.dist）自然會停。不然會去找「離牆裡那個點最近的空格」，常常就是門洞本身，整隊卡在門裡
+  if (!near && !onFloorDo(mover, () => sentryCellWalkable(...cellAt(tx, ty), true, !!(mover.summonDark || mover.followDark)))) { tx = target.x; ty = target.y; }
   mover.navFallback = hasFloors && !near ? target : null;   // 有陸橋的地圖：停在中間的那個點找不到路（例如落在別的區塊）→ 改成直接找去對方站的地方
   moveSentryWithPath(mover, tx, ty, cfg.speed, dt, hasFloors ? actorFloor(target) : null);
   mover.navFallback = null;   // 目的地在跟隨對象那一層（溫特上 2 樓就找上 2 樓的路）

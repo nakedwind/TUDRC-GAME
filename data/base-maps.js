@@ -14120,7 +14120,8 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "object4",
         "ox": 0,
-        "oy": 4
+        "oy": 4,
+        "sortDepth": 2
       },
       {
         "id": "tile_new_decor_coffee_machine",
@@ -14153,7 +14154,7 @@ const BASE_MAPS = [
         "layer": "object4",
         "ox": 16,
         "oy": 34,
-        "sortDepth": 0
+        "sortDepth": 1.5
       },
       {
         "id": "tile_hq_potted_plant",
@@ -14239,7 +14240,8 @@ const BASE_MAPS = [
         "r": 20,
         "layer": "overlay",
         "fx": true,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0
       },
       {
         "id": "tile_new_decor_box_three",

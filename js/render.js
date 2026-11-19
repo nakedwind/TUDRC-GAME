@@ -1095,6 +1095,8 @@ function draw() {
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ floor: looseFloor(c), y: c.y + 13, draw: () => drawCorpseSorted(c) });
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (typeof drawGroundItem === 'function') for (const g of G.groundItems || []) sortables.push({ floor: looseFloor(g), y: g.y + GROUND_ITEMS.sortDy, draw: () => drawGroundItem(ctx, g) });   // 溫特從背包放在地上的東西（js/ground-items.js）
+  if (typeof fishEggSortables === 'function') fishEggSortables(sortables);   // 比基尼小丑魚的魚卵（js/clownfish.js）：照底部 Y 跟人、物件排前後
+  if (typeof oreShardSortables === 'function') oreShardSortables(sortables);   // 炸開礦物後掉在地上的異質碎片（js/ore.js）：同上
   if (typeof mealSortables === 'function') mealSortables(sortables);   // 餐廳：桌上的餐盤、拿在手上的餐盤（js/meal.js）
   if (G.player) sortables.push({ ...actorDrawKey(G.player, G.player.y + 16, G.player.sitting ? seatDrawY(G.player.sitting) : null), draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
   // ---- 地上的特效（焦痕、地雷、碎片、油汙、水漬…）：畫在人物腳下 ----
@@ -1108,10 +1110,8 @@ function draw() {
     [() => typeof drawSootheGroundV2 === 'function' && drawSootheGroundV2(ctx), true],   // 疏導 V2：法陣、光柱畫在地上（js/soothe-fx-v2.js）
     [() => drawFlares(ctx), true],   // 地上燃燒的照明彈
     [() => drawLandmines(ctx), true],   // 地雷（js/landmine.js）
-    [() => typeof drawFishEggs === 'function' && drawFishEggs(ctx), true],   // 比基尼小丑魚的魚卵（js/clownfish.js）
     [() => typeof drawBananaEmperorGround === 'function' && drawBananaEmperorGround(ctx), false],   // 金蕉大王敲地的發光裂縫（js/banana-emperor.js）
     [() => typeof drawBananaPeels === 'function' && drawBananaPeels(ctx), true],   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
-    [() => drawOreShards(ctx), true],   // 炸開礦物後掉在地上的異質碎片（js/ore.js）
     [() => typeof drawFogV2Leaves === 'function' && drawFogV2Leaves(ctx, 'ground'), false],   // 起霧 V2：落到地上的葉子（js/fog-fx-v2.js）
     [() => drawOilGround(ctx), true],   // 油汙、火海底下的橘光（js/oil-barrels.js）
     [() => typeof drawFishWater === 'function' && drawFishWater(ctx), true],   // 魚頭君留下的水漬、積水（js/fish-head.js）

@@ -315,10 +315,16 @@ function blowFishEgg(egg) {
 function drawFishEggs(ctx) {
   const eggs = G.fishEggs;
   if (!eggs || !eggs.length) return;
+  for (const egg of eggs) if (!fxSkip(egg.floor)) drawFishEgg(ctx, egg);   // 另一層的魚卵這一輪不畫
+}
+// 魚卵一顆一顆跟人物、物件一起照底部 Y 排前後（js/render.js）：不會被「前後深度 0」的樓梯、柱子蓋住
+function fishEggSortables(out) {
+  for (const egg of G.fishEggs || []) out.push({ floor: looseFloor(egg), y: egg.y + 3, draw: () => drawFishEgg(ctx, egg) });
+}
+function drawFishEgg(ctx, egg) {
   const C = CLOWNFISH, now = performance.now() / 1000;
   const img = typeof monsterImage === 'function' ? monsterImage(CF_ART.egg) : null;
-  for (const egg of eggs) {
-    if (fxSkip(egg.floor)) continue;   // 另一層的魚卵這一輪不畫
+  {
     const armed = egg.fuse > 0;
     const soon = egg.hatch && egg.age > C.hatchT - C.hatchWarn;   // 快孵化了：微微抖動
     const shake = armed ? (Math.random() * 2 - 1) * 2.2 : soon ? Math.sin(now * 26 + egg.seed) * 1.1 : 0;

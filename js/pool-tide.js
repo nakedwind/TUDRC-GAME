@@ -1,10 +1,10 @@
 /* ===== 池核的抽水機、漲潮、抽水閥、溺水 =====
    流程（有畫 🛟 深水區的地圖才有，例如池核）：
    ① 一開始：淺水區有水、深水區是深水（要坐救生圈才能進去）
-   ② 抽水機（地圖上的發電機 dynamo）全部打開 → 1.5 秒抽乾：淺水區變成地面（之後永遠沒水）、深水區變成淺水，大家都能走
-      坐救生圈的人自動收起救生圈。抽水機打開後就關不掉（按了沒效果）
-   ③ 第一次抽乾後過 3 分鐘：水漲回來（2 秒），深水區又變回深水
-   ④ 水漲起來時：打開「抽水閥」（地圖編輯器選電源開關 → 勾「抽水閥」）→ 1.5 秒抽乾深水區；之後每 45 秒漲一次（第一次 90 秒）
+   ② 抽水機（地圖上的發電機 dynamo）全部打開：只是通電，水還不會退。抽水機打開後就關不掉（按了沒效果）
+   ③ 再去打開任何一個「抽水閥」（地圖編輯器選電源開關 → 勾「抽水閥」）→ 1.5 秒抽乾：淺水區變成地面（之後永遠沒水）、
+      所有深水區（BOSS 大水池、抽水機水池、救生員台）都變成淺水，大家都能走；坐救生圈的人自動收起救生圈
+   ④ 第一次抽乾後過 30 秒（firstHoldSecs）水漲回來（2 秒），深水區又變回深水；再打開抽水閥 → 抽乾，之後每 45 秒漲一次
    ・水要漲、要退之前 3 秒（POOL_TIDE.notice）：畫面中上方出現「水位即將上升……」「水位即將下降……」，開始漲／退就消失。
      所以打開抽水機、抽水閥之後，會先倒數 3 秒才開始退水（phase 'drainSoon'）
    ⑤ 水漲起來時還在深水區的隊友（沒坐救生圈）會溺水：每秒扣 1 HP，畫面上方中間跳「快打開抽水閥！」
@@ -16,7 +16,7 @@
      「深水時顯現」：深水區是深水時的樣子　　　　　　「淺水時顯現」：深水區抽成淺水時的樣子
      看不到的圖層：裡面勾了「這是水」的素材也不算水（js/water.js） */
 const POOL_TIDE = {
-  firstHoldSecs: 90,    // 第一次抽乾後，過幾秒水才漲回來（從抽水閥走到核心約 5～7 秒、溫特一個人打核心約 45 秒：第一次留寬一點，讓玩家看清楚抽乾的地形）
+  firstHoldSecs: 30,    // 第一次抽乾後，過幾秒水才漲回來（原本 90 秒）
   holdSecs: 45,         // 之後每次抽乾後，過幾秒水又漲回來（越後面越趕；核心扣的血不會回來，打不完下次抽乾再接著打）
   riseSecs: 2,          // 水漲起來要幾秒
   drainSecs: 1.5,       // 抽乾要幾秒
@@ -122,7 +122,8 @@ function drawPoolDeepTint(ctx) {
     ctx.save(); ctx.globalAlpha *= a; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';   // 平滑放大＝漸層
     ctx.drawImage(cv, OX, OY, COLS * CELL, ROWS * CELL); ctx.restore();
   };
-  if (deep >= .999 || !M.normal) put(M.all, T.alpha);   // 深水時：整張一起畫（一般、永遠深水接縫處不會有一條線）
+  if (!M.normal) put(M.all, T.alpha * deep);   // 沒有永遠深水：整片跟著水位淡掉
+  else if (deep >= .999) put(M.all, T.alpha);   // 深水時：整張一起畫（一般、永遠深水接縫處不會有一條線）
   else { put(M.normal, T.alpha * deep); put(M.keepMask, T.alpha); }
 }
 
@@ -132,16 +133,16 @@ function poolPumpLocked() { return poolTideActive() && poolTide().pumped; }
 function poolPumpCheck() {
   if (!poolTideActive() || typeof dynamosAllOn !== 'function' || !dynamosAllOn()) return;
   const s = poolTide(); if (s.pumped) return;
-  s.pumped = true; s.firstDrain = true; poolDrainSoon(s);
-  if (typeof systemNotice === 'function') systemNotice('抽水機啟動了，水正在退去……');
+  s.pumped = true;   // 只是通電：要再打開抽水閥才會抽水（usePoolValve）
+  if (typeof systemNotice === 'function') systemNotice('抽水機啟動了，打開抽水閥就能把水抽走。');
 }
 // ---- 抽水閥（地圖編輯器勾了「抽水閥」的電源開關）----
 function usePoolValve() {
   const s = poolTideActive() ? poolTide() : null;
   if (!s || !s.pumped) { sfx('error'); if (G && G.player) G.player.poolSay = { text: POOL_TIDE.valveNoPowerText, until: performance.now() + POOL_TIDE.valveSaySecs * 1000 }; return; }   // 溫特頭上的泡泡（drawPoolTideBubble）
   if (s.phase === 'drainSoon' || s.phase === 'draining') { sfx('switch'); systemNotice(POOL_TIDE.valveBusyText); return; }
-  if (s.phase !== 'high' && s.phase !== 'rising') { sfx('switch'); systemNotice(POOL_TIDE.valveLowText); return; }
-  s.firstDrain = false; poolDrainSoon(s); sfx('powerOn');
+  if (s.phase !== 'full' && s.phase !== 'high' && s.phase !== 'rising') { sfx('switch'); systemNotice(POOL_TIDE.valveLowText); return; }
+  s.firstDrain = s.phase === 'full'; poolDrainSoon(s); sfx('powerOn');   // full＝還沒抽過：第一次抽乾
 }
 // 要退水了：先倒數 POOL_TIDE.notice.secs 秒（畫面中上方「水位即將下降……」）才開始退；水正在漲的話，倒數時照樣漲
 function poolDrainSoon(s) { s.drainFromRise = s.phase === 'rising'; s.phase = 'drainSoon'; s.drainAt = s.t + POOL_TIDE.notice.secs; }
@@ -160,7 +161,7 @@ function updatePoolTide(dt) {
   } else if (s.phase === 'draining') {
     const k = dt / POOL_TIDE.drainSecs;
     s.deep = Math.max(0, s.deep - k); s.shallow = Math.max(0, s.shallow - k);
-    if (s.deep <= 0 && s.shallow <= 0) { s.phase = 'low'; s.riseAt = s.t + (s.firstDrain ? POOL_TIDE.firstHoldSecs : POOL_TIDE.holdSecs); }
+    if (s.deep <= 0 && s.shallow <= 0) { s.drained = true; s.phase = 'low'; s.riseAt = s.t + (s.firstDrain ? POOL_TIDE.firstHoldSecs : POOL_TIDE.holdSecs); }
   } else if (s.phase === 'low' && s.t >= s.riseAt) {
     s.phase = 'rising';
     const mates = poolMatesInDeep();
@@ -180,7 +181,7 @@ function updatePoolTide(dt) {
     if (typeof computeFlow === 'function') computeFlow();
   }
   // 溺水：深水時，還在深水區、沒坐救生圈的隊友每秒扣血
-  const drowning = deepNow && s.pumped ? poolMatesInDeep() : [];
+  const drowning = deepNow && s.drained ? poolMatesInDeep() : [];   // 抽乾過、水又漲回來才會溺水（剛通電還沒開抽水閥＝跟一開始一樣）
   for (const t of G.towers || []) {
     const now = drowning.includes(t);
     if (now && !t.drowning) poolDrownSound('poolDrownMate', t.id ?? t.type);   // 剛開始溺水：冒泡泡的聲音
@@ -196,7 +197,7 @@ function updatePoolTide(dt) {
     }
     if (t.hp <= 0) { t.target = null; if (typeof sentryStatus === 'function') sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
-  updateWinterDrown(dt, deepNow && s.pumped);
+  updateWinterDrown(dt, deepNow && s.drained);
   poolWarnShow(drowning.length > 0 && G.running && !G.over);
 }
 // 溫特溺水：跟隊友一樣，水漲起來時還在深水區、沒坐救生圈就原地溺水，每秒扣 drownDps

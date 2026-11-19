@@ -1476,15 +1476,31 @@ function playerBlocked(x, y, who = null) {
 }
 // 救援機制：角色若被卡在牆／建築裡（例如放置時的邊角誤差），
 // 由近到遠繞圈找最近的空位，把角色推出去。
+// 落點要「有地方走」：至少往上下左右其中一邊能直走 RESCUE_ROOM 像素。
+// 不然會被推進牆裡的小空隙（例如池核 24,13「只是圖片」的門：門洞上半段沒擋、四周都是牆），
+// 卡在裡面出不來，畫面上頭還會從門上面的牆冒出來。找不到這種落點才退回「最近的空位」。
+const RESCUE_ROOM = 28;
+function rescueRoomy(x, y, blockedFn) {
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    let ok = true;
+    for (let s = 4; s <= RESCUE_ROOM && ok; s += 4) if (blockedFn(x + dx * s, y + dy * s)) ok = false;
+    if (ok) return true;
+  }
+  return false;
+}
 function rescueStuck(p, blockedFn) {
   if (!blockedFn(p.x, p.y)) return false;
+  let first = null;   // 最近的空位（備用）
   for (let d = 6; d <= CELL * 5; d += 6) {
     for (let a = 0; a < 16; a++) {
       const ang = (a / 16) * Math.PI * 2;
       const x = p.x + Math.cos(ang) * d, y = p.y + Math.sin(ang) * d;
-      if (!blockedFn(x, y)) { p.x = x; p.y = y; return true; }
+      if (blockedFn(x, y)) continue;
+      if (rescueRoomy(x, y, blockedFn)) { p.x = x; p.y = y; return true; }
+      if (!first) first = [x, y];
     }
   }
+  if (first) { [p.x, p.y] = first; return true; }
   return false;
 }
 
