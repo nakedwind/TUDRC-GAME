@@ -928,10 +928,11 @@ function ammoPreviewInfo(key) {
     stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + lv + '）') + '</small><b>' + wsColor('彈匣 ' + slots[lv - 1] + ' 格') + '</b></div>' +
       (lv < slots.length ? '<div class="bag-gear-stat next"><small>' + L('stats', 'next', '升級後（Lv' + (lv + 1) + '）') + '</small><b>' + wsColor('彈匣 ' + slots[lv] + ' 格') + '</b></div>' : '');
     btn = lv < slots.length ? '<button type="button" class="ws-btn">' + L('btn', 'up', '升級') + ' ' + cost(costs[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
-  } else {   // 子彈：跟遊戲的彈藥頁一樣（預覽：身上 0 發、選一組、彈藥包放得下一組）
-    const set = ammoVal(key, 'max'), h = workshopAmmoBuyHtml({ id: key.slice(2), price: ammoVal(key, 'price'), qty: set, have: 0, room: set, set, cash: 99999 });
+  } else {   // 子彈：遊戲的補充彈藥頁改成商店排版（沒有下方說明欄），這裡只留價錢給你對照
+    const set = ammoVal(key, 'max'), price = ammoVal(key, 'price');
     tag = '<span class="bag-tag effect">子彈</span>';
-    stats = h.stats; btn = h.btn;
+    stats = '<div class="bag-gear-stat"><small>價錢</small><b>一發 $' + price + '・一組 ' + set + ' 發 $' + price * set + '</b></div>';
+    btn = '<button type="button" class="ws-btn" disabled>在補充彈藥頁買</button>';
   }
   const about = v.ownedDesc || '';
   // 經費：彈匣還能升級／子彈還沒開發的時候才有（寫在按鈕裡碎片的上面）
@@ -983,13 +984,17 @@ function renderPreview() {
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + workshopTabs(cfg).map(([id, label]) =>
     '<button type="button" role="tab" data-pv-tab="' + id + '" class="' + (pvTab === id ? 'active' : '') + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
   const empty = PV_EMPTY[pvTab] || '';
-  const side = pvTab === 'ammo' || pvTab === 'build' ? '' : pvSideHtml();   // 彈藥、建築頁沒有右邊的紙娃娃（跟遊戲一樣）   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
+  // 補充彈藥頁：跟遊戲一樣的商店排版（js/workshop-config.js 的 workshopAmmoShopHtml）。預覽：身上 0 發、彈藥包每種放得下 3 組、經費 $99999，購物車可以試按（不會影響遊戲）
+  const ammoShop = pvTab === 'ammo' ? workshopAmmoShopHtml({ cash: PV_AMMO_CASH, items: bullets.map(k => { const id = k.slice(2), set = ammoVal(k, 'max');
+    return { id, key: k, name: ammoVal(k, 'name'), image: ammoVal(k, 'image'), price: ammoVal(k, 'price'), have: 0, room: set * 3, set, n: pvAmmoCart[id] || 0, desc: ammoVal(k, 'desc') }; }) }) : null;
+  const side = ammoShop ? ammoShop.cart : pvTab === 'build' ? '' : pvSideHtml();   // 彈藥、建築頁沒有右邊的紙娃娃（跟遊戲一樣）   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
   stage.innerHTML = '<div id="workshop"><section class="workshop-card" role="dialog" aria-label="開發工坊預覽">' +
     '<header class="workshop-head">' + workshopHeadHtml(cfg) +
     '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
     '<div class="workshop-main"><div class="workshop-body">' + tabs +
+    (ammoShop ? '<div class="ws-scroll ws-ammo-scroll">' + (bullets.length ? '<div class="supply-shop-list ws-ammo-list">' + ammoShop.list + '</div>' : '<p class="ws-empty">' + empty + '</p>') + '</div>' :
     '<div class="ws-scroll">' + (list.length ? section('武器', weapons) + section('彈匣', mags) + section('背包', bags) + section('子彈', bullets) + section('建築', builds) + WORKSHOP_GEAR_GROUPS.map(([g, title]) => section(title, gear.filter(k => gearKind(k) === g))).join('') + section('隊員裝備', sgear) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
-    '<div class="ws-info' + (pick ? '' : ' empty') + '">' + (pick ? (isExtra(pick) ? extraPreviewInfo(pick) : isAmmo(pick) ? ammoPreviewInfo(pick) : previewInfo(pick)) : '<div class="bag-detail-empty"><span>🔧</span><p>' + empty + '</p></div>') + '</div></div>' +
+    '<div class="ws-info' + (pick ? '' : ' empty') + '">' + (pick ? (isExtra(pick) ? extraPreviewInfo(pick) : isAmmo(pick) ? ammoPreviewInfo(pick) : previewInfo(pick)) : '<div class="bag-detail-empty"><span>🔧</span><p>' + empty + '</p></div>') + '</div>') + '</div>' +
     side + '</div></section></div>';
   const ws = stage.querySelector('#workshop');
   ws.style.padding = '16px';
@@ -1062,6 +1067,32 @@ function pvEquip(slotId, key) {
   if (key) for (const [k, v] of Object.entries(pv.equipped)) if (v === key && k !== slotId) pv.equipped[k] = pv.equipped[slotId] || null;   // 已經穿在別格：兩格交換
   pv.equipped[slotId] = key || null; pv.menu = null;
 }
+// 補充彈藥頁的購物車（預覽用：子彈 id → 幾發；跟遊戲一樣「加入一組」、−／＋、清空、結帳，結帳只是清空）
+const pvAmmoCart = {}, PV_AMMO_CASH = 99999;
+function pvAmmoClick(e) {   // 回傳 true＝處理掉了
+  const room = id => ammoVal('b:' + id, 'max') * 3, price = id => ammoVal('b:' + id, 'price');
+  const set = (id, n) => { n = Math.max(0, Math.min(room(id), Math.round(n) || 0)); if (n) pvAmmoCart[id] = n; else delete pvAmmoCart[id]; };
+  const ca = e.target.closest('[data-ws-cart-add]');
+  if (ca) { const id = ca.dataset.wsCartAdd; set(id, (pvAmmoCart[id] || 0) + ammoVal('b:' + id, 'max')); renderPreview(); return true; }
+  const cd = e.target.closest('[data-ws-cart-dec]'); if (cd) { set(cd.dataset.wsCartDec, (pvAmmoCart[cd.dataset.wsCartDec] || 0) - 1); renderPreview(); return true; }
+  const ci = e.target.closest('[data-ws-cart-inc]'); if (ci) { set(ci.dataset.wsCartInc, (pvAmmoCart[ci.dataset.wsCartInc] || 0) + 1); renderPreview(); return true; }
+  if (e.target.closest('[data-ws-cart-clear]')) { Object.keys(pvAmmoCart).forEach(k => delete pvAmmoCart[k]); renderPreview(); return true; }
+  if (e.target.closest('[data-ws-cart-checkout]')) {
+    const total = Object.entries(pvAmmoCart).reduce((sum, [id, n]) => sum + price(id) * n, 0);
+    Object.keys(pvAmmoCart).forEach(k => delete pvAmmoCart[k]);
+    setStatus('（預覽）結帳 $' + total + '——只是預覽，不會影響遊戲'); renderPreview(); return true;
+  }
+  if (e.target.closest('[data-ws-cart-input]')) return true;   // 點輸入框：不要選別件
+  const card = e.target.closest('.ws-ammo-card[data-key]');   // 點商品卡（不是按鈕）：左邊選這顆子彈來改
+  if (card) { selKey = card.dataset.key; pvLastSel = selKey; renderList(); renderItemForm(); renderPreview(); return true; }
+  return false;
+}
+document.getElementById('previewStage').addEventListener('change', e => {   // 購物車裡直接打數字
+  const inp = e.target.closest('[data-ws-cart-input]'); if (!inp) return;
+  const id = inp.dataset.wsCartInput, n = /^\d+$/.test(inp.value.trim()) ? Number(inp.value.trim()) : 0, room = ammoVal('b:' + id, 'max') * 3;
+  if (n > 0) pvAmmoCart[id] = Math.min(room, n); else delete pvAmmoCart[id];
+  renderPreview();
+});
 // 右側的點擊（在 previewStage 的點擊裡最先處理）：回傳 true＝處理掉了
 function pvSideClick(e) {
   if (!e.target.closest('.workshop-side')) return false;
@@ -1176,6 +1207,7 @@ async function openAssetFolder(key) {
 }
 // 點預覽裡的欄位＝在左邊選它
 document.getElementById('previewStage').addEventListener('click', e => {
+  if (pvAmmoClick(e)) return;   // 補充彈藥頁：購物車
   if (pvSideClick(e)) return;   // 右側：穿上／卸下、分解
   const tb = e.target.closest('[data-pv-tab]');   // 上面的分頁：開發／升級（選那一頁的第一件）
   if (tb) {

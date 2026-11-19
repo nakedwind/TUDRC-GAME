@@ -3770,3 +3770,19 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #saveRestore input[type=number], #saveRestore select { padding: 2px 4px; border: 1px solid #536b80; border-radius: 6px; background: #101923; color: #edf5ff; font: inherit; }
 #saveRestore .sr-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 #saveRestore .sr-apply { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+
+/* ===== 開發工坊「補充彈藥」頁：跟商店一樣的排版（商品卡、購物車的樣式直接用上面商店的；這裡只調在工坊裡不一樣的地方）===== */
+.ws-ammo-list { flex: none; overflow: visible; padding: 4px 0 6px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.ws-ammo-scroll { padding-top: 2px; }
+.shop-item.ammo .shop-effect { background: rgba(255,212,121,.1); color: #ffd479; }
+.shop-item.ammo:hover { border-color: rgba(255,212,121,.4); }
+.workshop-side.ws-ammo-cart { padding: 0; gap: 0; overflow: hidden; }
+.ws-ammo-cart .cart-list { flex: 1; min-height: 0; flex-direction: column; overflow-x: hidden; overflow-y: auto; }   /* 商店在窄畫面會把購物車改成橫的；工坊右邊這欄一直是直的 */
+.ws-ammo-cart .cart-row { flex: none; width: auto; }
+.ws-ammo-cart .cart-foot { flex-direction: column; align-items: stretch; }
+.ws-ammo-cart .cart-remain { display: block; }
+.ws-cart-clear { margin-left: 8px; padding: 2px 8px; border: 1px solid rgba(255,255,255,.15); border-radius: 99px; background: transparent; color: #9aa6b2; cursor: pointer; font: 700 11px "Microsoft JhengHei", sans-serif; }
+.ws-cart-clear:hover:not(:disabled) { border-color: #ff9d8f; color: #ff9d8f; } .ws-cart-clear:disabled { opacity: .35; cursor: default; }
+.ws-ammo-cart .cart-qty input { width: 38px; height: 24px; padding: 0 2px; border: 1px solid rgba(255,255,255,.18); border-radius: 6px; background: rgba(0,0,0,.3); color: #fff; font: 700 13px "Microsoft JhengHei", sans-serif; text-align: center; font-variant-numeric: tabular-nums; }
+.ws-ammo-cart .cart-qty input:focus { outline: none; border-color: #ffd479; }
+@media (max-width: 760px) { .workshop-side.ws-ammo-cart { max-height: 260px; } }

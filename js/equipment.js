@@ -745,23 +745,22 @@ function ensureWorkshop() {
     if (pk) { if (wsPick !== pk.dataset.wsPick) { wsPick = pk.dataset.wsPick; sfx('menu'); renderWorkshop(); } return; }
     const tb = e.target.closest('[data-ws-tab]');   // 上面的分頁：製作裝備／升級裝備／彈藥／開發建築物
     if (tb) { if (wsPage !== tb.dataset.wsTab) { wsPage = tb.dataset.wsTab; wsPick = null; sfx('switch'); renderWorkshop(false); } return; }
-    const q = e.target.closest('[data-ws-qty]');   // 彈藥頁：選要買幾發（js/magazine.js）
-    if (q) { setAmmoQty(q.closest('[data-ws-qty-box]').dataset.wsQtyBox, q.dataset.wsQty); sfx('blip'); renderWorkshop(); return; }
+    // 補充彈藥頁（商店排版，js/magazine.js）：加入一組、購物車的 −／＋、清空、結帳
+    const ca = e.target.closest('[data-ws-cart-add]'); if (ca) { wsAmmoCartAdd(ca.dataset.wsCartAdd); renderWorkshop(); return; }
+    const cd = e.target.closest('[data-ws-cart-dec]'); if (cd) { const id = cd.dataset.wsCartDec; wsAmmoCartSet(id, (wsAmmoCart[id] || 0) - 1); sfx('switch'); renderWorkshop(); return; }
+    const ci = e.target.closest('[data-ws-cart-inc]'); if (ci) { const id = ci.dataset.wsCartInc; wsAmmoCartSet(id, (wsAmmoCart[id] || 0) + 1); sfx('blip'); renderWorkshop(); return; }
+    if (e.target.closest('[data-ws-cart-clear]')) { Object.keys(wsAmmoCart).forEach(k => delete wsAmmoCart[k]); sfx('switch'); renderWorkshop(); return; }
+    if (e.target.closest('[data-ws-cart-checkout]')) { wsAmmoCheckout(); renderWorkshop(); return; }
     const b = e.target.closest('[data-ws]'); if (!b) return;
     const [kind, id] = b.dataset.ws.split(':');
     workshopBuy(kind, id);
   });
-  // 彈藥頁：直接打數字（打的時候只更新總價；打完才整頁重畫，不然輸入框會一直失去焦點）
-  workshopEl.addEventListener('input', e => {
-    const inp = e.target.closest('[data-ws-qty-input]'); if (!inp) return;
-    const id = inp.closest('[data-ws-qty-box]').dataset.wsQtyBox, txt = inp.value.trim();
-    if (!/^\d*$/.test(txt)) return;
-    setAmmoQty(id, Number(txt) || 0);
-    const total = workshopEl.querySelector('.ws-buy-total'), btn = workshopEl.querySelector('[data-ws="ab:' + id + '"]'), cost = (wsAmmoQty[id] || 0) * bulletPrice(id);
-    if (total) total.textContent = '$' + cost;
-    if (btn) { btn.disabled = !(wsAmmoQty[id] > 0); btn.classList.toggle('short', cost > Math.floor(G.money || 0)); }
+  // 補充彈藥頁：購物車裡直接打數字（打完、離開輸入框才整頁重畫，不然輸入框會一直失去焦點）
+  workshopEl.addEventListener('change', e => {
+    const inp = e.target.closest('[data-ws-cart-input]'); if (!inp) return;
+    wsAmmoCartSet(inp.dataset.wsCartInput, /^\d+$/.test(inp.value.trim()) ? Number(inp.value.trim()) : 0); renderWorkshop();
   });
-  workshopEl.addEventListener('change', e => { if (e.target.closest('[data-ws-qty-input]')) renderWorkshop(); });
+  workshopEl.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('[data-ws-cart-input]')) e.target.blur(); });   // Enter＝打好了
   document.getElementById('wrap').appendChild(workshopEl);
 }
 // ---- 分解：右側「目前裝備」「背包裡的裝備」點一下選它，最下面按「分解裝備」 ----
@@ -911,7 +910,7 @@ const wsIcon = d => { const st = workshopIconStyle(d), h = equipIcon(d); return 
 // ---- 開發工坊 v4：分成四頁（跟諾亞對話時選，上面的分頁也可以切換）----
 // ・製作裝備：還沒開發的裝備（開發）；新版裝備（js/gear-v2.js）開發過的可以一直「製作一件」，所以這頁不會開發完就空了
 // ・升級裝備：手上的每一件裝備（新版：一件一格，各升各的，js/gear-v2.js）、手槍、彈匣、背包／彈藥包擴充
-// ・彈藥：用經費買子彈，可以自己選買幾發（js/magazine.js；只能在後室找到的子彈不賣）
+// ・彈藥：用經費買子彈，跟商店一樣放進購物車再結帳（js/magazine.js；只能在後室找到的子彈不賣）
 // ・開發建築物：開發新建築、把建築升到 Lv5（js/build.js；血量、地雷油桶油箱的攻擊力、爐具的煮飯速度）
 // ・格子一排 6 格（正方形，圖示＋名稱），格子底色照等級發光：Lv1 原本的、Lv2 綠、Lv3 藍、Lv4 紫、Lv5 金（.tier-N）
 // ・最下面固定一條說明欄（跟背包一樣）：左邊大圖、中間名稱／說明／數值、右邊開發／升級按鈕；打開時自動選第一格
@@ -962,10 +961,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     const L = (p, f, txt) => typeof workshopInfoLabel === 'function' ? workshopInfoLabel(wk, p, f, txt, { lv: e.lv, next: e.lv + 1 }) : txt;
     const tags = e.kind === 'ammo' ? '<span class="bag-tag effect">子彈</span>' : (e.lv ? '<span class="bag-tag effect">' + L('tag', 'lv', 'Lv' + e.lv) + '</span>' : e.canDev ? '<span class="bag-tag">' + L('tag', 'dev', '未開發') + '</span>' : '<span class="bag-tag">' + L('tag', 'field', '戰鬥區域取得') + '</span>') + (e.worn ? '<span class="bag-tag worn">穿戴中</span>' : '') + (e.extraTags || '');   // extraTags：新版裝備的「全隊可穿」「持有幾件」（js/gear-v2.js）
     let stats, btn, ready = '';   // ready：已經組好價錢的按鈕（製作一件、購買），不用再套 workshopPriceBtn
-    if (e.kind === 'ammo') {   // 彈藥：數量選擇＋購買（js/workshop-config.js 的 workshopAmmoBuyHtml，編輯器的預覽也用它）
-      const h = workshopAmmoBuyHtml({ id: e.bullet, price: e.price, qty: Math.min(wsAmmoQty[e.bullet] ?? e.set, e.room), have: e.have, room: e.room, set: e.set, cash: Math.floor(G.money || 0) });
-      stats = h.stats; ready = h.btn;
-    } else if (e.lv && page === 'make' && e.extraBtn) {   // 製作裝備頁：開發過的只能「製作一件」（升級在升級裝備頁）
+    if (e.lv && page === 'make' && e.extraBtn) {   // 製作裝備頁：開發過的只能「製作一件」（升級在升級裝備頁）
       stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + e.lv + '）') + '</small><b>' + wsColor(e.stat(e.lv)) + '</b></div>';
       ready = e.extraBtn;
     } else if (e.lv) {
@@ -1006,7 +1002,9 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   const spareKeys = typeof gearV2SpareList === 'function' ? gearV2SpareList() : EQUIPMENT.filter(d => equipState.owned[d.id] && !wornIds.has(d.id)).map(d => d.id);   // 新版：背包裡的每一件各列一格（js/gear-v2.js）
   const spare = spareKeys
     .map(key => { const d = equipDef(key), lv = gearKeyLv(key); return '<span class="wss-item' + tier(lv) + (wsScrapSel === key ? ' sel' : '') + '" data-scrap="' + key + '" title="' + d.name + ' Lv' + lv + '">' + equipIcon(d) + '<em>Lv' + lv + '</em></span>'; }).join('');
-  const side = page === 'ammo' || page === 'build' ? '' : '<aside class="workshop-side"><h3>目前裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + dollSlots + '</div></div>' +
+  // 補充彈藥頁：跟商店一樣的排版（左邊商品卡、右邊購物車），沒有下方說明欄（說明在滑鼠移上去的提示）
+  const ammoShop = page === 'ammo' ? workshopAmmoShopHtml({ items: wsAmmoShopItems(ammoList), cash: Math.floor(G.money || 0) }) : null;
+  const side = ammoShop ? ammoShop.cart : page === 'build' ? '' : '<aside class="workshop-side"><h3>目前裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + dollSlots + '</div></div>' +
     '<h3>背包裡的裝備</h3>' + (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">無</p>') +
     wsScrapBox() + '</aside>';   // 最下面：選到東西＝「分解裝備」，沒選＝換裝備的提示
   const SCROLLERS = ['.ws-scroll', '.workshop-side', '.workshop-main'];   // 會捲動的區塊（窄畫面時是 .workshop-main）
@@ -1015,8 +1013,9 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     '<header class="workshop-head">' + workshopHeadHtml() +   // 標題列的文字（開發工坊編輯器可以改：js/workshop-config.js）
     '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
     '<div class="workshop-main"><div class="workshop-body">' + tabs +
+    (ammoShop ? '<div class="ws-scroll ws-ammo-scroll">' + (ammoList.length ? '<div class="supply-shop-list ws-ammo-list">' + ammoShop.list + '</div>' : '<p class="ws-empty">' + empty + '</p>') + '</div>' :
     '<div class="ws-scroll">' + (list.length ? section('武器', weaponList) + section('彈匣', magList) + section('背包', bagList) + section('子彈', ammoList) + section('建築', buildEntryList) + WORKSHOP_GEAR_GROUPS.map(([k, title]) => section(title, gearList.filter(e => workshopGearGroup(e.def.kind) === k))).join('') + section('隊員裝備', sgearList) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
-    '<div class="ws-info' + (e ? '' : ' empty') + '">' + info + '</div></div>' + side + '</div></section>';
+    '<div class="ws-info' + (e ? '' : ' empty') + '">' + info + '</div>') + '</div>' + side + '</div></section>';
   if (scroll) SCROLLERS.forEach((q, i) => { const el = workshopEl.querySelector(q); if (el) el.scrollTop = scroll[i]; });
   if (typeof fitWorkshopDesc === 'function') fitWorkshopDesc(workshopEl);   // 說明盡量一行（js/workshop-config.js）
   attachWorkshopToast();

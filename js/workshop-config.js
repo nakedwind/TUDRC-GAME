@@ -504,19 +504,42 @@ function bulletPrice(id, cfg) {
 }
 // 能不能在諾亞那邊買：只能在後室找到的子彈（source: 'field'）不賣
 const bulletBuyable = (id, b) => id !== 'pistol' && !!b && !b.removed && b.source !== 'field';
-// 「彈藥」頁下方說明欄的數量選擇和購買按鈕（遊戲、開發工坊編輯器的預覽共用）
-//   o：{ id, price 一發多少, qty 選了幾發, have 身上有幾發, room 彈藥包還放得下幾發, set 一組幾發, cash 身上的經費 }
-function workshopAmmoBuyHtml(o) {
-  const total = o.qty * o.price, short = total > o.cash;
-  const stats = '<div class="bag-gear-stat"><small>價錢</small><b>一發 $' + o.price + '・身上有 ' + o.have + ' 發・彈藥包還放得下 ' + o.room + ' 發</b></div>' +
-    '<div class="ws-qty" data-ws-qty-box="' + o.id + '"><small>要補充幾發</small>' +
-    '<button type="button" data-ws-qty="-10">−10</button><button type="button" data-ws-qty="-1">−1</button>' +
-    '<input type="text" inputmode="numeric" data-ws-qty-input value="' + o.qty + '">' +
-    '<button type="button" data-ws-qty="1">＋1</button><button type="button" data-ws-qty="10">＋10</button>' +
-    '<button type="button" data-ws-qty="set">一組（' + o.set + '）</button><button type="button" data-ws-qty="max">最多</button></div>';
-  const btn = o.room <= 0 ? '<button type="button" class="ws-btn" disabled>彈藥包滿了</button>'
-    : '<button type="button" class="ws-btn ws-buy' + (short ? ' short' : '') + '" data-ws="ab:' + o.id + '"' + (o.qty > 0 ? '' : ' disabled') + '><span class="ws-btn-label">補充</span><b class="ws-buy-total">$' + total + '</b></button>';
-  return { stats, btn };
+// 「補充彈藥」頁：跟商店一樣的排版（左邊大張商品卡、右邊購物車＋合計＋結帳）。遊戲 js/equipment.js、開發工坊編輯器的預覽共用這一份
+//   o.items：每種子彈 { id, name, image, price 一發多少, have 身上有幾發, room 彈藥包還放得下幾發（已經扣掉購物車裡別種子彈會多佔的格子）,
+//             set 一組幾發, n 購物車裡有幾發, desc 說明（滑鼠移上去才顯示）, key 開發工坊的 key（編輯器用來選這一件） }
+//   o.cash：身上的經費
+//   回傳 { list: 商品卡, cart: 右邊的購物車 }
+const workshopAmmoCartTotal = items => items.reduce((sum, it) => sum + it.price * (it.n || 0), 0);
+// 商品卡上的「加入」這一下會加幾發：一組，但不超過彈藥包放得下的、錢買得起的
+function workshopAmmoAddCount(it, cashLeft) {
+  const afford = it.price > 0 ? Math.floor(cashLeft / it.price) : Infinity;
+  return Math.max(0, Math.min(it.set, it.room - (it.n || 0), afford));
+}
+function workshopAmmoShopHtml(o) {
+  const q = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const total = workshopAmmoCartTotal(o.items), left = o.cash - total;   // left：扣掉購物車後還能花的錢
+  const list = o.items.map(it => {
+    const n = it.n || 0, full = it.room - n <= 0, add = workshopAmmoAddCount(it, left), short = it.price * Math.min(it.set, it.room - n) - left;
+    const btn = full ? '<button class="shop-buy maxed" type="button" disabled>彈藥包滿了</button>'
+      : add <= 0 ? '<button class="shop-buy" type="button" disabled>還差 $' + Math.max(1, short) + '</button>'
+      : '<button class="shop-buy" type="button" data-ws-cart-add="' + it.id + '" aria-label="把 ' + q(it.name) + ' ' + add + ' 發加入購物車，$' + add * it.price + '"><span>' + (add === it.set ? '加入一組' : '加入 ' + add + ' 發') + '</span><b>$' + add * it.price + '</b></button>';
+    return '<article class="shop-item ammo ws-ammo-card' + (full ? ' maxed' : '') + '" data-ws-ammo="' + it.id + '"' + (it.key ? ' data-key="' + q(it.key) + '"' : '') + (it.desc ? ' title="' + q(it.desc) + '"' : '') + '>' +
+      (full ? '<span class="shop-full-tag">彈藥包滿了</span>' : '') + (n ? '<span class="shop-owned" title="購物車裡有 ' + n + ' 發">🛒' + n + '</span>' : '') +
+      '<div class="shop-item-image"><img src="' + q(it.image) + '" alt=""><strong title="' + q(it.name) + '">' + q(it.name) + '</strong></div>' +
+      '<span class="shop-effect">一組 ' + it.set + ' 發<small>身上 ' + it.have + ' 發</small></span>' + btn + '</article>';
+  }).join('');
+  const inCart = o.items.filter(it => it.n > 0), count = inCart.reduce((sum, it) => sum + it.n, 0);
+  const rows = inCart.map(it => '<div class="cart-row ammo" data-ws-cart-row="' + it.id + '"><img src="' + q(it.image) + '" alt=""><span class="slot-info"><strong>' + q(it.name) + '</strong><small>$' + it.price * it.n + '</small></span>' +
+    '<span class="cart-qty"><button type="button" data-ws-cart-dec="' + it.id + '" aria-label="' + q(it.name) + ' 少一發">' + (it.n > 1 ? '−' : '🗑') + '</button>' +
+    '<input type="text" inputmode="numeric" data-ws-cart-input="' + it.id + '" value="' + it.n + '" aria-label="' + q(it.name) + ' 要買幾發">' +
+    '<button type="button" data-ws-cart-inc="' + it.id + '" aria-label="' + q(it.name) + ' 多一發"' + (it.n >= it.room || it.price > left ? ' disabled' : '') + '>＋</button></span></div>').join('');
+  const over = total > o.cash;
+  const cart = '<aside class="workshop-side ws-ammo-cart shop-cart" aria-label="購物車">' +
+    '<div class="bag-head"><strong>🛒 購物車</strong><span>' + count + ' 發</span><button type="button" class="ws-cart-clear" data-ws-cart-clear' + (inCart.length ? '' : ' disabled') + '>清空</button></div>' +
+    '<div class="cart-list">' + (rows || '<span class="supply-empty">購物車是空的<br>按商品的「加入一組」</span>') + '</div>' +
+    '<footer class="cart-foot"><div class="cart-total"><span>合計</span><b>$' + total + '</b></div><div class="cart-remain">結帳後剩 $' + (o.cash - total) + '</div>' +
+    '<button type="button" class="cart-checkout" data-ws-cart-checkout' + (!inCart.length || over ? ' disabled' : '') + '>' + (over ? '還差 $' + (total - o.cash) : '結帳') + '</button></footer></aside>';
+  return { list, cart };
 }
 // 隊員裝備在開發工坊的說明＝裝備說明＋後面接的提示。提示可以在開發工坊編輯器改（items['sg:裝備id'].aboutTail，空白＝不接）；{n}＝目前有幾件
 const WORKSHOP_SG_TAIL = '做好放進背包，在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）';

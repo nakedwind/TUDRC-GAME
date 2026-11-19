@@ -39,12 +39,14 @@ let backroomMode = false, backroomTab = 'buy';   // backroomTab：buy 購買／s
 const shopCanSell = () => !vendingMode;
 const backroomCart = new Map();
 // 暫時開放後室商店購買全部特殊子彈；一般子彈本來就是無限。
-// 價錢跟諾亞開發工坊的「彈藥」頁同一份：data/equipment.js 的 BULLET_PRICE（開發工坊編輯器可以改，js/workshop-config.js 的 bulletPrice）
+// 一次賣一組（pack＝這種子彈的一組幾發，data/equipment.js 的 max，目前都是 BULLET_SET＝20 發）；購物車的數量＝幾組
+// 一發的價錢跟諾亞開發工坊的「補充彈藥」頁同一份：data/equipment.js 的 BULLET_PRICE（開發工坊編輯器可以改，js/workshop-config.js 的 bulletPrice），一組＝一發 × pack
 function backroomBulletStock() {
-  return Object.entries(BULLETS).filter(([id, b]) => id !== 'pistol' && !b.removed).map(([id, b]) => ({
-    id: 'shop-bullet:' + id, bullet: id, name: b.name, image: b.image, kind: 'ammo', price: bulletPrice(id),
-    effect: '每份 1 發・持有 ' + bulletCount(id) + ' 發',
-  }));
+  return Object.entries(BULLETS).filter(([id, b]) => id !== 'pistol' && !b.removed).map(([id, b]) => {
+    const pack = Math.max(1, b.max | 0 || 1);
+    return { id: 'shop-bullet:' + id, bullet: id, pack, name: b.name, image: b.image, kind: 'ammo', price: bulletPrice(id) * pack,
+      effect: '一組 ' + pack + ' 發・持有 ' + bulletCount(id) + ' 發' };
+  });
 }
 // ---- 零食、飲料：溫特身上每一種最多帶幾個 ----
 // 溫特的持有上限：CARRY_LIMIT、carryMax、carryRoom 在 js/backpack.js
@@ -80,8 +82,8 @@ function shopRoom(item) {
   let room = item.bullet ? Infinity : carryRoom(item, reserved);
   if (item.bullet) {   // 子彈：購物車裡別的子彈會多佔掉的格數先扣掉，剩下的才是這種放得下的
     let extra = 0;
-    for (const [id, n] of shopCart) { const b = n > 0 && id !== item.id && shopItemById(id)?.bullet; if (b) extra += bulletStacks(b, bulletCount(b) + n) - (bulletOwned(b) ? bulletStacks(b) : 0); }
-    room = bulletRoom(item.bullet, extra);
+    for (const [id, n] of shopCart) { const o = n > 0 && id !== item.id && shopItemById(id), b = o && o.bullet; if (b) extra += bulletStacks(b, bulletCount(b) + n * (o.pack || 1)) - (bulletOwned(b) ? bulletStacks(b) : 0); }   // n＝幾組
+    room = Math.floor(bulletRoom(item.bullet, extra) / (item.pack || 1));   // 放得下幾組（湊不滿一組的不賣）
   }
   if (vendingMode && isEocVending()) room = Math.min(room, (eocVendingState()[vendingColor] || {})[item.id] || 0);
   return room;
@@ -362,7 +364,7 @@ function checkoutCart() {
   }
   for (const [id, n] of shopCart) {
     const item = shopItemById(id);
-    if (item.bullet) addBullets(item.bullet, n);
+    if (item.bullet) addBullets(item.bullet, n * (item.pack || 1));   // 子彈：n 組
     else supplyInventory.set(id, (supplyInventory.get(id) || 0) + n);
   }
   shopCart.clear();

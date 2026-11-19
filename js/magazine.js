@@ -55,33 +55,53 @@ function magazineWorkshopEntries() {
     canDev: false, where: '', upCost: MAGAZINE.cost[m.lv - 1] || 0, upMoney: m.lv < MAGAZINE.slots.length ? wsMoney('m:magazine', m.lv - 1, MAGAZINE.cost[m.lv - 1] || 0) : 0, buy: 'mg:magazine' };
   return { bullets, mag };
 }
-// ---- 開發工坊「彈藥」頁：用經費買子彈（一發的價錢：js/workshop-config.js 的 bulletPrice；只能在後室找到的不賣）----
-const wsAmmoQty = {};   // 每種子彈目前選了要買幾發（關掉工坊也記著）
+// ---- 開發工坊「補充彈藥」頁：跟商店一樣，商品卡按「加入一組」放進購物車，右邊結帳（一發的價錢：js/workshop-config.js 的 bulletPrice；只能在後室找到的不賣）----
+// 畫面：js/workshop-config.js 的 workshopAmmoShopHtml（開發工坊編輯器的預覽也用它）
+const wsAmmoCart = {};   // 購物車：子彈 id → 幾發（關掉工坊也記著，結帳才扣錢、放進彈藥包）
+// 這種子彈還放得下幾發：購物車裡別種子彈會多佔掉的格子先扣掉（跟商店的 shopRoom 一樣）
+function wsAmmoRoom(id) {
+  let extra = 0;
+  for (const [b, n] of Object.entries(wsAmmoCart)) if (n > 0 && b !== id && BULLETS[b]) extra += bulletStacks(b, bulletCount(b) + n) - (bulletOwned(b) ? bulletStacks(b) : 0);
+  return Math.max(0, bulletRoom(id, extra));
+}
 function ammoShopEntries() {
   return Object.entries(BULLETS).filter(([id, b]) => bulletBuyable(id, b)).map(([id, b]) => {
-    const room = bulletRoom(id), price = bulletPrice(id);
-    if (wsAmmoQty[id] == null) wsAmmoQty[id] = b.max;   // 一開始選一組
+    const room = wsAmmoRoom(id), price = bulletPrice(id);
     return { key: 'b:' + id, kind: 'ammo', bullet: id, def: b, name: b.name, lv: 0, max: 0, icon: wsAmmoIcon(bulletIcon(b, 'ws-bullet-img'), b), image: b.image, emoji: b.icon,
-      tag: '子彈', worn: false, about: b.desc || '', price, have: bulletCount(id), room, set: b.max, buy: 'ab:' + id };
+      tag: '子彈', worn: false, about: b.desc || '', price, have: bulletCount(id), room, set: b.max, n: Math.min(wsAmmoCart[id] || 0, room) };
   });
 }
-function setAmmoQty(id, how) {   // how：'+1'、'-10'、'set'（一組）、'max'（放得下的最多、錢買得起的最多）或直接一個數字
-  const b = BULLETS[id]; if (!b) return;
-  const room = bulletRoom(id), price = bulletPrice(id), afford = price > 0 ? Math.floor(Math.floor(G.money || 0) / price) : room;
-  const cur = wsAmmoQty[id] ?? b.max;
-  let n = how === 'set' ? b.max : how === 'max' ? Math.min(room, afford) : typeof how === 'number' ? how : cur + Number(how);
-  wsAmmoQty[id] = Math.max(0, Math.min(room, Math.round(n) || 0));
+// 給 workshopAmmoShopHtml 的商品清單
+const wsAmmoShopItems = list => list.map(e => ({ id: e.bullet, name: e.name, image: e.image, price: e.price, have: e.have, room: e.room, set: e.set, n: e.n, desc: e.about }));
+const wsAmmoCartTotal = () => Object.entries(wsAmmoCart).reduce((sum, [id, n]) => sum + (BULLETS[id] ? bulletPrice(id) * n : 0), 0);
+// 購物車裡這種改成 n 發（不超過放得下的、錢買得起的）
+function wsAmmoCartSet(id, n) {
+  const b = BULLETS[id]; if (!bulletBuyable(id, b)) return;
+  const price = bulletPrice(id), others = wsAmmoCartTotal() - price * (wsAmmoCart[id] || 0);
+  const afford = price > 0 ? Math.floor((Math.floor(G.money || 0) - others) / price) : Infinity;
+  n = Math.max(0, Math.min(wsAmmoRoom(id), afford, Math.round(Number(n)) || 0));
+  if (n) wsAmmoCart[id] = n; else delete wsAmmoCart[id];
+}
+// 商品卡的「加入一組」
+function wsAmmoCartAdd(id) {
+  const e = ammoShopEntries().find(x => x.bullet === id); if (!e) return false;
+  const add = workshopAmmoAddCount(e, Math.floor(G.money || 0) - wsAmmoCartTotal());
+  if (add <= 0) { sfx('error'); showWorkshopToast(e.room - e.n <= 0 ? '彈藥包滿了，先到「升級裝備」擴充彈藥包' : '經費不夠', true); return false; }
+  wsAmmoCart[id] = (wsAmmoCart[id] || 0) + add; sfx('button');
+  return true;
+}
+// 結帳：一次扣錢、全部放進彈藥包
+function wsAmmoCheckout() {
+  const list = ammoShopEntries().filter(e => (wsAmmoCart[e.bullet] || 0) > 0);
+  if (!list.length) { sfx('error'); return; }
+  if (list.some(e => wsAmmoCart[e.bullet] > e.room)) { sfx('error'); showWorkshopToast('彈藥包格子不夠，請調整購物車數量', true); return; }
+  const total = list.reduce((sum, e) => sum + e.price * wsAmmoCart[e.bullet], 0), count = list.reduce((sum, e) => sum + wsAmmoCart[e.bullet], 0);
+  if (!spendWorkshop(0, total)) return;   // 只花經費（js/equipment.js）
+  for (const e of list) { addBullets(e.bullet, wsAmmoCart[e.bullet]); delete wsAmmoCart[e.bullet]; }
+  SFX.play('shopCheckout', .7, 'ws-ammo-buy');   // 結帳聲（跟商店一樣）
+  showWorkshopToast('🔫 結帳 $' + total + '，補充了 ' + count + ' 發子彈，到背包的彈藥包分頁裝進彈匣');
 }
 function magazineWorkshopBuy(kind, id) {
-  if (kind === 'ab') {   // 買子彈
-    const b = BULLETS[id]; if (!bulletBuyable(id, b)) return true;
-    const n = Math.min(wsAmmoQty[id] || 0, bulletRoom(id)), price = bulletPrice(id);
-    if (n <= 0) { sfx('error'); showWorkshopToast(bulletRoom(id) <= 0 ? '彈藥包滿了，先到「升級裝備」擴充彈藥包' : '先選要補充幾發', true); return true; }
-    if (!spendWorkshop(0, n * price)) return true;   // 只花經費（js/equipment.js）
-    addBullets(id, n); SFX.play('shopCheckout', .7, 'ws-ammo-buy');   // 結帳聲（跟商店一樣）
-    showWorkshopToast('🔫 補充了' + b.name + ' ' + n + ' 發（$' + n * price + '），到背包的彈藥包分頁裝進彈匣');
-    return true;
-  }
   if (kind === 'bd') {
     const b = BULLETS[id]; if (!b || b.source !== 'develop' || bulletOwned(id)) return false;
     if (bagUsedSlots(supplyInventory, 'weapon') >= bagCapacity('weapon')) { systemNotice('彈藥包已滿（' + bagCapacity('weapon') + ' 格），先升級彈藥包擴充', true); return true; }
