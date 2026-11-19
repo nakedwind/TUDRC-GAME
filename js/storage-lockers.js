@@ -185,12 +185,23 @@ function rollRandomContainerLoot(x,y,where,ammoChance){
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('medkit',x,y),   // 醫療包
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('firstaid',x,y),   // 急救包
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('eye-drops',x,y),   // 眼藥水
+    ()=>where!=='彈藥箱'&&tryLockerFoodFind(x,y),   // 烤熟的食物（只有置物箱，data/equipment.js 的 LOCKER_FOOD）
     ()=>typeof tryGraffitiPenFind==='function'&&tryGraffitiPenFind(x,y),   // 塗鴉筆（js/graffiti.js）
     ()=>typeof tryYouyouCardFind==='function'&&tryYouyouCardFind(),   // 好遊卡（js/mrt-locks.js）
   ];
   for(let i=tries.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[tries[i],tries[j]]=[tries[j],tries[i]];}   // 打亂順序，每一樣排在前面的機會一樣
   for(const t of tries)if(t())return true;   // 抽中一樣（真的拿到）就停
   return false;
+}
+// 置物箱開到烤熟的食物：先照 LOCKER_FOOD.chance 抽有沒有，有就從 LOCKER_FOOD.items 隨機挑一種放進背包；真的拿到回傳 true
+function tryLockerFoodFind(x,y){
+  if(typeof LOCKER_FOOD==='undefined'||MAP_SAFE||Math.random()>=LOCKER_FOOD.chance)return false;
+  const list=LOCKER_FOOD.items.filter(id=>itemById(id));if(!list.length)return false;
+  const id=list[Math.floor(Math.random()*list.length)];
+  if(!supplyGain(id,1))return false;   // 持有上限：拿不下就當沒抽到，換抽別樣
+  showItemPickupNotice(id,1);
+  if(typeof flash==='function')flash('🍢 '+itemById(id).name,x,y-40,'#ffd479',2.5);
+  return true;
 }
 // 背包滿了：開箱前先看放不放得下。放不下＝跳視窗、箱子蓋回去（不算開過），東西留在箱子裡，整理背包後再來開
 // loot：地圖編輯器指定的內容物；沒指定＝隨機，開得出來的都是「物品」分類，那一類格子滿了就算滿
