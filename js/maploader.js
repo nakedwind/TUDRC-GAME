@@ -49,6 +49,7 @@ const mapLayerOrderOf = m => (m && Array.isArray(m.layerOrder) && m.layerOrder.l
 const TILE_REGISTRY = {};
 // map＝要載入的地圖：戰鬥地圖用地圖編輯器的素材設定、基地用基地編輯器的（js/map-data.js 的 mapTileCatalog）
 function buildTileRegistry(map) {
+  if (typeof standingObstacleCache !== 'undefined') standingObstacleCache.clear();   // 換地圖：素材可能不同，重新判斷哪些是立著的障礙物
   const builtin = [
     { id: 'floor', role: 'floor', file: 'images/background/Back-room-floor.png', w: 1, h: 1 },
     { id: 'wall', role: 'wall', file: null, w: 1, h: 1 },
@@ -862,7 +863,16 @@ function stampIsStairs(s) {
   for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r0 + h; r++) if (rampCells.has(c + ',' + r)) return true;
   return false;
 }
-const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return stampOn2F(s) || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
+// 立在地上的障礙物（礦物、路障、探照燈…，不含埋在地上的地雷）：不管放在哪個圖層，都照底部跟人排前後。
+// 不然放在「地面裝飾」「2樓地板」這種圖層時，會被當成地板，人走到石頭上半部還畫在石頭前面
+const standingObstacleCache = new Map();
+function stampIsStandingObstacle(s) {
+  if (standingObstacleCache.has(s.id)) return standingObstacleCache.get(s.id);
+  const t = mapTileById(s.id), yes = !!(t && isMapObstacleTile(t) && !mapObstacleSpec(t).trap);
+  standingObstacleCache.set(s.id, yes);
+  return yes;
+}
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return stampOn2F(s) || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || stampIsStandingObstacle(s) || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
 // ---- 只畫畫面看得到的地方 ----
 // 大地圖（例如 Y 區 56×60 格）如果每一幀都把整張地圖的每一格、每張圖重畫一次，會很卡。
@@ -1066,7 +1076,8 @@ function mapOccluders() {
     // 2 樓的圖：地板類（平貼的圖、非物件圖層）＝2 樓的地板，在 2 樓的地上特效和人下面；物件類照底部 Y 跟 2 樓的人排前後；
     // 「2樓上層」圖層永遠在 2 樓的人上面。整個 2 樓都在 1 樓畫完之後才畫（蓋住橋下一樓的人）
     it.floor = 2;
-    if (flat || (!isOccLayer(lid) && !MAP_FLOOR2_TOP.has(lid))) { it.band = DRAW_BAND.ground; it.y = it.li; }
+    const standing = it.kind === 'stamp' && stampIsStandingObstacle(it.stamp);   // 礦物、路障：放在 2 樓地板圖層也照底部排前後
+    if (flat || (!isOccLayer(lid) && !MAP_FLOOR2_TOP.has(lid) && !standing)) { it.band = DRAW_BAND.ground; it.y = it.li; }
     else if (MAP_FLOOR2_TOP.has(lid)) { it.band = DRAW_BAND.top; it.y = it.li; }
   }
   // 平台邊緣的牆（js/map-levels.js 的 wallFaceCells 算進來的那些）：2 樓的人站在牆頂上時，一律畫在這面牆後面（牆蓋住人）。
