@@ -111800,12 +111800,6 @@ const BATTLE_MAPS = [
         "layer": "floor"
       },
       {
-        "id": "tile_bg_backroom_wall02_secret",
-        "c": 15,
-        "r": 35,
-        "layer": "object"
-      },
-      {
         "id": "tile_forest_layer_124_copy",
         "c": 15,
         "r": 36,
@@ -113986,9 +113980,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_forest_layer_115_copy_15",
         "c": 26,
-        "r": 70,
+        "r": 69,
         "layer": "overlay",
-        "ox": 20
+        "ox": 20,
+        "oy": 30
       },
       {
         "id": "tile_forest_layer_115_copy_15",
@@ -114209,7 +114204,7 @@ const BATTLE_MAPS = [
         "c": 107,
         "r": 68,
         "layer": "object11",
-        "oy": 30,
+        "oy": 20,
         "fx": true
       },
       {
@@ -114278,10 +114273,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_large",
-        "c": 69,
-        "r": 59,
+        "c": 68,
+        "r": 58,
         "layer": "object11",
-        "ox": 10
+        "ox": 30,
+        "oy": 20
       },
       {
         "id": "tile_obstacle_ore_large",
@@ -114953,7 +114949,8 @@ const BATTLE_MAPS = [
         "id": "tile_interactive_electric_light_02",
         "c": 96,
         "r": 89,
-        "layer": "object10"
+        "layer": "object10",
+        "circuit": 3
       },
       {
         "id": "tile_interactive_electric_light_02",
@@ -114992,19 +114989,22 @@ const BATTLE_MAPS = [
         "id": "tile_interactive_electric_light_02",
         "c": 69,
         "r": 57,
-        "layer": "object10"
+        "layer": "object10",
+        "circuit": 2
       },
       {
         "id": "tile_interactive_electric_light_02",
         "c": 71,
         "r": 51,
-        "layer": "object10"
+        "layer": "object10",
+        "circuit": 2
       },
       {
         "id": "tile_interactive_electric_light_02",
         "c": 77,
         "r": 47,
-        "layer": "object10"
+        "layer": "object10",
+        "circuit": 2
       },
       {
         "id": "tile_interactive_electric_light_02",
@@ -115016,13 +115016,15 @@ const BATTLE_MAPS = [
         "id": "tile_interactive_electric_light_02",
         "c": 116,
         "r": 18,
-        "layer": "object10"
+        "layer": "object10",
+        "circuit": 2
       },
       {
         "id": "tile_interactive_electric_light_02",
         "c": 47,
         "r": 81,
-        "layer": "object10"
+        "layer": "object10",
+        "circuit": 3
       },
       {
         "id": "tile_interactive_electric_light_02",
@@ -118313,6 +118315,12 @@ const BATTLE_MAPS = [
         "r": 99,
         "layer": "object5",
         "oy": 10
+      },
+      {
+        "id": "tile_bg_backroom_wall02_crack_breakable",
+        "c": 15,
+        "r": 35,
+        "layer": "object"
       }
     ],
     "solid": [
