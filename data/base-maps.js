@@ -2865,6 +2865,30 @@ const BASE_MAPS = [
       "23,16": [
         0,
         -27
+      ],
+      "8,19": [
+        0,
+        11
+      ],
+      "9,19": [
+        0,
+        11
+      ],
+      "10,19": [
+        0,
+        10
+      ],
+      "11,19": [
+        -1,
+        9
+      ],
+      "12,20": [
+        0,
+        -9
+      ],
+      "20,20": [
+        1,
+        -10
       ]
     },
     "coreSpots": [],
@@ -10012,19 +10036,25 @@ const BASE_MAPS = [
         "id": "tile_hospital_armchair_front",
         "c": 19,
         "r": 8,
-        "layer": "object"
+        "layer": "object",
+        "ox": 0,
+        "oy": -6
       },
       {
         "id": "tile_hospital_plant_on_stool",
         "c": 19,
         "r": 9,
-        "layer": "object2"
+        "layer": "object2",
+        "ox": 0,
+        "oy": 0
       },
       {
         "id": "tile_hospital_armchair_back",
         "c": 19,
         "r": 10,
-        "layer": "object3"
+        "layer": "object3",
+        "ox": 0,
+        "oy": 12
       },
       {
         "id": "tile_containment_tall_cabinet",
@@ -10168,7 +10198,8 @@ const BASE_MAPS = [
       "10,8",
       "10,7",
       "5,7",
-      "5,8"
+      "5,8",
+      "19,10"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14198,7 +14229,7 @@ const BASE_MAPS = [
       {
         "id": "tile_field_ammo_crate",
         "c": 4,
-        "r": 17,
+        "r": 18,
         "layer": "object4",
         "ox": 38,
         "oy": 4
