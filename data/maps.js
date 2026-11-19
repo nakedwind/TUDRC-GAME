@@ -15218,8 +15218,7 @@ const BATTLE_MAPS = [
         "c": 31,
         "r": 66,
         "layer": "object6",
-        "ox": 20
-      },
+        "ox": 20, "boxes": [[21, 114, 40, 65]] },
       {
         "id": "tile_mvoddiqi",
         "c": 42,
@@ -23422,8 +23421,7 @@ const BATTLE_MAPS = [
         "layer": "object10",
         "oy": 17.333333,
         "ox": 20,
-        "sortDepth": 0
-      },
+        "sortDepth": 0, "openDark": true },
       {
         "id": "tile_mvobzfro",
         "c": 33,
@@ -29090,7 +29088,6 @@ const BATTLE_MAPS = [
       "38,40",
       "38,41",
       "38,42",
-      "45,45",
       "9,31",
       "9,30",
       "9,29",
@@ -32057,10 +32054,6 @@ const BATTLE_MAPS = [
       "25,41": [
         -2,
         -2
-      ],
-      "45,45": [
-        -38,
-        0
       ],
       "9,31": [
         20,

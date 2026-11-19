@@ -3,7 +3,7 @@
      自己拿掉的不會馬上又放回去：要等用完、之後再拿到才會自動放。
    ・設定方式：打開背包，把道具拖到下方的快捷格；或在背包的說明欄按格子的數字鍵。
      快捷格之間也可以拖來拖去（兩格互換）；對快捷格按右鍵、或把它拖回背包＝拿掉。
-   ・同一種道具只會在一格（放到別格＝搬過去）。用完（×0）格子變暗但保留，補貨後可以直接用。
+   ・同一種道具只會在一格（放到別格＝搬過去）。用完（×0）就從快捷欄拿掉；之後再拿到，會優先放回原本那一格（那格還空著的話）。
    ・可以放的：補 HP／SP 的道具（醫療包、杏仁水、保溫杯）、急救包、異質急救包（按了選要治療的隊員）、腎上腺素、塗鴉筆。零食飲料是送禮用的。
    ・設定存在 tudrc_quickslots_v1（js/new-game.js 的進度清單：開新遊戲會重設、存檔欄位會一起存）。
      內容：{ slots：每一格放什麼, seen：已經自動放過的道具 }；以前的 Q／E／Z／X 讀進來時搬到 1～4。
@@ -66,13 +66,22 @@ renderQuickCountSetting();
 const quickItem = id => (id && typeof itemById === 'function' ? itemById(id) : null) || (typeof supplyById === 'function' ? supplyById(id) : null);
 function quickAllowed(item) { return !!item && (item.use === 'hp' || item.use === 'sp' || item.act === 'adrenaline' || item.act === 'eyedrops' || item.act === 'food' || item.act === 'toolbox' || item.act === 'graffiti' || item.act === 'firstaid'); }
 // 新拿到的道具：依拿到的順序（背包的先後）放進第一個空格。用完的從 seen 拿掉，下次拿到會再自動放
+// 用完的道具：從快捷欄拿掉（只拿這次遊戲中親眼看過還有剩、後來才用完的，免得背包還沒讀進來時把整排清空），並記住原本在哪一格
+const quickHad = new Set(), quickLastSlot = {};
 function quickAutoFill() {
   let changed = false;
+  for (const k of QUICK_KEYS) {
+    const id = quickSlots[k]; if (!id) continue;
+    if (supplyInventory.get(id) > 0) { quickHad.add(id); continue; }
+    if (!quickHad.has(id)) continue;
+    quickHad.delete(id); quickLastSlot[id] = k; quickSlots[k] = null; changed = true;
+  }
   for (const [id, n] of supplyInventory) {
     if (!(n > 0) || quickSeen.has(id) || !quickAllowed(quickItem(id))) continue;
     quickSeen.add(id); changed = true;
     if (quickSlotOf(id)) continue;
-    const empty = QUICK_KEYS.find(k => !quickSlots[k]);
+    const back = quickLastSlot[id];   // 用完之前在哪一格：還空著就放回去
+    const empty = back && QUICK_KEYS.includes(back) && !quickSlots[back] ? back : QUICK_KEYS.find(k => !quickSlots[k]);
     if (empty) quickSlots[empty] = id;
   }
   for (const id of [...quickSeen]) if (!(supplyInventory.get(id) > 0)) { quickSeen.delete(id); changed = true; }

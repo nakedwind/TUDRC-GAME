@@ -67,7 +67,7 @@
           <span>已選取：<b id="selName">—</b></span>
           <label title="圖層"><select id="selLayer"></select></label>
           <label id="selDepthControl" title="由圖片頂端往下數；線上方的人會被物件遮住，線下方的人會顯示在物件前面">人物遮擋線 <input id="selDepthInput" type="number" min="0" max="8" step="0.25" style="width:38px"> 格</label>
-          <label id="selDoorControl" class="hidden" title="手動門：玩家走到門前按 E 開關。自動門：玩家打不開，異質核心醒來時自動打開。">🚪 門：<select id="selDoorMode"></select></label>
+          <label id="selDoorControl" class="hidden" title="手動門：玩家走到門前按 E 開關。自動門：玩家打不開，異質核心醒來時自動打開。">🚪 門：<select id="selDoorMode"></select></label><label id="selDoorDarkWrap" class="hidden" title="挖空門打開時，門洞裡不露出地板，整個塗黑（門後是一片漆黑的通道）"><input type="checkbox" id="selDoorDark"> 打開後門洞全黑</label>
           <button class="btn" id="selUp">↑ 上移一層</button>
           <button class="btn" id="selDown">↓ 下移一層</button>
           <button class="btn" id="selFlipX">⇄ 左右翻</button>
@@ -235,7 +235,7 @@
     };
   </script>
   <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=merge4-20261115", "js/under-map.js?v=underscale-20261118", "data/tile-collisions.js?v=poolwall2-20261118", "js/tile-collisions.js?v=mapbox-20261120", "data/surface-tags.js?v=walltop2-20261118", "js/surface-tags.js?v=walltop2-20261118", "js/map-editor.js?v=tilebox-20261120", "js/map-editor-hidezone.js?v=merge4-20261115", "js/map-editor-transform.js?v=merge4-20261115", "js/map-editor-save.js?v=merge4-20261115", "js/map-editor-tilebox.js?v=mapbox-20261120", "js/map-editor-copy.js?v=merge4-20261115", "js/map-editor-occlusion.js?v=poolwall2-20261118", "js/asset-finder.js?v=merge4-20261115"]);</script>
+  <script>EditorStore.boot(["js/stamp-transform.js?v=merge4-20261115", "js/under-map.js?v=underscale-20261118", "data/tile-collisions.js?v=poolwall2-20261118", "js/tile-collisions.js?v=pillarbox-20261120", "data/surface-tags.js?v=walltop2-20261118", "js/surface-tags.js?v=walltop2-20261118", "js/map-editor.js?v=doordark-20261120", "js/map-editor-hidezone.js?v=merge4-20261115", "js/map-editor-transform.js?v=merge4-20261115", "js/map-editor-save.js?v=merge4-20261115", "js/map-editor-tilebox.js?v=mapbox-20261120", "js/map-editor-copy.js?v=merge4-20261115", "js/map-editor-occlusion.js?v=pillarbox-20261120", "js/asset-finder.js?v=merge4-20261115"]);</script>
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=surftag-20261117"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>

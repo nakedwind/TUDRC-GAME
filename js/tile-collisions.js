@@ -74,6 +74,9 @@ const tileBoxMapNow = () => (typeof curMap === 'function' ? curMap() : (typeof M
 const tileMapBoxesOf = (m, id) => m && m.tileBoxes && Object.prototype.hasOwnProperty.call(m.tileBoxes, id) && Array.isArray(m.tileBoxes[id]) ? m.tileBoxes[id] : undefined;   // undefined＝這張地圖沒有自己設
 const tileCollisionSharedBoxes = id => { const b = tileCollisionData()[id]; return Array.isArray(b) && b.length ? b : null; };   // 共用預設（物件編輯器）
 const tileCollisionBoxes = (id, m = tileBoxMapNow()) => { const own = tileMapBoxesOf(m, id); if (own !== undefined) return own.length ? own : null; return tileCollisionSharedBoxes(id); };
+// 地圖上某一個物件的方框：這個物件自己設了 boxes（地圖資料裡那個物件的 boxes 欄位，[]＝這一個不擋路）就照它自己的，
+// 沒設才照上面（這張地圖的 → 共用預設）。用在同一張素材大部分都正常、只有某一個擺的位置剛好擋住路的時候（例如池核 31,66 的柱子）
+const tileStampBoxes = s => s && Array.isArray(s.boxes) ? (s.boxes.length ? s.boxes : null) : tileCollisionBoxes(s && s.id);
 // 地圖編輯器用：把這張地圖上某張素材的橘框改成 boxes（同一張圖片的素材一起改）；boxes＝null＝改回共用預設
 function tileMapBoxesSet(m, id, boxes) {
   if (!m) return;
@@ -142,7 +145,7 @@ function tileCollisionDepthPx(s, tw, th) {
     if (rot % 2) return d / (th || 1) * tw;   // 轉 90 度的物件（高度變成原本的寬）：照比例放（0＝頂端、設滿＝底部，跟沒轉的一樣）
     return flip ? th - d : d;
   }
-  const boxes = tileCollisionBoxes(s.id); if (!boxes) return null;
+  const boxes = tileStampBoxes(s); if (!boxes) return null;
   const k = typeof stampScaleOf === 'function' ? stampScaleOf(s) : 1;
   if (k !== 1) { const t = { ...s, scale: 100 }; return tileCollisionDepthPx(t, tw, th); }   // 先用沒放大的算，stampDepthY 會再照比例放
   const placed = tileCollisionPlace(boxes, s, tw, th, 0, 0);
@@ -186,7 +189,7 @@ function tileBoxGrid() {
   const grid = new Map(), C = typeof CELL !== 'undefined' ? CELL : TILE_COLLISION_CELL;
   const doors = tileDoorRects(stamps, s => { const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null; return t ? [mapStampW(s, t) * C, mapStampH(s, t) * C] : null; });
   for (const s of stamps) {
-    const boxes = tileCollisionBoxes(s.id); if (!boxes) continue;
+    const boxes = tileStampBoxes(s); if (!boxes) continue;
     const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null; if (!t) continue;
     const f2 = typeof stampOn2F === 'function' && typeof hasFloors !== 'undefined' && hasFloors && stampOn2F(s);
     for (const [x0, y0, x1, y1] of tileCollisionPlace(boxes, s, mapTileW(t) * C, mapTileH(t) * C, OX + s.c * C + (s.ox || 0), OY + s.r * C + (s.oy || 0))) {
@@ -219,7 +222,7 @@ function drawTileCollisionOverlay(ctx, stamps, tileOf, tilePx, ox = 0, oy = 0, i
   ctx.lineWidth = 2; ctx.strokeStyle = '#ffa63a'; ctx.fillStyle = 'rgba(255,150,40,.28)';
   for (const s of stamps || []) {
     if (isHidden && isHidden(s)) continue;
-    const boxes = tileCollisionBoxes(s.id); if (!boxes) continue;
+    const boxes = tileStampBoxes(s); if (!boxes) continue;
     const t = tileOf(s.id); if (!t) continue;
     const [tw, th] = tilePx(t);
     for (const [x0, y0, x1, y1] of tileCollisionPlace(boxes, s, tw, th, ox + s.c * TILE_COLLISION_CELL + (s.ox || 0), oy + s.r * TILE_COLLISION_CELL + (s.oy || 0))) {

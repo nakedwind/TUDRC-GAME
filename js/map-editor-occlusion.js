@@ -34,7 +34,7 @@ function occBlockedFn(m) {
   const boxGrid = new Map();   // 素材碰撞方框（物件編輯器設的），照格子分好查得快
   const doors = typeof tileDoorRects === 'function' ? tileDoorRects(m.stamps, s => { const t = tileById(s.id); return t ? [stampW(s, t) * CELL, stampH(s, t) * CELL] : null; }) : [];   // 門口不擋（跟遊戲一樣，js/tile-collisions.js）
   if (typeof tileCollisionBoxes === 'function') for (const s of m.stamps || []) {
-    const boxes = tileCollisionBoxes(s.id), t = boxes && tileById(s.id); if (!t) continue;
+    const boxes = (typeof tileStampBoxes === 'function' ? tileStampBoxes(s) : tileCollisionBoxes(s.id)), t = boxes && tileById(s.id); if (!t) continue;
     for (const [x0, y0, x1, y1] of tileCollisionPlace(boxes, s, tileW(t) * CELL, tileH(t) * CELL, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0))) {
       const box = [x0, y0, x1, y1]; box.holes = typeof tileBoxHoles === 'function' ? tileBoxHoles(x0, y0, x1, y1, doors) : null;
       for (let c = Math.floor((x0 - OX) / CELL); c * CELL + OX < x1; c++) for (let r = Math.floor((y0 - OY) / CELL); r * CELL + OY < y1; r++) {
@@ -73,7 +73,7 @@ function occGameLines(m) {
     const t = tileById(s.id), own = occLineOf(s, t); if (!own) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
     items.push({ s, t, li: li(s.layer || 'top'), x0, y0, x1: x0 + stampW(s, t) * CELL, y1: y0 + stampH(s, t) * CELL, y: own.y, fixed: own.fixed, from: null,
-      ownBox: typeof tileCollisionBoxes === 'function' && !!tileCollisionBoxes(s.id) });   // 有自己碰撞的物件：遊戲裡只看自己的底部，不借
+      ownBox: typeof tileCollisionBoxes === 'function' && !!(typeof tileStampBoxes === 'function' ? tileStampBoxes(s) : tileCollisionBoxes(s.id)) });   // 有自己碰撞的物件：遊戲裡只看自己的底部，不借
   }
   for (const lid of order) {   // 一格一格放的小圖（物件圖層）也會被借
     if (!/^object\d*$/.test(lid) && lid !== 'overlay') continue;
