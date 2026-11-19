@@ -112196,7 +112196,8 @@ const BATTLE_MAPS = [
         "r": -2,
         "layer": "object7",
         "fx": true,
-        "oy": -8.666667
+        "oy": -8.666667,
+        "sortDepth": 10.25
       },
       {
         "id": "tile_mvpa0o8b",
