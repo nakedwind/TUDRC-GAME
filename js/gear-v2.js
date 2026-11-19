@@ -265,6 +265,7 @@ if (GEAR_V2) {
       e.about = [e.about, gearSquadNote(d)].filter(Boolean).join('');
       e.typeOnly = true; e.worn = false; e.lv = has ? 1 : 0;   // 「這一種」的格子：只放製作裝備頁；開發過的顯示新做出來的樣子（Lv1）
       e.extraTags = whoTag + (has ? '<span class="bag-tag">持有 ' + keys.length + ' 件</span>' : '');
+      e.tileNote = has ? gearOwnedTileNote(keys.length) : '';   // 格子左上角：全部持有幾件（背包＋大家身上）
       if (has) {   // 開發過了：「製作一件」
         const c = gearMakeCost(d);
         const mkBtn = '<button type="button" class="ws-btn" data-ws="mk:' + d.id + '">製作一件 <b>' + WS_SHARD_IMG + c.shards + '</b></button>';

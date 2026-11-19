@@ -136,6 +136,9 @@ function gearMakeCost(d) {
   return { shards, money: Number.isFinite(d.makeMoney) ? d.makeMoney : workshopMoneyAuto(shards), autoShards: auto };
 }
 
+// 新版裝備「製作裝備」頁的格子左上角：這種裝備全部持有幾件（背包＋大家身上；遊戲 js/gear-v2.js 和編輯器預覽共用）
+const gearOwnedTileNote = n => '持有 ' + n;
+
 // ---- 分解退回多少（遊戲 js/equipment.js、js/gear-v2.js 和開發工坊編輯器的預覽共用同一套）----
 // paid＝這一件到目前為止花過的每一筆：[{ shards: 異質碎片, money: 經費 }, …]（開發或製作那一筆＋每一次升級各一筆）
 // 退回：碎片、經費各一半（加總後再除以 2，小數捨去）

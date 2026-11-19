@@ -873,8 +873,9 @@ function pvIcon(key) {   // 格子裡的圖（套用編輯中的圖片大小、�
 }
 function previewTile(key) {
   const def = getDef(key), v = itemView(key), owned = pvOwned(key), lv = owned ? pvLv(key) : 0;
+  const note = GEAR_V2_ED && lv && pvTab === 'make' && !isWeapon(key) && !isExtra(key) && !isMag(key) ? gearOwnedTileNote(1) : '';   // 跟遊戲一樣：製作裝備頁左上角寫持有幾件（預覽固定 1 件，跟下方「持有 1 件」一樣）
   return '<button type="button" class="ws-tile' + (key.startsWith('bld:') ? ' build' : '') + (lv ? pvTier(lv) + ' owned' : isField(key, def) ? ' locked' : ' unowned') + (key === selKey ? ' sel ed-sel' : '') + '" draggable="true" data-key="' + esc(key) + '">' +
-    '<span class="ws-tile-icon">' + pvIcon(key) + '</span><b>' + esc(v.name) + '</b>' + (lv ? '<em>Lv' + lv + '</em>' : '') + '</button>';
+    '<span class="ws-tile-icon">' + pvIcon(key) + '</span><b>' + esc(v.name) + '</b>' + (lv ? '<em>Lv' + lv + '</em>' : '') + (note ? '<u>' + note + '</u>' : '') + '</button>';
 }
 // 下方說明欄（跟遊戲、背包一樣：大圖｜名稱、說明、數值｜按鈕）
 function previewInfo(key) {
