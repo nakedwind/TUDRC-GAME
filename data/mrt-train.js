@@ -27,7 +27,7 @@ const MRT_TRAIN_SETTINGS = {
   "frontSortDy": 10,
   "doorSortDy": -3,
   "soundGain": 0.55,
-  "stations": [{"map": "map_mvxz356e", "name": "R89區-紅線捷運站", "arrive": "mrtArriveRed"}, {"map": "map_mwizzi7s", "name": "B56區-藍線捷運站", "arrive": "mrtArriveBlue"}],
+  "stations": [{"map":"map_mvxz356e","name":"R89區-紅線捷運站","arrive":"mrtArriveRed"},{"map":"map_mwizzi7s","name":"B56區-藍線捷運站","arrive":"mrtArriveBlue"}],
   "nextTrainTime": 120,
   "cells": {
     "middle": [

@@ -1625,7 +1625,8 @@ function draw() {
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
   // 素材碰撞方框（物件編輯器「🧱 素材碰撞」設定，js/tile-collisions.js）：顯示紅格時畫成橘色，同一張素材貼幾個都一樣
-  if ((showSolid || brush.mode === 'solidnudge') && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
+  if ((showSolid || brush.mode === 'solidnudge' || brush.mode === 'tilebox') && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
+  if (typeof drawTileBoxEditor === 'function') drawTileBoxEditor(ctx);   // 🧱 橘框工具：選中的橘框（js/map-editor-tilebox.js）
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);

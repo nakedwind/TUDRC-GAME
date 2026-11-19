@@ -14,7 +14,8 @@ const POOL_BOSS = {
   maps: ['map_mv1bzur4'],     // 04. 池核
   of: 'clownfish',            // 以哪隻怪物為基準（怪物編輯器的比基尼小丑魚）
   scale: 2.2,                 // 放大幾倍
-  hp: 2400,                   // 血量（再乘整體難度）
+  hp: 4800,                   // 血量（再乘整體難度）
+  coreHpMul: 2,               // 牠守的異質核心血量是一般核心的幾倍（一般核心＝js/anomalous-core.js 的 CORE.hp × 難度）
   rewardMul: 6, crystalMul: 6,
   swimSpeed: 190,             // 潛在水裡游的速度（像素／秒）
   surfacedSpeedMul: .4,       // 浮上來時游的速度倍率（慢一點，比較好打）
@@ -58,6 +59,7 @@ function seedPoolBoss() {
   // 守的核心：在深水區裡的那顆（沒有就第一顆）
   const inDeep = k => typeof poolPointInDeepZone === 'function' && poolPointInDeepZone(k.x, k.y);
   const core = (G.cores || []).find(inDeep) || (G.cores || [])[0]; if (!core) return;
+  core.hp = core.maxhp = core.lastHp = Math.round(core.maxhp * POOL_BOSS.coreHpMul);   // 池核的核心比較硬（POOL_BOSS.coreHpMul）
   const P = POOL_BOSS, e = createMonster(base, core.x, core.y + CELL * .5);
   e.poolBoss = true; e.eliteName = P.name;
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是小丑魚血量 × 難度：換成 BOSS 的血量，難度照樣乘
