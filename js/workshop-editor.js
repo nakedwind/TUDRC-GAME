@@ -1021,10 +1021,12 @@ function pvReset() {   // 換裝備狀態：回到遊戲一開始的穿法（手
 }
 pvReset();
 const pvFits = (slot, key) => !isWeapon(key) && slot.kinds.includes(getDef(key).kind);
-function pvRefund(key) {   // 跟遊戲一樣：Lv1＝開發費用的一半；Lv2 以上＝升到目前這級的費用的一半；戰鬥區域撿到的 Lv1＝0
+function pvRefund(key) {   // 跟遊戲同一套（js/workshop-config.js 的 workshopScrapRefund）：開發／製作＋每一次升級花的碎片和經費，加起來退一半
   const lv = pvLv(key), w = isWeapon(key), def = getDef(key);
-  const paid = lv >= 2 ? effCost(key, w ? lv - 2 : lv - 1) : (!w && !isField(key, def) ? effCost(key, 0) : 0);
-  return Math.floor((paid || 0) / 2);
+  const step = i => ({ shards: effCost(key, i) || 0, money: workshopMoney(key, i, effCost(key, i) || 0, cfg) });   // cost 的第 i 格（跟升級按鈕一樣）
+  const paid = workshopUpgradePaid(1, lv, l => step(w ? l - 1 : l));   // 升一級：武器花 cost[lv-1]、裝備花 cost[lv]
+  if (!w) { if (GEAR_V2_ED) paid.push(gearV2MakeNow(key)); else if (!isField(key, def)) paid.push(step(0)); }   // 新版＝製作一件的費用；舊版＝開發費（戰鬥區域撿到的沒有）
+  return workshopScrapRefund(paid);
 }
 function pvSideHtml() {   // 跟遊戲一樣的紙娃娃：溫特＋頭部、上身、下身 ×2、隨身物品 ×2；點格子＝穿上／卸下、選了可以分解
   for (const k of Object.keys(pv.equipped)) if (pv.equipped[k] && !pvOwned(pv.equipped[k])) pv.equipped[k] = null;   // 刪掉的、分解掉的：卸下
@@ -1049,7 +1051,7 @@ function pvSideHtml() {   // 跟遊戲一樣的紙娃娃：溫特＋頭部、上
     bottom = pv.sel === 'w:pistol'
       ? '<div class="wss-scrap"><button type="button" class="wss-scrap-btn" disabled>無法分解</button><small>「' + esc(name) + '」是溫特一開始就持有的武器，不能分解或丟棄</small></div>'
       : '<div class="wss-scrap"><button type="button" class="wss-scrap-btn' + (pv.armed ? ' armed' : '') + '" data-pv-scrap>' + (pv.armed ? '確定分解「' + esc(name) + '」？' : '分解裝備') + '</button>' +
-        '<small>返還一半的異質碎片（<i class="ws-shard" role="img" aria-label="異質碎片"></i>' + pvRefund(pv.sel) + '）</small></div>';
+        '<small>' + workshopScrapNote(pvRefund(pv.sel)) + '</small></div>';
   }
   return '<aside class="workshop-side"><h3>目前裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + slots + '</div></div>' + menu +
     '<h3>背包裡的裝備</h3>' + (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">無</p>') + bottom + '</aside>';
@@ -1068,7 +1070,7 @@ function pvSideClick(e) {
     const key = pv.sel; if (!key) return true;
     if (!pv.armed) { pv.armed = true; clearTimeout(pvArmTimer); pvArmTimer = setTimeout(() => { if (pv.armed) { pv.armed = false; renderPreview(); } }, 3000); renderPreview(); return true; }
     clearTimeout(pvArmTimer); pv.armed = false; pv.scrapped.add(key); pv.sel = null;
-    setStatus('（預覽）分解了「' + itemView(key).name + '」，返還 ' + pvRefund(key) + ' 個異質碎片——只是預覽，換「裝備狀態」就會回來，不會影響遊戲');
+    setStatus('（預覽）分解了「' + itemView(key).name + '」，返還 ' + workshopScrapGot(pvRefund(key)).replace(/<\/?b>/g, '') + '——只是預覽，換「裝備狀態」就會回來，不會影響遊戲');
     renderPreview(); return true;
   }
   const slot = e.target.closest('[data-pv-slot]');

@@ -765,25 +765,28 @@ function ensureWorkshop() {
   document.getElementById('wrap').appendChild(workshopEl);
 }
 // ---- 分解：右側「目前裝備」「背包裡的裝備」點一下選它，最下面按「分解裝備」 ----
-// 返還一半的異質碎片：Lv1＝開發時花的一半；Lv2 以上＝升到目前這一級花的一半（只能在戰鬥區域撿到、沒花過碎片的 Lv1＝0）。
+// 返還一半的材料（異質碎片＋經費）：開發時花的＋每一次升級花的，全部加起來退一半（js/workshop-config.js 的 workshopScrapRefund）。
+// 只能在戰鬥區域撿到的（沒花過開發費）只算升級花的。
 // 手槍（溫特一開始就持有）不能分解。分解掉的裝備、武器就沒有了（之後可以再開發／撿到）。
 let wsScrapSel = null, wsScrapArmed = false, wsScrapArmTimer = null;   // 選到的 key（裝備 id／武器 w:id）；armed＝按過一次，再按一次才真的分解
 function wsScrapInfo(key) {
   if (!key) return null;
-  if (key.startsWith('w:')) {
+  if (key.startsWith('w:')) {   // 武器：升一級（lv→lv+1）花 cost[lv-1]
     const k = key.slice(2), w = WEAPON_UPGRADES[k], lv = equipState.weapons[k] || 0; if (!w || !lv) return null;
-    return { name: w.name, lv, keep: k === WS_KEEP_WEAPON, refund: lv >= 2 ? Math.floor((w.cost[lv - 2] || 0) / 2) : 0 };
+    const paid = workshopUpgradePaid(1, lv, l => ({ shards: w.cost[l - 1] || 0, money: wsMoney('w:' + k, l - 1, w.cost[l - 1] || 0) }));
+    return { name: w.name, lv, keep: k === WS_KEEP_WEAPON, refund: workshopScrapRefund(paid) };
   }
-  const d = equipDef(key), lv = equipState.owned[key] || 0; if (!d || !lv) return null;
-  const paid = lv >= 2 ? d.cost[lv - 1] : (d.source === 'develop' ? d.cost[0] : 0);
-  return { name: d.name, lv, keep: false, refund: Math.floor((paid || 0) / 2) };
+  const d = equipDef(key), lv = equipState.owned[key] || 0; if (!d || !lv) return null;   // 裝備：開發花 cost[0]、升一級（lv→lv+1）花 cost[lv]
+  const paid = workshopUpgradePaid(1, lv, l => ({ shards: d.cost[l] || 0, money: wsMoney(d.id, l, d.cost[l] || 0) }));
+  if (d.source === 'develop') paid.push({ shards: d.cost[0] || 0, money: wsMoney(d.id, 0, d.cost[0] || 0) });
+  return { name: d.name, lv, keep: false, refund: workshopScrapRefund(paid) };
 }
 function wsScrapBox() {
   const info = wsScrapInfo(wsScrapSel);
   if (!info) return '<p class="wss-tip">換裝備：打開背包</p>';
   if (info.keep) return '<div class="wss-scrap"><button type="button" class="wss-scrap-btn" disabled>無法分解</button><small>「' + info.name + '」是溫特一開始就持有的武器，不能分解或丟棄</small></div>';
   return '<div class="wss-scrap"><button type="button" class="wss-scrap-btn' + (wsScrapArmed ? ' armed' : '') + '" data-scrap-go>' + (wsScrapArmed ? '確定分解「' + info.name + '」？' : '分解裝備') + '</button>' +
-    '<small>返還一半的異質碎片（' + WS_SHARD_IMG + info.refund + '）</small></div>';
+    '<small>' + workshopScrapNote(info.refund) + '</small></div>';
 }
 function wsScrapSelect(key) {
   wsScrapSel = wsScrapSel === key ? null : key; wsScrapArmed = false; clearTimeout(wsScrapArmTimer);
@@ -805,9 +808,9 @@ function wsScrapGo() {
     delete equipState.owned[key];
     for (const slot of Object.keys(equipState.equipped)) if (equipState.equipped[slot] === key) equipState.equipped[slot] = null;
   }
-  training.crystals += info.refund; saveTraining(); if (typeof updateHUD === 'function') updateHUD();
+  refundWorkshop(info.refund);
   afterLoadoutChange(); SFX.play('achievement', .5, 'equip-up');
-  showWorkshopToast('分解了「' + info.name + '」，返還 <b>' + info.refund + '</b> 個異質碎片', true);
+  showWorkshopToast('分解了「' + info.name + '」，返還 ' + workshopScrapGot(info.refund), true);
   renderWorkshop();
 }
 // 工坊打開時的提示（碎片不夠、升級完成…）：顯示在工坊標題列的正中間、最上層，約 2.2 秒後淡出
@@ -854,6 +857,15 @@ function spendWorkshop(shards, money) {
     if (typeof updateHUD === 'function') updateHUD();
   }
   return true;
+}
+// 分解退回的材料：r＝{ shards: 異質碎片, money: 經費 }（跟 spendWorkshop 反過來：基地裡拿到的經費馬上存回錢包）
+function refundWorkshop(r) {
+  training.crystals += r.shards || 0; saveTraining();
+  if (r.money) {
+    G.money += r.money;
+    if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE && !window.TEST_MODE && typeof walletSet === 'function') walletSet(G.money);
+  }
+  if (typeof updateHUD === 'function') updateHUD();
 }
 // 開發／升級成功的特效（js/level-up-fx.js）：從下方說明欄的大圖爆開，重畫後左邊那一格彈一下
 // wsFxAt：按下按鈕時（重畫前）先量好大圖的位置；kind：'dev' 開發／'up' 升級／'craft' 製作

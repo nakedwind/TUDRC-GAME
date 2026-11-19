@@ -297,7 +297,8 @@ if (GEAR_V2) {
   };
   // 開發工坊右邊「背包裡的裝備」：背包裡的每一件各列一格
   window.gearV2SpareList = () => EQUIPMENT.flatMap(d => gearBagKeys(d.id));
-  // 分解：分解的是選到的那一件（要在背包裡）。返還一半的碎片：製作費的一半；Lv2 以上再加升到這一級花的一半。
+  // 分解：分解的是選到的那一件（要在背包裡）。返還一半的材料（異質碎片＋經費）：
+  // 製作這一件花的＋把它從 Lv1 升到目前等級每一次花的，全部加起來退一半（js/workshop-config.js 的 workshopScrapRefund）。
   // 每種的最後一件不能分解（學會了就一直會做）
   const v1ScrapInfo = wsScrapInfo, v1ScrapBox = wsScrapBox, v1ScrapGo = wsScrapGo;
   wsScrapInfo = function (key) {
@@ -305,14 +306,15 @@ if (GEAR_V2) {
     const d = equipDef(key); if (!d || !equipState.inst[key]) return null;
     const lv = gearKeyLv(key), who = gearWearer(key);
     const why = who ? '這件「' + d.name + '」' + gearWearerName(who) + '穿著，要先卸下' : gearTotal(d.id) < 2 ? '「' + d.name + '」只剩最後一件，不能分解' : '';
-    return { name: d.name, lv, keep: !!why, keepWhy: why, refund: Math.floor((gearMakeCost(d).shards + (lv >= 2 ? d.cost[lv - 1] || 0 : 0)) / 2), gear: true };
+    const paid = [gearMakeCost(d)].concat(workshopUpgradePaid(1, lv, l => ({ shards: d.cost[l] || 0, money: wsMoney(d.id, l, d.cost[l] || 0) })));   // 升一級（l→l+1）花 cost[l]，跟升級按鈕一樣
+    return { name: d.name, lv, keep: !!why, keepWhy: why, refund: workshopScrapRefund(paid), gear: true };
   };
   wsScrapBox = function () {
     const info = wsScrapInfo(wsScrapSel);
     if (!info || !info.gear) return v1ScrapBox();
     if (info.keep) return '<div class="wss-scrap"><button type="button" class="wss-scrap-btn" disabled>無法分解</button><small>' + info.keepWhy + '</small></div>';
     return '<div class="wss-scrap"><button type="button" class="wss-scrap-btn' + (wsScrapArmed ? ' armed' : '') + '" data-scrap-go>' + (wsScrapArmed ? '確定分解這件「' + info.name + ' Lv' + info.lv + '」？' : '分解這一件') + '</button>' +
-      '<small>返還一半的異質碎片（' + WS_SHARD_IMG + info.refund + '）</small></div>';
+      '<small>' + workshopScrapNote(info.refund) + '</small></div>';
   };
   wsScrapGo = function () {
     const key = wsScrapSel, info = wsScrapInfo(key);
@@ -325,10 +327,10 @@ if (GEAR_V2) {
     }
     clearTimeout(wsScrapArmTimer); wsScrapArmed = false; wsScrapSel = null;
     gearDropInst(key);
-    training.crystals += info.refund; saveTraining(); if (typeof updateHUD === 'function') updateHUD();
+    refundWorkshop(info.refund);
     gearSaveIfDirty();
     afterLoadoutChange(); SFX.play('achievement', .5, 'equip-up');
-    showWorkshopToast('分解了一件「' + info.name + ' Lv' + info.lv + '」，返還 <b>' + info.refund + '</b> 個異質碎片', true);
+    showWorkshopToast('分解了一件「' + info.name + ' Lv' + info.lv + '」，返還 ' + workshopScrapGot(info.refund), true);
     renderWorkshop();
   };
 

@@ -136,6 +136,29 @@ function gearMakeCost(d) {
   return { shards, money: Number.isFinite(d.makeMoney) ? d.makeMoney : workshopMoneyAuto(shards), autoShards: auto };
 }
 
+// ---- 分解退回多少（遊戲 js/equipment.js、js/gear-v2.js 和開發工坊編輯器的預覽共用同一套）----
+// paid＝這一件到目前為止花過的每一筆：[{ shards: 異質碎片, money: 經費 }, …]（開發或製作那一筆＋每一次升級各一筆）
+// 退回：碎片、經費各一半（加總後再除以 2，小數捨去）
+function workshopScrapRefund(paid) {
+  let shards = 0, money = 0;
+  for (const p of paid || []) { shards += Number(p && p.shards) || 0; money += Number(p && p.money) || 0; }
+  return { shards: Math.floor(shards / 2), money: Math.floor(money / 2) };
+}
+// 升級花的每一筆：從 fromLv 升到 toLv（例如 Lv1→Lv3＝兩筆）；one(lv)＝從 lv 升一級要花的 { shards, money }
+function workshopUpgradePaid(fromLv, toLv, one) {
+  const out = []; for (let lv = fromLv; lv < toLv; lv++) out.push(one(lv)); return out;
+}
+// 分解按鈕下面那行小字
+function workshopScrapNote(r) {
+  const parts = ['<i class="ws-shard" role="img" aria-label="異質碎片"></i>' + r.shards];
+  if (r.money) parts.push('經費 $' + r.money.toLocaleString('en-US'));
+  return '返還一半的材料（' + parts.join('、') + '）';
+}
+// 分解完的提示裡「返還了什麼」
+function workshopScrapGot(r) {
+  return '<b>' + r.shards + '</b> 個異質碎片' + (r.money ? '、<b>$' + r.money.toLocaleString('en-US') + '</b> 經費' : '');
+}
+
 // 下方說明欄的說明：盡量一行寫完——太長就把字縮小（最小 WS_DESC_MIN_FONT px），縮到最小還放不下才換行（遊戲、開發工坊編輯器的預覽都用）
 const WS_DESC_MIN_FONT = 10;
 function fitWorkshopDesc(root) {
