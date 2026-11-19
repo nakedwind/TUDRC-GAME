@@ -99,7 +99,7 @@ function stampVisibleBottom(s, xa, xb) {
 // 一般的格子／沒有圖片資料：圖片下緣最多低半格；大張的牆圖：用門那一段真正有畫的下緣，最多低一格（牆腳通常比門低一點）
 function wallBehindDoor(o, y, h, s) {
   const vis = s ? stampVisibleBottom(s, o.x, o.x + o.w) : null;
-  return vis != null ? vis < o.y + o.h + CELL : y + h <= o.y + o.h + CELL / 2;
+  return vis != null ? vis <= o.y + o.h + CELL + 1 : y + h <= o.y + o.h + CELL / 2;   // +1：圖片下緣剛好比門低一整格的（例如池核 9,4 門上疊的柱子）也算在門後面、要挖掉
 }
 // 兩張牆圖重疊的地方，js/maploader.js 會把補畫的結果存起來重複用（drawOverdrawPatch）。
 // 門打開時那份存檔還是沒挖洞的舊圖，會整塊蓋回門洞上 → 把「這張圖上面有哪幾扇挖空門開著」算進存檔的狀態，門一開關就重做
@@ -162,7 +162,8 @@ function drawOpenDoorsGround(ctx) {
     const c0 = Math.floor((patch.x - OX) / CELL), c1 = Math.floor((patch.x + patch.w - 1 - OX) / CELL), r0 = Math.floor((patch.y - OY) / CELL), r1 = Math.floor((patch.y + patch.h - 1 - OY) / CELL);
     const overlaps = st => { const tt = mapTileById(st.id); if (!tt) return false; const sx = OX + st.c * CELL + (st.ox || 0), sy = OY + st.r * CELL + (st.oy || 0); return sx < patch.x + patch.w && sx + mapStampW(st, tt) * CELL > patch.x && sy < patch.y + patch.h && sy + mapStampH(st, tt) * CELL > patch.y; };
     let drawn = false;
-    for (const lid of MAP_LAYER_ORDER) {   // 只露出最底下那層有東西的地面類圖層（上面那幾層可能是平貼的牆）
+    // s.openDark：地圖編輯器勾了「打開後門洞全黑」→ 不露地板，整個門洞塗黑（門後是一片漆黑的通道）
+    if (!s.openDark) for (const lid of MAP_LAYER_ORDER) {   // 只露出最底下那層有東西的地面類圖層（上面那幾層可能是平貼的牆）
       if (lid === 'top' || isOccLayer(lid)) continue;
       const layer = (MAP.layers && MAP.layers[lid]) || {}, cells = [];
       for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (layer[c + ',' + r] && !chairConfig(layer[c + ',' + r])) cells.push([c, r, layer[c + ',' + r]]);
@@ -172,7 +173,7 @@ function drawOpenDoorsGround(ctx) {
       for (const st of stamps) drawMapStampImg(ctx, st);
       drawn = true; break;
     }
-    if (!drawn) { ctx.fillStyle = '#0b0e12'; ctx.fillRect(patch.x, patch.y, patch.w, patch.h); }   // 底下沒鋪地板：黑色門洞
+    if (!drawn) { ctx.fillStyle = s.openDark ? '#000' : '#0b0e12'; ctx.fillRect(patch.x, patch.y, patch.w, patch.h); }   // 底下沒鋪地板（或設成全黑）：黑色門洞
     ctx.restore();
     drawOpenDoorFrame(ctx, R);
   }

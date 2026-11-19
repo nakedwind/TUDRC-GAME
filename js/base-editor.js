@@ -2448,6 +2448,11 @@ function refreshDoorControl() {
   const box = document.getElementById('selDoorControl'), select = document.getElementById('selDoorMode');
   const s = selectedDoorStamp();
   box.classList.toggle('hidden', !s);
+  // 「打開後門洞全黑」：只有挖空門（data/doors.js 有 cutout 的）才有
+  const darkWrap = document.getElementById('selDoorDarkWrap'), darkBox = document.getElementById('selDoorDark');
+  const cut = !!(s && typeof DOOR_TILES !== 'undefined' && DOOR_TILES[s.id] && DOOR_TILES[s.id].cutout);
+  if (darkWrap) darkWrap.classList.toggle('hidden', !cut);
+  if (darkBox && cut) darkBox.checked = !!s.openDark;
   if (!s) return;
   if (!select.options.length) for (const [value, label] of Object.entries(DOOR_MODES)) {
     const o = document.createElement('option'); o.value = value; o.textContent = label; select.appendChild(o);
@@ -2460,6 +2465,13 @@ function refreshDoorControl() {
     setStatus('記憶之門已更新', '#7ee0c0');
   });
 }
+document.getElementById('selDoorDark')?.addEventListener('change', e => {   // 挖空門打開後門洞全黑（js/doors.js 的 drawOpenDoorsGround）
+  const s = selectedDoorStamp(); if (!s) return;
+  pushUndo();
+  if (e.target.checked) s.openDark = true; else delete s.openDark;
+  saveMaps(); draw();
+  setStatus(e.target.checked ? '這扇門打開後門洞全黑' : '這扇門打開後露出地板', '#7ee0c0');
+});
 document.getElementById('selDoorMode').addEventListener('change', e => {
   const s = selectedDoorStamp(); if (!s) return;
   pushUndo();
