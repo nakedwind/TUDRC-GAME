@@ -1009,7 +1009,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     wsScrapBox() + '</aside>';   // 最下面：選到東西＝「分解裝備」，沒選＝換裝備的提示
   const SCROLLERS = ['.ws-scroll', '.workshop-side', '.workshop-main'];   // 會捲動的區塊（窄畫面時是 .workshop-main）
   const scroll = keepScroll ? SCROLLERS.map(q => workshopEl.querySelector(q)?.scrollTop || 0) : null;
-  workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
+  workshopEl.innerHTML = '<section class="workshop-card" data-ws-page="' + page + '" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +   // data-ws-page：每一頁頂部各自的顏色（css/style.css 最後面）
     '<header class="workshop-head">' + workshopHeadHtml() +   // 標題列的文字（開發工坊編輯器可以改：js/workshop-config.js）
     '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
     '<div class="workshop-main"><div class="workshop-body">' + tabs +

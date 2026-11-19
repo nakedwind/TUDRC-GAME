@@ -3787,3 +3787,14 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .ws-ammo-cart .cart-qty input { width: 38px; height: 24px; padding: 0 2px; border: 1px solid rgba(255,255,255,.18); border-radius: 6px; background: rgba(0,0,0,.3); color: #fff; font: 700 13px "Microsoft JhengHei", sans-serif; text-align: center; font-variant-numeric: tabular-nums; }
 .ws-ammo-cart .cart-qty input:focus { outline: none; border-color: #ffd479; }
 @media (max-width: 760px) { .workshop-side.ws-ammo-cart { max-height: 260px; } }
+
+/* ===== 開發工坊：四個分頁各自的顏色（標題列、最上面那條線、外框、選到的分頁），切換時一眼看得出在哪一頁 =====
+   --ws-page＝那一頁的顏色（R,G,B）。製作裝備＝金、升級裝備＝綠、補充彈藥＝藍、開發建築物＝磚橘。遊戲和開發工坊編輯器的預覽共用 */
+.workshop-card[data-ws-page="make"]  { --ws-page: 255,212,121; }
+.workshop-card[data-ws-page="up"]    { --ws-page: 110,222,140; }
+.workshop-card[data-ws-page="ammo"]  { --ws-page: 120,186,255; }
+.workshop-card[data-ws-page="build"] { --ws-page: 255,140,90; }
+.workshop-card[data-ws-page] { border-color: rgba(var(--ws-page),.5); transition: border-color .2s; }
+.workshop-card[data-ws-page] .workshop-head { background: linear-gradient(90deg, rgba(var(--ws-page),.3), rgba(var(--ws-page),.06) 70%, transparent); border-bottom-color: rgba(var(--ws-page),.4); box-shadow: inset 0 3px 0 rgb(var(--ws-page)); }
+.workshop-card[data-ws-page] .ws-tabs button.active { border-color: rgb(var(--ws-page)); background: linear-gradient(180deg, rgba(var(--ws-page),1), rgba(var(--ws-page),.78)); color: #14191f; box-shadow: 0 0 10px rgba(var(--ws-page),.4); }
+.workshop-card[data-ws-page] .ws-tabs button.active em { background: rgba(0,0,0,.2); color: #14191f; }

@@ -988,7 +988,7 @@ function renderPreview() {
   const ammoShop = pvTab === 'ammo' ? workshopAmmoShopHtml({ cash: PV_AMMO_CASH, items: bullets.map(k => { const id = k.slice(2), set = ammoVal(k, 'max');
     return { id, key: k, name: ammoVal(k, 'name'), image: ammoVal(k, 'image'), price: ammoVal(k, 'price'), have: 0, room: set * 3, set, n: pvAmmoCart[id] || 0, desc: ammoVal(k, 'desc') }; }) }) : null;
   const side = ammoShop ? ammoShop.cart : pvTab === 'build' ? '' : pvSideHtml();   // 彈藥、建築頁沒有右邊的紙娃娃（跟遊戲一樣）   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
-  stage.innerHTML = '<div id="workshop"><section class="workshop-card" role="dialog" aria-label="開發工坊預覽">' +
+  stage.innerHTML = '<div id="workshop"><section class="workshop-card" data-ws-page="' + pvTab + '" role="dialog" aria-label="開發工坊預覽">' +   // 每一頁頂部各自的顏色（跟遊戲一樣）
     '<header class="workshop-head">' + workshopHeadHtml(cfg) +
     '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
     '<div class="workshop-main"><div class="workshop-body">' + tabs +
