@@ -13934,11 +13934,11 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
-        "c": 3,
-        "r": 19,
+        "c": 7,
+        "r": 18,
         "layer": "overlay",
         "oy": 30,
-        "ox": 30
+        "ox": 10
       },
       {
         "id": "tile_eoc_security_camera",
@@ -14471,10 +14471,6 @@ const BASE_MAPS = [
       "30,22": [
         0,
         23
-      ],
-      "7,19": [
-        -17,
-        1
       ]
     },
     "safe": true,
