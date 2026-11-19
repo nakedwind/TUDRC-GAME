@@ -14434,7 +14434,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 3.55,
+        "sortDepth": 0.38,
         "c": 2,
         "r": 62,
         "layer": "object6",
@@ -14456,7 +14456,8 @@ const BATTLE_MAPS = [
         "r": 35,
         "layer": "object11",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 0.38
       },
       {
         "id": "tile_mvoa0cqd",
@@ -14610,7 +14611,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 2.6,
+        "sortDepth": 0.38,
         "c": 17,
         "r": 54,
         "layer": "object",
@@ -14618,7 +14619,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 2.6,
+        "sortDepth": 0.38,
         "c": 25,
         "r": 54,
         "layer": "object",
@@ -14996,7 +14997,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 4.13,
+        "sortDepth": 0.38,
         "c": 24,
         "r": 62,
         "layer": "object6",
@@ -15119,7 +15120,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 3.13,
+        "sortDepth": 0.38,
         "c": 37,
         "r": 62,
         "layer": "object",
@@ -15213,7 +15214,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 0,
+        "sortDepth": 0.38,
         "c": 31,
         "r": 66,
         "layer": "object6",
@@ -19176,7 +19177,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 3.45,
+        "sortDepth": 0.38,
         "c": 14,
         "r": 50,
         "layer": "object14",
@@ -19814,7 +19815,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 3.55,
+        "sortDepth": 0.38,
         "c": 33,
         "r": 50,
         "layer": "object14",
@@ -19832,7 +19833,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 2.6,
+        "sortDepth": 0.38,
         "c": 37,
         "r": 35,
         "layer": "object18",
@@ -20625,7 +20626,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 3.5,
+        "sortDepth": 0.38,
         "c": 43,
         "r": 71,
         "layer": "object6",
@@ -20706,7 +20707,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 3.18,
+        "sortDepth": 0.38,
         "c": 24,
         "r": 77,
         "layer": "object6",
@@ -21169,7 +21170,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "sortDepth": 3.5,
+        "sortDepth": 0.38,
         "c": 36,
         "r": 71,
         "layer": "object6",
@@ -35693,14 +35694,6 @@ const BATTLE_MAPS = [
       "34,9",
       "35,9",
       "36,9"
-    ],
-    "hideZones": [
-      [
-        642,
-        1425,
-        39,
-        121
-      ]
     ]
   },
   {
