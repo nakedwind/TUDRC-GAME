@@ -415,18 +415,47 @@ function drawLoofahVines(ctx) {
       ctx.strokeStyle = '#c8f59a'; ctx.lineWidth = 1; ctx.strokeRect(bx - .5, by - .5, 45, 6);
       ctx.globalAlpha = 1;
     }
-    if (!(p && p.rootT > 0 && v.caught.includes(p))) for (const k of [0, 1, 2]) {   // 沒抓到人：三根高矮不一的捲鬚從洞裡竄出來，中段繞成彈簧圈、頂端有葉子和勾起的捲尖
-      const r = n => (Math.sin(v.seed * (3 + n) + k * (5 + n)) + 1) / 2;   // 每根藤固定的隨機值（0～1）
-      const bx = v.x + [-12, 3, 14][k] + (r(1) - .5) * 5;
-      drawTendril(ctx, bx, v.y + 7, {
-        h: [46, 34, 25][k] * (.88 + r(2) * .24), grow,
-        lean: [-7, 4, 9][k] + Math.sin(now * 2.6 + k * 1.7 + v.seed) * 2.5,
-        turns: 1.7 + r(3) * .5, r: [8.5, 7, 5][k] + r(4) * 1.5, w: [3.4, 3, 2.4][k] * .8,
-        phase: v.seed + k * 2.1, side: k === 1 ? -1 : 1, leaf: k !== 2 || r(5) > .5,
-      });
+    if (!(p && p.rootT > 0 && v.caught.includes(p))) {   // 沒抓到人：三根高矮不一的捲鬚從洞裡竄出來，中段繞成彈簧圈、頂端有葉子和勾起的捲尖
+      if (grow >= 1) drawLoofahTuftCached(ctx, v, now);   // 長好了：貼預先畫好的圖（省效能，外觀一樣）
+      else drawLoofahTuft(ctx, v.x, v.y, v.seed, grow, now * 2.6);   // 正在冒出來／縮回去：照實際長度現畫
     }
     ctx.restore();
   }
+}
+// 一叢三根捲鬚（從洞裡竄出來的樣子）。sway：搖擺的角度（秒數 × 2.6）
+function drawLoofahTuft(ctx, x, y, seed, grow, sway) {
+  for (const k of [0, 1, 2]) {
+    const r = n => (Math.sin(seed * (3 + n) + k * (5 + n)) + 1) / 2;   // 每根藤固定的隨機值（0～1）
+    const bx = x + [-12, 3, 14][k] + (r(1) - .5) * 5;
+    drawTendril(ctx, bx, y + 7, {
+      h: [46, 34, 25][k] * (.88 + r(2) * .24), grow,
+      lean: [-7, 4, 9][k] + Math.sin(sway + k * 1.7 + seed) * 2.5,
+      turns: 1.7 + r(3) * .5, r: [8.5, 7, 5][k] + r(4) * 1.5, w: [3.4, 3, 2.4][k] * .8,
+      phase: seed + k * 2.1, side: k === 1 ? -1 : 1, leaf: k !== 2 || r(5) > .5,
+    });
+  }
+}
+// ---- 長好的捲鬚改貼預先畫好的圖 ----
+// 一叢捲鬚要畫幾百筆小線段，絲瓜女王的 4 片農田一次有 32 叢，每一幀現畫會讓顯示卡忙不過來（進農田房就超卡）。
+// 所以每一叢只在第一次用到時，把搖擺的過程畫成 TUFT_CACHE.frames 張小圖存起來，之後每幀直接貼圖。
+// 畫面放大倍率（VIEW_SCALE）變了就重畫，圖才不會糊。
+const TUFT_CACHE = { frames: 12, left: 44, right: 44, up: 76, down: 16 };   // 搖擺切成幾格；小圖從洞口往左、右、上、下各留多少像素
+const tuftCache = new WeakMap();   // 每一條藤蔓 → 它的小圖（藤蔓不見了就自動丟掉）
+function drawLoofahTuftCached(ctx, v, now) {
+  const T = TUFT_CACHE, s = Math.max(1, Math.ceil(VIEW_SCALE * (window.devicePixelRatio || 1)));
+  let c = tuftCache.get(v);
+  if (!c || c.s !== s || c.seed !== v.seed) { c = { s, seed: v.seed, imgs: [] }; tuftCache.set(v, c); }
+  const turn = ((now * 2.6) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+  const i = Math.floor(turn / (Math.PI * 2) * T.frames) % T.frames;
+  if (!c.imgs[i]) {
+    const w = T.left + T.right, h = T.up + T.down, cv = document.createElement('canvas');
+    cv.width = w * s; cv.height = h * s;
+    const g = cv.getContext('2d');
+    g.scale(s, s); g.lineCap = 'round'; g.lineJoin = 'round';
+    drawLoofahTuft(g, T.left, T.up, v.seed, 1, i / T.frames * Math.PI * 2);
+    c.imgs[i] = cv;
+  }
+  ctx.drawImage(c.imgs[i], v.x - T.left, v.y - T.up, T.left + T.right, T.up + T.down);
 }
 // ---- 射藤蔓時隊友旁邊的小提示：滑鼠左鍵圖示＋「幫隊友掙脫」，沒有底框，圖示和字同一個顏色 ----
 // 圖示用 images/ui/mouse-click.png（對話框「下一句」也用這張；原圖 80×80，滑鼠本體在 x 22～57、y 11～68）

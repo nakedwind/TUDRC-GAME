@@ -243,8 +243,20 @@ function enemyWideAt(c, r) {
 // 剛好卡在窄格裡（例如生在窄道）時，可以先走窄格出去，進到寬的地方之後就不再走窄格。
 // canBreakBuildings＝false 時繞過建築；回傳 { path, reached }
 function wideEnemyRoute(e, goalC, goalR, canBreakBuildings = true, maxSteps = Infinity) {
+  // 這次找路裡，每一格「是不是空地」「夠不夠寬」都只算一次記起來。
+  // 不記的話，同一格會被旁邊的格子重複問幾十次；目標走不到時要把整張地圖搜完，一次要幾十毫秒，好幾隻大體型怪一起找就會卡。
+  const openMemo = new Map(), wideMemo = new Map();
+  const isOpen = (c, r) => { const k = c + ',' + r; let v = openMemo.get(k); if (v === undefined) { v = enemyWideOpen(c, r); openMemo.set(k, v); } return v; };
+  const isWide = (c, r) => {   // 跟 enemyWideAt 一樣的判斷，只是用記起來的結果
+    const k = c + ',' + r; let v = wideMemo.get(k);
+    if (v !== undefined) return v;
+    v = false;
+    if (isOpen(c, r)) for (const [dc, dr] of [[-1, -1], [0, -1], [-1, 0], [0, 0]])
+      if (isOpen(c + dc, r + dr) && isOpen(c + dc + 1, r + dr) && isOpen(c + dc, r + dr + 1) && isOpen(c + dc + 1, r + dr + 1)) { v = true; break; }
+    wideMemo.set(k, v); return v;
+  };
   const [sc, sr] = cellAt(e.x, e.y), startKey = sc + ',' + sr;
-  const came = new Map([[startKey, null]]), queue = [[sc, sr, 0, !enemyWideAt(sc, sr)]];
+  const came = new Map([[startKey, null]]), queue = [[sc, sr, 0, !isWide(sc, sr)]];
   let best = [sc, sr], bestD = Math.hypot(goalC - sc, goalR - sr), reached = sc === goalC && sr === goalR;
   for (let qi = 0; qi < queue.length && !reached; qi++) {
     const [c, r, steps, narrow] = queue[qi];
@@ -252,8 +264,8 @@ function wideEnemyRoute(e, goalC, goalR, canBreakBuildings = true, maxSteps = In
     for (const [dc, dr] of ENEMY_NEIGHBORS) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
       if (came.has(key) || edgeBetween(c, r, nc, nr)) continue;   // 兩格中間有薄牆：繞路
-      const wide = enemyWideAt(nc, nr);
-      if (!wide && !(narrow && enemyWideOpen(nc, nr))) continue;
+      const wide = isWide(nc, nr);
+      if (!wide && !(narrow && isOpen(nc, nr))) continue;
       if (!canBreakBuildings && enemyBarrierAt(nc, nr)) continue;
       came.set(key, [c, r]); queue.push([nc, nr, steps + 1, narrow && !wide]);
       if (nc === goalC && nr === goalR) { best = [nc, nr]; reached = true; break; }
@@ -432,16 +444,20 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
 function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   e.aiRouteTimer = (e.aiRouteTimer || 0) - moveDt;
   const goal = goalC + ',' + goalR;
-  const failedHere = !e.aiPath && e.aiRouteFailed && e.aiRouteKey === routeKey && e.aiGoal === goal;   // 剛剛才找過、同一個目標走不到：等 aiRouteTimer 到了再找，不要每一幀都重找
-  if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || (!e.aiPath && !failedHere) || (e.aiPath && !e.aiPath.length)) {
+  // 剛剛才找過、同一個目標走不到：等 aiRouteTimer 到了再找，不要每一幀都重找
+  // （大體型走不到時會先走到離目標最近的地方，走完那段路後一樣要等，不然會停在門口每一幀都重找）
+  const failedHere = (!e.aiPath || !e.aiPath.length) && e.aiRouteFailed && e.aiRouteKey === routeKey && e.aiGoal === goal;
+  if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || (!failedHere && (!e.aiPath || !e.aiPath.length))) {
+    let reached = true;
     if (e.wide) {   // 大體型：只走寬的路，過不去就停在離目標最近的地方
       const around = canBreakBuildings === 'detour' ? wideEnemyRoute(e, goalC, goalR, false) : null;
-      e.aiPath = around && around.reached ? around.path : wideEnemyRoute(e, goalC, goalR, !!canBreakBuildings).path;
+      const route = around && around.reached ? around : wideEnemyRoute(e, goalC, goalR, !!canBreakBuildings);
+      e.aiPath = route.path; reached = route.reached;
     } else e.aiPath = (canBreakBuildings === 'detour' && buildEnemyRoute(e, goalC, goalR, false)) || buildEnemyRoute(e, goalC, goalR, !!canBreakBuildings);
     e.aiRouteKey = routeKey; e.aiGoal = goal; e.aiRouteTimer = .65 + Math.random() * .35;
-    // 走不到（例如目標在深水區裡）：找一次要把整張地圖搜完，很花時間，晚一點再找（ENEMY_ROUTE_FAIL_WAIT 秒）
-    e.aiRouteFailed = !e.aiPath;
-    if (!e.aiPath) e.aiRouteTimer = ENEMY_ROUTE_FAIL_WAIT;
+    // 走不到（例如目標在深水區裡、大體型被窄門擋住）：找一次要把整張地圖搜完，很花時間，晚一點再找（ENEMY_ROUTE_FAIL_WAIT 秒）
+    e.aiRouteFailed = !e.aiPath || !reached;
+    if (e.aiRouteFailed) e.aiRouteTimer = ENEMY_ROUTE_FAIL_WAIT;
   }
   if (!e.aiPath || !e.aiPath.length) return { reached: true };
   const [nc, nr] = e.aiPath[0], blocker = enemyBarrierAt(nc, nr);
