@@ -212,6 +212,7 @@ function stepMilkfishEnemy(e, dt) {
     if (nav.blocker) mfBlocked(e, nav.blocker, dt);
     return;
   }
+  if (typeof MAP !== 'undefined' && MAP && MAP.seekBase && typeof enemySeekBase === 'function' && enemySeekBase(e, dt, dt)) return;   // 地圖勾了「怪物沒目標時去打基地」（js/enemy-ai.js）
   mfWander(e, dt * C.wanderSpeedMul);
 }
 // 追人：夠近、中間沒擋住就高速衝過去（走路圖，貼近了才張嘴）；太遠或撞到東西衝不過去就尋路走過去

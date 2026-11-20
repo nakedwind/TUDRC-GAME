@@ -419,6 +419,7 @@ function stepClownfishEnemy(e, dt) {
 
 // ---- 沒有目標時的閒晃（跟 stepEnemy 結尾的邏輯一致）----
 function clownfishWander(e, moveDt) {
+  if (typeof MAP !== 'undefined' && MAP && MAP.seekBase && typeof enemySeekBase === 'function' && enemySeekBase(e, moveDt, moveDt)) return;   // 地圖勾了「怪物沒目標時去打基地」（js/enemy-ai.js）：一跳一跳往基地去
   e.wanderWait = Math.max(0, (e.wanderWait || 0) - moveDt);
   if (!e.wanderCell && e.wanderWait <= 0) e.wanderCell = chooseDarkWanderCell(e);
   if (e.wanderCell) {

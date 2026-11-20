@@ -7456,6 +7456,20 @@ const SHARED_TILES = [
     "flat": true
   },
   {
+    "id": "tile_poolwater_s_dark",
+    "name": "Poolcore_water_S_dark",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_water_S _dark.png",
+    "w": 1,
+    "h": 1,
+    "water": {
+      "depth": 25,
+      "speed": 40,
+      "see": 45
+    },
+    "flat": true
+  },
+  {
     "id": "tile_mwgnngo0",
     "name": "Poolcore_mrt-exit-2-sealed",
     "role": "floor",

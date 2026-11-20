@@ -354,3 +354,9 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .level-kind-item i { flex: none; width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,.4); }
 .level-kind-item span { display: grid; gap: 1px; }
 .level-kind-item small { color: #9aa4b2; font-size: 11px; }
+
+/* 圖層名字太長時：名字自己縮成「…」，鎖和眼睛按鈕固定寬度、永遠看得到（不會被擠出去） */
+.layer { min-width: 0; }
+.layer-label { min-width: 0; }
+.layer-count, .layer-op-tag, .layer-arrow { flex: none; white-space: nowrap; }
+.layer-lock, .layer-eye { flex: none; }

@@ -186,7 +186,8 @@ function stepFishHeadEnemy(e, dt) {
     } else fishGo(e, target.x, target.y, dt, 'fish');
     fishTrack(e, dt); return;
   }
-  // 3. 沒事做：發呆、在附近走走
+  // 3. 沒事做：地圖勾了「怪物沒目標時去打基地」就往基地走（js/enemy-ai.js 的 enemySeekBase），不然發呆、在附近走走
+  if (typeof MAP !== 'undefined' && MAP && MAP.seekBase && typeof enemySeekBase === 'function' && enemySeekBase(e, dt, dt)) { fishTrack(e, dt); return; }
   if (fh.spot) {
     const moved = moveEnemyToward(e, fh.spot, dt * C.wanderSpeedMul);
     if (!moved || Math.hypot(fh.spot.x - e.x, fh.spot.y - e.y) <= 3) { fh.spot = null; fh.wait = fhRand(C.idleMin, C.idleMax); }

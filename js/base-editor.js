@@ -988,6 +988,7 @@ function rotateBaseCells(cells, w, h, rot) {
 // ================= 畫布繪製 =================
 let showGrid = true;    // 格線開關（可用工具列按鈕切換）
 let showSolid = true;        // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）
+let showTileBox = true;      // 🟧 橘框（素材碰撞方框）自己的顯示開關：跟紅格分開，才選得清楚是紅格還是橘框
 // ---- 🎯 出入口微調：點出入口選取，方向鍵移動位置、[ ] 調判定範圍（存在 portal 的 ox、oy、radius；沒調過就不寫，跟原本一樣）----
 const PORTAL_RADIUS_DEFAULT = 52;   // 遊戲預設的判定範圍（js/game.js 的 PORTAL_RADIUS）
 const PORTAL_NUDGE_LIMIT = 200;     // 位移最多幾像素
@@ -1201,7 +1202,7 @@ function draw() {
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
   // 素材碰撞方框（物件編輯器「🧱 素材碰撞」設定，js/tile-collisions.js）：顯示紅格時畫成橘色，同一張素材貼幾個都一樣
-  if ((showSolid || brush.mode === 'solidnudge') && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
+  if (showTileBox && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
@@ -2997,6 +2998,12 @@ document.getElementById('solidToggle').addEventListener('click', e => {
   draw();
   setStatus(showSolid ? '已顯示紅格與怪物出生區綠格' : '已隱藏紅格與怪物出生區綠格（設定保留）', '#8fd3ff');
 });
+// 🟧 橘框的顯示開關（純顯示）：跟紅綠格分開開關
+{ const b = document.getElementById('tileBoxToggle'); if (b) {
+  const label = () => { b.textContent = showTileBox ? '🟧 橘框：開' : '🟧 橘框：關'; b.classList.toggle('off', !showTileBox); };
+  b.addEventListener('click', () => { showTileBox = !showTileBox; label(); draw(); setStatus(showTileBox ? '已顯示橘框（素材碰撞方框）' : '已隱藏橘框（設定保留）', '#8fd3ff'); });
+  label();
+} }
 
 // 🧹 刪除全部碰撞：只清這張地圖的紅格和紅格的微調（圖片、可破壞格、基地自己的碰撞格都不動）
 document.getElementById('clearSolid')?.addEventListener('click', () => {

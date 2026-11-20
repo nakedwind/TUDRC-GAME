@@ -65,7 +65,7 @@ function setupPropCollisions() {
     // 其他的（和手扶梯）：擋 1 樓，像素微調記在一樓那一份
     if ((!deck2F || both) && !mapWalls.has(key)) {
       mapWalls.add(key); propAddedWalls.add(key);
-      if (nudged && typeof mapSolidOffsets !== 'undefined' && !mapSolidOffsets[key]) { mapSolidOffsets[key] = off.slice(); propAddedOffsets.add(key); }
+      if (nudged && typeof mapSolidOffsets !== 'undefined' && !mapSolidOffsets[key]) { mapSolidOffsets[key] = off.slice(); propAddedOffsets.add(key); if (typeof solidOffsetsChanged === 'function') solidOffsetsChanged(); }   // 找路要重算哪些格子附近有微調（js/pathfinding.js）
     }
   });
 }

@@ -299,3 +299,9 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .layer-blend .layer-op-label { white-space: nowrap; }
 .layer-op-tag { margin-left: 4px; padding: 0 4px; border-radius: 4px; background: #24384a; color: #8fd3ff; font-size: 10px; }
 .layer-op-tag.layer-blend-tag { background: #3a2a4a; color: #d7b8ff; }
+
+/* 圖層名字太長時：名字自己縮成「…」，鎖和眼睛按鈕固定寬度、永遠看得到（不會被擠出去） */
+.layer { min-width: 0; }
+.layer-label { min-width: 0; }
+.layer-count, .layer-op-tag, .layer-arrow { flex: none; white-space: nowrap; }
+.layer-lock, .layer-eye { flex: none; }

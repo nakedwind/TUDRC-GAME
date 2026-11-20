@@ -1118,6 +1118,7 @@ const capKingCaps = m => (m.capKing && m.capKing.caps) || [];
 // ================= 畫布繪製 =================
 let showGrid = true;    // 格線開關（可用工具列按鈕切換）
 let showSolid = false;       // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）；載入／重新整理時預設關著
+let showTileBox = false;     // 🟧 橘框（素材碰撞方框）自己的顯示開關：跟紅格分開，才選得清楚是紅格還是橘框；用 🟧 橘框工具時一定顯示
 // ---- 🎯 出入口微調：點出入口選取，方向鍵移動位置、[ ] 調判定範圍（存在 portal 的 ox、oy、radius；沒調過就不寫，跟原本一樣）----
 const PORTAL_RADIUS_DEFAULT = 52;   // 遊戲預設的判定範圍（js/game.js 的 PORTAL_RADIUS）
 const PORTAL_NUDGE_LIMIT = 200;     // 位移最多幾像素
@@ -1624,8 +1625,8 @@ function draw() {
   drawLeafPileMarks(m);
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
-  // 素材碰撞方框（物件編輯器「🧱 素材碰撞」設定，js/tile-collisions.js）：顯示紅格時畫成橘色，同一張素材貼幾個都一樣
-  if ((showSolid || brush.mode === 'solidnudge' || brush.mode === 'tilebox') && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
+  // 素材碰撞方框（物件編輯器「🧱 素材碰撞」設定，js/tile-collisions.js）：「🟧 橘框」開關打開時畫成橘色，同一張素材貼幾個都一樣
+  if ((showTileBox || brush.mode === 'tilebox') && typeof drawTileCollisionOverlay === 'function') drawTileCollisionOverlay(ctx, m.stamps, tileById, t => [tileW(t) * CELL, tileH(t) * CELL], OX, OY, s => hiddenLayers.has(s.layer || 'top'));
   if (typeof drawTileBoxEditor === 'function') drawTileBoxEditor(ctx);   // 🧱 橘框工具：選中的橘框（js/map-editor-tilebox.js）
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
@@ -4076,6 +4077,12 @@ document.getElementById('solidToggle').addEventListener('click', e => {
   setStatus(showSolid ? '已顯示紅格與怪物出生區綠格' : '已隱藏紅格與怪物出生區綠格（設定保留）', '#8fd3ff');
 });
 { const b = document.getElementById('solidToggle'); b.textContent = showSolid ? '🧱 紅綠格：開' : '🧱 紅綠格：關'; b.classList.toggle('off', !showSolid); }   // 按鈕一開始就照預設（關）
+// 🟧 橘框的顯示開關（純顯示）：跟紅綠格分開開關
+{ const b = document.getElementById('tileBoxToggle'); if (b) {
+  const label = () => { b.textContent = showTileBox ? '🟧 橘框：開' : '🟧 橘框：關'; b.classList.toggle('off', !showTileBox); };
+  b.addEventListener('click', () => { showTileBox = !showTileBox; label(); draw(); setStatus(showTileBox ? '已顯示橘框（素材碰撞方框）' : '已隱藏橘框（設定保留；用 🟧 橘框工具時還是會顯示）', '#8fd3ff'); });
+  label();
+} }
 
 // 🧹 刪除全部碰撞：只清這張地圖的紅格、紅格的微調、邊緣碰撞線（圖片、可破壞格、基地自己的碰撞格都不動）
 document.getElementById('clearSolid')?.addEventListener('click', () => {
@@ -4173,6 +4180,8 @@ function loadRules() {
   document.getElementById('f_cols').value = m.cols;
   document.getElementById('f_rows').value = m.rows;
   document.getElementById('f_npcs').checked = !!m.npcs;
+  const seekBaseField = document.getElementById('f_seekBase');   // 👾 怪物沒目標時去打基地（js/enemy-ai.js 的 enemySeekBase）；劇情地圖編輯器沒有這欄
+  if (seekBaseField) seekBaseField.checked = !!m.seekBase;
   const storyField = document.getElementById('f_story');
   if (storyField) storyField.checked = !!m.story;
   const safeField = document.getElementById('f_safe');
@@ -4327,6 +4336,10 @@ document.getElementById('f_desc').addEventListener('input', e => { curMap().desc
 document.getElementById('f_npcs').addEventListener('change', e => {
   curMap().npcs = e.target.checked; saveMaps();
   setStatus(e.target.checked ? '這張地圖會出現場景 NPC（克莉思、克萊兒、路德、穆恩、艾德林、諾亞、阿瓦倫）' : '這張地圖不會出現場景 NPC', '#8fd3ff');
+});
+document.getElementById('f_seekBase')?.addEventListener('change', e => {
+  pushUndo(); if (e.target.checked) curMap().seekBase = true; else delete curMap().seekBase; saveMaps();
+  setStatus(e.target.checked ? '這張地圖的怪物沒目標時會去打基地（路上會推開手動門）' : '這張地圖的怪物沒目標時照原本在黑暗處遊蕩', '#8fd3ff');
 });
 const storyField = document.getElementById('f_story');
 if (storyField) storyField.addEventListener('change', e => {

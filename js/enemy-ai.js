@@ -280,7 +280,7 @@ function wideEnemyRoute(e, goalC, goalR, canBreakBuildings = true, maxSteps = In
 function resetEnemyNavigation(e) {
   e.hasTarget = false; e.baseTarget = null;
   e.aiPath = null; e.aiGoal = null; e.aiRouteKey = null; e.aiRouteTimer = 0;
-  e.wanderCell = null;
+  e.wanderCell = null; e.seekStep = null;   // 往基地走的下一步（enemySeekBase）：門開關、建築變了要重算（每格站得下的位置 seekStandPoint 是共用的，門那幾格本來就不記）
 }
 // 擊退與衝撞要逐小步檢查，避免一次跨進基地、牆壁或建築的阻擋格。
 function displaceEnemy(e, dx, dy, distance, resetRoute = true) { return onFloorDo(e, () => displaceEnemyNow(e, dx, dy, distance, resetRoute)); }   // 照被推的怪物那一層（js/pathfinding.js）
@@ -469,6 +469,155 @@ function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   }
   moveEnemyToward(e, { x: tx, y: ty }, moveDt);
   return {};
+}
+// ---- 往基地走（地圖設定 MAP.seekBase）----
+// 流場（js/pathfinding.js 的 computeFlow）告訴怪物「每一格離基地幾步」，但它只看格子正中間能不能站；
+// 怪物身體有寬度，被微調過的牆擠窄的地方，正中間站不下、往旁邊挪一點才過得去，有的地方大隻的根本過不去。
+// 所以：在附近（最多 SEEK_LOOK 格）找「身體站得下」的格子，挑離基地最近的那格，走它的第一步；到了新的格子再重算。
+// 卡住超過 SEEK_STUCK 秒：那一格先避開 SEEK_BAN 秒，改走別條路。開關門時 resetEnemyNavigation 會把這些記錄清掉重算。
+const SEEK_LOOK = 60, SEEK_STUCK = 1.5, SEEK_BAN = 6, SEEK_REST = 5, SEEK_MS = 6;
+const SEEK_WAIT = { wait: true };   // seekBaseNext 回傳這個＝這一幀還沒輪到算
+let seekBudget = { at: 0, spent: 0 };
+const ENEMY_DOOR_PUSH = .6;   // 怪物在關著的門前推幾秒才打開
+// 試站的位置：格子正中間（門洞是門洞正中線）先試，再一點一點往外挪（最多 18 像素，不會挪到隔壁格）
+const SEEK_SHIFTS = (() => { const out = [], seen = new Set(), add = (dx, dy) => { const k = dx + ',' + dy; if (!seen.has(k)) { seen.add(k); out.push([dx, dy]); } }; for (let d = -18; d <= 18; d += 2) { add(d, 0); add(0, d); } for (const dy of [-18, -12, -6, 6, 12, 18]) for (const dx of [-18, -12, -6, 0, 6, 12, 18]) add(dx, dy); return out.sort((a, b) => Math.abs(a[0]) + Math.abs(a[1]) - Math.abs(b[0]) - Math.abs(b[1])); })();   // 左右、上下每 2 像素試一次（窄道常常要挪到剛好的位置），斜的粗一點
+// 這格裡面身體站得下、而且四周還留 2 像素的位置（剛好貼牆的點差一點點就卡住）；沒有就回傳 null。
+// 同一張地圖上、同樣體型的怪物共用一份（換地圖才重算；門的格子會開會關，不記）
+let seekPtCache = { map: null, byBody: new Map() };
+function seekStandPoint(e, c, r) {
+  if (seekPtCache.map !== MAP) seekPtCache = { map: MAP, byBody: new Map() };
+  const body = enemyBodyR(e) + (e.wide ? 'w' : '') + (e.behavior === 'moth' ? 'f' : '');
+  if (!seekPtCache.byBody.has(body)) seekPtCache.byBody.set(body, new Map());
+  const cache = seekPtCache.byBody.get(body), k = c + ',' + r;
+  if (cache.has(k)) return cache.get(k);
+  const [x, y] = cellStandPoint(c, r);
+  const roomy = (px, py) => !enemyBlocked(px, py, e) && !enemyBlocked(px - 2, py, e) && !enemyBlocked(px + 2, py, e) && !enemyBlocked(px, py - 2, e) && !enemyBlocked(px, py + 2, e);
+  let pt = null;
+  const inCell = (px, py) => { const [pc, pr] = cellAt(px, py); return pc === c && pr === r; };   // 挪過的點還要在這一格裡（門洞正中線可能偏一點）
+  for (const [dx, dy] of SEEK_SHIFTS) if (inCell(x + dx, y + dy) && roomy(x + dx, y + dy)) { pt = [x + dx, y + dy]; break; }
+  if (!(typeof mapDoors !== 'undefined' && mapDoors.some(d => d.cells.includes(k)))) cache.set(k, pt);   // 門的格子會開會關：不記
+  return pt;
+}
+// 從現在的位置走到 (x1, y1) 的小路：以 4 像素為一格找身體過得去的路（直線走過去可能擦到窄道的牆角）
+// 回傳要依序走過的點（只留轉彎的地方）；找不到回傳 null
+const SEEK_PX = 4;
+function seekPixelPath(e, x1, y1) {
+  const x0 = e.x, y0 = e.y, pad = 16;
+  const ox = Math.min(x0, x1) - pad, oy = Math.min(y0, y1) - pad;
+  const W = Math.ceil((Math.abs(x1 - x0) + pad * 2) / SEEK_PX) + 1, H = Math.ceil((Math.abs(y1 - y0) + pad * 2) / SEEK_PX) + 1;
+  const ptOf = i => [ox + (i % W) * SEEK_PX, oy + Math.floor(i / W) * SEEK_PX];
+  const idx = (x, y) => Math.round((y - oy) / SEEK_PX) * W + Math.round((x - ox) / SEEK_PX);
+  const start = idx(x0, y0), goal = idx(x1, y1), prev = new Int32Array(W * H).fill(-2), q = [start];
+  prev[start] = -1;
+  for (let h = 0; h < q.length; h++) {
+    const i = q[h]; if (i === goal) break;
+    const gx = i % W, gy = Math.floor(i / W);
+    for (const [dx, dy] of ENEMY_NEIGHBORS) {
+      const nx = gx + dx, ny = gy + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+      const n = ny * W + nx; if (prev[n] !== -2) continue;
+      const [px, py] = ptOf(n);
+      if (n !== goal && enemyBlocked(px, py, e)) { prev[n] = -3; continue; }
+      prev[n] = i; q.push(n);
+    }
+  }
+  if (prev[goal] < -1) return null;
+  const pts = [[x1, y1]];
+  let dir = null;
+  for (let i = prev[goal], last = goal; i >= 0 && i !== start; last = i, i = prev[i]) {   // 倒著走回起點，方向變了才記一個點
+    const d = i - last;
+    if (d !== dir) { if (dir !== null) pts.push(ptOf(last)); dir = d; }
+  }
+  return pts.reverse();
+}
+const seekClosedDoor = k => typeof mapDoors !== 'undefined' ? mapDoors.find(d => !d.open && d.own.includes(k)) || null : null;
+// 下一步：回傳 { next: [欄, 列], pt: 要走到的點 } 或 null（附近沒有更靠近基地、身體過得去的格子）
+function seekBaseNext(e, c, r, here) {
+  const from = c + ',' + r, now = performance.now() / 1000;
+  if (e.seekStep && e.seekStep.from === from) return e.seekStep.step;
+  // 每一幀最多花 SEEK_MS 毫秒幫怪物算下一步（開局、開門時一大群一起算會頓一下）：
+  // 時間用完了就先站著，下一幀再接著算（算到一半的「站得下的位置」都存起來了，下次很快）
+  const t0 = performance.now();
+  if (t0 - seekBudget.at > 10) seekBudget = { at: t0, spent: 0 };
+  if (seekBudget.spent >= SEEK_MS) return SEEK_WAIT;
+  const overtime = () => performance.now() - t0 + seekBudget.spent > SEEK_MS;
+  const banned = k => e.seekBan && e.seekBan.get(k) > now;
+  const fits = (cc, rr, k) => {
+    if (!inGrid(cc, rr) || !Number.isFinite(flowAt(cc, rr)) || banned(k)) return false;
+    const d = seekClosedDoor(k); if (d) return monsterOpensDoor(d);   // 關著的手動門：會推開，算走得過去
+    return !!enemyBarrierAt(cc, rr) || !!seekStandPoint(e, cc, rr);   // 建築會打掉；其他要身體站得下
+  };
+  const prev = new Map([[from, null]]), q = [[c, r]];
+  let goal = null, goalF = here;
+  for (let h = 0; h < q.length && prev.size < SEEK_LOOK; h++) {
+    if (overtime()) { seekBudget.spent += performance.now() - t0; return SEEK_WAIT; }
+    const [qc, qr] = q[h], qk = qc + ',' + qr;
+    if (qk !== from && (seekClosedDoor(qk) || enemyBarrierAt(qc, qr))) continue;   // 門要先推開、建築要先打掉：不從那邊再往下搜
+    for (const [dc, dr] of ENEMY_NEIGHBORS) {
+      const nc = qc + dc, nr = qr + dr, k = nc + ',' + nr;
+      if (prev.has(k) || edgeBetween(qc, qr, nc, nr) || !fits(nc, nr, k)) continue;
+      prev.set(k, qk); q.push([nc, nr]);
+      const f = flowAt(nc, nr); if (f < goalF) { goalF = f; goal = k; }
+    }
+  }
+  let step = null;
+  if (goal) {
+    let k = goal; while (prev.get(k) !== from) k = prev.get(k);
+    const next = k.split(',').map(Number), pt = seekStandPoint(e, next[0], next[1]) || cellStandPoint(next[0], next[1]);
+    // 門、建築那格不用走進去（站在前面推門、打建築）；其他照小路走，找不到小路就先避開那格、下次重算
+    const special = seekClosedDoor(k) || enemyBarrierAt(next[0], next[1]);
+    const path = special ? [pt] : seekPixelPath(e, pt[0], pt[1]);
+    if (path) step = { next, pt, path };
+    else (e.seekBan = e.seekBan || new Map()).set(k, now + SEEK_BAN);
+  }
+  e.seekStep = { from, step }; e.seekStill = 0;
+  seekBudget.spent += performance.now() - t0;
+  return step;
+}
+// 回傳 true＝這一幀有在往基地走；false＝這裡走不到基地（照舊在黑暗處遊蕩）
+function enemySeekBase(e, moveDt, dt) {
+  const base = G.obstacles.find(o => o.isBase && o.hp > 0); if (!base) return false;
+  let [c, r] = cellAt(e.x, e.y), here = flowAt(c, r);
+  // 站在格子交界上（小路的轉角常常剛好在格線上）：算到的那格正中間可能是牆，改看旁邊 1 像素的那格
+  if (!Number.isFinite(here)) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+    const [cc, rr] = cellAt(e.x + dx, e.y + dy), f = flowAt(cc, rr);
+    if (Number.isFinite(f)) { c = cc; r = rr; here = f; break; }
+  }
+  if (!Number.isFinite(here)) return false;   // 這裡走不到基地
+  // 已經到營地附近（流場最低的地方）：直接走到基地旁邊打它
+  if (here <= 2) {
+    const [gc, gr] = closestObstacleCell(e, base);
+    const nav = enemyNavigate(e, gc, gr, moveDt, 'base:' + gc + ',' + gr, true);
+    if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
+    else if (nav.reached) enemyAttackObstacle(e, base, dt);
+    return true;
+  }
+  if (e.seekRestUntil > performance.now() / 1000) return false;   // 剛剛發現過不去：先遊蕩一下
+  const step = seekBaseNext(e, c, r, here);
+  // 附近沒有身體過得去的路（例如大體型擠不進一格寬的窄道）：先照舊遊蕩 SEEK_REST 秒再試，不然會在窄道口來回抖
+  if (step === SEEK_WAIT) return true;   // 還沒輪到算：這一幀先站著
+  if (!step) { e.seekRestUntil = performance.now() / 1000 + SEEK_REST; e.seekStep = null; return false; }
+  e.aiPath = null;   // 沿流場走，不用找路的路線
+  const [nc, nr] = step.next, k = nc + ',' + nr;
+  const door = seekClosedDoor(k);   // 下一格是關著的門：站在門前推一下就打開
+  if (door) {
+    e.doorPushT = (e.doorPushT || 0) + dt;
+    if (e.doorPushT >= ENEMY_DOOR_PUSH) { e.doorPushT = 0; setDoorOpen(door, true); }
+    return true;
+  }
+  e.doorPushT = 0;
+  const blocker = enemyBarrierAt(nc, nr);   // 路上有建築擋著：打掉
+  if (blocker) { enemyAttackObstacle(e, blocker, dt); return true; }
+  // 照小路一段一段走（每一段都是直的，不會擦到牆角）
+  while (step.path.length && Math.hypot(step.path[0][0] - e.x, step.path[0][1] - e.y) < 1) step.path.shift();
+  if (!step.path.length) { e.seekStep = null; return true; }   // 走到了（挪過的位置可能還在原本那格）：重算下一步
+  const [tx, ty] = step.path[0], x0 = e.x, y0 = e.y;
+  moveEnemyToward(e, { x: tx, y: ty }, moveDt);
+  // 卡住：一直沒動就把那一格先避開，改走別條路
+  if (Math.hypot(e.x - x0, e.y - y0) < .05 && moveDt > 0) {
+    e.seekStill = (e.seekStill || 0) + moveDt;
+    if (e.seekStill > SEEK_STUCK) { (e.seekBan = e.seekBan || new Map()).set(k, performance.now() / 1000 + SEEK_BAN); e.seekStep = null; e.seekStill = 0; }
+  } else e.seekStill = 0;
+  return true;
 }
 function chooseDarkWanderCell(e) {
   if (e.squadLeader && typeof squadWanderCell === 'function') { const near = squadWanderCell(e); if (near) return near; }   // 金蕉王的隊員：待在隊長附近（js/golden-banana-king.js）
@@ -707,6 +856,8 @@ function stepEnemy(e, dt) {
     return;
   }
 
+  // 地圖勾了「怪物沒目標時去打基地」（池核）：沿著流場往基地走，路上關著的手動門推開、擋路的建築打掉
+  if (typeof MAP !== 'undefined' && MAP && MAP.seekBase && enemySeekBase(e, moveDt, dt)) return;
   // 沒有感知到目標時不再直衝營地，而是在附近黑暗處走走停停。
   e.wanderWait = Math.max(0, (e.wanderWait || 0) - dt);
   if (!e.wanderCell && e.wanderWait <= 0) e.wanderCell = chooseDarkWanderCell(e);

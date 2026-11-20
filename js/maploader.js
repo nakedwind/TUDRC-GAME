@@ -349,7 +349,7 @@ function returnPortalCell(fromId, source = null) {
 // ---- 不可穿透格的像素微調 ----
 // 一般的不可穿透格＝整格 40×40 都擋。地圖編輯器可以幫某些格子加上像素位移，
 // 讓擋路範圍對齊美術（例如沙發用方向鍵微調過位置）。位移後的方框可能跨到鄰格，
-// 所以判定時要連周圍 8 格一起看。怪物尋路仍然以「整格」為單位（見 pathfinding.js）。
+// 所以判定時要連周圍 8 格一起看。找路（isWall）也照微調後的位置算：格子正中間被蓋住才算牆（見 js/pathfinding.js 的 wall1F）。
 let mapSolidOffsets = {};
 const solidOffsetAt = (c, r) => mapSolidOffsets[c + ',' + r];
 // 物件自帶的擋路格（椅子、置物箱、電梯、捷運閘門）：用方向鍵微調過位置（ox、oy 像素）的物件，
@@ -361,7 +361,7 @@ function stampSolidOrigin(s) {
 function addStampSolidOffset(key, off) {   // 回傳有沒有加（這格本來就有微調、或沒偏移就不加）
   if (!off || (!off[0] && !off[1]) || mapSolidOffsets[key]) return false;
   if (MAP && mapSolidOffsets === MAP.solidOffsets) mapSolidOffsets = { ...mapSolidOffsets };   // 別改到地圖資料本身
-  mapSolidOffsets[key] = off.slice();
+  mapSolidOffsets[key] = off.slice(); solidOffsetsChanged();
   return true;
 }
 // 電梯物件清單快取：地圖物件很多，每次碰撞判定都整張掃一遍會很慢
@@ -449,12 +449,12 @@ function solidBlocksPoint(x, y) {
   if (elevator !== null) return elevator;
   if (typeof tileBoxBlocksPoint === 'function' && tileBoxBlocksPoint(x, y)) return true;   // 素材碰撞方框（物件編輯器設定，js/tile-collisions.js）
   const [c, r] = cellAt(x, y);
-  if (floorCtx === 2) return nudgedWallAt(x, y, isWall, solid2OffsetAt);   // 二樓：照 2 樓的擋路格和 2 樓的像素微調（不吃一樓牆的微調）
-  if (isWall(c, r) && !solidOffsetAt(c, r)) return true;        // 沒微調過：整格都擋
+  if (floorCtx === 2) return nudgedWallAt(x, y, isWallRaw, solid2OffsetAt);   // 二樓：照 2 樓的擋路格和 2 樓的像素微調（不吃一樓牆的微調）
+  if (isWallRaw(c, r) && !solidOffsetAt(c, r)) return true;     // 沒微調過：整格都擋（撞牆照原始紅格；找路用的 isWall 見 js/pathfinding.js）
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
     const cc = c + dc, rr = r + dr;
     const off = solidOffsetAt(cc, rr);
-    if (!off || !isWall(cc, rr)) continue;
+    if (!off || !isWallRaw(cc, rr)) continue;
     const x0 = OX + cc * CELL + off[0], y0 = OY + rr * CELL + off[1];
     if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return true;
   }

@@ -38,18 +38,52 @@ function setMapWallFaces(cells) { floor2WallFace = new Set(cells || []); }
 // 只擋 1 樓的人，跟一樓紅格 mapWalls 分開放（不然 2 樓的物件牆判定、燈光都會被影響）
 let floor1Auto = new Set();
 function setMapFloor1Auto(cells) { floor1Auto = new Set(cells || []); }
-const wall1F = k => mapWalls.has(k) || floor1Auto.has(k);
+// ---- 牆只有一份：紅格（含方向鍵微調後的位置）＋素材橘框 ----
+// 撞牆（走路）照紅格「微調後的方塊」和橘框擋（js/maploader.js 的 solidBlocksPoint），用的是原始的紅格 wall1FRaw。
+// 找路（隊友、怪物、出生點、蓋建築…所有問「這格是不是牆」isWall 的地方）不另外存一份，而是照同樣的牆算出來：
+//   這一格的正中間（角色站的地方）有沒有被微調後的紅格或橘框蓋住。紅格被微調到隔壁格，找路就當隔壁那格是牆、原本那格空出來。
+//   這樣不管紅格怎麼微調，走路和找路看到的牆都一樣，不會出現「找路以為走得過、走過去卻撞牆卡住」。
+const wall1FRaw = k => mapWalls.has(k) || floor1Auto.has(k);
+// 有微調過的紅格附近（本身和周圍 8 格）才需要細算；其他格子照原本的紅格判斷就好（找路一次問上萬格，要快）
+// mapSolidOffsets 被換掉（換地圖、讀進度）會自動重算；在原地加、刪微調的程式要呼叫 solidOffsetsChanged()
+let solidOffsetsVer = 0, nudgeNear = { src: null, ver: -1, set: new Set() };
+function solidOffsetsChanged() { solidOffsetsVer++; }
+function nudgeNearSet() {
+  const src = typeof mapSolidOffsets !== 'undefined' ? mapSolidOffsets : null;
+  if (nudgeNear.src === src && nudgeNear.ver === solidOffsetsVer) return nudgeNear.set;
+  const set = new Set();
+  for (const k in src || {}) { const [c, r] = k.split(',').map(Number); for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) set.add((c + dc) + ',' + (r + dr)); }
+  nudgeNear = { src, ver: solidOffsetsVer, set };
+  return set;
+}
+// 找路用的一樓牆：k＝'c,r'
+function wall1F(k, c, r) {
+  if (floor1Auto.has(k)) return true;
+  if (c === undefined) [c, r] = k.split(',').map(Number);
+  if (typeof tileBoxCoversCellFast === 'function' && tileBoxCoversCellFast(c, r)) return true;   // 橘框蓋住這格中間
+  if (!nudgeNearSet().has(k)) return mapWalls.has(k);
+  if (mapWalls.has(k) && !mapSolidOffsets[k]) return true;   // 沒微調過的紅格：整格都擋
+  const x = OX + c * CELL + CELL / 2, y = OY + r * CELL + CELL / 2;   // 這格正中間有沒有被（微調後的）紅格蓋住
+  for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
+    const kk = (c + dc) + ',' + (r + dr), o = mapSolidOffsets[kk];
+    if (!o || !mapWalls.has(kk)) continue;
+    const x0 = OX + (c + dc) * CELL + o[0], y0 = OY + (r + dr) * CELL + o[1];
+    if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return true;
+  }
+  return false;
+}
 const deckBlocked = k => floor2Solid.has(k) || floor2WallFace.has(k) || (mapWalls.has(k) && typeof objectWallOn2F === 'function' && objectWallOn2F(k));
 function setMapFloors(deck, ramps, solid2) {
   floor2SolidOffsets = {};
   deckCells = new Set(deck || []); floor2Solid = new Set(solid2 || []); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
 }
 // 明確指定樓層查牆（不看「現在處理誰」）：不屬於任何角色的程式（飛行物、出生點、檢查）用這個
-const wallAt = (f, c, r) => hasFloors ? wallOnFloor(f, c, r) : mapWalls.has(c + ',' + r);
-function wallOnFloor(f, c, r) {
+const wallAt = (f, c, r) => hasFloors ? wallOnFloor(f, c, r) : wall1F(c + ',' + r, c, r);
+// raw＝true：撞牆用，照原始的紅格（微調後的方塊由呼叫的程式自己算）；沒給＝找路用
+function wallOnFloor(f, c, r, raw = false) {
   const k = c + ',' + r;
   if (rampCells.has(k)) return mapWalls.has(k);
-  if (f !== 2) return wall1F(k);
+  if (f !== 2) return raw ? wall1FRaw(k) : wall1F(k, c, r);
   return !deckCells.has(k) || deckBlocked(k);
 }
 // 站在樓層出入口上的人，走出去的格子照「走出去之後在哪一層」判斷：走到 2 樓地面不管一樓有沒有牆都走得過去，走到一般格子照一樓的牆
@@ -75,14 +109,17 @@ function onFloorDo(who, fn) {
   if (typeof who === 'number') setFloorCtxTo(who); else setFloorCtx(who);
   try { return fn(); } finally { [floorCtx, floorOnRamp, floorOnDeck, floorScoped] = keep; }
 }
-function wallNow(c, r) {
+function wallNow(c, r, raw = false) {
   if (!floorScoped) floorUnscoped();
-  const k = c + ',' + r;
+  const k = c + ',' + r, w1 = () => raw ? wall1FRaw(k) : wall1F(k, c, r);
   if (rampCells.has(k)) return mapWalls.has(k) || (floorCtx !== 2 && !floorOnRamp && floorOnDeck);   // 一樓的人站在 2 樓地面的格子上：不能從這邊走進手扶梯（只能從一樓那頭上去）
-  if (floorOnRamp) return deckCells.has(k) ? deckBlocked(k) : wall1F(k);
-  return floorCtx === 2 ? !deckCells.has(k) || deckBlocked(k) : wall1F(k);
+  if (floorOnRamp) return deckCells.has(k) ? deckBlocked(k) : w1();
+  return floorCtx === 2 ? !deckCells.has(k) || deckBlocked(k) : w1();
 }
-const isWall = (c, r) => hasFloors ? wallNow(c, r) : mapWalls.has(c + ',' + r);
+// 找路用：這格能不能站人（照微調後的紅格和橘框算，見上面 wall1F）
+const isWall = (c, r) => hasFloors ? wallNow(c, r) : wall1F(c + ',' + r, c, r);
+// 撞牆用：原始的紅格（微調後的方塊、橘框由 solidBlocksPoint／nudgedWallAt 另外算）
+const isWallRaw = (c, r) => hasFloors ? wallNow(c, r, true) : mapWalls.has(c + ',' + r);
 // 處理某個角色之前先呼叫：設好「他在幾樓、是不是站在樓層出入口上」（算完用 clearFloorCtx 還原）
 function setFloorCtx(a) {
   floorScoped = true;
@@ -345,10 +382,10 @@ const cellStandPoint = (c, r) => doorLanePoint(c, r) || center(c, r);
 function enemyWallCell(c, r, f = floorCtx) {
   const [x, y] = f === 2 ? center(c, r) : cellStandPoint(c, r);
   if (f === 2) return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(2, cc, rr), solid2OffsetAt);   // 2 樓：照 2 樓的像素微調
-  return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(1, cc, rr));
+  return nudgedWallAt(x, y, (cc, rr) => wallOnFloor(1, cc, rr, true));
 }
 // 怪物走路的碰撞：這個點有沒有撞到（微調後的）牆
-const enemyWallPoint = (x, y) => floorCtx === 2 ? nudgedWallAt(x, y, isWall, solid2OffsetAt) : nudgedWallAt(x, y, isWall);
+const enemyWallPoint = (x, y) => floorCtx === 2 ? nudgedWallAt(x, y, isWallRaw, solid2OffsetAt) : nudgedWallAt(x, y, isWallRaw);
 
 // ---- 營地（怪物的目標格）；空的話預設為最下面一排 ----
 let campCells = new Set();
@@ -356,7 +393,16 @@ const isCamp = (c, r) => campCells.size ? campCells.has(c + ',' + r) : (r === RO
 
 // ---- 流場（每格到營地的最短步數，會繞過固定牆）----
 let flow = [], flow2 = [];   // flow2＝二樓的人用的（有陸橋的地圖才有）
+// 地圖設定「怪物沒目標時去打基地」（MAP.seekBase，地圖編輯器勾選）：關著的手動門也算路（怪物走到門前會推開，js/enemy-ai.js 的 enemySeekBase）
+// 上鎖、記憶之門、畫作門不算（怪物打不開）
+const monsterOpensDoor = d => !!d && d.mode === 'manual';
 function computeFlow() {
+  const doorPass = typeof MAP !== 'undefined' && MAP && MAP.seekBase && typeof mapDoors !== 'undefined'
+    ? mapDoors.filter(d => !d.open && monsterOpensDoor(d)).flatMap(d => [...d.own].filter(k => mapWalls.has(k))) : [];
+  for (const k of doorPass) mapWalls.delete(k);   // 算流場時先當門開著，算完馬上放回去
+  try { computeFlowNow(); } finally { for (const k of doorPass) mapWalls.add(k); }
+}
+function computeFlowNow() {
   const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck, keepScoped = floorScoped; floorCtx = 1; floorOnRamp = false; floorOnDeck = false; floorScoped = true;   // 算一樓的薄牆要用一樓的規則
   flow = new Array(COLS * ROWS).fill(Infinity);
   flow2 = hasFloors ? new Array(COLS * ROWS).fill(Infinity) : [];

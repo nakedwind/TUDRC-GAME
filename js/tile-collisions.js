@@ -214,6 +214,15 @@ function tileBoxBlocksPoint(x, y) {
 }
 // 這一格能不能蓋建築：格子中心在方框裡就不行
 function tileBoxCoversCell(c, r) { return tileBoxBlocksPoint(OX + c * CELL + CELL / 2, OY + r * CELL + CELL / 2); }
+// 找路用（js/pathfinding.js 的 isWall）：這一格的正中間有沒有被素材方框蓋住
+// 找路一次會問上萬格，所以這張地圖已經整理過方框的話直接用整理好的，不再每次重新檢查有沒有改過（改了素材碰撞要重新整理頁面）
+function tileBoxCoversCellFast(c, r) {
+  const grid = tileBoxIndex.map === MAP ? tileBoxIndex.grid : tileBoxGrid();
+  const list = grid && grid.get(c + ',' + r); if (!list) return false;
+  const x = OX + c * CELL + CELL / 2, y = OY + r * CELL + CELL / 2;
+  for (const b of list) if (x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1 && !tileBoxInHole(b, x, y) && tileBoxActive(b)) return true;
+  return false;
+}
 
 // ---- 編輯器：顯示紅格時畫出素材方框（橘色）----
 // tileOf(id)＝編輯器自己的找素材函式；tilePx(t)＝[寬, 高] 像素
