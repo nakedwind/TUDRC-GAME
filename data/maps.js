@@ -159682,7 +159682,24 @@ const BATTLE_MAPS = [
         "53,47": "tile_new_bg_floor"
       },
       "ground2": {},
-      "ground3": {},
+      "ground3": {
+        "21,21": "tile_obstacle_ore_small",
+        "27,15": "tile_obstacle_ore_small",
+        "21,10": "tile_obstacle_ore_small",
+        "37,9": "tile_obstacle_ore_small",
+        "48,11": "tile_obstacle_ore_small",
+        "30,17": "tile_obstacle_ore_small",
+        "36,59": "tile_obstacle_ore_small",
+        "49,61": "tile_obstacle_ore_small",
+        "29,84": "tile_obstacle_ore_small",
+        "45,83": "tile_obstacle_ore_small",
+        "29,91": "tile_obstacle_ore_small",
+        "40,93": "tile_interactive_storage_locker_key",
+        "26,71": "tile_interactive_storage_locker_key",
+        "50,60": "tile_interactive_storage_locker_key",
+        "19,59": "tile_interactive_pickup_battery",
+        "41,83": "tile_interactive_pickup_battery"
+      },
       "object": {},
       "object2": {},
       "object3": {},
@@ -164595,6 +164612,125 @@ const BATTLE_MAPS = [
         "c": 45,
         "r": 3,
         "layer": "object5"
+      },
+      {
+        "id": "tile_dmg_floor_crack_stained",
+        "c": 46,
+        "r": 16,
+        "layer": "ground3",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_floor_stain_seep",
+        "c": 20,
+        "r": 18,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_floor_stain_smudge",
+        "c": 25,
+        "r": 14,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_brick_chunks",
+        "c": 28,
+        "r": 21,
+        "layer": "ground3",
+        "ox": 10
+      },
+      {
+        "id": "tile_dmg_rubble_brick_chunks",
+        "c": 37,
+        "r": 10,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_floor_crack_fork",
+        "c": 39,
+        "r": 20,
+        "layer": "ground3",
+        "ox": 20
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 37,
+        "r": 13,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 21,
+        "r": 12,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 47,
+        "r": 13,
+        "layer": "ground3",
+        "ox": 20
+      },
+      {
+        "id": "tile_obstacle_ore_limestone",
+        "c": 28,
+        "r": 10,
+        "layer": "ground3",
+        "ox": 20
+      },
+      {
+        "id": "tile_obstacle_ore_manganese",
+        "c": 39,
+        "r": 14,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_obstacle_ore_coal",
+        "c": 23,
+        "r": 17,
+        "layer": "ground3",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 32,
+        "r": 19,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 47,
+        "r": 19,
+        "layer": "ground3",
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 44,
+        "r": 13,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 20,
+        "r": 15,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
       }
     ],
     "solid": [
