@@ -114,6 +114,7 @@ const coreClearTimeText = sec => typeof battleTimeText === 'function' ? battleTi
 // 每幀檢查（game.js 的 update 呼叫；取代原本「核心全破＋異質體清光才勝利」）
 function checkCoreClear(dt = 0) {
   if (MAP_SAFE || !G.cores.length || !G.cores.every(c => c.dead)) return;
+  if (!G.coreClearShown && typeof ratKingHoldsClear === 'function' && ratKingHoldsClear()) return;   // 花蓮老鼠王還沒被列車撞飛：先別結算（js/rat-king.js）
   if (!G.coreClearShown) {           // 核心剛全部打破：等一下（看碎裂表演）再結算
     G.coreClearWait = (G.coreClearWait || 0) + dt;
     if ((G.coreKeyDrops && G.coreKeyDrops.length) || (typeof itemIntroOpen !== 'undefined' && itemIntroOpen)) {   // 鑰匙還在地上、或拿到鑰匙的視窗還開著：先別跳結算

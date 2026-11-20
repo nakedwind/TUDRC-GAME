@@ -8,20 +8,21 @@
 const LANDMINE = { trigger: .45, fuse: 1, radius: 1.6, damage: 150, sentry: 60, player: 40 };
 
 const isLandmine = o => !!(o && o.trap);
-function mineCenter(o) { return { x: OX + (o.c + .5) * CELL, y: OY + (o.r + .5) * CELL }; }
+function mineCenter(o) { return { x: OX + (o.c + .5) * CELL + (o.mrtShift || 0), y: OY + (o.r + .5) * CELL }; }   // mrtShift：放在捷運車廂裡、跟著列車移動（js/mrt-train.js）
 function landmineAt(c, r) { return G.obstacles.find(o => isLandmine(o) && o.c === c && o.r === r) || null; }
 
 // ---- 每幀更新（在 update 裡呼叫）----
 function updateLandmines(dt) {
   for (const o of [...G.obstacles]) {
     if (!isLandmine(o) || o.hp <= 0) continue;
+    if (o.mrtCargo && !o.fuseT) continue;   // 跟著捷運開走中（在隧道裡、車門關著）：怪物踩不到
     const p = mineCenter(o);
     if (o.fuseT > 0) {   // 已經被踩到：倒數爆炸
       o.fuseT -= dt;
       if (o.fuseT <= 0) detonateMine(o);
       continue;
     }
-    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && !e.flying && sameFloor(e, o) && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL);   // 飄在空中的（珍珠小童）踩不到
+    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && !e.flying && !e.mineEater && sameFloor(e, o) && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL);   // 飄在空中的（珍珠小童）踩不到；虱目魚王踩到不會爆（會把地雷吃掉，js/milkfish-king.js）
     if (stepped) {
       o.fuseT = LANDMINE.fuse;
       if (typeof sfxAt === 'function') sfxAt('mineBeep', p.x, p.y, .8, 'mine-beep');   // 先「嗶嗶」，引信 1 秒後才爆
@@ -112,11 +113,19 @@ function detonateMineNow(o) {
 
 // ---- 繪製（地面層，在角色腳下）----
 function drawLandmines(ctx) {
-  const now = performance.now() / 1000;
   for (const o of G.obstacles) {
     if (!isLandmine(o) || fxSkip(hasFloors ? actorFloor(o) : 0)) continue;   // 陸橋補畫時跳過橋下的地雷
+    if (typeof mrtMineOnTrain === 'function' && mrtMineOnTrain(o)) continue;   // 放在捷運車廂裡的：跟著列車畫在車廂地板上（js/mrt-train.js 的 mrtTrainSortables），不然會被車廂蓋住
+    drawLandmine(ctx, o);
+  }
+}
+// 畫一顆地雷（車廂裡的地雷也用這個，js/mrt-train.js）
+function drawLandmine(ctx, o) {
+  if (o.mrtHidden) return;   // 跟著捷運開進隧道了
+  const now = performance.now() / 1000;
+  {
     const img = obstacleImgs[o.type] && obstacleImgs[o.type].h;
-    const x = OX + o.c * CELL, y = OY + o.r * CELL;
+    const x = OX + o.c * CELL + (o.mrtShift || 0), y = OY + o.r * CELL;
     if (img && img.complete && img.naturalWidth) {
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, x, y, CELL, CELL);

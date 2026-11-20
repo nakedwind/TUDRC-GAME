@@ -26,10 +26,12 @@ const MrtTrainEditor = (() => {
   const DOOR_FIELDS = [['x0', '門洞 1 左緣'], ['x1', '門洞 2 左緣'], ['x2', '門洞 3 左緣'], ['y', '上緣'], ['w', '寬'], ['h', '高']];
   const ART_FIELDS = [['a0', 'x'], ['a1', 'y'], ['a2', '寬'], ['a3', '高']];
   const NUM_FIELDS = [
-    ['到站、離站', [['arriveSoundLead', '到站音樂先響幾秒列車才出現', '秒', .5], ['firstWait', '第一班幾秒後來', '秒（要比上一格長，音樂才來得及先響）', .5], ['waitMin', '下一班最少隔', '秒', 1], ['waitMax', '下一班最多隔', '秒', 1], ['arriveDecel', '進站減速度', '越小進站越久', 10], ['departAccel', '離站加速度', '越小開走越慢', 10]]],
+    ['到站、離站', [['arriveSoundLead', '到站音樂先響幾秒列車才出現', '秒', .5], ['firstWait', '第一班幾秒後來', '秒（要比上一格長，音樂才來得及先響）', .5], ['firstStagger', '第一班錯開', '秒（每台車再隨機多等 0～這麼多秒；發電機全開時也一台一台陸續開門）', 1], ['waitMin', '下一班最少隔', '秒', 1], ['waitMax', '下一班最多隔', '秒', 1], ['arriveDecel', '進站減速度', '越小進站越久', 10], ['departAccel', '離站加速度', '越小開走越慢', 10]]],
     ['車門（照這個順序播音效）', [['doorTime', '開門／關門各', '秒（開門時播開門聲）', .1], ['dwell', '門開好後幾秒播離站警示音', '秒', .5], ['departWarnTime', '離站警示音響多久才播「車門即將關閉」', '秒（離站警示音 5.05 秒）', .05], ['warnTime', '「車門即將關閉」響多久才關門', '秒（這段 3.76 秒；關門時播關門聲）', .05], ['afterClose', '門關好後幾秒開走', '秒（關門聲 5.34 秒；開走時播列車啟動音）', .1], ['doorPassAt', '車門開到幾成才走得過', '0～1', .05]]],
     ['搭車（溫特在車上時關門）', [['rideTime', '開進隧道後黑幾秒才進站', '秒（要比到站音樂先響的秒數長）', .5], ['rideFadeCells', '離隧道口幾格開始變黑', '格（進站時進到軌道幾格才亮回來）', .5], ['rideShake', '搖晃強度', '', .1], ['nextTrainTime', '沒搭上車的隊員幾秒後搭下班車到站', '秒（不小心搭上車的隊員也是這麼久才回站）', 10]]],
     ['發電機全部打開（捷運站最後一台打開那一刻）', [['powerOnShake', '畫面震動強度', '0＝不震；搭車搖晃是 1.6，最大 16', .5], ['powerOnHumDelay', '幾秒後播「台北捷運(白噪音) 02」', '秒（發電機發動聲長約 3.4 秒；音量在音效編輯器調）', .5]]],
+    ['載怪物的列車（地圖編輯器勾「會載怪物」的車廂）', [['monsterChance', '每班載怪物的機率', '0～1（0.3＝30%）', .05], ['monsterMin', '最少幾隻', '隻', 1], ['monsterMax', '最多幾隻', '隻（怪物種類照地圖的怪物比例）', 1]]],
+    ['到站音樂（越遠越小聲、靠近的車只播一首）', [['arriveFullCells', '幾格以內最大聲', '格（算到列車最近的地方）', 1], ['arriveFadeCells', '幾格完全聽不到', '格（中間越遠越小聲）', 1], ['arriveMergeCells', '兩台車相距不到幾格只播一首', '格（建議是上一格的 2 倍，任何地方都不會同時聽到兩首）', 1]]],
     ['其他', [['frontSortDy', '外殼的排序往下', '像素（車內的人被蓋住、月台上的人在前面）', 1], ['doorSortDy', '門口那段外殼的排序往下', '像素，負的＝往上（站在門口還沒上車的人在前面）', 1], ['soundGain', '列車音量', '0～1', .05]]],
   ];
 
@@ -73,7 +75,7 @@ const MrtTrainEditor = (() => {
       ${NUM_FIELDS.map(([title, list]) => `<fieldset class="mrt-box"><legend>${title}</legend><div class="mrt-grid">` +
         list.map(([k, n, unit, step]) => `<label title="${unit}">${n}<span class="mrt-unit">${unit}</span><input type="number" step="${step}" data-num="${k}"></label>`).join('') + `</div></fieldset>`).join('')}
       <fieldset class="mrt-box"><legend>互通的捷運站（搭上車會隨機開到另一站）</legend>
-        <p class="help" style="margin-top:0">地圖 id 在地圖編輯器的地圖清單看得到（例如 map_mvxz356e）。到站音樂填音效編輯器裡的名稱（mrtArriveRed＝淡水信義線-紅線、mrtArriveBlue＝板南線-藍線；空白＝預設的到站音樂）。不在這份名單裡的地圖，搭車照舊開回同一站。</p>
+        <p class="help" style="margin-top:0">地圖 id 在地圖編輯器的地圖清單看得到（例如 map_mvxz356e）。到站音樂填音效編輯器裡的名稱（mrtArriveRed＝淡水信義線-紅線、mrtArriveBlue＝板南線-藍線、mrtArriveGreen＝松山新店線-綠線、mrtArriveOrange＝中和新盧線-橘線；空白＝預設的到站音樂）。不在這份名單裡的地圖，搭車照舊開回同一站。</p>
         <div id="mrtStations"></div><div class="row"><button id="mrtStationAdd" class="btn">＋ 新增車站</button></div></fieldset>
       <div class="row"><button id="mrtReset" class="btn">從正式資料重設</button><span id="mrtStatus" class="status"></span></div>`;
     center.after(panel);

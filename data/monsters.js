@@ -360,6 +360,58 @@ const MONSTERS_DEFAULT = [
     "deathSound": "milkfishDeath"
   },
   {
+    "id": "milkfish_king",
+    "wide": true,
+    "name": "虱目魚王",
+    "element": "water",
+    "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
+    "hp": 2400,
+    "speed": 34,
+    "playerDamage": 22,
+    "sentryDamage": 20,
+    "buildingDamage": 60,
+    "reward": 400,
+    "crystals": 30,
+    "width": 220,
+    "height": 264,
+    "frames": {
+      "front": "images/monster/milkfish-kid/milkfish-kid-front.png",
+      "walkFront": [
+        "images/monster/milkfish-kid/milkfish-kid-walk-01.png",
+        "images/monster/milkfish-kid/milkfish-kid-walk-02.png",
+        "images/monster/milkfish-kid/milkfish-kid-walk-03.png",
+        "images/monster/milkfish-kid/milkfish-kid-walk-02.png"
+      ]
+    },
+    "behavior": "milkfishKing",
+    "mfKing": {
+      "noticeRange": 8,
+      "leash": 14,
+      "eatSense": 7,
+      "chewTime": 1,
+      "bellyMax": 6,
+      "maxPrey": 2,
+      "holdTime": 8,
+      "mateLandDamage": 25,
+      "mateStun": 2.5,
+      "spitRange": 9,
+      "spitWindup": 0.8,
+      "spitFlight": 0.9,
+      "spitCooldown": 3.5,
+      "spitRadius": 1.2,
+      "spitDamage": 30,
+      "coreSpitHp": 0.33,
+      "coreOutTime": 4,
+      "rushSpeedMul": 2.2,
+      "stepShake": 6
+    },
+    "hitSound": "milkfishHurt",
+    "deathSound": "milkfishDeath",
+    "noHitSquash": true,
+    "stagger": 0,
+    "knockMul": 0
+  },
+  {
     "id": "burrowing_mouse",
     "name": "花蓮版權老鼠",
     "sprite": "images/monster/burrowing-mouse/mouse-open.png",

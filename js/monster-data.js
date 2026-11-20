@@ -51,7 +51,8 @@ function validMonsterCatalog(list) {
     ...(monster.behavior === 'boomerang' ? { behavior: 'boomerang', boomerang: validBoomerangCfg(monster.boomerang) } : {}),
     ...(monster.behavior === 'fishhead' ? { behavior: 'fishhead' } : {}),
     ...(monster.behavior === 'burrow' ? { behavior: 'burrow', burrow: validBurrowCfg(monster.burrow) } : {}),
-    ...(monster.behavior === 'milkfish' || monster.behavior === 'milkfishSmall' ? { behavior: monster.behavior } : {}),   // milkfish＝虱目魚小子：吃隊友、吃一格的物品；milkfishSmall＝小虱目魚小子：只吃物品（js/milkfish-kid.js，數值在 MILKFISH）
+    ...(monster.behavior === 'milkfish' || monster.behavior === 'milkfishSmall' ? { behavior: monster.behavior } : {}),
+    ...(monster.behavior === 'milkfishKing' ? { behavior: 'milkfishKing', mfKing: validMilkfishKingCfg(monster.mfKing) } : {}),   // milkfishKing＝虱目魚王：吞核心、吃建築和隊友再吐出來砸人（js/milkfish-king.js）   // milkfish＝虱目魚小子：吃隊友、吃一格的物品；milkfishSmall＝小虱目魚小子：只吃物品（js/milkfish-kid.js，數值在 MILKFISH）
     ...(monster.behavior === 'vine' ? { behavior: 'vine' } : {}),
     ...(monster.behavior === 'clownfish' ? { behavior: 'clownfish' } : {}),
     ...(monster.behavior === 'gourd' ? { behavior: 'gourd' } : {}),   // gourd＝葫蘆猴：慢慢拖行、升空泰山壓頂、一格的窄道過不去（js/gourd-monkey.js，數值在 GOURD）
@@ -107,6 +108,36 @@ const BURROW_FIELDS = [
   { key: 'cooldown', label: '攻擊間隔（秒）', min: .5, max: 15, step: .1, def: 2.6 },
   { key: 'emergeTime', label: '本體出土／入土（秒）', min: .3, max: 3, step: .05, def: .75 },
 ];
+// 虱目魚王（js/milkfish-king.js）：吃建築、吞隊友、吐東西砸人、吐核心
+const MILKFISH_KING_FIELDS = [
+  { key: 'noticeRange',    label: '甦醒距離（格）',               min: 2,   max: 30,  step: .5,  def: 8 },
+  { key: 'leash',          label: '守備範圍（格，離原位）',       min: 3,   max: 40,  step: 1,   def: 14 },
+  { key: 'eatSense',       label: '找建築吃的範圍（格）',         min: 1,   max: 20,  step: .5,  def: 7 },
+  { key: 'chewTime',       label: '吃一個建築要嚼多久（秒）',     min: .2,  max: 5,   step: .1,  def: 1 },
+  { key: 'bellyMax',       label: '肚子最多裝幾個建築',           min: 1,   max: 20,  step: 1,   def: 6 },
+  { key: 'maxPrey',        label: '最多同時吞幾個隊友',           min: 0,   max: 4,   step: 1,   def: 2 },
+  { key: 'holdTime',       label: '隊友含多久才吐出來（秒）',     min: 1,   max: 60,  step: .5,  def: 8 },
+  { key: 'mateLandDamage', label: '隊友被吐出來摔傷（不會摔死）', min: 0,   max: 300, step: 1,   def: 25 },
+  { key: 'mateStun',       label: '隊友摔暈幾秒',                 min: 0,   max: 10,  step: .1,  def: 2.5 },
+  { key: 'spitRange',      label: '吐東西的距離（格）',           min: 2,   max: 20,  step: .5,  def: 9 },
+  { key: 'spitWindup',     label: '吐之前鼓起來（秒）',           min: .2,  max: 3,   step: .05, def: .8 },
+  { key: 'spitFlight',     label: '吐出去在空中飛（秒）',         min: .3,  max: 3,   step: .05, def: .9 },
+  { key: 'spitCooldown',   label: '吐建築的間隔（秒）',           min: .5,  max: 20,  step: .5,  def: 3.5 },
+  { key: 'spitRadius',     label: '砸到地上的範圍（格）',         min: .3,  max: 4,   step: .1,  def: 1.2 },
+  { key: 'spitDamage',     label: '砸到人的傷害',                 min: 0,   max: 300, step: 1,   def: 30 },
+  { key: 'coreSpitHp',     label: '每掉幾 % 血吐一次核心',        min: .05, max: 1,   step: .05, def: .33, pct: true },
+  { key: 'coreOutTime',    label: '吐完核心喘氣幾秒',             min: .5,  max: 15,  step: .5,  def: 4 },
+  { key: 'rushSpeedMul',   label: '衝回去吞核心的速度 ×',         min: .5,  max: 5,   step: .1,  def: 2.2 },
+  { key: 'stepShake',      label: '腳步震動大小',                 min: 0,   max: 20,  step: .5,  def: 6 },
+];
+function validMilkfishKingCfg(raw) {
+  const src = raw && typeof raw === 'object' ? raw : {}, out = {};
+  for (const f of MILKFISH_KING_FIELDS) {
+    const n = Number(src[f.key]); out[f.key] = Number.isFinite(n) ? Math.max(f.min, Math.min(f.max, n)) : f.def;
+  }
+  out.bellyMax = Math.round(out.bellyMax); out.maxPrey = Math.round(out.maxPrey);
+  return out;
+}
 function validBurrowCfg(raw) {
   const src = raw && typeof raw === 'object' ? raw : {}, out = {};
   for (const f of BURROW_FIELDS) {

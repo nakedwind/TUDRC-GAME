@@ -58,6 +58,8 @@ const BEHAVIOR_UI = {
     desc: '本體、手與地洞分層，使用程式遮罩平滑出土／縮回。生成與瞬移使用自由座標，不吸附格線；以「地洞剛出現」開始出土。本體周圍 5×5 格內可以伸手：目標在左邊用左手，右邊用右手。出手前鎖定地面並預警，可移動閃避；本體躲回去或死亡後，原地洞保留 5 秒。手的洞隨攻擊結束消失。洞口實際範圍暫時不能行走或放置建築，洞消失後恢復。' },
   charger: { key: 'charger', fields: () => CHARGER_FIELDS, valid: c => validChargerCfg(c), title: '🐦 衝撞行為',
     desc: '平時發呆、偶爾散步；玩家或哨兵進入注意範圍（中間沒有牆）就愣一下，然後直線衝過去，撞到會把人撞飛。玩家一出現就只追玩家，哨兵的嘲諷也引不走。' },
+  milkfishKing: { key: 'mfKing', fields: () => MILKFISH_KING_FIELDS, valid: c => validMilkfishKingCfg(c), title: '👑 虱目魚王（BOSS）',
+    desc: '守在核心旁，被叫醒後把核心吞進肚子保護。吃掉附近的建築（地雷、油箱、油桶、燈、路障…）存在肚子裡，再瞄準隊友或溫特吐出來砸人：地雷落地爆炸、油箱油桶郵筒漏油。最多同時含幾個隊友，含一陣子吐出來，隊友摔到地上受傷、頭暈。血量每掉一段就把核心吐到地上（打得到），喘完氣衝回去吞回來。上面的「攻擊玩家」是咬溫特的傷害。哪張地圖有牠寫在 js/milkfish-king.js 的 MILKFISH_KING_MAPS。' },
   shooter: { key: 'shooter', fields: () => SHOOTER_FIELDS, valid: c => validShooterCfg(c), title: '🫧 飄浮噴珍珠',
     desc: '半浮在空中慢慢移動；看到玩家或哨兵就飄到射程內，手上的珍珠閃一下後噴出珍珠，太近會往後飄。地圖上有異質核心醒著時變成生氣的紅眼圖，噴得比較快。每顆珍珠的傷害用上面的「攻擊玩家／哨兵／建築」。' },
 };
@@ -100,6 +102,7 @@ function addMonster(copy = false) {
   if (source.charger) monster.charger = { ...source.charger };
   if (source.shooter) monster.shooter = { ...source.shooter };
   if (source.burrow) monster.burrow = { ...source.burrow };
+  if (source.mfKing) monster.mfKing = { ...source.mfKing };
   monsters.push(monster); selectedId = monster.id;
   saveMonsters(); render();
   document.getElementById('f_name').focus(); document.getElementById('f_name').select();

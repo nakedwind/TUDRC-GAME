@@ -126,6 +126,7 @@ function enemyAttackSentry(e, target, dt) {
 function enemyAttackPlayer(e, dt) {
   const p = G.player;
   if (!p || p.hp <= 0) return;
+  if (p.rkHeld) return;   // 被老鼠王的手抓著（js/rat-king.js）：其他怪物打不到
   if (!sameFloor(e, p)) return;   // 保險：不管哪一種攻擊，不同樓層（陸橋上／下）的都打不到溫特
   monsterSwingCue(e, e.playerTouchCd || 0, p.x, p.y);
   if ((e.playerTouchCd || 0) > 0) return;
@@ -187,7 +188,7 @@ const SENTRY_AGGRO_TIME = 5;
 // 只有被他打中、正在記仇（sentryAggro）的那一隻才會攻擊他。
 function enemyNoticesSentry(e, t) {
   if (t && !sameFloor(e, t)) return false;   // 不同樓層（陸橋上／下）：打不到、也不追（js/pathfinding.js）
-  if (t && t.eatenBy) return false;   // 被虱目魚小子吃掉、卡在魚嘴裡（js/milkfish-kid.js）
+  if (t && (t.eatenBy || t.rkHeld)) return false;   // rkHeld：被老鼠王的手抓住（js/rat-king.js）   // 被虱目魚小子吃掉、卡在魚嘴裡（js/milkfish-kid.js）
   if (t && (t.grabbed || t.grabFall)) return false;   // 被溫特抓起來（js/grab.js）：怪物不理他
   if (t && t.vineCap) return false;   // 被藤蔓吊走（js/vines.js）：怪物不理他
   if (!TYPES[t.type] || !TYPES[t.type].noAggro) return true;
@@ -574,9 +575,13 @@ function stepEnemy(e, dt) {
   if (e.dummy) { updateEnemyEffects(e, dt); return; }   // 訓練室的沙包：不會動、不會打人（js/practice.js）
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
+  if (e.ratKing) { stepRatKing(e, dt); return; }   // 花蓮老鼠王：卡在鐵軌上、手由 updateRatKing 出（js/rat-king.js）
+  if (e.ratKingHand) { e.moving = false; e.target = null; e.knockT = 0; return; }   // 老鼠王抓人的手：不動，打掉就放人
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信
+  if (e.mrtExit && typeof mrtStepExit === 'function' && mrtStepExit(e, dt)) return;   // 剛從捷運下車：先直直走到月台上（js/mrt-train.js）
   if (e.poolBoss) { stepPoolBoss(e, dt); return; }   // 池核的巨大比基尼小丑魚：游泳、潛水、擱淺都由 js/pool-boss.js 自己管
   if ((e.confuseT > 0 || e.brawlT > 0) && stepConfusedEnemy(e, dt)) return;   // 混亂（混亂彈、會混亂的隊員）：改打其他怪物；被混亂的怪物打到：回手打牠
+  if (e.mothBoss) { stepMothBoss(e, dt); return; }   // 人面蝶后：抱著核心在幾個區域之間飛、築巢（js/moth-boss.js）
   if (e.behavior === 'moth') { stepMothEnemy(e, dt); return; }   // 人面蝶：在空中飛（飛得過牆，不用下面的卡牆檢查）、撒鱗粉、趨光（js/human-face-butterfly.js）
   const blocked = (x, y) => enemyBlocked(x, y, e);
   if (blocked(e.x, e.y)) {
@@ -597,6 +602,7 @@ function stepEnemy(e, dt) {
   if (e.squadLeader && typeof stepSquadLeash === 'function' && stepSquadLeash(e, dt)) return;   // 金蕉王的隊員：離隊長太遠就走回去（js/golden-banana-king.js）
   if (e.elite) { stepEliteBird(e, dt); return; }   // 菁英鳥頭人：守在核心旁、自己管走回原位（js/elite-bird-head.js）
   if (e.loofahQueen) { stepLoofahQueen(e, dt); return; }   // 絲瓜女王：踏地垂下藤蔓、不離開農田房（js/loofah-queen.js）
+  if (e.behavior === 'milkfishKing') { stepMilkfishKing(e, dt); return; }   // 虱目魚王：吞核心、吃建築和隊友再吐出來砸人（js/milkfish-king.js）
   if (e.pearlBoss) { stepPearlBoss(e, dt); return; }   // 珍珠大童：抱著核心閒晃、閉殼降珍珠，自己管回原位（js/pearl-elder.js）
   if (e.guardPose && stepEliteGuardPose(e, dt)) return;   // 大隊長身邊的手下：背對玩家站崗，大隊長大叫才轉身
   // 核心醒著：狂暴的異質體離核心太遠就衝回去守著（js/core-frenzy.js）；溫特貼在旁邊時照樣先打溫特

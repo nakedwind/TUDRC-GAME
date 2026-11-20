@@ -187,6 +187,7 @@ function drawCharacterShadow(actor) {
   ctx.restore();
 }
 function drawTower(t) {
+  if (t.rkHeld) return;   // 被老鼠王的手抓住、拖進地底：看不到（js/rat-king.js）
   if (t.eatenBy) {   // 被虱目魚小子吃掉：只畫魚嘴裡露出的腳（js/milkfish-kid.js）；說的話畫在魚頭上
     if (t.say && t.say.text) queueTowerBubble(t, t.eatenBy.x, t.eatenBy.y - (t.eatenBy.drawHeight || 120) - 6, t.say.text, t.say.col || BUBBLE_COLORS[t.type]);
     return;
@@ -451,6 +452,9 @@ function drawEnemy(e) {
   if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
   if (e.behavior === 'burrow' && typeof drawBurrowingMouseBody === 'function') {
     drawBurrowingMouseBody(ctx, e);
+  } else if (e.ratKing && typeof drawRatKing === 'function') {   // 花蓮老鼠王：下半身被月台擋住（js/rat-king.js）
+    drawRatKing(ctx, e);
+  } else if (e.ratKingHand) {   // 老鼠王抓人的手：由 ratKingSortables 畫
   } else if (baseSprite.complete && baseSprite.naturalWidth) {
     const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
     const prevSmooth = ctx.imageSmoothingEnabled;   // 畫完放回原本的設定（不要直接打開平滑，不然後面畫的牆、道具會被糊掉）
@@ -466,8 +470,10 @@ function drawEnemy(e) {
     const fuseP = e.fuseT > 0 ? 1 - e.fuseT / SLIME_BOMB.fuse : 0;
     const fuseFlash = fuseP > 0 ? (Math.sin(fuseP * fuseP * 60) > 0 ? .85 : .15) : 0;
     if (e.hitT > 0) drawHitFlash(sprite, Math.min(1, e.hitT / .16), e.hitColor, dx, dy, dw, dh);   // 先閃白，再轉屬性色
+    if (e.mothBoss && typeof drawMothBossCore === 'function') drawMothBossCore(ctx, e, dx, dy, dw, dh);   // 人面蝶后抱著的核心（js/moth-boss.js）
     if (e.pearlBoss && typeof drawPearlBossCore === 'function') drawPearlBossCore(ctx, e, dx, dy, dw, dh);   // 珍珠大童抱著的核心（js/pearl-elder.js）
-    if (e.mf && e.mf.prey && typeof drawMilkfishPrey === 'function') drawMilkfishPrey(ctx, e, dx, dy, dw, dh, baseSprite);   // 虱目魚小子嘴裡的隊友：用這一幀實際畫的位置，被打壓扁、晃動時才會黏在嘴上（js/milkfish-kid.js）
+    if (e.mf && e.mf.prey && typeof drawMilkfishPrey === 'function') drawMilkfishPrey(ctx, e, dx, dy, dw, dh, baseSprite);
+    if (e.mk && typeof drawMilkfishKingBody === 'function') drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, baseSprite);   // 虱目魚王：肚子裡的核心發光、嘴裡的隊友、王冠（js/milkfish-king.js）   // 虱目魚小子嘴裡的隊友：用這一幀實際畫的位置，被打壓扁、晃動時才會黏在嘴上（js/milkfish-kid.js）
     if (walkFrame && walkFrame.rig) drawRigArm(e, walkFrame, dx, dy, dw, dh);   // 揮手：即時轉動的手臂
     const fuseSil = fuseFlash ? flashSprite(sprite, '#ff6a3d') : null;
     if (fuseSil) { ctx.globalAlpha = fuseFlash * .75; ctx.drawImage(fuseSil, dx, dy, dw, dh); ctx.globalAlpha = 1; }
@@ -944,6 +950,7 @@ function drawDashCooldown(p, hpY) {
   ctx.restore();
 }
 function drawPlayer(p) {
+  if (p.rkHeld) return;   // 被老鼠王的手抓住、拖進地底：看不到（js/rat-king.js）
   drawCharacterShadow(p);
   if (G.playerDeath) { drawPlayerDeath(p); return; }   // 倒下：陣亡動畫
   const img = pickCharacterFrame(playerSprites, p);
@@ -1081,9 +1088,10 @@ function draw() {
     : typeof escalatorRiderKey === 'function' ? escalatorRiderKey(a, y) : { floor: visualFloor(a), band: DRAW_BAND.obj, y };
   for (const t of G.towers) sortables.push({ ...actorDrawKey(t, t.y + 17, t.sitting ? seatDrawY(t.sitting) : null), draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
   for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ ...actorDrawKey(npc, npc.y + 17, npc.sitting ? seatDrawY(npc.sitting) : bedY), draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
-  for (const e of G.enemies) if (enemyVisible(e) && e.behavior !== 'moth') sortables.push({ ...actorDrawKey(e, e.y + 13, null), draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
+  for (const e of G.enemies) if ((enemyVisible(e) || e.ratKing) && e.behavior !== 'moth') sortables.push({ ...actorDrawKey(e, e.y + 13, null), draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
-  if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
+  if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);
+  if (typeof ratKingSortables === 'function') ratKingSortables(sortables);   // 花蓮老鼠王的手、被撞飛的本體（js/rat-king.js）   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof loofahQueenSortables === 'function') loofahQueenSortables(sortables);   // 絲瓜女王頭上吊著的核心（js/loofah-queen.js）
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
   if (typeof escalatorSortables === 'function') escalatorSortables(sortables);   // 側面手扶梯前面的扶手外殼：蓋在站在上面的人身上（js/escalators.js）
@@ -1102,7 +1110,8 @@ function draw() {
   // 有陸橋的地圖畫兩輪：第 1 輪在 1 樓地板上（1 樓的、沒記樓層的），第 2 輪在 2 樓地板畫好之後（只畫記著 2 樓的）。
   // 每個畫圖函式自己用 fxSkip(東西的 floor) 跳過另一層的（js/pathfinding.js）；第二個欄位＝這個函式有沒有分樓層，沒分的只在第 1 輪畫
   const groundFx = [
-    [() => typeof drawBurrowingMouseGround === 'function' && drawBurrowingMouseGround(ctx), true],   // 老鼠鑽地的土堆、洞（js/burrowing-mouse.js）
+    [() => typeof drawBurrowingMouseGround === 'function' && drawBurrowingMouseGround(ctx), true],   
+    [() => typeof drawRatKingGround === 'function' && drawRatKingGround(ctx), true],   // 花蓮老鼠王：手的預警圈、核心連到老鼠王的紫光（js/rat-king.js）   // 老鼠鑽地的土堆、洞（js/burrowing-mouse.js）
     [() => typeof drawGraffitiGround === 'function' && drawGraffitiGround(ctx), true],   // 地板上的塗鴉（js/graffiti.js）
     [() => drawScorchMarks(ctx), true],   // 地上腐蝕焦痕（焦黑燒痕，還在扣血時透出紫色餘燼）
     [() => drawAcidWarnings(ctx), true],   // 腐蝕池的危險範圍圈（js/attack-fx.js）
@@ -1287,6 +1296,7 @@ function draw() {
   if (typeof drawPearlElderTelegraphs === 'function') drawPearlElderTelegraphs(ctx);   // 珍珠落點的陰影圈、大童暈眩的星星：畫在黑幕上面（js/pearl-elder.js）
   if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
   if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
+  if (typeof drawMilkfishKingFx === 'function') drawMilkfishKingFx(ctx);   // 虱目魚王吐東西的落點紅圈、飛在空中的東西（js/milkfish-king.js）
   if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
   if (typeof drawGrabBuildingTarget === 'function') drawGrabBuildingTarget(ctx);   // 抓著建築：要放下的位置（js/grab.js）
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢

@@ -106,6 +106,7 @@ function updateActorFloor(a) {
       for (let dc = -1; dc <= 1 && !edge; dc++) for (let dr = -1; dr <= 1; dr++) if (deckCells.has((c + dc) + ',' + (r + dr)) !== on) { edge = true; break; }
       if (!edge || a.floor == null) a.floor = on ? 2 : 1;   // 在邊緣：維持原本那層
     }
+    if (a.mothBoss && a.floor === 1 && mapWalls.has(k)) a.floor = 2;   // 人面蝶后在 2 樓的牆上空換區：算 2 樓，才不會被 2 樓的牆蓋住看不到（js/moth-boss.js）
     a._fk = k; return;
   }
   if (a.floor == null) a.floor = spawnFloorAt(...cellAt(a.x, a.y));   // 剛生出來就站在陸橋上（一樓是牆、或只有 2 樓的地方）：算 2 樓

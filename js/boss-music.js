@@ -51,8 +51,11 @@ const BossMusic = (() => {
   function eliteHunting() {
     if (typeof loofahQueenHunting === 'function' && loofahQueenHunting()) return true;
     if (typeof bananaEmperorHunting === 'function' && bananaEmperorHunting()) return true;
-    if (typeof gourdKingHunting === 'function' && gourdKingHunting()) return true;   // 葫蘆猴王（js/gourd-king.js）   // 金蕉大王（js/banana-emperor.js）   // 絲瓜女王的 BOSS 戰（js/loofah-queen.js）
+    if (typeof gourdKingHunting === 'function' && gourdKingHunting()) return true;
+    if (typeof ratKingHunting === 'function' && ratKingHunting()) return true;   // 花蓮老鼠王（js/rat-king.js）   // 葫蘆猴王（js/gourd-king.js）   // 金蕉大王（js/banana-emperor.js）   // 絲瓜女王的 BOSS 戰（js/loofah-queen.js）
     if (typeof pearlBossHunting === 'function' && pearlBossHunting()) return true;
+    if (typeof milkfishKingHunting === 'function' && milkfishKingHunting()) return true;   // 虱目魚王（js/milkfish-king.js）
+    if (typeof mothBossHunting === 'function' && mothBossHunting()) return true;   // 人面蝶后（js/moth-boss.js）
     if (typeof poolBossHunting === 'function' && poolBossHunting() && !poolBossFar) return true;   // 池核的巨大比基尼小丑魚（js/pool-boss.js）；離太遠不算   // 珍珠大童的 BOSS 戰（js/pearl-elder.js）
     if (typeof capKingHunting === 'function' && capKingHunting()) return true;   // 大夯吉寶盯上溫特（js/elite-cap-king.js）
     return (G.enemies || []).some(e => e.elite && e.eliteAwake && e.hp > 0 && !e.dead && e.eb
@@ -69,7 +72,7 @@ const BossMusic = (() => {
   }
   // 畫面上方還有 BOSS 血條（鳥頭大隊長、大夯吉寶、珍珠大童；跟 js/core-frenzy.js 的 drawCoreBossUI 同一份資料）
   const bossBarShown = () => [typeof eliteBossBars === 'function' && eliteBossBars(), typeof capKingBossBars === 'function' && capKingBossBars(),
-    typeof pearlBossBars === 'function' && pearlBossBars(), !poolBossFar && typeof poolBossBars === 'function' && poolBossBars(), typeof loofahQueenBars === 'function' && loofahQueenBars(), typeof bananaEmperorBars === 'function' && bananaEmperorBars(), typeof gourdKingBars === 'function' && gourdKingBars()].some(bars => bars && bars.length)
+    typeof pearlBossBars === 'function' && pearlBossBars(), typeof mothBossBars === 'function' && mothBossBars(), !poolBossFar && typeof poolBossBars === 'function' && poolBossBars(), typeof loofahQueenBars === 'function' && loofahQueenBars(), typeof bananaEmperorBars === 'function' && bananaEmperorBars(), typeof gourdKingBars === 'function' && gourdKingBars(), typeof milkfishKingBars === 'function' && milkfishKingBars(), typeof ratKingBars === 'function' && ratKingBars()].some(bars => bars && bars.length)
     || (typeof capKingMusicHold === 'function' && capKingMusicHold());   // 順順宮主：第一隻大夯吉寶出現後，直到全部（含帽子裡的）打倒都不停（js/elite-cap-king.js）
 
   function tick() {

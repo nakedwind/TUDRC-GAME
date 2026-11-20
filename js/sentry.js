@@ -490,21 +490,25 @@ function unwedgeSentry(t) {
 }
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
 // goalFloor：目的地在幾樓（有陸橋的地圖才用；沒給＝照那一格：只有 2 樓的＝2、只有 1 樓的＝1、陸橋上照隊員自己）
+// 找路用的時鐘（毫秒）：照「遊戲裡過了多久」算，不是照真實時間。
+// 「找不到路等 2 秒再找」要照遊戲時間等：暫停、選單開著時不算；自動測試一下子跑完 30 秒的遊戲時，也真的會重找
+// （以前照真實時間，測試裡隊員在手扶梯頂端找路失敗一次後就一直不重找，「隊員跟著溫特上下樓」測試會失敗）
+function sentryNavClock() { return ((typeof G !== 'undefined' && G && G.navClock) || 0) * 1000; }
 function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.followDark), goalFloor = null) {   // allowDark：找一條可以穿過黑暗的路（召喚時、跟著溫特走時、去撿地上的東西時）
   if (hasFloors) {
     // 走不到的地方：同一個起點、同一個目的地 2 秒內不再重找（兩層一起找路走不到時會搜到上限 6000 格，一次要好幾百毫秒，
     // 隊員每隔一下就重找一次，遊戲會一頓一頓的）
-    const gf = goalFloor || placeFloorAt(targetX, targetY, t), now = performance.now();
+    const gf = goalFloor || placeFloorAt(targetX, targetY, t), now = sentryNavClock();
     const failKey = cellAt(t.x, t.y).join(',') + ',' + actorFloor(t) + '>' + cellAt(targetX, targetY).join(',') + ',' + gf + (allowDark ? 'd' : '');
-    if (t._pathFail && t._pathFail.key === failKey && now < t._pathFail.until) return null;
+    if (t._pathFail && t._pathFail.key === failKey && now < t._pathFail.until && t._pathFail.until - now <= SENTRY_PATH_FAIL_WAIT) return null;   // 後面那個條件：重新開局時鐘歸零，舊的記錄不算
     const path = buildSentryPathFloors(t, targetX, targetY, allowDark, gf);
     t._pathFail = path == null ? { key: failKey, until: now + SENTRY_PATH_FAIL_WAIT } : null;
     return path;
   }
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
   // 走不到的地方（例如溫特在深水區裡）：同一個起點、同一個目的地 SENTRY_PATH_FAIL_WAIT 內不再重找（找一次要把整張地圖搜完，大地圖會頓一下）
-  const failKey1 = sc + ',' + sr + '>' + rawGc + ',' + rawGr + (allowDark ? 'd' : ''), now1 = performance.now();
-  if (t._pathFail && t._pathFail.key === failKey1 && now1 < t._pathFail.until) return null;
+  const failKey1 = sc + ',' + sr + '>' + rawGc + ',' + rawGr + (allowDark ? 'd' : ''), now1 = sentryNavClock();
+  if (t._pathFail && t._pathFail.key === failKey1 && now1 < t._pathFail.until && t._pathFail.until - now1 <= SENTRY_PATH_FAIL_WAIT) return null;
   const fail = () => { t._pathFail = { key: failKey1, until: now1 + SENTRY_PATH_FAIL_WAIT }; return null; };
   const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return fail();
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
@@ -750,12 +754,16 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   return false;
 }
 // 在 (cx,cy) 周圍找一個「亮的、走得到」的隨機點
-function sampleWanderTarget(cx, cy, radius) {
+// who：在誰身邊閒逛（有 2 樓的地圖才用）：只挑跟這個人同一層的地方，也不挑手扶梯上的格子。
+// 不然跟著溫特上了 2 樓的隊員，閒逛時會挑到平台底下的 1 樓、或手扶梯頂端，又走回樓下或被手扶梯帶下去，一直上上下下
+function sampleWanderTarget(cx, cy, radius, who = null) {
+  const floor = hasFloors && who ? actorFloor(who) : null;
   for (let i = 0; i < 12; i++) {
     const ang = Math.random() * Math.PI * 2, d = 30 + Math.random() * radius;
     const x = cx + Math.cos(ang) * d, y = cy + Math.sin(ang) * d;
     const [c, r] = cellAt(x, y);
     if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;
+    if (floor != null && ((typeof escalatorFlowAt === 'function' && escalatorFlowAt(c, r)) || placeFloorAt(x, y, who) !== floor)) continue;
     if (sentryBlocked(x, y) || !personnelInLight(x, y)) continue;
     return { x, y };
   }
@@ -853,7 +861,7 @@ function updateSentry(t, dt) {
 function updateSentryMain(t, dt) {
   t.followDark = false;   // 這一幀要不要穿過黑暗：跟著溫特、照顧人、撿地上的東西時才打開（moveSentryWithPath 看這個）
   if (t.hp <= 0) { t.target = null; t.moving = false; if (!(t.say && t.say.hurt)) t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉（倒下時喊的那句留著，js/mate-hurt-talk.js）
-  if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
+  if (t.eatenBy || t.rkHeld) { t.target = null; t.moving = false; return; }   // rkHeld：被老鼠王的手抓住（js/rat-king.js）   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
   if (t.mrtRide) { t.target = null; t.moving = false; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
   if (typeof mealInviteStep === 'function' && mealInviteStep(t, dt)) return;   // 被邀請一起去吃飯：跟著溫特、吃飯、吃完逛一下（js/meal-invite.js）
   if (typeof baseFollowStep === 'function') baseFollowStep(t);   // 雷德跟著溫特換地圖：剛過來的放到溫特旁邊（js/base-follow.js）
@@ -1017,7 +1025,7 @@ function updateSentryMain(t, dt) {
     const anchor = companion ? companion.anchor : (t.mode === 'hold' && t.anchor ? t.anchor : t);
     const radius = companion ? companion.radius * .92 : (t.mode === 'hold' ? 70 : 200);
     const home = !companion && t.mode === 'free' ? homeAreaOf(t.type) : null;   // 平時待在自己的活動範圍（研究部…）
-    const tgt = home ? sampleHomeTarget(home, t) : sampleWanderTarget(anchor.x, anchor.y, radius);
+    const tgt = home ? sampleHomeTarget(home, t) : sampleWanderTarget(anchor.x, anchor.y, radius, companion ? companion.anchor : t);   // 跟著別人：挑那個人那一層的地方
     if (!tgt) { t.waitT = 0.8; return; }
     t.target = tgt; return;
   }

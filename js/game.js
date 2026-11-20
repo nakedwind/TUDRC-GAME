@@ -1365,9 +1365,12 @@ function newGame() {
   if (typeof seedChickens === 'function') seedChickens();   // 森林的鳥巢和雞（js/chickens.js）
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
+  if (typeof seedMothBoss === 'function') seedMothBoss();   // 抱著核心換區飛的人面蝶后（js/moth-boss.js）
+  if (typeof seedMilkfishKing === 'function') seedMilkfishKing();   // 守在核心旁的虱目魚王（js/milkfish-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
   if (typeof seedPoolBoss === 'function') seedPoolBoss();   // 池核：守在深水區核心旁的巨大比基尼小丑魚（js/pool-boss.js）
   if (typeof seedLoofahQueen === 'function') seedLoofahQueen();
+  if (typeof seedRatKing === 'function') seedRatKing();   // 花蓮老鼠王：躲在鐵軌底下，核心醒了就冒出來（js/rat-king.js）
   if (typeof seedGourdKing === 'function') seedGourdKing();   // 葫蘆猴王：躲在 BOSS 牆後面，核心醒了就撞牆出來（js/gourd-king.js）
   if (typeof seedBananaEmperor === 'function') seedBananaEmperor();   // 金蕉大王：守在核心旁邊、大隻隊員＋兩隻金蕉王（js/banana-emperor.js）   // 絲瓜女王：核心吊在她頭上、農田長藤蔓、3 隻絲瓜小姐守著（js/loofah-queen.js）
   if (typeof arriveVitals === 'function' && !MAP_STORY) arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
@@ -1612,7 +1615,7 @@ function updatePlayer(dt) {
   p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
   if (p.swimRing) { p.dashPart = 0; p.dashT = 0; }   // 衝刺到一半坐上救生圈：衝刺立刻停掉
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
-  if (p.mrtRide) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
+  if (p.mrtRide || p.rkHeld) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
   if (p.vineCap || p.vineDazeT > 0) { p.moving = false; p.anim = 0; return; }   // 被藤蔓吊走、摔下來頭暈（js/vines.js）
   if (typeof updateLeader === 'function' && updateLeader(p, dt)) { p.moving = false; p.anim = 0; p.dir = 'front'; return; }   // 艾德林帶隊：治癒光環、技能冷卻；詠唱中站著不動（js/leader-skills.js）
   if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼（按移動鍵會中斷疏導、急救，js/channel-actions.js）
@@ -2332,8 +2335,10 @@ function frame(ts) {
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
 }
 function update(dt) {
+  G.navClock = (G.navClock || 0) + dt;   // 遊戲時間（秒）：隊員找路「找不到等一下再找」用（js/sentry.js 的 sentryNavClock）
   floorAudit(dt);   // 樓層體檢：測試模式下，場上有東西沒記樓層就在主控台提醒（js/pathfinding.js）
   if (typeof updateBurrowingMouseFx === 'function') updateBurrowingMouseFx(dt);
+  if (typeof updateRatKing === 'function') updateRatKing(dt);   // 花蓮老鼠王：冒出來、手、搬核心、列車撞飛（js/rat-king.js）
   if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);
   if (typeof updateTutorial === 'function') updateTutorial(dt);   // 新手區教學提示（js/tutorial.js）
@@ -2421,7 +2426,7 @@ function update(dt) {
       if (t.gunReloadT === 0) t.gunAmmo = GUIDE_GUN.mag;
     }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
-    if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
+    if (t.eatenBy || t.rkHeld) { t.meleeSwing = null; t.gunSwing = null; continue; }   // rkHeld：被老鼠王的手抓住（js/rat-king.js）   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
     if (t.sleepT > 0 || t.mothWakeT > 0 || t.dazeT > 0 || t.slipDizzyT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著、剛醒爬起來、暈眩：不攻擊
     if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
     if (typeof campBedResting === 'function' && campBedResting(t)) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 躺在行軍床上休息：不攻擊、不疏導（js/camp-beds.js）
@@ -2672,13 +2677,14 @@ function update(dt) {
     G.scorchMarks = G.scorchMarks.filter(m => m.t > 0);
   }
   if (typeof fishHeadArmor === 'function') fishHeadArmor();
+  if (typeof mothBossArmor === 'function') mothBossArmor();   // 人面蝶后：飛行中難打、停在燈上好打、同一區打不死（js/moth-boss.js）
   if (typeof pearlShellArmor === 'function') pearlShellArmor();   // 珍珠小童：被打就閉殼、閉著防禦變高（js/pearl-kid.js）   // 魚頭君：正面減傷、斜後加傷（js/fish-head.js）
   // 柯林大招的破甲：破甲期間受到的傷害（所有人、所有來源）×ULTIMATES.colyn.breakMul；在死亡判定前統一算
   for (const e of G.enemies) {
     if (e.breakT > 0) { e.breakT -= dt; if (e.prevHp != null && e.hp < e.prevHp) e.hp = e.prevHp - (e.prevHp - e.hp) * ULTIMATES.colyn.breakMul; }
     e.prevHp = e.hp;
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if ((e.ratKing || e.ratKingHand) && typeof ratKingHoldDeath === 'function' && ratKingHoldDeath(e)) continue;   /* 花蓮老鼠王：先照核心護甲算、沒血了等列車撞飛；抓人的手被打掉只放人（js/rat-king.js） */ if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
@@ -2848,7 +2854,7 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text, typeof missionLoseButton === 'function' ? missionLoseButton() : '重新部署');   // 有應變中心可回時，大按鈕＝撤退回應變中心（js/missions.js）
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.poolBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && (e.ratKing || e.capKing || e.pearlBoss || e.poolBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.mothBoss) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;
