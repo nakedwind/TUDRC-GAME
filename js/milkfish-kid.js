@@ -337,8 +337,9 @@ function mfRelease(t, rescued) {
 }
 // 每幀（game.js 的 update 呼叫）：被吃的人跟著魚嘴走、消化扣血；虱目魚小子死了就把人放出來
 function updateMilkfish(dt) {
+  if (typeof updateMilkfishKing === 'function') updateMilkfishKing(dt);   // 虱目魚王：嘴裡的人、吐出去的東西、肚子裡的核心（js/milkfish-king.js）
   for (const t of G.towers) {
-    const e = t.eatenBy; if (!e) continue;
+    const e = t.eatenBy; if (!e || !e.mf) continue;   // 不是虱目魚小子吃的就不管
     if (e.dead || e.hp <= 0 || !G.enemies.includes(e)) { mfRelease(t, true); continue; }   // 打死了：救出來
     t.x = e.x; t.y = e.y; t.moving = false;
     if (t.hp <= 0) { mfRelease(t, false); continue; }

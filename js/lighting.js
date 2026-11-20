@@ -71,6 +71,7 @@ const lightSpreadMemo = new Map();
 // 陸橋用：lightSurf＝每一格最上面是哪一層（0 一樓、1 二樓地面、2 樓層出入口：兩層都算）；lightWalls2＝二樓的人看到的牆（不是 2 樓地面的格子都算牆）
 let beamNoLos = false;
 let lightSurf = new Uint8Array(COLS * ROWS), lightWalls2 = new Uint8Array(COLS * ROWS), lightSkipSurf = -1;
+let lightWalls2Sig = '';   // 二樓牆表的指紋（refreshLightFloors 算）
 function refreshLightFloors() {
   if (lightSurf.length !== COLS * ROWS) { lightSurf = new Uint8Array(COLS * ROWS); lightWalls2 = new Uint8Array(COLS * ROWS); }
   lightSurf.fill(0); lightWalls2.fill(1);
@@ -80,6 +81,10 @@ function refreshLightFloors() {
   for (const k of rampCells) { const i = idx(k); if (i >= 0) { lightSurf[i] = 2; lightWalls2[i] = lightWalls[i]; } }
   // 樓梯／手扶梯的上半段（js/maploader.js 的 stairUpperRects）：跟樓層出入口一樣兩層的光都吃、二樓的光也走得過去
   if (typeof stairUpperRects !== 'undefined') { if (MAP) mapOccluders(); for (const b of stairUpperRects) for (let c = Math.floor((b.x0 - OX) / CELL); c * CELL + OX < b.x1; c++) for (let r = Math.floor((b.y0 - OY) / CELL); r * CELL + OY < b.y1; r++) { if (!inGrid(c, r)) continue; const i = r * COLS + c; if (lightSurf[i] !== 1 || lightWalls2[i] !== 0) { lightSurf[i] = 2; lightWalls2[i] = lightWalls[i]; } } }
+  // 二樓的牆表有沒有變：燈光記憶（LIGHT_CACHE）照這個判斷二樓的燈要不要重算
+  let sig = 0, n = 0;
+  for (let i = 0; i < lightWalls2.length; i++) if (lightWalls2[i]) { sig = (sig + Math.imul(i + 1, 2654435761)) | 0; n++; }
+  lightWalls2Sig = sig + ':' + n;
   return true;
 }
 // 2 樓的牆面：牆的圖有好幾格高，光只擴散得到牆腳那一格 → 牆面跟著「正下方最近的 2 樓地面」一起亮（往下找最多 4 格），不然整面牆是黑的
@@ -155,9 +160,11 @@ function markBeamMask(l) {
 // 只處理光走得到的格子（記在 q 裡），不掃整張地圖：大地圖、燈又多的時候每幀省很多時間。
 function spreadLight(l, onCell) {
   // 同一盞燈、同一個位置、牆也沒變：照上一次的結果（哪幾格、多亮）再給一次，不用重新擴散（LIGHT_CACHE）
-  // 有陸橋的地圖（兩層樓分開擴散）不記，照舊每次算
-  if (LIGHT_CACHE.enabled && !hasFloors && lightWallsSig) {
-    const key = l.x + ',' + l.y + ',' + l.r + (l.cone ? ',' + l.cone.ang + ',' + l.cone.half : '') + '|' + lightWallsSig;
+  // 有 2 樓的地圖（兩層樓分開擴散）：記的時候多記「照的是哪一層的牆」，一樓、二樓各記各的
+  // （以前有 2 樓的地圖完全不記、每一幀全部重算，捷運站這種燈多的地圖會卡）
+  if (LIGHT_CACHE.enabled && lightWallsSig) {
+    const wallsTag = !hasFloors ? '' : lightWalls === lightWalls2 ? '|2:' + lightWalls2Sig : '|1';
+    const key = l.x + ',' + l.y + ',' + l.r + (l.cone ? ',' + l.cone.ang + ',' + l.cone.half : '') + '|' + lightWallsSig + wallsTag;
     let hit = lightSpreadMemo.get(key);
     if (!hit) {
       const cells = [];
@@ -294,9 +301,34 @@ const BASE_ART_LAMPS = [
 const MAP_LAMP_TILES = [
   { file: /\/森林(藍)?\/bg_forest_light(_blue)?\.png$/i, lamps: [[.24, .68]], r: 170, lantern: true },   // 森林的木柱吊燈（藍色版也會亮）
 ];
+// 地圖上「會發光的圖」（臨時基地的圖、燈具素材）：換地圖（或地圖的物件數量變了）才重新找一次，
+// 不用每一幀把地圖上上千個物件都比對一遍（捷運站物件很多，以前每幀掃兩遍會卡）
+let lightStampCache = { map: null, stamps: null, n: -1, f2: null, bases: [], lamps: [], on2F: new Map() };
+function lightStampSpecs() {
+  const stamps = (MAP && MAP.stamps) || [];
+  const c = lightStampCache;
+  if (c.map === MAP && c.stamps === stamps && c.n === stamps.length && c.f2 === MAP_FLOOR2_LAYERS) return c;
+  const bases = [], lamps = [];
+  for (const s of stamps) {
+    const t = mapTileById(s.id); if (!t) continue;
+    const base = !t.baseHp && BASE_ART_LAMPS.find(b => b.file.test(String(t.file || '')));
+    if (base) bases.push({ s, t, spec: base });
+    const lamp = MAP_LAMP_TILES.find(b => b.file.test(String(t.file || '')));
+    if (lamp) lamps.push({ s, t, spec: lamp });
+  }
+  lightStampCache = { map: MAP, stamps, n: stamps.length, f2: MAP_FLOOR2_LAYERS, bases, lamps, on2F: new Map() };
+  return lightStampCache;
+}
 // 這盞燈的位置有沒有落在「2樓」物件圖層的圖上（電燈、日光燈沒有自己的圖層資料，用位置判斷是 2 樓的燈還是 1 樓的燈）
+// 電燈的位置不會變：同一張地圖、同一個位置問過就記住答案
 function lightOn2FObject(x, y) {
   if (!MAP) return false;
+  const memo = lightStampSpecs().on2F, key = x + ',' + y;
+  let ans = memo.get(key);
+  if (ans === undefined) { ans = lightOn2FObjectNow(x, y); if (memo.size > 2000) memo.clear(); memo.set(key, ans); }
+  return ans;
+}
+function lightOn2FObjectNow(x, y) {
   for (const s of MAP.stamps || []) {
     const lid = s.layer || 'top';
     if (!MAP_FLOOR2_LAYERS.has(lid) || !isOccLayer(lid)) continue;
@@ -352,18 +384,17 @@ function getLights() {
   }
   // 長得像臨時基地、但只是圖片的基地（沒有 baseHp、不會被打壞的）：一樣有中央的光和四角的燈。
   // 四盞燈的位置用圖片寬高的比例（池核那張圖比較大）：x 左右、y 上下
-  if (typeof MAP !== 'undefined' && MAP) for (const s of MAP.stamps || []) {
-    const t = mapTileById(s.id), spec = t && !t.baseHp && BASE_ART_LAMPS.find(b => b.file.test(String(t.file || '')));
-    if (!spec || (G && G.mapDestroyed && G.mapDestroyed.has(s))) continue;
+  const lightArt = typeof MAP !== 'undefined' && MAP ? lightStampSpecs() : { bases: [], lamps: [] };   // 會發光的圖（換地圖才重新找）
+  for (const { s, t, spec } of lightArt.bases) {
+    if (G && G.mapDestroyed && G.mapDestroyed.has(s)) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     const f2 = stampOn2F(s) ? 2 : 1;   // 陸橋：2 樓的燈只照 2 樓
     L.push({ x: x0 + w / 2, y: y0 + h / 2, r: LIGHT.baseR || 300, floor: f2 });
     const lampR = LIGHT.baseLampR || 190;
     spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * fy; L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7, floor: f2 }); });
   }
-  if (typeof MAP !== 'undefined' && MAP) for (const s of MAP.stamps || []) {   // 會亮的燈具素材（MAP_LAMP_TILES）
-    const t = mapTileById(s.id), spec = t && MAP_LAMP_TILES.find(b => b.file.test(String(t.file || '')));
-    if (!spec || (G && G.mapDestroyed && G.mapDestroyed.has(s))) continue;
+  for (const { s, t, spec } of lightArt.lamps) {   // 會亮的燈具素材（MAP_LAMP_TILES）
+    if (G && G.mapDestroyed && G.mapDestroyed.has(s)) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     const f2 = stampOn2F(s) ? 2 : 1;
     spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * (s.fy ? 1 - fy : fy); L.push({ floor: f2, x, y, visualX: x, visualY: y, r: spec.r, warm: true, single: true, lantern: !!spec.lantern, phase: s.c * 7 + s.r * 13 + i }); });

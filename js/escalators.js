@@ -16,7 +16,12 @@
    ・在上面左右走會自動跟著斜坡上下；會動的手扶梯在斜坡那一段把人往上（或往下）帶，兩頭的平台不帶
    ・會不會動（stamp.still）、往上還是往下（stamp.escDown）：地圖編輯器選手扶梯之後勾選
    ・底下實心的格子（擋子彈、怪物繞路用）：物件編輯器（data/prop-collisions.js 的「手扶梯（側面）」）
-   ・上下翻轉、旋轉、調過大小角度的側面手扶梯：只是一張圖（不動、不擋、不帶人） */
+   ・上下翻轉、旋轉、調過大小角度的側面手扶梯：只是一張圖（不動、不擋、不帶人）
+   ===== 陷阱手扶梯（正面的，地圖編輯器選手扶梯後勾「陷阱手扶梯」＝stamp.escTrap）=====
+   ・溫特或隊員搭往上的那條，快到頂（離頂端 trap.near 格內）時：手扶梯先卡住、抖一下（trap.warn 秒），
+     接著兩條階梯一起高速往下捲（trap.speed），站在上面的人全部被送到最下面，再往外甩出 trap.push 像素、暈一下（trap.daze 秒）。
+   ・往下衝的時候溫特不能自己走（game.js 看 a.escRush）。人都下來之後手扶梯恢復正常，可以再被騙一次。
+   ・數值在下面 ESCALATOR.trap */
 const ESCALATOR = {
   speed: 36,     // 階梯移動速度（像素／秒；溫特走路 230、隊員 90 上下）
   againstSlow: .5,   // 逆著階梯走：自己的走路速度少幾成（.5＝只剩一半，再扣掉階梯本身的速度）
@@ -26,6 +31,9 @@ const ESCALATOR = {
   footDy: 14,    // 角色的位置往下幾點是腳
   riderTall: 72, // 乘客從腳往上大約多高（像素）：身體碰到手扶梯上半段就改畫在 2 樓地板之上（escalatorRiderHigh）
   enemyFootDy: 10,
+  // 陷阱手扶梯（stamp.escTrap）：near＝離頂端幾格觸發、warn＝卡住抖動幾秒、speed＝往下衝的速度（像素／秒，比溫特走路 230 快）、
+  // push＝衝到底後再往外甩幾像素、daze＝落地暈幾秒、shake＝畫面搖晃、cooldown＝恢復後幾秒內不會再觸發；音效是音效編輯器裡的名稱
+  trap: { near: 1.6, warn: .45, speed: 520, push: 60, daze: .8, shake: 6, cooldown: 1.5, warnSound: 'knock2', rushSound: 'gourdDrag' },
   tiles: {
     tile_mrt_escalator_front: { y: 27, h: 100, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
     tile_mrt_escalator_front_high: { y: 26, h: 270, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
@@ -56,19 +64,30 @@ const ESCALATOR = {
 let escalatorPhase = 0;   // 階梯捲了多遠（世界像素）；遊戲暫停時不動
 
 function escalatorSpec(id) { return ESCALATOR.tiles[id] || null; }
+// 陷阱手扶梯的狀態（每座一份）：phase＝'idle'｜'warn'（卡住抖動）｜'rush'（往下衝）；roll＝觸發後階梯自己捲到哪（不跟其他手扶梯一起捲）
+const escTrapStates = new WeakMap();
+function escTrapState(s) {
+  let st = escTrapStates.get(s);
+  if (!st) { st = { phase: 'idle', t: 0, roll: 0, cd: 0 }; escTrapStates.set(s, st); }
+  return st;
+}
+const escTrapActive = s => !!(s && s.escTrap && !s.still && escTrapStates.has(s) && escTrapStates.get(s).phase !== 'idle');
+const escTrapDownDir = s => s.fy ? -1 : 1;   // 「往下」在畫面上是哪個方向（上下翻轉的手扶梯反過來）
 
 // 畫手扶梯：回傳 true＝已經畫好（整張圖＋捲動的階梯）
 function drawEscalatorAnimation(ctx, s, img, x, y, w, h) {
   if (escalatorSideSpec(s.id)) return drawSideEscalator(ctx, s, img, x, y, w, h);
   const spec = escalatorSpec(s.id);
   if (!spec || s.still || !img.naturalWidth) return false;   // still：地圖編輯器關掉的手扶梯，當一般圖片畫
+  const trap = escTrapActive(s) ? escTrapState(s) : null;   // 陷阱手扶梯觸發中：卡住抖動、或兩條一起往下捲
+  if (trap && trap.phase === 'warn') { x += (Math.random() * 2 - 1) * 2.5; y += (Math.random() * 2 - 1) * 1.5; }
   ctx.drawImage(img, x, y, w, h);
   const kx = w / img.naturalWidth, ky = h / img.naturalHeight, P = ESCALATOR.period;
-  const p = Math.floor(escalatorPhase / ky) % P;   // 捲了幾個原始像素（取整數，像素圖才不會糊）
+  const p = Math.floor((trap ? trap.roll : escalatorPhase) / ky) % P;   // 捲了幾個原始像素（取整數，像素圖才不會糊）
   if (!p) return true;
   for (const lane of spec.lanes) {
     const dx = x + lane.x * kx, dw = lane.w * kx, top = y + spec.y * ky;
-    if (lane.dir < 0) {   // 往上：整條往上移 p，最上面那 p 接到最下面
+    if ((trap ? 1 : lane.dir) < 0) {   // 陷阱往下衝：兩條都往圖片的下方捲（上下翻轉的圖畫出來自然反過來）   // 往上：整條往上移 p，最上面那 p 接到最下面
       ctx.drawImage(img, lane.x, spec.y + p, lane.w, spec.h - p, dx, top, dw, (spec.h - p) * ky);
       ctx.drawImage(img, lane.x, spec.y, lane.w, p, dx, top + (spec.h - p) * ky, dw, p * ky);
     } else {              // 往下：整條往下移 p，最下面那 p 接到最上面
@@ -83,6 +102,7 @@ function drawEscalatorAnimation(ctx, s, img, x, y, w, h) {
 // 階梯每動 1 像素這個值就變，補畫才會跟著重做；不會動的、不是手扶梯的回傳空字串
 function escalatorAnimSig(s) {
   if (s.still || !(escalatorSpec(s.id) || escalatorSideUsable(s))) return '';
+  if (escTrapActive(s)) { const st = escTrapState(s); return 't' + Math.floor(st.roll) + (st.phase === 'warn' ? Math.random() : ''); }   // 陷阱觸發中：自己捲；抖動時每幀重畫
   return 'e' + Math.floor(escalatorPhase);
 }
 
@@ -149,6 +169,7 @@ function carryOnEscalator(a, footDy, dt, blocked) { return onFloorDo(a, () => ca
 function carryOnEscalatorNow(a, footDy, dt, blocked) {
   const lane = escalatorLaneAt(a.x, a.y + footDy);
   if (!lane) { a.escY = null; return false; }
+  if (escTrapActive(lane.stamp)) return carryOnTrap(a, lane, footDy, dt, blocked);   // 陷阱手扶梯觸發中
   const carry = ESCALATOR.speed * dt;
   let move = carry + escalatorAgainstPush(a, lane, carry);
   while (move > 0) {
@@ -160,6 +181,71 @@ function carryOnEscalatorNow(a, footDy, dt, blocked) {
   }
   a.escY = a.y;
   return true;
+}
+// 陷阱手扶梯觸發中站在上面：卡住時站著不動；往下衝時被高速送到最下面，離開階梯後再往外甩一段（a.escPush）
+function carryOnTrap(a, lane, footDy, dt, blocked) {
+  const st = escTrapState(lane.stamp), T = ESCALATOR.trap, dir = escTrapDownDir(lane.stamp);
+  a.escRush = true; a.escY = null;
+  if (st.phase !== 'rush') return true;
+  let move = T.speed * dt;
+  while (move > 0) {
+    const step = Math.min(4, move); move -= step;
+    const ny = a.y + dir * step;
+    if (blocked(a.x, ny)) break;
+    a.y = ny;
+    if (!escalatorLaneAt(a.x, a.y + footDy)) { a.escPush = { left: T.push, dir }; break; }   // 衝出底部：再往外甩一段
+  }
+  return true;
+}
+// 衝出底部後往外甩，停下來暈一下
+function escTrapPushStep(a, dt, blocked) {
+  const P = a.escPush; if (!P) return;
+  const T = ESCALATOR.trap;
+  let move = Math.min(P.left, T.speed * .7 * dt);
+  P.left -= move;
+  while (move > 0) {
+    const step = Math.min(4, move); move -= step;
+    const ny = a.y + P.dir * step;
+    if (blocked(a.x, ny)) { P.left = 0; break; }
+    a.y = ny;
+  }
+  if (P.left <= 0) {
+    a.escPush = null; a.escRush = false;
+    if (a.hp > 0) { a.slipDizzyT = Math.max(a.slipDizzyT || 0, T.daze); a.dazeT = Math.max(a.dazeT || 0, T.daze); }
+    if (G.effects) G.effects.push({ ring: true, x: a.x, y: a.y + 14, r: 4, r2: 34, life: .3, life0: .3, color: '#d8d0c0' });
+  }
+}
+// 每幀：陷阱手扶梯有沒有人快到頂（觸發）→ 卡住抖動 → 往下衝 → 人都下來了恢復正常
+function updateEscalatorTraps(dt) {
+  const T = ESCALATOR.trap, mates = [G.player, ...(G.towers || [])].filter(a => a && a.hp > 0);
+  const traps = [...new Set(escalatorLanes().filter(l => l.stamp.escTrap).map(l => l.stamp))];
+  for (const s of traps) {
+    const st = escTrapState(s), lanes = escalatorLanes().filter(l => l.stamp === s), down = escTrapDownDir(s);
+    const onIt = a => { const l = escalatorLaneAt(a.x, a.y + ESCALATOR.footDy); return l && l.stamp === s ? l : null; };
+    const riders = [G.player, ...(G.towers || []), ...(G.npcs || []), ...(G.enemies || [])].filter(a => a && !a.dead && onIt(a));
+    const cx = (Math.min(...lanes.map(l => l.x0)) + Math.max(...lanes.map(l => l.x1))) / 2, cy = (lanes[0].y0 + lanes[0].y1) / 2;
+    if (st.phase === 'idle') {
+      st.cd = Math.max(0, st.cd - dt);
+      if (st.cd > 0) continue;
+      // 溫特或隊員搭在「往上」那條，腳離頂端不到 near 格 → 觸發
+      const near = mates.some(a => { const l = onIt(a); if (!l || l.dir === down) return false; const end = l.dir < 0 ? l.y0 : l.y1; return Math.abs(a.y + ESCALATOR.footDy - end) <= T.near * CELL; });
+      if (!near) continue;
+      st.phase = 'warn'; st.t = T.warn; st.roll = escalatorPhase;
+      if (typeof sfxAt === 'function') sfxAt(T.warnSound, cx, cy, 1, 'esc-trap-warn');
+      if (typeof addShake === 'function') addShake(T.shake * .6);
+    } else if (st.phase === 'warn') {
+      st.t -= dt;
+      if (st.t <= 0) {
+        st.phase = 'rush'; st.t = 0;
+        if (typeof sfxAt === 'function') sfxAt(T.rushSound, cx, cy, 1, 'esc-trap-rush');
+        if (typeof addShake === 'function') addShake(T.shake);
+        if (G.player && onIt(G.player) && typeof systemNotice === 'function') systemNotice('⚠ 手扶梯突然往下衝！', true);
+      }
+    } else if (st.phase === 'rush') {
+      st.t += dt; st.roll += T.speed * dt;
+      if (st.t > .4 && !riders.length) { st.phase = 'idle'; st.cd = T.cooldown; }   // 人都被送下去了：恢復正常
+    }
+  }
 }
 let escalatorRideCd = 0;   // 踩上手扶梯音效的冷卻（秒）
 // 溫特這一幀才剛踩上階梯：播廣播（冷卻中就不播）
@@ -175,7 +261,14 @@ function updateEscalators(dt) {
   escalatorPhase = (escalatorPhase + ESCALATOR.speed * dt) % 100000;
   escalatorRideCd = Math.max(0, escalatorRideCd - dt);
   if (!G || (!escalatorLanes().length && !escalatorSideLanes().length)) return;
+  updateEscalatorTraps(dt);   // 陷阱手扶梯（stamp.escTrap）
   const still = a => a.sitting || a.grabbed || a.grabFall || a.eatenBy;
+  // 陷阱手扶梯：衝出底部的人往外甩；不在觸發中的手扶梯上、也沒在甩的人，解除「不能自己走」
+  for (const a of [G.player, ...(G.towers || []), ...(G.npcs || [])]) {
+    if (!a) continue;
+    if (a.escPush) escTrapPushStep(a, dt, a === G.player ? playerBlocked : sentryBlocked);
+    else if (a.escRush) { const l = escalatorLaneAt(a.x, a.y + ESCALATOR.footDy); if (!l || !escTrapActive(l.stamp)) a.escRush = false; }
+  }
   // 正面的（直的）和側面的（斜的）都試：回傳有沒有被會動的階梯帶著
   const ride = (a, footDy, blocked) => { const front = carryOnEscalator(a, footDy, dt, blocked), side = rideSideEscalator(a, footDy, dt, blocked); return front || side; };
   if (G.player && !still(G.player)) escalatorRideSound(G.player, ride(G.player, ESCALATOR.footDy, playerBlocked));

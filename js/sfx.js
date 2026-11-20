@@ -48,6 +48,8 @@ const SFX = (() => {
     mrtArrive: '環境/門與機關/板南線-藍線.mp3',               // 捷運列車：到站音樂（響 5 秒後列車才出現，js/mrt-train.js）
     mrtArriveRed: '環境/門與機關/淡水信義線-紅線.mp3',        // 捷運列車：紅線車站（R89）的到站音樂（哪個車站用哪首在 data/mrt-train.js 的 stations）
     mrtArriveBlue: '環境/門與機關/板南線-藍線.mp3',           // 捷運列車：藍線車站（B56）的到站音樂
+    mrtArriveGreen: '環境/門與機關/松山新店線-綠線.mp3',      // 捷運列車：綠線車站（G11）的到站音樂
+    mrtArriveOrange: '環境/門與機關/中和新盧線-橘線.mp3',     // 捷運列車：橘線車站（O666）的到站音樂
     dynamoStart: '設施/發電機發動.mp3',        // 發電機全部打開：發動（只播一次，js/storage-lockers.js；音量在音效編輯器調，預設開大聲 2 倍）
     mrtPowerSteam: '設施/發動蒸氣音.mp3',      // 捷運站發電機最後一台打開：跟發動聲一起播一次蒸氣聲（js/storage-lockers.js）
     mrtPowerHum: '環境/台北捷運(白噪音) 02.m4a',   // 捷運站發電機全部打開：發動聲之後播一次捷運站的環境聲（不循環，js/mrt-train.js 的 mrtPowerOnFx）
@@ -57,6 +59,7 @@ const SFX = (() => {
     mrtDoorWarn: '環境/門與機關/車門即將關閉.mp3',            // 捷運列車：「車門即將關閉」
     mrtDoorClose: '環境/門與機關/台北捷運關門聲.mp3',         // 捷運列車：車門關上
     mrtDepart: '環境/門與機關/列車啟動音.m4a',                // 捷運列車：開走（列車啟動音）
+    mrtHorn: '環境/門與機關/列車啟動音.m4a',                  // 捷運列車：鳴笛衝進站撞飛花蓮老鼠王（js/rat-king.js；還沒有鳴笛音檔，先用列車啟動音，可在音效編輯器換）
     elevator: '環境/門與機關/電梯.mp3',
     storyDoor: '環境/門與機關/電梯.mp3',   // 回憶劇情的自動門開關（data/story-scenes.js 的 sfx；先借電梯聲，可在音效編輯器換）
     storyDoorSlam: ['環境/門與機關/關門.mp3', '戰鬥/命中/敲打.mp3'],   // 回憶劇情：用力關門（關門＋敲打一起播）
@@ -229,6 +232,10 @@ const SFX = (() => {
     milkfishSpit: '怪物/史萊姆/slime-land.mp3',           // 吐出隊友（被打死獲救、被消化到倒下）
     milkfishHurt: '怪物/虱目魚小子/虱目魚小子被打.mp3',
     milkfishDeath: '怪物/虱目魚小子/虱目魚小子死掉.mp3',
+    // 虱目魚王（js/milkfish-king.js）：先借用現有音檔，之後在音效編輯器換成專屬的
+    milkfishKingStep: '戰鬥/heavy-walking-footsteps.mp3',   // 沉重的腳步
+    milkfishKingRoar: '怪物/虱目魚小子/虱目魚小子被打.mp3',   // 甦醒吼叫：被打的聲音壓低、加回音（SOUND_PITCH、SOUND_ECHO）
+    milkfishKingSpit: '怪物/史萊姆/slime-land.mp3',          // 吐東西、吐隊友、吐核心：壓低一點
     storyThunder: ['戰鬥/元素/雷電.mp3', '戰鬥/爆炸/大爆炸.mp3', '戰鬥/爆炸/石塊掉落.mp3'],   // 劇情的巨雷（js/story-scene.js 的 thunder）：雷電＋大爆炸＋石塊掉落一起播
     storyCharge: '戰鬥/元素/集氣.mp3',   // 劇情的集氣（開場安柏放大招前，data/story-scenes.js 的 sfx）
     // 人面蝶：拍翅膀（飛的時候每拍一輪翅膀播一次）、撒鱗粉、被打、死掉（js/human-face-butterfly.js）
@@ -287,9 +294,9 @@ const SFX = (() => {
     'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotConfuse', 'hitConfuse', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall', 'storyPunch', 'storyPartyPopper', 'storyPartyHorn']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
-  const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };
+  const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72, milkfishKingRoar: .62, milkfishKingSpit: .7 };
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
-  const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 }, capKingDeath: { delay: .22, feedback: .5, wet: .65 }, pearlElderDeath: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
+  const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 }, capKingDeath: { delay: .22, feedback: .5, wet: .65 }, pearlElderDeath: { delay: .22, feedback: .5, wet: .65 }, milkfishKingRoar: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
   // 好幾個音檔一起播的音效：每一層各自的音量倍率（照 files 裡的順序；沒寫＝1）
   const LAYER_GAIN = { storySandbagBreak: [1, 1.8] };   // 沙包被打破：小撞擊大聲一點
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
@@ -330,7 +337,7 @@ const SFX = (() => {
           g.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(master);
           src.addEventListener('ended', () => setTimeout(() => { d.disconnect(); fb.disconnect(); wet.disconnect(); }, 2500));
         }
-        const h = { src, g }; remember(sourceKey, h);
+        const h = { src, g, name, per: gain / (base || 1) }; remember(sourceKey, h);   // per：這一層比叫的時候給的音量多幾倍（setSourceGain 用）
         src.onended = () => { activeSources.delete(src); forget(sourceKey, h); };
         // 剪輯：有設開始／結束就只播那一段（start 的第 2 個數字＝從第幾秒開始、第 3 個＝播幾秒）
         if (clip.to > clip.from) src.start(0, clip.from / 1000, (clip.to - clip.from) / 1000);
@@ -343,7 +350,7 @@ const SFX = (() => {
       const speedOn = clip.speed !== 1;
       audio.volume = Math.min(1, volume * gain); audio.preservesPitch = audio.mozPreservesPitch = audio.webkitPreservesPitch = speedOn;
       audio.playbackRate = speedOn ? clip.speed : rate;
-      const h = { audio }; remember(sourceKey, h);
+      const h = { audio, name, per: gain / (base || 1) }; remember(sourceKey, h);
       let timer = 0;
       activeAudio.set(audio, gain); const cleanup = () => { clearInterval(timer); activeAudio.delete(audio); forget(sourceKey, h); };
       audio.addEventListener('ended', cleanup, { once: true }); audio.addEventListener('error', cleanup, { once: true });
@@ -586,9 +593,20 @@ const SFX = (() => {
       }
     }
   }
+  // 正在播的聲音中途改音量（例如捷運到站音樂：溫特走遠就變小聲，js/mrt-train.js）
+  // gain＝跟 play 給的一樣（還沒乘音效編輯器的音量）；音量慢慢追過去，不會一頓一頓
+  function setSourceGain(sourceKey, gain) {
+    for (const h of playingByKey.get(sourceKey) || []) {
+      const g = Math.max(0, gain * (SOUND_GAIN[h.name] ?? 1) * (h.per || 1));
+      if (h.src) { const t = ctx.currentTime; h.g.gain.cancelScheduledValues(t); h.g.gain.setTargetAtTime(g, t, .08); }
+      else if (h.audio) { activeAudio.set(h.audio, g); h.audio.volume = Math.min(1, volume * g); }
+    }
+  }
   return {
     play,
     fadeOut,
+    setSourceGain,
+    isPlaying: sourceKey => playingByKey.has(sourceKey),   // 這個來源的聲音還在播嗎
     unlock,   // 劇情播放時輸入被擋住，由 js/story-scene.js 代為喚醒
     GAIN_KEY,
     FILE_KEY,

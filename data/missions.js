@@ -43,6 +43,8 @@ const BOSS_BOUNTIES = [
   { id: 'capKing', name: '順順宮主', flag: 'capKingLord', money: 3000 },   // js/elite-cap-king.js（只算跟核心躲在一起的宮主本人，大夯吉寶不算）
   { id: 'pearl', name: '珍珠大童', flag: 'pearlBoss', money: 3000 },       // js/pearl-elder.js
   { id: 'gourdKing', name: '葫蘆猴王', flag: 'gourdKing', money: 3000 },   // js/gourd-king.js（金額是預設，待確認）
+  { id: 'mothBoss', name: '人面蝶后', flag: 'mothBoss', money: 3000 },     // js/moth-boss.js（金額是預設，待確認）
+  { id: 'ratKing', name: '花蓮老鼠王', flag: 'ratKing', money: 3000 },     // js/rat-king.js（金額是預設，待確認）
 ];
 
 const MISSIONS = [
@@ -82,16 +84,19 @@ const MISSIONS = [
     desc: '藍線的捷運站，跟 R89 之間有捷運互通。',
   },
   {
-    id: 'zone5', map: null, name: '？？？', x: 76, y: 47, after: [], locked: true,   // B56 右下方單獨的區域：還沒決定，先鎖著
-    desc: '應變中心還在收集情報。',
+    // G11 綠線捷運站：B56 右下方單獨一個點（先鎖著；從別站搭捷運進去過就會開放）。BOSS 是虱目魚王（js/milkfish-king.js）
+    id: 'g11', map: 'map_mwm655e8', name: 'G11區捷運站', x: 76, y: 47, after: [], locked: true,
+    desc: '綠線的捷運站，核心旁邊守著巨大的虱目魚王。',
   },
   {
-    // 右上角兩個互連的「？」的第一個；鎖著的時候名字顯示成「？？？」（hidden）
-    id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 76, y: 27, after: [], locked: true, hidden: true, squad: 'winter',
-    desc: '地下街後方的大廳，空間開闊，異質體容易從各個方向包夾。',
+    // O666 橘線捷運站：右上角，連到 Y 區最深處（先鎖著；從別站搭捷運進去過就會開放）。BOSS 是花蓮老鼠王（js/rat-king.js）
+    //   原本這個位置是「台北車站大廳」（id: station），搬到最右上角的 Y 區最深處（id: deep）了
+    id: 'o666', map: 'map_691cf40a-884b-423d-b1df-beef88b16f00', name: 'O666區捷運站', x: 76, y: 27, after: [], locked: true,
+    desc: '橘線的捷運站，上方月台的列車被花蓮老鼠王卡住了。',
   },
   {
-    id: 'deep', map: null, name: 'Y 區最深處', x: 89, y: 12, after: ['station'], boss: true,
-    desc: '應變中心預測會出現 BOSS 級異質體的地方。控制整個 Y 區之後才能前往。',
+    // Y 區最深處＝台北車站大廳（O666 控制了就開放；O666 的紅色列車也是開到這裡）
+    id: 'deep', map: 'map_mr4mbd88', name: '台北車站大廳', x: 89, y: 12, after: ['o666'], boss: true,
+    desc: 'Y 區最深處的大廳，應變中心預測會出現 BOSS 級異質體。空間開闊，異質體容易從各個方向包夾。',
   },
 ];

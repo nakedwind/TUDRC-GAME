@@ -2780,6 +2780,22 @@ const SHARED_TILES = [
     "h": 4
   },
   {
+    "id": "tile_mrt_train_car_head_red",
+    "name": "紅色車廂（車頭）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-train-car-head-red.png",
+    "w": 26,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_train_car_middle_red",
+    "name": "紅色車廂（中段）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-train-car-middle-red.png",
+    "w": 26,
+    "h": 4
+  },
+  {
     "id": "tile_mrt_train_door",
     "name": "車門",
     "role": "floor",

@@ -40,3 +40,5 @@
 - 音效（Sound effects/怪物/老鼠）：mouseDig 鑽土（入土、地底移動每 1.8 秒）、mouseOut 鑽出、mouseAttack 手鑽出地面、mouseHurt 被打、mouseDeath 死掉（暫用被打音效播低 0.8）。
 - 暈眩（任何來源的 stunT）：mouse-dizzy01～04 每 0.22 秒隨機換一張，頭上三顆星星繞圈，本體以洞口為軸左右搖 ±0.045 弧度（底部不動，不會露出土堆外）。
 - 死掉音效 mouseDeath：老鼠被打放大（音量倍率 1.8，在音效編輯器可調）、播放速度 0.72 壓低，加回音（js/sfx.js 的 SOUND_ECHO）。
+
+握拳的手：`left-fist.png`（同 110×90 畫布、同一隻手臂，只把手套改成握拳；照 left-hand 的黑框白手套畫法手繪）。花蓮老鼠王（js/rat-king.js）的拳頭砸地、抓人用這張，抓核心張開的手照舊用 left-hand.png。

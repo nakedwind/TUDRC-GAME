@@ -115,22 +115,24 @@ function underMapConfig() {
 }
 
 // 這張地圖「完全沒鋪東西」的格子（所有圖層都沒有小圖、也沒有大圖蓋到）：有黑幕時底圖只在這些格子裡露出來
-let underVoidCache = { map: null, n: -1, path: null };
-function underVoidPath() {
+let underVoidCache = { map: null, n: -1, path: null, mask: null };
+function underVoidData() {
   const n = (MAP.stamps || []).length;
-  if (underVoidCache.map === MAP && underVoidCache.n === n) return underVoidCache.path;
-  const path = new Path2D();
+  if (underVoidCache.map === MAP && underVoidCache.n === n) return underVoidCache;
+  const path = new Path2D(), mask = new Uint8Array(COLS * ROWS);   // mask：每一格是不是空格（1＝空）
   for (let r = 0; r < ROWS; r++) {
     let start = -1;   // 同一列連在一起的空格合成一長條，比較省
     for (let c = 0; c <= COLS; c++) {
       const empty = c < COLS && !hasImageAt(c, r);
+      if (empty) mask[r * COLS + c] = 1;
       if (empty && start < 0) start = c;
       if (!empty && start >= 0) { path.rect(OX + start * CELL, OY + r * CELL, (c - start) * CELL, CELL); start = -1; }
     }
   }
-  underVoidCache = { map: MAP, n, path };
-  return path;
+  underVoidCache = { map: MAP, n, path, mask };
+  return underVoidCache;
 }
+function underVoidPath() { return underVoidData().path; }
 
 // 每一幀呼叫兩次（js/render.js 的 draw）：
 //   pass＝'below'：塗黑底色之後、畫地板之前（沒有黑幕的地圖用這個，有鋪地板的地方自然會蓋住它）
@@ -151,4 +153,36 @@ function drawUnderMap(ctx, pass = 'below') {
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(cv, OX + dx * CELL, OY + dy * CELL, ucols * CELL, urows * CELL);
   ctx.restore();
+}
+// 有黑幕的地圖：底圖是蓋在黑幕「上面」的（不然暗處整片黑、看不到底圖），所以會把剛好站在空格旁邊、身體伸進空格的怪物、人、建築也蓋掉。
+// 底圖應該在最下面 → 底圖畫完後，把「站在亮處、身體碰到空格」的東西在空格範圍裡再畫一次（只畫空格那一塊，其他地方不動）。
+// 站在暗處的不用補畫：本來就被黑幕蓋住看不到。items＝js/render.js 排好的要畫的東西（有 who 的才是會動的東西或建築）
+function redrawOverUnderMap(ctx, items) {
+  const info = underMapConfig();
+  if (!info || !(LIGHT.enabled && info.cfg.aboveDark)) return;   // 底圖畫在黑幕下面的地圖：本來就在最下面，不用補
+  const { path, mask } = underVoidData();
+  const voidAt = (c, r) => c >= 0 && r >= 0 && c < COLS && r < ROWS && mask[r * COLS + c] === 1;
+  const touchesVoid = (x0, y0, x1, y1) => {   // 這個範圍（像素）有沒有碰到空格
+    const c0 = Math.floor((x0 - OX) / CELL), c1 = Math.floor((x1 - OX) / CELL), r0 = Math.floor((y0 - OY) / CELL), r1 = Math.floor((y1 - OY) / CELL);
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (voidAt(c, r)) return true;
+    return false;
+  };
+  let clipped = false;
+  for (const it of items) {
+    const w = it.who; if (!w) continue;
+    let box, lit;
+    if (w.kind === 'obstacle' || w.c != null && w.w != null && w.x == null) {   // 建築：照佔的格子，往上多算 2 格（圖通常比擋路格高）
+      const x0 = OX + w.c * CELL + (w.mrtShift || 0), y0 = OY + w.r * CELL;
+      box = [x0, y0 - 2 * CELL, x0 + (w.w || 1) * CELL - 1, y0 + (w.h || 1) * CELL - 1];
+      lit = isLit(x0 + (w.w || 1) * CELL / 2, y0 + (w.h || 1) * CELL / 2);
+    } else {   // 怪物、隊員、溫特、NPC、核心：腳在 (x, y) 附近，身體往上大約 2.5 格
+      if (w.mrtHidden) continue;
+      box = [w.x - CELL, w.y - 2.5 * CELL, w.x + CELL, w.y + .6 * CELL];
+      lit = isLit(w.x, w.y);
+    }
+    if (!lit || !touchesVoid(...box)) continue;
+    if (!clipped) { ctx.save(); ctx.clip(path); clipped = true; }
+    it.draw();
+  }
+  if (clipped) ctx.restore();
 }

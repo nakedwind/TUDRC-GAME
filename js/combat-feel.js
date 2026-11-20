@@ -268,11 +268,13 @@ function onEnemyDeath(e) {
   trackKillAchievements(e);   // 成就計數（js/achievements.js；「擊倒某一種怪物」用上面圖鑑的消滅次數，所以放在後面）
   if (typeof foodDeathDrop === 'function') foodDeathDrop(e);   // 虱目魚小子、魚頭君：掉魚肚、生魚片（js/food.js）
   if (typeof recordBossBounty === 'function') recordBossBounty(e);   // 討伐 BOSS：回應變中心由艾德林報告特別獎金（js/missions.js）
+  if (e.ratKing && typeof ratKingDown === 'function') { ratKingDown(e); return; }   // 花蓮老鼠王被列車撞飛（js/rat-king.js）
   if (e.behavior === 'burrow') { burrowingMouseDeath(e); return; }   // 沉回洞口，取消尚未命中的地底手
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.elite && typeof eliteBirdDown === 'function') eliteBirdDown(e);   // 菁英鳥頭人：橫幅提示核心護盾消失（js/elite-bird-head.js）
   if (e.capKing && typeof capKingBigDown === 'function') capKingBigDown(e);   // 大夯吉寶：橫幅提示核心護盾消失（js/elite-cap-king.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
+  if (e.mothBoss && typeof mothBossDown === 'function') mothBossDown(e);   // 人面蝶后：抱著的核心掉在原地（js/moth-boss.js）
   if (e.behavior === 'moth' && typeof mothDeathBurst === 'function') { mothDeathBurst(e); return; }   // 人面蝶：炸出一大團鱗粉，從空中掉下來化成灰（js/human-face-butterfly.js）
   if (e.pearlBoss && typeof pearlBossDown === 'function') pearlBossDown(e);   // 珍珠大童：核心掉在原地、大珍珠碎掉（js/pearl-elder.js）
   if (e.loofahQueen && typeof loofahQueenDown === 'function') loofahQueenDown(e);   // 絲瓜女王：核心留在半空中，要用火燒斷藤蔓（js/loofah-queen.js）
