@@ -1615,7 +1615,7 @@ function updatePlayer(dt) {
   p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
   if (p.swimRing) { p.dashPart = 0; p.dashT = 0; }   // 衝刺到一半坐上救生圈：衝刺立刻停掉
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
-  if (p.mrtRide || p.rkHeld) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
+  if (p.mrtRide || p.rkHeld || p.escRush) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）；escRush：陷阱手扶梯往下衝（js/escalators.js）
   if (p.vineCap || p.vineDazeT > 0) { p.moving = false; p.anim = 0; return; }   // 被藤蔓吊走、摔下來頭暈（js/vines.js）
   if (typeof updateLeader === 'function' && updateLeader(p, dt)) { p.moving = false; p.anim = 0; p.dir = 'front'; return; }   // 艾德林帶隊：治癒光環、技能冷卻；詠唱中站著不動（js/leader-skills.js）
   if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼（按移動鍵會中斷疏導、急救，js/channel-actions.js）

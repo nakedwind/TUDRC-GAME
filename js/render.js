@@ -1075,20 +1075,20 @@ function draw() {
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ floor: stampDrawFloor(d.stamp), y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
-  for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({floor:looseFloor(core),y:core.y+23,draw:()=>wadeDraw0(core,'core',()=>drawCore(core))});   // 泡在深水裡：水面以下半透明（js/pool-tide.js 的 poolCoreWade）
+  for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({who:core,floor:looseFloor(core),y:core.y+23,draw:()=>wadeDraw0(core,'core',()=>drawCore(core))});   // 泡在深水裡：水面以下半透明（js/pool-tide.js 的 poolCoreWade）
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
   if (typeof leafPileSortables === 'function') leafPileSortables(sortables);   // 樹葉堆（js/leaf-piles.js）
   if (typeof chickenSortables === 'function') chickenSortables(sortables);   // 森林的雞（含溫特抱著的；js/chickens.js）
-  for (const o of G.obstacles) if (!o.trap) sortables.push({ floor: looseFloor(o), y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
+  for (const o of G.obstacles) if (!o.trap) sortables.push({ who: o, floor: looseFloor(o), y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   // 角色畫在幾樓、哪一層、前後：一般照腳底 Y；坐著照椅子；在側面手扶梯上由 js/escalators.js 決定（快到 2 樓時畫在 2 樓地板上）
   const actorDrawKey = (a, y, seatY) => seatY != null ? { floor: visualFloor(a), band: DRAW_BAND.obj, y: seatY }
     : typeof escalatorRiderKey === 'function' ? escalatorRiderKey(a, y) : { floor: visualFloor(a), band: DRAW_BAND.obj, y };
-  for (const t of G.towers) sortables.push({ ...actorDrawKey(t, t.y + 17, t.sitting ? seatDrawY(t.sitting) : null), draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
-  for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ ...actorDrawKey(npc, npc.y + 17, npc.sitting ? seatDrawY(npc.sitting) : bedY), draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
-  for (const e of G.enemies) if ((enemyVisible(e) || e.ratKing) && e.behavior !== 'moth') sortables.push({ ...actorDrawKey(e, e.y + 13, null), draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
+  for (const t of G.towers) sortables.push({ who: t, ...actorDrawKey(t, t.y + 17, t.sitting ? seatDrawY(t.sitting) : null), draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
+  for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ who: npc, ...actorDrawKey(npc, npc.y + 17, npc.sitting ? seatDrawY(npc.sitting) : bedY), draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
+  for (const e of G.enemies) if ((enemyVisible(e) || e.ratKing) && e.behavior !== 'moth') sortables.push({ who: e, ...actorDrawKey(e, e.y + 13, null), draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);
   if (typeof ratKingSortables === 'function') ratKingSortables(sortables);   // 花蓮老鼠王的手、被撞飛的本體（js/rat-king.js）   // 獨立手洞依落點排序，不跟著本體漂移
@@ -1105,7 +1105,7 @@ function draw() {
   if (typeof fishEggSortables === 'function') fishEggSortables(sortables);   // 比基尼小丑魚的魚卵（js/clownfish.js）：照底部 Y 跟人、物件排前後
   if (typeof oreShardSortables === 'function') oreShardSortables(sortables);   // 炸開礦物後掉在地上的異質碎片（js/ore.js）：同上
   if (typeof mealSortables === 'function') mealSortables(sortables);   // 餐廳：桌上的餐盤、拿在手上的餐盤（js/meal.js）
-  if (G.player) sortables.push({ ...actorDrawKey(G.player, G.player.y + 16, G.player.sitting ? seatDrawY(G.player.sitting) : null), draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
+  if (G.player) sortables.push({ who: G.player, ...actorDrawKey(G.player, G.player.y + 16, G.player.sitting ? seatDrawY(G.player.sitting) : null), draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
   // ---- 地上的特效（焦痕、地雷、碎片、油汙、水漬…）：畫在人物腳下 ----
   // 有陸橋的地圖畫兩輪：第 1 輪在 1 樓地板上（1 樓的、沒記樓層的），第 2 輪在 2 樓地板畫好之後（只畫記著 2 樓的）。
   // 每個畫圖函式自己用 fxSkip(東西的 floor) 跳過另一層的（js/pathfinding.js）；第二個欄位＝這個函式有沒有分樓層，沒分的只在第 1 輪畫
@@ -1277,6 +1277,7 @@ function draw() {
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
   if (typeof drawUnderMap === 'function') drawUnderMap(ctx, 'above');   // 有黑幕的地圖：底下透出的另一張地圖畫在黑幕上面（只畫在沒鋪東西的格子，js/under-map.js）
+  if (typeof redrawOverUnderMap === 'function') redrawOverUnderMap(ctx, sortables);   // 站在亮處、身體伸進空格的怪物、人、建築：在空格那一塊再畫一次，底圖才會在它們下面
   if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
   for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);

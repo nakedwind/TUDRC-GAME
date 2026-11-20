@@ -1034,6 +1034,11 @@ function drawStamp(s) {
   if (!s.blend && alpha === 1) drawStampRaw(s);
   else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
   if (s.still) drawStillBadge(s);
+  if (s.escTrap && !s.still) {   // 陷阱手扶梯：左上角標「陷阱」（只在編輯器裡看得到）
+    const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+    ctx.save(); ctx.fillStyle = 'rgba(150,40,190,.92)'; ctx.fillRect(x, y, 30, 15);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('陷阱', x + 4, y + 8); ctx.restore();
+  }
   if (s.rush && STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(curMap())) {   // K56 以外的地圖：勾了「會暴衝撞人」的車，左上角標「暴衝」
     const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
     ctx.save(); ctx.fillStyle = 'rgba(230,120,20,.92)'; ctx.fillRect(x, y, 30, 15);
@@ -3385,6 +3390,7 @@ const STILL_VEHICLE_MAP = 'map_mvvdbiyx';   // K56 區-地下街的車預設會�
 const vehicleDefaultRush = m => m && m.id === STILL_VEHICLE_MAP;
 const stampMoves = (m, s) => STILL_VEHICLE_IDS.has(s.id) && !vehicleDefaultRush(m) ? !!s.rush : !s.still;   // 這個物件現在「會動」嗎
 const isSideEscalator = id => id === 'tile_mrt_escalator_side';   // 側面（斜的）手扶梯：多一個「往上／往下」可以選（stamp.escDown）
+const isFrontEscalator = id => /^tile_mrt_escalator_front/.test(id);   // 正面（直的）手扶梯：多一個「陷阱手扶梯」可以勾（stamp.escTrap）
 const isStillEscalator = id => /^tile_mrt_escalator_front/.test(id) || isSideEscalator(id);
 function selectedStillTargets() {
   const m = curMap();
@@ -3396,7 +3402,8 @@ function refreshStillControl() {
   if (!box) {
     box = document.createElement('div'); box.id = 'stillControl'; box.className = 'blend-control';
     box.innerHTML = '<label><input type="checkbox" id="stillToggle"> <span id="stillToggleText"></span></label>'
-      + '<label id="escDownLabel" title="側面的手扶梯：沒勾＝把人往上帶，勾了＝往下帶。要先勾「手扶梯會動」才有差"><input type="checkbox" id="escDownToggle"> 手扶梯往下（沒勾＝往上）</label>';
+      + '<label id="escDownLabel" title="側面的手扶梯：沒勾＝把人往上帶，勾了＝往下帶。要先勾「手扶梯會動」才有差"><input type="checkbox" id="escDownToggle"> 手扶梯往下（沒勾＝往上）</label>'
+      + '<label id="escTrapLabel" title="正面的手扶梯：溫特或隊員搭往上那條快到頂時，手扶梯突然卡住、高速往下衝，把人全部送回最下面（js/escalators.js 的 ESCALATOR.trap）。要先勾「手扶梯會動」"><input type="checkbox" id="escTrapToggle"> 陷阱手扶梯（快到頂突然往下衝）</label>';
     document.getElementById('selControls').appendChild(box);
     document.getElementById('escDownToggle').addEventListener('change', e => {
       if (dropLockedSelections('切換手扶梯方向')) return;
@@ -3405,6 +3412,14 @@ function refreshStillControl() {
       for (const s of list) { if (e.target.checked) s.escDown = true; else delete s.escDown; }
       saveMaps(); draw(); refreshSelPanel();
       setStatus(list.length + ' 座手扶梯已設為' + (e.target.checked ? '往下' : '往上'), '#7ee0c0');
+    });
+    document.getElementById('escTrapToggle').addEventListener('change', e => {
+      if (dropLockedSelections('切換陷阱手扶梯')) return;
+      const list = selectedStillTargets().filter(s => isFrontEscalator(s.id)); if (!list.length) return;
+      pushUndo();
+      for (const s of list) { if (e.target.checked) s.escTrap = true; else delete s.escTrap; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus(list.length + ' 座手扶梯已設為' + (e.target.checked ? '陷阱手扶梯（快到頂會往下衝）' : '一般手扶梯'), '#7ee0c0');
     });
     document.getElementById('stillToggle').addEventListener('change', e => {
       if (dropLockedSelections('切換會不會動')) return;
@@ -3425,6 +3440,9 @@ function refreshStillControl() {
   toggle.checked = off === 0; toggle.indeterminate = off > 0 && off < list.length;
   const sides = list.filter(s => isSideEscalator(s.id)), downToggle = document.getElementById('escDownToggle'), downN = sides.filter(s => s.escDown).length;
   document.getElementById('escDownLabel').classList.toggle('hidden', !sides.length);
+  const fronts = list.filter(s => isFrontEscalator(s.id)), trapToggle = document.getElementById('escTrapToggle'), trapN = fronts.filter(s => s.escTrap).length;
+  document.getElementById('escTrapLabel').classList.toggle('hidden', !fronts.length);
+  trapToggle.checked = fronts.length > 0 && trapN === fronts.length; trapToggle.indeterminate = trapN > 0 && trapN < fronts.length;
   downToggle.checked = sides.length > 0 && downN === sides.length; downToggle.indeterminate = downN > 0 && downN < sides.length;
   document.getElementById('stillToggleText').textContent = list.every(s => isStillEscalator(s.id)) ? '手扶梯會動' : list.some(s => isStillEscalator(s.id)) ? '會動' : '會暴衝撞人';
 }

@@ -130596,6 +130596,30 @@ const BATTLE_MAPS = [
         "at": "61,46",
         "to": "61,35"
       }
+    ],
+    "leafPiles": [
+      "89,94",
+      "57,102",
+      "55,85",
+      "62,73",
+      "63,47",
+      "65,32",
+      "100,47",
+      "104,28",
+      "24,77",
+      "11,80",
+      "23,91",
+      "9,89",
+      "34,62",
+      "17,59",
+      "15,40",
+      "38,33",
+      "45,51",
+      "49,65",
+      "97,99",
+      "125,101",
+      "128,95",
+      "107,77"
     ]
   },
   {
@@ -159570,7 +159594,93 @@ const BATTLE_MAPS = [
     "desc": "",
     "layers": {
       "floor": {},
-      "ground": {},
+      "ground": {
+        "14,46": "tile_new_bg_floor",
+        "15,46": "tile_new_bg_floor",
+        "16,46": "tile_new_bg_floor",
+        "17,46": "tile_new_bg_floor",
+        "18,46": "tile_new_bg_floor",
+        "19,46": "tile_new_bg_floor",
+        "20,46": "tile_new_bg_floor",
+        "21,46": "tile_new_bg_floor",
+        "22,46": "tile_new_bg_floor",
+        "23,46": "tile_new_bg_floor",
+        "24,46": "tile_new_bg_floor",
+        "25,46": "tile_new_bg_floor",
+        "26,46": "tile_new_bg_floor",
+        "27,46": "tile_new_bg_floor",
+        "28,46": "tile_new_bg_floor",
+        "29,46": "tile_new_bg_floor",
+        "30,46": "tile_new_bg_floor",
+        "31,46": "tile_new_bg_floor",
+        "32,46": "tile_new_bg_floor",
+        "33,46": "tile_new_bg_floor",
+        "34,46": "tile_new_bg_floor",
+        "35,46": "tile_new_bg_floor",
+        "36,46": "tile_new_bg_floor",
+        "37,46": "tile_new_bg_floor",
+        "38,46": "tile_new_bg_floor",
+        "39,46": "tile_new_bg_floor",
+        "40,46": "tile_new_bg_floor",
+        "41,46": "tile_new_bg_floor",
+        "42,46": "tile_new_bg_floor",
+        "43,46": "tile_new_bg_floor",
+        "44,46": "tile_new_bg_floor",
+        "45,46": "tile_new_bg_floor",
+        "46,46": "tile_new_bg_floor",
+        "47,46": "tile_new_bg_floor",
+        "48,46": "tile_new_bg_floor",
+        "49,46": "tile_new_bg_floor",
+        "50,46": "tile_new_bg_floor",
+        "51,46": "tile_new_bg_floor",
+        "52,46": "tile_new_bg_floor",
+        "53,46": "tile_new_bg_floor",
+        "54,46": "tile_new_bg_floor",
+        "55,46": "tile_new_bg_floor",
+        "13,47": "tile_new_bg_floor",
+        "14,47": "tile_new_bg_floor",
+        "15,47": "tile_new_bg_floor",
+        "16,47": "tile_new_bg_floor",
+        "17,47": "tile_new_bg_floor",
+        "18,47": "tile_new_bg_floor",
+        "19,47": "tile_new_bg_floor",
+        "20,47": "tile_new_bg_floor",
+        "21,47": "tile_new_bg_floor",
+        "22,47": "tile_new_bg_floor",
+        "23,47": "tile_new_bg_floor",
+        "24,47": "tile_new_bg_floor",
+        "25,47": "tile_new_bg_floor",
+        "26,47": "tile_new_bg_floor",
+        "27,47": "tile_new_bg_floor",
+        "28,47": "tile_new_bg_floor",
+        "29,47": "tile_new_bg_floor",
+        "30,47": "tile_new_bg_floor",
+        "31,47": "tile_new_bg_floor",
+        "32,47": "tile_new_bg_floor",
+        "33,47": "tile_new_bg_floor",
+        "34,47": "tile_new_bg_floor",
+        "35,47": "tile_new_bg_floor",
+        "36,47": "tile_new_bg_floor",
+        "37,47": "tile_new_bg_floor",
+        "38,47": "tile_new_bg_floor",
+        "39,47": "tile_new_bg_floor",
+        "40,47": "tile_new_bg_floor",
+        "41,47": "tile_new_bg_floor",
+        "42,47": "tile_new_bg_floor",
+        "43,47": "tile_new_bg_floor",
+        "44,47": "tile_new_bg_floor",
+        "45,47": "tile_new_bg_floor",
+        "46,47": "tile_new_bg_floor",
+        "47,47": "tile_new_bg_floor",
+        "48,47": "tile_new_bg_floor",
+        "49,47": "tile_new_bg_floor",
+        "50,47": "tile_new_bg_floor",
+        "51,47": "tile_new_bg_floor",
+        "55,47": "tile_new_bg_floor",
+        "54,47": "tile_new_bg_floor",
+        "52,47": "tile_new_bg_floor",
+        "53,47": "tile_new_bg_floor"
+      },
       "ground2": {},
       "ground3": {},
       "object": {},
@@ -159591,7 +159701,8 @@ const BATTLE_MAPS = [
         "31,31": "tile_containment_wall_top_straight",
         "40,32": "tile_containment_wall_top_straight",
         "40,31": "tile_containment_wall_top_straight"
-      }
+      },
+      "object5": {}
     },
     "stamps": [
       {
@@ -160851,7 +160962,8 @@ const BATTLE_MAPS = [
         "c": 15,
         "r": 40,
         "layer": "object2",
-        "oy": -8
+        "oy": -8,
+        "escTrap": true
       },
       {
         "id": "tile_mrt_room_wall",
@@ -161582,62 +161694,68 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_storage_locker",
         "c": 20,
-        "r": 57,
+        "r": 56,
         "layer": "object",
         "lockerLoot": {
           "kind": "empty",
           "qty": 1
-        }
+        },
+        "oy": 20
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 24,
-        "r": 57,
+        "r": 56,
         "layer": "object",
         "ox": 10,
         "lockerLoot": {
           "kind": "item",
           "id": "youyou-card",
           "qty": 1
-        }
+        },
+        "oy": 20
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 28,
-        "r": 57,
+        "r": 56,
         "layer": "object",
         "ox": 20,
         "lockerLoot": {
           "kind": "empty",
           "qty": 1
-        }
+        },
+        "oy": 20
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 33,
-        "r": 57,
+        "r": 56,
         "layer": "object",
         "lockerLoot": {
           "kind": "empty",
           "qty": 1
-        }
+        },
+        "oy": 20
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 38,
-        "r": 57,
+        "r": 56,
         "layer": "object",
         "lockerLoot": {
           "kind": "empty",
           "qty": 1
-        }
+        },
+        "oy": 20
       },
       {
         "id": "tile_mrt_escalator_front_high03",
         "c": 22,
         "r": 40,
         "layer": "object2",
-        "oy": -8
+        "oy": -8,
+        "escTrap": true
       },
       {
         "id": "tile_mrt_escalator_front_high03",
@@ -161651,21 +161769,24 @@ const BATTLE_MAPS = [
         "c": 36,
         "r": 40,
         "layer": "object2",
-        "oy": -8
+        "oy": -8,
+        "escTrap": true
       },
       {
         "id": "tile_mrt_escalator_front_high03",
         "c": 43,
         "r": 40,
         "layer": "object2",
-        "oy": -8
+        "oy": -8,
+        "escTrap": true
       },
       {
         "id": "tile_mrt_escalator_front_high03",
         "c": 50,
         "r": 40,
         "layer": "object2",
-        "oy": -8
+        "oy": -8,
+        "escTrap": true
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -163695,19 +163816,22 @@ const BATTLE_MAPS = [
         "id": "tile_bg_backroom_door_wood",
         "c": 30,
         "r": 87,
-        "layer": "object2"
+        "layer": "object2",
+        "doorMode": "picture"
       },
       {
         "id": "tile_bg_backroom_door_wood",
         "c": 34,
         "r": 87,
-        "layer": "object2"
+        "layer": "object2",
+        "doorMode": "picture"
       },
       {
         "id": "tile_bg_backroom_door_wood",
         "c": 38,
         "r": 87,
-        "layer": "object2"
+        "layer": "object2",
+        "doorMode": "picture"
       },
       {
         "id": "tile_new_decor_plant02",
@@ -163822,6 +163946,655 @@ const BATTLE_MAPS = [
         "r": 56,
         "layer": "object3",
         "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 35,
+        "r": 24,
+        "layer": "object2",
+        "oy": 30
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 45,
+        "r": 58,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 14,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 17,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 20,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 23,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 26,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 29,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 32,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 35,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 38,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 41,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 44,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 47,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 50,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 53,
+        "r": 39,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 18,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 21,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 24,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 27,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 30,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 33,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 36,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 39,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 42,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 45,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_yellow",
+        "c": 48,
+        "r": 60,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 28,
+        "r": 90,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 31,
+        "r": 90,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 34,
+        "r": 90,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 37,
+        "r": 90,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 40,
+        "r": 90,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 14,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 17,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 20,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 23,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 26,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 29,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 32,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 35,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 38,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 41,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 44,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 47,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 50,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_tactile_paving_white",
+        "c": 53,
+        "r": 48,
+        "layer": "ground2",
+        "oy": -22
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 20,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 23,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 26,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 29,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 32,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 35,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 38,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 41,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 44,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 47,
+        "r": 8,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 20,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 23,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 26,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 29,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 32,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 35,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 38,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 41,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 44,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 47,
+        "r": 9,
+        "layer": "ground",
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mrt_floor_guide_lines",
+        "c": 21,
+        "r": 9,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_floor_guide_lines",
+        "c": 29,
+        "r": 9,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_floor_guide_lines",
+        "c": 38,
+        "r": 9,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 29,
+        "r": 102,
+        "layer": "object5",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 33,
+        "r": 103,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 37,
+        "r": 103,
+        "layer": "object5",
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 33,
+        "r": 85,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 28,
+        "r": 79,
+        "layer": "object5",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 33,
+        "r": 79,
+        "layer": "object5",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 38,
+        "r": 79,
+        "layer": "object5",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 26,
+        "r": 67,
+        "layer": "object5",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 31,
+        "r": 67,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 36,
+        "r": 67,
+        "layer": "object5",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 40,
+        "r": 67,
+        "layer": "object5",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 22,
+        "r": 56,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 26,
+        "r": 56,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 30,
+        "r": 56,
+        "layer": "object5",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 35,
+        "r": 56,
+        "layer": "object5",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 49,
+        "r": 56,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 48,
+        "r": 43,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 41,
+        "r": 43,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 34,
+        "r": 43,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 27,
+        "r": 43,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 20,
+        "r": 43,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 30,
+        "r": 33,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 39,
+        "r": 33,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 25,
+        "r": 3,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 29,
+        "r": 3,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 33,
+        "r": 3,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 37,
+        "r": 3,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 41,
+        "r": 3,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 45,
+        "r": 3,
+        "layer": "object5"
       }
     ],
     "solid": [
@@ -166311,7 +167084,6 @@ const BATTLE_MAPS = [
       "33,25",
       "33,26",
       "34,25",
-      "35,25",
       "34,26",
       "35,26",
       "36,25",
@@ -167113,14 +167885,232 @@ const BATTLE_MAPS = [
     "solidOffsets": {},
     "safe": false,
     "npcs": false,
-    "portals": [],
+    "portals": [
+      {
+        "c": 38,
+        "r": 88,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          84
+        ]
+      },
+      {
+        "c": 36,
+        "r": 81,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 31,
+        "r": 81,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 26,
+        "r": 81,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          71
+        ]
+      },
+      {
+        "c": 41,
+        "r": 81,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 24,
+        "r": 69,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 29,
+        "r": 69,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 34,
+        "r": 69,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 44,
+        "r": 69,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 39,
+        "r": 69,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          61
+        ]
+      },
+      {
+        "c": 42,
+        "r": 58,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 17,
+        "r": 33,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 25,
+        "r": 33,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 29,
+        "r": 33,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 43,
+        "r": 33,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 47,
+        "r": 33,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 35,
+        "r": 25,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 21,
+        "r": 33,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          34,
+          92
+        ]
+      },
+      {
+        "c": 52,
+        "r": 33,
+        "to": "map_691cf40a-884b-423d-b1df-beef88b16f00",
+        "at": [
+          35,
+          20
+        ]
+      }
+    ],
     "hiddenPickups": [],
     "cols": 80,
     "rows": 110,
     "underMap": {
       "map": "map_mwizzi7s",
       "dark": 85
-    }
+    },
+    "layerOrder": [
+      {
+        "id": "floor",
+        "name": "🟫 地板"
+      },
+      {
+        "id": "ground",
+        "name": "🌿 地面裝飾"
+      },
+      {
+        "id": "ground2",
+        "name": "🍂 地面裝飾 2"
+      },
+      {
+        "id": "ground3",
+        "name": "🩹 地面裝飾 3"
+      },
+      {
+        "id": "object",
+        "name": "📦 物件"
+      },
+      {
+        "id": "object2",
+        "name": "🧰 物件 2"
+      },
+      {
+        "id": "object3",
+        "name": "🪑 物件 3"
+      },
+      {
+        "id": "object4",
+        "name": "🚧 物件 4"
+      },
+      {
+        "id": "overlay",
+        "name": "🎯 物件裝飾"
+      },
+      {
+        "id": "object5",
+        "name": "燈"
+      },
+      {
+        "id": "top",
+        "name": "☁️ 上層"
+      }
+    ]
   }
 ];
 // 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來
