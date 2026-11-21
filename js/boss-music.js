@@ -73,7 +73,7 @@ const BossMusic = (() => {
   function nearestBossCells() {
     const p = G && G.player; if (!p) return null;
     let best = null;
-    for (const e of G.enemies || []) if (isBoss(e)) { const d = Math.hypot(e.x - p.x, e.y - p.y) / CELL; if (best == null || d < best) best = d; }
+    for (const e of [...(G.enemies || []), ...(G.mothBossAway || [])]) if (isBoss(e)) { const d = Math.hypot(e.x - p.x, e.y - p.y) / CELL; if (best == null || d < best) best = d; }
     return best;
   }
   // 距離 → 音量倍率（照 distance 那幾個點畫直線）

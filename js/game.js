@@ -2347,6 +2347,7 @@ function update(dt) {
   G.navClock = (G.navClock || 0) + dt;   // 遊戲時間（秒）：隊員找路「找不到等一下再找」用（js/sentry.js 的 sentryNavClock）
   floorAudit(dt);   // 樓層體檢：測試模式下，場上有東西沒記樓層就在主控台提醒（js/pathfinding.js）
   if (typeof updateBurrowingMouseFx === 'function') updateBurrowingMouseFx(dt);
+  if (typeof updateMothBossAway === 'function') updateMothBossAway(dt);   // 人面蝶后飛到畫面外時不在怪物清單裡：倒數、飛回來（js/moth-boss.js）
   if (typeof updateRatKing === 'function') updateRatKing(dt);   // 花蓮老鼠王：冒出來、手、搬核心、列車撞飛（js/rat-king.js）
   if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);

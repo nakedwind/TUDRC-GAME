@@ -3,6 +3,8 @@
    - 驚醒：溫特走到 wakeRange 格內（看得到）、或打中牠 → 尖叫，核心跟著甦醒（異質體狂暴化），
            畫面上方出現 BOSS 血條，然後牠抱著核心飛走。
    - 換區：照 route 的順序飛往下一個區域（飛得過牆），一路灑下下一區顏色的鱗粉當路標（也是陷阱，吸滿一樣會中招）。
+           有時候（MOTH_BOSS.sky.chance）改成「飛向鏡頭」：往上飛、越來越大，飛出畫面外消失一下（這段時間打不到），
+           再從畫面外又大又高地飛下來，邊飛邊變回原本大小，降落在下一區的巢上。
            飛行中很難打（受到的傷害 × flyDefense）。系統訊息只說牠飛走了，不說去哪一區。
    - 築巢：飛到那一區後把核心放在地上（這時候核心打得到），在附近繞著目標飛、撒那一區的鱗粉：
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
@@ -48,6 +50,9 @@ const MOTH_BOSS = {
   flyDefense: .35,               // 飛行換區時受到的傷害倍率
   flyFloor: .06,                 // 飛行途中血量最少留到「這一段的底線 + 幾成血」（才不會一到巢就馬上又飛走）
   trailEvery: .55,               // 飛行時每幾秒在身後灑一團鱗粉（路標）
+  // 飛向鏡頭（換區時有機會用這種方式）：chance＝機率、up＝往上飛走幾秒、away＝消失在畫面外幾秒、down＝飛回來幾秒、
+  // rise＝最高再往上飛幾像素（要飛出畫面）、grow＝最大時體型再加幾倍（1.2＝變成 2.2 倍）
+  sky: { chance: .5, up: 1.3, away: 1.6, down: 1.5, rise: 700, grow: 1.2 },
   leash: 8,                      // 築巢時離巢最遠飛幾格（目標跑太遠就回巢）
   orbit: { min: 1.6, max: 3.2 }, // 繞著目標飛：離目標最近、最遠幾格
   nestOrbit: 2.2,                // 沒有目標時繞著巢飛的半徑（格）
@@ -57,12 +62,13 @@ const MOTH_BOSS = {
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 };
 const mbSpot = () => typeof MAP !== 'undefined' && MAP ? MOTH_BOSS.maps[MAP.id] || null : null;
-const mothBosses = () => (G && G.enemies ? G.enemies.filter(e => e.mothBoss && !e.dead && e.hp > 0) : []);
+// 場上的人面蝶后（包括飛到畫面外、暫時不在怪物清單 G.enemies 裡的，見 G.mothBossAway）
+const mothBosses = () => (G && G.enemies ? [...G.enemies, ...(G.mothBossAway || [])].filter(e => e.mothBoss && !e.dead && e.hp > 0) : []);
 const mbDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
 // ---- 開場（game.js 在 seedCores 之後呼叫）：生在起點，抱起離起點最近的核心 ----
 function seedMothBoss() {
-  G.mothBossPathCache = null;
+  G.mothBossPathCache = null; G.mothBossAway = [];
   const spot = mbSpot();
   if (!spot || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'human_face_butterfly');
@@ -82,7 +88,7 @@ function seedMothBoss() {
   e.mothBoss = true; e.eliteName = P.name;
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是一般人面蝶血量 × 整體難度：換成 BOSS 的血量，難度照樣乘
   e.reward = Math.round(e.reward * P.rewardMul); e.crystals = Math.round((e.crystals ?? 5) * P.crystalMul);
-  e.drawWidth = Math.round(base.width * P.scale); e.drawHeight = Math.round(base.height * P.scale);
+  e.drawWidth = e.mbW = Math.round(base.width * P.scale); e.drawHeight = e.mbH = Math.round(base.height * P.scale);   // mbW、mbH：原本的大小（飛向鏡頭時會暫時變大）
   e.speed = base.speed * P.speedMul;
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true;   // 推不動、不硬直
   e.floor = spawnFloorAt(...cellAt(x, y));
@@ -110,7 +116,7 @@ function mothBossArmor() {
     if (e.mbHp == null || e.hp > e.mbHp) { e.mbHp = e.hp; continue; }
     let lost = e.mbHp - e.hp;
     if (lost <= 0) continue;
-    if (mb.state === 'fly' || mb.state === 'grab') lost *= MOTH_BOSS.flyDefense;
+    if (mb.state === 'fly' || mb.state === 'grab' || mb.state === 'skyUp' || mb.state === 'skyDown') lost *= MOTH_BOSS.flyDefense;
     e.hp = e.mbHp - lost;
     if (mb.state === 'sleep') mothBossWake(e);
     const floor = mbStageFloor(e, mb.stage);
@@ -232,6 +238,7 @@ function stepMothBoss(e, dt) {
   const goalLift = mb.state === 'sleep' ? P.sleepHeight : P.height;
   m.lift += (goalLift - m.lift) * Math.min(1, dt * 3);
   e.slimeLift = Math.max(4, m.lift + Math.sin(m.phase * MOTH.bobSpeed) * (slow ? 2 : MOTH.bob));
+  if (mb.state === 'skyUp' || mb.state === 'skyDown') mbSkyLook(e);   // 飛向鏡頭：飛得更高、變大
   m.fleeT = 0;   // 一般人面蝶「撒完就逃」不適用：BOSS 自己決定去哪
   const core = e.carryCore;
   if (core && core.dead) e.carryCore = null;
@@ -258,6 +265,18 @@ function stepMothBoss(e, dt) {
       return;
     }
     case 'fly': mbFly(e, dt); return;
+    case 'skyUp': {   // 往上飛、越來越大，時間到就飛出畫面外（移出怪物清單，打不到）
+      if (mb.t <= 0) mbSkyLeave(e);
+      return;
+    }
+    case 'skyDown': {   // 從畫面外飛回來，邊降邊變回原本大小
+      if (mb.t <= 0) {
+        e.drawWidth = e.mbW; e.drawHeight = e.mbH;
+        mbSet(e, e.carryCore && e.carryCore.carried ? 'land' : 'nest');
+        if (!e.carryCore || !e.carryCore.carried) mbArrive(e);
+      }
+      return;
+    }
     case 'land': {   // 降到巢上，把核心放下來
       if (mothFlyToward(e, mb.nest.x, mb.nest.y, dt, P.flySpeedMul * .6) || mbDist(e, mb.nest) < 6) mbDropCore(e);
       return;
@@ -273,7 +292,54 @@ function mbStartMove(e, state) {
   mb.nest = mbNestFor(e, z);
   mb.path = mbFindPath(e.x, e.y, mb.nest.x, mb.nest.y);
   mb.trail = 0;
+  // 有時候改成飛向鏡頭（抱著核心時才這樣飛：核心還在，飛走的那幾秒不會被當成清場）
+  const P = MOTH_BOSS.sky;
+  if (e.carryCore && !e.carryCore.dead && Math.random() < P.chance) {
+    mbSet(e, 'skyUp', P.up);
+    if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-sky');
+    return;
+  }
   mbSet(e, 'fly');
+}
+// ---- 飛向鏡頭 ----
+// 0＝原本的樣子、1＝最高最大（飛出畫面外）
+function mbSkyAmount(e) {
+  const P = MOTH_BOSS.sky, mb = e.mb;
+  const u = mb.state === 'skyUp' ? 1 - Math.max(0, mb.t) / P.up : mb.state === 'skyDown' ? Math.max(0, mb.t) / P.down : 0;
+  return Math.max(0, Math.min(1, u));
+}
+// 照進度把牠畫得更高、更大（一開始慢、越飛越快）
+function mbSkyLook(e) {
+  const P = MOTH_BOSS.sky, u = mbSkyAmount(e), k = u * u, grow = 1 + P.grow * u;
+  e.slimeLift += P.rise * k;
+  e.drawWidth = Math.round(e.mbW * grow); e.drawHeight = Math.round(e.mbH * grow);
+}
+// 飛出畫面外：移出怪物清單（子彈、隊員都打不到），位置直接換到下一區的巢，等 away 秒再飛回來
+function mbSkyLeave(e) {
+  const P = MOTH_BOSS.sky, mb = e.mb;
+  const i = G.enemies.indexOf(e);
+  if (i >= 0) G.enemies.splice(i, 1);
+  (G.mothBossAway || (G.mothBossAway = [])).push(e);
+  e.x = mb.nest.x; e.y = mb.nest.y;
+  e.floor = spawnFloorAt(...cellAt(e.x, e.y));
+  e.mo.spray = null; e.mo.target = null;
+  mbSet(e, 'away', P.away);
+}
+// 每幀（game.js 呼叫）：飛到畫面外的人面蝶后倒數，時間到就放回怪物清單、從畫面外飛下來
+function updateMothBossAway(dt) {
+  const list = G && G.mothBossAway;
+  if (!list || !list.length) return;
+  for (const e of [...list]) {
+    const core = e.carryCore;
+    if (core && core.carried) { core.x = e.x; core.y = e.y; }
+    if (e.dead || e.hp <= 0) { G.mothBossAway = G.mothBossAway.filter(o => o !== e); continue; }
+    e.mb.t -= dt;
+    if (e.mb.t > 0) continue;
+    G.mothBossAway = G.mothBossAway.filter(o => o !== e);
+    if (!G.enemies.includes(e)) G.enemies.push(e);
+    mbSet(e, 'skyDown', MOTH_BOSS.sky.down);
+    if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-sky');
+  }
 }
 // 飛往下一區：一路灑下一區顏色的鱗粉
 function mbFly(e, dt) {
@@ -416,7 +482,8 @@ const MOTH_BOSS_CORE_ART = { x: .10, y: .42, angle: -8 };   // 核心捧在兩�
 function drawMothBossCore(ctx, e, dx, dy, dw, dh) {
   const core = e.carryCore;
   if (!core || core.dead || !core.carried || !coreImg.complete || !coreImg.naturalWidth) return;
-  const A = MOTH_BOSS_CORE_ART, len = CORE.h, w = CORE.w, now = performance.now() / 1000;
+  const grow = e.mbH ? e.drawHeight / e.mbH : 1;   // 飛向鏡頭變大時，核心跟著一起變大
+  const A = MOTH_BOSS_CORE_ART, len = CORE.h * grow, w = CORE.w * grow, now = performance.now() / 1000;
   ctx.save();
   ctx.translate(dx + dw * A.x, dy + dh * A.y); ctx.rotate(A.angle * Math.PI / 180);
   ctx.imageSmoothingEnabled = false;
