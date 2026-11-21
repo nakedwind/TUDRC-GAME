@@ -29,6 +29,7 @@ const MILKFISH_KING_FX = {
   name: '虱目魚王',
   stepEvery: 70,          // 每走幾像素踩一步（震動、腳步聲）
   shakeRange: 18,         // 溫特在幾格內才感覺得到震動
+  stepShakeTime: .3,      // 每一步的震動維持幾秒再慢慢停（震動大小是怪物編輯器的「腳步震動大小」；以前只震一瞬間、牠又走很慢，幾乎感覺不到）
   eatReach: 95,           // 離隊友幾像素內可以吞
   gulpWindup: .45,        // 吞隊友前張嘴（秒）
   biteReach: 80, biteWindup: .5, biteHit: 100, biteCooldown: 1.4,   // 咬溫特
@@ -564,7 +565,17 @@ function updateMilkfishKing(dt) {
       else { mk.core.x = e.x; mk.core.y = e.y; mk.core.carried = true; mk.core.hidden = true; mk.core.lastHp = mk.core.hp; }
     }
   }
+  // 腳步的震動：維持一小段時間、慢慢變小（mkRumble 設定的）
+  const Rb = G.mkRumble;
+  if (Rb && Rb.t > 0) { Rb.t -= dt; const k = Math.max(0, Rb.t / Rb.dur); if (k > 0) shakeAmt = Math.max(shakeAmt, Rb.amt * (.35 + .65 * k)); }
   mkUpdateShots(dt);
+}
+// 震一下：amt 像素、維持 dur 秒（一般的 addShake 一瞬間就衰減完了，巨物的腳步要震久一點才感覺得到）
+function mkRumble(amt, dur) {
+  const Rb = G.mkRumble;
+  if (Rb && Rb.t > 0 && Rb.amt * Rb.t / Rb.dur > amt) return;   // 正在震更大的：不要蓋掉
+  G.mkRumble = { amt, t: dur, dur };
+  addShake(amt);
 }
 function mkUpdateShots(dt) {
   const list = G.mkShots || [];
@@ -716,7 +727,7 @@ function mkFootsteps(e, moved) {
   if (mk.stepDist < F.stepEvery) return;
   mk.stepDist %= F.stepEvery;
   const p = G.player;
-  if (p) { const d = mkDist(p, e) / CELL, k = 1 - d / F.shakeRange; if (d < F.shakeRange) addShake(C.stepShake * (.2 + .8 * k * k)); }
+  if (p) { const d = mkDist(p, e) / CELL, k = 1 - d / F.shakeRange; if (d < F.shakeRange) mkRumble(C.stepShake * (.2 + .8 * k * k), F.stepShakeTime); }   // 越近震越大
   e.hitSquashT = .12;   // 落腳時身體被壓扁一下再彈回
   G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 6, r2: 48, life: .32, life0: .32, color: '#b9b2a2' });
   if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);   // 跟鳥頭大隊長跑步一樣揚起一團煙塵（js/gourd-monkey.js）
