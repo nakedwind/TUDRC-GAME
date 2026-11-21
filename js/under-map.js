@@ -168,7 +168,18 @@ function redrawOverUnderMap(ctx, items) {
     return false;
   };
   let clipped = false;
-  for (const it of items) {
+  const clip = () => { if (!clipped) { ctx.save(); ctx.clip(path); clipped = true; } };
+  // 補畫的順序跟原本一樣：先地上的怪物、人、建築 → 人面蝶的鱗粉霧 → 人面蝶（飛在最上面）
+  const isMoth = it => it.who && it.who.behavior === 'moth';
+  redrawItems(items.filter(it => !isMoth(it)));
+  // 鱗粉霧（js/human-face-butterfly.js 的 drawMothClouds；它本來就只畫亮處的霧，暗處的霧另外畫在黑幕上面，不用補）
+  const clouds = (G.mothClouds || []).filter(c => !c.boom && isVisible(c.x, c.y));
+  if (typeof drawMothClouds === 'function' && clouds.some(c => touchesVoid(c.x - c.r, c.y - 6 - c.r, c.x + c.r, c.y - 6 + c.r))) { clip(); drawMothClouds(ctx); }
+  redrawItems(items.filter(isMoth));
+  if (clipped) ctx.restore();
+
+  function redrawItems(list) {
+  for (const it of list) {
     const w = it.who; if (!w) continue;
     let box, lit;
     if (w.kind === 'obstacle' || w.c != null && w.w != null && w.x == null) {   // 建築：照佔的格子，往上多算 2 格（圖通常比擋路格高）
@@ -184,8 +195,8 @@ function redrawOverUnderMap(ctx, items) {
       lit = isLit(w.x, w.y) || (lift > 0 && isLit(w.x, w.y - lift));
     }
     if (!lit || !touchesVoid(...box)) continue;
-    if (!clipped) { ctx.save(); ctx.clip(path); clipped = true; }
+    clip();
     it.draw();
   }
-  if (clipped) ctx.restore();
+  }
 }
