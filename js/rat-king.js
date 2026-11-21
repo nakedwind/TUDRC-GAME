@@ -38,7 +38,8 @@ const RAT_KING = {
   // 手：every＝隔幾秒冒一波（最短～最長），count＝一波幾隻；frenzy＝暴怒時的版本
   //   scale＝手的大小（原圖 110×90 的幾倍）；riseSpeed＝往上舉、縮回去的速度（1＝原本的速度，.5＝一半的速度）
   //   coreHoleGap＝一般的手離核心洞至少幾格（核心洞只給搬核心的手用）
-  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [2.8, 4.2], frenzyCount: [2, 3], frenzySpeed: .75, grabChance: .3, scale: 2.5, riseSpeed: .5, coreHoleGap: 2.5 },
+  //   grabChance＝一波裡第一隻手用「抓」的機會（其他是拳頭）；holdSway＝抓住人時手左右搖晃：幅度（弧度，.1 約 6 度）、速度
+  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [2.8, 4.2], frenzyCount: [2, 3], frenzySpeed: .75, grabChance: .6, scale: 2.5, riseSpeed: .5, coreHoleGap: 2.5, holdSway: { angle: .1, speed: 2.4 } },
   // 核心洞：地圖上鋪的這種洞素材就是核心會出現的地方（在地圖編輯器加減、搬動，核心出現的位置就跟著變）
   holeTile: 'tile_mvmo77lx',     // 地圖素材「hole02」
   // 一般的手冒出來時地上裂開的洞（用同一張 hole02 圖）：size＝大小倍率、linger＝手縮回去後洞還留幾秒才淡掉
@@ -882,6 +883,10 @@ function rkHandPose(h) {
   const pose = { reveal, open: t < 0 ? burrowEase(h.age / h.windup) : 1, crack: 0, stretch: t >= up && t < up + .15 ? 1 + .08 * Math.sin((t - up) / .15 * Math.PI) : 1 };
   if (h.kind === 'flail') pose.tilt = Math.sin(h.age * 22 + h.cx) * .35;   // 亂抓：左右甩
   else if (h.kind === 'grab' && h.held && h.hold - (t - up) < .5) pose.tilt = Math.sin(h.age * 40) * .12;   // 快丟出去：用力晃
+  else if (h.kind === 'grab' && (h.held || h.carry)) {   // 握著人：以洞口為軸慢慢左右搖晃（剛抓到時從 0 慢慢晃起來）
+    const W = RAT_KING.hands.holdSway, k = Math.min(1, Math.max(0, t - up) / .4);
+    pose.tilt = Math.sin((t - up) * W.speed * Math.PI) * W.angle * k;
+  }
   return pose;
 }
 function rkHandFile(h) {
