@@ -177,8 +177,11 @@ function redrawOverUnderMap(ctx, items) {
       lit = isLit(x0 + (w.w || 1) * CELL / 2, y0 + (w.h || 1) * CELL / 2);
     } else {   // 怪物、隊員、溫特、NPC、核心：腳在 (x, y) 附近，身體往上大約 2.5 格
       if (w.mrtHidden) continue;
-      box = [w.x - CELL, w.y - 2.5 * CELL, w.x + CELL, w.y + .6 * CELL];
-      lit = isLit(w.x, w.y);
+      // 飛在空中的怪物（人面蝶等）：身體在腳下的影子上方 lift 像素，範圍要跟著往上、照圖的寬高放大
+      const lift = w.slimeLift || 0, size = w.sizeMul || 1;
+      const halfW = Math.max(CELL, (w.drawWidth || 40) * size / 2), up = Math.max(2.5 * CELL, lift + (w.drawHeight || 33) * size + 13);
+      box = [w.x - halfW, w.y - up, w.x + halfW, w.y + .6 * CELL];
+      lit = isLit(w.x, w.y) || (lift > 0 && isLit(w.x, w.y - lift));
     }
     if (!lit || !touchesVoid(...box)) continue;
     if (!clipped) { ctx.save(); ctx.clip(path); clipped = true; }
