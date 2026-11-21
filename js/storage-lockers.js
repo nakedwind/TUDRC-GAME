@@ -244,9 +244,8 @@ function grantLockerLoot(loot,where='置物櫃'){
     // 1 組子彈（地圖編輯器「子彈（1 組）」）：彈藥包放得下多少拿多少
     const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
     if(bulletRoom(loot.id)<=0){systemNotice('彈藥包已滿，放不下'+b.name);return;}
-    const first=!bulletOwned(loot.id),got=grantBullets(loot.id,b.max,'在'+where+'找到');
+    const got=grantBullets(loot.id,b.max,'在'+where+'找到');
     if(!got)return;
-    if(!first&&typeof itemIntroForBullet==='function')itemIntroForBullet(loot.id,got);   // 開出來的東西每次都跳視窗（第一次 grantBullets 已經跳過）
     showItemPickupNotice({name:b.name,image:b.image},got,false);
   }
 }

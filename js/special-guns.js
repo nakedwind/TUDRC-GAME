@@ -42,10 +42,11 @@ function tryGunFind(x, y, chance = GUN_FINDS.ammo, where = '置物箱', count) {
 function grantBullets(id, n, how, x, y) {
   const b = BULLETS[id]; if (!b) return 0;
   const first = !bulletOwned(id), got = addBullets(id, n);
-  if (first && typeof itemIntroForBullet === 'function') itemIntroForBullet(id, got);
+  // 第一次拿到跳說明；從置物櫃、彈藥箱開出來的每次都跳（不然開到拿過的子彈會被當成「空的」）
+  if ((first || (typeof itemIntroFromLocker !== 'undefined' && itemIntroFromLocker)) && typeof itemIntroForBullet === 'function') itemIntroForBullet(id, got);
   if (typeof battleGot === 'function') battleGot(b.icon + ' ' + b.name, null, got);
   systemNotice((how || '找到') + b.icon + ' ' + b.name + ' +' + got + (first ? '！滾輪可以換成這種子彈' : '（現在 ' + bulletCount(id) + ' 發）'));
-  if (x != null) flash(b.icon + ' ' + b.name + ' +' + got, x, y - 40, b.color, 1.2);
+  if (x != null) flash(b.icon + ' ' + b.name + ' +' + got, x, y - 10, b.color, 1.2);   // 飄字位置：箱子上緣往上 10px（原本 40px 太高）
   if (first) SFX.play('favorUp', .8, 'gun-get');
   return got;
 }
