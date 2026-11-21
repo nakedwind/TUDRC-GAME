@@ -14,8 +14,8 @@
           在這之前把那隻手打掉（手有血量），人就救出來了。
    - 最後一顆核心破掉：老鼠王暈倒 stun.time 秒（頭上轉星星），這段時間受到的傷害 ×stun.dmgMul，是爆發輸出的好時機。
    - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻；還會從洞裡叫出小的花蓮版權老鼠。
-   - 血量歸零（死亡表演）：畫面上下出現電影黑邊 → 老鼠王卡在鐵軌上掙扎、所有洞都伸出手亂抓、月台警示燈閃紅光、隧道裡的車燈越來越亮
-     → 紅色列車鳴笛衝進站把牠撞飛（白光閃一下、畫面頓住、大震動、碎片火花）→ 老鼠王邊轉邊飛向鏡頭 → 「討伐成功」。
+   - 血量歸零（死亡表演，節奏慢）：老鼠王卡在鐵軌上暈頭轉向 → 響起這個車站的到站音樂、隧道裡的車燈越來越亮、地面越震越大
+     → 捷運煞車聲（煞車來不及）→ 紅色列車撞上去（白光、畫面頓住、慢動作、大震動、火花）→ 老鼠王邊轉邊飛向鏡頭 → 「討伐成功」。
      之後列車照常停靠，可以搭車（開往哪裡寫在 data/mrt-train.js 的 variants）。核心全破的結算畫面會等老鼠王被撞飛之後才跳。
    素材：本體沿用花蓮版權老鼠的圖（放大 scale 倍）；拳頭是 left-fist.png，抓核心張開的手是 left-hand.png（都用 images/monster/rat-king/ 的紫藍版，見 RAT_KING.artDir）。
    數值都在下面的 RAT_KING。必須在 burrowing-mouse.js 之後、game.js 之前載入。
@@ -61,13 +61,12 @@ const RAT_KING = {
   //   rise／hold／sink＝冒出、握住、拖下去；under＝在地底幾秒；popHold＝從另一個洞冒出來後握著幾秒才放下；minMove＝新的洞至少離原本幾格
   core: { react: { shake: .55, windup: .2 }, exposeCap: .2, first: [10, 14], every: [16, 24], windup: 1, rise: .25, hold: .55, sink: .4, under: [1.2, 2], popHold: 1, minMove: 6 },
   mice: { every: [9, 13], count: [1, 2], max: 4 },   // 暴怒後叫出小老鼠：隔幾秒、一次幾隻、場上最多幾隻
-  // 最後一擊：列車進站的速度（減速度倍率，越大衝越快）、老鼠王被撞飛幾秒
+  // 最後一擊：列車進站的速度（減速度倍率，越大衝越快；1＝平常進站的速度）、老鼠王被撞飛幾秒
   //   slowMo＝撞上去那一刻的慢動作：持續幾秒（現實時間）、變成幾倍速
-  ram: { decelMul: 3.2, fly: 2.2, slowMo: { time: 1, scale: .3 } },
-  // 死亡表演：struggle＝血量歸零後掙扎幾秒列車才開始進站；flailEvery＝掙扎時每隔幾秒伸出一隻亂抓的手；
-  //   bars＝電影黑邊佔畫面高度的幾成；horns＝列車鳴笛的時間點（掙扎開始後第幾秒）
-  //   slowMo＝血量歸零那一刻的慢動作
-  finale: { struggle: 2.8, flailEvery: .18, bars: .11, horns: [0, 1.5], slowMo: { time: .6, scale: .4 } },
+  ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 } },
+  // 死亡表演的節奏：daze＝血量歸零後先暈幾秒才響到站音樂；musicLead＝音樂響了幾秒後列車才從隧道進站；
+  //   brakeLead＝撞上前幾秒響煞車聲（音效「mrtBrake」）；musicGain＝到站音樂的音量；slowMo＝血量歸零那一刻的慢動作
+  finale: { daze: 2.5, musicLead: 5, brakeLead: 1.6, musicGain: .8, slowMo: { time: .5, scale: .5 } },
   // 拳頭（老鼠王專用的紫藍版）；fistFront＝只有前面手指的那一層，握住人／核心時蓋在上面（拳頭 → 人／核心 → 手指）
   art: { fist: 'images/monster/rat-king/left-fist.png', fistFront: 'images/monster/rat-king/left-fist-02.png' },
   // 握在拳頭裡的人／核心放在原圖（110×90）的哪一點：held＝人身體的中心（人橫躺、頭朝外露出拳頭），core＝核心的中心
@@ -148,7 +147,7 @@ const rkSound = (name, x, y, gain = .9) => { if (typeof sfxAt === 'function') sf
 function seedRatKing() {
   G.ratKing = null;
   if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) || !rkSpot()) return;
-  G.ratKing = { phase: 'sleep', t: 0, e: null, hands: [], under: [], digs: [], pops: [], waveT: 0, coreT: 0, miceT: 0, grabCd: 0, cores: 0, cine: 0, flash: 0 };
+  G.ratKing = { phase: 'sleep', t: 0, e: null, hands: [], under: [], digs: [], pops: [], waveT: 0, coreT: 0, miceT: 0, grabCd: 0, cores: 0, flash: 0 };
   [...Object.values(rkArt()), RAT_KING.art.fist, RAT_KING.art.fistFront, RAT_KING.dig.art].forEach(f => typeof monsterImage === 'function' && monsterImage(f));   // 先載好圖
   rkWrapCoreDraw();
 }
@@ -317,19 +316,17 @@ function rkEmerge(K) {
   if (typeof addShake === 'function') addShake(14);
   if (typeof addHitstop === 'function') addHitstop(.06);
   for (let k = 0; k < 5; k++) rkDirt(x + (k / 4 - .5) * 6 * CELL, edge, 1.6);
-  if (typeof coreBanner === 'function') coreBanner(B.name + '現身', '異質核心在保護牠：先把核心打破！', '#f0a3c8');
-  systemNotice('⚠ ' + B.name + '從鐵軌底下鑽出來了！核心還在的時候牠很硬，先打破核心！', true);
+  if (typeof coreBanner === 'function') coreBanner(B.name + '現身', '', '#f0a3c8');   // 不說怎麼打（核心是護甲這件事讓玩家自己發現）
 }
 function rkStun(K, e) {
   e.rkStunned = true; e.rkStunT = RAT_KING.stun.time; e.stunT = 0;
   K.hands = K.hands.filter(h => h.kind !== 'punch' || h.age >= h.windup);   // 還在預警的拳頭取消
-  systemNotice('★ ' + RAT_KING.name + '失去核心的保護、暈倒了！趁現在猛攻！', true);
-  if (typeof coreBanner === 'function') coreBanner(RAT_KING.name + '暈倒了', '受到的傷害加倍！', '#ffe36e');
+  if (typeof coreBanner === 'function') coreBanner(RAT_KING.name + '暈倒了', '', '#ffe36e');   // 不說傷害加倍（讓玩家自己發現）
   rkSound('mouseHurt', e.x, e.y, 1.2);
 }
 function rkEnrage(e) {
   e.rkEnraged = true;
-  systemNotice('⚠ ' + RAT_KING.name + '暴怒了！手變多了，還叫來了小老鼠！', true);
+
   if (typeof coreBanner === 'function') coreBanner(RAT_KING.name + '暴怒', '', '#ff6a5a');
   if (typeof addShake === 'function') addShake(8);
   rkSound('mouseAttack', e.x, e.y, 1.2);
@@ -368,14 +365,13 @@ function ratKingHoldDeath(e) {
 }
 
 // ---- 手 ----
-// h：{ kind: 'punch'｜'grab'｜'core'｜'pop'｜'spit'｜'flail', x, y＝落腳點, cx, cy＝洞口（打／抓的中心）, age, windup, rise, hold, sink, side, hole?, dig? }
+// h：{ kind: 'punch'｜'grab'｜'core'｜'pop'｜'spit', x, y＝落腳點, cx, cy＝洞口（打／抓的中心）, age, windup, rise, hold, sink, side, hole?, dig? }
 function rkHandTimes(kind, fast = 1) {
   const P = RAT_KING.punch, Gb = RAT_KING.grab, C = RAT_KING.core, up = 1 / (RAT_KING.hands.riseSpeed || 1);   // up：往上舉要多花幾倍時間
   if (kind === 'punch') return { windup: P.windup * fast, rise: P.rise * up, hold: P.hold, sink: P.sink * up };
   if (kind === 'grab') return { windup: Gb.windup * fast, rise: Gb.rise * up, hold: Gb.hold, sink: .45 * up };
   if (kind === 'core') return { windup: C.windup, rise: C.rise * up, hold: C.hold, sink: C.sink * up };
   if (kind === 'pop') return { windup: C.windup * .8, rise: C.rise * up, hold: C.popHold, sink: .3 * up };
-  if (kind === 'flail') return { windup: .12, rise: .18, hold: rkRand(.35, .7), sink: .22 };   // 死亡表演：亂抓的手
   return { windup: .7, rise: .2 * up, hold: .35, sink: .3 * up };
 }
 function rkNewHand(K, kind, x, y, extra = {}) {
@@ -435,7 +431,7 @@ function updateRkHands(K, dt) {
   for (const h of K.hands) {
     const before = h.age; h.age += dt;
     const up = h.windup + h.rise;
-    if (before < h.windup && h.age >= h.windup && h.kind !== 'flail') {   // 鑽出地面：噴土
+    if (before < h.windup && h.age >= h.windup) {   // 鑽出地面：噴土
       rkSound('mouseAttack', h.cx, h.cy, .8);
       if (typeof rockBurstFx === 'function') rockBurstFx(h.cx, h.cy, 'mouseHand');
     }
@@ -700,8 +696,8 @@ function rkThrowLand(cap, wall) {
   cap.h = Math.max(1, cap.h); cap.fallH0 = Math.max(60, cap.h);
 }
 
-// ---- 死亡表演 ----
-// 1. 血量歸零：畫面頓一下、白光一閃、上下出現電影黑邊；老鼠王卡在鐵軌上暈頭掙扎，所有洞伸出手亂抓，警示燈閃紅光，車燈越來越亮
+// ---- 死亡表演（節奏：暈眩 → 到站音樂 → 列車進站、越近越震 → 煞車聲 → 煞車來不及撞飛）----
+// 1. 血量歸零：畫面頓一下、白光輕閃、短暫慢動作；老鼠王卡在鐵軌上暈頭轉向（頭上轉星星）
 function rkStartFinale(e) {
   const K = G.ratKing;
   e.hp = 1; e.rkHp = 1; e.rkStunT = 99; e.rkDying = true;
@@ -713,40 +709,63 @@ function rkStartFinale(e) {
     if (u.who) { rkRelease(u.who); u.who.x = u.from.x; u.who.y = u.from.y; }
     if (u.core) { u.core.hidden = false; u.core.x = u.from.x; u.core.y = u.from.y; }
   }
-  for (const h of K.hands) if (h.core) { h.core.hidden = false; }
+  for (const h of K.hands) { if (h.core) h.core.hidden = false; h.age = Math.max(h.age, h.windup + h.rise + h.hold); }   // 場上的手全部縮回去
   for (const c of G.cores || []) c.rkReact = null;
   for (const p of K.pops || []) { rkRelease(p.who); p.who.x = p.x; p.who.y = p.y; }   // 正要被拋出來的人：直接放出來
-  K.hands = []; K.under = []; K.pops = [];
-  K.phase = 'finale'; K.t = 0; K.hit = false; K.flailT = 0; K.horn = 0; K.flash = .7;
+  K.under = []; K.pops = [];
+  K.phase = 'finale'; K.t = 0; K.hit = false; K.music = false; K.braked = false; K.rumble = 0; K.flash = .45;
+  // 先算好：列車開始進站後幾秒會撞到老鼠王 → 煞車聲要在撞上前 brakeLead 秒響（可能在列車露臉之前就開始響）
+  const F = RAT_KING.finale, tr = rkTrain();
+  K.enterAt = F.daze + F.musicLead;
+  K.hitIn = tr ? rkRamHitTime(tr, e, RAT_KING.ram.decelMul) : 0;
+  K.brakeAt = Math.max(F.daze, K.enterAt + K.hitIn - F.brakeLead);
   if (typeof addHitstop === 'function') addHitstop(.09);
-  rkSlowMo(RAT_KING.finale.slowMo);
-  if (typeof addShake === 'function') addShake(12);
-  rkSound('mouseHurt', e.x, e.y, 1.3); rkSound('bigBoom', e.x, e.y, .6);
-  systemNotice('⚠ ' + RAT_KING.name + '卡在鐵軌上動不了了！', true);
+  rkSlowMo(F.slowMo);
+  if (typeof addShake === 'function') addShake(8);
+  rkSound('mouseHurt', e.x, e.y, 1.3);
+  systemNotice(RAT_KING.name + '卡在鐵軌上動不了了……', true);
+}
+// 列車用 mrtRamArrive(tr, decelMul) 進站的話，幾秒後車頭會碰到老鼠王（js/mrt-train.js：一開始速度 v0、一路減速，停在月台）
+function rkRamHitTime(tr, e, decelMul) {
+  const a = MRT_TRAIN.arriveDecel * decelMul, D = tr.inDist, v0 = Math.sqrt(2 * a * D);
+  const head = tr.dir > 0 ? Math.max(...tr.cars.map(c => c.x + c.w)) : Math.min(...tr.cars.map(c => c.x));   // 停好時車頭的位置
+  const reachX = tr.dir > 0 ? e.x - e.drawWidth * .3 : e.x + e.drawWidth * .3;
+  const d = Math.max(0, Math.min(D, D - (head - reachX) * (tr.dir > 0 ? 1 : -1)));   // 從隧道口開始要走多遠才碰到
+  const disc = v0 * v0 - 2 * a * d;
+  return disc <= 0 ? v0 / a : (v0 - Math.sqrt(disc)) / a;
+}
+// 震動強度（0～1）：暈眩時不震，到站音樂響了以後越來越大，列車進站後照「還有幾秒撞上」越來越大
+function rkRumbleK(K, e) {
+  const F = RAT_KING.finale;
+  if (K.phase === 'finale') return K.t < F.daze ? 0 : .15 + .45 * Math.min(1, (K.t - F.daze) / F.musicLead);
+  if (K.hit) return 0;
+  const left = Math.max(0, K.hitIn - K.t);
+  return .6 + .4 * (1 - Math.min(1, left / Math.max(.1, K.hitIn)));
 }
 function updateRkFinale(K, dt) {
   const e = K.e, F = RAT_KING.finale; if (!e) return;
   K.t += dt; e.rkAge = (e.rkAge || 0) + dt;
-  updateRkHands(K, dt);
-  const k = Math.min(1, K.t / F.struggle);
-  if (typeof addShake === 'function') addShake(2 + 6 * k);   // 列車越來越近，震得越來越大
-  while (K.horn < F.horns.length && K.t >= F.horns[K.horn]) { K.horn++; if (typeof sfx === 'function') sfx('mrtHorn'); }
-  if ((K.flailT -= dt) <= 0) { K.flailT = F.flailEvery; rkFlailHand(K, e); }
-  if (Math.random() < dt * 10) rkDirt(e.x + rkRand(-3, 3) * CELL, rkEdgeY(), .9);
-  if (K.t >= F.struggle) rkStartRam(K, e);
+  updateRkHands(K, dt);   // 剛剛縮回去的手把動畫播完
+  if (!K.music && K.t >= F.daze) {   // 2. 到站音樂（這個車站自己的那首，js/mrt-train.js 的 mrtArriveSound）
+    K.music = true;
+    const name = typeof mrtArriveSound === 'function' ? mrtArriveSound() : 'mrtArrive';
+    if (typeof SFX !== 'undefined' && SFX.play) SFX.play(name, F.musicGain, 'rat-king-arrive');
+  }
+  rkBrakeCheck(K, K.t);
+  K.rumble = rkRumbleK(K, e);
+  if (K.rumble > 0 && typeof addShake === 'function') addShake(1 + 9 * K.rumble);
+  if (K.rumble > .3 && Math.random() < dt * 8 * K.rumble) rkDirt(e.x + rkRand(-3, 3) * CELL, rkEdgeY(), .7);
+  if (K.t >= K.enterAt) rkStartRam(K, e);
 }
-// 掙扎時亂抓的手（只是表演，不會打人）：從核心洞、或老鼠王前面的月台邊緣冒出來
-function rkFlailHand(K, e) {
-  const holes = rkHoles().filter(o => !rkHoleBusy(K, o));
-  if (holes.length && Math.random() < .4) { const hole = holes[Math.floor(Math.random() * holes.length)]; rkNewHand(K, 'flail', hole.x, hole.y, { hole }); return; }
-  const x = e.x + rkRand(-6, 6) * CELL, y = rkEdgeY() + rkRand(.8, 3) * CELL, [c, r] = cellAt(x, y);
-  if (!inGrid(c, r) || isWall(c, r)) return;
-  rkNewHand(K, 'flail', x, rkFootY(y), { cx: x, cy: y });
+// 煞車聲：時間到就響一次（finale 和 ram 都要檢查；at＝從血量歸零開始算的秒數）
+function rkBrakeCheck(K, at) {
+  if (K.braked || at < K.brakeAt) return;
+  K.braked = true;
+  if (typeof sfx === 'function') sfx('mrtBrake');
 }
-// 2. 列車鳴笛衝進站
+// 3. 列車衝進站（車速 ram.decelMul）
 function rkStartRam(K, e) {
   K.phase = 'ram'; K.t = 0; K.hit = false;
-  systemNotice('⚠ 列車進站了！', true);
   const tr = rkTrain();
   if (tr && typeof mrtRamArrive === 'function') mrtRamArrive(tr, RAT_KING.ram.decelMul);
   else rkRamHit(K, e);   // 沒有列車：直接倒下
@@ -756,8 +775,11 @@ function updateRkRam(K, dt) {
   e.rkAge = (e.rkAge || 0) + dt;
   updateRkHands(K, dt);
   if (!K.hit) {
-    if (typeof addShake === 'function') addShake(8);
-    if ((K.flailT -= dt) <= 0) { K.flailT = RAT_KING.finale.flailEvery; rkFlailHand(K, e); }
+    K.t += dt;
+    rkBrakeCheck(K, K.enterAt + K.t);
+    K.rumble = rkRumbleK(K, e);
+    if (typeof addShake === 'function') addShake(1 + 9 * K.rumble);
+    if (Math.random() < dt * 10) rkDirt(e.x + rkRand(-3, 3) * CELL, rkEdgeY(), .9);
     const tr = rkTrain();
     if (!tr) { rkRamHit(K, e); return; }
     // 車頭的位置：往右開的車頭在右邊（off 是負的＝還在隧道裡）
@@ -773,11 +795,10 @@ function updateRkRam(K, dt) {
   }
   if (K.t >= RAT_KING.ram.fly) { K.phase = 'dead'; K.flyDone = true; rkVictory(K, e); }
 }
-// 3. 撞上去：畫面頓住、白光、大震動、衝擊波、火花碎片；所有亂抓的手縮回去
+// 4. 撞上去：畫面頓住、白光、慢動作、大震動、衝擊波、火花碎片
 function rkRamHit(K, e, dir = 1) {
-  K.hit = true; K.t = 0; K.flyDir = dir; K.flash = 1;
+  K.hit = true; K.t = 0; K.flyDir = dir; K.flash = 1; K.rumble = 0;
   e.rkRammed = true; e.hp = 0; e.rkStunT = 0;
-  for (const h of K.hands) h.age = Math.max(h.age, h.windup + h.rise + h.hold);
   if (typeof addShake === 'function') addShake(16);
   if (typeof addHitstop === 'function') addHitstop(.09);
   rkSlowMo(RAT_KING.ram.slowMo);
@@ -797,11 +818,12 @@ function rkRamHit(K, e, dir = 1) {
   if (typeof onEnemyDeath === 'function') onEnemyDeath(e);
   if (typeof questEvent === 'function') questEvent('kill', { monster: e.type });
 }
-// 4. 飛遠之後：討伐成功的橫幅、黑邊收起來、金色碎光灑下來
+// 5. 飛遠之後：討伐成功的橫幅、金色碎光灑下來、到站音樂慢慢收掉
 function rkVictory(K, e) {
   if (typeof coreBanner === 'function') coreBanner('討伐成功！', RAT_KING.name + '被列車撞飛了・列車恢復通行', '#ffd28a');
   const p = G.player || e;
   for (let i = 0; i < 40; i++) G.effects.push({ particle: true, kind: 'spark', x: p.x + rkRand(-260, 260), y: p.y - rkRand(120, 260), vx: rkRand(-20, 20), vy: rkRand(40, 120), r: 1.5 + Math.random() * 2, life: 1.2 + Math.random() * .6, life0: 1.8, color: ['#ffe36e', '#ffd28a', '#f0a3c8', '#ffffff'][i % 4] });
+  if (typeof SFX !== 'undefined' && SFX.fadeOut) SFX.fadeOut('rat-king-arrive', 2.5);
   if (typeof sfx === 'function') sfx('win');
 }
 // 慢動作：借用隊員暴走那一套（js/berserk-fx.js 的 battleTimeScale 讀 G.slowMoT／G.slowMoScale）
@@ -825,8 +847,6 @@ function updateRkFx(K, dt) {
   const e = K.e;
   if (e && e.rkArmorFlash > 0) e.rkArmorFlash -= dt;
   if (K.flash > 0) K.flash = Math.max(0, K.flash - dt * 2.6);
-  const want = K.phase === 'finale' || K.phase === 'ram' || (K.phase === 'dead' && K.flyDone && (K.endT = (K.endT || 0) + dt) < 1.2) ? 1 : 0;   // 電影黑邊：表演中拉出來，結束後停一下再收
-  K.cine += (want - K.cine) * Math.min(1, dt * 5);
   for (const d of K.digs || []) d.age += dt;
   if (K.digs) K.digs = K.digs.filter(d => d.age < d.life);
 }
@@ -835,8 +855,7 @@ function updateRkFx(K, dt) {
 function ratKingBars() {
   const K = G && G.ratKing, e = K && K.e;
   if (!rkAlive(e) || !e.eliteAwake) return [];
-  const armor = Math.round((1 - ratKingDamageMul(e)) * 100);
-  const tag = e.rkStunT > 0 ? '（暈倒・傷害加倍）' : armor > 0 ? '（核心護甲 ' + armor + '%）' : e.rkEnraged ? '（暴怒）' : '';
+  const tag = e.rkStunT > 0 ? '（暈倒）' : e.rkEnraged ? '（暴怒）' : '';   // 不顯示核心護甲幾 %（讓玩家自己發現）
   return [{ label: RAT_KING.name + tag, ratio: e.hp / e.maxhp, hit: e.hitT > 0, colors: ['#7a2e55', '#f0a3c8'], frame: '#d95a9a', text: '#ffe0f0' }];
 }
 const ratKingHunting = () => { const K = G && G.ratKing; return !!(K && rkAlive(K.e) && K.e.eliteAwake); };
@@ -846,7 +865,7 @@ const ratKingHunting = () => { const K = G && G.ratKing; return !!(K && rkAlive(
 function drawRatKing(c, e) {
   const B = RAT_KING, S = B.scale, w = 110 * S, h = 90 * S, edge = rkEdgeY();
   const art = rkArt(), t = performance.now() / 1000;
-  const K = G.ratKing, flying = K && K.phase === 'ram' && K.hit, struggling = K && (K.phase === 'finale' || (K.phase === 'ram' && !K.hit));
+  const K = G.ratKing, flying = K && K.phase === 'ram' && K.hit, struggling = K && (K.phase === 'finale' || (K.phase === 'ram' && !K.hit)), rumble = struggling ? K.rumble || 0 : 0;
   let file = burrowMouseBlinkFrame(art, e.rkAge || 0);
   const dizzy = e.rkStunT > 0 || e.rkDying;
   if (dizzy) { const slot = Math.floor(t / .22); file = art['dizzy' + (1 + Math.floor(Math.abs(Math.sin(slot * 12.9898) * 43758.5453) % 1 * 4))]; }
@@ -864,11 +883,11 @@ function drawRatKing(c, e) {
   }
   c.beginPath(); c.rect(e.x - w, edge - h * 2, w * 2, h * 2); c.clip();   // 月台邊緣以下不畫（被月台擋住）
   if (e.hitT > 0) c.translate((Math.random() * 2 - 1) * 3, 0);
-  if (struggling) c.translate((Math.random() * 2 - 1) * 6, (Math.random() * 2 - 1) * 2);   // 卡在鐵軌上拼命掙扎
-  if (dizzy) { c.translate(e.x, edge); c.rotate(Math.sin(t * (struggling ? 13 : 5)) * (struggling ? .09 : .04)); c.translate(-e.x, -edge); }
+  if (rumble > 0) c.translate((Math.random() * 2 - 1) * 5 * rumble, (Math.random() * 2 - 1) * 1.5 * rumble);   // 列車越近，跟著地面抖得越厲害
+  if (dizzy) { c.translate(e.x, edge); c.rotate(Math.sin(t * 5) * .05); c.translate(-e.x, -edge); }   // 暈頭轉向：慢慢左右晃
   // 核心護甲：身體外圍一圈紫光（越多核心越亮）；剛被護甲擋掉傷害時閃一下
   const armor = 1 - ratKingDamageMul(e);
-  if (struggling) { c.shadowColor = 'rgba(255,60,40,' + (.5 + .4 * Math.sin(t * 16)) + ')'; c.shadowBlur = 30; }
+  if (struggling) { /* 死亡表演：不發光 */ }
   else if (armor > 0 && !(e.rkStunT > 0)) { c.shadowColor = 'rgba(176,110,255,' + Math.min(1, .45 + armor * .6 + (e.rkArmorFlash > 0 ? .4 : 0)) + ')'; c.shadowBlur = 18 + armor * 22; }
   else if (e.rkEnraged) { c.shadowColor = 'rgba(255,80,60,' + (.55 + .3 * Math.sin(t * 7)) + ')'; c.shadowBlur = 26; }
   c.drawImage(img, e.x - w / 2, top, w, h);
@@ -882,8 +901,7 @@ function rkHandPose(h) {
   const t = h.age - h.windup, up = h.rise, top = h.rise + h.hold;
   const reveal = t < 0 ? 0 : t < up ? burrowEase(t / up) : t < top ? 1 : 1 - burrowEase((t - top) / Math.max(.01, h.sink));
   const pose = { reveal, open: t < 0 ? burrowEase(h.age / h.windup) : 1, crack: 0, stretch: t >= up && t < up + .15 ? 1 + .08 * Math.sin((t - up) / .15 * Math.PI) : 1 };
-  if (h.kind === 'flail') pose.tilt = Math.sin(h.age * 22 + h.cx) * .35;   // 亂抓：左右甩
-  else if (h.kind === 'grab' && h.held && h.hold - (t - up) < .5) pose.tilt = Math.sin(h.age * 40) * .12;   // 快丟出去：用力晃
+  if (h.kind === 'grab' && h.held && h.hold - (t - up) < .5) pose.tilt = Math.sin(h.age * 40) * .12;   // 快丟出去：用力晃
   else if (h.kind === 'grab' && (h.held || h.carry)) {   // 握著人：以洞口為軸慢慢左右搖晃（剛抓到時從 0 慢慢晃起來）
     const W = RAT_KING.hands.holdSway, k = Math.min(1, Math.max(0, t - up) / .4);
     pose.tilt = Math.sin((t - up) * W.speed * Math.PI) * W.angle * k;
@@ -892,7 +910,6 @@ function rkHandPose(h) {
 }
 function rkHandFile(h) {
   const open = rkArt().hand, fist = RAT_KING.art.fist, up = h.windup + h.rise;
-  if (h.kind === 'flail') return Math.sin(h.age * 14 + h.cx) > 0 ? open : fist;   // 亂抓：張開、握緊、張開……
   if (h.kind === 'core' || h.kind === 'pop') return h.age < up + h.hold * .35 && h.kind === 'core' ? open : h.kind === 'pop' && h.age >= up + h.hold * .7 ? open : fist;   // 抓核心：張開→握住；放核心：握著→張開
   if (h.kind === 'spit') return h.age < up + .1 ? fist : open;
   return fist;
@@ -943,9 +960,9 @@ function rkDrawHeldActor(ctx, a, x, y, h) {
   ctx.drawImage(img, -size / 2, -size / 2, size, size);
   ctx.restore();
 }
-// 預警圈：拳頭橘色、抓人紫色、搬核心淡紫（亂抓的手、核心被打到後冒出來的手不畫）
+// 預警圈：拳頭橘色、抓人紫色、搬核心淡紫（核心被打到後冒出來的手不畫）
 function drawRkWarning(c, h) {
-  if (h.age >= h.windup + h.rise || h.kind === 'flail' || h.windup < .3) return;
+  if (h.age >= h.windup + h.rise || h.windup < .3) return;
   const k = Math.min(1, h.age / Math.max(.01, h.windup));
   const R = (h.kind === 'grab' ? RAT_KING.grab.radius : h.kind === 'punch' ? RAT_KING.punch.radius : 1.4) * CELL, o = rkHandSpot(h);
   const col = h.kind === 'grab' ? ['#c58bff', '#9b4dff'] : h.kind === 'punch' ? ['#ff986c', '#e96b4a'] : ['#d9c2ff', '#8c6bbf'];
@@ -984,7 +1001,8 @@ function drawRatKingGround(c) {
 // 隧道裡越來越亮的車燈（死亡表演，畫在世界裡）：列車從哪一頭進站，那一頭的軌道就亮起來
 function drawRkHeadlight(c, K) {
   const tr = rkTrain(); if (!tr || K.hit) return;
-  const k = K.phase === 'finale' ? Math.min(1, K.t / RAT_KING.finale.struggle) : 1, t = performance.now() / 1000;
+  const F = RAT_KING.finale, k = K.phase === 'finale' ? Math.max(0, Math.min(1, (K.t - F.daze) / F.musicLead)) : 1, t = performance.now() / 1000;
+  if (k <= 0) return;   // 還在暈：隧道裡還沒有車燈
   const x = tr.dir > 0 ? tr.clipL : tr.clipR, y = rkEdgeY() - 70, R = 120 + 380 * k;
   const g = c.createRadialGradient(x, y, 0, x, y, R), a = (.35 + .5 * k) * (.85 + .15 * Math.sin(t * 30));
   g.addColorStop(0, 'rgba(255,250,215,' + a.toFixed(3) + ')'); g.addColorStop(.35, 'rgba(255,230,150,' + (a * .45).toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,220,120,0)');
@@ -999,27 +1017,10 @@ function ratKingSortables(list) {
     list.push({ floor: 1, y: rkEdgeY() + 1, draw: () => drawRkHeadlight(ctx, K) });
   }
 }
-// 畫面最上層（js/render.js 最後呼叫，螢幕座標）：電影黑邊、警示紅光、「列車進站」字樣、撞擊白光
+// 畫面最上層（js/render.js 最後呼叫，螢幕座標）：死亡表演的白光（血量歸零輕閃一下、撞上去大閃一下）
 function drawRatKingScreen(c) {
   const K = G && G.ratKing; if (!K || typeof cv === 'undefined') return;
   rkMuteHitFx();   // 溫特被丟出去、躺著的時候：畫面四周不閃紅（這個函式在受擊紅暈之前呼叫）
-  const W = cv.width, H = cv.height, t = performance.now() / 1000;
-  const warn = K.phase === 'finale' || (K.phase === 'ram' && !K.hit);
-  c.save();
-  if (warn) {   // 月台警示：畫面四周一閃一閃的紅光
-    const p = .5 + .5 * Math.sin(t * 9), R = Math.max(W, H) * .75;
-    const g = c.createRadialGradient(W / 2, H / 2, R * .4, W / 2, H / 2, R);
-    g.addColorStop(0, 'rgba(255,40,30,0)'); g.addColorStop(1, 'rgba(255,40,30,' + (.15 + .3 * p).toFixed(3) + ')');
-    c.fillStyle = g; c.fillRect(0, 0, W, H);
-  }
-  if (K.cine > .01) {   // 電影黑邊
-    const bh = Math.round(H * RAT_KING.finale.bars * K.cine);
-    c.fillStyle = '#000'; c.fillRect(0, 0, W, bh); c.fillRect(0, H - bh, W, bh);
-    if (warn && Math.sin(t * 9) > -.3) {   // 黑邊上的警示字
-      c.font = 'bold ' + Math.max(16, Math.round(bh * .42)) + 'px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillStyle = '#ffcf4a'; c.fillText('⚠ 列車進站中　請勿靠近軌道 ⚠', W / 2, bh / 2);
-    }
-  }
-  if (K.flash > 0) { c.fillStyle = 'rgba(255,255,255,' + Math.min(1, K.flash).toFixed(3) + ')'; c.fillRect(0, 0, W, H); }   // 撞擊白光
-  c.restore();
+  if (!(K.flash > 0)) return;
+  c.save(); c.fillStyle = 'rgba(255,255,255,' + Math.min(1, K.flash).toFixed(3) + ')'; c.fillRect(0, 0, cv.width, cv.height); c.restore();
 }
