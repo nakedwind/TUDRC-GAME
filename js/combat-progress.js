@@ -103,6 +103,7 @@ function resetMapLoot(mapId) {
   const here = token => { try { return JSON.parse(token)[0] === mapId; } catch (_) { return false; } };
   for (const set of [unlockedStorageLockers, collectedStorageKeys]) for (const token of [...set]) if (here(token)) set.delete(token);
   if (typeof clawResetMap === 'function') clawResetMap(mapId);   // 這張地圖的夾娃娃機也重新擺滿（js/claw-machine.js）
+  if (typeof mrtForgetGates === 'function') mrtForgetGates(mapId);   // 刷卡打開的捷運閘門關回去（js/mrt-locks.js）
 }
 function redeployCombat(mapId) {
   clearCombatProgress(mapId); resetMapLoot(mapId);

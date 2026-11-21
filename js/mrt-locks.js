@@ -26,6 +26,13 @@ let mrtUnlocked = {};
 try { const d = JSON.parse(localStorage.getItem(MRT_STORE) || '{}'); if (d && typeof d === 'object') mrtUnlocked = d; } catch (_) {}
 const mrtToken = s => [s.id, s.c, s.r].join('|');
 function mrtSaveUnlocked() { try { localStorage.setItem(MRT_STORE, JSON.stringify(mrtUnlocked)); } catch (_) {} }
+// 刷過卡打開的閘門（地圖 id → [位置…]）：離開地圖、搭捷運換站、讀檔再回來都繼續開著，不用再刷一次；
+// 重新部署戰場才關回去（js/combat-progress.js 的 resetMapLoot 呼叫 mrtForgetGates）
+const MRT_GATE_STORE = 'tudrc_mrt_gates_v1';
+let mrtGatesOpen = {};
+try { const d = JSON.parse(localStorage.getItem(MRT_GATE_STORE) || '{}'); if (d && typeof d === 'object') mrtGatesOpen = d; } catch (_) {}
+function mrtSaveGates() { try { localStorage.setItem(MRT_GATE_STORE, JSON.stringify(mrtGatesOpen)); } catch (_) {} }
+function mrtForgetGates(mapId) { if (mrtGatesOpen[mapId]) { delete mrtGatesOpen[mapId]; mrtSaveGates(); } }
 
 // 換地圖、重新開始時：哪些格子要擋（js/game.js 在 setupDoors 之後呼叫）
 let mrtAddedWalls = new Set();   // 這裡加進固定牆的格子（G 會整個換掉，所以另外記：重開時先全部還原）
@@ -46,13 +53,14 @@ function setupMrtLocks() {
   mrtAdded2F = new Set();
   G.mrtLocks = [];
   if (!MAP) return;
-  const perm = mrtUnlocked[MAP.id] || [];
+  const perm = mrtUnlocked[MAP.id] || [], gates = mrtGatesOpen[MAP.id] || [];
   for (const s of MAP.stamps || []) {
     const cfg = MRT_LOCKS[s.id]; if (!cfg) continue;
     const t = mapTileById(s.id); if (!t) continue;
     const o = stampSolidOrigin(s), w = mapTileW(t), h = mapTileH(t), row = o.r + h - 1;   // 擋路格照像素微調對齊圖片（js/maploader.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
-    const lock = { stamp: s, cfg, open: cfg.kind === 'exit' && (perm.includes(mrtToken(s)) || s.lockItem === 'none'), cells: [], added: [],   // none：編輯器設成「不用鑰匙」
+    const open = cfg.kind === 'exit' ? perm.includes(mrtToken(s)) || s.lockItem === 'none' : gates.includes(mrtToken(s));   // 入口：永久解封、或編輯器設成「不用鑰匙」；閘門：這張地圖刷過卡
+    const lock = { stamp: s, cfg, open, cells: [], added: [],
       x: x0 + w * CELL / 2, top: y0, bottom: y0 + h * CELL, c0: o.c, c1: o.c + w - 1, r0: o.r, r1: row };
     for (let dc = 0; dc < w; dc++) lock.cells.push({ key: (o.c + dc) + ',' + row, dc, off: o.off });
     G.mrtLocks.push(lock);
@@ -151,7 +159,10 @@ function useMrtLockNearPlayer() {
   }
   if (l.cfg.consume) { if (n <= need) supplyInventory.delete(item); else supplyInventory.set(item, n - need); }
   l.open = true;
-  if(l.cfg.kind==='gate'){l.opening=true;l.openProgress=0;}
+  if(l.cfg.kind==='gate'){l.opening=true;l.openProgress=0;
+    const list = mrtGatesOpen[MAP.id] = mrtGatesOpen[MAP.id] || [];   // 記住這個閘門開過了（重新部署前一直開著）
+    if (!list.includes(mrtToken(l.stamp))) { list.push(mrtToken(l.stamp)); mrtSaveGates(); }
+  }
   applyMrtLock(l);
   if (l.cfg.kind === 'exit') {   // 入口解封：永久記住
     (mrtUnlocked[MAP.id] = mrtUnlocked[MAP.id] || []).push(mrtToken(l.stamp)); mrtSaveUnlocked();

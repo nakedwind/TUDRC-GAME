@@ -16,6 +16,7 @@
     'tudrc_camp_ammo_v1',   // 營地彈藥箱（js/camp-supply.js）
     'tudrc_vending_stock_v1',   // 2F應變中心販賣機的庫存（js/shop.js 的 EOC_VENDING）   // 各地圖營地物資箱的數量（js/camp-supply.js）
     'tudrc_mrt_unlocked_v1',   // 已經解封的捷運入口（js/mrt-locks.js）
+    'tudrc_mrt_gates_v1',   // 刷卡打開過的捷運閘門，重新部署前一直開著（js/mrt-locks.js）
     'tudrc_memory_doors_v1',   // 已經解開鎖鏈的記憶之門（js/memory-doors.js）
     'tudrc_costumes_v1',   // 擁有的服裝、每個人穿什麼（js/costumes.js）
     'tudrc_claw_machine_v2',   // 夾娃娃機裡還剩什麼、剩幾次、保夾累積（js/claw-machine.js）
