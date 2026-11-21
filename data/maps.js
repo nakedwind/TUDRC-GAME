@@ -168421,7 +168421,6 @@ const BATTLE_MAPS = [
         "27,15": "tile_obstacle_ore_small",
         "21,10": "tile_obstacle_ore_small",
         "37,9": "tile_obstacle_ore_small",
-        "48,11": "tile_obstacle_ore_small",
         "30,17": "tile_obstacle_ore_small",
         "36,59": "tile_obstacle_ore_small",
         "49,61": "tile_obstacle_ore_small",
@@ -168432,7 +168431,8 @@ const BATTLE_MAPS = [
         "26,71": "tile_interactive_storage_locker_key",
         "50,60": "tile_interactive_storage_locker_key",
         "19,59": "tile_interactive_pickup_battery",
-        "41,83": "tile_interactive_pickup_battery"
+        "41,83": "tile_interactive_pickup_battery",
+        "48,11": "tile_obstacle_ore_small"
       },
       "object": {},
       "object2": {},
@@ -168778,67 +168778,67 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_wall",
         "c": 28,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 29,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 30,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 31,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 32,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 33,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 34,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 35,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 36,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 37,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 38,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_pillar_a02",
@@ -168868,11 +168868,12 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_train_car_head",
-        "c": 21,
+        "c": 29,
         "r": 105,
         "layer": "object",
         "cars": 1,
-        "bothDoors": true
+        "bothDoors": true,
+        "ox": 10
       },
       {
         "id": "tile_mrt_rail_track_objects",
@@ -169231,13 +169232,13 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_wall",
         "c": 39,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
         "c": 40,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_tunnel_wall",
@@ -169309,7 +169310,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_room_wall",
         "c": 25,
         "r": 101,
-        "layer": "object"
+        "layer": "top"
       },
       {
         "id": "tile_mrt_room_wall",
@@ -172139,28 +172140,28 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_wall_sign_platform_orange",
         "c": 28,
         "r": 101,
-        "layer": "object",
+        "layer": "top",
         "oy": 28
       },
       {
         "id": "tile_mrt_wall_orange_band",
         "c": 32,
         "r": 101,
-        "layer": "object",
+        "layer": "top",
         "oy": 28
       },
       {
         "id": "tile_mrt_wall_orange_band",
         "c": 36,
         "r": 101,
-        "layer": "object",
+        "layer": "top",
         "oy": 28
       },
       {
         "id": "tile_mrt_wall_orange_band",
         "c": 37,
         "r": 101,
-        "layer": "object",
+        "layer": "top",
         "oy": 28
       },
       {
@@ -173136,20 +173137,20 @@ const BATTLE_MAPS = [
         "id": "tile_bg_electric_light",
         "c": 29,
         "r": 102,
-        "layer": "object5",
+        "layer": "top",
         "oy": 10
       },
       {
         "id": "tile_bg_electric_light",
         "c": 33,
         "r": 103,
-        "layer": "object5"
+        "layer": "top"
       },
       {
         "id": "tile_bg_electric_light",
         "c": 37,
         "r": 103,
-        "layer": "object5",
+        "layer": "top",
         "ox": 30
       },
       {
@@ -173407,18 +173408,19 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_limestone",
-        "c": 28,
-        "r": 10,
+        "c": 27,
+        "r": 8,
         "layer": "ground3",
-        "ox": 20
+        "ox": 20,
+        "oy": 20
       },
       {
         "id": "tile_obstacle_ore_manganese",
-        "c": 39,
+        "c": 38,
         "r": 14,
         "layer": "ground3",
-        "ox": 30,
-        "oy": 10
+        "ox": 10,
+        "oy": 30
       },
       {
         "id": "tile_obstacle_ore_coal",
@@ -173443,9 +173445,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_large",
-        "c": 44,
-        "r": 13,
-        "layer": "ground3"
+        "c": 46,
+        "r": 12,
+        "layer": "ground3",
+        "oy": 30,
+        "ox": 30
       },
       {
         "id": "tile_obstacle_ore_large",
@@ -173483,6 +173487,44 @@ const BATTLE_MAPS = [
         "r": 92,
         "layer": "object",
         "oy": 6.666667
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 40,
+        "r": 9,
+        "layer": "ground3",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 24,
+        "r": 9,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 33,
+        "r": 11,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 43,
+        "r": 13,
+        "layer": "ground3",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 27,
+        "r": 13,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 20
       }
     ],
     "solid": [
@@ -174168,7 +174210,6 @@ const BATTLE_MAPS = [
       "27,89",
       "27,90",
       "26,88",
-      "27,88",
       "26,87",
       "27,87",
       "25,91",
@@ -176692,7 +176733,96 @@ const BATTLE_MAPS = [
       "59,21",
       "58,19",
       "59,18",
-      "59,20"
+      "59,20",
+      "40,36",
+      "40,35",
+      "40,34",
+      "31,36",
+      "31,35",
+      "31,34",
+      "27,45",
+      "27,44",
+      "27,43",
+      "27,42",
+      "27,41",
+      "27,40",
+      "28,40",
+      "28,41",
+      "28,42",
+      "28,43",
+      "28,44",
+      "28,45",
+      "20,45",
+      "20,44",
+      "20,43",
+      "20,42",
+      "20,41",
+      "20,40",
+      "21,40",
+      "21,41",
+      "21,42",
+      "21,43",
+      "21,44",
+      "21,45",
+      "14,45",
+      "14,44",
+      "14,43",
+      "14,42",
+      "14,41",
+      "14,40",
+      "55,40",
+      "55,41",
+      "55,42",
+      "55,43",
+      "55,44",
+      "55,45",
+      "48,45",
+      "48,44",
+      "48,40",
+      "48,41",
+      "48,42",
+      "48,43",
+      "49,40",
+      "49,41",
+      "49,42",
+      "49,43",
+      "49,44",
+      "49,45",
+      "42,45",
+      "42,44",
+      "42,43",
+      "42,42",
+      "42,41",
+      "41,40",
+      "41,42",
+      "41,43",
+      "41,44",
+      "41,45",
+      "42,40",
+      "41,41",
+      "35,40",
+      "35,41",
+      "35,42",
+      "35,43",
+      "35,44",
+      "35,45",
+      "34,45",
+      "34,44",
+      "34,43",
+      "34,42",
+      "34,41",
+      "34,40",
+      "28,88",
+      "27,88",
+      "29,88",
+      "31,88",
+      "32,88",
+      "33,88",
+      "35,88",
+      "36,88",
+      "37,88",
+      "40,88",
+      "39,88"
     ],
     "breakable": [],
     "coreSpots": [
