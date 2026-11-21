@@ -349,7 +349,7 @@ function stepConfusedEnemy(e, dt) {
   foe.hp -= dmg; foe.hitT = Math.max(foe.hitT || 0, .14); foe.hitColor = '#c98bff';
   flashDmg('-' + Math.round(dmg), foe.x, foe.y - 26, '#d6a0ff');
   if (typeof sfxMonsterHit === 'function') sfxMonsterHit(foe, .4, 'monster');
-  if (!(foe.confuseT > 0) && foe.hp > 0) { foe.brawlWith = e; foe.brawlT = ((typeof BULLETS !== 'undefined' && BULLETS.confuse && BULLETS.confuse.brawl) || 3) * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1); }   // 被打的回手
+  if (!(foe.confuseT > 0) && foe.hp > 0 && !(typeof confuseImmune === 'function' && confuseImmune(foe))) { foe.brawlWith = e; foe.brawlT = ((typeof BULLETS !== 'undefined' && BULLETS.confuse && BULLETS.confuse.brawl) || 3) * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1); }   // 被打的回手（不會混亂的 BOSS 不回手，照自己的行為打人）
   return true;
 }
 
