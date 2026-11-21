@@ -890,12 +890,13 @@ function drawRatKing(c, e) {
   const top = edge - B.showRow * S + (1 - (e.rkRise ?? 1)) * B.showRow * S;   // 冒出來的過程：從月台邊緣往上升
   c.save();
   c.imageSmoothingEnabled = false;
-  if (flying) {   // 被撞飛：沿著 ram.flyAngle 的斜線往旁邊飛出去、邊轉、最後淡掉（大小不變）
-    const p = rkFlyPos(K, e), dir = K.flyDir || 1, grow = 1;
+  if (flying) {   // 被撞飛：沿著 ram.flyAngle 的斜線往旁邊飛出去、邊轉、最後淡掉（大小不變）；一樣在月台地面底下（月台邊緣以下被擋住）
+    const p = rkFlyPos(K, e), dir = K.flyDir || 1;
+    c.beginPath(); c.rect(p.x - w * 2, edge - h * 4, w * 4, h * 4); c.clip();
     c.globalAlpha = Math.max(0, 1 - Math.max(0, p.k - .55) / .45);
-    c.translate(p.x, p.y); c.rotate(dir * p.k * 9); c.scale(grow, grow); c.drawImage(img, -w / 2, -h / 2, w, h);
+    c.save(); c.translate(p.x, p.y); c.rotate(dir * p.k * 9); c.drawImage(img, -w / 2, -h / 2, w, h); c.restore();
+    if (typeof drawBurrowDizzyStars === 'function' && p.k < .7) drawBurrowDizzyStars(c, p.x, p.y - h * .45, S * .9, t);
     c.restore();
-    if (typeof drawBurrowDizzyStars === 'function' && p.k < .7) drawBurrowDizzyStars(c, p.x, p.y - h * .45 * grow, S * .9, t);
     return;
   }
   c.beginPath(); c.rect(e.x - w, edge - h * 2, w * 2, h * 2); c.clip();   // 月台邊緣以下不畫（被月台擋住）
@@ -1031,7 +1032,7 @@ function ratKingSortables(list) {
   const K = G && G.ratKing; if (!K) return;
   for (const h of K.hands) if (h.age >= h.windup * .5) list.push({ floor: 1, y: h.y + 13, draw: () => drawRkHand(ctx, h) });
   if ((K.phase === 'finale' || K.phase === 'ram') && K.e) {
-    list.push({ floor: 1, y: rkEdgeY() + (K.hit ? 400 : 0), draw: () => drawRatKing(ctx, K.e) });   // 被撞飛：畫在最前面
+    list.push({ floor: 1, y: rkEdgeY(), draw: () => drawRatKing(ctx, K.e) });   // 被撞飛也一樣排在月台邊緣（站在月台上的人在牠前面）
     list.push({ floor: 1, y: rkEdgeY() + 1, draw: () => drawRkHeadlight(ctx, K) });
   }
 }
