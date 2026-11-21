@@ -265,7 +265,7 @@ function drawChargerDizzyStars(ctx) {
   }
 }
 
-// ---- 鎖定玩家時眼睛閃藍光 ----
+// ---- 鎖定玩家時眼睛閃藍光（鳥頭大隊長閃紅光）----
 // 畫在黑幕上面（render.js 在照明彈光暈之後呼叫），所以鳥頭人站在暗處時，也看得到兩點藍光亮起。
 const EYE_FLASH = { time: .6, rise: .1, radius: 15, color: [90, 185, 255] };
 function drawChargerEyeFlashes(ctx) {
@@ -279,18 +279,19 @@ function drawChargerEyeFlashes(ctx) {
     const dw = e.drawWidth || 60, dh = e.drawHeight || 80, sx = dw / 60, sy = dh / 80;
     const left = e.x - dw / 2, top = e.y + 13 - (e.slimeLift || 0) - dh;
     const flip = lazy && f.idleEyes ? !!e.faceRight === (f.idleFacing === 'left') : false;   // 側面發呆圖朝右時左右翻
-    const [r, g, b] = EYE_FLASH.color;
+    const [r, g, b] = e.eyeFlashColor || EYE_FLASH.color;   // 鳥頭大隊長閃紅光（js/elite-bird-head.js 的 eyeFlash）
+    const lt = c => Math.round(c + (255 - c) * .75);         // 光芯：顏色混 75% 白
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (const [ex, ey] of eyes) {
       const x = flip ? e.x + (e.x - (left + ex * sx)) : left + ex * sx, y = top + ey * sy;
       const R = EYE_FLASH.radius * (.55 + .45 * k);
       const grad = ctx.createRadialGradient(x, y, 0, x, y, R);
-      grad.addColorStop(0, `rgba(225,245,255,${(.95 * k).toFixed(3)})`);
+      grad.addColorStop(0, `rgba(${lt(r)},${lt(g)},${lt(b)},${(.95 * k).toFixed(3)})`);
       grad.addColorStop(.3, `rgba(${r},${g},${b},${(.75 * k).toFixed(3)})`);
       grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
       ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fill();
       // 十字閃光（橫長直短）
-      ctx.fillStyle = `rgba(200,236,255,${(.85 * k).toFixed(3)})`;
+      ctx.fillStyle = `rgba(${lt(r)},${lt(g)},${lt(b)},${(.85 * k).toFixed(3)})`;
       ctx.fillRect(x - 13 * k, y - .75, 26 * k, 1.5);
       ctx.fillRect(x - .75, y - 6 * k, 1.5, 12 * k);
     }

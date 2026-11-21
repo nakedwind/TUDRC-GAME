@@ -15,7 +15,9 @@
 const ELITE_BIRD = {
   name: '鳥頭大隊長',
   hpMul: 12, dmgMul: 2.2, rewardMul: 5, crystalMul: 5,   // 以原型鳥頭人（data/monsters.js）的數值為基準；hpMul 12 → 血量 1800
-  scale: 2.5, hue: -35,         // 體型放大倍率、換色（色相旋轉角度）
+  scale: 2.5,                    // 體型放大倍率
+  artDir: 'images/monster/bird-head-elite/',   // 專用的圖（頭紫藍、眼睛紅）：檔名跟普通鳥頭人一樣，只換資料夾；用 tools/recolor-bird-elite.py 從鳥頭人的圖換色產生
+  eyeFlash: [255, 60, 70],       // 鎖定目標時眼睛閃的光（紅色；普通鳥頭人是藍光，js/bird-head.js 的 EYE_FLASH）
   speedMul: .5,                  // 走路速度倍率（以原型鳥頭人為基準；衝撞速度另外看 chargeSpeed）。動畫步伐、腳步聲照移動距離觸發，跟著一起變慢
   knockMul: 0,                   // 被隊員打時的擊退倍率：0＝推不動（雷德盾撞、大招擊退也推不動）
   stagger: 0,                    // 被重擊硬直幾秒：0＝不會硬直
@@ -52,6 +54,14 @@ const ELITE_BIRD = {
   shakeRange: 20,
 };
 
+// ---- 換成大隊長專用的圖：把普通鳥頭人的圖片路徑換到 ELITE_BIRD.artDir 資料夾（檔名不變）----
+const eliteBirdArtPath = file => typeof file === 'string' && ELITE_BIRD.artDir ? ELITE_BIRD.artDir + file.split('/').pop() : file;
+function eliteBirdUseArt(e) {
+  const swap = v => Array.isArray(v) ? v.map(swap) : typeof v === 'string' && /\.png$/i.test(v) ? eliteBirdArtPath(v) : v;
+  e.sprite = eliteBirdArtPath(e.sprite);
+  if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, v]) => [k, swap(v)]));
+}
+
 // ---- 開場：照地圖設定擺上場（game.js 在 seedCores 之後呼叫）----
 function seedEliteGuards() {
   const cfg = typeof MAP !== 'undefined' && MAP && MAP.elite;
@@ -69,6 +79,7 @@ function seedEliteGuards() {
   if (!inGrid(c, r) || isWall(c, r)) return;
   const [x, y] = center(c, r);
   const E = ELITE_BIRD, e = createMonster(base, x, y);
+  eliteBirdUseArt(e);   // 換成大隊長專用的圖
   e.elite = true; e.eliteName = E.name;
   e.hp = e.maxhp = Math.round(e.maxhp * E.hpMul);
   e.playerDamage = Math.round(e.playerDamage * E.dmgMul);
@@ -78,7 +89,7 @@ function seedEliteGuards() {
   e.drawWidth = Math.round(base.width * E.scale); e.drawHeight = Math.round(base.height * E.scale);
   e.speed = base.speed * E.speedMul;
   e.shockResist = 1;   // 不怕電：雷電照樣吃全額傷害，但不會被麻痺停住（安柏的雷擊、雷電彈）
-  e.tint = E.hue; e.knockMul = E.knockMul; e.staggerTime = E.stagger; e.unpushable = true;   // unpushable：隊員的盾撞、大招擊退都推不動（game.js）
+  e.eyeFlashColor = E.eyeFlash; e.knockMul = E.knockMul; e.staggerTime = E.stagger; e.unpushable = true;   // unpushable：隊員的盾撞、大招擊退都推不動（game.js）
   e.noHitSquash = true;   // 被打中不壓扁回彈（js/combat-feel.js；落腳時的壓扁是 eliteBirdFootsteps 另外設的，不受影響）
   e.home = { x, y }; e.guardCore = core;
   e.faceRight = false; e.faceBack = true;   // 背對玩家、看著核心

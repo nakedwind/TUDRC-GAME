@@ -98,10 +98,10 @@ const bestiaryTexts = cfg => ({ ...BESTIARY_TEXT_DEFAULT, ...(bestiaryCfg(cfg).t
 const bestiaryStyle = cfg => ({ ...BESTIARY_STYLE_DEFAULT, ...(bestiaryCfg(cfg).style || {}) });
 
 // ---- 菁英怪（地圖 BOSS）：遊戲裡是拿原本的怪物加強出來的，圖鑑裡當成另一隻（key＝原本的 id + ':elite'，接在原本那隻後面）----
-// 新增菁英怪時在這裡加一行：of＝拿哪一隻怪物加強、def＝那隻菁英怪的設定（名稱 name、換色 hue；圖片跟原本那隻一樣）
+// 新增菁英怪時在這裡加一行：of＝拿哪一隻怪物加強、def＝那隻菁英怪的設定（名稱 name、換色 hue；有專用的圖就寫 artDir＝圖的資料夾，檔名跟原本那隻一樣；沒寫就用原本那隻的圖）
 // 消滅次數另外算（js/bestiary.js 的 bestiaryKeyOf）
 const BESTIARY_ELITES = [
-  { of: 'bird_head', def: () => typeof ELITE_BIRD !== 'undefined' ? ELITE_BIRD : { name: '鳥頭大隊長', hue: -35 } },   // js/elite-bird-head.js（沒載入時用括號裡的）
+  { of: 'bird_head', def: () => typeof ELITE_BIRD !== 'undefined' ? ELITE_BIRD : { name: '鳥頭大隊長', artDir: 'images/monster/bird-head-elite/' } },   // js/elite-bird-head.js（沒載入時用括號裡的）
   { of: 'pearl_kid', def: () => typeof PEARL_ELDER !== 'undefined' ? PEARL_ELDER : { name: '珍珠大童' } },   // js/pearl-elder.js
   { of: 'hangi_bao', def: () => typeof CAP_KING !== 'undefined' ? CAP_KING.big : { name: '大夯吉寶' } },   // 順順宮主帽子裡的大夯吉寶（js/elite-cap-king.js）
   { of: 'loofah_lady', def: () => typeof LOOFAH_QUEEN !== 'undefined' ? LOOFAH_QUEEN : { name: '絲瓜女王' } },   // js/loofah-queen.js
@@ -115,7 +115,7 @@ function bestiaryBaseList() {
   for (const m of cat) {
     if (m.id !== 'slime') {
       out.push({ key: m.id, name: m.name, image: m.sprite, hue: null });
-      for (const el of BESTIARY_ELITES) if (el.of === m.id) { const d = el.def(); out.push({ key: m.id + ':elite', name: d.name, image: m.sprite, hue: Number.isFinite(d.hue) ? d.hue : null }); }
+      for (const el of BESTIARY_ELITES) if (el.of === m.id) { const d = el.def(); out.push({ key: m.id + ':elite', name: d.name, image: d.artDir ? d.artDir + m.sprite.split('/').pop() : m.sprite, hue: Number.isFinite(d.hue) ? d.hue : null }); }
       continue;
     }
     for (const v of variants.length ? variants : [{ id: 'normal', name: m.name }]) {   // 史萊姆：每一種變體各一隻（顏色跟遊戲一樣）
