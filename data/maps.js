@@ -139749,70 +139749,63 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwayj4gp",
         "c": 62,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 61,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 60,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 59,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 58,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 57,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 56,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 55,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 54,
-        "r": 32,
-        "layer": "object5",
-        "level": "span"
-      },
-      {
-        "id": "tile_mrt_room_pillar",
-        "c": 53,
-        "r": 32,
+        "r": 33,
         "layer": "object5",
         "level": "span"
       },
@@ -150873,6 +150866,7 @@ const BATTLE_MAPS = [
       "50,33",
       "51,33",
       "52,33",
+      "53,33",
       "54,33",
       "55,33",
       "56,33",
@@ -150920,6 +150914,16 @@ const BATTLE_MAPS = [
       "50,34",
       "51,34",
       "52,34",
+      "53,34",
+      "54,34",
+      "55,34",
+      "56,34",
+      "57,34",
+      "58,34",
+      "59,34",
+      "60,34",
+      "61,34",
+      "62,34",
       "64,34",
       "65,34",
       "66,34",
