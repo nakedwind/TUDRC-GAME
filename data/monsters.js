@@ -403,7 +403,11 @@ const MONSTERS_DEFAULT = [
       "coreSpitHp": 0.33,
       "coreOutTime": 4,
       "rushSpeedMul": 2.2,
-      "stepShake": 6
+      "stepShake": 6,
+      "coreAtkMul": 1.5,
+      "acidPoolR": 1.1,
+      "acidPoolLife": 5,
+      "acidPoolDps": 8
     },
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",

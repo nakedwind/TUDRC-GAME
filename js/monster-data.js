@@ -129,6 +129,10 @@ const MILKFISH_KING_FIELDS = [
   { key: 'coreOutTime',    label: '吐完核心喘氣幾秒',             min: .5,  max: 15,  step: .5,  def: 4 },
   { key: 'rushSpeedMul',   label: '衝回去吞核心的速度 ×',         min: .5,  max: 5,   step: .1,  def: 2.2 },
   { key: 'stepShake',      label: '腳步震動大小',                 min: 0,   max: 20,  step: .5,  def: 6 },
+  { key: 'coreAtkMul',     label: '核心在肚子裡時攻擊力 ×',       min: 1,   max: 5,   step: .05, def: 1.5 },
+  { key: 'acidPoolR',      label: '核心在肚子裡：腳下腐蝕池大小（格）', min: .3, max: 4, step: .1, def: 1.1 },
+  { key: 'acidPoolLife',   label: '腐蝕池留在地上幾秒',           min: .5,  max: 30,  step: .5,  def: 5 },
+  { key: 'acidPoolDps',    label: '腐蝕池每秒傷害（溫特、隊友）', min: 0,   max: 100, step: 1,   def: 8 },
 ];
 function validMilkfishKingCfg(raw) {
   const src = raw && typeof raw === 'object' ? raw : {}, out = {};
