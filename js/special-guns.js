@@ -17,9 +17,10 @@
      被牠打到的怪物會回手打牠 brawl 秒（自相殘殺）。大型怪物一半時間；頭目、生命體沒有效果。子彈會穿過隊員。
    - 數量存在 equipState.bullets（js/flare.js 的 bulletCount／addBullets）；每種的數值在 data/equipment.js 的 BULLETS。
 */
+// 射程、火海／著火每秒傷害、大型怪物門檻：數字在 data/bullet-tuning.js（🔫 彈藥編輯器改），這裡只是照著拿；飛行秒數、拋物線高度、飛行速度、命中半徑是手感，留在這裡
 const SPECIAL_GUN = {
-  incendiary: { range: 8, flight: [.32, .7], arc: [24, 70], fireDps: 10, burnDmg: 4 },   // 最遠幾格、飛行秒數（近～遠）、拋物線高度、火海每秒傷害、著火每秒傷害
-  tranq: { range: 9, speed: 1100, hitR: 16, bigHp: 150 },   // 最遠幾格、飛行速度、命中判定半徑、血量多少以上算大型怪物
+  incendiary: { range: BULLETS.incendiary.range, flight: [.32, .7], arc: [24, 70], fireDps: BULLETS.incendiary.fireDps, burnDmg: BULLETS.incendiary.burnDmg },   // 最遠幾格、飛行秒數（近～遠）、拋物線高度、火海每秒傷害、著火每秒傷害
+  tranq: { range: BULLETS.tranq.range, speed: 1100, hitR: 16, bigHp: BULLET_TUNING.bigHp },   // 最遠幾格、飛行速度（混亂彈也用這個）、命中判定半徑、血量多少以上算大型怪物
 };
 // 對怪物的效果倍率（data/equipment.js 的 BULLET_FOE_MUL）：只用在打怪物的數字上，打到隊員、溫特的照原本
 const foeMul = v => v * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1);

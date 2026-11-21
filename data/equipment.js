@@ -186,35 +186,38 @@ const BULLET_SET = 20;
 // 特殊子彈對「怪物」的效果倍率：傷害、睡／暈／麻痺／混亂的秒數、擊退距離、黏膠的減速、燃燒彈火海燒怪物的傷害都乘上這個數。
 // 對溫特和隊員的效果不變（麻醉彈、閃光彈讓隊員睡／暈的秒數，雷電彈電到隊員、火海燙到隊員的傷害，黏膠讓隊員變慢都照下面原本的數字）。
 // 照明彈、螢光漆彈、治療彈不受影響（治療彈打到怪物不會補兩倍）。下面 BULLETS 寫的都是「原本的數字」。
-const BULLET_FOE_MUL = 2;
+const BULLET_FOE_MUL = BULLET_TUNING.foeMul;   // 數字在 data/bullet-tuning.js（🔫 彈藥編輯器）
 // 諾亞的開發工坊「彈藥」頁：子彈一發多少經費（$）。可以自己選要買幾發。
 // 只能在後室（戰鬥區域）找到的子彈（source: 'field'）不賣；開發工坊編輯器可以改價錢（data/workshop.js 的 items['b:子彈id'].price）
 const BULLET_PRICE = { flare: 5, tranq: 15, paint: 10, split: 15, knock: 12, confuse: 15, default: 10 };
+// 子彈的名字、圖、顏色、說明、一組幾發、怎麼拿到；數值另外放在 data/bullet-tuning.js（見下面）
 const BULLETS = {
   pistol:     { name: '一般子彈', icon: '•', image: 'images/weapon/bullet/Ordinarybullets.png', color: '#ffe79a' },
-  flare:      { name: '照明彈', icon: '🔥', image: 'images/weapon/bullet/Flare.png', color: '#ff8a5c', max: BULLET_SET, gap: .8, shine: 24, source: 'supply',   // shine：落地後亮幾秒
+  flare:      { name: '照明彈', icon: '🔥', image: 'images/weapon/bullet/Flare.png', color: '#ff8a5c', max: BULLET_SET, source: 'supply',
     desc: '打出去落地後燃燒、照亮周圍一大片；照亮的地方隊員看得到怪物、也能蓋建築。每次出勤會在營地的彈藥箱放一組，打完到彈藥箱補。' },
-  incendiary: { name: '燃燒彈', icon: '🧨', image: 'images/weapon/bullet/Incendiary bomb.png', color: '#ff9a3c', max: BULLET_SET, gap: .6, r: 1.1, burn: 6, ignite: 0, source: 'field',   // r：火海半徑（格）、burn：火海燒幾秒、ignite：被炸到的怪物身上著火幾秒（0＝不著火）
+  incendiary: { name: '燃燒彈', icon: '🧨', image: 'images/weapon/bullet/Incendiary bomb.png', color: '#ff9a3c', max: BULLET_SET, source: 'field',
     desc: '拋物線飛過怪物頭上，落地燒出一片火海；會點燃油桶、油汙，燒掉怪物「生命體」碎掉的那堆。火海敵我都會燙。' },
-  tranq:      { name: '麻醉彈', icon: '💤', image: 'images/weapon/bullet/tranquilizerdarts.png', color: '#b9a7ff', max: BULLET_SET, gap: .35, sleep: 3, mist: 0, source: 'develop', cost: 120,   // sleep：睡幾秒（大型怪物一半）、mist：麻醉霧半徑（格，0＝沒有）
+  tranq:      { name: '麻醉彈', icon: '💤', image: 'images/weapon/bullet/tranquilizerdarts.png', color: '#b9a7ff', max: BULLET_SET, source: 'develop', cost: 120,
     desc: '打中的怪物睡著（不動、不攻擊）；打中暴走的隊員會睡一下，醒來恢復正常。對怪物「生命體」沒有效果。' },
-  paint:      { name: '螢光漆彈', icon: '🎨', image: 'images/weapon/bullet/Paintball.png', color: '#39ff14', max: BULLET_SET, gap: .3, source: 'develop', cost: 100,
+  paint:      { name: '螢光漆彈', icon: '🎨', image: 'images/weapon/bullet/Paintball.png', color: '#39ff14', max: BULLET_SET, source: 'develop', cost: 100,
     desc: '打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。同時只能標一隻，打新的舊的就消失；怪物死掉漆就跟著消失。' },
-  split:      { name: '分裂彈', icon: '✳️', image: 'images/weapon/bullet/SplitBullet.png', color: '#9fe3ff', max: BULLET_SET, gap: .5, pellets: 8, spread: .7, dmg: 4, range: 5, near: 1, farMul: .4, source: 'develop', cost: 150,   // 像散彈槍：pellets 一次幾顆、spread 扇形角度（弧度，越大越散）、dmg 每顆傷害、range 射程（格）；near 格以內每顆全傷害，越遠越弱，到射程盡頭只剩 farMul 倍
+  split:      { name: '分裂彈', icon: '✳️', image: 'images/weapon/bullet/SplitBullet.png', color: '#9fe3ff', max: BULLET_SET, source: 'develop', cost: 150,
     desc: '像散彈槍一樣一次噴出一大把小子彈。貼得越近，打中的顆數越多、每顆也越痛；離遠了子彈散開，只會擦到幾顆。' },
-  flash:      { name: '閃光彈', icon: '💥', image: 'images/weapon/bullet/Flashbang.png', color: '#fff6a8', max: BULLET_SET, gap: .7, r: 2.4, stun: 2.5, range: 8, source: 'field',   // r：閃光半徑（格）、stun：暈幾秒、range：最遠丟幾格
+  flash:      { name: '閃光彈', icon: '💥', image: 'images/weapon/bullet/Flashbang.png', color: '#fff6a8', max: BULLET_SET, source: 'field',
     desc: '丟出去爆出強光，範圍內的怪物暈眩幾秒。範圍內的隊員也會被閃到、暈一下。對怪物「生命體」沒有效果。' },
-  shock:      { name: '雷電彈', icon: '⚡', image: 'images/weapon/bullet/ElectronBomb.png', color: '#8fd8ff', max: BULLET_SET, gap: .5, dmg: 10, chain: 3, chainR: 3, stun: 1.2, source: 'field',   // dmg：傷害、chain：最多再跳幾隻、chainR：跳躍距離（格）、stun：麻痺幾秒
+  shock:      { name: '雷電彈', icon: '⚡', image: 'images/weapon/bullet/ElectronBomb.png', color: '#8fd8ff', max: BULLET_SET, source: 'field',
     desc: '打中的怪物觸電受傷、短暫麻痺，電流再跳到附近幾隻怪物。旁邊有隊員也會被電到。' },
-  heal:       { name: '治療彈', icon: '💚', image: 'images/weapon/bullet/TreatmentBullet.png', color: '#7ee0a0', max: BULLET_SET, gap: .8, heal: 40, source: 'field',   // heal：補多少 HP
+  heal:       { name: '治療彈', icon: '💚', image: 'images/weapon/bullet/TreatmentBullet.png', color: '#7ee0a0', max: BULLET_SET, source: 'field',
     desc: '打中誰就補誰的 HP：瞄準隊員可以幫他補血；打歪打到怪物，也會幫怪物補血。' },
-  sticky:     { name: '黏著彈', icon: '🟢', image: 'images/weapon/bullet/StickyBullet.png', color: '#7ed957', max: BULLET_SET, gap: .6, r: 1.3, stick: 30, slow: .2, range: 8, speed: 700, source: 'field',   // r：黏膠半徑（格）、stick：黏膠留在地上幾秒、slow：踩到時速度剩幾成、range：最遠幾格、speed：飛行速度
+  sticky:     { name: '黏著彈', icon: '🟢', image: 'images/weapon/bullet/StickyBullet.png', color: '#7ed957', max: BULLET_SET, source: 'field',
     desc: '打出去落地噴出一灘黏膠（打中怪物就黏在牠腳下），黏膠會留在地上 30 秒。踩進去的怪物會變很慢；溫特和隊員踩到也一樣會被黏住，小心打的位置。飛在空中、鑽在地底的怪物不受影響。' },
-  knock:      { name: '擊退彈', icon: '💨', image: 'images/weapon/bullet/KnockbackBullet.png', color: '#6f9bff', max: BULLET_SET, gap: .5, dmg: 6, push: 2.2, slide: .2, wallStun: 1.8, wallDmg: 8, range: 9, source: 'develop', cost: 130,   // dmg：傷害、push：推幾格、slide：推出去花幾秒、wallStun：撞牆暈幾秒（大型怪物一半）、wallDmg：撞牆再扣多少、range：射程（格）
+  knock:      { name: '擊退彈', icon: '💨', image: 'images/weapon/bullet/KnockbackBullet.png', color: '#6f9bff', max: BULLET_SET, source: 'develop', cost: 130,
     desc: '打中的怪物被往後推開；推去撞到牆壁或建築會暈一下、再受一點傷。很重的怪物推不動，在空中飛的人面蝶推得開但不會撞牆。' },
-  confuse:    { name: '混亂彈', icon: '🌀', image: 'images/weapon/bullet/ConfusionBullet.png', color: '#c98bff', max: BULLET_SET, gap: .5, confuse: 6, brawl: 3, range: 9, source: 'develop', cost: 150,   // confuse：混亂幾秒（大型怪物一半）、brawl：被混亂的怪物打到的那隻會回手打牠幾秒、range：射程（格）
+  confuse:    { name: '混亂彈', icon: '🌀', image: 'images/weapon/bullet/ConfusionBullet.png', color: '#c98bff', max: BULLET_SET, source: 'develop', cost: 150,
     desc: '打中的怪物陷入混亂幾秒：不理溫特和隊員，跑去攻擊身邊的其他怪物；被打的怪物也會回頭打牠，讓牠們自相殘殺。大型怪物混亂的時間減半；頭目、怪物「生命體」沒有效果。打不中隊員（會穿過去）。' },
 };
+// 每種子彈的數值（射擊間隔、傷害、範圍、秒數…）在 data/bullet-tuning.js（🔫 彈藥編輯器改），這裡蓋進上面的 BULLETS
+for (const id in BULLET_TUNING.bullets) if (BULLETS[id]) Object.assign(BULLETS[id], BULLET_TUNING.bullets[id]);
 // 在置物箱裡找到特殊子彈（只有後室才找得到的 field 子彈）：ammo 找到子彈的機率；kinds 會找到哪幾種；ammoFind 一次給幾發；start 第一次拿到（設定好的置物櫃）給幾發
 // 沒指定內容物的彈藥箱（js/flare.js）：empty＝整箱是空的機率；ammo＝開出特殊子彈的機率（比置物櫃的 GUN_FINDS.ammo 高）；ammoCount＝開到特殊子彈時給幾發（一組＝BULLET_SET 發；置物櫃照下面 GUN_FINDS.ammoFind）；其他物品跟置物櫃一樣照 ITEM_DROPS
 const AMMO_CRATE_LOOT = { empty: .05, ammo: .8, ammoCount: BULLET_SET };
