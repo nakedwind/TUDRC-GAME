@@ -11,7 +11,8 @@
        地雷 → 落地爆炸；油桶、油箱、瓦斯爐 → 落地爆炸（跟被溫特打爆一樣，會起火）；郵筒 → 撞破漏出一灘油；
        露營燈 → 燒一小團火。地雷以外的東西落地都會碎成好幾塊往外飛（碎掉動畫）。
        （在肚子裡不會爆炸）
-   ・吃隊友：最多同時含 maxPrey 個（嘴裡露出腳），含 holdTime 秒後瞄準別的隊友或溫特吐出來：
+   ・吃隊友：最多同時含 maxPrey 個（整個人看不見，肚子那裡冒出他說的話，每 preyTalkEvery 秒一句），含 holdTime 秒後瞄準別的隊友或溫特吐出來；
+       含著隊友時附近沒人，就主動走去找人準備吐。追隊友／建築走不過去（身體太寬）時，stuckGive 秒後先放棄，去做別的事：
        隊友飛到地上受傷、躺著暈眩（借用 js/vines.js 被藤蔓丟下來的動畫），落點旁邊的人也會被砸到。
    ・吐核心（表演）：血量每掉 coreSpitHp，就把核心吐到地上，喘 coreOutTime 秒後急著衝回去吞回來；核心在地上時打得到。
    ・倒下：核心掉在原地，嘴裡的隊友獲救（直接放出來）。
@@ -40,6 +41,9 @@ const MILKFISH_KING_FX = {
   coreSpitDist: [3, 4.5], // 核心吐多遠（格）
   mateArcTime: .9,        // 隊友在空中飛幾秒
   wanderRadius: 3,        // 閒晃範圍（格，以原位為中心）
+  stuckGive: 2.5,         // 走向隊友／建築／溫特，幾秒都沒更靠近就放棄（身體太寬擠不過去時才不會卡在原地）
+  stuckSkip: 6,           // 放棄後幾秒內不再去追那個目標
+  preyTalkEvery: 3.5,     // 被吞進肚子的隊友每隔幾秒在肚子那裡冒一句話（對話編輯器「被虱目魚小子吞掉」那格的台詞）
   gaitMin: .3,            // 落腳那一刻的速度只剩幾成（越小越「一頓一頓」）；平均速度還是怪物編輯器的「速度」
   bobHeight: 5,           // 走路時身體上下起伏多高（像素）
   shards: { cols: 3, rows: 3, gravity: 900, life: 1.2 },   // 吐出來的建築碎掉：切成幾塊、往下掉多快、碎片留幾秒
@@ -113,6 +117,7 @@ function mkEdibleItem(e, o) {
 }
 const mkItemCenter = o => ({ x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + (o.h || 1) - .5) * CELL });
 function mkEdibleMate(e, t) {
+  if (mkSkipped(e, t)) return false;   // 剛剛走不過去、先放棄的隊友
   return t.hp > 0 && !t.berserk && !t.eatenBy && !t.vineCap && !(t.vineDazeT > 0) && !t.grabbed && !t.mrtRide && enemyNoticesSentry(e, t);
 }
 // 可以瞄準吐東西的人：溫特、看得到的隊友（不包括嘴裡的、被丟在空中的）
@@ -302,16 +307,18 @@ function mkHunt(e, dt) {
     mk.mate = mate;
     if (mate) {
       if (mkDist(mate, e) <= F.eatReach) { mk.aim = mate; e.faceRight = mate.x > e.x; mkSet(e, 'gulp', F.gulpWindup); return; }
-      mkGo(e, mate, dt, 'mk-mate');
+      if (mkStuck(e, mate, dt)) mk.mate = null;   // 走不過去：先放棄這個隊友，下一幀找別的事做
+      else mkGo(e, mate, dt, 'mk-mate');
       return;
     }
   }
   // 5. 附近有建築：去吃
-  const item = mk.item && mkEdibleItem(e, mk.item) ? mk.item : mkPickItem(e);
+  const item = mk.item && mkEdibleItem(e, mk.item) && !mkSkipped(e, mk.item) ? mk.item : mkPickItem(e);
   mk.item = item;
   if (item) {
     const ic = mkItemCenter(item);
     if (mkDist(ic, e) <= F.itemReach * CELL + ((item.w || 1) - 1) * CELL * .5) { mkStartChew(e, item); return; }
+    if (mkStuck(e, item, dt)) { mk.item = null; return; }   // 走不過去：先放棄這個建築
     const nav = enemyNavigate(e, item.c, item.r + (item.h || 1) - 1, dt, 'mk-item:' + item.c + ',' + item.r, true);
     if (nav.blocker) mkBlocked(e, nav.blocker, dt);
     else if (nav.reached) moveEnemyToward(e, ic, dt);
@@ -319,8 +326,40 @@ function mkHunt(e, dt) {
   }
   // 6. 溫特看得到：走過去
   if (p && p.hp > 0 && sameFloor(e, p) && mkDist(p, e) <= C.noticeRange * 1.5 * CELL && hasLineOfSight(e.x, e.y, p.x, p.y)) { mkGo(e, p, dt, 'mk-player'); return; }
+  // 6b. 嘴裡含著隊友、附近又沒人：主動去找人準備吐（以前會在原位慢慢晃、停很久，看起來像卡住）
+  if (mk.prey.length && mkSeekSpitTarget(e, dt)) return;
   // 7. 沒事做：在原位附近晃
   mkWander(e, dt);
+}
+// ---- 走不過去就放棄：一直沒有更靠近目標（例如身體太寬擠不進窄道）超過 stuckGive 秒，就先不理牠 stuckSkip 秒，去做別的事 ----
+const mkClock = () => (G && G.battleTime) || 0;
+function mkSkipped(e, t) { const sk = e.mk && e.mk.skip; return !!(sk && sk.has(t) && sk.get(t) > mkClock()); }
+function mkStuck(e, t, dt) {
+  const mk = e.mk, F = MILKFISH_KING_FX, d = mkDist(t.x != null ? t : mkItemCenter(t), e);
+  if (!mk.stuck || mk.stuck.t !== t) mk.stuck = { t, best: d, time: 0 };
+  if (d < mk.stuck.best - 6) { mk.stuck.best = d; mk.stuck.time = 0; return false; }
+  mk.stuck.time += dt;
+  if (mk.stuck.time < F.stuckGive) return false;
+  (mk.skip = mk.skip || new Map()).set(t, mkClock() + F.stuckSkip);
+  mk.stuck = null;
+  return true;
+}
+// 嘴裡含著隊友時要找人吐：離原位守備範圍內最近的溫特或隊友（看不到也走過去，找到看得到、在射程內的位置就停下來）
+function mkSeekSpitTarget(e, dt) {
+  const C = mkCfg(e), mk = e.mk, p = G.player, cands = [];
+  if (p && p.hp > 0 && sameFloor(e, p)) cands.push(p);
+  for (const t of G.towers) if (t.hp > 0 && !t.eatenBy && !t.vineCap && sameFloor(e, t)) cands.push(t);
+  let best = null, bestD = Infinity;
+  for (const t of cands) {
+    if (mkSkipped(e, t) || mkDist(t, mk.home) > C.leash * CELL) continue;
+    const d = mkDist(t, e);
+    if (d < bestD) { best = t; bestD = d; }
+  }
+  if (!best) return false;
+  if (bestD <= C.spitRange * CELL * .6 && hasLineOfSight(e.x, e.y, best.x, best.y)) { e.faceRight = best.x > e.x; return true; }   // 夠近了：站著等吐
+  if (mkStuck(e, best, dt)) return false;
+  mkGo(e, best, dt, 'mk-seek');
+  return true;
 }
 function mkGo(e, t, dt, key) {
   const [gc, gr] = cellAt(t.x, t.y);
@@ -337,7 +376,7 @@ function mkPickItem(e) {
   const C = mkCfg(e), mk = e.mk;
   let best = null, bestD = C.eatSense * CELL;
   for (const o of G.obstacles) {
-    if (!mkEdibleItem(e, o)) continue;
+    if (!mkEdibleItem(e, o) || mkSkipped(e, o)) continue;
     const c = mkItemCenter(o), d = mkDist(c, e);
     if (d < bestD && mkDist(c, mk.home) <= C.leash * CELL) { best = o; bestD = d; }
   }
@@ -509,7 +548,11 @@ function updateMilkfishKing(dt) {
   for (const e of [...mkKings()]) {
     const mk = e.mk;
     if (!mkAlive(e)) { mkDown(e); continue; }
-    for (const pr of mk.prey) { pr.t.x = e.x; pr.t.y = e.y; pr.t.moving = false; }
+    for (const pr of mk.prey) {
+      pr.t.x = e.x; pr.t.y = e.y; pr.t.moving = false;
+      pr.talkT = (pr.talkT ?? MILKFISH_KING_FX.preyTalkEvery) - dt;   // 隔一陣子在肚子裡再冒一句（剛吞下去那句由 mkGulpMate 說）
+      if (pr.talkT <= 0) { pr.talkT = MILKFISH_KING_FX.preyTalkEvery; if (!(pr.t.say && pr.t.say.text) && typeof mateHurtSay === 'function') mateHurtSay(pr.t, 'swallowed'); }
+    }
     mk.prey = mk.prey.filter(pr => pr.t.eatenBy === e && G.towers.includes(pr.t));
     for (const t of G.towers) if (t.eatenBy === e && !mk.prey.some(pr => pr.t === t)) mfRelease(t, true);   // 保險：標記被吞、卻不在嘴裡名單上的人，直接放出來（不會永遠卡住）
     if (mk.coreIn && mk.core) {
@@ -693,12 +736,7 @@ function drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, frameImg) {
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
-  // 嘴裡的隊友：一個在中間，兩個就左右分開
-  const n = mk.prey.length;
-  mk.prey.forEach((pr, i) => {
-    const off = n > 1 ? (i - (n - 1) / 2) * dw * .14 : 0;
-    if (typeof drawMilkfishPrey === 'function') drawMilkfishPrey(ctx, { mf: { prey: pr.t }, forceFrame: e.forceFrame, drawHeight: e.drawHeight, drawWidth: e.drawWidth }, dx + off, dy, dw, dh, frameImg);
-  });
+  // 吞進去的隊友：整個人看不見（不畫嘴裡的腳），說的話畫在肚子上（js/render.js 的 drawTower 呼叫 milkfishKingBellySpot）
   mkDrawCrown(ctx, dx, dy, dw, !!(e.forceFrame && /attack/.test(e.forceFrame)));
 }
 // 王冠：畫在頭頂上（像素風的小金冠）；raised＝張嘴攻擊圖（頭比較高）；dark＝倒下時變黑的程度 0～1
@@ -717,6 +755,14 @@ function mkDrawCrown(ctx, dx, dy, dw, raised, dark = 0) {
 }
 // 倒下的屍體上的王冠（js/bird-head.js 的巨物倒下呼叫；座標已經轉到屍體腳底）
 function milkfishKingCorpseCrown(ctx, c, dark) { mkDrawCrown(ctx, -c.w / 2, -c.h, c.w, false, dark); }
+// 被吞進肚子的隊友說話泡泡要畫在哪裡：肚子的位置；吞了兩個就左右分開（js/render.js 的 drawTower 呼叫）
+function milkfishKingBellySpot(t) {
+  const e = t.eatenBy, mk = e && e.mk;
+  if (!mk) return null;
+  const n = mk.prey.length, i = Math.max(0, mk.prey.findIndex(pr => pr.t === t));
+  const off = n > 1 ? (i - (n - 1) / 2) * e.drawWidth * .32 : 0;
+  return { x: e.x + off, y: e.y - (e.drawHeight || 264) * .38 };
+}
 function mkItemImage(o) {
   if (o.mapTileId && typeof mapTileById === 'function' && typeof tileImage === 'function') { const img = tileImage(mapTileById(o.mapTileId)); if (img) return img; }
   const set = typeof obstacleImgs !== 'undefined' && obstacleImgs[o.type];

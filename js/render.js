@@ -189,7 +189,8 @@ function drawCharacterShadow(actor) {
 function drawTower(t) {
   if (t.rkHeld) return;   // 被老鼠王的手抓住、拖進地底：看不到（js/rat-king.js）
   if (t.eatenBy) {   // 被虱目魚小子吃掉：只畫魚嘴裡露出的腳（js/milkfish-kid.js）；說的話畫在魚頭上
-    if (t.say && t.say.text) queueTowerBubble(t, t.eatenBy.x, t.eatenBy.y - (t.eatenBy.drawHeight || 120) - 6, t.say.text, t.say.col || BUBBLE_COLORS[t.type]);
+    const belly = t.eatenBy.mk && typeof milkfishKingBellySpot === 'function' ? milkfishKingBellySpot(t) : null;   // 被虱目魚王吞掉：泡泡畫在肚子上（js/milkfish-king.js）
+    if (t.say && t.say.text) queueTowerBubble(t, belly ? belly.x : t.eatenBy.x, belly ? belly.y : t.eatenBy.y - (t.eatenBy.drawHeight || 120) - 6, t.say.text, t.say.col || BUBBLE_COLORS[t.type]);
     return;
   }
   drawCharacterShadow(t);
