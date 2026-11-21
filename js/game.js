@@ -2460,14 +2460,14 @@ function update(dt) {
       if (!t.resting) { t.resting = true; sendSentryRest(t); }
     } else if (t.taint <= 80) t.resting = false;
     // 應變中心（安全區）裡嚮導不幫人補血、疏導：負荷高的哨兵要叫去 2F疏導室，由溫特（C）或亞許疏導（js/vitals.js）；受傷的去醫院休養
-    if (spec.aura && !t.berserk && !t.gsCast && !inHospital && !MAP_SAFE) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
+    if (spec.aura && !t.berserk && !t.gsCast && !inHospital && !MAP_SAFE && !(typeof mrtSeparated === 'function' && mrtSeparated(t))) {   // 坐在溫特沒坐的捷運上被載走：不疏導。嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
       t.auraCd = Math.max(0, (t.auraCd || 0) - dt);
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
         const soothed = [];
         let usedSP = false, usedMedkit = false;   // 同一次範圍疏導只扣一次 SP；治療消耗一個急救包
         for (const o of G.towers) {
-          if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
+          if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL || (typeof mrtSeparated === 'function' && mrtSeparated(o))) continue;   // 被捷運載走的人補不到
           // 疏導消耗 SP；補血消耗急救包，兩項資源各自檢查。
           const needSoothe = !TYPES[o.type].guide && (o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1));
           const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1) && !(typeof hospitalResting === 'function' && hospitalResting(o));   // 住院的人不靠嚮導補血

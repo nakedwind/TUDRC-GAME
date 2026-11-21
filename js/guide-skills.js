@@ -7,8 +7,8 @@
 
 const GUIDE_COMBAT_RANGE = 8;   // 'combat'：嚮導 8 格內有怪物才算戰鬥中
 
-// 場上活著的隊友（包含嚮導自己；倒下、被吃掉的不算）
-const guideSkillAllies = () => ((typeof G !== 'undefined' && G && G.towers) || []).filter(o => o.hp > 0 && !o.eatenBy);
+// 場上活著的隊友（包含嚮導自己；倒下、被吃掉、坐在溫特沒坐的捷運上被載走的不算）
+const guideSkillAllies = () => ((typeof G !== 'undefined' && G && G.towers) || []).filter(o => o.hp > 0 && !o.eatenBy && !(typeof mrtSeparated === 'function' && mrtSeparated(o)));
 
 // 這招現在需不需要放（條件成立）
 function guideSkillWanted(t, s) {
@@ -60,7 +60,7 @@ const guideBuffText = s => '全隊' + Object.entries(s.buff).map(([k, v]) => GUI
 const guideActiveOf = (type, id) => (typeof skillNodeOf === 'function' && (skillNodeOf(type, id) || {}).active) || null;
 function updateGuideSkills(t, dt) {
   const list = { ult: guideActiveOf(t.type, 'ult'), 'a-1': guideActiveOf(t.type, 'a-1'), 'b-1': guideActiveOf(t.type, 'b-1') };
-  if (!isGuideTree(t.type) || t.hp <= 0 || t.berserk || (typeof MAP_SAFE !== 'undefined' && MAP_SAFE)) { t.gsCast = null; return; }
+  if (!isGuideTree(t.type) || t.hp <= 0 || t.berserk || (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) || (typeof mrtSeparated === 'function' && mrtSeparated(t))) { t.gsCast = null; return; }   // 坐在溫特沒坐的捷運上被載走：不放技能
   t.gsCd = t.gsCd || {};
   for (const id of Object.keys(t.gsCd)) t.gsCd[id] = Math.max(0, t.gsCd[id] - dt);
   // 詠唱中：時間到才放；SP 在這時才扣，不夠就作廢
