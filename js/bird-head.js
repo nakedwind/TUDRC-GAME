@@ -305,23 +305,70 @@ function fallDirection(e) {
   const blocked = d => { for (let k = 10; k <= len; k += 10) if (enemyBlocked(e.x + d * k, e.y)) return true; return false; };
   return onFloorDo(e, () => blocked(dir) && !blocked(-dir) ? -dir : dir);   // 照倒下的那一層判斷牆
 }
-function pushFallCorpse(e) {
-  const img = monsterImage(e.lastFrameFile || e.sprite);
+// giant：BOSS（鳥頭大隊長、虱目魚王）用「巨物倒下」：先站著左右搖晃、慢慢變黑，再重重倒下（地面大震動、煙塵）
+// extra：倒下時身上還要畫的東西（例如虱目魚王的王冠），用 (ctx, c, dark) 呼叫，dark＝變黑的程度 0～1
+function pushFallCorpse(e, opt = {}) {
+  const img = monsterImage(e.lastFrameFile || e.sprite), giant = !!opt.giant, G2 = GIANT_FALL;
   (G.fxCorpses = G.fxCorpses || []).push({
     floor: actorFloor(e),   // 死在幾樓（陸橋上的屍體才不會被橋面蓋住）
     fall: true, img, x: e.x, y: e.y, z: 0, w: e.drawWidth || 60, h: e.drawHeight || 80,
-    t: 0, life: 2.6, dir: fallDirection(e), flip: !!e.lastFrameFlip,
+    t: 0, life: giant ? G2.sway + G2.fall + G2.lie + G2.fade : 2.6, dir: fallDirection(e), flip: !!e.lastFrameFlip,
+    giant, extra: opt.extra || null, stumbles: 0,
   });
+  if (giant) {   // 斷氣的瞬間：一聲悶響、輕輕震一下
+    if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 4, .04);
+    if (typeof sfxAt === 'function') sfxAt('eliteStep', e.x, e.y, 1, 'giant-fall-start');
+  }
 }
+// 巨物倒下的時間軸（秒）與力道
+const GIANT_FALL = {
+  sway: 1.2,        // 站著左右搖晃多久（搖 3 下）
+  swayAmp: .1,      // 搖晃角度（弧度，越後面晃越大）
+  swayTimes: 3,
+  fall: .8,         // 倒下花多久（越倒越快）
+  lie: 3,           // 倒在地上躺多久
+  fade: 1,          // 最後淡出多久
+  shake: 16,        // 倒地時畫面震動
+  shakeRange: 22,   // 溫特在幾格內感覺得到倒地的震動（越近越大）
+  dust: { rocks: 14, speed: [60, 170], up: [120, 240], dust: 10, dustRise: 3, size: 1 },   // 倒地揚起的煙塵、碎石（js/gourd-monkey.js 的 rockBurstFx）
+};
+const giantFallLand = () => GIANT_FALL.sway + GIANT_FALL.fall;   // 幾秒時碰到地面
 // 由 combat-feel.js 的屍體更新呼叫：倒地瞬間揚起一圈灰塵
 function updateFallCorpse(c) {
+  if (c.giant) { updateGiantFall(c); return; }
   if (!c.landed && c.t >= .45) {
     c.landed = true;
     G.effects.push({ ring: true, x: c.x + c.dir * c.h * .45, y: c.y + 10, r: 6, r2: 30, life: .3, life0: .3, color: '#b9b2a2' });
   }
 }
+function updateGiantFall(c) {
+  const F = GIANT_FALL, land = giantFallLand();
+  // 搖晃時每晃到一邊，腳下踉蹌一下（小震動、揚灰）
+  const step = Math.floor(c.t / (F.sway / (F.swayTimes * 2)));
+  if (c.t < F.sway && step > c.stumbles) {
+    c.stumbles = step;
+    if (typeof nearbyImpact === 'function') nearbyImpact(c.x, c.y, 2 + step, 0);
+    for (let i = 0; i < 3; i++) G.effects.push({ particle: true, kind: 'spark', x: c.x + (Math.random() * 2 - 1) * c.w * .25, y: c.y + 12, vx: (Math.random() * 2 - 1) * 60, vy: -15 - Math.random() * 25, r: 2 + Math.random() * 2, life: .35, life0: .35, color: '#a9a292' });
+  }
+  if (!c.landed && c.t >= land) {   // 重重倒在地上：大震動、頓一下、一長條煙塵和碎石、兩圈衝擊波
+    c.landed = true;
+    const p = G.player;
+    if (p) { const d = Math.hypot(p.x - c.x, p.y - c.y) / CELL, k = 1 - d / F.shakeRange; if (d < F.shakeRange) addShake(F.shake * (.25 + .75 * k * k)); }
+    if (typeof addHitstop === 'function') addHitstop(.08);
+    const len = c.h * .9;
+    for (let i = 0; i < 4; i++) {   // 沿著倒下的身體揚起煙塵
+      const x = c.x + c.dir * len * (.15 + .25 * i), y = c.y + 12;
+      if (typeof rockBurstFx === 'function') rockBurstFx(x, y, { ...F.dust, rocks: Math.round(F.dust.rocks / 2) });
+      G.effects.push({ ring: true, x, y, r: 8, r2: c.w * .35, life: .45, life0: .45, color: '#b9b2a2' });
+    }
+    G.effects.push({ ring: true, x: c.x + c.dir * len * .5, y: c.y + 12, r: 10, r2: len * 1.1, life: .6, life0: .6, color: '#d9d2c0' });
+    (G.eliteCracks = G.eliteCracks || []).push({ x: c.x + c.dir * len * .55, y: c.y + 12, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .3, flip: c.dir < 0 });   // 地上撞出裂痕（js/elite-bird-head.js 的 drawEliteGround）
+    if (typeof sfxAt === 'function') { sfxAt('eliteStep', c.x, c.y, 1.6, 'giant-fall-land'); sfxAt('knock2', c.x, c.y, 1.3, 'giant-fall-land2'); }
+  }
+}
 // 由 combat-feel.js 的屍體繪製呼叫
 function drawFallCorpse(ctx, c) {
+  if (c.giant) { drawGiantFall(ctx, c); return; }
   const p = Math.min(1, c.t / .45), ease = p * p;   // 像真的倒下：一開始慢、越倒越快
   const bounce = p >= 1 ? Math.max(0, .06 * Math.sin((c.t - .45) * 22) * Math.exp(-(c.t - .45) * 9)) : 0;   // 落地輕彈
   const ang = c.dir * (Math.PI / 2) * (ease - bounce);
@@ -333,4 +380,30 @@ function drawFallCorpse(ctx, c) {
     const black = flashSprite(c.img, '#07090c');
     if (black) { ctx.globalAlpha *= Math.min(.92, c.t / .9); ctx.drawImage(black, -c.w / 2, -c.h, c.w, c.h); }   // 慢慢變黑
   }
+}
+// 巨物倒下：搖晃（越晃越大、全身發抖）→ 越倒越快 → 落地彈兩下躺平；從搖晃開始慢慢變黑
+function drawGiantFall(ctx, c) {
+  const F = GIANT_FALL, land = giantFallLand();
+  let ang;
+  if (c.t < F.sway) {
+    const k = c.t / F.sway;
+    ang = Math.sin(k * Math.PI * 2 * F.swayTimes) * F.swayAmp * (.35 + .65 * k);
+    ctx.translate((Math.random() * 2 - 1) * 1.5, 0);   // 全身發抖
+  } else if (c.t < land) {
+    const p = (c.t - F.sway) / F.fall;
+    ang = c.dir * (Math.PI / 2) * Math.pow(p, 2.3);
+  } else {
+    const u = c.t - land, bounce = Math.max(0, .09 * Math.sin(u * 16) * Math.exp(-u * 6));   // 落地彈兩下
+    ang = c.dir * (Math.PI / 2) * (1 - bounce);
+  }
+  ctx.translate(c.x, c.y + 13); ctx.rotate(ang);
+  if (c.flip) ctx.scale(-1, 1);
+  ctx.globalAlpha = Math.min(1, c.life / F.fade);   // 最後淡出
+  const dark = Math.min(.92, c.t / land);   // 倒地那一刻剛好全黑
+  if (c.img.width) {
+    ctx.drawImage(c.img, -c.w / 2, -c.h, c.w, c.h);
+    const black = flashSprite(c.img, '#07090c');
+    if (black) { const a = ctx.globalAlpha; ctx.globalAlpha = a * dark; ctx.drawImage(black, -c.w / 2, -c.h, c.w, c.h); ctx.globalAlpha = a; }
+  }
+  if (c.extra) c.extra(ctx, c, dark);
 }

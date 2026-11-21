@@ -699,10 +699,14 @@ function drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, frameImg) {
     const off = n > 1 ? (i - (n - 1) / 2) * dw * .14 : 0;
     if (typeof drawMilkfishPrey === 'function') drawMilkfishPrey(ctx, { mf: { prey: pr.t }, forceFrame: e.forceFrame, drawHeight: e.drawHeight, drawWidth: e.drawWidth }, dx + off, dy, dw, dh, frameImg);
   });
-  // 王冠：畫在頭頂上（像素風的小金冠）
-  const s = Math.max(2, Math.round(dw / 60)), cw = 9 * s, cx = Math.round(dx + dw / 2 - cw / 2), cy = Math.round(dy - 5 * s + (e.forceFrame && /attack/.test(e.forceFrame) ? 0 : 2 * s));
+  mkDrawCrown(ctx, dx, dy, dw, !!(e.forceFrame && /attack/.test(e.forceFrame)));
+}
+// 王冠：畫在頭頂上（像素風的小金冠）；raised＝張嘴攻擊圖（頭比較高）；dark＝倒下時變黑的程度 0～1
+function mkDrawCrown(ctx, dx, dy, dw, raised, dark = 0) {
+  const s = Math.max(2, Math.round(dw / 60)), cw = 9 * s, cx = Math.round(dx + dw / 2 - cw / 2), cy = Math.round(dy - 5 * s + (raised ? 0 : 2 * s));
   const rows = ['1...1...1', '11.111.11', '111111111', '121212121', '111111111'];
   ctx.save();
+  if (dark > 0) ctx.filter = 'brightness(' + Math.max(0, 1 - dark).toFixed(2) + ')';
   for (let r = 0; r < rows.length; r++) for (let c = 0; c < 9; c++) {
     const ch = rows[r][c]; if (ch === '.') continue;
     ctx.fillStyle = ch === '2' ? '#e8423f' : r === 0 ? '#fff1a8' : '#f2c230';
@@ -711,6 +715,8 @@ function drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, frameImg) {
   ctx.fillStyle = '#9a6a10'; ctx.fillRect(cx, cy + 5 * s, cw, s);
   ctx.restore();
 }
+// 倒下的屍體上的王冠（js/bird-head.js 的巨物倒下呼叫；座標已經轉到屍體腳底）
+function milkfishKingCorpseCrown(ctx, c, dark) { mkDrawCrown(ctx, -c.w / 2, -c.h, c.w, false, dark); }
 function mkItemImage(o) {
   if (o.mapTileId && typeof mapTileById === 'function' && typeof tileImage === 'function') { const img = tileImage(mapTileById(o.mapTileId)); if (img) return img; }
   const set = typeof obstacleImgs !== 'undefined' && obstacleImgs[o.type];

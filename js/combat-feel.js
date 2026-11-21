@@ -273,7 +273,7 @@ function onEnemyDeath(e) {
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.elite && typeof eliteBirdDown === 'function') eliteBirdDown(e);   // 菁英鳥頭人：橫幅提示核心護盾消失（js/elite-bird-head.js）
   if (e.capKing && typeof capKingBigDown === 'function') capKingBigDown(e);   // 大夯吉寶：橫幅提示核心護盾消失（js/elite-cap-king.js）
-  if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
+  if (e.behavior === 'charger') { pushFallCorpse(e, { giant: !!e.elite }); return; }   // 鳥頭大隊長（elite）：巨物倒下   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
   if (e.mothBoss && typeof mothBossDown === 'function') mothBossDown(e);   // 人面蝶后：抱著的核心掉在原地（js/moth-boss.js）
   if (e.behavior === 'moth' && typeof mothDeathBurst === 'function') { mothDeathBurst(e); return; }   // 人面蝶：炸出一大團鱗粉，從空中掉下來化成灰（js/human-face-butterfly.js）
   if (e.pearlBoss && typeof pearlBossDown === 'function') pearlBossDown(e);   // 珍珠大童：核心掉在原地、大珍珠碎掉（js/pearl-elder.js）
@@ -283,9 +283,10 @@ function onEnemyDeath(e) {
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童
   if (e.behavior === 'gourd') { gourdDeathCorpse(e); return; }   // 葫蘆猴：不倒下，原地閉眼變黑、碎成灰燼飄散（跟珍珠小童一樣；js/gourd-monkey.js）   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
-  if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall') {   // 虱目魚小子：倒下變黑（跟鳥頭人一樣）
+  if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall' || e.behavior === 'milkfishKing') {   // 虱目魚小子：倒下變黑（跟鳥頭人一樣）；虱目魚王：巨物倒下（王冠跟著倒）
     if (e.forceAttack && e.frames) { e.lastFrameFile = e.frames.front; e.lastFrameFlip = false; }   // 死在撲咬的瞬間：攻擊圖尺寸不同，改用站姿圖倒下才不會變形
-    pushFallCorpse(e); return;
+    const king = e.behavior === 'milkfishKing';
+    pushFallCorpse(e, king ? { giant: true, extra: typeof milkfishKingCorpseCrown === 'function' ? milkfishKingCorpseCrown : null } : {}); return;
   }
   if (e.behavior === 'healer') { if (typeof bananaKingDeath === 'function') bananaKingDeath(e); pushFallCorpse(e); return; }   // 金蕉王：倒下、掉香蕉（js/golden-banana-king.js）
   if (e.behavior === 'boomerang' || e.behavior === 'fishhead' || e.behavior === 'vine' || e.behavior === 'clownfish') { pushFallCorpse(e); return; }   // 比基尼小丑魚也跟絲瓜小姐一樣倒下（js/clownfish.js）   // 魚頭君也倒下   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
