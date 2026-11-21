@@ -6,7 +6,7 @@
        藍＝睡眠：溫特、隊員睡 20 秒，不能動、不能攻擊；被打到就會醒（MOTH.sleep）
    ・吸滿才發作：站在霧裡頭上會出現那種顏色的量表，吸滿才中招；離開霧量表會慢慢退掉。
    ・粉塵爆炸：鱗粉可燃。火（照明彈、火海、著火的怪物、希奧妮／安柏打中的地方、油桶爆炸、地雷、燃燒彈）碰到鱗粉霧就會炸開，
-     相連的霧一團接一團連鎖引爆，範圍內的人、怪物（包括人面蝶自己）、油桶都會被炸到。人面蝶身上著火時撒不出粉。
+     相連的霧一團接一團連鎖引爆，範圍內的人、怪物（包括人面蝶自己，但人面蝶只受 blast.mothMul＝3 成傷害）、油桶都會被炸到。人面蝶身上著火時撒不出粉。
    ・趨光：附近有露營燈、探照燈就會飛過去停在燈上休息（停著的時候不撒粉），休息完那盞燈一陣子內不會再吸引牠。
    ・死掉時炸出一大團鱗粉。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值都在下面的 MOTH。
@@ -38,7 +38,7 @@ const MOTH = {
   sleep: { time: 20 },                       // 睡眠：睡幾秒（被打到就醒）
   meleeMiss: .95,       // 近戰隊員打牠打不到的機率（飛得高，只有 5% 打得到）
   // ---- 粉塵爆炸 ----
-  blast: { radius: 1.4, enemy: 45, sentry: 14, player: 12, chainDelay: .07 },   // 半徑（格）、對怪物／隊員／溫特的傷害、連鎖引爆的間隔（秒）
+  blast: { radius: 1.4, enemy: 45, sentry: 14, player: 12, chainDelay: .07, mothMul: .3 },   // 半徑（格）、對怪物／隊員／溫特的傷害、連鎖引爆的間隔（秒）、人面蝶（一般和人面蝶后）被炸到的傷害倍率
   blastMin: 2,          // 連在一起的霧至少幾團，碰到火才會爆炸（只有一團不會炸）
   bigBlastAt: 3,        // 連在一起的霧有幾團以上算大爆炸
   bigBlastMul: 1.6,     // 大爆炸的傷害倍率
@@ -324,7 +324,7 @@ function mothBlastNow(c) {
     if (e.dead || e.hp <= 0 || !blastHits(e)) continue;
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R) continue;
-    const hurt = B.enemy * k * (1 - .4 * d / R);
+    const hurt = B.enemy * k * (1 - .4 * d / R) * (e.behavior === 'moth' ? B.mothMul : 1);   // 人面蝶自己的粉塵炸到自己：只受 3 成傷害
     e.hp -= hurt; e.hitT = .2; e.hitColor = '#ff9a3c';
     e.fireHitAt = performance.now() / 1000;   // 爆焰可以燒死生命體（js/lifeform.js）
     flashDmg('-' + Math.round(hurt), e.x, e.y - 26 - (e.slimeLift || 0), '#ff9a3c');
