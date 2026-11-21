@@ -8,16 +8,16 @@ const BULLET_TUNING = {
   "foeMul": 2,
   "bigHp": 150,
   "bullets": {
-    "flare": { "gap": 0.8, "shine": 24 },
-    "incendiary": { "gap": 0.6, "range": 8, "r": 1.1, "burn": 6, "fireDps": 10, "ignite": 0, "burnDmg": 4 },
-    "tranq": { "gap": 0.35, "range": 9, "sleep": 3, "mist": 0 },
+    "flare": { "gap": 0.8, "shine": 30 },
+    "incendiary": { "gap": 0.6, "range": 8, "r": 1.5, "burn": 8, "fireDps": 15, "ignite": 0, "burnDmg": 4 },
+    "tranq": { "gap": 0.35, "range": 12, "sleep": 40, "mist": 0.5 },
     "paint": { "gap": 0.3 },
-    "split": { "gap": 0.5, "pellets": 8, "spread": 0.7, "dmg": 4, "range": 5, "near": 1, "farMul": 0.4 },
-    "flash": { "gap": 0.7, "r": 2.4, "stun": 2.5, "range": 8 },
-    "shock": { "gap": 0.5, "dmg": 10, "chain": 3, "chainR": 3, "stun": 1.2 },
+    "split": { "gap": 0.5, "pellets": 8, "spread": 0.7, "dmg": 8, "range": 6, "near": 1, "farMul": 0.4 },
+    "flash": { "gap": 0.7, "r": 4, "stun": 5, "range": 12 },
+    "shock": { "gap": 0.5, "dmg": 20, "chain": 4, "chainR": 3, "stun": 5 },
     "heal": { "gap": 0.8, "heal": 40 },
-    "sticky": { "gap": 0.6, "r": 1.3, "stick": 30, "slow": 0.2, "range": 8, "speed": 700 },
-    "knock": { "gap": 0.5, "dmg": 6, "push": 2.2, "slide": 0.2, "wallStun": 1.8, "wallDmg": 8, "range": 9 },
-    "confuse": { "gap": 0.5, "confuse": 6, "brawl": 3, "range": 9 }
+    "sticky": { "gap": 0.6, "r": 2, "stick": 30, "slow": 0.2, "range": 10, "speed": 700 },
+    "knock": { "gap": 0.5, "dmg": 15, "push": 3, "slide": 0.2, "wallStun": 1.5, "wallDmg": 8, "range": 10 },
+    "confuse": { "gap": 0.5, "confuse": 15, "brawl": 3, "range": 9 }
   }
 };
