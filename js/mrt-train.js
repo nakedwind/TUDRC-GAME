@@ -101,6 +101,12 @@ function mrtTrainRestoreCleared(tr) {
   const solid2 = new Set((MAP && MAP.solid2) || []);
   for (const k of tr.cleared2 || []) if (solid2.has(k) && typeof floor2Solid !== 'undefined') floor2Solid.add(k);
   tr.cleared2 = [];
+  // 2 樓的列車：停著時暫時當成 2 樓地面的車內格子，拿掉（列車開走、門開關時重算）
+  // （換地圖後這兩份會換成新的一份：只還原到當初改的那一份，不會弄到新地圖）
+  if (typeof deckCells !== 'undefined' && tr.deckRef === deckCells) for (const k of tr.addedDeck || []) deckCells.delete(k);
+  tr.addedDeck = [];
+  if (typeof floor2WallFace !== 'undefined' && tr.faceRef === floor2WallFace) for (const k of tr.clearedFace || []) floor2WallFace.add(k);   // 拿掉的平台邊緣牆面放回去
+  tr.clearedFace = [];
 }
 function mrtTrainApplyEdges() {
   const all = new Set(), up = new Set();   // all：擋一樓的人；up：停在 2 樓的列車（例如 B56 上面那班），只擋 2 樓的人
@@ -355,6 +361,11 @@ function mrtTrainUpdateSolid(tr) {
       tr.floor.push(k);
       if (mapWalls.has(k)) { mapWalls.delete(k); tr.cleared.push(k); }   // 軌道上的碰撞格：列車停著時是車內地板
       if (up && floor2Solid.has(k)) { floor2Solid.delete(k); (tr.cleared2 ||= []).push(k); }   // 2 樓的列車：軌道上的 2 樓碰撞也一樣
+      // 2 樓的列車：車內走得進去的格子都要算「2 樓地面」，不然只有剛好疊在 2 樓月台上的那幾格走得過，
+      // 隊員、怪物找路會把車廂其他地方（含車門）當成牆
+      if (up && typeof deckCells !== 'undefined' && !deckCells.has(k)) { deckCells.add(k); (tr.addedDeck ||= []).push(k); tr.deckRef = deckCells; }
+      // 2 樓平台邊緣自動算出來的牆面（js/map-levels.js 的 wallFaceCells）剛好落在車廂裡：列車停著時也拿掉，不然會把車廂切成兩半
+      if (up && typeof floor2WallFace !== 'undefined' && floor2WallFace.has(k)) { floor2WallFace.delete(k); (tr.clearedFace ||= []).push(k); tr.faceRef = floor2WallFace; }
       // 走得進去的格子跟車外之間放薄牆：外側門口往下、對面通道往上，門開著時不擋
       const out = (cc, rr) => !type.has(cc + ',' + rr);
       if (out(c, r + 1) && !(t === 'D' && open)) tr.edges.push(c + ',' + r + ',B');
@@ -715,32 +726,42 @@ function mrtRollMonsters(tr) {
 }
 function mrtSpawnMonsters(tr, n) {
   if (!n || typeof createMonster !== 'function' || typeof chooseMonster !== 'function' || typeof ACTIVE_MONSTERS === 'undefined') return;
-  // 出生點：每一扇車門（同一排連在一起的門口格 D）的正中間，怪物才不會卡在門框上
-  const floorSet = new Set(tr.floor || []), doorCells = [], inside = [];
+  // 出生點：每一扇車門的正中間，怪物才不會卡在門框上。
+  //   下方車門＝最下面一排連在一起的門口格 D（往下走出去）；兩側都開的班次再加上方車門＝最上面一排的對面通道格 F（往上走出去）
+  //   只挑門外是月台的門（門外是牆、地圖邊緣的不挑）：例如 B56 下面那班車貼著地圖下緣，怪物只會從上方車門出來
+  const floorSet = new Set(tr.floor || []), f = mrtTrainFloor(tr), doorCells = { 1: [], '-1': [] }, inside = [];
   for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
     const k = x.c + ',' + x.r; if (!floorSet.has(k)) continue;
-    (x.t === 'D' ? doorCells : inside).push([x.c, x.r]);
+    if (x.t === 'D') doorCells[1].push([x.c, x.r]);
+    else if (x.t === 'F' && tr.bothDoors && x.r === tr.topRow) doorCells[-1].push([x.c, x.r]);
+    else inside.push([x.c, x.r]);
   }
-  const has = new Set(doorCells.map(d => d.join(','))), doors = [];
-  for (const [c, r] of doorCells.sort((a, b) => a[1] - b[1] || a[0] - b[0])) {
-    if (has.has((c - 1) + ',' + r)) continue;   // 不是這扇門最左邊那格
-    let w = 1; while (has.has((c + w) + ',' + r)) w++;
-    doors.push({ x: OX + (c + w / 2) * CELL, c: c + Math.floor(w / 2), r });
+  const outsideFree = (c, rr) => inGrid(c, rr) && !floorSet.has(c + ',' + rr) && !onFloorDo(f, () => isWall(c, rr));   // 車外這格是不是月台（照列車那一層的牆）
+  const doors = [];
+  for (const dir of [1, -1]) {
+    const has = new Set(doorCells[dir].map(d => d.join(',')));
+    for (const [c, r] of doorCells[dir].sort((a, b) => a[1] - b[1] || a[0] - b[0])) {
+      if (has.has((c - 1) + ',' + r)) continue;   // 不是這扇門最左邊那格
+      let w = 1; while (has.has((c + w) + ',' + r)) w++;
+      const mc = c + Math.floor(w / 2);
+      doors.push({ x: OX + (c + w / 2) * CELL, c: mc, r, dir, out: outsideFree(mc, r + dir) });
+    }
   }
-  if (!doors.length) for (const [c, r] of inside) doors.push({ x: center(c, r)[0], c, r });
-  if (!doors.length) return;
-  const f = mrtTrainFloor(tr);
+  const usable = doors.filter(d => d.out);
+  const pick = usable.length ? usable : doors;   // 每扇門外面都是牆：照舊隨便挑一扇（怪物自己找路）
+  if (!pick.length) for (const [c, r] of inside) pick.push({ x: center(c, r)[0], c, r, dir: 1 });
+  if (!pick.length) return;
   for (let i = 0; i < n; i++) {
-    const d = doors[Math.floor(Math.random() * doors.length)];   // 隨機挑一扇門
+    const d = pick[Math.floor(Math.random() * pick.length)];   // 隨機挑一扇門
     const y = OY + (d.r + .5) * CELL;
     const m = createMonster(chooseMonster(MAP, ACTIVE_MONSTERS), d.x, y);
     if (hasFloors) m.floor = f === 2 ? 2 : 1;
     m.mrtFrom = tr.soundId;
-    // 下車：從車門口直直走到月台上（車外 2 格；月台在上面或下面都可以，看哪一邊不是車廂、不是牆）
-    for (const dir of [1, -1]) {
-      const r1 = d.r + dir, r2 = d.r + dir * 2, free = rr => inGrid(d.c, rr) && !floorSet.has(d.c + ',' + rr) && !mapWalls.has(d.c + ',' + rr);
-      if (!free(r1)) continue;
-      m.mrtExit = { x: d.x, y: OY + ((free(r2) ? r2 : r1) + .5) * CELL, t: 3 }; break;   // 車外只剩一格（例如列車貼著地圖邊）：走出去一格就好
+    // 下車：從車門口直直走到月台上（車外 2 格；先照這扇門朝的方向，走不出去再試另一邊）
+    for (const dir of [d.dir, -d.dir]) {
+      const r1 = d.r + dir, r2 = d.r + dir * 2;
+      if (!outsideFree(d.c, r1)) continue;
+      m.mrtExit = { x: d.x, y: OY + ((outsideFree(d.c, r2) ? r2 : r1) + .5) * CELL, t: 3 }; break;   // 車外只剩一格（例如列車貼著地圖邊）：走出去一格就好
     }
     G.enemies.push(m);
   }
