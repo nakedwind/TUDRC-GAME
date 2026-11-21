@@ -9,7 +9,8 @@
    - 核心（2026-11-21 改）：被天上垂下來的異質絲瓜藤纏著吊在半空中（不是吊在她頭上、不跟著她走），吊著的時候打不到、炸不到。
        溫特開槍打吊著核心的藤蔓（游標點在核心或它上面那段藤蔓上，跟救倒吊的隊友一樣），打中 core.shotHits 發藤蔓斷掉、核心掉到地上。
        核心掉在地上時打得到，但她活著時核心有護盾（受到的傷害少 core.shield 成）；
-       她下一次重踏召喚藤蔓時，天上垂下一根藤把核心抓回半空中（在原地吊起來）。
+       她每次重踏召喚藤蔓時，核心都會被收上去、換一個地方吊下來（core.move）；掉在地上的核心也會先被天上垂下來的藤蔓抓回去。
+   - 重踏時震得樹上掉葉子、天上掉小碎石（stomp.rocks，ROCK_ART.small，不擋路、砸到有一點點傷害）。
        她倒下後：不會再抓回去、護盾消失；還吊著的話一樣開槍打下來（火燒藤蔓也行）。
    - 4 片農田：一直長著會纏人的絲瓜藤（走上去就被纏住，跟絲瓜小姐的藤蔓一樣：連按方向鍵掙扎、溫特開槍幫隊友射斷）。
        怕火：被火海或希奧妮的火燒到 → 整片藤蔓消失 farm.burnTime 秒，之後再長出來。
@@ -32,10 +33,21 @@ const LOOFAH_QUEEN = {
     shake: 16,                   // 畫面震動（貼身時；原本 10，越遠越小，距離是所有 BOSS 共用的 BOSS_SHAKE.range）
     crack: 1,                    // 腳下踩出的裂痕大小（素材圖，js/combat-feel.js 的 CRACK_ART）
     rocks: { rocks: 14, speed: [60, 170], up: [110, 230], dust: 12, dustRise: 3, size: .9 },   // 揚起的灰塵、小石頭（js/gourd-monkey.js 的 rockBurstFx）
-    leaves: 28, leafRange: 9,    // 震得樹上掉下幾片葉子、落在她周圍幾格內
-    leafHigh: [160, 300],        // 葉子從多高開始掉（像素）
-    leafFall: [55, 95],          // 往下飄的速度（像素／秒）
+    leaves: 30, leafRange: 9,    // 震得樹上掉下幾片葉子、落在她周圍幾格內
+    leafHigh: [180, 320],        // 葉子從多高開始掉（像素）
+    leafDrop: [90, 150],         // 一被震下來往下衝的速度（像素／秒）：震落是一口氣掉下來，不是被風吹著飄
+    leafGravity: 380,            // 往下加速多快（像素／秒²）
+    leafMax: 300,                // 最快掉多快（像素／秒）
+    leafDelay: .25,              // 全部葉子在幾秒內被震下來
     leafRest: 2.5,               // 落地後停幾秒才淡掉
+    rocks: 9,                    // 震下來幾顆小碎石（ROCK_ART.small；不擋路，砸到有一點點傷害）
+    rockFall: .9,                // 碎石：地上影子出現到砸下來幾秒（影子越來越深）
+    rockDelay: [.05, .5],        // 碎石：踏下去之後幾秒才開始掉（每顆不一樣）
+    rockHeight: 360,             // 碎石從多高掉下來（像素）
+    rockRadius: 16,              // 碎石砸到的範圍（像素）
+    rockDamage: 5,               // 碎石砸到溫特、隊友的傷害
+    rockAimed: 2,                // 其中幾顆瞄準我方站的地方（其他隨機落在她周圍 leafRange 格內）
+    rockRest: 2,                 // 碎石落地後在地上留幾秒才淡掉
   },
   keepDistance: 3,               // 目標太近（格）：往後退一點
   vines: {                       // 每次踏地垂下來的藤蔓
@@ -72,7 +84,7 @@ const LOOFAH_QUEEN = {
     fireR: 30,                   // 她倒下後：火海離核心正下方多近（像素）就把藤蔓燒斷
     shotHits: 3,                 // 溫特開槍打中吊著核心的藤蔓幾發就斷（跟救倒吊的隊友 VINES.hangHits 一樣）
     shield: .6,                  // 她活著時，掉在地上的核心少受幾成傷害
-    regrab: { down: .45, lift: .8 },   // 重踏時抓回核心：藤蔓垂下來幾秒、把核心拉上去幾秒
+    move: { grab: .45, up: .55, down: .75, high: 380, near: 3, far: 8, minMove: 3 },   // 每次重踏，核心被收上去換位置：藤蔓垂到地上抓核心幾秒（核心在地上時）、收上去幾秒、換到新位置放下來幾秒、收多高（像素）；新位置離她原位幾～幾格、至少離舊位置幾格
     fall: 1700,                  // 掉下來的重力
   },
   guards: { count: 3, radius: 2.5 },   // 一起守核心的絲瓜小姐：幾隻、生在離她幾格的地方
@@ -97,9 +109,9 @@ const lqDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 // 絲瓜小姐的圖片路徑 → 女王專用的那張（同檔名、換到 LOOFAH_QUEEN.artDir 資料夾）
 const lqArt = f => typeof f === 'string' && /\.png$/i.test(f) && LOOFAH_QUEEN.artDir ? LOOFAH_QUEEN.artDir + f.split('/').pop() : f;
 
-// G.loofahQueens：[{ e, core, state, h, fallV, plots }]；state：hang（被天上的藤吊著）→ falling（藤被打斷）→ down（在地上）→ regrab（她重踏，藤蔓垂下來抓回去）→ hang
+// G.loofahQueens：[{ e, core, state, h, fallV, plots }]；state：hang（被天上的藤吊著）→ falling（藤被打斷）→ down（在地上）→ move（她重踏：收上去、換位置放下來；在地上的話先被藤蔓抓回去）→ hang
 function seedLoofahQueen() {
-  G.loofahQueens = []; G.lqLeaves = [];
+  G.loofahQueens = []; G.lqLeaves = []; G.lqRocks = [];
   const spot = lqSpot();
   if (!spot || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'loofah_lady');
@@ -322,20 +334,79 @@ function lqDropVine(x, y, e) {
 function lqStompFx(e) {
   const S = LOOFAH_QUEEN.stomp;
   const rec = (G.loofahQueens || []).find(r => r.e === e);
-  if (rec && rec.state === 'down' && rec.core && !rec.core.dead) lqRegrabCore(rec);   // 核心掉在地上：天上垂下藤蔓把它抓回去
+  if (rec && rec.core && !rec.core.dead && (rec.state === 'down' || rec.state === 'hang')) lqMoveCore(rec);   // 核心被收上去、換一個地方吊下來（掉在地上的話先被藤蔓抓回去）
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, S.shake, .08); else addShake(8);
   (G.eliteCracks = G.eliteCracks || []).push({ size: S.crack, power: 1, life: 6, x: e.x, y: e.y + 12, at: performance.now() / 1000 });   // 畫在 js/elite-bird-head.js 的 drawEliteGround
   if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y + 12, S.rocks);
   const rows = typeof FOG_FX_V2 !== 'undefined' ? FOG_FX_V2.leafRows : [0, 1, 2, 3];
   const list = (G.lqLeaves = G.lqLeaves || []);
-  for (let i = 0; i < S.leaves; i++) {
+  for (let i = 0; i < S.leaves; i++) {   // 葉子一口氣被震下來：往下衝、越掉越快，邊掉邊亂翻，只有一點點左右晃
     const a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * S.leafRange * CELL;
     list.push({ x: e.x + Math.cos(a) * d, y: e.y + Math.sin(a) * d * .7, z: S.leafHigh[0] + Math.random() * (S.leafHigh[1] - S.leafHigh[0]),
-      vz: S.leafFall[0] + Math.random() * (S.leafFall[1] - S.leafFall[0]), delay: Math.random() * .7, rest: S.leafRest,
-      ph: Math.random() * 6.28, sway: 14 + Math.random() * 18, spin: (3 + Math.random() * 4) * (Math.random() < .5 ? -1 : 1),
+      vz: S.leafDrop[0] + Math.random() * (S.leafDrop[1] - S.leafDrop[0]), vx: (Math.random() * 2 - 1) * 25, delay: Math.random() * S.leafDelay, rest: S.leafRest,
+      ph: Math.random() * 6.28, sway: 2 + Math.random() * 3, spin: (9 + Math.random() * 8) * (Math.random() < .5 ? -1 : 1),
       shape: Math.floor(Math.random() * 3), row: rows[Math.floor(Math.random() * rows.length)] });
   }
   if (list.length > 200) list.splice(0, list.length - 200);
+  // 小碎石：先在地上出現影子，影子越來越深，砸下來（不擋路）
+  const foes = [G.player, ...G.towers].filter(a => a && a.hp > 0 && lqDist(a, e) <= S.leafRange * CELL);
+  const rocks = (G.lqRocks = G.lqRocks || []);
+  for (let i = 0; i < S.rocks; i++) {
+    let x, y;
+    const aim = i < S.rockAimed && foes.length ? foes[Math.floor(Math.random() * foes.length)] : null;
+    for (let k = 0; k < 8; k++) {
+      if (aim) { x = aim.x + (Math.random() * 2 - 1) * 16; y = aim.y + (Math.random() * 2 - 1) * 10; }
+      else { const a = Math.random() * Math.PI * 2, d = (1 + Math.random() * (S.leafRange - 1)) * CELL; x = e.x + Math.cos(a) * d; y = e.y + Math.sin(a) * d * .7; }
+      const [c, r] = cellAt(x, y);
+      if (inGrid(c, r) && !isWall(c, r)) break;
+      x = null;
+    }
+    if (x == null) continue;
+    rocks.push({ x, y, t: -(S.rockDelay[0] + Math.random() * (S.rockDelay[1] - S.rockDelay[0])), rest: S.rockRest, seed: Math.random() * 9,
+      art: ROCK_ART.small[Math.floor(Math.random() * ROCK_ART.small.length)], flip: Math.random() < .5 });
+  }
+}
+// 小碎石每幀：影子 → 砸下來（小傷害、揚灰）→ 留在地上一下再淡掉
+function lqUpdateRocks(dt) {
+  const list = G.lqRocks, S = LOOFAH_QUEEN.stomp;
+  if (!list || !list.length) return;
+  for (const k of list) {
+    k.t += dt;
+    if (k.landed) { k.rest -= dt; continue; }
+    if (k.t < S.rockFall) continue;
+    k.landed = true;
+    if (typeof rockBurstFx === 'function') rockBurstFx(k.x, k.y, { rocks: 4, speed: [30, 90], up: [60, 120], dust: 2, dustRise: 1, size: .55, spread: 6 });
+    if (typeof sfxAt === 'function') sfxAt('gourdTossLand', k.x, k.y, .25, 'lq-rock');
+    const p = G.player;
+    if (p && p.hp > 0 && Math.hypot(p.x - k.x, p.y - k.y) <= S.rockRadius + 8 && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
+      const dmg = Math.round(typeof equipPlayerDamage === 'function' ? equipPlayerDamage(S.rockDamage) : S.rockDamage);
+      p.hp = Math.max(0, p.hp - dmg); p.hitT = .25; G.damageVignetteT = .25; flashDmg('-' + dmg, p.x, p.y - 46, '#ff6b6b');
+      if (typeof playPlayerHit === 'function') playPlayerHit(1, true);
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被落石砸中'); }
+    }
+    for (const t of G.towers) {
+      if (t.hp <= 0 || Math.hypot(t.x - k.x, t.y - k.y) > S.rockRadius + 6 || (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(t))) continue;
+      const dmg = S.rockDamage * (1 - (typeof sentryDefense === 'function' ? sentryDefense(t) : 0));
+      t.hp = Math.max(0, t.hp - dmg); t.hitT = Math.max(t.hitT || 0, .2);
+      flash('-' + Math.round(dmg), t.x, t.y - 30, '#ff8f8f');
+      if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+    }
+  }
+  G.lqRocks = list.filter(k => !k.landed || k.rest > 0);
+}
+// 地面層（js/render.js 呼叫）：碎石落點的影子、落在地上的碎石
+function drawLoofahQueenGround(ctx) {
+  const list = G && G.lqRocks, S = LOOFAH_QUEEN.stomp;
+  if (!list || !list.length) return;
+  ctx.save();
+  for (const k of list) {
+    if (k.t < 0 || (typeof isVisible === 'function' && !isVisible(k.x, k.y))) continue;
+    if (k.landed) { if (typeof drawRockArt === 'function') drawRockArt(ctx, k.art, k.x, k.y + 6, 1, 0, Math.min(1, k.rest / .6)); continue; }
+    const u = Math.min(1, k.t / S.rockFall), r = S.rockRadius * (.45 + .55 * u);
+    ctx.globalAlpha = .12 + .4 * u; ctx.fillStyle = '#120c08';
+    ctx.beginPath(); ctx.ellipse(k.x, k.y, r, r * .45, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
 }
 // 掉下來的葉子：左右飄著往下掉，落地後停一下再淡掉
 function lqUpdateLeaves(dt) {
@@ -344,22 +415,32 @@ function lqUpdateLeaves(dt) {
   for (const l of list) {
     if (l.delay > 0) { l.delay -= dt; continue; }
     l.ph += dt;
-    if (l.z > 0) l.z = Math.max(0, l.z - l.vz * dt);
-    else l.rest -= dt;
+    if (l.z > 0) {
+      const S = LOOFAH_QUEEN.stomp;
+      l.vz = Math.min(S.leafMax, l.vz + S.leafGravity * dt);   // 越掉越快
+      l.z = Math.max(0, l.z - l.vz * dt); l.x += (l.vx || 0) * dt;
+    } else l.rest -= dt;
   }
   G.lqLeaves = list.filter(l => l.rest > 0);
 }
 // 畫葉子（畫在角色上面，js/render.js 呼叫）：用起霧落葉那張點陣圖（js/fog-fx-v2.js），還沒載好就畫小色塊
 function drawLoofahQueenAir(ctx) {
-  if (!G || !G.lqLeaves || !G.lqLeaves.length) return;
+  if (!G) return;
+  const S = LOOFAH_QUEEN.stomp;
+  for (const k of G.lqRocks || []) {   // 正在往下掉的小碎石（邊掉邊轉）
+    if (k.landed || k.t < S.rockFall * .35 || (typeof isVisible === 'function' && !isVisible(k.x, k.y))) continue;
+    const u = (k.t - S.rockFall * .35) / (S.rockFall * .65), z = S.rockHeight * (1 - u * u);
+    if (typeof drawRockArt === 'function') drawRockArt(ctx, k.art, k.x, k.y + 6 - z, 1, k.seed + k.t * 6);
+  }
+  if (!G.lqLeaves || !G.lqLeaves.length) return;
   const sprite = typeof fogV2LeafReady === 'function' && fogV2LeafReady() && typeof fogV2LeafSprite === 'function';
   const cols = typeof FOG_FX_V2 !== 'undefined' ? FOG_FX_V2.leafColors : ['#6f8f3a', '#a0863a'];
   ctx.save();
   for (const l of G.lqLeaves) {
     if (l.delay > 0 || (typeof isVisible === 'function' && !isVisible(l.x, l.y))) continue;
-    const falling = l.z > 0, x = l.x + (falling ? Math.sin(l.ph * 2.2) * l.sway : 0), y = l.y - l.z;
+    const falling = l.z > 0, x = l.x + (falling ? Math.sin(l.ph * 9) * l.sway : 0), y = l.y - l.z;   // 只有一點點快速抖動（被震下來的），不是慢慢左右飄
     const flip = falling ? Math.cos(l.ph * l.spin) : 1;
-    ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(falling ? Math.sin(l.ph * 2.2) * .8 : .3); ctx.scale(Math.sign(flip || 1) * Math.max(.2, Math.abs(flip)), 1);
+    ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(falling ? l.ph * l.spin * .35 : .3); ctx.scale(Math.sign(flip || 1) * Math.max(.2, Math.abs(flip)), 1);
     ctx.globalAlpha = .95 * Math.min(1, l.rest / .8);
     if (sprite) fogV2LeafSprite(ctx, l);
     else { ctx.fillStyle = cols[l.row % cols.length]; ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, Math.PI * 2); ctx.fill(); }
@@ -369,6 +450,7 @@ function drawLoofahQueenAir(ctx) {
 }
 function updateLoofahQueen(dt) {
   lqUpdateLeaves(dt);   // 重踏震下來的葉子（她倒下後也要飄完）
+  lqUpdateRocks(dt);    // 重踏震下來的小碎石
   if (!G.loofahQueens || !G.loofahQueens.length) return;
   // 女王垂下來的藤蔓：停夠久就縮回去；縮完（或抓完人）就拿掉
   if (G.vines) {
@@ -575,13 +657,23 @@ function lqUpdateCore(rec, dt) {
     }
     return;
   }
-  if (rec.state === 'regrab') {   // 藤蔓垂下來 → 纏住 → 把核心拉回半空中
-    const R = Q.core.regrab;
-    rec.t += dt;
-    if (rec.t < R.down) { rec.h = 0; core.lqHangH = 0; return; }
-    const k = Math.min(1, (rec.t - R.down) / R.lift), want = lqHangRoom(core, Q.core.hungH);
-    rec.h = want * (1 - Math.pow(1 - k, 3)); core.lqHangH = rec.h;
-    if (k >= 1) { rec.state = 'hang'; rec.hits = 0; }
+  if (rec.state === 'move') {   // 收上去 → 換位置 → 放下來
+    const M = Q.core.move, mv = rec.mv;
+    mv.t += dt;
+    if (mv.phase === 'grab') {   // 核心在地上：藤蔓先從天上垂下來纏住它
+      rec.h = 0; core.lqHangH = 0;
+      if (mv.t >= M.grab) { mv.phase = 'up'; mv.t = 0; mv.h0 = 0; }
+      return;
+    }
+    if (mv.phase === 'up') {   // 往上收（越收越快），收到畫面外
+      const k = Math.min(1, mv.t / M.up);
+      rec.h = mv.h0 + (M.high - mv.h0) * k * k; core.lqHangH = rec.h;
+      if (k >= 1) { core.x = mv.to.x; core.y = mv.to.y; mv.phase = 'down'; mv.t = 0; }   // 換到新位置
+      return;
+    }
+    const want = lqHangRoom(core, Q.core.hungH), k = Math.min(1, mv.t / M.down);   // 從天上放下來（越放越慢）
+    rec.h = want + (M.high - want) * Math.pow(1 - k, 3); core.lqHangH = rec.h;
+    if (k >= 1) { rec.state = 'hang'; rec.hits = 0; rec.mv = null; }
     return;
   }
   if (rec.state === 'falling') {
@@ -605,15 +697,35 @@ function lqDropCore(rec) {
   rec.state = 'falling'; rec.fallV = 0; rec.hits = 0;
   lqCoreLandSpot(rec.core, rec);
 }
-// 她重踏：天上垂下一根藤把地上的核心抓回去（在原地吊起來）
-function lqRegrabCore(rec) {
-  const core = rec.core;
-  rec.state = 'regrab'; rec.t = 0; rec.h = 0; rec.hits = 0;
+// 她重踏：核心被收上去、換一個地方吊下來（掉在地上的話，先被天上垂下來的藤蔓抓回去）
+function lqMoveCore(rec) {
+  const core = rec.core, M = LOOFAH_QUEEN.core.move, fromGround = rec.state === 'down';
+  const to = lqCoreNewSpot(rec);
+  if (!to && !fromGround) return;   // 找不到新位置：吊著的就留在原地
+  rec.state = 'move'; rec.hits = 0;
+  rec.mv = { phase: fromGround ? 'grab' : 'up', t: 0, h0: rec.h, to: to || { x: core.x, y: core.y } };
   core.carried = true; core.lastHp = core.hp;   // 一被藤蔓纏住就打不到了
   lqCorePool(core, false);
-  G.effects.push({ ring: true, x: core.x, y: core.y + 4, r: 6, r2: 50, life: .4, life0: .4, color: '#7fbf5a' });
-  if (typeof sfxAt === 'function') sfxAt('loofahVine', core.x, core.y, .8, 'loofah-queen-core-regrab');
-  systemNotice('異質核心被藤蔓抓回去了！', true);
+  if (fromGround) {
+    G.effects.push({ ring: true, x: core.x, y: core.y + 4, r: 6, r2: 50, life: .4, life0: .4, color: '#7fbf5a' });
+    systemNotice('異質核心被藤蔓抓回去了！', true);
+  }
+  if (typeof sfxAt === 'function') sfxAt('loofahVine', core.x, core.y, .8, 'loofah-queen-core-move');
+}
+// 核心的新位置：離她的原位 near～far 格、離舊位置至少 minMove 格、站得下而且上面吊得夠高
+function lqCoreNewSpot(rec) {
+  const M = LOOFAH_QUEEN.core.move, home = rec.e.lq ? rec.e.lq.home : rec.e, core = rec.core;
+  const floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null;
+  for (let i = 0; i < 40; i++) {
+    const a = Math.random() * Math.PI * 2, d = (M.near + Math.random() * (M.far - M.near)) * CELL;
+    const p = lqFreeSpot(home.x + Math.cos(a) * d, home.y + Math.sin(a) * d * .8);
+    if (!p || Math.hypot(p.x - core.x, p.y - core.y) < M.minMove * CELL) continue;
+    const [c, r] = cellAt(p.x, p.y);
+    if (floor && !floor.has(c + ',' + r)) continue;
+    if (lqHangRoom({ x: p.x, y: p.y }, LOOFAH_QUEEN.core.hungH) < LOOFAH_QUEEN.core.hungH * .8) continue;   // 上面太靠牆
+    return p;
+  }
+  return null;
 }
 // 核心護盾：她活著時，掉在地上的核心這段時間少掉的血只算一部分（game.js 判定核心破掉前、anomalous-core.js 的核心更新前呼叫）
 function lqShieldCore() {
@@ -682,7 +794,7 @@ function loofahQueenDown(e) {
   const rec = (G.loofahQueens || []).find(r => r.e === e);
   for (const g of G.lqGround || []) if (g.owner === e) { if (g.state === 'up') { g.state = 'retract'; g.rt = 0; } else if (!g.state) g.state = 'gone'; }   // 地面的藤：還沒鑽出來的取消、晃著的縮回去
   if (G.lqGround) G.lqGround = G.lqGround.filter(g => g.state !== 'gone');
-  if (rec && rec.state === 'regrab') rec.state = 'hang';   // 正在抓回去時她倒下：就停在半空中（之後一樣開槍打下來）
+  if (rec && rec.state === 'move' && rec.mv) { if (rec.mv.phase !== 'down') { rec.core.x = rec.mv.to.x; rec.core.y = rec.mv.to.y; } rec.mv.phase = 'down'; rec.mv.t = 0; }   // 正在換位置時她倒下：直接放到新位置吊著（之後一樣開槍打下來）
   for (const v of G.vines || []) if (v.lqTemp && v.lqOwner === e && (v.state === 'hang' || v.state === 'descend')) { v.state = 'retract'; v.regrowAfter = 1e9; }
   if (typeof sfxAt === 'function') sfxAt('loofahDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著播的那聲會被去重吃掉
   systemNotice(e.eliteName + '倒下了！', true);
@@ -812,9 +924,11 @@ function drawLoofahQueenCore(ctx, rec) {
   }
   ctx.restore();
   // 吊著核心的異質絲瓜藤：從天上垂下來；抓回去時先從天上垂到地上的核心，再把核心拉上去
-  if (rec.state === 'regrab' && typeof drawVineStem === 'function') {
-    const R = LOOFAH_QUEEN.core.regrab, k = Math.min(1, rec.t / R.down), topY = cam.y - 30;
+  if (rec.state === 'move' && rec.mv && rec.mv.phase === 'grab' && typeof drawVineStem === 'function') {   // 藤蔓從天上垂到地上的核心
+    const k = Math.min(1, rec.mv.t / LOOFAH_QUEEN.core.move.grab), topY = cam.y - 30;
     drawVineStem(ctx, { x: core.x, seed: core.seed }, cx, topY + (cy - len * .35 - topY) * k, now, true);
+  } else if (rec.state === 'move' && typeof drawVineStem === 'function') {
+    drawVineStem(ctx, { x: core.x, seed: core.seed }, cx, cy - len * .35, now, true);
   } else if (rec.state === 'hang' && typeof drawVineStem === 'function')
     drawVineStem(ctx, { x: core.x, seed: core.seed }, cx, cy - len * .35, now, true);
   if (coreImg.complete && coreImg.naturalWidth) {
@@ -830,7 +944,7 @@ function drawLoofahQueenCore(ctx, rec) {
     ctx.restore();
   }
   // 纏在核心上的藤（絲瓜小姐纏人的畫法）
-  if ((rec.state === 'hang' || (rec.state === 'regrab' && rec.t >= LOOFAH_QUEEN.core.regrab.down)) && typeof drawWrap === 'function') {
+  if ((rec.state === 'hang' || (rec.state === 'move' && rec.mv && (rec.mv.phase !== 'grab' || rec.mv.t >= LOOFAH_QUEEN.core.move.grab * .8))) && typeof drawWrap === 'function') {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     drawWrap(ctx, { x: cx, y: cy - 4, rootT: 1, struggleT: 0 }, 1, now, core.seed);
     ctx.restore();

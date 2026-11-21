@@ -1128,6 +1128,7 @@ function draw() {
     [() => typeof drawEliteGround === 'function' && drawEliteGround(ctx), false],   // 鳥頭大隊長跑步踩出的小裂痕（js/elite-bird-head.js）
     [() => typeof drawGourdGround === 'function' && drawGourdGround(ctx), true],   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
     [() => typeof drawLoofahGround === 'function' && drawLoofahGround(ctx), true],   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）
+    [() => typeof drawLoofahQueenGround === 'function' && drawLoofahQueenGround(ctx), false],   // 絲瓜女王重踏震下來的碎石：影子、落地的碎石（js/loofah-queen.js）
     [() => typeof drawHiddenTunnels === 'function' && drawHiddenTunnels(ctx), false],   // 球球找到的地道（js/rescue-dog.js）
     [() => drawCombatFeelGround(ctx), true],   // 黏液痕跡、自爆範圍警示（js/combat-feel.js）
     [() => typeof drawGluePools === 'function' && drawGluePools(ctx), true],   // 黏著彈的黏膠（js/special-guns.js）

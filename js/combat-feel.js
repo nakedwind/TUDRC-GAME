@@ -73,8 +73,23 @@ const CRACK_ART = {
   dust: 'images/破損建築/debris-dust.png',
   spread: 30,   // 疊上去的小裂痕離中心多遠（像素，再乘 size）
 };
-// 先載好裂痕圖：等所有程式載完（monsterImage 在別的檔案）才開始載，第一次裂開才不會閃空白
-window.addEventListener('load', () => { if (typeof monsterImage === 'function') CRACK_ART.files.concat(CRACK_ART.dust).forEach(f => monsterImage(f)); });
+// 落石的圖（tools/draw-falling-rocks.py 畫的）：小顆＝絲瓜女王重踏震下來的碎石（不擋路）；大顆＝葫蘆猴王震下來的大石頭（落地擋路）
+const ROCK_ART = {
+  small: [1, 2, 3].map(i => 'images/破損建築/falling-rock-small-0' + i + '.png'),
+  big: [1, 2].map(i => 'images/破損建築/falling-rock-big-0' + i + '.png'),
+};
+// 先載好裂痕圖、落石圖：等所有程式載完（monsterImage 在別的檔案）才開始載，第一次裂開才不會閃空白
+window.addEventListener('load', () => { if (typeof monsterImage === 'function') CRACK_ART.files.concat(CRACK_ART.dust, ROCK_ART.small, ROCK_ART.big).forEach(f => monsterImage(f)); });
+// 畫一顆落石的圖：x, y＝石頭底部中央；s＝放大倍率（點陣圖照原本像素畫）；rot＝旋轉
+function drawRockArt(ctx, file, x, y, s = 1, rot = 0, alpha = 1) {
+  const img = monsterImage(file);
+  if (!img.complete || !img.naturalWidth || alpha <= 0) return false;
+  const w = img.naturalWidth * s, h = img.naturalHeight * s, prev = ctx.imageSmoothingEnabled;
+  ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha *= alpha;
+  ctx.translate(x, y - h / 2); ctx.rotate(rot); ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore(); ctx.imageSmoothingEnabled = prev;
+  return true;
+}
 // 做一組裂痕：size＝大小（1＝原圖大小，大約 80～120 像素寬），power＝破壞多大（0＝一張，1＝三張再加碎土灰）
 function makeCrackArt(size = 1, power = 0) {
   const P = Math.max(0, Math.min(1, power)), pick = () => CRACK_ART.files[Math.floor(Math.random() * CRACK_ART.files.length)];
