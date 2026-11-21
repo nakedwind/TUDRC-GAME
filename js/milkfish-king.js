@@ -117,6 +117,8 @@ function mkInit(e, core) {
   (G.mkKings = G.mkKings || []).push(e);
   G.mkShots = G.mkShots || [];
 }
+// 正面站姿圖（出場竄出、落地、吼叫用）：不讓走路動畫換成側面
+function mkFront(e) { e.forceFrame = e.frames && e.frames.front || null; e.forceFlip = false; e.forceAttack = false; }
 function mkSet(e, state, t = 0) { e.mk.state = state; e.mk.t = t; }
 
 // ---- 能吃的東西 ----
@@ -215,7 +217,7 @@ function mkStep(e, dt) {
       if (see || e.hp < e.maxhp || (core && core.awake)) mkRoar(e);
       return;
     }
-    case 'roar': mfPose(e, 'attack', p ? p.x : null); if (mk.t <= 0) mkSet(e, mk.core && !mk.core.dead && !mk.coreIn ? 'toCore' : 'hunt'); return;
+    case 'roar': mkFront(e); if (mk.t <= 0) mkSet(e, mk.core && !mk.core.dead && !mk.coreIn ? 'toCore' : 'hunt'); return;
     case 'toCore': case 'rushCore': {   // 走過去（吐出來後：急著衝過去）把核心吞進肚子
       const core = mk.core;
       if (!core || core.dead || core.carried) { mkSet(e, 'hunt'); return; }
@@ -921,7 +923,7 @@ function mkIntroUpdate(dt) {
     e.x = I.from.x + (I.to.x - I.from.x) * p; e.y = I.from.y + (I.to.y - I.from.y) * p;
     e.slimeLift = mkIntroLift(e, p);
     e.faceRight = I.to.x > I.from.x;
-    mfPose(e, p < .7 ? 'attack' : null, I.to.x);   // 張大嘴衝出來，快落地時換回站姿
+    mkFront(e);   // 出場一路都是正面（攻擊圖只在吞核心、咬人、吐東西時用）
     // 身上一路往下滴水
     const w = e.drawWidth || 200, h = e.drawHeight || 240, list = G.poolSplash || (G.poolSplash = []);
     if (e.slimeLift > 0) for (let i = 0; i < 2; i++) list.push({ x: e.x + (Math.random() - .5) * w * .5, y: e.y, z: e.slimeLift + Math.random() * h * .7, vx: (Math.random() - .5) * 40, vy: 0, vz: -20 + Math.random() * 60, r: 2 + Math.random() * 3, t: 0, life: 1.5 });
