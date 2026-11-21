@@ -66,6 +66,47 @@ function nearbyImpact(x, y, shake, stop) {
   if (stop && k > .5) addHitstop(stop);
 }
 
+// ---- 地面裂痕（素材圖）：BOSS 踩地、砸地、敲地、倒下、藤蔓鑽地都用這一套 ----
+// 從 images/破損建築/ 的裂痕圖隨機挑；破壞越大（power 0～1）疊越多張、放越大，大破壞再蓋一層碎土灰（debris-dust）
+const CRACK_ART = {
+  files: ['crack04', 'crack05', 'crack06', 'crack07', 'floor-crack-cross', 'floor-crack-fork'].map(n => 'images/破損建築/' + n + '.png'),
+  dust: 'images/破損建築/debris-dust.png',
+  spread: 30,   // 疊上去的小裂痕離中心多遠（像素，再乘 size）
+};
+// 先載好裂痕圖：等所有程式載完（monsterImage 在別的檔案）才開始載，第一次裂開才不會閃空白
+window.addEventListener('load', () => { if (typeof monsterImage === 'function') CRACK_ART.files.concat(CRACK_ART.dust).forEach(f => monsterImage(f)); });
+// 做一組裂痕：size＝大小（1＝原圖大小，大約 80～120 像素寬），power＝破壞多大（0＝一張，1＝三張再加碎土灰）
+function makeCrackArt(size = 1, power = 0) {
+  const P = Math.max(0, Math.min(1, power)), pick = () => CRACK_ART.files[Math.floor(Math.random() * CRACK_ART.files.length)];
+  const rot = () => (Math.random() * 2 - 1) * .35;
+  const out = [{ file: pick(), dx: 0, dy: 0, s: size * (1 + P * .35), rot: rot(), flip: Math.random() < .5 }];
+  for (let i = 1, n = 1 + Math.round(P * 2); i < n; i++) {
+    const a = Math.random() * Math.PI * 2, d = CRACK_ART.spread * size * (.5 + Math.random() * .6);
+    out.push({ file: pick(), dx: Math.cos(a) * d, dy: Math.sin(a) * d * .55, s: size * (.55 + Math.random() * .3), rot: rot(), flip: Math.random() < .5 });
+  }
+  if (P >= .5) out.push({ file: CRACK_ART.dust, dx: 0, dy: 0, s: size * (1.2 + P), rot: 0, flip: Math.random() < .5 });
+  return out;
+}
+// 畫一組裂痕；tint／tintA：裂縫透出的光（例如金蕉大王的法術顏色）
+function drawCrackArt(ctx, x, y, art, alpha = 1, tint = null, tintA = 0) {
+  if (!art || alpha <= 0) return;
+  const prev = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  for (const p of art) {
+    const img = monsterImage(p.file);
+    if (!img.complete || !img.naturalWidth) continue;
+    const w = img.naturalWidth * p.s, h = img.naturalHeight * p.s;
+    ctx.save(); ctx.translate(x + p.dx, y + p.dy); ctx.rotate(p.rot); if (p.flip) ctx.scale(-1, 1);
+    ctx.globalAlpha = alpha; ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    if (tint && tintA > 0 && p.file !== CRACK_ART.dust) {
+      const glow = flashSprite(img, tint);
+      if (glow) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alpha * tintA; ctx.drawImage(glow, -w / 2, -h / 2, w, h); }
+    }
+    ctx.restore();
+  }
+  ctx.imageSmoothingEnabled = prev;
+}
+
 function rollSlimeVariant() {
   const t = G.battleTime || 0;
   for (const [id, v] of Object.entries(SLIME_VARIANTS)) {

@@ -365,6 +365,7 @@ function updateGiantFall(c) {
       G.effects.push({ ring: true, x, y, r: 8, r2: c.w * .35, life: .45, life0: .45, color: '#b9b2a2' });
     }
     G.effects.push({ ring: true, x: c.x + c.dir * len * .5, y: c.y + 12, r: 10, r2: len * 1.1, life: .6, life0: .6, color: '#d9d2c0' });
+    for (let i = 0; i < 2; i++) (G.eliteCracks = G.eliteCracks || []).push({ size: .9, power: 1, life: 6, x: c.x + c.dir * len * (.3 + .45 * i), y: c.y + 12 + (Math.random() * 2 - 1) * 6, at: performance.now() / 1000 });   // 倒下的身體壓出一長條大裂痕（素材圖，js/combat-feel.js 的 CRACK_ART）
     (G.eliteCracks = G.eliteCracks || []).push({ x: c.x + c.dir * len * .55, y: c.y + 12, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .3, flip: c.dir < 0 });   // 地上撞出裂痕（js/elite-bird-head.js 的 drawEliteGround）
     if (typeof sfxAt === 'function') { sfxAt('eliteStep', c.x, c.y, 1.6, 'giant-fall-land'); sfxAt('knock2', c.x, c.y, 1.3, 'giant-fall-land2'); }
   }

@@ -55,7 +55,7 @@ const GOURD = {
   bodyFlat: 0.5,        // 身體橢圓的扁度（縱向半徑＝橫向 × 這個比例）
   bodyY: 4,             // 身體橢圓的中心比腳底座標往下幾像素
   bodyAirLift: 24,      // 升空超過幾像素就不擋人
-  crackImage: 'images/破損建築/crack06.png',   // 砸下來時地上的裂痕圖
+  crackImage: 'images/破損建築/crack06.png',   // （舊的單張裂痕圖；現在改用 js/combat-feel.js 的 CRACK_ART 隨機挑）
   crackScale: 1,        // 裂痕圖放大倍率（原圖 120×80）
   crackLife: 5,         // 地裂留多久（秒）
   fx: {                 // 落地特效
@@ -513,25 +513,11 @@ function drawGourdGround(ctx) {
       ctx.beginPath(); ctx.moveTo(m.x + nx * off * .5 - ca * 4, m.y + ny * off * .25 - sa * 2); ctx.lineTo(m.x + nx * off * .5 + ca * 4, m.y + ny * off * .25 + sa * 2); ctx.stroke();
     }
   }
-  for (const k of G.gourdCracks || []) {   // 砸出來的地裂
+  for (const k of G.gourdCracks || []) {   // 砸出來的地裂：素材圖疊幾張（js/combat-feel.js 的 CRACK_ART），砸得越大越大片
     if (fxSkip(k.floor)) continue;
     if (!isVisible(k.x, k.y)) continue;
-    const img = monsterImage(C.crackImage);   // 地面裂痕圖（images/破損建築/crack06.png），隨機左右翻
-    if (img.complete && img.naturalWidth) {
-      const w = img.naturalWidth * (k.scale || C.crackScale), h = img.naturalHeight * (k.scale || C.crackScale), prev = ctx.imageSmoothingEnabled;
-      ctx.globalAlpha = Math.min(1, k.life / 1.5); ctx.imageSmoothingEnabled = false;
-      ctx.save(); ctx.translate(k.x, k.y); if (k.flip) ctx.scale(-1, 1);
-      ctx.drawImage(img, -w / 2, -h / 2, w, h);
-      ctx.restore(); ctx.imageSmoothingEnabled = prev;
-    }
-    ctx.globalAlpha = .5 * Math.min(1, k.life / 1.5); ctx.strokeStyle = '#1d1710'; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.ellipse(k.x, k.y, 26, 9, 0, 0, Math.PI * 2); ctx.stroke();
-    for (let i = 0; i < 7; i++) {
-      const a = k.seed + i * 0.9, len = 18 + ((i * 37 + k.seed * 13) % 16);
-      ctx.beginPath(); ctx.moveTo(k.x + Math.cos(a) * 12, k.y + Math.sin(a) * 4);
-      ctx.lineTo(k.x + Math.cos(a + .2) * (12 + len * .5), k.y + Math.sin(a + .2) * (4 + len * .2));
-      ctx.lineTo(k.x + Math.cos(a - .1) * (12 + len), k.y + Math.sin(a - .1) * (4 + len * .38)); ctx.stroke();
-    }
+    k.art = k.art || makeCrackArt(k.scale || C.crackScale, k.power ?? .7);
+    drawCrackArt(ctx, k.x, k.y, k.art, Math.min(1, k.life / 1.5));
   }
   for (const e of G.enemies) {   // 落點警示：蓄力時淡淡出現，升空後越來越紅、由外往內填滿
     const s = e.gm && e.gm.slam;

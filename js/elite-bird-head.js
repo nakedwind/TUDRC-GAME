@@ -49,7 +49,7 @@ const ELITE_BIRD = {
   returnRamCd: 1,                // 走回原位的路上撞到溫特：撞一次後幾秒內不再撞（傷害、擊退跟衝撞一樣）
   stepEvery: 60,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
   stepShake: 10, walkShake: 5,   // 衝撞、走路時每一步的畫面震動（貼身時的最大值；溫特在 shakeRange 格內才震，越近越大）
-  runCrack: { scale: .32, life: 3, image: 'images/破損建築/crack06.png' },   // 跑步（衝撞、衝回原位）時每一步踩出的小裂痕：大小（原圖 120×80 的幾倍）、留幾秒
+  runCrack: { scale: .32, life: 3 },   // 跑步時每一步踩出的小裂痕：大小（原圖的幾倍）、留幾秒；圖從 js/combat-feel.js 的 CRACK_ART 隨機挑   // 跑步（衝撞、衝回原位）時每一步踩出的小裂痕：大小（原圖 120×80 的幾倍）、留幾秒
   runDust: { rocks: 0, dust: 8, dustRise: 2, size: .6, spread: 10 },        // 跑步時每一步揚起的煙塵（js/gourd-monkey.js 的 rockBurstFx）
   shakeRange: 20,   // （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
 };
@@ -475,19 +475,15 @@ function stepEliteBird(e, dt) {
 function drawEliteGround(ctx) {
   const list = G.eliteCracks;
   if (!list || !list.length) return;
-  const C = ELITE_BIRD.runCrack, now = performance.now() / 1000, img = monsterImage(C.image);
-  G.eliteCracks = list.filter(k => now - k.at < C.life);
-  if (!img.complete || !img.naturalWidth) return;
-  const w = img.naturalWidth * C.scale, h = img.naturalHeight * C.scale, prev = ctx.imageSmoothingEnabled;
-  ctx.save(); ctx.imageSmoothingEnabled = false;
+  const C = ELITE_BIRD.runCrack, now = performance.now() / 1000;
+  G.eliteCracks = list.filter(k => now - k.at < (k.life || C.life));
+  ctx.save();
   for (const k of G.eliteCracks) {
     if (!isVisible(k.x, k.y)) continue;
-    ctx.globalAlpha = Math.min(1, (C.life - (now - k.at)) / 1) * .85;
-    ctx.save(); ctx.translate(k.x, k.y); ctx.rotate(k.rot); if (k.flip) ctx.scale(-1, 1);
-    ctx.drawImage(img, -w / 2, -h / 2, w, h);
-    ctx.restore();
+    k.art = k.art || makeCrackArt(k.size || C.scale, k.power || 0);   // size／power：這一處裂多大（巨物倒下、BOSS 登場會給比較大的）
+    drawCrackArt(ctx, k.x, k.y, k.art, Math.min(1, ((k.life || C.life) - (now - k.at)) / 1) * .85);
   }
-  ctx.restore(); ctx.imageSmoothingEnabled = prev;
+  ctx.restore();
 }
 function drawEliteTelegraphs(ctx) {
   if (!G || !G.enemies) return;

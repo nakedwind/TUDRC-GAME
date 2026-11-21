@@ -387,32 +387,10 @@ function drawBananaEmperorGround(ctx) {
   for (const c of G.beCracks || []) {
     const grow = Math.min(1, c.t / .15), glow = Math.max(0, 1 - c.t / K.glow), fade = c.fadeOut == null ? 1 : Math.max(0, c.fadeOut / K.fade);
     if (fade <= 0) continue;
-    ctx.save(); ctx.translate(c.x, c.y); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    const poly = (pts, dx = 0, dy = 0) => { ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x + dx, y + dy) : ctx.moveTo(x + dx, y + dy)); ctx.closePath(); };
-    // 一條裂縫一段一段畫：越往外越細（taper），剛裂開時從中間往外長出來（grow）
-    const crack = (l, wMul, dx, dy) => {
-      const n = Math.max(2, Math.ceil(l.pts.length * grow));
-      for (let i = 1; i < n; i++) {
-        const k = l.taper ? Math.pow(1 - (i - 1) / (l.pts.length - 1), .8) : 1;
-        ctx.lineWidth = Math.max(.6, l.w * k * wMul);
-        ctx.beginPath(); ctx.moveTo(l.pts[i - 1][0] + dx, l.pts[i - 1][1] + dy); ctx.lineTo(l.pts[i][0] + dx, l.pts[i][1] + dy); ctx.stroke();
-      }
-    };
-    ctx.globalAlpha = fade;
-    ctx.fillStyle = 'rgba(12,8,4,.45)'; poly(c.pit); ctx.fill();                                  // 中間凹下去
-    ctx.strokeStyle = 'rgba(0,0,0,.18)'; for (const l of c.lines) crack(l, 2.2, 0, 0);          // 裂縫邊緣淡淡的陰影
-    ctx.strokeStyle = 'rgba(16,11,6,.85)'; for (const l of c.lines) crack(l, 1, 0, 0);         // 裂縫本體（深色）
-    ctx.strokeStyle = 'rgba(255,238,205,.22)'; for (const l of c.lines) crack(l, .45, .8, 1.3);  // 下緣被光照到的亮邊：看起來有深度
-    for (const ch of c.chunks) {   // 碎土塊：亮的上面＋暗的影子
-      ctx.fillStyle = 'rgba(0,0,0,.28)'; poly(ch, .8, 1.6); ctx.fill();
-      ctx.fillStyle = 'rgba(210,190,150,.32)'; poly(ch); ctx.fill();
-      ctx.strokeStyle = 'rgba(30,20,10,.5)'; ctx.lineWidth = .8; poly(ch); ctx.stroke();
-    }
-    if (glow > 0) {   // 剛裂開：裂縫裡透出法術顏色的光
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = beRgb(c.col, .5 * glow * fade); for (const l of c.lines) crack(l, 2.4, 0, 0);
-      ctx.strokeStyle = beRgb(c.col.map(v => Math.min(255, v + 120)), .9 * glow * fade); for (const l of c.lines) crack(l, .55, 0, 0);
-    }
+    // 裂痕用素材圖（js/combat-feel.js 的 CRACK_ART）：大小照這片裂痕的範圍；剛裂開時從小長大、裂縫透出法術顏色的光
+    c.art = c.art || makeCrackArt(Math.max(.4, c.R * 2.2 / 110), c.R > 60 ? 1 : .4);
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(.6 + .4 * grow, .6 + .4 * grow);
+    drawCrackArt(ctx, 0, 0, c.art, fade, glow > 0 ? beHex(c.col.map(v => Math.min(255, v + 60))) : null, .9 * glow);
     ctx.restore();
   }
   for (const m of G.beCircles || []) beDrawCircle(ctx, m, now);

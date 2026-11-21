@@ -760,7 +760,7 @@ function mkFootsteps(e, moved) {
   G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 6, r2: 48, life: .32, life0: .32, color: '#b9b2a2' });
   if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);   // 跟鳥頭大隊長跑步一樣揚起一團煙塵（js/gourd-monkey.js）
   if (mk.coreIn) mkDropPool(e);   // 核心在肚子裡：踩一步留一攤腐蝕池
-  (G.eliteCracks = G.eliteCracks || []).push({ x: e.x + (Math.random() * 2 - 1) * 8, y: e.y + 14, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .5, flip: Math.random() < .5 });   // 跟鳥頭大隊長共用的小裂痕（js/elite-bird-head.js 的 drawEliteGround）
+  (G.eliteCracks = G.eliteCracks || []).push({ size: .42, x: e.x + (Math.random() * 2 - 1) * 8, y: e.y + 14, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .5, flip: Math.random() < .5 });   // 跟鳥頭大隊長共用的小裂痕（js/elite-bird-head.js 的 drawEliteGround）
   if (G.eliteCracks.length > 40) G.eliteCracks.shift();
   for (let i = 0; i < 4; i++) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() * 2 - 1) * 22, y: e.y + 14, vx: (Math.random() * 2 - 1) * 70, vy: -20 - Math.random() * 30, r: 2 + Math.random() * 2.5, life: .35, life0: .35, color: '#a9a292' });
   if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 1.2, 'milkfish-king-step');
@@ -999,7 +999,8 @@ function mkIntroLand(I) {
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 10 + i * 8, r2: 90 + i * 40, life: .45 + i * .12, life0: .45 + i * .12, color: i ? '#b9b2a2' : '#ffffff' });
   if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
   const cracks = G.eliteCracks = G.eliteCracks || [];   // 跟鳥頭大隊長共用的小裂痕
-  for (let i = 0; i < 4; i++) cracks.push({ x: e.x + (Math.random() * 2 - 1) * 40, y: e.y + 12 + (Math.random() * 2 - 1) * 10, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
+  cracks.push({ size: 1, power: 1, life: 6, x: e.x, y: e.y + 14, at: performance.now() / 1000 });   // 重重落地：中間一大片裂痕
+  for (let i = 0; i < 4; i++) cracks.push({ size: .5, life: 6, x: e.x + (Math.random() * 2 - 1) * 40, y: e.y + 12 + (Math.random() * 2 - 1) * 10, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
   if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
   if (typeof addPuddle === 'function') { const pd = addPuddle(e.x, e.y + 11, 14, 12); if (pd) pd.growTo = 46; }   // 地上一攤水（魚頭君的水漬，js/fish-head.js）
   if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 2, 'milkfish-king-intro-land');
