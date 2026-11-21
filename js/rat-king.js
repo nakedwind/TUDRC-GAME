@@ -697,7 +697,7 @@ function rkThrowLand(cap, wall) {
 }
 
 // ---- 死亡表演（節奏：暈眩 → 到站音樂 → 列車進站、越近越震 → 煞車聲 → 煞車來不及撞飛）----
-// 1. 血量歸零：畫面頓一下、白光輕閃、短暫慢動作；老鼠王卡在鐵軌上暈頭轉向（頭上轉星星）
+// 1. 血量歸零：畫面頓一下、短暫慢動作（不閃白）；老鼠王卡在鐵軌上暈頭轉向（頭上轉星星）
 function rkStartFinale(e) {
   const K = G.ratKing;
   e.hp = 1; e.rkHp = 1; e.rkStunT = 99; e.rkDying = true;
@@ -713,7 +713,7 @@ function rkStartFinale(e) {
   for (const c of G.cores || []) c.rkReact = null;
   for (const p of K.pops || []) { rkRelease(p.who); p.who.x = p.x; p.who.y = p.y; }   // 正要被拋出來的人：直接放出來
   K.under = []; K.pops = [];
-  K.phase = 'finale'; K.t = 0; K.hit = false; K.music = false; K.braked = false; K.rumble = 0; K.flash = .45;
+  K.phase = 'finale'; K.t = 0; K.hit = false; K.music = false; K.braked = false; K.rumble = 0; K.flash = 0;   // 暈眩開始：不閃白
   // 先算好：列車開始進站後幾秒會撞到老鼠王 → 煞車聲要在撞上前 brakeLead 秒響（可能在列車露臉之前就開始響）
   const F = RAT_KING.finale, tr = rkTrain();
   K.enterAt = F.daze + F.musicLead;
@@ -1017,7 +1017,7 @@ function ratKingSortables(list) {
     list.push({ floor: 1, y: rkEdgeY() + 1, draw: () => drawRkHeadlight(ctx, K) });
   }
 }
-// 畫面最上層（js/render.js 最後呼叫，螢幕座標）：死亡表演的白光（血量歸零輕閃一下、撞上去大閃一下）
+// 畫面最上層（js/render.js 最後呼叫，螢幕座標）：死亡表演的白光（只有撞上去那一下）
 function drawRatKingScreen(c) {
   const K = G && G.ratKing; if (!K || typeof cv === 'undefined') return;
   rkMuteHitFx();   // 溫特被丟出去、躺著的時候：畫面四周不閃紅（這個函式在受擊紅暈之前呼叫）
