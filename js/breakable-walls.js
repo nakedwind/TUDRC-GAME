@@ -340,6 +340,7 @@ function breakableWallDisplayTile(s, t) {
 }
 // 爆炸（x, y, 半徑 R 像素）：範圍內的可炸開牆往下一個階段
 function blastWalls(x, y, R) {
+  if (typeof gkBlastBoulders === 'function') gkBlastBoulders(x, y, R);   // 葫蘆猴王震下來擋路的大石頭：一炸就碎（js/gourd-king.js）
   if (!G || !MAP || !(G.wallStage instanceof Map)) return;   // 回憶劇情演出中（newGame 沒跑完）：牆還沒設定，不處理
   for (const s of MAP.stamps || []) {
     const spec = breakableWallSpec(s); if (!spec || spec.boss) continue;   // BOSS 牆：炸彈炸不開，只會被 BOSS 撞開（js/gourd-king.js）

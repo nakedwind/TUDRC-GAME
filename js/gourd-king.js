@@ -92,7 +92,7 @@ const GOURD_KING = {
       chance: .5,                // 沒瞄準的落石有幾成是大顆
       radius: 46,                // 大顆砸到的範圍（像素）
       damageMul: 1.6,            // 大顆的傷害是小顆的幾倍
-      hp: 400,                   // 落地的大石頭有多硬（怪物被擋住會去打它；爆炸也炸得開）
+      hp: 400,                   // 落地的大石頭有多硬（怪物被擋住會去打它）；爆炸（油桶、地雷、自爆史萊姆、希奧妮大招）一炸就碎（gkBlastBoulders）
       life: 25,                  // 落地後留幾秒就碎掉（免得 BOSS 場地被塞滿）
     },
   },
@@ -443,6 +443,16 @@ window.addEventListener('load', () => {
   obstacleImgs.gkBoulder = { h: monsterImage(ROCK_ART.big[0]) };
   obstacleImgs.gkBoulder2 = { h: monsterImage(ROCK_ART.big[1]) };
 });
+// 爆炸炸到落地的大石頭：直接碎掉（js/breakable-walls.js 的 blastWalls 呼叫——會炸開牆的爆炸都算）
+function gkBlastBoulders(x, y, R) {
+  let hit = false;
+  for (const b of G.gkBoulders || []) {
+    const cx = OX + (b.o.c + 1) * CELL, cy = OY + (b.o.r + 1.5) * CELL;
+    if (Math.hypot(cx - x, cy - y) > R + CELL) continue;
+    b.o.hp = 0; hit = true;
+  }
+  if (hit) gkUpdateBoulders(0);
+}
 // 落地的大石頭：時間到（或被打爛）就碎掉
 function gkUpdateBoulders(dt) {
   if (!G.gkBoulders || !G.gkBoulders.length) return;
