@@ -31,6 +31,7 @@ const CAP_KING = {
   coreShield: .9,          // 還有大夯吉寶活著（含還躲在帽子裡沒跳出來的）時，核心少受幾成傷害
   big: {                   // 大夯吉寶（以普通夯吉寶 data/monsters.js 的數值為基準）
     name: '大夯吉寶',
+    artDir: 'images/monster/hangi-bao-big/',   // 專用的圖（身體紫藍）：檔名跟夯吉寶一樣，只換資料夾；順順宮主也用這組、再疊 coreTint；用 tools/recolor-hangi-bao-big.py 從夯吉寶的圖換色產生
     scale: 2.6, hpMul: 18, dmgMul: 1.8, rewardMul: 5, crystalMul: 5,   // hpMul 18 → 血量 810
     lordHp: 1800,          // 跟核心躲在同一頂帽子裡的那隻（順順宮主本人）的血量
     coreTint: '#ffb4a6',   // 跟核心躲在同一頂帽子裡的那隻：用色彩增值疊這個顏色，看起來稍微偏紅（越接近白色越淡，越紅越明顯）
@@ -178,6 +179,11 @@ function capKingSpawnBig(cap) {
   const withCore = cap === G.capKing.coreCap;
   e.capKing = true; e.eliteName = withCore ? CAP_KING.name : B.name;   // 跟核心躲在一起的那隻就是「順順宮主」本人（血條、倒下提示、擊殺統計都用這個名字）
   e.capKingLord = withCore;
+  if (B.artDir) {   // 換成大夯吉寶專用的圖（另外複製一份，不要改到普通夯吉寶共用的設定）
+    const swap = f => typeof f === 'string' && /\.png$/i.test(f) ? B.artDir + f.split('/').pop() : f;
+    e.sprite = swap(e.sprite);
+    if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(swap) : swap(f)]));
+  }
   e.hp = e.maxhp = withCore ? B.lordHp : Math.round(e.maxhp * B.hpMul);
   if (withCore && B.coreTint) e.tint = 'multiply:' + B.coreTint;   // 稍微偏紅（js/combat-feel.js 的 tintedSprite）
   e.playerDamage = Math.round(e.playerDamage * B.dmgMul);
