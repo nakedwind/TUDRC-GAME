@@ -425,7 +425,7 @@ function drawEnemy(e) {
   const bodyX = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleX || 1), bodyY = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleY || 1);
   const slimeW = (e.drawWidth || 42) * bodyX * sqX, slimeH = (e.drawHeight || 33) * bodyY * sqY;
   const bottomY = e.y + 13 - lift;
-  const shadowScale = Math.max(.55, 1 - lift / 22) * size * (e.behavior === 'gourd' ? (e.drawWidth || 42) / 40 : 1);   // 葫蘆猴身體很寬：影子跟著變大
+  const shadowScale = Math.max(.55, 1 - lift / 22) * size * (e.behavior === 'gourd' ? (e.drawWidth || 42) / 40 : e.mk ? (e.drawWidth || 220) * .3 / 15 : 1);   // 葫蘆猴身體很寬：影子跟著變大；虱目魚王：影子半徑＝身體寬的 3 成（js/milkfish-king.js）
   ctx.globalAlpha = .28 * Math.min(1, shadowScale); ctx.fillStyle = '#071015';
   if (e.behavior !== 'burrow') { ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill(); }   // 版權老鼠從土堆裡出來，不畫腳下陰影
   // 撲擊落點警示：蓄力時由外往內縮的紅圈＋逐漸填滿，飛撲時保持顯示

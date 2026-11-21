@@ -32,7 +32,7 @@ const MILKFISH_KING_MAPS = {
 const MILKFISH_KING_FX = {
   name: '虱目魚王',
   artDir: 'images/monster/milkfish-king/',   // 專用的圖（上衣紫藍、短褲和頭髮深紫藍）：檔名跟虱目魚小子一樣，只換資料夾；用 tools/recolor-milkfish-king.py 換色產生
-  stepEvery: 70,          // 每走幾像素踩一步（震動、腳步聲）
+  stepEvery: 50,          // 每走幾像素踩一步（震動、腳步聲）；2026-11-21 從 70 改 50（踩得快 4 成）
   shakeRange: 18,         // 溫特在幾格內才感覺得到震動
   stepShakeTime: .3,      // 每一步的震動維持幾秒再慢慢停（震動大小是怪物編輯器的「腳步震動大小」；以前只震一瞬間、牠又走很慢，幾乎感覺不到）
   eatReach: 95,           // 離隊友幾像素內可以吞
