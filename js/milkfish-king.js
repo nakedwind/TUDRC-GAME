@@ -16,13 +16,17 @@
        隊友飛到地上受傷、躺著暈眩（借用 js/vines.js 被藤蔓丟下來的動畫），落點旁邊的人也會被砸到。
    ・吐核心（表演）：血量每掉 coreSpitHp，就把核心吐到地上，喘 coreOutTime 秒後急著衝回去吞回來；核心在地上時打得到。
    ・倒下：核心掉在原地，嘴裡的隊友獲救（直接放出來）。
+   ・從水池登場（地圖設定 intro: 'pool'，G11 有開）：一開始不在場上，躲在旁邊的深水區裡。溫特開槍打到核心 →
+       畫面越震越大、水池冒泡（introRumble 秒）→ 從水池最靠近原位的那格竄出來，水花炸開、一道水浪跟著牠衝上來，
+       在空中一路滴水 → 重重落在原位（大震動、水花、地上留一攤水）→ 吼叫，走去把核心吞進肚子。
+       在空中的時候還不算在場上（打不到、不會被瞄準）。數值在怪物編輯器「虱目魚王」的「登場」那幾格。
    數值：怪物編輯器的「虱目魚王」（data/monsters.js 的 milkfish_king；行為欄位表在 js/monster-data.js 的 MILKFISH_KING_FIELDS）。
    哪張地圖有牠：下面的 MILKFISH_KING_MAPS。
    必須在 milkfish-kid.js、vines.js、landmine.js、oil-barrels.js 之後、game.js 之前載入。
 */
-// 地圖 id → 出生位置（{ c, r }；空的 {}＝站在地圖核心下方 2 格）
+// 地圖 id → 出生位置（{ c, r }；沒寫＝站在地圖核心下方 2 格）；intro: 'pool'＝一開始躲在旁邊的深水區，溫特開槍打核心才竄出來
 const MILKFISH_KING_MAPS = {
-  map_mwm655e8: {},   // G11區-綠線捷運站
+  map_mwm655e8: { intro: 'pool' },   // G11區-綠線捷運站：右邊的水池
 };
 // 不想給編輯器調的細節（動畫、特效）
 const MILKFISH_KING_FX = {
@@ -48,6 +52,12 @@ const MILKFISH_KING_FX = {
   gaitMin: .3,            // 落腳那一刻的速度只剩幾成（越小越「一頓一頓」）；平均速度還是怪物編輯器的「速度」
   bobHeight: 5,           // 走路時身體上下起伏多高（像素）
   shards: { cols: 3, rows: 3, gravity: 900, life: 1.2 },   // 吐出來的建築碎掉：切成幾塊、往下掉多快、碎片留幾秒
+  // 從水池登場的細節（秒數、高度、震動大小在怪物編輯器）
+  intro: { poolSearch: 10,   // 從原位往外找幾格內的深水
+    sink: .85,               // 一開始沉在水面下多深（身體高度的幾成）
+    waveUntil: .62,          // 水浪跟到飛行的哪裡（0～1）才斷掉落回水裡
+    waveWrap: .28,           // 浪頭包住牠身體下面多高（身體高度的幾成）
+    bubbleEvery: .07 },      // 震動時水面每隔幾秒冒一個泡泡
 };
 // 走路一頓一頓的時候，為了讓平均速度不變要乘的倍數（照 gaitMin 先算好）
 const MK_GAIT_NORM = (() => { const m = MILKFISH_KING_FX.gaitMin, n = 200; let s = 0; for (let i = 0; i < n; i++) s += 1 / (m + (1 - m) * Math.sin(Math.PI * (i + .5) / n)); return s / n; })();
@@ -60,7 +70,7 @@ const mkAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
 
 // ---- 開場：照 MILKFISH_KING_MAPS 擺在核心旁（game.js 在 seedCores 之後呼叫）----
 function seedMilkfishKing() {
-  G.mkKings = []; G.mkShots = []; G.mkShards = [];
+  G.mkKings = []; G.mkShots = []; G.mkShards = []; G.mkIntro = null;
   const cfg = typeof MAP !== 'undefined' && MAP ? MILKFISH_KING_MAPS[MAP.id] : null;
   if (!cfg || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'milkfish_king');
@@ -77,6 +87,7 @@ function seedMilkfishKing() {
   if (!inGrid(c, r) || isWall(c, r)) return;
   const [x, y] = center(c, r), e = createMonster(base, x, y);
   mkInit(e, core);
+  if (cfg.intro === 'pool' && mkIntroSetup(e)) return;   // 從水池登場：先躲起來，溫特開槍打核心才出來
   G.enemies.push(e);
 }
 // 離 (x, y) 最近、走得到的空格（一圈一圈往外找）
@@ -550,6 +561,7 @@ function mkLaunchMate(e, t, x1, y1) {
 // ---- 每幀（milkfish-kid.js 的 updateMilkfish 呼叫）：嘴裡的人跟著走、飛行中的東西、BOSS 倒下 ----
 function updateMilkfishKing(dt) {
   if (!G) return;
+  mkIntroUpdate(dt);   // 從水池登場的表演
   for (const e of [...mkKings()]) {
     const mk = e.mk;
     if (!mkAlive(e)) { mkDown(e); continue; }
@@ -853,3 +865,178 @@ function milkfishKingBars() {
 }
 // BOSS 音樂（js/boss-music.js）：醒著、活著就算在戰鬥
 const milkfishKingHunting = () => mkKings().some(e => e.eliteAwake && mkAlive(e) && e.mk.state !== 'return');
+
+
+// ===== 從水池登場（MILKFISH_KING_MAPS 的 intro: 'pool'）=====
+// G.mkIntro = { e, phase: 'hidden'→'rumble'→'leap', t, from: 竄出的水面, to: 落地點（原位） }
+// 躲著的時候牠不在 G.enemies、也不在 G.mkKings（打不到、不畫、沒有血條）；落地那一刻才放上場。
+function mkIntroSetup(e) {
+  const F = MILKFISH_KING_FX.intro, [hc, hr] = cellAt(e.x, e.y);
+  if (typeof deepWaterBlocksCell !== 'function') return false;
+  let best = null, bestD = Infinity;   // 離原位最近的深水格
+  for (let r = hr - F.poolSearch; r <= hr + F.poolSearch; r++) for (let c = hc - F.poolSearch; c <= hc + F.poolSearch; c++) {
+    if (!inGrid(c, r) || !deepWaterBlocksCell(c, r)) continue;
+    const d = Math.hypot(c - hc, r - hr);
+    if (d < bestD) { best = [c, r]; bestD = d; }
+  }
+  if (!best) return false;   // 附近沒有水池：照舊直接站在原位
+  // 往水池裡面再挪一格（不要剛好在池邊，水花才不會噴到岸上一半）
+  const dc = Math.sign(best[0] - hc), dr = Math.sign(best[1] - hr);
+  if (inGrid(best[0] + dc, best[1] + dr) && deepWaterBlocksCell(best[0] + dc, best[1] + dr)) { best[0] += dc; best[1] += dr; }
+  const [fx, fy] = center(best[0], best[1]);
+  G.mkKings = G.mkKings.filter(k => k !== e);   // mkInit 放進去的：還沒上場，先拿掉
+  G.mkIntro = { e, phase: 'hidden', t: 0, from: { x: fx, y: fy }, to: { x: e.x, y: e.y }, bubbleT: 0 };
+  return true;
+}
+// 溫特開槍打中核心（js/game.js 呼叫）：還躲在水裡就開始登場
+function milkfishKingCoreShot(core) {
+  const I = G && G.mkIntro;
+  if (!I || I.phase !== 'hidden' || (I.e.mk.core && I.e.mk.core !== core)) return;
+  I.phase = 'rumble'; I.t = 0;
+  if (typeof systemNotice === 'function') systemNotice('水池裡好像有什麼東西……！', true);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', I.from.x, I.from.y, 1.2, 'milkfish-king-intro-rumble');   // 水底傳來低沉的吼聲
+}
+function mkIntroUpdate(dt) {
+  const I = G.mkIntro;
+  if (G.poolSplash && G.poolSplash.length && typeof updatePoolSplash === 'function' && !(typeof poolTideActive === 'function' && poolTideActive())) updatePoolSplash(dt);   // 水花（池核地圖以外由這裡更新；池核自己會更新）
+  if (!I || I.phase === 'hidden') return;
+  const e = I.e, C = mkCfg(e), F = MILKFISH_KING_FX.intro;
+  I.t += dt;
+  if (I.phase === 'rumble') {   // 越震越大、水面冒泡
+    const k = Math.min(1, I.t / C.introRumble);
+    mkRumble(C.introShake * (.25 + .75 * k), .25);
+    I.bubbleT -= dt;
+    while (I.bubbleT <= 0) {
+      I.bubbleT += F.bubbleEvery / (.4 + k);   // 越接近竄出越密
+      const a = Math.random() * Math.PI * 2, rr = Math.random() * CELL * (.6 + 1.2 * k), x = I.from.x + Math.cos(a) * rr, y = I.from.y + Math.sin(a) * rr * .5;
+      const list = G.poolSplash || (G.poolSplash = []);
+      list.push({ ring: true, x, y, r0: 2, r1: 10 + Math.random() * 16 * (1 + k), t: 0, life: .5 + Math.random() * .3 });   // 泡泡破掉的小水波
+      if (Math.random() < .5 + .5 * k) list.push({ x, y, z: 0, vx: (Math.random() - .5) * 30, vy: (Math.random() - .5) * 12, vz: 80 + Math.random() * 140 * (1 + k), r: 1.5 + Math.random() * 2.5, t: 0, life: 1 });   // 小水珠彈起來
+    }
+    if (I.t >= C.introRumble) mkIntroLeap(I);
+    return;
+  }
+  if (I.phase === 'leap') {
+    const p = Math.min(1, I.t / C.introLeapTime);
+    e.x = I.from.x + (I.to.x - I.from.x) * p; e.y = I.from.y + (I.to.y - I.from.y) * p;
+    e.slimeLift = mkIntroLift(e, p);
+    e.faceRight = I.to.x > I.from.x;
+    mfPose(e, p < .7 ? 'attack' : null, I.to.x);   // 張大嘴衝出來，快落地時換回站姿
+    // 身上一路往下滴水
+    const w = e.drawWidth || 200, h = e.drawHeight || 240, list = G.poolSplash || (G.poolSplash = []);
+    if (e.slimeLift > 0) for (let i = 0; i < 2; i++) list.push({ x: e.x + (Math.random() - .5) * w * .5, y: e.y, z: e.slimeLift + Math.random() * h * .7, vx: (Math.random() - .5) * 40, vy: 0, vz: -20 + Math.random() * 60, r: 2 + Math.random() * 3, t: 0, life: 1.5 });
+    // 水浪斷掉的那一刻：上半截散成水珠落回去
+    if (!I.waveBroke && p >= F.waveUntil) { I.waveBroke = true; mkIntroWaveBreak(I); }
+    if (p >= 1) mkIntroLand(I);
+  }
+}
+// 高度：一開始沉在水面下，往上衝出去，畫一道拋物線落在原位（0＝站在地上）
+function mkIntroLift(e, p) {
+  const C = mkCfg(e), sink = (e.drawHeight || 240) * MILKFISH_KING_FX.intro.sink;
+  return 4 * C.introLeapHeight * p * (1 - p) - sink * Math.pow(1 - p, 4);
+}
+function mkIntroLeap(I) {
+  const e = I.e;
+  I.phase = 'leap'; I.t = 0;
+  e.x = I.from.x; e.y = I.from.y; e.slimeLift = mkIntroLift(e, 0);
+  const w = e.drawWidth || 200;
+  if (typeof poolBossSplash === 'function') poolBossSplash({ x: I.from.x, y: I.from.y - 8, drawWidth: w * 1.3 }, 'up');   // 水花炸開（跟池核 BOSS 出水同一套，會震、有水聲）
+  if (typeof sfxAt === 'function') sfxAt('poolBossDive', I.from.x, I.from.y, 1.2, 'milkfish-king-intro-splash');
+  mkRumble(mkCfg(e).introShake * 1.3, .5);
+  flash('嘩啦——！！', I.from.x, I.from.y - 120, '#9fd6ff');
+}
+// 水浪斷掉：沿著水浪散成一大堆水珠往下掉
+function mkIntroWaveBreak(I) {
+  const e = I.e, list = G.poolSplash || (G.poolSplash = []), w = e.drawWidth || 200, topZ = Math.max(0, e.slimeLift);
+  for (let i = 0; i < 70; i++) {
+    const k = Math.random(), x = I.from.x + (e.x - I.from.x) * k, y = I.from.y + (e.y - I.from.y) * k, z = topZ * k * (.6 + Math.random() * .5);
+    list.push({ x: x + (Math.random() - .5) * w * .35, y: y + (Math.random() - .5) * 10, z, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 20, vz: -20 + Math.random() * 120, r: 2.5 + Math.random() * 4, t: 0, life: 1.6 });
+  }
+}
+function mkIntroLand(I) {
+  const e = I.e, C = mkCfg(e), w = e.drawWidth || 200;
+  G.mkIntro = null;
+  e.x = I.to.x; e.y = I.to.y; e.slimeLift = 0; e.hitSquashT = .16;   // 落地壓扁一下
+  e.mk.home = { x: e.x, y: e.y };
+  G.enemies.push(e);
+  if (!G.mkKings.includes(e)) G.mkKings.push(e);
+  // 重重落地：大震動、塵土、裂痕，身上的水濺開、地上留一攤水
+  mkRumble(C.introLandShake, .6);
+  if (typeof addHitstop === 'function') addHitstop(.06);
+  if (typeof poolBossSplash === 'function') poolBossSplash({ x: e.x, y: e.y + 6, drawWidth: w }, 'land');
+  for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 10 + i * 8, r2: 90 + i * 40, life: .45 + i * .12, life0: .45 + i * .12, color: i ? '#b9b2a2' : '#ffffff' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
+  const cracks = G.eliteCracks = G.eliteCracks || [];   // 跟鳥頭大隊長共用的小裂痕
+  for (let i = 0; i < 4; i++) cracks.push({ x: e.x + (Math.random() * 2 - 1) * 40, y: e.y + 12 + (Math.random() * 2 - 1) * 10, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
+  if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
+  if (typeof addPuddle === 'function') { const pd = addPuddle(e.x, e.y + 11, 14, 12); if (pd) pd.growTo = 46; }   // 地上一攤水（魚頭君的水漬，js/fish-head.js）
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 2, 'milkfish-king-intro-land');
+  mkRoar(e);   // 吼叫 → 走去把核心吞進肚子
+}
+// 畫在空中的牠＋跟著衝上來的水浪（js/render.js 收集要排前後的東西時呼叫）
+function milkfishKingSortables(list) {
+  const I = G && G.mkIntro;
+  if (!I || I.phase !== 'leap') return;
+  list.push({ floor: typeof visualFloor === 'function' ? visualFloor(I.e) : 1, band: typeof DRAW_BAND !== 'undefined' ? DRAW_BAND.obj : 2, y: Math.max(I.e.y, I.from.y) + 13, draw: () => mkIntroDraw(ctx, I) });   // 跟一般怪物一樣排在人物那一層
+}
+function mkIntroDraw(ctx, I) {
+  const e = I.e, F = MILKFISH_KING_FX.intro, C = mkCfg(e), p = Math.min(1, I.t / C.introLeapTime);
+  const w = e.drawWidth || 200, footY = e.y + 13, bodyBottom = footY - e.slimeLift;
+  // 水浪：從水面往上捲到牠身體下面的一道水，越往上越細；飛到 waveUntil 就斷掉（散成水珠由 mkIntroWaveBreak 做）
+  const h = e.drawHeight || 240, now = performance.now() / 1000;
+  const fade = p < F.waveUntil ? 1 - Math.max(0, (p - F.waveUntil * .6) / (F.waveUntil * .4)) : 0;
+  // 浪頭的位置：包住牠下半身（身體下緣往上 waveWrap 的高度）
+  const crestY = Math.min(I.from.y + 10, bodyBottom - h * F.waveWrap);
+  if (fade > 0) {
+    const bx = I.from.x, by = I.from.y + 12, tx = e.x, ty = crestY;
+    const baseW = w * .95, topW = w * .62, midX = bx + (tx - bx) * .4, midY = by - (by - ty) * .55;   // 底下寬、往上收、中間往前鼓
+    const wob = Math.sin(now * 18) * 4;   // 水在流動：邊緣微微抖
+    const shape = (k, dy = 0) => {   // k＝寬度倍數（畫內層亮光用）
+      ctx.beginPath();
+      ctx.moveTo(bx - baseW * k / 2, by + dy);
+      ctx.quadraticCurveTo(midX - (baseW + topW) * k / 4 - wob, midY, tx - topW * k / 2, ty + dy);
+      ctx.quadraticCurveTo(tx, ty - 26 * k + dy, tx + topW * k / 2, ty + dy);   // 頂端圓圓鼓起的浪頭
+      ctx.quadraticCurveTo(midX + (baseW + topW) * k / 4 + wob, midY, bx + baseW * k / 2, by + dy);
+      ctx.closePath();
+    };
+    ctx.save();
+    // 外層：深一點的水藍
+    ctx.globalAlpha = .9 * fade;
+    const g = ctx.createLinearGradient(0, by, 0, ty - 26);
+    g.addColorStop(0, 'rgba(40,120,200,1)'); g.addColorStop(.55, 'rgba(90,175,235,1)'); g.addColorStop(1, 'rgba(200,240,255,1)');
+    ctx.fillStyle = g; shape(1); ctx.fill();
+    // 內層：亮一點，像水裡透光
+    ctx.globalAlpha = .55 * fade; ctx.fillStyle = 'rgba(200,240,255,1)'; shape(.45, -6); ctx.fill();
+    // 兩邊白色浪花邊
+    ctx.globalAlpha = .95 * fade; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    shape(1); ctx.stroke();
+    // 邊上一顆顆的浪花泡沫
+    ctx.fillStyle = '#f4fcff';
+    for (let i = 0; i <= 10; i++) {
+      const k = i / 10, side = i % 2 ? 1 : -1;
+      const x = bx + (tx - bx) * k + side * (baseW + (topW - baseW) * k) / 2, y = by + (ty - by) * k;
+      ctx.beginPath(); ctx.arc(x + Math.sin(now * 12 + i) * 3, y, 5 + 5 * (1 - k) + Math.sin(now * 9 + i * 2) * 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+    // 水面上一大圈白沫
+    ctx.globalAlpha = .9 * fade; ctx.fillStyle = 'rgba(240,250,255,.95)';
+    ctx.beginPath(); ctx.ellipse(bx, by, baseW * .75, baseW * .2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // 牠的身體：還在水面下的部分不畫（腳底那條線以下＝水裡）
+  ctx.save();
+  if (e.slimeLift < 0) { ctx.beginPath(); ctx.rect(e.x - w * 2, footY - 2000, w * 4, 2000); ctx.clip(); }
+  drawEnemy(e);
+  ctx.restore();
+  // 浪頭的白沫蓋在牠身體前面：看起來像被水浪托著、包著衝上來
+  if (fade > 0) {
+    ctx.save(); ctx.globalAlpha = .92 * fade;
+    const cw = w * .62 / 2, cy = crestY + 4;
+    const g2 = ctx.createLinearGradient(0, cy - 20, 0, cy + 24);
+    g2.addColorStop(0, 'rgba(255,255,255,1)'); g2.addColorStop(1, 'rgba(120,195,240,.0)');
+    ctx.fillStyle = g2;
+    ctx.beginPath(); ctx.ellipse(e.x, cy + 6, cw, 22, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 7; i++) { const k = i / 6 - .5; ctx.beginPath(); ctx.arc(e.x + k * cw * 1.8, cy - 4 + Math.abs(k) * 10 + Math.sin(now * 14 + i) * 2, 7 + (1 - Math.abs(k) * 2) * 5, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+}

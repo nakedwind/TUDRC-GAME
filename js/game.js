@@ -2124,6 +2124,7 @@ function updatePlayerAttack(dt) {
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
     const critMul = rollCrit('player'), shotDmg = Math.round(playerGun().dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
+    if (typeof milkfishKingCoreShot === 'function') milkfishKingCoreShot(best);   // 虱目魚王還躲在水池裡：開始登場表演（js/milkfish-king.js）
     best.hp -= shotDmg; markHit(critMul);
     if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
     if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60, true); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');

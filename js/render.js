@@ -1094,6 +1094,7 @@ function draw() {
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);
   if (typeof ratKingSortables === 'function') ratKingSortables(sortables);   // 花蓮老鼠王的手、被撞飛的本體（js/rat-king.js）   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof loofahQueenSortables === 'function') loofahQueenSortables(sortables);   // 絲瓜女王頭上吊著的核心（js/loofah-queen.js）
+  if (typeof milkfishKingSortables === 'function') milkfishKingSortables(sortables);   // 虱目魚王從水池竄出來、在空中的樣子＋水浪（js/milkfish-king.js）
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
   if (typeof escalatorSortables === 'function') escalatorSortables(sortables);   // 側面手扶梯前面的扶手外殼：蓋在站在上面的人身上（js/escalators.js）
   if (typeof mrtTrainSortables === 'function') mrtTrainSortables(sortables);   // 捷運列車（js/mrt-train.js）
