@@ -409,14 +409,18 @@ function escapeDarkness(actor, dt) {
   if (actor.groundTrip || nearFollowedPlayer(actor)) return false;
   // 被叫來跟隨護衛、而且找得到路過去：中間暗也照走（不然走進暗處就逃回燈下、再往前又逃回來，看起來像站在原地不動）
   // 每秒重新確認一次「找得到路」（穿過黑暗也算），路被擋住時才照舊躲回燈下
-  if (actor.mode === 'escort' && G && G.player && !MAP_SAFE) {
+  // 自由走動、平常就跟著別人走的隊員也一樣（跟著溫特的大家、跟著艾德林的阿瓦倫）：溫特走進沒開燈的地方（例如 B56 沒開燈的路橋）時，
+  // 不然隊員一踩進暗處就被拉回燈下，整隊停在最後一盞燈旁邊不跟（sentryCompanionRule）
+  const followAnchor = actor.mode === 'escort' ? G && G.player
+    : (actor.mode === 'free' && G && G.towers && G.towers.includes(actor) ? sentryCompanionRule(actor)?.anchor : null);
+  if (followAnchor && G && G.player && !MAP_SAFE) {
     actor.escortRouteT = (actor.escortRouteT || 0) - dt;
     if (actor.escortRouteT <= 0) {
       actor.escortRouteT = 1;
-      actor.escortRouteOk = buildSentryPath(actor, G.player.x, G.player.y, true, hasFloors ? actorFloor(G.player) : null) !== null;
+      actor.escortRouteOk = buildSentryPath(actor, followAnchor.x, followAnchor.y, true, hasFloors ? actorFloor(followAnchor) : null) !== null;
     }
     if (actor.escortRouteOk) return false;
-    if (typeof watchSentryProgress === 'function' && !personnelInLight(actor.x, actor.y)) watchSentryProgress(actor, dt, leaderLabel(), () => sentryLeaderBlockReason(actor));   // 過不去又待在暗處：一樣說出原因（js/sentry-blocked.js）
+    if (actor.mode === 'escort' && typeof watchSentryProgress === 'function' && !personnelInLight(actor.x, actor.y)) watchSentryProgress(actor, dt, leaderLabel(), () => sentryLeaderBlockReason(actor));   // 過不去又待在暗處：一樣說出原因（js/sentry-blocked.js）
   }
   if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
     if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
@@ -977,7 +981,7 @@ function updateSentryMain(t, dt) {
     } else t.leftBehind = false;
     if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
       t.target = null; t.waitT = 0;
-      t.followDark = companion.anchor === G.player || inDoorway;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）；站在門口：門外暗也要走出來，不然會一直堵在門裡
+      t.followDark = true;   // 跟著別人走（溫特、或阿瓦倫跟著艾德林）：中間是暗的也照走（溫特身上有燈）；站在門口：門外暗也要走出來，不然會一直堵在門裡
       // 站在門口、對方就在旁邊：直接走到對方站的地方（對方常常就停在門口外面一格，只靠近到一格內的話會停在門裡）；一走出門口就照平常停下來
       followTarget(t, companion.anchor, { dist: inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
       if (t.mode === 'escort' && typeof watchSentryProgress === 'function') watchSentryProgress(t, dt, leaderLabel(), () => sentryLeaderBlockReason(t));   // 叫來護衛卻過不來：說出原因（js/sentry-blocked.js）
