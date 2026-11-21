@@ -19,6 +19,7 @@ const LOOFAH_QUEEN = {
   maps: { map_f307boss: { c: 86, r: 15 }, map_mw2dn6re: { c: 113, r: 23 } },   // 出現在哪幾張地圖、生在哪一格（測試：F307 BOSS 場地、F307 本圖的農田房上方）
   hp: 3000, dmgMul: 1.5, rewardMul: 6, crystalMul: 6,   // 以絲瓜小姐（data/monsters.js）為基準；hp：血量（再乘整體難度）
   scale: 2.5,                    // 體型放大倍率
+  artDir: 'images/monster/loofah-queen/',   // 專用的圖（絲瓜頭紫藍、裙子淡紫、眼珠紅）：檔名跟絲瓜小姐一樣，只換資料夾；用 tools/recolor-loofah-queen.py 從絲瓜小姐的圖換色產生
   slow: 2,                       // 動作慢幾倍：走路速度 ÷ slow；抬腳、收腳、踏地間隔 × slow（以絲瓜小姐的 LOOFAH 為基準）
   wakeRange: 7,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
   loseRange: 16,                 // 目標離她幾格以外就不追
@@ -78,6 +79,9 @@ const lqAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
 const lqDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
 // ---- 開場（game.js 在 seedCores、seedVines 之後呼叫）----
+// 絲瓜小姐的圖片路徑 → 女王專用的那張（同檔名、換到 LOOFAH_QUEEN.artDir 資料夾）
+const lqArt = f => typeof f === 'string' && /\.png$/i.test(f) && LOOFAH_QUEEN.artDir ? LOOFAH_QUEEN.artDir + f.split('/').pop() : f;
+
 // G.loofahQueens：[{ e, core, state, h, fallV, plots }]；state：carried（吊在她頭上）→ hung（她倒下，吊在原地）→ falling → down
 function seedLoofahQueen() {
   G.loofahQueens = [];
@@ -100,6 +104,8 @@ function seedLoofahQueen() {
   lqCorePool(core, false);
   const e = createMonster(base, x, y);
   e.loofahQueen = true; e.eliteName = Q.name;
+  e.sprite = lqArt(e.sprite);   // 換成女王專用的圖（另外複製一份，不要改到絲瓜小姐共用的設定）
+  if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(lqArt) : lqArt(f)]));
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * Q.hp);   // createMonster 給的是絲瓜小姐血量 × 整體難度：換成女王的血量，難度照樣乘
   e.playerDamage = Math.round(e.playerDamage * Q.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * Q.dmgMul);
@@ -195,7 +201,7 @@ function stepLoofahQueen(e, dt) {
   q.cd -= dt;
   if (e.stunT > 0) { q.windup = 0; q.recover = 0; e.forceFrame = null; return; }
   if (q.windup > 0) {   // 抬腳 → 重踏
-    q.windup -= dt; e.forceFrame = L.stompFrame;
+    q.windup -= dt; e.forceFrame = lqArt(L.stompFrame);
     if (q.windup <= 0) lqStomp(e);
     return;
   }
