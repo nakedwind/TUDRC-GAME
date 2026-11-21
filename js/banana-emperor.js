@@ -53,7 +53,9 @@ const BANANA_EMPEROR = {
     def:  { name: '防禦下降',   mul: 1.4, time: 8 },          // 藍：受到的傷害 × mul
     spd:  { name: '速度下降',   mul: .6,  time: 8 },          // 紫：走路速度 × mul
   },
-  shake: 7,                      // 敲地時畫面震多大
+  shake: 16,                     // 施法第二下（真正放出法術那一下）畫面震多大（貼身時；2026-11-21 從 7 加強）
+  shakeRange: 22,                // 溫特在幾格內感覺得到敲地的震動（越近越大；以前只有 6 格）
+  tap1: { hold: .28, lift: .22, shake: 8, crack: .6 },   // 施法敲兩下：第一下停幾秒、再舉起來幾秒、第一下震多大、第一下的裂痕大小（倍）
   step: { every: 30, shake: 4.5, range: 18 },   // 走路：每走幾像素踩一步（2026-11-21 使用者指定 30，原本 56）、每一步畫面震多大（貼身時）、溫特在幾格內才感覺得到（越近越大）
   cracks: {                      // 地上的裂痕（整場戰鬥都在，越敲越多）
     count: 8, len: [55, 120],    // 每片幾條裂縫、每條多長（像素）
@@ -191,6 +193,16 @@ function stepBananaEmperor(e, dt) {
   be.hp0 = e.hp;
   if (e.stunT > 0 && !be.phase) { e.forceFrame = BE_ART.stand; return; }
   if (be.phase === 'raise') { beRaise(e, rec, dt); return; }
+  if (be.phase === 'tap1') {   // 敲第一下：停在敲地姿勢一下
+    be.t -= dt; e.forceFrame = BE_ART.tap; e.forceFlip = !!e.faceRight;
+    if (be.t <= 0) { be.phase = 'reraise'; be.t = B.tap1.lift; }
+    return;
+  }
+  if (be.phase === 'reraise') {   // 再舉起來，準備敲第二下（真正放出法術）
+    be.t -= dt; e.forceFrame = BE_ART.raise; e.forceFlip = !!e.faceRight;
+    if (be.t <= 0) beFinalTap(e, rec);
+    return;
+  }
   if (be.phase === 'tap') { be.t -= dt; e.forceFrame = BE_ART.tap; e.forceFlip = !!e.faceRight; if (be.t <= 0) { be.phase = null; e.forceFrame = BE_ART.stand; } return; }
   if (!e.eliteAwake) { beWander(e, rec, dt); return; }
   be.cd -= dt;
@@ -260,12 +272,25 @@ function beRaise(e, rec, dt) {
     G.effects.push({ particle: true, x: sx + Math.cos(a) * r, y: sy + Math.sin(a) * r, vx: -Math.cos(a) * r * 3.4, vy: -Math.sin(a) * r * 3.4, r: 1.8 + Math.random() * 1.8, life: .3, life0: .3, color: beHex(col) });
   }
   if (be.t > 0) return;
-  // 敲地！
+  // 敲第一下：小一點的震動和裂痕，法術還沒放出來
+  be.phase = 'tap1'; be.t = B.tap1.hold;
+  e.forceFrame = BE_ART.tap;
+  beTapFx(e, col, true);
+}
+// 敲第二下：放出法術（魔法陣亮一下、大震動）
+function beFinalTap(e, rec) {
+  const B = BANANA_EMPEROR, be = e.be, col = B.spells[be.spell].color;
   be.phase = 'tap'; be.t = B.tapHold; be.cd = B.castEvery; be.last = be.spell;
   e.forceFrame = BE_ART.tap;
   if (be.circle) { be.circle.burst = .9; be.circle = null; }   // 魔法陣亮一下再淡掉
   beTapFx(e, col);
   beCast(e, rec, be.spell, be.aim);
+}
+// 敲地的震動：溫特在 shakeRange 格內才震，越近越大（平方衰減，跟鳥頭大隊長的腳步一樣）
+function beTapShake(x, y, amount) {
+  const p = G.player; if (!p) return;
+  const d = Math.hypot(p.x - x, p.y - y) / CELL, R = BANANA_EMPEROR.shakeRange, k = 1 - d / R;
+  if (d < R) addShake(amount * (.2 + .8 * k * k));
 }
 // 權杖頂端在哪（原圖朝左，權杖在左手邊；敲地時權杖尾端在腳邊）
 function beStaffTip(e) {
@@ -277,9 +302,18 @@ function beStaffFoot(e) {
   return [e.x + side * w * .37, e.y - 6];
 }
 const beGlowPal = c => [c.map(v => Math.min(255, v + 90)), c, c.map(v => v * .3)];
-// 敲地的畫面：地上裂開（越裂越多）、畫面震動、塵土、顏色光圈往外擴
-function beTapFx(e, col) {
+// 敲地的畫面：地上裂開（越裂越多）、畫面震動、塵土、顏色光圈往外擴；first＝施法的第一下（小一點、不放法術）
+function beTapFx(e, col, first) {
   const B = BANANA_EMPEROR, K = B.cracks, [fx, fy] = beStaffFoot(e);
+  if (first) {
+    beAddCracks(fx, fy, col, B.tap1.crack);
+    beTapShake(fx, fy, B.tap1.shake);
+    G.effects.push({ ring: true, x: fx, y: fy, r: 4, r2: 50, life: .3, life0: .3, color: '#fff3c4' });
+    for (let i = 0; i < 8; i++) { const a = -Math.PI * Math.random(), sp = 50 + Math.random() * 90; G.effects.push({ particle: true, x: fx + (Math.random() - .5) * 14, y: fy - 2, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6, r: 1.5 + Math.random() * 2, life: .4, life0: .4, color: '#8a7a5a' }); }
+    if (typeof llDust === 'function') for (let i = 0; i < 2; i++) llDust(fx + (Math.random() - .5) * 36, fy + 4, true);
+    if (typeof sfxAt === 'function') sfxAt('loofahStomp', fx, fy, .8, 'banana-emperor-tap1');
+    return;
+  }
   beAddCracks(fx, fy, col, 1);
   for (let i = 0; i < K.extra; i++) {   // 魔法陣裡另外裂開幾片小的
     const a = Math.random() * Math.PI * 2, d = (1.5 + Math.random() * (B.circle - 2)) * CELL;
@@ -288,7 +322,8 @@ function beTapFx(e, col) {
     beAddCracks(x, y, col, K.extraScale);
     if (typeof llDust === 'function') llDust(x, y + 4, false);
   }
-  if (typeof nearbyImpact === 'function') nearbyImpact(fx, fy, B.shake, .06); else addShake(B.shake);
+  beTapShake(fx, fy, B.shake);
+  if (typeof addHitstop === 'function') addHitstop(.07);   // 敲下去那一刻頓一下
   G.effects.push({ fglow: true, pal: beGlowPal(col), x: fx, y: fy - 6, r0: 16, r1: 90, life: .5, life0: .5 });
   G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 6, r2: B.circle * CELL, life: .55, life0: .55, color: beHex(col) });
   G.effects.push({ ring: true, x: fx, y: fy, r: 4, r2: 70, life: .35, life0: .35, color: '#fff3c4' });
@@ -592,7 +627,7 @@ function updateBananaEmperor(dt) {
   if (G.beCircles && G.beCircles.length) {
     for (const m of G.beCircles) { m.t += dt; if (m.burst > 0) m.burst -= dt; }
     G.beCircles = G.beCircles.filter(m => m.burst > 0 || (m.burst === 0 && m.t < m.charge + 1));
-    for (const rec of G.bananaEmperors || []) if (rec.e.be.circle && (!beAlive(rec.e) || rec.e.be.phase !== 'raise')) { G.beCircles = G.beCircles.filter(m => m !== rec.e.be.circle); rec.e.be.circle = null; }   // 施法被打斷、他倒下：陣消失
+    for (const rec of G.bananaEmperors || []) if (rec.e.be.circle && (!beAlive(rec.e) || !['raise', 'tap1', 'reraise'].includes(rec.e.be.phase))) { G.beCircles = G.beCircles.filter(m => m !== rec.e.be.circle); rec.e.be.circle = null; }   // 施法被打斷、他倒下：陣消失
   }
   // 裂痕：他還活著就一直留著；倒下後慢慢淡掉
   if (G.beCracks && G.beCracks.length) {
