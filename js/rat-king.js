@@ -9,7 +9,8 @@
    - 一般的手（只在核心洞以外的地方冒出來，冒出來的地方會先裂開一個洞）：
        1. 拳頭：在溫特或隊員腳下冒出握拳的手往上打，打中會被揍飛（飛出去、彈兩下、躺著暈，跟藤蔓丟人同一套）。
        2. 抓人：紫色預警圈。被抓到的人握在拳頭裡（頭露在外面），過 grab.hold 秒：
-          溫特 → 被往外丟出去；隊員 → 有 grab.dragChance 的機會被拖進地底（之後從別的地方吐出來），不然也是被丟出去。
+          溫特 → 被往外丟出去；隊員 → 有 grab.dragChance 的機會被拖進地底（過一陣子別的地方的地面裂開，從洞口被往上拋飛、落地暈眩），不然也是被丟出去。
+          被揍飛、丟出去、躺在地上暈的時候不會受擊閃紅、發抖。
           在這之前把那隻手打掉（手有血量），人就救出來了。
    - 最後一顆核心破掉：老鼠王暈倒 stun.time 秒（頭上轉星星），這段時間受到的傷害 ×stun.dmgMul，是爆發輸出的好時機。
    - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻；還會從洞裡叫出小的花蓮版權老鼠。
@@ -35,9 +36,9 @@ const RAT_KING = {
   enrageAt: .5,                  // 血量剩幾成暴怒
   emerge: { delay: 2.2, rumble: 2.4, rise: 2.4, hold: 1.2 },   // 核心醒了幾秒後開始震、震幾秒才冒出來、冒出來花幾秒、亮相多停幾秒
   // 手：every＝隔幾秒冒一波（最短～最長），count＝一波幾隻；frenzy＝暴怒時的版本
-  //   scale＝手的大小（原圖 110×90 的幾倍）；riseSpeed＝往上舉的速度（1＝原本的速度，.9＝慢一點）
+  //   scale＝手的大小（原圖 110×90 的幾倍）；riseSpeed＝往上舉、縮回去的速度（1＝原本的速度，.7＝慢一點）
   //   coreHoleGap＝一般的手離核心洞至少幾格（核心洞只給搬核心的手用）
-  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [1.4, 2.4], frenzyCount: [2, 3], frenzySpeed: .75, grabChance: .3, scale: 2.5, riseSpeed: .9, coreHoleGap: 2.5 },
+  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [1.4, 2.4], frenzyCount: [2, 3], frenzySpeed: .75, grabChance: .3, scale: 2.5, riseSpeed: .7, coreHoleGap: 2.5 },
   // 核心洞：地圖上鋪的這種洞素材就是核心會出現的地方（在地圖編輯器加減、搬動，核心出現的位置就跟著變）
   holeTile: 'tile_mvmo77lx',     // 地圖素材「hole02」
   // 一般的手冒出來時地上裂開的洞（用同一張 hole02 圖）：size＝大小倍率、linger＝手縮回去後洞還留幾秒才淡掉
@@ -49,7 +50,9 @@ const RAT_KING = {
   //   dragChance＝抓到隊員時被拖進地底的機會（其他就丟出去；溫特一律丟出去）；
   //   throw＝丟出去：飛多遠（格）、往上拋的速度、從多高丟出去（像素，約拳頭的高度）、撞牆扣多少血、丟出去時的傷害倍率
   grab: { windup: 1.15, rise: .22, radius: 2, hold: 1.8, handHp: 260, under: 2.2, spitDamageMul: 1.2, daze: 1.4, cooldown: 7,
-    dragChance: .5, throw: { dist: [4.5, 7], up: 260, height: 100, wallDamage: 12, damageMul: 1 } },
+    dragChance: .5, throw: { dist: [4.5, 7], up: 260, height: 100, wallDamage: 12, damageMul: 1 },
+    // pop＝拖進地底的隊員過一陣子從洞口被往上拋出來：地面先裂開冒土幾秒（warn），再往上拋（up＝往上的速度，越大飛越高）、落在幾格外（dist），落地彈兩下、躺著暈
+    pop: { warn: .7, up: 520, dist: [1.5, 3] } },
   // 搬核心：
   //   react＝核心被打到：先震幾秒，手才冒出來（冒出來花 windup 秒）把它抓住
   //   exposeCap＝核心每露出來一次，最多被打掉幾成血（.2＝兩成；打到上限就打不動，等手來搬）
@@ -67,7 +70,7 @@ const RAT_KING = {
   // 拳頭（老鼠王專用的紫藍版）；fistFront＝只有前面手指的那一層，握住人／核心時蓋在上面（拳頭 → 人／核心 → 手指）
   art: { fist: 'images/monster/rat-king/left-fist.png', fistFront: 'images/monster/rat-king/left-fist-02.png' },
   // 握在拳頭裡的人／核心放在原圖（110×90）的哪一點：held＝人身體的中心（人橫躺、頭朝外露出拳頭），core＝核心的中心
-  grip: { held: [33, 31], core: [48, 20], coreSize: .65 },   // coreSize＝核心畫成原本大小的幾倍（核心從拳頭上方露出來）
+  grip: { held: [33, 31], core: [48, 31], coreSize: 1 },   // coreSize＝核心畫成原本大小的幾倍；核心橫躺握在拳頭裡、兩頭露出來
   artDir: 'images/monster/rat-king/',   // 專用的圖（黑毛深紫藍、領結袖子紫藍）：檔名跟花蓮版權老鼠一樣，只換資料夾；用 tools/recolor-rat-king.py 換色產生
 };
 // 老鼠王用的整組圖：身體、眨眼、暈眩、手換成 RAT_KING.artDir 的紫藍版，地洞、土堆照用花蓮版權老鼠的（js/burrowing-mouse.js 的 BURROW_MOUSE_ART）
@@ -144,7 +147,7 @@ const rkSound = (name, x, y, gain = .9) => { if (typeof sfxAt === 'function') sf
 function seedRatKing() {
   G.ratKing = null;
   if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) || !rkSpot()) return;
-  G.ratKing = { phase: 'sleep', t: 0, e: null, hands: [], under: [], digs: [], waveT: 0, coreT: 0, miceT: 0, grabCd: 0, cores: 0, cine: 0, flash: 0 };
+  G.ratKing = { phase: 'sleep', t: 0, e: null, hands: [], under: [], digs: [], pops: [], waveT: 0, coreT: 0, miceT: 0, grabCd: 0, cores: 0, cine: 0, flash: 0 };
   [...Object.values(rkArt()), RAT_KING.art.fist, RAT_KING.art.fistFront, RAT_KING.dig.art].forEach(f => typeof monsterImage === 'function' && monsterImage(f));   // 先載好圖
   rkWrapCoreDraw();
 }
@@ -179,6 +182,7 @@ function updateRatKing(dt) {
   const K = G && G.ratKing; if (!K || dt <= 0) return;
   updateRkFx(K, dt);
   updateRkThrows(dt);
+  rkMuteHitFx();
   if (K.phase === 'finale') { updateRkFinale(K, dt); return; }
   if (K.phase === 'ram') { updateRkRam(K, dt); return; }
   if (!G.running || G.over || K.phase === 'dead') return;
@@ -217,6 +221,7 @@ function updateRatKing(dt) {
   if (!e.rkEnraged && e.hp <= e.maxhp * RAT_KING.enrageAt) rkEnrage(e);
   updateRkHands(K, dt);
   updateRkUnder(K, dt);
+  updateRkPops(K, dt);
   updateRkCoreReact(K, dt);   // 核心被打到：震完就叫手來搬（暈倒時也照搬）
   if (e.rkStunT > 0) { e.rkStunT -= dt; return; }   // 暈著：不出手
   K.grabCd = Math.max(0, K.grabCd - dt);
@@ -365,12 +370,12 @@ function ratKingHoldDeath(e) {
 // h：{ kind: 'punch'｜'grab'｜'core'｜'pop'｜'spit'｜'flail', x, y＝落腳點, cx, cy＝洞口（打／抓的中心）, age, windup, rise, hold, sink, side, hole?, dig? }
 function rkHandTimes(kind, fast = 1) {
   const P = RAT_KING.punch, Gb = RAT_KING.grab, C = RAT_KING.core, up = 1 / (RAT_KING.hands.riseSpeed || 1);   // up：往上舉要多花幾倍時間
-  if (kind === 'punch') return { windup: P.windup * fast, rise: P.rise * up, hold: P.hold, sink: P.sink };
-  if (kind === 'grab') return { windup: Gb.windup * fast, rise: Gb.rise * up, hold: Gb.hold, sink: .45 };
-  if (kind === 'core') return { windup: C.windup, rise: C.rise * up, hold: C.hold, sink: C.sink };
-  if (kind === 'pop') return { windup: C.windup * .8, rise: C.rise * up, hold: C.popHold, sink: .3 };
+  if (kind === 'punch') return { windup: P.windup * fast, rise: P.rise * up, hold: P.hold, sink: P.sink * up };
+  if (kind === 'grab') return { windup: Gb.windup * fast, rise: Gb.rise * up, hold: Gb.hold, sink: .45 * up };
+  if (kind === 'core') return { windup: C.windup, rise: C.rise * up, hold: C.hold, sink: C.sink * up };
+  if (kind === 'pop') return { windup: C.windup * .8, rise: C.rise * up, hold: C.popHold, sink: .3 * up };
   if (kind === 'flail') return { windup: .12, rise: .18, hold: rkRand(.35, .7), sink: .22 };   // 死亡表演：亂抓的手
-  return { windup: .7, rise: .2 * up, hold: .35, sink: .3 };   // spit：把抓走的人吐出來
+  return { windup: .7, rise: .2 * up, hold: .35, sink: .3 * up };
 }
 function rkNewHand(K, kind, x, y, extra = {}) {
   const e = K.e, fast = e && e.rkEnraged ? RAT_KING.hands.frenzySpeed : 1;
@@ -563,16 +568,41 @@ function updateRkUnder(K, dt) {
       }
       const s = rkRandomSpot(avoid, RAT_KING.core.minMove) || u.from;
       rkDigHand(K, 'pop', s.x, s.y, { core: u.core });
-    } else if (u.who) {   // 被拖下去的隊員：從別的地方（核心洞以外）吐出來
+    } else if (u.who) {   // 被拖下去的隊員：別的地方（核心洞以外）的地面先裂開冒土，等一下從洞口被往上拋出來
       const a = u.who;
       if (a.hp <= 0 || (!G.towers.includes(a) && a !== G.player)) { rkRelease(a); continue; }
-      const s = rkRandomSpot([u.from], 5) || u.from;
+      const s = rkRandomSpot([u.from], 5) || u.from, P = RAT_KING.grab.pop;
       a.x = s.x; a.y = s.y;
-      rkDigHand(K, 'spit', s.x, s.y, { who: a });
+      (K.pops || (K.pops = [])).push({ who: a, x: s.x, y: s.y, t: P.warn, puff: 0 });
+      rkAddDig(K, s.x, s.y, P.warn + .6);
+      rkSound('mouseDig', s.x, s.y, 1);
     }
   }
 }
-// 吐出來：扣血、揍飛一小段、暈一下
+// 從洞口被拋出來的隊員：裂開的地方一直冒土，時間到就往上拋飛（扣血）→ 落地彈兩下 → 躺著暈
+function updateRkPops(K, dt) {
+  if (!K.pops || !K.pops.length) return;
+  const P = RAT_KING.grab.pop, Gb = RAT_KING.grab, e = K.e;
+  for (const p of K.pops) {
+    p.t -= dt; p.puff -= dt;
+    if (p.t > 0) { if (p.puff <= 0) { p.puff = .12; rkDirt(p.x + rkRand(-14, 14), p.y + 4, .5); } continue; }
+    const a = p.who;
+    rkRelease(a); a.x = p.x; a.y = p.y;
+    if (e && a.hp > 0) {
+      if (a === G.player) { const pd = e.playerDamage; e.playerDamage = Math.round(pd * Gb.spitDamageMul); e.playerTouchCd = 0; enemyAttackPlayer(e, 0); e.playerDamage = pd; }
+      else { const sd = e.sentryDamage; e.sentryDamage = Math.round(sd * Gb.spitDamageMul); e.atkCd = 0; enemyAttackSentry(e, a, 0); e.sentryDamage = sd; }
+    }
+    if (a.hp > 0) rkLaunch(a, { x: p.x + rkRand(-1, 1), y: p.y + rkRand(-1, 1) }, { dist: P.dist, up: P.up, spread: Math.PI });
+    if (typeof rockBurstFx === 'function') rockBurstFx(p.x, p.y, 'mouseHand');
+    for (let k = 0; k < 2; k++) rkDirt(p.x + rkRand(-10, 10), p.y + 4, 1.4);
+    G.effects.push({ ring: true, x: p.x, y: p.y, r: 6, r2: 50, life: .35, life0: .35, color: '#d8c6a0' });
+    rkSound('mouseOut', p.x, p.y, 1);
+    if (typeof addShake === 'function') addShake(4);
+    if (G.towers.includes(a) && typeof sentryStatus === 'function') sentryStatus(a, '被拋出來了！', '#ffb36b', true);
+  }
+  K.pops = K.pops.filter(p => p.t > 0);
+}
+// 吐出來（沒有地方可以拋飛時的舊做法，留著給 spit 手用）：扣血、揍飛一小段、暈一下
 function rkSpit(K, h) {
   const a = h.who, e = K.e; if (!a) return;
   rkRelease(a);
@@ -620,7 +650,7 @@ function rkLaunch(a, from, cfg, startH = 0) {
   G.vineCaps.push({ v, actor: a, isPlayer, mode: 'toss', ground: true, rkThrow: true, phase: 'thrown', t: 0, h: startH,
     x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y, topH: 0,
     tx, ty, vh: cfg.up, speed: dist / Math.max(.2, flight), wallDamage: cfg.wallDamage || 0, spin: 0, spinDir: tx >= 0 ? 1 : -1, lieSide: tx >= 0 ? 1 : -1 });
-  a.vineCap = true; a.dashT = 0; a.knockT = 0; a.rootT = 0; a.moving = false;
+  a.vineCap = true; a.dashT = 0; a.knockT = 0; a.rootT = 0; a.moving = false; a.rkTossed = true;
   if (isPlayer) {
     if (typeof cancelChannel === 'function' && typeof playerChannel !== 'undefined' && playerChannel) cancelChannel();
     if (a.sitting && typeof standUp === 'function') standUp();
@@ -631,6 +661,16 @@ function rkLaunch(a, from, cfg, startH = 0) {
 // 飛在空中的人：往前飛、往上拋再掉下來、翻滾；撞牆或落地就交給 js/vines.js 的「掉下來」（彈兩下、躺著暈）
 function updateRkThrows(dt) {
   for (const cap of G.vineCaps || []) if (cap.rkThrow && cap.phase === 'thrown') rkThrowStep(cap, dt);
+}
+// 被揍飛、丟出去、躺在地上暈的這段：不要受擊閃紅、發抖（溫特也不要畫面四周閃紅、被打的鏡頭震動）
+//   每幀在 update 和畫圖前各清一次（同一幀別的怪物打到他也照樣清掉）；爬起來就恢復正常
+function rkMuteHitFx() {
+  for (const a of [G && G.player, ...((G && G.towers) || [])]) {
+    if (!a || !a.rkTossed) continue;
+    if (!a.vineCap && !(a.vineDazeT > 0)) { a.rkTossed = false; continue; }
+    a.hitT = 0;
+    if (a === G.player) { G.damageVignetteT = 0; G.cameraShakeT = 0; }
+  }
 }
 function rkThrowStep(cap, dt) {
   const a = cap.actor;
@@ -673,7 +713,8 @@ function rkStartFinale(e) {
   }
   for (const h of K.hands) if (h.core) { h.core.hidden = false; }
   for (const c of G.cores || []) c.rkReact = null;
-  K.hands = []; K.under = [];
+  for (const p of K.pops || []) { rkRelease(p.who); p.who.x = p.x; p.who.y = p.y; }   // 正要被拋出來的人：直接放出來
+  K.hands = []; K.under = []; K.pops = [];
   K.phase = 'finale'; K.t = 0; K.hit = false; K.flailT = 0; K.horn = 0; K.flash = .7;
   if (typeof addHitstop === 'function') addHitstop(.09);
   rkSlowMo(RAT_KING.finale.slowMo);
@@ -859,7 +900,8 @@ function drawRkHand(c, h) {
       if (who) rkDrawHeldActor(ctx, who, left + RAT_KING.grip.held[0] * sx, top + RAT_KING.grip.held[1] * sy, h);
       else if (typeof coreImg !== 'undefined' && coreImg.complete && coreImg.naturalWidth) {
         const k = RAT_KING.grip.coreSize, cw = CORE.w * k, ch = CORE.h * k, [gx, gy] = RAT_KING.grip.core;
-        ctx.drawImage(coreImg, left + gx * sx - cw / 2, top + gy * sy - ch / 2, cw, ch);
+        ctx.save(); ctx.translate(left + gx * sx, top + gy * sy); ctx.rotate(-Math.PI / 2);   // 橫躺（跟握住的人一樣）
+        ctx.drawImage(coreImg, -cw / 2, -ch / 2, cw, ch); ctx.restore();
       }
     };
     if (fist) pose.over = RAT_KING.art.fistFront;
@@ -918,6 +960,7 @@ function drawRkDig(c, d) {
 // 地上：裂開的洞、預警圈、核心連到老鼠王的紫色光線（js/render.js 的 groundFx 呼叫）
 function drawRatKingGround(c) {
   const K = G && G.ratKing; if (!K) return;
+  rkMuteHitFx();   // 畫人之前再清一次受擊閃紅（地上特效比人先畫）
   if (typeof fxSkip === 'function' && fxSkip(1)) return;
   for (const d of K.digs || []) drawRkDig(c, d);
   for (const h of K.hands) drawRkWarning(c, h);
@@ -953,6 +996,7 @@ function ratKingSortables(list) {
 // 畫面最上層（js/render.js 最後呼叫，螢幕座標）：電影黑邊、警示紅光、「列車進站」字樣、撞擊白光
 function drawRatKingScreen(c) {
   const K = G && G.ratKing; if (!K || typeof cv === 'undefined') return;
+  rkMuteHitFx();   // 溫特被丟出去、躺著的時候：畫面四周不閃紅（這個函式在受擊紅暈之前呼叫）
   const W = cv.width, H = cv.height, t = performance.now() / 1000;
   const warn = K.phase === 'finale' || (K.phase === 'ram' && !K.hit);
   c.save();
