@@ -2071,10 +2071,12 @@ function updatePlayerAttack(dt) {
     if ((!isOil && !isOre) || o.hp <= 0) continue;
     const c = isOil ? oilCenter(o) : oreCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
     if (d > playerGun().range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
-    if (isOil) {
-      const left = o.artX ?? OX + o.c * CELL, top = o.artY ?? OY + o.r * CELL;
-      if (aim.x >= left && aim.x <= left + (o.w || 1) * CELL && aim.y >= top && aim.y <= top + (o.h || 1) * CELL) {
-        best = oilProxy(o); bestD = d; bestOnBody = true; continue;
+    // 點在油桶、異質礦的圖上：一定打它（不看扇形角度）。異質礦的「中心」算在底下擋路那排格子，
+    // 站在礦旁邊時點礦圖的上半部或邊緣，跟中心的角度會差很多，不這樣做的話子彈會直接飛過去、礦也不會閃白
+    {
+      const left = o.artX ?? OX + o.c * CELL + ((o.off && o.off[0]) || 0), top = o.artY ?? OY + o.r * CELL + ((o.off && o.off[1]) || 0);
+      if ((isOil || !bestOnBody) && aim.x >= left && aim.x <= left + (o.w || 1) * CELL && aim.y >= top && aim.y <= top + (o.h || 1) * CELL) {   // 礦：點在怪物身上的話還是打怪物（油桶照舊優先）
+        best = isOil ? oilProxy(o) : oreProxy(o); bestD = d; bestOnBody = true; continue;
       }
     }
     if (bestOnBody) continue;
