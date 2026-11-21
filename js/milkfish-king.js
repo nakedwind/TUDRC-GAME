@@ -422,7 +422,7 @@ function mkSwallowCore(e) {
   core.carried = true; core.hidden = true; core.x = e.x; core.y = e.y; core.lastHp = core.hp;   // carried＋hidden：打不到、炸不到、不畫（js/game.js、js/render.js）
   if (!core.awake) { wakeCore(core); core.lastHp = core.hp; }
   G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .45, r: 8, r2: 60, life: .4, life0: .4, color: '#c78bff' });
-  if (typeof coreBanner === 'function') coreBanner('核心被吞進肚子裡了', e.eliteName + '攻擊力變高，腳下會留下腐蝕池！趁牠把核心吐出來的時候打！', '#c78bff');
+  if (typeof coreBanner === 'function') coreBanner('核心被吞進肚子裡了', e.eliteName + '攻擊力變高了！趁牠把核心吐出來的時候打！', '#c78bff');
   mkApplyAtk(e); mkDropPool(e);
   flash('咕嚕！', e.x, e.y - e.drawHeight - 8, '#c78bff');
   if (typeof sfxAt === 'function') sfxAt('milkfishGulp', e.x, e.y, 1.3, 'milkfish-king-core');
