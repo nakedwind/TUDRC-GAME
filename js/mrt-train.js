@@ -859,15 +859,7 @@ function updateMrtTrains(dt) {
     } else if (tr.state === 'closed') {
       if (tr.t <= 0 && !mrtPowered()) {   // 沒電開不走：停在月台；溫特在車上就重新開門讓他下車
         if (mrtOnTrain(tr, G.player)) { tr.state = 'opening'; tr.t = T.doorTime; mrtTrainSound(tr, 'open'); }
-        else {
-          // 溫特已經下車：列車要關著門停在月台等發電機。還在車上的隊員、球球、怪物先放到月台，
-          // 不然會被關在車廂裡，要等發電機全部打開才出得來
-          mrtTrainUnload(tr);
-          const below = OY + (tr.bottomRow + 1.5) * CELL, above = OY + (tr.topRow - .5) * CELL;   // 列車下方／上方的月台
-          const free = (x, y) => { const [c, r] = cellAt(x, y); return inGrid(c, r) && !isWall(c, r); };
-          for (const t of G.towers) if (mrtOnTrain(tr, t)) { t.y = free(t.x, below) || !free(t.x, above) ? below : above; t.navPath = null; t.navGoal = null; }
-          tr.state = 'idle';
-        }
+        else tr.state = 'idle';   // 溫特已經下車：關著門停在月台。還在車上的隊員會被關在裡面，這是故意的（要趕快找發電機救他們出來），不要放他們下車
       } else if (tr.t <= 0) {
         mrtTrainSound(tr, 'depart');
         if (mrtOnTrain(tr, G.player)) mrtTrainBoard(tr);   // 溫特在車上：車上的人跟著列車開走（搭車）
