@@ -55,7 +55,6 @@ const MOTH_BOSS = {
   // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
   burst: { every: [7, 10], first: 2.5, telegraph: 1.6, time: 1.2, puffs: 16, cover: .95 },
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
-  music: { near: 8, far: 32 },   // BOSS 音樂（js/boss-music.js）：溫特離牠 near 格以內全音量，越遠越小聲，far 格以外降到最小（BOSS_MUSIC.quiet，跟順順宮主沒在追溫特時一樣）
 };
 const mbSpot = () => typeof MAP !== 'undefined' && MAP ? MOTH_BOSS.maps[MAP.id] || null : null;
 const mothBosses = () => (G && G.enemies ? G.enemies.filter(e => e.mothBoss && !e.dead && e.hp > 0) : []);
@@ -409,14 +408,8 @@ function mothBossBars() {
   }
   return out;
 }
-// 中BOSS 音樂（js/boss-music.js）：醒著的人面蝶后離溫特多近（1＝near 格以內，0＝far 格以外）；沒有醒著的就是 null（不播）
-function mothBossMusicK() {
-  const list = mothBosses().filter(e => e.eliteAwake), p = G && G.player;
-  if (!list.length) return null;
-  if (!p) return 0;
-  const M = MOTH_BOSS.music, d = Math.min(...list.map(e => mbDist(e, p))) / CELL;
-  return Math.max(0, Math.min(1, (M.far - d) / (M.far - M.near)));
-}
+// 中BOSS 音樂（js/boss-music.js）：醒著就播（音量照溫特離牠多遠，在 boss-music.js 統一算）
+const mothBossHunting = () => mothBosses().some(e => e.eliteAwake);
 
 // ---- 畫面：抱在懷裡的核心＋蓋在核心上的前方手（render.js 畫完身體後呼叫，dx～dh＝身體實際畫的位置）----
 const MOTH_BOSS_CORE_ART = { x: .10, y: .42, angle: -8 };   // 核心捧在兩隻手中間：中心位置（圖寬、圖高的比例）、旋轉角度（度）；大小＝核心原本的大小（CORE.w × CORE.h），不跟著牠的體型縮放
