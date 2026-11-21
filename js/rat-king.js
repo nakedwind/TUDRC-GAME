@@ -63,8 +63,9 @@ const RAT_KING = {
   core: { react: { shake: .55, windup: .2 }, exposeCap: .2, first: [10, 14], every: [16, 24], windup: 1, rise: .25, hold: .55, sink: .4, under: [1.2, 2], popHold: 1, minMove: 6 },
   mice: { every: [9, 13], count: [1, 2], max: 4 },   // 暴怒後叫出小老鼠：隔幾秒、一次幾隻、場上最多幾隻
   // 最後一擊：列車進站的速度（減速度倍率，越大衝越快；1＝平常進站的速度）、老鼠王被撞飛幾秒
-  //   slowMo＝撞上去那一刻的慢動作：持續幾秒（現實時間）、變成幾倍速；flyDir＝被撞飛往哪邊（1＝右、-1＝左、0＝跟著列車開的方向）
-  ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 }, flyDir: 1 },
+  //   slowMo＝撞上去那一刻的慢動作：持續幾秒（現實時間）、變成幾倍速；flyDir＝被撞飛往哪邊（1＝右、-1＝左、0＝跟著列車開的方向）；
+  //   flyAngle＝往上飛的角度（度，0＝水平、10＝稍微往上）；flyDist＝飛多遠（格）
+  ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 }, flyDir: 1, flyAngle: 10, flyDist: 16 },
   // 死亡表演的節奏：daze＝血量歸零後先暈幾秒才響到站音樂；musicLead＝音樂響了幾秒後列車才從隧道進站；
   //   （現在：暈 2.5 秒＋音樂 17 秒＋列車衝進來約 0.7 秒 ≒ 血量歸零後 20 秒撞上）
   //   brakeLead＝撞上前幾秒響煞車聲（音效「mrtBrake」）；musicGain＝到站音樂的音量；slowMo＝血量歸零那一刻的慢動作
@@ -840,7 +841,8 @@ function rkSlowMo(cfg) { if (cfg && cfg.time > 0) { G.slowMoT = cfg.time; G.slow
 function rkFlyPos(K, e) {
   const B = RAT_KING, k = Math.min(1, K.t / B.ram.fly), dir = K.flyDir || 1;
   const top = rkEdgeY() - B.showRow * B.scale, h = 90 * B.scale;
-  return { k, x: e.x + dir * k * 16 * CELL, y: top + h / 2 - Math.sin(k * Math.PI) * 7 * CELL - k * 5 * CELL };
+  const dist = k * (B.ram.flyDist || 16) * CELL;   // 沿著 flyAngle 的斜線直直飛出去
+  return { k, x: e.x + dir * dist, y: top + h / 2 - dist * Math.tan((B.ram.flyAngle || 0) * Math.PI / 180) };
 }
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）----
 function ratKingDown(e) {
