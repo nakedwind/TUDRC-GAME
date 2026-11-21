@@ -418,7 +418,7 @@ function mothBossMusicK() {
   return Math.max(0, Math.min(1, (M.far - d) / (M.far - M.near)));
 }
 
-// ---- 畫面：抱在懷裡的核心（render.js 畫完身體後呼叫，dx～dh＝身體實際畫的位置）----
+// ---- 畫面：抱在懷裡的核心＋蓋在核心上的前方手（render.js 畫完身體後呼叫，dx～dh＝身體實際畫的位置）----
 const MOTH_BOSS_CORE_ART = { x: .10, y: .42, angle: -8 };   // 核心捧在兩隻手中間：中心位置（圖寬、圖高的比例）、旋轉角度（度）；大小＝核心原本的大小（CORE.w × CORE.h），不跟著牠的體型縮放
 function drawMothBossCore(ctx, e, dx, dy, dw, dh) {
   const core = e.carryCore;
@@ -436,4 +436,14 @@ function drawMothBossCore(ctx, e, dx, dy, dw, dh) {
   }
   if (core.hitT > 0) drawHitFlash(coreImg, Math.min(1, core.hitT / .16), '#d69bff', -w / 2, -len / 2, w, len);
   ctx.restore();
+  // 前方那隻手蓋在核心上面：每張動作圖都有一張同名加「-前方手」的圖（跟本體一樣大、只畫前面那隻手），疊在同一個位置
+  const file = e.forceFrame || e.sprite;
+  const hand = file && monsterImage(file.replace(/\.png$/i, '-前方手.png'));
+  if (hand && hand.complete && hand.naturalWidth) {
+    const smooth = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(hand, dx, dy, dw, dh);
+    if (e.hitT > 0) drawHitFlash(hand, Math.min(1, e.hitT / .16), e.hitColor, dx, dy, dw, dh);   // 被打時手也跟身體一起閃
+    ctx.imageSmoothingEnabled = smooth;
+  }
 }
