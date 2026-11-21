@@ -25,7 +25,7 @@ const CLAW_MACHINE = {
   costumeGrip: .4,       // N 服裝的夾力
   machines: [
     { stock: { medkit: 2, 'almond-water': 2, firstaid: 2, thermos: 1, 'anomaly-firstaid': 1, 'shards-5': 1 }, costumes: 1 },   // 第 1 台：補給
-    { stock: { battery: 2, 'youyou-card': 2, 'graffiti': 2, toolbox: 1, 'eye-drops': 1, 'shards-5': 1 }, costumes: 1 },   // 第 2 台：探索
+    { stock: { battery: 2, 'youyou-card': 3, 'graffiti': 2, toolbox: 1, 'eye-drops': 1, 'shards-5': 1 }, costumes: 1 },   // 第 2 台：探索
     { stock: { 'almond-water': 1, battery: 1, 'graffiti': 1, adrenaline: 2, charm: 1, 'bird-green': 1, 'shards-10': 1 }, costumes: 2 },   // 第 3 台：稀有，大獎在這台
   ],
   prizes: [
@@ -33,7 +33,7 @@ const CLAW_MACHINE = {
     { id: 'graffiti',         grip: .68, tier: 'common' },
     { id: 'almond-water',     grip: .64, tier: 'common' },
     { id: 'medkit',           grip: .60, tier: 'common' },
-    { id: 'youyou-card',      grip: .52, tier: 'common' },
+    { id: 'youyou-card',      grip: .70, tier: 'common' },   // 好遊卡：調成最好夾的一種（原本 .52）
     { id: 'firstaid',         grip: .46, tier: 'common' },
     { id: 'toolbox',          grip: .46, tier: 'common' },
     { id: 'thermos',          grip: .42, tier: 'common' },
