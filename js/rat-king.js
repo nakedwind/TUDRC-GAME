@@ -7,7 +7,7 @@
        核心被打到 → 先震動 → 洞裡冒出手把核心抓住 → 拖進洞裡 → 從另一個洞冒出來放下。
        每次核心露出來，最多只會被打掉 core.exposeCap 成血量（打到上限就打不動了，等手來搬），所以要多打幾輪才打得破。
    - 一般的手（只在核心洞以外的地方冒出來，冒出來的地方會先裂開一個洞）：
-       1. 拳頭：在溫特或隊員腳下冒出握拳的手往上打，一隻手只打一個人（範圍裡離洞口最近的），打中會被揍飛（飛出去、彈兩下、躺著暈，跟藤蔓丟人同一套）。
+       1. 拳頭：在溫特或隊員腳下冒出握拳的手往上打，一隻手只打一個（範圍裡離洞口最近的；怪物自己人也會被打到），打中會被揍飛（飛出去、彈兩下、躺著暈，跟藤蔓丟人同一套）。
        2. 抓人：紫色預警圈。被抓到的人握在拳頭裡（頭露在外面），過 grab.hold 秒：
           溫特 → 被往外丟出去；隊員 → 有 grab.dragChance 的機會被拖進地底（過一陣子別的地方的地面裂開，從洞口被往上拋飛、落地暈眩），不然也是被丟出去。
           被揍飛、丟出去、躺在地上暈的時候不會受擊閃紅、發抖。
@@ -45,7 +45,8 @@ const RAT_KING = {
   // 一般的手冒出來時地上裂開的洞（用同一張 hole02 圖）：size＝大小倍率、linger＝手縮回去後洞還留幾秒才淡掉
   dig: { art: 'images/破損建築/hole02.png', size: 1, linger: 1.2 },
   // 拳頭：預警幾秒、冒出、停住、縮回；打中範圍（格）；launch＝揍飛：飛多遠（格，最短～最長）、往上拋的速度
-  punch: { windup: .95, rise: .18, hold: .35, sink: .3, radius: 2.2, launch: { dist: [2.5, 3.8], up: 230 } },
+  //   monsterDamage＝拳頭打到怪物（自己人也會被打）扣多少血
+  punch: { windup: .95, rise: .18, hold: .35, sink: .3, radius: 2.2, launch: { dist: [2.5, 3.8], up: 230 }, monsterDamage: 40 },
   // 抓人：預警幾秒、冒出、打中範圍（格）、握住幾秒才丟出去／拖下去（這段時間打掉手就救出來）、手的血量、
   //   在地底幾秒、吐出來的傷害倍率、吐出來暈幾秒、兩次抓人至少隔幾秒；
   //   dragChance＝抓到隊員時被拖進地底的機會（其他就丟出去；溫特一律丟出去）；
@@ -446,11 +447,18 @@ function updateRkHands(K, dt) {
 // 手完全冒出來的那一刻
 function rkHandUp(K, e, h) {
   const P = RAT_KING.punch;
-  if (h.kind === 'punch') {   // 揍飛：一隻手只打一個人（範圍裡離洞口最近的那個），打中的人飛出去、彈兩下、躺著暈
-    const o = rkHandSpot(h), within = a => a && a.hp > 0 && !a.rkHeld && !a.eatenBy && !a.vineCap && Math.hypot(a.x - o.x, a.y - o.y) <= P.radius * CELL;
-    const a = [G.player, ...G.towers].filter(within).sort((p, q) => Math.hypot(p.x - o.x, p.y - o.y) - Math.hypot(q.x - o.x, q.y - o.y))[0];
+  if (h.kind === 'punch') {   // 揍飛：一隻手只打一個（範圍裡離洞口最近的那個，怪物自己人也算），打中的人飛出去、彈兩下、躺著暈
+    const o = rkHandSpot(h), near = a => Math.hypot(a.x - o.x, a.y - o.y) <= P.radius * CELL;
+    const people = [G.player, ...G.towers].filter(a => a && a.hp > 0 && !a.rkHeld && !a.eatenBy && !a.vineCap && near(a));
+    const monsters = G.enemies.filter(m => !m.dead && m.hp > 0 && !m.ratKing && !m.ratKingHand && (!e || sameFloor(e, m)) && near(m));
+    const a = [...people, ...monsters].sort((p, q) => Math.hypot(p.x - o.x, p.y - o.y) - Math.hypot(q.x - o.x, q.y - o.y))[0];
     if (a === G.player) { const hp0 = a.hp; e.playerTouchCd = 0; enemyAttackPlayer(e, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
-    else if (a) { const hp0 = a.hp; e.atkCd = 0; enemyAttackSentry(e, a, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
+    else if (a && G.towers.includes(a)) { const hp0 = a.hp; e.atkCd = 0; enemyAttackSentry(e, a, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
+    else if (a) {   // 打到怪物：扣血、重重往外彈開（打死了照一般怪物死掉，會掉碎片）
+      a.hp -= P.monsterDamage; a.hitT = Math.max(a.hitT || 0, .2); a.hitColor = '#f0a3c8';
+      if (typeof flashDmg === 'function') flashDmg('-' + P.monsterDamage, a.x, a.y - 26, '#f0a3c8');
+      if (typeof enemyHitReact === 'function') enemyHitReact(a, o.x, o.y, true);
+    }
     if (typeof addShake === 'function') addShake(4);
   } else if (h.kind === 'grab') {
     const a = h.target, o = rkHandSpot(h);
