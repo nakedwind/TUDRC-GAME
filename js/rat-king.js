@@ -15,7 +15,7 @@
    - 最後一顆核心破掉：老鼠王暈倒 stun.time 秒（頭上轉星星），這段時間受到的傷害 ×stun.dmgMul，是爆發輸出的好時機。
    - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻；還會從洞裡叫出小的花蓮版權老鼠。
    - 血量歸零（死亡表演，節奏慢）：老鼠王卡在鐵軌上暈頭轉向 → 響起這個車站的到站音樂、隧道裡的車燈越來越亮、地面越震越大
-     → 捷運煞車聲（煞車來不及）→ 紅色列車撞上去（白光、畫面頓住、慢動作、大震動、火花）→ 老鼠王邊轉邊飛向鏡頭 → 「討伐成功」。
+     → 捷運煞車聲（煞車來不及）→ 紅色列車撞上去（白光、畫面頓住、慢動作、大震動、火花）→ 老鼠王邊轉邊往右飛出去 → 「討伐成功」。
      之後列車照常停靠，可以搭車（開往哪裡寫在 data/mrt-train.js 的 variants）。核心全破的結算畫面會等老鼠王被撞飛之後才跳。
    素材：本體沿用花蓮版權老鼠的圖（放大 scale 倍）；拳頭是 left-fist.png，抓核心張開的手是 left-hand.png（都用 images/monster/rat-king/ 的紫藍版，見 RAT_KING.artDir）。
    數值都在下面的 RAT_KING。必須在 burrowing-mouse.js 之後、game.js 之前載入。
@@ -890,8 +890,8 @@ function drawRatKing(c, e) {
   const top = edge - B.showRow * S + (1 - (e.rkRise ?? 1)) * B.showRow * S;   // 冒出來的過程：從月台邊緣往上升
   c.save();
   c.imageSmoothingEnabled = false;
-  if (flying) {   // 被撞飛：往列車開的方向飛出去、往上拋、邊轉邊變大（飛向鏡頭）、最後淡掉
-    const p = rkFlyPos(K, e), dir = K.flyDir || 1, grow = 1 + p.k * .9;
+  if (flying) {   // 被撞飛：沿著 ram.flyAngle 的斜線往旁邊飛出去、邊轉、最後淡掉（大小不變）
+    const p = rkFlyPos(K, e), dir = K.flyDir || 1, grow = 1;
     c.globalAlpha = Math.max(0, 1 - Math.max(0, p.k - .55) / .45);
     c.translate(p.x, p.y); c.rotate(dir * p.k * 9); c.scale(grow, grow); c.drawImage(img, -w / 2, -h / 2, w, h);
     c.restore();
