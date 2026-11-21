@@ -36,9 +36,9 @@ const RAT_KING = {
   enrageAt: .5,                  // 血量剩幾成暴怒
   emerge: { delay: 2.2, rumble: 2.4, rise: 2.4, hold: 1.2 },   // 核心醒了幾秒後開始震、震幾秒才冒出來、冒出來花幾秒、亮相多停幾秒
   // 手：every＝隔幾秒冒一波（最短～最長），count＝一波幾隻；frenzy＝暴怒時的版本
-  //   scale＝手的大小（原圖 110×90 的幾倍）；riseSpeed＝往上舉、縮回去的速度（1＝原本的速度，.7＝慢一點）
+  //   scale＝手的大小（原圖 110×90 的幾倍）；riseSpeed＝往上舉、縮回去的速度（1＝原本的速度，.5＝一半的速度）
   //   coreHoleGap＝一般的手離核心洞至少幾格（核心洞只給搬核心的手用）
-  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [1.4, 2.4], frenzyCount: [2, 3], frenzySpeed: .75, grabChance: .3, scale: 2.5, riseSpeed: .7, coreHoleGap: 2.5 },
+  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [1.4, 2.4], frenzyCount: [2, 3], frenzySpeed: .75, grabChance: .3, scale: 2.5, riseSpeed: .5, coreHoleGap: 2.5 },
   // 核心洞：地圖上鋪的這種洞素材就是核心會出現的地方（在地圖編輯器加減、搬動，核心出現的位置就跟著變）
   holeTile: 'tile_mvmo77lx',     // 地圖素材「hole02」
   // 一般的手冒出來時地上裂開的洞（用同一張 hole02 圖）：size＝大小倍率、linger＝手縮回去後洞還留幾秒才淡掉
@@ -49,7 +49,7 @@ const RAT_KING = {
   //   在地底幾秒、吐出來的傷害倍率、吐出來暈幾秒、兩次抓人至少隔幾秒；
   //   dragChance＝抓到隊員時被拖進地底的機會（其他就丟出去；溫特一律丟出去）；
   //   throw＝丟出去：飛多遠（格）、往上拋的速度、從多高丟出去（像素，約拳頭的高度）、撞牆扣多少血、丟出去時的傷害倍率
-  grab: { windup: 1.15, rise: .22, radius: 2, hold: 1.8, handHp: 260, under: 2.2, spitDamageMul: 1.2, daze: 1.4, cooldown: 7,
+  grab: { windup: 1.15, rise: .22, radius: 2, hold: 3.6, handHp: 260, under: 2.2, spitDamageMul: 1.2, daze: 1.4, cooldown: 7,
     dragChance: .5, throw: { dist: [4.5, 7], up: 260, height: 100, wallDamage: 12, damageMul: 1 },
     // pop＝拖進地底的隊員過一陣子從洞口被往上拋出來：地面先裂開冒土幾秒（warn），再往上拋（up＝往上的速度，越大飛越高）、落在幾格外（dist），落地彈兩下、躺著暈
     pop: { warn: .7, up: 520, dist: [1.5, 3] } },
