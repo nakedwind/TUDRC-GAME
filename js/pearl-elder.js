@@ -23,6 +23,7 @@ const PEARL_ELDER = {
   maps: { map_mvvdbiyx: { c: 91, r: 32 } },   // 出現在哪幾張地圖、生在哪一格（K56區-地下街：右邊有斑馬線、電梯的大房間，斑馬線上方的中間；地圖改成 106×96 之後的座標）
   hp: 3000, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hp：血量（再乘整體難度）
   scale: 2.6,                    // 體型放大倍率
+  artDir: 'images/monster/pearl-elder/',   // 專用的圖（貝殼、帽子紫藍，眼睛紅）：檔名跟珍珠小童一樣，只換資料夾；用 tools/recolor-pearl-elder.py 從珍珠小童的圖換色產生
   speedMul: 1.2,                 // 飄的速度倍率（以珍珠小童為基準）
   hover: 26,                     // 張殼時飄多高（像素）
   wakeRange: 6,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
@@ -99,6 +100,11 @@ function seedPearlElder() {
   G.cores.push(core);
   const P = PEARL_ELDER, S = P.scatter, e = createMonster(base, x, y);
   e.pearlBoss = true; e.eliteName = P.name;
+  if (P.artDir) {   // 換成大童專用的圖（另外複製一份，不要改到珍珠小童共用的設定）
+    const swap = f => typeof f === 'string' ? P.artDir + f.split('/').pop() : f;
+    e.sprite = swap(e.sprite);
+    if (e.art) e.art = Object.fromEntries(Object.entries(e.art).map(([k, f]) => [k, swap(f)]));
+  }
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是珍珠小童血量 × 整體難度：換成大童的血量，難度照樣乘
   e.playerDamage = Math.round(e.playerDamage * P.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * P.dmgMul);

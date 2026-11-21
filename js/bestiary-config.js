@@ -102,7 +102,7 @@ const bestiaryStyle = cfg => ({ ...BESTIARY_STYLE_DEFAULT, ...(bestiaryCfg(cfg).
 // 消滅次數另外算（js/bestiary.js 的 bestiaryKeyOf）
 const BESTIARY_ELITES = [
   { of: 'bird_head', def: () => typeof ELITE_BIRD !== 'undefined' ? ELITE_BIRD : { name: '鳥頭大隊長', artDir: 'images/monster/bird-head-elite/' } },   // js/elite-bird-head.js（沒載入時用括號裡的）
-  { of: 'pearl_kid', def: () => typeof PEARL_ELDER !== 'undefined' ? PEARL_ELDER : { name: '珍珠大童' } },   // js/pearl-elder.js
+  { of: 'pearl_kid', def: () => typeof PEARL_ELDER !== 'undefined' ? PEARL_ELDER : { name: '珍珠大童', artDir: 'images/monster/pearl-elder/' } },   // js/pearl-elder.js
   { of: 'hangi_bao', def: () => typeof CAP_KING !== 'undefined' ? CAP_KING.big : { name: '大夯吉寶' } },   // 順順宮主帽子裡的大夯吉寶（js/elite-cap-king.js）
   { of: 'loofah_lady', def: () => typeof LOOFAH_QUEEN !== 'undefined' ? LOOFAH_QUEEN : { name: '絲瓜女王' } },   // js/loofah-queen.js
   { of: 'golden_banana_king', def: () => typeof BANANA_EMPEROR !== 'undefined' ? BANANA_EMPEROR : { name: '金蕉大王' } },   // js/banana-emperor.js
