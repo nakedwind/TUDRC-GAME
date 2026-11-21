@@ -13,7 +13,7 @@
    - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻；還會從洞裡叫出小的花蓮版權老鼠。
    - 血量歸零：老鼠王卡在鐵軌上動不了 → 紅色列車鳴笛衝進站把牠撞飛 → 列車照常停靠，之後可以搭車（開往哪裡寫在 data/mrt-train.js 的 variants）。
      核心全破的結算畫面會等老鼠王被撞飛之後才跳。
-   素材：本體沿用花蓮版權老鼠的圖（放大 scale 倍）；拳頭是 images/monster/burrowing-mouse/left-fist.png，抓核心張開的手是 left-hand.png。
+   素材：本體沿用花蓮版權老鼠的圖（放大 scale 倍）；拳頭是 left-fist.png，抓核心張開的手是 left-hand.png（都用 images/monster/rat-king/ 的紫藍版，見 RAT_KING.artDir）。
    數值都在下面的 RAT_KING。必須在 burrowing-mouse.js 之後、game.js 之前載入。
 */
 const RAT_KING = {
@@ -40,8 +40,14 @@ const RAT_KING = {
   //   搬核心：隔幾秒搬一顆、預警、冒出、握住、拖下去；在地底幾秒（最短～最長）、冒出來後握著幾秒才放下、新位置至少離原本幾格
   mice: { every: [9, 13], count: [1, 2], max: 4 },   // 暴怒後叫出小老鼠：隔幾秒、一次幾隻、場上最多幾隻
   ram: { decelMul: 3.2, fly: 1.6 },   // 最後一擊：列車進站的速度（減速度倍率，越大衝越快）、老鼠王被撞飛幾秒
-  art: { fist: 'images/monster/burrowing-mouse/left-fist.png' },
+  art: { fist: 'images/monster/rat-king/left-fist.png' },   // 拳頭（老鼠王專用的紫藍版）
+  artDir: 'images/monster/rat-king/',   // 專用的圖（黑毛深紫藍、領結袖子紫藍）：檔名跟花蓮版權老鼠一樣，只換資料夾；用 tools/recolor-rat-king.py 換色產生
 };
+// 老鼠王用的整組圖：身體、眨眼、暈眩、手換成 RAT_KING.artDir 的紫藍版，地洞、土堆照用花蓮版權老鼠的（js/burrowing-mouse.js 的 BURROW_MOUSE_ART）
+const RK_ART_KEYS = ['body', 'bodyHalf', 'bodyClosed', 'dizzy1', 'dizzy2', 'dizzy3', 'dizzy4', 'hand'];
+let rkArtCache = null;
+const rkArt = () => rkArtCache || (rkArtCache = Object.fromEntries(Object.entries(BURROW_MOUSE_ART).map(([k, f]) =>
+  [k, RK_ART_KEYS.includes(k) && RAT_KING.artDir ? RAT_KING.artDir + f.split('/').pop() : f])));
 const rkRand = (a, b) => a + Math.random() * (b - a);
 const rkRandInt = ([a, b]) => Math.floor(rkRand(a, b + 1));
 const rkSpot = () => typeof MAP !== 'undefined' && MAP ? RAT_KING.maps[MAP.id] || null : null;
@@ -80,7 +86,7 @@ function seedRatKing() {
   G.ratKing = null;
   if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) || !rkSpot()) return;
   G.ratKing = { phase: 'sleep', t: 0, e: null, hands: [], under: [], waveT: 0, coreT: 0, miceT: 0, grabCd: 0, cores: 0 };
-  [...Object.values(BURROW_MOUSE_ART), RAT_KING.art.fist].forEach(f => typeof monsterImage === 'function' && monsterImage(f));   // 先載好圖
+  [...Object.values(rkArt()), RAT_KING.art.fist].forEach(f => typeof monsterImage === 'function' && monsterImage(f));   // 先載好圖
 }
 // 列車被老鼠王卡住了嗎（js/mrt-train.js 問）：老鼠王還沒被撞飛之前，那班車都不進站
 function ratKingBlocksTrain(tr) {
@@ -500,7 +506,7 @@ const ratKingHunting = () => { const K = G && G.ratKing; return !!(K && rkAlive(
 // 老鼠王本體（render.js 的 drawEnemy 呼叫；被撞飛時由 ratKingSortables 畫）
 function drawRatKing(c, e) {
   const B = RAT_KING, S = B.scale, w = 110 * S, h = 90 * S, edge = rkEdgeY();
-  const art = BURROW_MOUSE_ART, t = performance.now() / 1000;
+  const art = rkArt(), t = performance.now() / 1000;
   const K = G.ratKing, flying = K && K.phase === 'ram' && K.hit;
   let file = burrowMouseBlinkFrame(art, e.rkAge || 0);
   const dizzy = e.rkStunT > 0 || e.rkDying;
@@ -536,7 +542,7 @@ function rkHandPose(h) {
   return { reveal, open: t < 0 ? burrowEase(h.age / h.windup) : 1, crack: 0, stretch: t >= up && t < up + .15 ? 1 + .08 * Math.sin((t - up) / .15 * Math.PI) : 1 };
 }
 function rkHandFile(h) {
-  const open = BURROW_MOUSE_ART.hand, fist = RAT_KING.art.fist, up = h.windup + h.rise;
+  const open = rkArt().hand, fist = RAT_KING.art.fist, up = h.windup + h.rise;
   if (h.kind === 'core' || h.kind === 'pop') return h.age < up + h.hold * .35 && h.kind === 'core' ? open : h.kind === 'pop' && h.age >= up + h.hold * .7 ? open : fist;   // 抓核心：張開→握住；放核心：握著→張開
   if (h.kind === 'spit') return h.age < up + .1 ? fist : open;
   return fist;
@@ -550,7 +556,7 @@ function drawRkHand(c, h) {
     c.drawImage(coreImg, h.x - cw / 2 + (h.side === 'right' ? -6 : 6), h.y + 6 - lift - ch * .7, cw, ch);
     c.restore();
   }
-  drawBurrowMasked(c, monsterImage, BURROW_MOUSE_ART, h.x, h.y, 110 * scale, 90 * scale, h.side, rkHandFile(h), pose);
+  drawBurrowMasked(c, monsterImage, rkArt(), h.x, h.y, 110 * scale, 90 * scale, h.side, rkHandFile(h), pose);
   if (h.enemy && h.enemy.hp > 0) {   // 抓人的手：小血條＋「打這裡」提示
     const r = h.enemy.hp / h.enemy.maxhp, x = h.x - 26, y = h.y - 96;
     c.save(); c.fillStyle = 'rgba(0,0,0,.7)'; c.fillRect(x - 1, y - 1, 54, 7);
