@@ -2,7 +2,7 @@
 //  戰鬥中的 BOSS 音樂（跟 js/music.js 的一般背景音樂分開）
 //  兩首各自獨立，條件都符合時一起播：
 //  ・鳥頭大隊長盯上玩家（醒著、有追打目標）、大夯吉寶盯上溫特（js/elite-cap-king.js）→ 淡入「中BOSS」（每場戰鬥第一次被盯上時晚 startDelay 秒才開始）；
-//    失去仇恨（走回原位、目標跑掉）但畫面上方的 BOSS 血條還在 → 降成很小聲（quiet）繼續播；BOSS 全部倒下、血條消失 → 淡出。
+//    失去仇恨（走回原位、目標跑掉）但畫面上方的 BOSS 血條還在 → 照樣播（2026-11-22 拿掉「降成很小聲」）；BOSS 全部倒下、血條消失 → 淡出。
 //    再乘上溫特離最近的 BOSS 多遠：越近越大聲、越遠越小聲（distance，所有 BOSS 都一樣）。
 //  ・異質核心甦醒 → 馬上淡入「異質核心甦醒」，播放中音量慢慢忽大忽小；核心被打破 → 淡出。
 //  ・音檔、各自的音量在「音效編輯器」的「音樂」分類（bossElite、bossCore）調整；
@@ -14,10 +14,10 @@ const BOSS_MUSIC = {
   fadeIn: 2.0,          // 淡入幾秒
   fadeOut: 2.5,         // 淡出幾秒
   loseDelay: 1.5,       // 大隊長失去目標後等幾秒才淡出（衝撞完短暫停頓時不會一直切來切去）
-  quiet: .2,            // 「中BOSS」：沒在追打、但 BOSS 血條還在畫面上時，音量降成原本的幾倍（不會完全消失；再乘上距離的倍率）
   // 「中BOSS」音量照溫特離最近的 BOSS 幾格：[格數, 音量倍率]，中間照比例；比第一點近＝第一點的音量，比最後一點遠＝最後一點的音量
   // 2026-11-21 使用者指定：音樂音量 50%、音效編輯器 bossElite 80% 時，聽到 3 格內 0.30、20 格 0.20、40 格 0.05
-  distance: [[3, .75], [20, .5], [40, .125]],
+  // 2026-11-22 使用者指定：最大音量改 0.35（同樣的設定下 3 格內聽到 0.35 → 倍率 .875）
+  distance: [[3, .875], [20, .5], [40, .125]],
   startDelay: 2,        // 每場戰鬥第一次被大隊長盯上：等幾秒才開始播「中BOSS」（之後再被盯上就馬上播；核心甦醒的音樂一律馬上播）
   swell: { low: .6, high: 1.0, period: 7 },   // 核心音樂忽大忽小：最小／最大是原本的幾倍、一輪幾秒
   // 池核的巨大比基尼小丑魚（js/pool-boss.js）：醒了就一直算「在追打」，所以改看距離——
@@ -118,7 +118,7 @@ const BossMusic = (() => {
         if (on) eliteHeard = true;
       }
       let goal = on ? 1 : 0;
-      if (key === 'elite') goal = (on ? 1 : bars ? B.quiet : 0) * nearMul;   // 中BOSS：在追打＝原本音量、沒在追但血條還在＝quiet，再乘上離 BOSS 多遠
+      if (key === 'elite') goal = (on || (bars && eliteHeard) ? 1 : 0) * nearMul;   // 中BOSS：在追打、或沒在追但血條還在（這場已經開始播過）都是原本音量，再乘上離 BOSS 多遠
       if (!goal && !tracks[key]) continue;   // 還沒播過的不用建
       const t = track(key); if (!t) continue;
       t.level = t.level < goal ? Math.min(goal, t.level + dt / B.fadeIn) : Math.max(goal, t.level - dt / B.fadeOut);
