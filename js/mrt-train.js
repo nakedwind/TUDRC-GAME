@@ -168,6 +168,31 @@ function setupMrtTrains() {
   }
   setupMrtGates();
 }
+// ---- 軌道、列車停靠範圍：這一格是不是（順順宮帽等「不能出現在軌道上、車廂裡」的東西用；js/hangi-bao.js）----
+// 軌道＝地圖上鋪了軌道素材（圖檔 mrt-rail-track*.png：一般軌道、有雜物的軌道、mrt-rail-track25…，大圖或格子小圖都算）蓋到的格子；
+// 列車＝每班列車停好時車廂蓋住的格子（不管現在車在不在站上）。換地圖、重開時自動重算
+const MRT_RAIL_FILE = /\/mrt-rail-track[^/]*\.png$/i;
+let mrtTrackCache = { map: null, trains: null, set: new Set() };
+function mrtTrackCells() {
+  const trains = (G && G.mrtTrains) || null;
+  if (mrtTrackCache.map === MAP && mrtTrackCache.trains === trains) return mrtTrackCache.set;
+  const set = new Set(), isRail = id => { const t = id && mapTileById(id); return !!t && (id === MRT_TRAIN.railTile || MRT_RAIL_FILE.test(String(t.file || ''))); };
+  for (const s of (MAP && MAP.stamps) || []) {
+    if (!isRail(s.id)) continue;
+    const t = mapTileById(s.id), c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+    const w = typeof mapStampW === 'function' ? mapStampW(s, t) : mapTileW(t), h = typeof mapStampH === 'function' ? mapStampH(s, t) : mapTileH(t);
+    for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) set.add((c0 + dc) + ',' + (r0 + dr));
+  }
+  for (const L of Object.values((MAP && MAP.layers) || {})) for (const k in L) if (isRail(L[k])) set.add(k);
+  for (const tr of trains || []) for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
+    const cx = OX + x.c * CELL;
+    if (cx >= tr.clipL - 1 && cx + CELL <= tr.clipR + 1) set.add(x.c + ',' + x.r);   // 隧道裡（畫面外）的車廂不算
+  }
+  mrtTrackCache = { map: MAP, trains, set };
+  return set;
+}
+const mrtTrackCell = (c, r) => mrtTrackCells().has(c + ',' + r);
+
 // 這站的列車能不能開：捷運站裡放了發電機，就要全部打開（js/storage-lockers.js）；沒放發電機、或不是捷運站的地圖一律可以
 function mrtPowered() {
   if (!MAP || typeof dynamoCount !== 'function' || typeof dynamoStationMap !== 'function' || !dynamoStationMap(MAP)) return true;
