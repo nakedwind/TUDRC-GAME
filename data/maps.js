@@ -152749,11 +152749,11 @@ const BATTLE_MAPS = [
         "42,82": "tile_interactive_pickup_battery"
       },
       "object2": {},
-      "object3": {
+      "object3": {},
+      "object4": {},
+      "overlay": {
         "74,47": "tile_interactive_power_switch_off"
       },
-      "object4": {},
-      "overlay": {},
       "top": {
         "26,7": "tile_containment_wall_top_straight",
         "26,6": "tile_containment_wall_top_straight",
@@ -157860,7 +157860,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_large",
         "c": 72,
         "r": 42,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mvyw7lrk",
@@ -157872,43 +157872,43 @@ const BATTLE_MAPS = [
         "id": "tile_mwayj4gp",
         "c": 74,
         "r": 45,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 75,
         "r": 45,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 76,
         "r": 45,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 77,
         "r": 45,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 78,
         "r": 45,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 79,
         "r": 45,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mwayj4gp",
         "c": 80,
         "r": 45,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mrt_room_highwall",
@@ -158066,7 +158066,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_large",
         "c": 81,
         "r": 42,
-        "layer": "object2"
+        "layer": "object4"
       },
       {
         "id": "tile_mvyw7lrk",
@@ -158366,7 +158366,8 @@ const BATTLE_MAPS = [
         "r": 68,
         "layer": "object6",
         "cars": 2,
-        "bothDoors": true
+        "bothDoors": true,
+        "mrtMonsters": true
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -158387,7 +158388,7 @@ const BATTLE_MAPS = [
         "id": "tile_interactive_storage_locker",
         "c": 78,
         "r": 46,
-        "layer": "object3",
+        "layer": "object4",
         "ox": 10,
         "oy": 20
       },
@@ -158562,7 +158563,7 @@ const BATTLE_MAPS = [
         "id": "tile_mwfznsib",
         "c": 76,
         "r": 47,
-        "layer": "object3",
+        "layer": "object4",
         "ox": 30,
         "oy": 30
       },
@@ -161964,6 +161965,21 @@ const BATTLE_MAPS = [
         "layer": "object",
         "ox": 20,
         "oy": 30
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 11,
+        "r": 76,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 75,
+        "r": 46,
+        "layer": "object4",
+        "oy": 20
       }
     ],
     "solid": [
