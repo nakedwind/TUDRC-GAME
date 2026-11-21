@@ -456,6 +456,13 @@ function mrtTrainUnload(tr) {
   for (const a of mrtTrainActors()) if (a !== G.player && (!G.towers.includes(a) || a.mrtArrivedOn === tr.soundId) && mrtOnTrain(tr, a)) { a.y = platformY; a.navPath = null; a.navGoal = null; }   // 坐這班車來、還沒走下車的隊員也請下車
   for (const t of G.towers) if (t.mrtArrivedOn === tr.soundId) delete t.mrtArrivedOn;
 }
+// 這位隊員是不是坐在「溫特沒坐的那班車」上（被載走、正在開走，或搭下班車正要進站）：跟溫特分開了，
+// 嚮導技能、隨身疏導都不能放、也補不到他（js/guide-skills.js、js/game.js）。跟溫特坐同一班車的不算
+function mrtSeparated(a) {
+  if (!a || !a.mrtRide || !G || a === G.player) return false;
+  const tr = (G.mrtTrains || []).find(x => x.riders && x.riders.some(r => r.a === a));
+  return !tr || !mrtPlayerAboard(tr);
+}
 // 溫特在不在這班車上（tr.riders 也可能只有不小心搭上車的隊員、或搭下班車回來的隊員）
 const mrtPlayerAboard = tr => !!(tr.riders && G.player && tr.riders.some(r => r.a === G.player));
 // ---- 搭車：車上的人跟著列車一起動（a.mrtRide＝搭車中，溫特、隊員、怪物這時不自己動：js/game.js、js/sentry.js、js/enemy-ai.js）----
