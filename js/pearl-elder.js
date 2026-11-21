@@ -78,6 +78,7 @@ const PEARL_ELDER = {
     trigger: 14,                 // 離滾珠幾像素算踩到
     safe: 2,                     // 滑倒（含頭暈）結束後幾秒內不會再被滾珠滑倒（避免被卡在牆邊連續滑倒）
   },
+  shake: { land: 11, bounce: 11, bump: 14 },   // 畫面震動（貼身時；越遠越小，距離是所有 BOSS 共用的 BOSS_SHAKE.range）：閉殼掉到地上、滾動撞牆反彈、撞牆停下（2026-11-21 加強：原本 5／6／7）
   land: { shakeMax: 10, shakeMin: 3, shakeRange: 12 },   // 大珍珠落地的畫面震動：就在旁邊、shakeRange 格外圍的強度（上限 16）
 };
 
@@ -289,8 +290,9 @@ function stepPearlBossState(e, dt) {
     if (e.slimeLift <= 0 && !pk.landed) {   // 落地：揚起一圈灰塵、震一下
       pk.landed = true; pk.vz = 0;
       G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 10, r2: 70, life: .3, life0: .3, color: '#d8d0c0' });
-      bossImpact(e.x, e.y, 5, 0);
-      if (typeof sfxAt === 'function') sfxAt('pearlHit', e.x, e.y, 1, 'pearl-elder-land');
+      bossImpact(e.x, e.y, P.shake.land, .05);
+      if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y + 12, { rocks: 6, speed: [50, 130], up: [90, 170], dust: 6, dustRise: 2, size: .8 });   // 重重摔在地上：揚起灰塵、小石頭（js/gourd-monkey.js）
+      if (typeof sfxAt === 'function') { sfxAt('pearlHit', e.x, e.y, 1, 'pearl-elder-land'); sfxAt('gourdSlam', e.x, e.y, .6, 'pearl-elder-land2'); }
     }
   } else {
     const want = e.stunT > 0 ? 6 : P.hover + Math.sin(pk.bob * 2.1) * 4;
@@ -426,7 +428,8 @@ function pearlBossRollBounce(e, rl, wall) {
   rl.dir = { x: vx / len, y: vy / len };
   rl.bounces--; rl.left = R.len * CELL * R.bounceLen; rl.hit.clear();
   G.effects.push({ ring: true, x: e.x + nx * 40, y: e.y + ny * 20, r: 6, r2: 46, life: .25, life0: .25, color: '#c9c2b0' });
-  bossImpact(e.x, e.y, 6, .04);
+  bossImpact(e.x, e.y, PEARL_ELDER.shake.bounce, .05);
+  if (typeof rockBurstFx === 'function') rockBurstFx(e.x + nx * 40, e.y + ny * 20 + 10, { rocks: 6, speed: [50, 140], up: [80, 160], dust: 5, dustRise: 2, size: .75 });   // 撞到牆：牆邊噴出碎石灰塵
   if (typeof sfxAt === 'function') sfxAt('gourdSlam', e.x, e.y, .7, 'pearl-elder-roll-bounce');
 }
 // 蓄力時畫的路線：沿著方向往前找第一道牆（建築不算，會被撞爛）；回傳距離（像素），最多 maxLen
@@ -455,7 +458,8 @@ function pearlBossRollBump(e) {
   const R = PEARL_ELDER.roll, pk = e.pk;
   pk.roll = null; pk.rollCd = R.every;
   G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 6, r2: 50, life: .3, life0: .3, color: '#c9c2b0' });
-  bossImpact(e.x, e.y, 7, .06);
+  bossImpact(e.x, e.y, PEARL_ELDER.shake.bump, .08);
+  if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y + 10, { rocks: 10, speed: [60, 170], up: [100, 200], dust: 8, dustRise: 3, size: .9 });   // 狠狠撞上牆停下：大量碎石灰塵
   if (typeof sfxAt === 'function') sfxAt('gourdSlam', e.x, e.y, .9, 'pearl-elder-roll-bump');
   if (R.wallStun > 0) pearlBossSet(e, 'stunned', R.wallStun);
 }
