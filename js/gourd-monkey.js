@@ -300,13 +300,15 @@ function gourdImpactNow(e) {
     if (!blds.has(o) || d < blds.get(o)) blds.set(o, d);
   }
   for (const [o, d] of blds) {
-    if (d <= R + CELL / 2) gourdCrushObstacle(e, o, e.buildingDamage ?? BARRIER.breakDmg);
+    if (d <= R + CELL / 2 && /^gkBoulder/.test(o.type || '')) o.hp = 0;   // 葫蘆猴王震下來的大石頭：被壓到就碎（js/gourd-king.js 的 gkUpdateBoulders 處理碎掉）；震波外圈的照樣彈一下
+    else if (d <= R + CELL / 2) gourdCrushObstacle(e, o, e.buildingDamage ?? BARRIER.breakDmg);
     else if (d <= C.knockRadius + CELL / 2) {
       gourdCrushObstacle(e, o, C.shockBuildingDamage);
       const k = Math.max(0, Math.min(1, (d - R) / (C.knockRadius + CELL / 2 - R)));   // 越靠近葫蘆猴彈越高
       if (o.hp > 0 && !o.isBase) o.gourdHop = { t: -k * .08, h: C.hopMax + (C.hopMin - C.hopMax) * k, landed: false };   // 外圈晚一點點才彈，像震波往外傳
     }
   }
+  if (typeof gkUpdateBoulders === 'function') gkUpdateBoulders(0);   // 壓碎的大石頭馬上碎掉
   if (e.gourdKing && typeof gourdKingImpact === 'function') gourdKingImpact(e, quick);   // 葫蘆猴王：天花板落石、暴怒連跳（js/gourd-king.js）
 }
 function gourdHitPlayer(e, p) {
