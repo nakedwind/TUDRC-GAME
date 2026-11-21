@@ -57,7 +57,9 @@ const MILKFISH_LEGS = {
   guide: [1, 2, 3].map(i => MILKFISH_ART + 'legs-guide-0' + i + '.png'),
 };
 const mfRand = (a, b) => a + Math.random() * (b - a);
-const mfArt = e => e.behavior === 'milkfishSmall' ? MILKFISH_SMALL_ART : MILKFISH_ART;
+const mfArt = e => e.behavior === 'milkfishSmall' ? MILKFISH_SMALL_ART
+  : e.behavior === 'milkfishKing' && typeof MILKFISH_KING_FX !== 'undefined' && MILKFISH_KING_FX.artDir ? MILKFISH_KING_FX.artDir + 'milkfish-kid-'   // 虱目魚王：用專用的紫藍版（js/milkfish-king.js）
+  : MILKFISH_ART;
 // 指定這一幀用哪張動作圖（js/render.js 的 monsterWalkFrame 讀 forceFrame／forceFlip／forceAttack）
 // 攻擊圖（attack）：尺寸跟站姿圖不同，用原本的像素比例畫、腳底中央對齊；原圖朝左，目標在右邊就左右翻
 function mfPose(e, name, towardX) {

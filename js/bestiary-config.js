@@ -107,6 +107,8 @@ const BESTIARY_ELITES = [
   { of: 'loofah_lady', def: () => typeof LOOFAH_QUEEN !== 'undefined' ? LOOFAH_QUEEN : { name: '絲瓜女王', artDir: 'images/monster/loofah-queen/' } },   // js/loofah-queen.js
   { of: 'golden_banana_king', def: () => typeof BANANA_EMPEROR !== 'undefined' ? BANANA_EMPEROR : { name: '金蕉大王', artDir: 'images/monster/banana-emperor/' } },   // js/banana-emperor.js
 ];
+// 本身就是一種怪物、但遊戲裡換了專用圖的 BOSS：圖鑑也用那組圖（檔名一樣、換資料夾）
+const BESTIARY_ART_DIR = { milkfish_king: 'images/monster/milkfish-king/' };   // 虱目魚王（js/milkfish-king.js 的 MILKFISH_KING_FX.artDir）
 // ---- 遊戲裡有哪些怪物：怪物編輯器的怪物＋史萊姆變體＋菁英怪 ----
 function bestiaryBaseList() {
   const cat = typeof ACTIVE_MONSTERS !== 'undefined' ? ACTIVE_MONSTERS : (typeof monsterCatalog === 'function' ? monsterCatalog() : []);
@@ -114,7 +116,7 @@ function bestiaryBaseList() {
   const out = [];
   for (const m of cat) {
     if (m.id !== 'slime') {
-      out.push({ key: m.id, name: m.name, image: m.sprite, hue: null });
+      const dir = BESTIARY_ART_DIR[m.id]; out.push({ key: m.id, name: m.name, image: dir ? dir + m.sprite.split('/').pop() : m.sprite, hue: null });
       for (const el of BESTIARY_ELITES) if (el.of === m.id) { const d = el.def(); out.push({ key: m.id + ':elite', name: d.name, image: d.artDir ? d.artDir + m.sprite.split('/').pop() : m.sprite, hue: Number.isFinite(d.hue) ? d.hue : null }); }
       continue;
     }

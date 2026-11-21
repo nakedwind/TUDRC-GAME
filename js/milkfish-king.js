@@ -31,6 +31,7 @@ const MILKFISH_KING_MAPS = {
 // 不想給編輯器調的細節（動畫、特效）
 const MILKFISH_KING_FX = {
   name: '虱目魚王',
+  artDir: 'images/monster/milkfish-king/',   // 專用的圖（上衣紫藍、短褲和頭髮深紫藍）：檔名跟虱目魚小子一樣，只換資料夾；用 tools/recolor-milkfish-king.py 換色產生
   stepEvery: 70,          // 每走幾像素踩一步（震動、腳步聲）
   shakeRange: 18,         // 溫特在幾格內才感覺得到震動
   stepShakeTime: .3,      // 每一步的震動維持幾秒再慢慢停（震動大小是怪物編輯器的「腳步震動大小」；以前只震一瞬間、牠又走很慢，幾乎感覺不到）
@@ -109,6 +110,12 @@ function mkInit(e, core) {
   const spec = ACTIVE_MONSTERS.find(m => m.id === e.type);
   e.mkCfg = typeof validMilkfishKingCfg === 'function' ? validMilkfishKingCfg(spec && spec.mfKing) : {};
   e.eliteName = MILKFISH_KING_FX.name;
+  if (MILKFISH_KING_FX.artDir && !e.mkArtSwapped) {   // 換成魚王專用的圖（另外複製一份，不要改到共用的設定；笑、攻擊圖在 js/milkfish-kid.js 的 mfArt）
+    const swap = f => typeof f === 'string' && /\.png$/i.test(f) ? MILKFISH_KING_FX.artDir + f.split('/').pop() : f;
+    e.sprite = swap(e.sprite);
+    if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(swap) : swap(f)]));
+    e.mkArtSwapped = true;
+  }
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true; e.mineEater = true;
   e.walkStride = MILKFISH_KING_FX.stepEvery;   // 走路圖每踩一步換一張（左腳、右腳輪流），換圖的時間由 mkFootsteps 對齊落腳（js/render.js 的 monsterWalkFrame）   // mineEater：踩到地雷不會引爆（會把地雷吃掉，js/landmine.js）
   if (core === undefined) core = G.cores.filter(k => !k.dead).reduce((best, k) => !best || mkDist(k, e) < mkDist(best, e) ? k : best, null);
