@@ -54,7 +54,7 @@ const BANANA_EMPEROR = {
     spd:  { name: '速度下降',   mul: .6,  time: 8 },          // 紫：走路速度 × mul
   },
   shake: 16,                     // 施法第二下（真正放出法術那一下）畫面震多大（貼身時；2026-11-21 從 7 加強）
-  shakeRange: 22,                // 溫特在幾格內感覺得到敲地的震動（越近越大；以前只有 6 格）
+  shakeRange: 22,                // （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
   tap1: { hold: .28, lift: .22, shake: 8, crack: .6 },   // 施法敲兩下：第一下停幾秒、再舉起來幾秒、第一下震多大、第一下的裂痕大小（倍）
   step: { every: 30, shake: 4.5, range: 18 },   // 走路：每走幾像素踩一步（2026-11-21 使用者指定 30，原本 56）、每一步畫面震多大（貼身時）、溫特在幾格內才感覺得到（越近越大）
   cracks: {                      // 地上的裂痕（整場戰鬥都在，越敲越多）
@@ -243,7 +243,7 @@ function beFootsteps(e, moved) {
   if (be.stepDist < S.every) return;
   be.stepDist %= S.every;
   const p = G.player;
-  if (p) { const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, k = 1 - d / S.range; if (d < S.range) addShake(S.shake * (.2 + .8 * k * k)); }
+  if (p) { const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, R = bossShakeRange(), k = 1 - d / R; if (d < R) addShake(S.shake * (.2 + .8 * k * k)); }
   e.hitSquashT = .08;
   G.effects.push({ ring: true, x: e.x, y: e.y + 13, r: 6, r2: 34, life: .3, life0: .3, color: '#b9b2a2' });
   for (let i = 0; i < 3; i++) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() * 2 - 1) * 18, y: e.y + 13, vx: (Math.random() * 2 - 1) * 60, vy: -15 - Math.random() * 25, r: 2 + Math.random() * 2, life: .35, life0: .35, color: '#a9a292' });
@@ -289,7 +289,7 @@ function beFinalTap(e, rec) {
 // 敲地的震動：溫特在 shakeRange 格內才震，越近越大（平方衰減，跟鳥頭大隊長的腳步一樣）
 function beTapShake(x, y, amount) {
   const p = G.player; if (!p) return;
-  const d = Math.hypot(p.x - x, p.y - y) / CELL, R = BANANA_EMPEROR.shakeRange, k = 1 - d / R;
+  const d = Math.hypot(p.x - x, p.y - y) / CELL, R = bossShakeRange(), k = 1 - d / R;   // BOSS 共用的震動距離（js/combat-feel.js 的 BOSS_SHAKE）
   if (d < R) addShake(amount * (.2 + .8 * k * k));
 }
 // 權杖頂端在哪（原圖朝左，權杖在左手邊；敲地時權杖尾端在腳邊）
@@ -713,7 +713,7 @@ function drawBananaEmperorAir(ctx) {
 function bananaEmperorDown(e) {
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#ffe27a');
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
 }
 // ---- BOSS 血條（js/core-frenzy.js）、中BOSS 音樂（js/boss-music.js）----
 function bananaEmperorBars() {

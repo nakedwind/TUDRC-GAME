@@ -160,7 +160,7 @@ function mbScream(e, banner) {
   if (banner && typeof coreBanner === 'function') coreBanner(banner, '', '#f4d9ff');
   const top = e.y - (e.slimeLift || 0) - e.drawHeight * .5;
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: top, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#e7c8ff' : '#ffffff' });
-  nearbyImpact(e.x, e.y, 7, .05);
+  bossImpact(e.x, e.y, 7, .05);
   if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-scream');
 }
 
@@ -376,7 +376,7 @@ function mbDropCore(e) {
       const a = Math.random() * Math.PI * 2, sp = 8 + Math.random() * 16;
       pushCorrosionMist(c.x + Math.cos(a) * 12, c.y + 4 + Math.sin(a) * 8, Math.cos(a) * sp, Math.sin(a) * sp);
     }
-    nearbyImpact(c.x, c.y, 5, .03);
+    bossImpact(c.x, c.y, 5, .03);
   }
   mbSet(e, 'nest');
   mbArrive(e);
@@ -466,7 +466,7 @@ function mothBossDown(e) {
   }
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#f4d9ff');
-  nearbyImpact(e.x, e.y, 10, .08);
+  bossImpact(e.x, e.y, 10, .08);
 }
 
 // ---- 畫面上方的 BOSS 血條（core-frenzy.js 的 drawCoreBossUI 呼叫）：人面蝶后＋抱著的核心 ----

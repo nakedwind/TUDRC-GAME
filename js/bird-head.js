@@ -332,7 +332,7 @@ const GIANT_FALL = {
   lie: 3,           // 倒在地上躺多久
   fade: 1,          // 最後淡出多久
   shake: 16,        // 倒地時畫面震動
-  shakeRange: 22,   // 溫特在幾格內感覺得到倒地的震動（越近越大）
+  shakeRange: 22,   // （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
   dust: { rocks: 14, speed: [60, 170], up: [120, 240], dust: 10, dustRise: 3, size: 1 },   // 倒地揚起的煙塵、碎石（js/gourd-monkey.js 的 rockBurstFx）
 };
 const giantFallLand = () => GIANT_FALL.sway + GIANT_FALL.fall;   // 幾秒時碰到地面
@@ -356,7 +356,7 @@ function updateGiantFall(c) {
   if (!c.landed && c.t >= land) {   // 重重倒在地上：大震動、頓一下、一長條煙塵和碎石、兩圈衝擊波
     c.landed = true;
     const p = G.player;
-    if (p) { const d = Math.hypot(p.x - c.x, p.y - c.y) / CELL, k = 1 - d / F.shakeRange; if (d < F.shakeRange) addShake(F.shake * (.25 + .75 * k * k)); }
+    if (p) { const d = Math.hypot(p.x - c.x, p.y - c.y) / CELL, R = bossShakeRange(), k = 1 - d / R; if (d < R) addShake(F.shake * (.25 + .75 * k * k)); }
     if (typeof addHitstop === 'function') addHitstop(.08);
     const len = c.h * .9;
     for (let i = 0; i < 4; i++) {   // 沿著倒下的身體揚起煙塵

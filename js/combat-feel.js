@@ -44,6 +44,17 @@ const SLIME_SPIT = { range: 5, minRange: 1.5, windup: .75, flySpeed: 6.5, cooldo
 const HIT_FEEL = { knock: 5, heavyKnock: 16, stagger: .3 };
 // 畫面震動只在玩家附近發生：range 格以內才震，越近越強
 const SHAKE_FEEL = { range: 6 };
+// BOSS 的震動（走路、敲地、砸地、倒下……）：溫特在 range 格內都感覺得到，越近越大。所有 BOSS 共用這一個數字，要調遠近改這裡
+const BOSS_SHAKE = { range: 30 };
+const bossShakeRange = () => BOSS_SHAKE.range;
+// BOSS 用的大型衝擊：跟 nearbyImpact 一樣的強度算法，只是傳得比較遠；頓格只在很近（3 格內）才有
+function bossImpact(x, y, shake, stop) {
+  if (!G.player) return;
+  const d = Math.hypot(G.player.x - x, G.player.y - y) / CELL, R = BOSS_SHAKE.range;
+  if (d > R) return;
+  addShake(shake * (.25 + .75 * Math.pow(1 - d / R, 2)));   // 平方衰減：貼身最大，越遠越小
+  if (stop && d < SHAKE_FEEL.range * .5) addHitstop(stop);
+}
 
 // 大型衝擊（巨型倒下、自爆）：依玩家距離決定震動強度，太遠就完全不震、不頓格
 function nearbyImpact(x, y, shake, stop) {

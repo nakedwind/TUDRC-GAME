@@ -181,7 +181,7 @@ function poolBossFlop(pb, dt) {
   if (p >= 1) { pb.flopT = poolBossRand(P.flop); e.slimeLift = 0; e.forceFrame = art.crouch || null; e.forceFlip = !e.forceFlip; nearbyImpactSafe(e); return; }   // 摔回地上，換個方向躺
   e.forceFrame = art.air || null; e.slimeLift = Math.sin(Math.PI * p) * P.flopLift;
 }
-const nearbyImpactSafe = e => { if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 3, .04); };
+const nearbyImpactSafe = e => { if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 3, .04); };
 // ---- 水花（份量參考油桶爆炸）----
 //   up＝從水裡躍出來：水往四周炸開＋往上噴；dive＝跳進水裡：高高的水柱＋往外噴；land＝落回水面：小一點
 //   每次都有：中間一片白色水沫、往外擴散的好幾圈水波、大大小小的水滴、水霧團、畫面搖晃
@@ -212,7 +212,7 @@ function poolBossSplash(e, kind = 'up') {
       vz: 25 + Math.random() * 40, r: 18 + Math.random() * 22, grow: 40 + Math.random() * 40, t: 0, life: 1 + Math.random() * .6 });
   }
   if (list.length > 900) list.splice(0, list.length - 900);   // 太多了就丟掉最舊的，不然會卡
-  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, K.shake, big ? .04 : 0);   // 畫面搖一下（離溫特越近越大，6 格外不搖）
+  if (typeof bossImpact === 'function') bossImpact(x, y, K.shake, big ? .04 : 0);   // 畫面搖一下（離溫特越近越大，6 格外不搖）
   if (typeof sfxAt === 'function') sfxAt('poolBossSplash', x, y, big ? 1 : .6, 'pool-boss-splash-' + kind); else if (typeof sfx === 'function') sfx('poolBossSplash');
 }
 function updatePoolSplash(dt) {

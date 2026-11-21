@@ -257,7 +257,7 @@ function lqStomp(e) {
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 14, r2: 46 * Q.scale, life: .45, life0: .45, color: '#b9a27a' });
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 28 * Q.scale, life: .3, life0: .3, color: '#e3d3a8' });
   for (let i = 0; i < 16; i++) llDust(e.x + (Math.random() - .5) * 30 * Q.scale, e.y + 12, 1);
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 10, .18); else addShake(5);
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 10, .18); else addShake(5);
   if (typeof sfxAt === 'function') sfxAt('loofahStomp', e.x, e.y, 1.4, 'loofah-queen-stomp');
   if (!G.vines) G.vines = [];
   let made = 0;
@@ -455,7 +455,7 @@ function lqThrowStep(cap, dt) {
     flash('撞到牆了！', a.x, a.y - 60, '#ffd27a', .8);
     G.effects.push({ ring: true, x: nx, y: ny - cap.h, r: 4, r2: 30, life: .3, life0: .3, color: '#e8dcc0' });
     for (let i = 0; i < 8; i++) G.effects.push({ particle: true, x: nx, y: ny - cap.h - 10, vx: -cap.tx * (40 + Math.random() * 80) + (Math.random() - .5) * 60, vy: -30 - Math.random() * 60, r: 1.5 + Math.random() * 1.5, life: .45, life0: .45, color: '#b9a27a' });
-    if (typeof nearbyImpact === 'function') nearbyImpact(a.x, a.y, cap.isPlayer ? 8 : 5, .08); else addShake(5);
+    if (typeof bossImpact === 'function') bossImpact(a.x, a.y, cap.isPlayer ? 8 : 5, .08); else addShake(5);
     if (typeof sfxAt === 'function') sfxAt('knock2', a.x, a.y, .9, 'loofah-queen-wall');
     lqThrowLand(cap, true);
     return;
@@ -523,7 +523,7 @@ function lqUpdateCore(rec, dt) {
       const a = Math.random() * Math.PI * 2, sp = 8 + Math.random() * 16;
       if (typeof pushCorrosionMist === 'function') pushCorrosionMist(core.x + Math.cos(a) * 12, core.y + 4 + Math.sin(a) * 8, Math.cos(a) * sp, Math.sin(a) * sp);
     }
-    if (typeof nearbyImpact === 'function') nearbyImpact(core.x, core.y, 8, .1); else addShake(3);
+    if (typeof bossImpact === 'function') bossImpact(core.x, core.y, 8, .1); else addShake(3);
     if (typeof sfxAt === 'function') sfxAt('vineLand', core.x, core.y, .9, 'loofah-queen-core-land');
     systemNotice('異質核心掉下來了！', true);
   }
@@ -560,7 +560,7 @@ function loofahQueenDown(e) {
   if (typeof sfxAt === 'function') sfxAt('loofahDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著播的那聲會被去重吃掉
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#d9f5b8');   // 不提示要用火燒
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
 }
 
 // ---- 農田的絲瓜藤（放進 G.loofahVines，farm 標記；畫法、掙扎、開槍幫隊友都跟絲瓜小姐的藤蔓一樣，js/loofah-lady.js）----

@@ -33,7 +33,7 @@ const MILKFISH_KING_FX = {
   name: '虱目魚王',
   artDir: 'images/monster/milkfish-king/',   // 專用的圖（上衣紫藍、短褲和頭髮深紫藍）：檔名跟虱目魚小子一樣，只換資料夾；用 tools/recolor-milkfish-king.py 換色產生
   stepEvery: 35,          // 每走幾像素踩一步（震動、腳步聲）；2026-11-21 使用者指定 35（原本 70）
-  shakeRange: 18,         // 溫特在幾格內才感覺得到震動
+  shakeRange: 18,         // （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
   stepShakeTime: .3,      // 每一步的震動維持幾秒再慢慢停（震動大小是怪物編輯器的「腳步震動大小」；以前只震一瞬間、牠又走很慢，幾乎感覺不到）
   eatReach: 95,           // 離隊友幾像素內可以吞
   gulpWindup: .45,        // 吞隊友前張嘴（秒）
@@ -437,7 +437,7 @@ function mkRoar(e) {
   systemNotice(e.eliteName + '甦醒了！', true);
   flash('咕嚕嚕——！！', e.x, e.y - e.drawHeight - 10, '#8fd3ff');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#8fd3ff' : '#ffffff' });
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 9, .06); else addShake(6);
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 9, .06); else addShake(6);
   if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-roar');
 }
 
@@ -481,7 +481,7 @@ function mkCoreLand(s) {
   const core = s.core;
   core.x = s.x1; core.y = s.y1; core.carried = false; core.hidden = false; core.lastHp = core.hp; core.hitT = .2;
   G.effects.push({ ring: true, x: core.x, y: core.y + 10, r: 6, r2: 50, life: .4, life0: .4, color: '#c78bff' });
-  if (typeof nearbyImpact === 'function') nearbyImpact(core.x, core.y, 6, .05);
+  if (typeof bossImpact === 'function') bossImpact(core.x, core.y, 6, .05);
   if (typeof coreBanner === 'function') coreBanner('核心掉出來了', '趁牠還沒吞回去，快打核心！', '#ffd27a');
   if (typeof sfxAt === 'function') sfxAt('knock2', core.x, core.y, 1, 'milkfish-king-core-land');
 }
@@ -674,7 +674,7 @@ function mkMateLand(s) {
   if (dmg > 0) { a.hp -= dmg; if (s.cap) s.cap.hp = a.hp; flashDmg('-' + Math.round(dmg), a.x, a.y - 50, '#ff6b6b'); }
   mkSplash(s.king, x, y, C.spitDamage * .6 * atk, a);
   G.effects.push({ ring: true, x, y: y + 12, r: 6, r2: C.spitRadius * CELL, life: .35, life0: .35, color: '#cfe9ff' });
-  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 5, .05);
+  if (typeof bossImpact === 'function') bossImpact(x, y, 5, .05);
 }
 // 建築落地：依種類爆炸、漏油、起火或砸碎
 function mkItemLand(s) {
@@ -686,7 +686,7 @@ function mkItemLand(s) {
   mkSplash(e, x, y, C.spitDamage * (s.atk || 1), null);
   G.effects.push({ ring: true, x, y: y + 6, r: 6, r2: C.spitRadius * CELL, life: .35, life0: .35, color: '#d9d2c0' });
   for (let i = 0; i < 10; i++) { const a = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 120; G.effects.push({ particle: true, kind: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 40, r: 2 + Math.random() * 2.5, life: .45, life0: .45, color: '#9a9283' }); }
-  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 6, .05); else addShake(4);
+  if (typeof bossImpact === 'function') bossImpact(x, y, 6, .05); else addShake(4);
   if (typeof sfxAt === 'function') sfxAt('knock2', x, y, 1.1, 'milkfish-king-land');
   const name = String(o.type || '') + ' ' + String((typeof mapTileById === 'function' && o.mapTileId && (mapTileById(o.mapTileId) || {}).name) || '');
   if (o.trap) {   // 地雷：落地就爆
@@ -739,7 +739,7 @@ function mkDown(e) {
   mk.coreIn = false;
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '核心掉出來了，趁現在打破核心！', '#8fd3ff');
   systemNotice(e.eliteName + '倒下了！核心掉出來了', true);
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 10, .08);
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 10, .08);
 }
 
 // 走路圖用第幾張：照「踩了幾步」決定，不用畫面自己累積的走路距離（那個會跟落腳差半步，換圖和震動就對不上）
@@ -755,7 +755,7 @@ function mkFootsteps(e, moved) {
   mk.stepDist %= F.stepEvery;
   mk.stepCount++; mkSyncWalkFrame(e);   // 落腳：走路圖換成另一隻腳（跟下面的震動、腳步聲同一刻）
   const p = G.player;
-  if (p) { const d = mkDist(p, e) / CELL, k = 1 - d / F.shakeRange; if (d < F.shakeRange) mkRumble(C.stepShake * (.2 + .8 * k * k), F.stepShakeTime); }   // 越近震越大
+  if (p) { const d = mkDist(p, e) / CELL, R = bossShakeRange(), k = 1 - d / R; if (d < R) mkRumble(C.stepShake * (.2 + .8 * k * k), F.stepShakeTime); }   // 越近震越大
   e.hitSquashT = .12;   // 落腳時身體被壓扁一下再彈回
   G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 6, r2: 48, life: .32, life0: .32, color: '#b9b2a2' });
   if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);   // 跟鳥頭大隊長跑步一樣揚起一團煙塵（js/gourd-monkey.js）

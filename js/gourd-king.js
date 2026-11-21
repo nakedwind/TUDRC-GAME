@@ -420,7 +420,7 @@ function gkRockLand(k, R) {
   {
     rockBurstFx(k.x, k.y, { rocks: 7, speed: [40, 120], up: [90, 180], dust: 4, dustRise: 1, size: .8 * k.size, spread: 10 });
     G.effects.push({ ring: true, x: k.x, y: k.y, r: 4, r2: R.radius * 1.3, life: .3, life0: .3, color: '#a8936c' });
-    if (typeof nearbyImpact === 'function') nearbyImpact(k.x, k.y, 4, 0);
+    if (typeof bossImpact === 'function') bossImpact(k.x, k.y, 4, 0);
     if (typeof sfxAt === 'function') sfxAt('gourdTossLand', k.x, k.y, .5, 'gk-rock');
     const p = G.player;
     if (p && p.hp > 0 && blastHits(p) && Math.hypot(p.x - k.x, p.y - k.y) <= R.radius + 10 && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
@@ -514,7 +514,7 @@ function gourdKingDown(e) {
   if (G.gourdKing) G.gourdKing.phase = 'dead';
   systemNotice(GOURD_KING.name + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(GOURD_KING.name + '倒下了', '', '#e8c27a');
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 12, .1);
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 12, .1);
 }
 // ---- BOSS 血條（js/core-frenzy.js）、中BOSS 音樂（js/boss-music.js）----
 function gourdKingBars() {

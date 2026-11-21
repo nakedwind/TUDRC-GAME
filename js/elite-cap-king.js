@@ -39,7 +39,7 @@ const CAP_KING = {
     capSpread: { n: 3, angle: 22, scale: 1.8, hitR: 28 },   // 一次丟幾頂、相鄰兩頂差幾度、帽子放大、打中判定半徑（像素）
     boomerang: { noticeRange: 12, loseRange: 20, throwRange: 6.5, keepDistance: 2.5, windup: .55, cooldown: 2.2, capSpeed: 230 },   // 覆蓋普通夯吉寶的迴力鏢數值（欄位見 js/monster-data.js 的 BOOMERANG_FIELDS）
     stepEvery: 46,         // 每走幾像素踩一步（震動、揚塵、腳步聲）
-    stepShake: 6, shakeRange: 16,   // 每一步的畫面震動（貼身時最大），溫特在幾格內才震
+    stepShake: 6, shakeRange: 16,   // 每一步的畫面震動（貼身時最大）；shakeRange （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
   },
 };
 const ckRand = ([a, b]) => Math.round(a + Math.random() * (b - a));
@@ -108,7 +108,7 @@ function openCapKingCap(cap) {
   if (typeof sfxAt === 'function') sfxAt('capKingPop', cap.x, cap.y, 1, 'hangi-cap');
   G.effects.push({ ring: true, x: cap.x, y: cap.y, r: 10, r2: 80, life: .4, life0: .4, color: hasCore ? '#c77bff' : '#ffd479' });
   if (typeof addLightFlash === 'function') addLightFlash('muzzle', cap.x, cap.y - 40);
-  nearbyImpact(cap.x, cap.y, 3, 0);
+  bossImpact(cap.x, cap.y, 3, 0);
   if (first) {
     if (typeof questEvent === 'function') questEvent('openCap');   // 支線進度（js/quests.js）
     if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮平安符（js/equipment.js）
@@ -195,7 +195,7 @@ function capKingSpawnBig(cap) {
   G.capKing.bigs.push(e);
   if (G.capKing.cycleT == null) G.capKing.cycleT = CAP_KING.cycleTime;   // 第一隻跳出來：開始每 cycleTime 秒蓋帽洗牌
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: cap.x, y: cap.y - 40, r: 10 + i * 8, r2: 120 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ffd27a' : '#ffffff' });
-  nearbyImpact(cap.x, cap.y, 9, .06);
+  bossImpact(cap.x, cap.y, 9, .06);
   flash('！！', cap.x, cap.y - e.drawHeight - 20, '#ffd27a', 1.4);
   systemNotice(e.eliteName + '從帽子裡跳出來了！', true);
 }
@@ -209,8 +209,8 @@ function capKingBigSteps(e) {
   e.ckStep %= B.stepEvery;
   const p = G.player;
   if (p) {
-    const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, k = 1 - d / B.shakeRange;
-    if (d < B.shakeRange) addShake(B.stepShake * (.2 + .8 * k * k));   // 平方衰減：貼身震很大，越遠越小
+    const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, R = bossShakeRange(), k = 1 - d / R;   // BOSS 共用的震動距離（js/combat-feel.js 的 BOSS_SHAKE）
+    if (d < R) addShake(B.stepShake * (.2 + .8 * k * k));   // 平方衰減：貼身震很大，越遠越小
   }
   e.hitSquashT = .07;   // 落腳時身體被壓扁一下
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 46, life: .3, life0: .3, color: '#b9b2a2' });
@@ -242,7 +242,7 @@ function capKingBossBars() {
 }
 // 倒下（combat-feel.js 的 onEnemyDeath 呼叫）
 function capKingBigDown(e) {
-  nearbyImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
+  bossImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
   e.deathSound = 'capKingDeath';   // 死掉的聲音：這裡先大聲播（有回音）；game.js 接著用同一個來源（monster-death）播的那聲會被去重吃掉，不會疊兩次
   if (typeof sfxAt === 'function') sfxAt('capKingDeath', e.x, e.y, 2.2, 'monster-death');
   // 只說倒下了：不提還有幾隻（含躲在帽子裡的）、也不提核心護盾消失（全部倒下時護盾會默默解除，讓玩家自己發現）
