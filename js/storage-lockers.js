@@ -174,8 +174,8 @@ function useStoragePropNearPlayer(filter){
 // 做法：1. 先抽特殊子彈（ammoChance：置物櫃 GUN_FINDS.ammo；彈藥箱傳 AMMO_CRATE_LOOT.ammo，比較高），抽中就停
 //       2. 沒抽中子彈：把其他東西的順序打亂，一樣一樣抽（機率在 data/equipment.js 的 ITEM_DROPS 等），抽中一樣就停
 // 所以「開到子彈的機率」就是設定檔寫的那個數字；其他東西只在沒開到子彈時才有機會
-function rollRandomContainerLoot(x,y,where,ammoChance){
-  if(typeof tryGunFind==='function'&&tryGunFind(x,y,ammoChance??GUN_FINDS.ammo,where))return true;   // 特殊子彈（js/special-guns.js）
+function rollRandomContainerLoot(x,y,where,ammoChance,ammoCount){   // ammoCount：開到子彈給幾發（彈藥箱＝一組；沒給＝照 GUN_FINDS.ammoFind）
+  if(typeof tryGunFind==='function'&&tryGunFind(x,y,ammoChance??GUN_FINDS.ammo,where,ammoCount))return true;   // 特殊子彈（js/special-guns.js）
   const tries=[
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('thermos',x,y),   // 保溫瓶
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('adrenaline',x,y),   // 腎上腺素

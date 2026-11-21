@@ -216,8 +216,8 @@ const BULLETS = {
     desc: '打中的怪物陷入混亂幾秒：不理溫特和隊員，跑去攻擊身邊的其他怪物；被打的怪物也會回頭打牠，讓牠們自相殘殺。大型怪物混亂的時間減半；頭目、怪物「生命體」沒有效果。打不中隊員（會穿過去）。' },
 };
 // 在置物箱裡找到特殊子彈（只有後室才找得到的 field 子彈）：ammo 找到子彈的機率；kinds 會找到哪幾種；ammoFind 一次給幾發；start 第一次拿到（設定好的置物櫃）給幾發
-// 沒指定內容物的彈藥箱（js/flare.js）：empty＝整箱是空的機率；ammo＝開出特殊子彈的機率（比置物櫃的 GUN_FINDS.ammo 高）；其他物品跟置物櫃一樣照 ITEM_DROPS
-const AMMO_CRATE_LOOT = { empty: .05, ammo: .8 };
+// 沒指定內容物的彈藥箱（js/flare.js）：empty＝整箱是空的機率；ammo＝開出特殊子彈的機率（比置物櫃的 GUN_FINDS.ammo 高）；ammoCount＝開到特殊子彈時給幾發（一組＝BULLET_SET 發；置物櫃照下面 GUN_FINDS.ammoFind）；其他物品跟置物櫃一樣照 ITEM_DROPS
+const AMMO_CRATE_LOOT = { empty: .05, ammo: .8, ammoCount: BULLET_SET };
 // ammo＝置物櫃（沒指定內容物）開出特殊子彈的機率
 const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal', 'sticky'],
   ammoFind: { incendiary: 2, flash: 2, shock: 2, heal: 1, tranq: 3, paint: 4, sticky: 2, knock: 3, confuse: 3 },

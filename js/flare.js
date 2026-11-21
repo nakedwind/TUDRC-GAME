@@ -240,7 +240,7 @@ function useAmmoCrateNearPlayer() {
   // 開出來的東西跳視窗（js/item-intro.js）；什麼都沒有就飄字
   const before = typeof itemIntroCount !== 'undefined' ? itemIntroCount : 0;
   if (typeof itemIntroFromLocker !== 'undefined') itemIntroFromLocker = true;
-  try { if (s.lockerLoot) grantLockerLoot(s.lockerLoot, '彈藥箱'); else if (Math.random() >= AMMO_CRATE_LOOT.empty) rollRandomContainerLoot(crate.x, crate.top, '彈藥箱', AMMO_CRATE_LOOT.ammo); }   // 沒指定內容物：有 AMMO_CRATE_LOOT.empty 的機率整箱空的，不然跟置物櫃一樣隨機開出東西、特殊子彈的機率比較高（js/storage-lockers.js）
+  try { if (s.lockerLoot) grantLockerLoot(s.lockerLoot, '彈藥箱'); else if (Math.random() >= AMMO_CRATE_LOOT.empty) rollRandomContainerLoot(crate.x, crate.top, '彈藥箱', AMMO_CRATE_LOOT.ammo, AMMO_CRATE_LOOT.ammoCount); }   // 開到特殊子彈給一組（AMMO_CRATE_LOOT.ammoCount）   // 沒指定內容物：有 AMMO_CRATE_LOOT.empty 的機率整箱空的，不然跟置物櫃一樣隨機開出東西、特殊子彈的機率比較高（js/storage-lockers.js）
   finally { if (typeof itemIntroFromLocker !== 'undefined') itemIntroFromLocker = false; }
   if (typeof itemIntroCount !== 'undefined' && itemIntroCount === before) flash('空的', crate.x, crate.top - 8, '#dce6ed', 1.6);
   updateHUD(); saveGame();
