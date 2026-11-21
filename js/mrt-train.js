@@ -25,7 +25,7 @@
        不在名單裡的地圖照舊開回同一站。每站的到站音樂也在 stations 設（arrive）。
      沒搭上車的隊員：留在原本那站，nextTrainTime 秒（預設 2 分鐘）後搭下一班車到溫特這站（隊員欄顯示「正在搭下班車」倒數）。
      溫特沒上車、隊員不小心留在車上：隊員跟著列車開走，nextTrainTime 秒後搭車回站（隊員欄顯示「不小心搭上車」倒數）。
-       時間到了以後，等下一班車進站時從車上走下來；在沒有捷運的地圖就直接回到營地；回應變中心就全員歸隊。
+       時間到了以後，等離溫特最近的那台車（同一層優先，mrtNearestReturnTrain）下一班進站時從車上走下來；在沒有捷運的地圖就直接回到營地；回應變中心就全員歸隊。
      發電機：捷運站裡的發電機（js/storage-lockers.js 的 dynamo）全部打開之前，列車停在月台、車門關著不動（狀態 idle）；
        全部打開後開門、照常一班一班來（mrtPowered）。溫特還在車上時不會關門停住（避免被關在車裡出不去）。地圖上沒放發電機就不用開。
    車廂裡蓋的建築（燈、路障…，地雷除外）：列車開走時跟著車廂一起走（燈光也跟著動），下次停好時放回原本的格子。
@@ -619,9 +619,26 @@ function mrtTrainSeatRiders(tr, actors) {
     tr.riders.push({ a, x });
   });
 }
+// 隊員回站要搭哪台車：離溫特最近的那台（同一層的優先）。
+// 不算：通道列車（不會開走再進站）、指定開去別處的車（例如 O666 紅色列車）、被花蓮老鼠王卡住的車、溫特正坐著的車、沒電停著的車
+function mrtNearestReturnTrain() {
+  const p = G.player, trains = G.mrtTrains || [];
+  if (!p) return null;
+  const ok = trains.filter(tr => !tr.fixed && !(tr.variant && tr.variant.dest) && tr.state !== 'idle' && tr.state !== 'tunnel'
+    && !mrtPlayerAboard(tr) && !(typeof ratKingBlocksTrain === 'function' && ratKingBlocksTrain(tr)));
+  const pf = p.floor === 2 ? 2 : 1;
+  const dist = tr => Math.hypot(Math.max(tr.clipL, Math.min(tr.clipR, p.x)) - p.x, Math.max(tr.top, Math.min(tr.bottom, p.y)) - p.y)
+    + (hasFloors && (mrtTrainFloor(tr) === 2 ? 2 : 1) !== pf ? 1e6 : 0);   // 不同層的車排到後面
+  let best = null, bd = Infinity;
+  for (const tr of ok) { const d = dist(tr); if (d < bd) { bd = d; best = tr; } }
+  return best;
+}
 // 列車進站前：搭下班車的隊員時間到了，就坐這班車來（停好開門後走下車）
+// 只坐離溫特最近的那台車（不然綠線 8 台車，常常從很遠的月台下車）；別台車進站就繼續等
 function mrtTrainBringBack(tr) {
   if (MAP_SAFE || !mrtAway.some(m => m.t <= 0)) return;
+  const near = mrtNearestReturnTrain();
+  if (near && near !== tr) return;   // 這台不是最近的：等最近那台進站
   const due = mrtAway.filter(m => m.t <= 0);
   mrtAway = mrtAway.filter(m => m.t > 0);
   const back = mrtRejoin(due.map(m => m.type));
