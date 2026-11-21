@@ -1654,8 +1654,17 @@ function updatePlayer(dt) {
   const pushing = typeof bigPearlPlayerPush === 'function' && bigPearlPlayerPush(p, nx, ny, dx / len, dy / len);   // 頂到大珍珠：往前推，不自動往旁邊滑開（js/pearl-elder.js）
   // edgeWallCrossed：一步走太遠（衝刺、畫面卡一下）時，不會直接跳過薄牆（js/pathfinding.js）
   const px0 = p.x, py0 = p.y;   // 走之前的位置（看有沒有被擋住，js/pool-platform.js 的「跳下去」）
-  if (!playerBlocked(nx, p.y) && !edgeWallCrossed(p.x, p.y, nx, p.y, PLAYER.r)) p.x = nx; else if (!dy && !pushing) slideIntoGap(p, 'x', nx - p.x, step);
-  if (!playerBlocked(p.x, ny) && !edgeWallCrossed(p.x, p.y, p.x, ny, PLAYER.r)) p.y = ny; else if (!dx && !pushing) slideIntoGap(p, 'y', ny - p.y, step);
+  const xBlocked = !!dx && (playerBlocked(nx, p.y) || edgeWallCrossed(p.x, p.y, nx, p.y, PLAYER.r));
+  if (dx && !xBlocked) p.x = nx;
+  const ny2 = p.y + dy / len * step;   // 從左右走完之後的位置算
+  const yBlocked = !!dy && (playerBlocked(p.x, ny2) || edgeWallCrossed(p.x, p.y, p.x, ny2, PLAYER.r));
+  if (dy && !yBlocked) p.y = ny2;
+  // 被擋住、另一個方向也沒在走（或也被擋住，例如斜著貼牆走）：往旁邊挪一點看過不過得去（牆角、牆面凸出的幾像素、一格寬的開口）
+  // 先處理完兩個方向的移動再挪，挪過的位置才不會被另一個方向的移動蓋掉（以前貼牆往左右走，挪下去又被拉回原位，會卡住不動）
+  if (!pushing) {
+    if (xBlocked && (!dy || yBlocked)) slideIntoGap(p, 'x', nx - p.x, step);
+    else if (yBlocked && (!dx || xBlocked)) slideIntoGap(p, 'y', ny2 - p.y, step);
+  }
   if (typeof swimRingAfterMove === 'function') swimRingAfterMove(p, dx, dy);   // 撞到深水跳提示、划上岸收起救生圈（js/swim-ring.js）
   if (typeof poolPlatformAfterMove === 'function') poolPlatformAfterMove(p, dx, dy, px0, py0);   // 抽乾的平台上往邊上走被擋住：出現「跳下去」（js/pool-platform.js）
   if (p.dashPart > 0) {   // 衝刺中：身後留殘影（js/render.js 的 drawDashTrail）

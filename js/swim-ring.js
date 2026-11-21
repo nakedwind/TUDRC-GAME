@@ -85,10 +85,14 @@ function deepWaterBlocksCell(c, r) { return isDeepWaterCell(c, r); }
 // 溫特的碰撞（js/game.js 的 playerBlocked）：沒坐救生圈就不能從岸上踩進深水；
 // 已經泡在深水裡（水漲回來時人在深水區＝溺水，js/pool-tide.js）就不擋：原地不動、可以自己走回岸上，但走上岸之後就下不去了。
 // 坐救生圈時反過來：划不出深水區（停在邊上，要按「收起泳圈」才上岸）。溫特腳下已經不是深水（例如水剛被抽乾）就不擋，讓他可以自動收起
+// 擋路用的深水：微調過位置的深水格之間會留下 1～2 像素的縫，縫兩邊（3 像素內）都是深水就當成深水
+// （不然坐救生圈划到縫上會被擋住，像撞到看不見的東西）
+const deepWaterSolidAt = (x, y) => deepWaterAtPoint(x, y)
+  || (deepWaterAtPoint(x - 3, y) && deepWaterAtPoint(x + 3, y)) || (deepWaterAtPoint(x, y - 3) && deepWaterAtPoint(x, y + 3));
 function deepWaterBlocksPlayer(x, y) {
   const p = G.player;
-  if (!riding()) return deepWaterAtPoint(x, y) && !deepWaterAtPoint(p.x, p.y);
-  return deepWaterAtPoint(p.x, p.y) && !deepWaterAtPoint(x, y);
+  if (!riding()) return deepWaterSolidAt(x, y) && !deepWaterAtPoint(p.x, p.y);
+  return deepWaterAtPoint(p.x, p.y) && !deepWaterSolidAt(x, y);
 }
 // 划水速度（給 js/build.js 的 slowFactorAt）
 function swimRingSpeedAt(x, y) {
@@ -131,7 +135,17 @@ function swimRingAfterMove(p, dx, dy) {
 }
 
 // ---- 坐救生圈划到深水區的邊上：岸上離救生圈最近、站得住的地方 { x, y }（js/render.js 畫「收起泳圈」、空白鍵用）----
+// 畫面每一幀都會問（畫「收起泳圈」），算一次要好幾毫秒：溫特沒動（同一個 4 像素格）、半秒內就用上次的答案
+let swimShoreCache = { key: '', at: 0, spot: null };
 function swimRingShoreSpot() {
+  const p = typeof G !== 'undefined' && G && G.player;
+  const key = p ? Math.round(p.x / 4) + ',' + Math.round(p.y / 4) + (p.swimRing ? 'r' : '') : '', now = performance.now();
+  if (key === swimShoreCache.key && now - swimShoreCache.at < 500) return swimShoreCache.spot ? { ...swimShoreCache.spot } : null;
+  const spot = swimRingShoreSpotNow();
+  swimShoreCache = { key, at: now, spot: spot ? { ...spot } : null };
+  return spot;
+}
+function swimRingShoreSpotNow() {
   const p = typeof G !== 'undefined' && G && G.player;
   if (!p || !p.swimRing || p.hp <= 0 || !deepWaterAtPoint(p.x, p.y)) return null;
   // 旁邊就是電燈開關（電源、抽水閥）：讓給開關，不然「收起泳圈」會蓋掉開關、按空白鍵也只會上岸（js/storage-lockers.js）
@@ -152,11 +166,37 @@ function swimRingShoreSpot() {
         if (deepWaterAtPoint(x, y) || playerBlocked(x, y)) continue;
         if (swimRingTinyIsland(x, y)) continue;   // 四周一下子就碰到深水的小空格（多半是深水區漏畫的格子）：不算岸邊
         if (typeof edgeWallCrossed === 'function' && edgeWallCrossed(p.x, p.y, x, y, r)) continue;   // 中間隔著邊緣碰撞（薄牆）
+        if (swimRingWallBetween(p.x, p.y, x, y)) continue;   // 中間隔著牆（泳池上下的牆另一邊是走廊）：不能穿牆上岸，只能從沒有牆的岸邊（左右的階梯）上去
+        if (swimRingPocket(x, y)) continue;   // 牆上的小凹槽（例如「只是圖片」的門的門洞）：上去了也走不到別的地方，不算岸邊
         best = { x, y }; break;
       }
     }
   } finally { p.swimRing = true; }
   return best;
+}
+// 這個岸上的點是不是牆上的小凹槽：從這裡往外一步一步擴散（每步 6 像素，深水、牆都走不過去），
+// 擴散不到 SWIM_POCKET_MIN 步就走完了＝小凹槽（真正的岸邊、階梯會連到一大片陸地）
+const SWIM_POCKET_MIN = 60;
+function swimRingPocket(x, y) {
+  const S = 6, seen = new Set(['0,0']), q = [[0, 0]];   // q＝走得到的點
+  for (let h = 0; h < q.length; h++) {
+    if (q.length >= SWIM_POCKET_MIN) return false;
+    const [i, j] = q[h];
+    for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const ni = i + di, nj = j + dj, k = ni + ',' + nj; if (seen.has(k)) continue;
+      seen.add(k);
+      const px = x + ni * S, py = y + nj * S;
+      if (playerBlocked(px, py) || deepWaterAtPoint(px, py)) continue;
+      q.push([ni, nj]);
+    }
+  }
+  return true;
+}
+// 從救生圈到岸上那個點，中間有沒有牆（每 4 像素看一次「不可穿透」：紅格、微調後的紅格、橘框）
+function swimRingWallBetween(x0, y0, x1, y1) {
+  const d = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.ceil(d / 4));
+  for (let i = 1; i < n; i++) { const t = i / n; if (solidBlocksPoint(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)) return true; }
+  return false;
 }
 // 這個不是深水的點，往上下左右各走不到 2 格就又碰到深水：是被深水圍住的小空格（例如地圖編輯器漏畫了一格深水），不當作岸邊
 function swimRingTinyIsland(x, y) {
