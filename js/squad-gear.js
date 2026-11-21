@@ -35,7 +35,7 @@ function modsText(mods) {
 const GUIDE_BUFF_LABEL = { atk: '攻擊力', def: '防禦率', spd: '攻擊速度' };
 function guideActiveTexts(a) {
   if (!a) return { effect: '', note: '' };
-  const who = a.one ? (a.soothe ? '負荷最高的隊員' : 'HP 最低的隊員') : '全隊', fx = [];
+  const near = a.range > 0 ? a.range + ' 格內' : '', who = a.one ? near + (a.soothe ? '負荷最高的隊員' : 'HP 最低的隊員') : near ? near + '的隊友' : '全隊', fx = [];   // 有設距離：寫成「5 格內的隊友」
   if (a.heal) fx.push(who + ' HP +' + a.heal);
   if (a.soothe) fx.push((a.heal ? '' : who) + '負荷 −' + a.soothe);
   if (a.wake) fx.push('暴走的隊員立刻清醒');
