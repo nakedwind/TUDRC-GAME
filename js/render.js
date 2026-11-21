@@ -1383,6 +1383,7 @@ function draw() {
     ctx.fillStyle = '#ffd479'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('🎯 點擊地圖，指定「' + TYPES[assigning.type].name + '」的巡邏位置（Esc 取消）', cv.width / 2, 29);
   }
+  if (typeof drawRatKingScreen === 'function') drawRatKingScreen(ctx);   // 花蓮老鼠王的死亡表演：電影黑邊、警示紅光、撞擊白光（js/rat-king.js）
   // 玩家受擊：畫面四周紅暈快速閃現後淡出（同《苦艾與甘露》的受擊回饋）。
   if ((G.damageVignetteT || 0) > 0) {
     const elapsed = 1 - G.damageVignetteT / .45;
