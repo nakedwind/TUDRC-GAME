@@ -685,7 +685,7 @@ function mrtRamArrive(tr, decelMul = 3) {
 }
 // 每次開始一張地圖（js/game.js 的 begin）：回應變中心＝全員歸隊；其他地圖：不在身邊的隊員先不出現
 function mrtAwayOnBegin() {
-  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { mrtAway = []; if (typeof dynamoForget === 'function') dynamoForget(); return; }   // 捷運站的發電機也全部關回去
+  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { mrtAway = []; if (typeof dynamoForget === 'function') dynamoForget(); return; }   // 捷運站的發電機不會關回去（打開過就永遠開著，js/storage-lockers.js）
   if (!mrtAway.length || !G || !Array.isArray(G.towers)) return;
   const away = new Set(mrtAway.map(m => m.type));
   G.towers = G.towers.filter(t => !away.has(t.type));
