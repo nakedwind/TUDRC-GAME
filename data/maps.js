@@ -96878,6 +96878,21 @@ const BATTLE_MAPS = [
         "c": 60,
         "r": 96,
         "layer": "object"
+      },
+      {
+        "id": "tile_decor_foldingchair",
+        "c": 48,
+        "r": 107,
+        "layer": "object",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_decor_gasstove02",
+        "c": 48,
+        "r": 109,
+        "layer": "object",
+        "ox": 20
       }
     ],
     "solid": [
@@ -140229,7 +140244,7 @@ const BATTLE_MAPS = [
         "c": 26,
         "r": 82,
         "layer": "object4",
-        "cars": 3,
+        "cars": 1,
         "bothDoors": true,
         "mrtMonsters": true
       },
@@ -143083,7 +143098,7 @@ const BATTLE_MAPS = [
         "scale": 210,
         "ox": 10,
         "fy": true,
-        "oy": 6.666667
+        "oy": 6.666666999999961
       },
       {
         "id": "tile_eoc_door_exit_fade",
@@ -143348,10 +143363,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_street_claw_machine",
-        "c": 80,
+        "c": 78,
         "r": 54,
         "layer": "object6",
-        "oy": 30
+        "oy": 30,
+        "ox": 30
       },
       {
         "id": "tile_street_claw_machine",
@@ -143374,7 +143390,8 @@ const BATTLE_MAPS = [
         "r": 58,
         "layer": "object6",
         "ox": 20,
-        "fx": false
+        "fx": false,
+        "rush": true
       },
       {
         "id": "tile_street_ubike",
@@ -143852,21 +143869,23 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 41,
-        "r": 61,
-        "layer": "object6"
+        "c": 40,
+        "r": 63,
+        "layer": "top",
+        "ox": 20
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 47,
-        "r": 61,
-        "layer": "object6"
+        "c": 46,
+        "r": 63,
+        "layer": "top",
+        "ox": 30
       },
       {
         "id": "tile_mwbro91n",
         "c": 22,
         "r": 18,
-        "layer": "object3",
+        "layer": "object6",
         "ox": 32.666667,
         "oy": 24
       },
@@ -143874,7 +143893,7 @@ const BATTLE_MAPS = [
         "id": "tile_mwbro91n",
         "c": 64,
         "r": 18,
-        "layer": "object3",
+        "layer": "object6",
         "ox": 20,
         "oy": 20
       },
@@ -143897,6 +143916,33 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "ox": 20,
         "oy": 20
+      },
+      {
+        "id": "tile_decor_foldingchair",
+        "c": 50,
+        "r": 18,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 36,
+        "r": 79,
+        "layer": "top",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 40,
+        "r": 80,
+        "layer": "top"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 45,
+        "r": 80,
+        "layer": "top",
+        "ox": 30
       }
     ],
     "solid": [
@@ -149320,7 +149366,23 @@ const BATTLE_MAPS = [
       "12,19",
       "11,19",
       "10,19",
-      "15,18"
+      "15,18",
+      "23,54",
+      "23,55",
+      "24,55",
+      "24,54",
+      "19,42",
+      "23,42",
+      "24,42",
+      "42,22",
+      "41,22",
+      "40,22",
+      "39,22",
+      "38,22",
+      "37,22",
+      "49,22",
+      "50,22",
+      "51,22"
     ],
     "breakable": [],
     "coreSpots": [
@@ -154905,21 +154967,13 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_train_car_head",
-        "c": 25,
-        "r": 52,
-        "layer": "object6",
-        "cars": 1,
-        "fx": false
-      },
-      {
-        "id": "tile_mrt_train_car_head",
         "c": 33,
-        "r": 52,
+        "r": 51,
         "layer": "object6",
         "cars": 1,
         "fx": false,
-        "bothDoors": true,
-        "mrtFixed": true
+        "ox": 10,
+        "oy": 30
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -157353,13 +157407,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_train_car_head",
-        "c": 39,
+        "c": 35,
         "r": 43,
         "layer": "object9",
         "fx": true,
         "cars": 2,
         "bothDoors": true,
-        "mrtMonsters": true
+        "mrtMonsters": true,
+        "ox": 30
       },
       {
         "id": "tile_mrt_train_car_head",
@@ -157367,7 +157422,8 @@ const BATTLE_MAPS = [
         "r": 35,
         "layer": "object6",
         "cars": 2,
-        "bothDoors": true
+        "bothDoors": true,
+        "mrtMonsters": true
       },
       {
         "id": "tile_mrt_train_car_head",
@@ -157579,9 +157635,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_pillar_a",
-        "c": 67,
+        "c": 66,
         "r": 0,
-        "layer": "object"
+        "layer": "object",
+        "ox": 30
       },
       {
         "id": "tile_mwayj4gp",
@@ -157993,15 +158050,17 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwayj4gp",
-        "c": 69,
+        "c": 68,
         "r": 4,
-        "layer": "object"
+        "layer": "object",
+        "ox": 30
       },
       {
         "id": "tile_mwayj4gp",
-        "c": 71,
+        "c": 70,
         "r": 4,
-        "layer": "object"
+        "layer": "object",
+        "ox": 30
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -158080,40 +158139,40 @@ const BATTLE_MAPS = [
         "c": 46,
         "r": 6,
         "layer": "object",
-        "oy": 8.666667,
-        "ox": 2.666667
+        "oy": 8.66666699999999,
+        "ox": 12.666666999999961
       },
       {
         "id": "tile_mrt_platform_screen_doors",
-        "c": 55,
+        "c": 54,
         "r": 6,
         "layer": "object",
-        "oy": 8.666667,
-        "ox": 2.666667
+        "oy": 8.66666699999999,
+        "ox": 32.66666699999996
       },
       {
         "id": "tile_mrt_glass_railing",
-        "c": 64,
+        "c": 63,
         "r": 6,
         "layer": "object",
-        "oy": 8.666667,
-        "ox": 2.666667
+        "oy": 8.66666699999999,
+        "ox": 32.66666699999996
       },
       {
         "id": "tile_mrt_gate_card_readers",
         "c": 52,
         "r": 6,
         "layer": "object",
-        "oy": 8.666667,
-        "ox": 2.666667
+        "oy": 8.66666699999999,
+        "ox": 12.666666999999961
       },
       {
         "id": "tile_mrt_gate_card_readers",
-        "c": 61,
+        "c": 60,
         "r": 6,
         "layer": "object",
-        "oy": 8.666667,
-        "ox": 2.666667
+        "oy": 8.66666699999999,
+        "ox": 32.66666699999996
       },
       {
         "id": "tile_mrt_wall_sign_platform_green",
@@ -159206,11 +159265,12 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mrt_floor_tile_strip",
         "c": 55,
-        "r": 23,
+        "r": 21,
         "layer": "ground",
-        "ox": 10,
         "fx": true,
-        "angle": 90
+        "angle": 90,
+        "oy": 30,
+        "ox": 10
       },
       {
         "id": "tile_mrt_recycling_bins",
@@ -160794,10 +160854,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwayj4gp",
-        "c": 70,
+        "c": 69,
         "r": 4,
         "layer": "object",
-        "fx": true
+        "fx": true,
+        "ox": 30
       },
       {
         "id": "tile_mwayj4gp",
@@ -161874,6 +161935,35 @@ const BATTLE_MAPS = [
         "c": 56,
         "r": 28,
         "layer": "ground"
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 29,
+        "r": 34,
+        "layer": "object",
+        "ox": 20
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 71,
+        "r": 4,
+        "layer": "object",
+        "ox": 30
+      },
+      {
+        "id": "tile_decor_gasstove02",
+        "c": 22,
+        "r": 78,
+        "layer": "object",
+        "ox": 20
+      },
+      {
+        "id": "tile_decor_foldingchair",
+        "c": 22,
+        "r": 76,
+        "layer": "object",
+        "ox": 20,
+        "oy": 30
       }
     ],
     "solid": [
@@ -167541,7 +167631,17 @@ const BATTLE_MAPS = [
       "40,26",
       "58,26",
       "59,26",
-      "60,26"
+      "60,26",
+      "44,78",
+      "45,78",
+      "46,78",
+      "47,78",
+      "48,78",
+      "48,77",
+      "47,77",
+      "46,77",
+      "45,77",
+      "44,77"
     ],
     "breakable": [],
     "coreSpots": [
@@ -173350,6 +173450,19 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "ox": 20,
         "oy": 20
+      },
+      {
+        "id": "tile_decor_foldingchair",
+        "c": 37,
+        "r": 91,
+        "layer": "object"
+      },
+      {
+        "id": "tile_decor_gasstove02",
+        "c": 37,
+        "r": 92,
+        "layer": "object",
+        "oy": 6.666667
       }
     ],
     "solid": [
