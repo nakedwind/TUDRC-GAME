@@ -564,8 +564,8 @@ function drawVineActor(a, baseDraw, overlay = false) {
     try { drawWrap(ctx, { x: a.x, y: a.y, rootT: 0, struggleT: 0 }, grow, now, cap.wrapSeed); } finally { if (C) Object.assign(C, keep); }
   }
   ctx.restore();
-  if (cap.phase === 'hang') {   // 藤蔓還要打幾發：腳上面幾顆小點（打中一發暗一顆）
-    const n = VINES.hangHits, left = n - (cap.hits || 0), by = ay - 10;
+  if (cap.phase === 'hang') {   // 藤蔓還要打幾發：幾顆小點（打中一發暗一顆）；倒吊的畫在腳上面，從地面撐起來的（頭上腳下）畫在頭頂上，不要蓋住臉
+    const n = VINES.hangHits, left = n - (cap.hits || 0), by = cap.ground ? py - 50 * s : ay - 10;
     for (let i = 0; i < n; i++) {
       const x = ax + (i - (n - 1) / 2) * 7;
       ctx.fillStyle = i < left ? '#c8d46a' : 'rgba(40,44,20,.6)'; ctx.strokeStyle = '#1e220c'; ctx.lineWidth = 1;
