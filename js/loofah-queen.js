@@ -25,6 +25,15 @@ const LOOFAH_QUEEN = {
   loseRange: 16,                 // 目標離她幾格以外就不追
   leash: 9,                      // 最遠走到離原位幾格（不會被引出農田房）
   stompRange: 13.5,              // 目標在幾格內（看得到）就踏地（原本 9 格，使用者要大 1.5 倍）
+  stomp: {                       // 重踏的力道感（2026-11-21 加強）
+    shake: 16,                   // 畫面震動（貼身時；原本 10，越遠越小，距離是所有 BOSS 共用的 BOSS_SHAKE.range）
+    crack: 1,                    // 腳下踩出的裂痕大小（素材圖，js/combat-feel.js 的 CRACK_ART）
+    rocks: { rocks: 14, speed: [60, 170], up: [110, 230], dust: 12, dustRise: 3, size: .9 },   // 揚起的灰塵、小石頭（js/gourd-monkey.js 的 rockBurstFx）
+    leaves: 28, leafRange: 9,    // 震得樹上掉下幾片葉子、落在她周圍幾格內
+    leafHigh: [160, 300],        // 葉子從多高開始掉（像素）
+    leafFall: [55, 95],          // 往下飄的速度（像素／秒）
+    leafRest: 2.5,               // 落地後停幾秒才淡掉
+  },
   keepDistance: 3,               // 目標太近（格）：往後退一點
   vines: {                       // 每次踏地垂下來的藤蔓
     count: 7,                    // 一次幾條（原本 6 條，使用者要多 1.2 倍）
@@ -84,7 +93,7 @@ const lqArt = f => typeof f === 'string' && /\.png$/i.test(f) && LOOFAH_QUEEN.ar
 
 // G.loofahQueens：[{ e, core, state, h, fallV, plots }]；state：carried（吊在她頭上）→ hung（她倒下，吊在原地）→ falling → down
 function seedLoofahQueen() {
-  G.loofahQueens = [];
+  G.loofahQueens = []; G.lqLeaves = [];
   const spot = lqSpot();
   if (!spot || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'loofah_lady');
@@ -257,7 +266,7 @@ function lqStomp(e) {
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 14, r2: 46 * Q.scale, life: .45, life0: .45, color: '#b9a27a' });
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 28 * Q.scale, life: .3, life0: .3, color: '#e3d3a8' });
   for (let i = 0; i < 16; i++) llDust(e.x + (Math.random() - .5) * 30 * Q.scale, e.y + 12, 1);
-  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 10, .18); else addShake(5);
+  lqStompFx(e);
   if (typeof sfxAt === 'function') sfxAt('loofahStomp', e.x, e.y, 1.4, 'loofah-queen-stomp');
   if (!G.vines) G.vines = [];
   let made = 0;
@@ -303,7 +312,55 @@ function lqDropVine(x, y, e) {
 }
 
 // ---- 每幀（game.js 的 update 呼叫，在 updateLoofahVines 之後、updateVines 之前）----
+// 重踏的力道感：大震動、腳下裂開、灰塵和小石頭噴起來、震得樹上的葉子掉下來
+function lqStompFx(e) {
+  const S = LOOFAH_QUEEN.stomp;
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, S.shake, .08); else addShake(8);
+  (G.eliteCracks = G.eliteCracks || []).push({ size: S.crack, power: 1, life: 6, x: e.x, y: e.y + 12, at: performance.now() / 1000 });   // 畫在 js/elite-bird-head.js 的 drawEliteGround
+  if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y + 12, S.rocks);
+  const rows = typeof FOG_FX_V2 !== 'undefined' ? FOG_FX_V2.leafRows : [0, 1, 2, 3];
+  const list = (G.lqLeaves = G.lqLeaves || []);
+  for (let i = 0; i < S.leaves; i++) {
+    const a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * S.leafRange * CELL;
+    list.push({ x: e.x + Math.cos(a) * d, y: e.y + Math.sin(a) * d * .7, z: S.leafHigh[0] + Math.random() * (S.leafHigh[1] - S.leafHigh[0]),
+      vz: S.leafFall[0] + Math.random() * (S.leafFall[1] - S.leafFall[0]), delay: Math.random() * .7, rest: S.leafRest,
+      ph: Math.random() * 6.28, sway: 14 + Math.random() * 18, spin: (3 + Math.random() * 4) * (Math.random() < .5 ? -1 : 1),
+      shape: Math.floor(Math.random() * 3), row: rows[Math.floor(Math.random() * rows.length)] });
+  }
+  if (list.length > 200) list.splice(0, list.length - 200);
+}
+// 掉下來的葉子：左右飄著往下掉，落地後停一下再淡掉
+function lqUpdateLeaves(dt) {
+  const list = G.lqLeaves;
+  if (!list || !list.length) return;
+  for (const l of list) {
+    if (l.delay > 0) { l.delay -= dt; continue; }
+    l.ph += dt;
+    if (l.z > 0) l.z = Math.max(0, l.z - l.vz * dt);
+    else l.rest -= dt;
+  }
+  G.lqLeaves = list.filter(l => l.rest > 0);
+}
+// 畫葉子（畫在角色上面，js/render.js 呼叫）：用起霧落葉那張點陣圖（js/fog-fx-v2.js），還沒載好就畫小色塊
+function drawLoofahQueenAir(ctx) {
+  if (!G || !G.lqLeaves || !G.lqLeaves.length) return;
+  const sprite = typeof fogV2LeafReady === 'function' && fogV2LeafReady() && typeof fogV2LeafSprite === 'function';
+  const cols = typeof FOG_FX_V2 !== 'undefined' ? FOG_FX_V2.leafColors : ['#6f8f3a', '#a0863a'];
+  ctx.save();
+  for (const l of G.lqLeaves) {
+    if (l.delay > 0 || (typeof isVisible === 'function' && !isVisible(l.x, l.y))) continue;
+    const falling = l.z > 0, x = l.x + (falling ? Math.sin(l.ph * 2.2) * l.sway : 0), y = l.y - l.z;
+    const flip = falling ? Math.cos(l.ph * l.spin) : 1;
+    ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(falling ? Math.sin(l.ph * 2.2) * .8 : .3); ctx.scale(Math.sign(flip || 1) * Math.max(.2, Math.abs(flip)), 1);
+    ctx.globalAlpha = .95 * Math.min(1, l.rest / .8);
+    if (sprite) fogV2LeafSprite(ctx, l);
+    else { ctx.fillStyle = cols[l.row % cols.length]; ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+  ctx.restore();
+}
 function updateLoofahQueen(dt) {
+  lqUpdateLeaves(dt);   // 重踏震下來的葉子（她倒下後也要飄完）
   if (!G.loofahQueens || !G.loofahQueens.length) return;
   // 女王垂下來的藤蔓：停夠久就縮回去；縮完（或抓完人）就拿掉
   if (G.vines) {
