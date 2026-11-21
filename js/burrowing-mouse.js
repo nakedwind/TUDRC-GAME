@@ -385,6 +385,10 @@ function drawBurrowMasked(context, getImage, art, x, y, width, height, kind, raw
     context.translate(mouthX, plane); context.rotate(pose.tilt || 0); context.scale(1, pose.stretch); context.translate(-mouthX, -plane);
     const offset = (1 - pose.reveal) * height;
     context.drawImage(raw, x - width / 2, top + offset, width, height);
+    // 花蓮老鼠王的手（js/rat-king.js）：握在手裡的人／核心夾在「拳頭」和「前面的手指」中間，跟著手一起冒出來、縮回去
+    if (pose.between) pose.between(context, x - width / 2, top + offset, sx, sy);
+    const over = pose.over && getImage(pose.over);
+    if (over?.complete && over.naturalWidth) context.drawImage(over, x - width / 2, top + offset, width, height);
     context.restore();
   }
   drawHole();   // 土堆最後畫：常駐在老鼠本體／手的前方
