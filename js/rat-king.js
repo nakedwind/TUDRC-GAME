@@ -63,12 +63,12 @@ const RAT_KING = {
   core: { react: { shake: .55, windup: .2 }, exposeCap: .2, first: [10, 14], every: [16, 24], windup: 1, rise: .25, hold: .55, sink: .4, under: [1.2, 2], popHold: 1, minMove: 6 },
   mice: { every: [9, 13], count: [1, 2], max: 4 },   // 暴怒後叫出小老鼠：隔幾秒、一次幾隻、場上最多幾隻
   // 最後一擊：列車進站的速度（減速度倍率，越大衝越快；1＝平常進站的速度）、老鼠王被撞飛幾秒
-  //   slowMo＝撞上去那一刻的慢動作：持續幾秒（現實時間）、變成幾倍速
-  ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 } },
+  //   slowMo＝撞上去那一刻的慢動作：持續幾秒（現實時間）、變成幾倍速；flyDir＝被撞飛往哪邊（1＝右、-1＝左、0＝跟著列車開的方向）
+  ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 }, flyDir: 1 },
   // 死亡表演的節奏：daze＝血量歸零後先暈幾秒才響到站音樂；musicLead＝音樂響了幾秒後列車才從隧道進站；
-  //   （musicLead 31＝橘線到站音樂的長度，音樂完整播完列車才進站；換了音樂要跟著改）
+  //   （現在：暈 2.5 秒＋音樂 17 秒＋列車衝進來約 0.7 秒 ≒ 血量歸零後 20 秒撞上）
   //   brakeLead＝撞上前幾秒響煞車聲（音效「mrtBrake」）；musicGain＝到站音樂的音量；slowMo＝血量歸零那一刻的慢動作
-  finale: { daze: 2.5, musicLead: 31, brakeLead: 1.6, musicGain: .8, slowMo: { time: .5, scale: .5 } },
+  finale: { daze: 2.5, musicLead: 17, brakeLead: 1.6, musicGain: .8, slowMo: { time: .5, scale: .5 } },
   // 拳頭（老鼠王專用的紫藍版）；fistFront＝只有前面手指的那一層，握住人／核心時蓋在上面（拳頭 → 人／核心 → 手指）
   art: { fist: 'images/monster/rat-king/left-fist.png', fistFront: 'images/monster/rat-king/left-fist-02.png' },
   // 握在拳頭裡的人／核心放在原圖（110×90）的哪一點：held＝人身體的中心（人橫躺、頭朝外露出拳頭），core＝核心的中心
@@ -807,7 +807,7 @@ function updateRkRam(K, dt) {
 }
 // 4. 撞上去：畫面頓住、白光、慢動作、大震動、衝擊波、火花碎片
 function rkRamHit(K, e, dir = 1) {
-  K.hit = true; K.t = 0; K.flyDir = dir; K.flash = 1; K.rumble = 0;
+  K.hit = true; K.t = 0; K.flyDir = RAT_KING.ram.flyDir || dir; K.flash = 1; K.rumble = 0;
   e.rkRammed = true; e.hp = 0; e.rkStunT = 0;
   if (typeof addShake === 'function') addShake(16);
   if (typeof addHitstop === 'function') addHitstop(.09);
@@ -817,9 +817,9 @@ function rkRamHit(K, e, dir = 1) {
   for (let k = 0; k < 6; k++) rkDirt(e.x + rkRand(-3, 3) * CELL, edge, 1.8);
   G.effects.push({ ring: true, x: e.x, y: edge, r: 10, r2: 260, life: .55, life0: .55, color: '#ffd28a' });
   G.effects.push({ ring: true, x: e.x, y: my, r: 20, r2: 340, life: .7, life0: .7, color: '#ffffff' });
-  for (let i = 0; i < 46; i++) {   // 撞擊的火花往前噴
-    const a = (dir > 0 ? 0 : Math.PI) + (Math.random() - .5) * 2.2, sp = 160 + Math.random() * 360;
-    G.effects.push({ particle: true, kind: 'spark', x: e.x - dir * 40, y: my + rkRand(-40, 40), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 80, r: 1.5 + Math.random() * 2.5, life: .5 + Math.random() * .4, life0: .9, color: i % 3 ? '#ffd28a' : '#ffffff' });
+  for (let i = 0; i < 46; i++) {   // 撞擊的火花往老鼠王飛的方向噴
+    const a = (K.flyDir > 0 ? 0 : Math.PI) + (Math.random() - .5) * 2.2, sp = 160 + Math.random() * 360;
+    G.effects.push({ particle: true, kind: 'spark', x: e.x - K.flyDir * 40, y: my + rkRand(-40, 40), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 80, r: 1.5 + Math.random() * 2.5, life: .5 + Math.random() * .4, life0: .9, color: i % 3 ? '#ffd28a' : '#ffffff' });
   }
   // 照一般怪物死掉的流程：掉碎片、記擊殺、圖鑑、特別獎金（game.js 的死亡判斷；這時已經不在 G.enemies 裡，這裡自己跑一次）
   e.dead = true;
