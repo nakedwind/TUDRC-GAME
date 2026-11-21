@@ -980,11 +980,24 @@ function updateSentryMain(t, dt) {
       t.leftBehindT = (t.leftBehindT || 0) - dt;
       if (t.leftBehindT <= 0) { t.leftBehindT = 1; if (buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, hasFloors ? actorFloor(companion.anchor) : null) !== null) t.leftBehind = false; }
     } else t.leftBehind = false;
-    if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
+    // 直線上很近、實際卻要繞一大圈（例如隔著停在月台的通道列車、隔著牆）：不算跟上了，要繞過去。
+    // 不然隊員站在列車另一邊的月台，直線距離不到跟隨範圍就停下來，永遠不跟過來。每秒用找路算一次實際要走幾格
+    let detour = false;
+    if (!t.leftBehind && !otherFloor && companionDistance <= companion.radius) {
+      t.detourCheckT = (t.detourCheckT || 0) - dt;
+      if (t.detourCheckT <= 0) {
+        t.detourCheckT = 1;
+        const path = buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, hasFloors ? actorFloor(companion.anchor) : null);
+        t.followDetour = !!(path && path.length * CELL > companion.radius * 1.5);   // 要走的格數比跟隨範圍多一半以上＝要繞路
+      }
+      detour = !!t.followDetour;
+    } else t.followDetour = false;
+    if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || detour || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
       t.target = null; t.waitT = 0;
       t.followDark = true;   // 跟著別人走（溫特、或阿瓦倫跟著艾德林）：中間是暗的也照走（溫特身上有燈）；站在門口：門外暗也要走出來，不然會一直堵在門裡
       // 站在門口、對方就在旁邊：直接走到對方站的地方（對方常常就停在門口外面一格，只靠近到一格內的話會停在門裡）；一走出門口就照平常停下來
-      followTarget(t, companion.anchor, { dist: inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
+      // 要繞路：直接走到對方身邊（直線距離本來就在範圍內，照平常的停止距離會原地不動），走到了找路距離變短就恢復平常
+      followTarget(t, companion.anchor, { dist: detour ? CELL * 1.5 : inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
       if (t.mode === 'escort' && typeof watchSentryProgress === 'function') watchSentryProgress(t, dt, leaderLabel(), () => sentryLeaderBlockReason(t));   // 叫來護衛卻過不來：說出原因（js/sentry-blocked.js）
       return;
     }
