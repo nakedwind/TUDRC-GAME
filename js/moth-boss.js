@@ -6,10 +6,10 @@
            飛行中很難打（受到的傷害 × flyDefense）。系統訊息會說牠往哪一區飛。
    - 築巢：飛到那一區後把核心放在地上（這時候核心打得到），在附近繞著目標飛、撒那一區的鱗粉：
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
+   - 大面積撒粉：築巢時有人在這一區，每隔幾秒翅膀發光、地上出現那一區顏色的圓圈預告，接著把整個區域撒滿鱗粉（MOTH_BOSS.burst）。
    - 每掉 1/4 血 → 尖叫、飛回去撿起核心，抱著飛往下一區（同一區打不死牠，血會停在那一段的底線）。
    - 最後一區被打倒 → 核心掉在牠倒下的地方；核心如果先被打破，牠照樣換區，只是沒有東西可抱。
-   - 趨光：附近有露營燈、探照燈會飛過去停在燈上（停著時受到的傷害 × perch.dmgMul，是輸出時間）。
-           下一區如果已經架好燈，牠會直接把巢築在燈旁邊，等於可以先埋伏。飛行途中經過燈也會被吸過去停一下。
+   - 不會趨光（2026-11-21 拿掉）：一般人面蝶會飛去停在燈上，人面蝶后不會。
    - 鱗粉霧、粉塵爆炸、中毒／混亂／睡眠都沿用一般人面蝶（js/human-face-butterfly.js）。
    出現在哪張地圖：MOTH_BOSS.maps（地圖 id → 起點、各區巢的位置）。起點會抱走離起點最近的那顆地圖核心。
    數值都在下面的 MOTH_BOSS。必須在 human-face-butterfly.js、anomalous-core.js 之後、game.js 之前載入。
@@ -38,7 +38,7 @@ const MOTH_BOSS = {
   hp: 2400,                      // 血量（再乘整體難度）；分成 route 那麼多段，每一段打完就換區
   coreHp: 1500,                  // 牠抱著的核心血量（地圖難度 1；難度越高照比例加）
   rewardMul: 8, crystalMul: 8,   // 以一般人面蝶（data/monsters.js）為基準
-  scale: 1.8,                    // 體型放大倍率
+  scale: 2.16,                   // 體型放大倍率（以一般人面蝶為基準）
   height: 110,                   // 平常飛多高（像素）
   sleepHeight: 46,               // 沉睡時停多高
   speedMul: 2,                   // 在巢附近飛的速度倍率（以一般人面蝶為基準）
@@ -51,8 +51,9 @@ const MOTH_BOSS = {
   leash: 8,                      // 築巢時離巢最遠飛幾格（目標跑太遠就回巢）
   orbit: { min: 1.6, max: 3.2 }, // 繞著目標飛：離目標最近、最遠幾格
   nestOrbit: 2.2,                // 沒有目標時繞著巢飛的半徑（格）
-  perch: { time: 5, dmgMul: 1.5, lampInZone: true },   // 停在燈上幾秒、停著時受到的傷害倍率；lampInZone：下一區有燈就把巢築在燈旁邊
-  dropCoreDist: 1.2,             // 巢築在燈旁邊時，核心放在離燈幾格的地方
+  // 大面積撒粉（築巢時、這一區有目標才會撒）：every＝每隔幾秒一次（最短～最長）、first＝到巢後第一次等幾秒、
+  // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
+  burst: { every: [7, 10], first: 2.5, telegraph: 1.6, time: 1.2, puffs: 16, cover: .95 },
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 };
 const mbSpot = () => typeof MAP !== 'undefined' && MAP ? MOTH_BOSS.maps[MAP.id] || null : null;
@@ -110,7 +111,6 @@ function mothBossArmor() {
     let lost = e.mbHp - e.hp;
     if (lost <= 0) continue;
     if (mb.state === 'fly' || mb.state === 'grab') lost *= MOTH_BOSS.flyDefense;
-    if (e.mo && e.mo.perch) lost *= MOTH_BOSS.perch.dmgMul;
     e.hp = e.mbHp - lost;
     if (mb.state === 'sleep') mothBossWake(e);
     const floor = mbStageFloor(e, mb.stage);
@@ -138,8 +138,7 @@ function mothBossLeave(e) {
   mb.stage++;
   mbScream(e, null);
   mb.next = e.carryCore && !e.carryCore.dead && !e.carryCore.carried ? 'grab' : 'fly';
-  e.mo.spray = null;
-  if (e.mo.perch) { e.mo.perch.mothCdUntil = (G.mothClock || 0) + MOTH.lure.cooldown; e.mo.perch = null; }
+  e.mo.spray = null; mb.burst = null;
   const z = mbZone(e, mb.stage);
   systemNotice(MOTH_BOSS.name + (mb.next === 'grab' ? '撿起核心，' : '') + '往' + z.name + '飛走了！', true);
   if (typeof coreBanner === 'function') coreBanner(MOTH_BOSS.name + '往' + z.name + '飛走了', '', '#f4d9ff');
@@ -213,43 +212,32 @@ function mbFollowPath(e, dt, mul) {
   return !mb.path.length;
 }
 
-// ---- 巢的位置：那一區有燈就築在燈旁邊（趨光陷阱），沒有就是那一區的中心 ----
+// ---- 巢的位置：那一區的中心 ----
 function mbNestFor(e, z) {
-  const [zx, zy] = center(z.c, z.r);
-  if (MOTH_BOSS.perch.lampInZone) {
-    let lamp = null, bestD = z.radius * CELL;
-    for (const o of mothLamps()) { const s = mothLampSpot(o), d = Math.hypot(s.x - zx, s.y - zy); if (d < bestD) { bestD = d; lamp = o; } }
-    if (lamp) {
-      const s = mothLampSpot(lamp);
-      for (let i = 0; i < 12; i++) {   // 核心放在燈旁邊一點、能放東西的地方
-        const a = i / 12 * Math.PI * 2, x = s.x + Math.cos(a) * MOTH_BOSS.dropCoreDist * CELL, y = s.y + Math.sin(a) * MOTH_BOSS.dropCoreDist * CELL, [c, r] = cellAt(x, y);
-        if (inGrid(c, r) && !spawnWallAt(c, r) && !G.grid[c + ',' + r]) return { x, y, lamp };
-      }
-    }
-  }
-  return { x: zx, y: zy, lamp: null };
+  const [x, y] = center(z.c, z.r);
+  return { x, y };
 }
 
 // ---- 每幀（enemy-ai.js 的 stepEnemy 呼叫）----
 function stepMothBoss(e, dt) {
   const P = MOTH_BOSS, m = e.mo, mb = e.mb, f = e.frames || {};
   m.phase += dt; mb.t -= dt;
-  // 拍翅膀（沉睡、停在燈上拍得慢）
-  const slow = mb.state === 'sleep' || m.perch;
+  // 拍翅膀（沉睡時拍得慢）
+  const slow = mb.state === 'sleep';
   const wings = f.walkFront && f.walkFront.length ? f.walkFront : [f.front || e.sprite];
   m.flapT = (m.flapT || 0) + dt * MOTH.flapFps * (slow ? .35 : mb.state === 'fly' ? 1.4 : 1);
   e.forceFrame = wings[Math.floor(m.flapT) % wings.length];
   const flapRound = Math.floor(m.flapT / Math.max(wings.length, Math.round(MOTH.flapFps * MOTH.sound.flapEvery)));
   if (flapRound !== m.flapRound) { m.flapRound = flapRound; if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, P.sound.flap * (slow ? .5 : 1), 'moth-boss-flap'); }
   e.forceFlip = !!e.faceRight;   // 原圖朝左
-  const goalLift = mb.state === 'sleep' ? P.sleepHeight : m.perch ? mothLampSpot(m.perch).lift : P.height;
+  const goalLift = mb.state === 'sleep' ? P.sleepHeight : P.height;
   m.lift += (goalLift - m.lift) * Math.min(1, dt * 3);
   e.slimeLift = Math.max(4, m.lift + Math.sin(m.phase * MOTH.bobSpeed) * (slow ? 2 : MOTH.bob));
   m.fleeT = 0;   // 一般人面蝶「撒完就逃」不適用：BOSS 自己決定去哪
   const core = e.carryCore;
   if (core && core.dead) e.carryCore = null;
   else if (core && core.carried) { core.x = e.x; core.y = e.y; }   // 核心抱在身上，跟著飛
-  if (e.stunT > 0) { m.spray = null; return; }   // 被麻醉、麻痺：停在空中
+  if (e.stunT > 0) { m.spray = null; mb.burst = null; return; }   // 被麻醉、麻痺：停在空中（大面積撒粉也被打斷）
   switch (mb.state) {
     case 'sleep': {
       const p = G.player;
@@ -288,28 +276,12 @@ function mbStartMove(e, state) {
   mb.trail = 0;
   mbSet(e, 'fly');
 }
-// 飛往下一區：一路灑下一區顏色的鱗粉；經過燈會被吸過去停一下
+// 飛往下一區：一路灑下一區顏色的鱗粉
 function mbFly(e, dt) {
-  const P = MOTH_BOSS, m = e.mo, mb = e.mb, z = mbZone(e, mb.stage);
-  if (m.perch) {   // 停在燈上：時間到、燈被拆了就繼續飛（重新找路）
-    const o = m.perch;
-    m.perchT -= dt;
-    if (m.perchT <= 0 || o.hp <= 0 || !G.obstacles.includes(o)) {
-      o.mothCdUntil = (G.mothClock || 0) + MOTH.lure.cooldown; m.perch = null;
-      mb.path = mbFindPath(e.x, e.y, mb.nest.x, mb.nest.y);
-    } else { const s = mothLampSpot(o); mothFlyToward(e, s.x, s.y, dt, .5); }
-    return;
-  }
-  const lamp = mbLureLamp(e);
-  if (lamp && lamp !== mb.nest.lamp) {
-    const s = mothLampSpot(lamp);
-    if (mothFlyToward(e, s.x, s.y, dt, P.flySpeedMul)) { m.perch = lamp; m.perchT = P.perch.time; flash('被燈光吸引了', e.x, e.y - e.slimeLift - e.drawHeight, '#fff2b0'); }
-    return;
-  }
+  const P = MOTH_BOSS, mb = e.mb, z = mbZone(e, mb.stage);
   mb.trail -= dt;
   if (mb.trail <= 0 && !(e.burnT > 0)) { mb.trail = P.trailEvery; mothPuff(e.x + mothRand(-20, 20), e.y + mothRand(-10, 16), mbKind(e, z), false, actorFloor(e)); }
   if (mbFollowPath(e, dt, P.flySpeedMul)) {
-    if (mb.nest.lamp && mb.nest.lamp.hp > 0) { m.perch = mb.nest.lamp; m.perchT = P.perch.time; }   // 巢旁邊有燈：先停在燈上（埋伏的輸出時間）
     mbSet(e, e.carryCore && e.carryCore.carried ? 'land' : 'nest');
     if (!e.carryCore || !e.carryCore.carried) mbArrive(e);
   }
@@ -317,6 +289,7 @@ function mbFly(e, dt) {
 // 到巢了
 function mbArrive(e) {
   const z = mbZone(e, e.mb.stage);
+  e.mb.burstCd = MOTH_BOSS.burst.first; e.mb.burst = null;   // 到巢後等一下才第一次大面積撒粉
   flash(MOTH_BOSS.name + '在' + z.name + '築巢', e.x, e.y - e.slimeLift - e.drawHeight - 6, '#f4d9ff');
 }
 function mbDropCore(e) {
@@ -342,39 +315,17 @@ function mbKind(e, z) {
   if (z.kind !== 'mix') return z.kind;
   return MOTH_KINDS[e.mb.mixIdx % MOTH_KINDS.length];
 }
-// 附近會吸引牠的燈（冷卻中的不算）
-function mbLureLamp(e) {
-  let lamp = null, d0 = MOTH.lure.range * CELL;
-  const now = G.mothClock || 0;
-  for (const o of mothLamps()) {
-    if ((o.mothCdUntil || 0) > now) continue;
-    const s = mothLampSpot(o), d = Math.hypot(s.x - e.x, s.y - e.y);
-    if (d < d0) { d0 = d; lamp = o; }
-  }
-  return lamp;
-}
 // 築巢：在巢附近繞著目標飛、撒這一區的鱗粉；目標跑出巢的範圍就回巢上空繞
 function mbNest(e, dt) {
   const P = MOTH_BOSS, m = e.mo, mb = e.mb, z = mbZone(e, mb.stage), home = mb.nest;
-  if (m.perch) {
-    const o = m.perch;
-    m.perchT -= dt;
-    if (m.perchT <= 0 || o.hp <= 0 || !G.obstacles.includes(o)) { o.mothCdUntil = (G.mothClock || 0) + MOTH.lure.cooldown; m.perch = null; }
-    else { const s = mothLampSpot(o); mothFlyToward(e, s.x, s.y, dt, .5); return; }
-  }
-  const lamp = mbLureLamp(e);
-  if (lamp && Math.hypot(mothLampSpot(lamp).x - home.x, mothLampSpot(lamp).y - home.y) <= P.leash * CELL) {
-    m.spray = null;
-    const s = mothLampSpot(lamp);
-    if (mothFlyToward(e, s.x, s.y, dt)) { m.perch = lamp; m.perchT = P.perch.time; }
-    return;
-  }
   let target = mothPickTarget(e);
   if (target && mbDist(target, home) > (P.leash + 3) * CELL) target = null;   // 跑出巢的範圍：不追
   m.target = target;
-  const had = m.spray;
-  mothSpray(e, dt, true);
-  if (m.spray && m.spray !== had) { m.spray.kind = mbKind(e, z); mb.mixIdx++; }   // 新的一輪：換成這一區的顏色
+  if (!mbBurst(e, dt, z, !!target)) {   // 沒在大面積撒粉：照一般人面蝶一輪一輪撒
+    const had = m.spray;
+    mothSpray(e, dt, true);
+    if (m.spray && m.spray !== had) { m.spray.kind = mbKind(e, z); mb.mixIdx++; }   // 新的一輪：換成這一區的顏色
+  }
   m.orbit += dt * .6;
   if (target) {
     const R = (P.orbit.min + (P.orbit.max - P.orbit.min) * (.5 + .5 * Math.sin(m.phase * .7))) * CELL;
@@ -386,6 +337,54 @@ function mbNest(e, dt) {
     const R = P.nestOrbit * CELL;
     mothFlyToward(e, home.x + Math.cos(m.orbit) * R, home.y + Math.sin(m.orbit) * R * .6, dt, .7);
   }
+}
+// 大面積撒粉：冷卻好了（而且這一區有人）→ 翅膀發光、地上圓圈預告 → 在 time 秒內把整區撒滿大團鱗粉。
+// 正在預告或撒的時候回傳 true（這時候不做一般的一輪一輪撒粉）
+function mbBurst(e, dt, z, hasTarget) {
+  const B = MOTH_BOSS.burst, m = e.mo, mb = e.mb, home = mb.nest;
+  if (!mb.burst) {
+    mb.burstCd = (mb.burstCd ?? B.first) - dt;
+    if (mb.burstCd > 0 || !hasTarget || e.burnT > 0) return false;
+    // 開始預告：用一般人面蝶的翅膀發光（m.spray 的 tele），顏色＝這一區的鱗粉
+    const kind = mbKind(e, z), [r, g, b] = MOTH_COLORS[kind].rgb, R = z.radius * CELL * B.cover;
+    mb.mixIdx++;
+    mb.burst = { kind, t: 0, done: 0, R, spots: mbBurstSpots(home, R, B.puffs) };
+    m.spray = { kind, phase: 'tele', t: 0, burst: true };
+    const col = `rgb(${r},${g},${b})`;
+    for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: home.x, y: home.y, r: R * (.15 + i * .25), r2: R, life: B.telegraph - i * .3, life0: B.telegraph - i * .3, color: col });
+    flash(MOTH_BOSS.name + '張開翅膀…', e.x, e.y - e.slimeLift - e.drawHeight - 6, MOTH_COLORS[kind].glow);
+    if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake * .6, 'moth-boss-scream');
+    return true;
+  }
+  const s = mb.burst;
+  if (e.burnT > 0) { mb.burst = null; m.spray = null; mb.burstCd = B.every[0]; return false; }   // 身上著火：鱗粉燒掉了，撒不出來
+  s.t += dt;
+  if (m.spray && m.spray.burst) m.spray.t = Math.min(s.t, B.telegraph) / B.telegraph * MOTH.telegraph;   // 翅膀照預告進度越來越亮
+  if (s.t < B.telegraph) return true;
+  if (m.spray && m.spray.phase === 'tele') {   // 預告結束：開始撒（翅膀一閃一閃）
+    m.spray.phase = 'spray';
+    G.effects.push({ ring: true, x: home.x, y: home.y, r: 20, r2: s.R, life: .5, life0: .5, color: MOTH_COLORS[s.kind].glow });
+    if (typeof sfxAt === 'function') sfxAt('mothSpray', e.x, e.y, 1, 'moth-boss-burst');
+  }
+  const want = Math.min(s.spots.length, Math.ceil((s.t - B.telegraph) / B.time * s.spots.length));
+  for (; s.done < want; s.done++) { const p = s.spots[s.done]; mothPuff(p.x, p.y, s.kind, true, actorFloor(e)); }
+  if (s.done >= s.spots.length) {
+    mb.burst = null; m.spray = null;
+    mb.burstCd = mothRand(B.every[0], B.every[1]);
+    return false;
+  }
+  return true;
+}
+// 大面積撒粉的落點：從巢中心往外螺旋排開（平均鋪滿整個圓，再加一點亂數），飛不到的地方（地圖外）跳過
+function mbBurstSpots(home, R, n) {
+  const out = [], turn = Math.PI * (3 - Math.sqrt(5));   // 黃金角：點會平均散開
+  const a0 = Math.random() * Math.PI * 2;
+  for (let i = 0; i < n; i++) {
+    const d = R * Math.sqrt((i + .5) / n), a = a0 + i * turn;
+    const x = home.x + Math.cos(a) * d + mothRand(-14, 14), y = home.y + Math.sin(a) * d * .75 + mothRand(-10, 10);
+    if (mothCanFly(x, y)) out.push({ x, y });
+  }
+  return out;
 }
 
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）：抱著的核心掉在原地 ----
@@ -414,11 +413,11 @@ function mothBossBars() {
 const mothBossHunting = () => mothBosses().some(e => e.eliteAwake);
 
 // ---- 畫面：抱在懷裡的核心（render.js 畫完身體後呼叫，dx～dh＝身體實際畫的位置）----
-const MOTH_BOSS_CORE_ART = { x: .25, y: .55, len: .32, angle: -12 };   // 核心疊在牠身上的位置：中心（圖寬、圖高的比例）、長度（圖高的比例）、旋轉角度（度）
+const MOTH_BOSS_CORE_ART = { x: .10, y: .42, angle: -8 };   // 核心捧在兩隻手中間：中心位置（圖寬、圖高的比例）、旋轉角度（度）；大小＝核心原本的大小（CORE.w × CORE.h），不跟著牠的體型縮放
 function drawMothBossCore(ctx, e, dx, dy, dw, dh) {
   const core = e.carryCore;
   if (!core || core.dead || !core.carried || !coreImg.complete || !coreImg.naturalWidth) return;
-  const A = MOTH_BOSS_CORE_ART, len = dh * A.len, w = CORE.w * len / CORE.h, now = performance.now() / 1000;
+  const A = MOTH_BOSS_CORE_ART, len = CORE.h, w = CORE.w, now = performance.now() / 1000;
   ctx.save();
   ctx.translate(dx + dw * A.x, dy + dh * A.y); ctx.rotate(A.angle * Math.PI / 180);
   ctx.imageSmoothingEnabled = false;
