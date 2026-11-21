@@ -35,9 +35,9 @@ const LOOFAH_QUEEN = {
     rocks: { rocks: 14, speed: [60, 170], up: [110, 230], dust: 12, dustRise: 3, size: .9 },   // 揚起的灰塵、小石頭（js/gourd-monkey.js 的 rockBurstFx）
     leaves: 30, leafRange: 9,    // 震得樹上掉下幾片葉子、落在她周圍幾格內
     leafHigh: [180, 320],        // 葉子從多高開始掉（像素）
-    leafDrop: [90, 150],         // 一被震下來往下衝的速度（像素／秒）：震落是一口氣掉下來，不是被風吹著飄
-    leafGravity: 380,            // 往下加速多快（像素／秒²）
-    leafMax: 300,                // 最快掉多快（像素／秒）
+    leafDrop: [240, 330],        // 一被震下來往下衝的速度（像素／秒）：先快……
+    leafSlow: 45,                // ……後慢：被空氣擋住慢慢減到這個速度，之後輕輕飄著落地
+    leafDrag: 3.2,               // 減速多快（越大越快慢下來）
     leafDelay: .25,              // 全部葉子在幾秒內被震下來
     leafRest: 2.5,               // 落地後停幾秒才淡掉
     rocks: 9,                    // 震下來幾顆小碎石（ROCK_ART.small；不擋路，砸到有一點點傷害）
@@ -342,9 +342,10 @@ function lqStompFx(e) {
   const list = (G.lqLeaves = G.lqLeaves || []);
   for (let i = 0; i < S.leaves; i++) {   // 葉子一口氣被震下來：往下衝、越掉越快，邊掉邊亂翻，只有一點點左右晃
     const a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * S.leafRange * CELL;
+    const v0 = S.leafDrop[0] + Math.random() * (S.leafDrop[1] - S.leafDrop[0]);
     list.push({ x: e.x + Math.cos(a) * d, y: e.y + Math.sin(a) * d * .7, z: S.leafHigh[0] + Math.random() * (S.leafHigh[1] - S.leafHigh[0]),
-      vz: S.leafDrop[0] + Math.random() * (S.leafDrop[1] - S.leafDrop[0]), vx: (Math.random() * 2 - 1) * 25, delay: Math.random() * S.leafDelay, rest: S.leafRest,
-      ph: Math.random() * 6.28, sway: 2 + Math.random() * 3, spin: (9 + Math.random() * 8) * (Math.random() < .5 ? -1 : 1),
+      vz: v0, v0, vx: (Math.random() * 2 - 1) * 40, delay: Math.random() * S.leafDelay, rest: S.leafRest,
+      ph: Math.random() * 6.28, sway: 8 + Math.random() * 8, spin: (9 + Math.random() * 8) * (Math.random() < .5 ? -1 : 1),
       shape: Math.floor(Math.random() * 3), row: rows[Math.floor(Math.random() * rows.length)] });
   }
   if (list.length > 200) list.splice(0, list.length - 200);
@@ -416,9 +417,10 @@ function lqUpdateLeaves(dt) {
     if (l.delay > 0) { l.delay -= dt; continue; }
     l.ph += dt;
     if (l.z > 0) {
-      const S = LOOFAH_QUEEN.stomp;
-      l.vz = Math.min(S.leafMax, l.vz + S.leafGravity * dt);   // 越掉越快
-      l.z = Math.max(0, l.z - l.vz * dt); l.x += (l.vx || 0) * dt;
+      const S = LOOFAH_QUEEN.stomp, k = Math.exp(-S.leafDrag * dt);
+      l.vz = S.leafSlow + (l.vz - S.leafSlow) * k;   // 先快後慢：往下衝的速度慢慢減到 leafSlow
+      l.vx = (l.vx || 0) * k;
+      l.z = Math.max(0, l.z - l.vz * dt); l.x += l.vx * dt;
     } else l.rest -= dt;
   }
   G.lqLeaves = list.filter(l => l.rest > 0);
@@ -438,9 +440,11 @@ function drawLoofahQueenAir(ctx) {
   ctx.save();
   for (const l of G.lqLeaves) {
     if (l.delay > 0 || (typeof isVisible === 'function' && !isVisible(l.x, l.y))) continue;
-    const falling = l.z > 0, x = l.x + (falling ? Math.sin(l.ph * 9) * l.sway : 0), y = l.y - l.z;   // 只有一點點快速抖動（被震下來的），不是慢慢左右飄
-    const flip = falling ? Math.cos(l.ph * l.spin) : 1;
-    ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(falling ? l.ph * l.spin * .35 : .3); ctx.scale(Math.sign(flip || 1) * Math.max(.2, Math.abs(flip)), 1);
+    // 剛震下來衝得快：快速亂翻、不太晃；慢下來之後：輕輕左右飄（calm 0→1）
+    const S = LOOFAH_QUEEN.stomp, calm = falling => falling ? Math.max(0, Math.min(1, 1 - (l.vz - S.leafSlow) / Math.max(1, (l.v0 || S.leafDrop[1]) - S.leafSlow))) : 1;
+    const falling = l.z > 0, c = calm(falling), x = l.x + (falling ? Math.sin(l.ph * 2.6) * l.sway * c : 0), y = l.y - l.z;
+    const flip = falling ? Math.cos(l.ph * l.spin * (1 - .7 * c)) : 1;
+    ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(falling ? l.ph * l.spin * .35 * (1 - c) + Math.sin(l.ph * 2.6) * .6 * c : .3); ctx.scale(Math.sign(flip || 1) * Math.max(.2, Math.abs(flip)), 1);
     ctx.globalAlpha = .95 * Math.min(1, l.rest / .8);
     if (sprite) fogV2LeafSprite(ctx, l);
     else { ctx.fillStyle = cols[l.row % cols.length]; ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, Math.PI * 2); ctx.fill(); }
