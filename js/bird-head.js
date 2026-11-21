@@ -23,7 +23,7 @@ function chargerTargets(e) {
 // （先找打過自己的，再找視線內最近的）。
 function chargerPlayerNoticeable(e) {
   const p = G.player;
-  if (!p || p.hp <= 0) return false;
+  if (!p || p.hp <= 0 || !sameFloor(e, p)) return false;   // 不同樓層（陸橋上／下）的看不到、打不到（js/pathfinding.js）
   const d = Math.hypot(p.x - e.x, p.y - e.y);
   if ((e.playerAggroT || 0) > 0 && d <= ENEMY_SENSE_RANGE) return true;   // 被溫特打中：18 格內都記仇
   return d <= chargerCfg(e).noticeRange * CELL && hasLineOfSight(e.x, e.y, p.x, p.y);

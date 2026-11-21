@@ -730,7 +730,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
     [moveX, moveY] = sentryCellPos(...goal);
   }
   if (waypoint) [moveX, moveY] = sentryCellPos(waypoint.c, waypoint.r);
-  const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally') : 1);   // 走在鐵絲網上變慢
+  const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally', t) : 1);   // 走在鐵絲網上變慢（給 t：別層的坑洞、黏膠不算）
   if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY, dark)) {
     t.x = moveX; t.y = moveY;
     if (waypoint) t.navPath.shift();
@@ -809,6 +809,7 @@ function hasAggroTarget(t) {
     if (e.dead || e.awake === false || e.hidden || e.carried || (typeof poolCoreSubmerged === 'function' && G.cores.includes(e) && poolCoreSubmerged(e))) continue;   // 泡在深水裡的核心也不算（js/pool-tide.js）；沉睡的核心不算目標；躲在順順宮帽裡、抱在珍珠大童身上的也不算（js/elite-cap-king.js、js/pearl-elder.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不主動接敵（js/elite-bird-head.js）
     if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
+    if (!cores.includes(e) && !sameFloor(e, t)) continue;   // 陸橋上／下不同樓層的怪物打不到：不算（不然橋上的隊員會一直站在橋下怪物的正上方不走、也不跟溫特）
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
   }
   return false;
@@ -911,7 +912,7 @@ function updateSentryMain(t, dt) {
   if (menuSentry === t) return;                       // 選單開著時先站好
   // 漆彈標記的怪物（js/special-guns.js）：自由走動、跟隨護衛的哨兵會追過去；原地巡邏、指派位置的不追；不追進黑暗；嚮導不追（有空時在射程內才打）
   const marked = !ownSpec.guide && (t.mode === 'free' || t.mode === 'escort') && typeof paintTarget === 'function' ? paintTarget() : null;
-  if (marked && personnelInLight(marked.x, marked.y) && (Math.hypot(marked.x - t.x, marked.y - t.y) > ownSpec.range * CELL - 6 || !hasLineOfSight(t.x, t.y, marked.x, marked.y))) {
+  if (marked && sameFloor(marked, t) && personnelInLight(marked.x, marked.y) && (Math.hypot(marked.x - t.x, marked.y - t.y) > ownSpec.range * CELL - 6 || !hasLineOfSight(t.x, t.y, marked.x, marked.y))) {
     t.target = null; t.waitT = 0;
     moveSentryWithPath(t, marked.x, marked.y, (ownSpec.walkSpeed || 80) * 1.2, dt);
     return;
@@ -922,7 +923,7 @@ function updateSentryMain(t, dt) {
   if (ownSpec.guide && G.enemies.length) {
     let threat = null, threatD = Infinity;
     for (const e of G.enemies) {
-      if (e.dead || e.confuseT > 0) continue;
+      if (e.dead || e.confuseT > 0 || !sameFloor(e, t)) continue;   // 陸橋上／下不同樓層的怪物碰不到，不用躲
       const d = Math.hypot(e.x - t.x, e.y - t.y);
       if (d < threatD) { threat = e; threatD = d; }
     }
@@ -1010,6 +1011,7 @@ function updateSentryMain(t, dt) {
       if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不去追
       if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
       if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心
+      if (!G.cores.includes(e) && !sameFloor(e, t)) continue;   // 不同樓層（陸橋上／下）的怪物打不到，不去追（以前會走到牠正上方一直站著）
       if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
       const d = Math.hypot(e.x - t.x, e.y - t.y);
       if (d < fd && d <= detectR) { fd = d; foe = e; }

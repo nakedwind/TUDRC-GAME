@@ -1649,7 +1649,7 @@ function updatePlayer(dt) {
   else if (dy) p.dir = dy < 0 ? 'back' : 'front';
   p.anim += dt;
   const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dashMul(p) * dt   // 輕量跑鞋、腎上腺素（js/equipment.js）× 衝刺
-    * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally') : 1);   // 走在鐵絲網上變慢
+    * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally', p) : 1);   // 走在鐵絲網上變慢（給 p：別層的坑洞、黏膠不算）
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   const pushing = typeof bigPearlPlayerPush === 'function' && bigPearlPlayerPush(p, nx, ny, dx / len, dy / len);   // 頂到大珍珠：往前推，不自動往旁邊滑開（js/pearl-elder.js）
   // edgeWallCrossed：一步走太遠（衝刺、畫面卡一下）時，不會直接跳過薄牆（js/pathfinding.js）

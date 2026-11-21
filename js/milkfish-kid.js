@@ -166,7 +166,7 @@ function stepMilkfishEnemy(e, dt) {
   let mate = mf.mate && mfEdibleMate(e, mf.mate) && Math.hypot(mf.mate.x - e.x, mf.mate.y - e.y) <= C.loseRange * CELL ? mf.mate : null;
   if (!mate && mf.cd <= 0) mate = mfPickMate(e);
   mf.mate = mate;
-  const p = G.player, pd = p && p.hp > 0 && !mfIsSmall(e) ? Math.hypot(p.x - e.x, p.y - e.y) : Infinity;
+  const p = G.player, pd = p && p.hp > 0 && !mfIsSmall(e) && sameFloor(e, p) ? Math.hypot(p.x - e.x, p.y - e.y) : Infinity;
   const mateD = mate ? Math.hypot(mate.x - e.x, mate.y - e.y) : Infinity;
   const seesPlayer = Number.isFinite(pd) && hasLineOfSight(e.x, e.y, p.x, p.y);
   if (mf.playerChasing) {

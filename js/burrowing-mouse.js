@@ -116,7 +116,7 @@ function burrowMouseBlinkFrame(art, age) {
 function burrowMouseTargets(e, range, throughWalls = false) {
   const candidates = e.confuseT > 0
     ? G.enemies.filter(o => o !== e && !o.dead && o.hp > 0)
-    : [G.player, ...G.towers.filter(t => !t.berserk && !t.eatenBy && enemyNoticesSentry(e, t))];
+    : [G.player, ...G.towers.filter(t => !t.berserk && !t.eatenBy && enemyNoticesSentry(e, t))].filter(t => t && sameFloor(e, t));   // 不同樓層（陸橋上／下）的看不到、打不到（js/pathfinding.js）
   return candidates.filter(t => t && t.hp > 0 && Math.hypot(t.x - e.x, t.y - e.y) <= range * CELL
     && (throughWalls || hasLineOfSight(e.x, e.y, t.x, t.y))).sort((a, b) => {
       const taunt = t => !e.confuseT && G.towers.includes(t) && (TYPES[t.type]?.taunt || 0) * CELL >= Math.hypot(t.x - e.x, t.y - e.y) ? 1 : 0;
@@ -131,11 +131,12 @@ function burrowMouseInReach(e, p) {
 const BURROW_MOUND_SLOW = .2;
 function* burrowMouseMoundShapes() {
   if (typeof G === 'undefined' || !G) return;
-  const mound = (x, y, w = 110, h = 90) => ({ x, y: y - 3 * h / 90, rx: 42 * w / 110, ry: 14 * h / 90 });
-  for (const h of G.burrowHoles || []) if (!h.slow && (h.age || 0) < (h.lifetime ?? 5)) yield mound(h.x, h.y, h.w, h.h);
+  // floor：土堆在幾樓（陸橋底下 1 樓的土堆不會讓橋上的人變慢）
+  const mound = (x, y, w = 110, h = 90, floor) => ({ x, y: y - 3 * h / 90, rx: 42 * w / 110, ry: 14 * h / 90, floor });
+  for (const h of G.burrowHoles || []) if (!h.slow && (h.age || 0) < (h.lifetime ?? 5)) yield mound(h.x, h.y, h.w, h.h, h.floor);
   for (const e of [...(G.enemies || []), ...(G.burrowLurkers || [])]) if (e.behavior === 'burrow' && !e.dead && e.hp > 0) {
-    yield mound(e.x, e.y, e.drawWidth || 110, e.drawHeight || 90);
-    for (const h of e.bm?.hands || []) yield { x: h.x + (h.side === 'left' ? 4 : -4), y: h.y, rx: 24, ry: 9 };
+    yield mound(e.x, e.y, e.drawWidth || 110, e.drawHeight || 90, actorFloor(e));
+    for (const h of e.bm?.hands || []) yield { x: h.x + (h.side === 'left' ? 4 : -4), y: h.y, rx: 24, ry: 9, floor: actorFloor(e) };
   }
 }
 function burrowMouseLeaveHole(e, delay = 0) {
@@ -152,14 +153,16 @@ function burrowMouseDeathHole(e) {
   });
 }
 // 給 js/build.js 的 slowFactorAt：溫特、隊員、地面怪物踩到土堆或死亡洞都會變慢。
-function burrowMouseSlowAt(x, y) {
+function burrowMouseSlowAt(x, y, actor) {   // actor：誰在走；有給就只算同一樓層的土堆和洞（沒給＝不分樓層）
   let k = 1;
   if (typeof G === 'undefined' || !G) return k;
   for (const m of burrowMouseMoundShapes()) {
+    if (actor && !fieldHits(m.floor, actor)) continue;   // 別層的土堆踩不到
     const dx = (x - m.x) / m.rx, dy = (y - m.y) / m.ry;
     if (dx * dx + dy * dy <= 1) { k = BURROW_MOUND_SLOW; break; }
   }
   for (const h of G.burrowHoles || []) if (h.slow && h.age >= (h.show || 0) && h.age < h.lifetime) {
+    if (actor && !fieldHits(h.floor, actor)) continue;   // 別層的死亡洞踩不到
     const sx = (h.w || 110) / 110, sy = (h.h || 90) / 90;
     const dx = (x - h.x) / (42 * sx), dy = (y - (h.y - 10 * sy)) / (16 * sy);
     if (dx * dx + dy * dy <= 1) k = Math.min(k, h.slow);

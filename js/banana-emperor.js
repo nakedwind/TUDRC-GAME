@@ -412,7 +412,7 @@ function beDrawCircle(ctx, m, now) {
 
 // ---- 目標：看得到的最近一個我方（溫特、隊友）----
 function beFoe(e) {
-  const R = 16 * CELL, list = [G.player, ...G.towers].filter(t => t && t.hp > 0 && !t.berserk);
+  const R = 16 * CELL, list = [G.player, ...G.towers].filter(t => t && t.hp > 0 && !t.berserk && sameFloor(e, t));   // 不同樓層（陸橋上／下）的看不到、打不到（js/pathfinding.js）
   let best = null, bestD = R;
   for (const t of list) { const d = Math.hypot(t.x - e.x, t.y - e.y); if (d <= bestD && hasLineOfSight(e.x, e.y, t.x, t.y)) { best = t; bestD = d; } }
   return best;
@@ -512,7 +512,7 @@ function bananaDebuffAtk(a) { return a && a.beDebuff && a.beDebuff.atk > 0 ? BAN
 // 香蕉皮雨：幾個瞄準我方站的地方，其他落在他身邊；落點先出現影子
 function bePeelRain(e, foe) {
   const S = BANANA_EMPEROR.spells.peels, C = BANANA_KING, peels = (G.bananaPeels = G.bananaPeels || []);
-  const foes = [G.player, ...G.towers].filter(t => t && t.hp > 0 && Math.hypot(t.x - e.x, t.y - e.y) <= 16 * CELL && hasLineOfSight(e.x, e.y, t.x, t.y));
+  const foes = [G.player, ...G.towers].filter(t => t && t.hp > 0 && sameFloor(e, t) && Math.hypot(t.x - e.x, t.y - e.y) <= 16 * CELL && hasLineOfSight(e.x, e.y, t.x, t.y));
   const spots = [];
   for (let i = 0; i < S.count; i++) {
     let x, y;
