@@ -22,6 +22,7 @@ const GOURD_KING = {
   // 哪張地圖、哪一面牆是 BOSS 牆：[牆左上角的欄, 列]（地圖編輯器裡那張「捷運高牆X6」圖章的位置）
   maps: { map_mvxz356e: { wall: [37, 13] } },   // R89區-紅線捷運站：上方的隱藏牆
   scale: 2,                      // 體型：一般葫蘆猴的幾倍
+  artDir: 'images/monster/gourd-king/',   // 專用的圖（葫蘆紫藍）：檔名跟葫蘆猴一樣，只換資料夾；用 tools/recolor-gourd-king.py 從葫蘆猴的圖換色產生
   hp: 3600,                      // 血量（再乘整體難度）
   atk: 1.6,                      // 攻擊力：一般葫蘆猴的幾倍（壓到溫特、隊友、建築）
   speedMul: 1.1,                 // 拖行速度：一般葫蘆猴的幾倍
@@ -121,7 +122,9 @@ function gourdKingWallSpec(s) {
   return spot && s.c === spot.wall[0] && s.r === spot.wall[1] && /^tile_mrt_room_highwallx6/.test(s.id) ? 'gourd_king_wall' : null;
 }
 // 葫蘆猴王壓頂用的數值：一般葫蘆猴的 GOURD 蓋上 slam；暴怒連跳的小壓頂再蓋上 combo
-const GK_SLAM = Object.assign({}, GOURD, GOURD_KING.slam);
+// 葫蘆猴的圖片路徑 → 猴王專用的那張（同檔名、換到 GOURD_KING.artDir 資料夾）
+const gkArt = f => typeof f === 'string' && /\.png$/i.test(f) && GOURD_KING.artDir ? GOURD_KING.artDir + f.split('/').pop() : f;
+const GK_SLAM = Object.assign({}, GOURD, GOURD_KING.slam, { art: Object.fromEntries(Object.entries(GOURD.art).map(([k, f]) => [k, gkArt(f)])) });   // art：壓扁／拉長圖換成猴王的
 const GK_SLAM_QUICK = Object.assign({}, GK_SLAM, { crouch: GOURD_KING.combo.crouch, rise: GOURD_KING.combo.rise, hang: GOURD_KING.combo.hang, height: GOURD_KING.combo.height });
 function gourdKingCfg(e) { return e.gm && e.gm.slam && e.gm.slam.quick ? GK_SLAM_QUICK : GK_SLAM; }
 const gkRand = (a, b) => a + Math.random() * (b - a);
@@ -144,7 +147,7 @@ function seedGourdKing() {
   const s = gkWallStamp(); if (!s) return;
   G.gourdKing = { stamp: s, phase: 'sleep', t: 0, hits: 0, e: null, jitter: 0, jitterT: 0 };
   const base = ACTIVE_MONSTERS.find(m => m.id === 'gourd_monkey');
-  if (base) [base.sprite, GOURD.art.squash, GOURD.art.tall].forEach(monsterImage);   // 先載好圖，踏出來那一下才不會閃空白
+  if (base) [gkArt(base.sprite), GK_SLAM.art.squash, GK_SLAM.art.tall].forEach(monsterImage);   // 先載好圖，踏出來那一下才不會閃空白
   GOURD_KING.wall.stages.forEach(id => { const t = mapTileById(id); if (t && typeof tileImage === 'function') tileImage(t); });
 }
 
@@ -271,6 +274,8 @@ function gkEmerge(K) {
   const sx = box.cx, sy = OY + (box.r0 + 5.5) * CELL;   // 破洞最下排（牆腳）：整隻站在牆前面，看得清楚
   const e = createMonster(base, sx, sy);
   e.gourdKing = true; e.eliteName = B.name; e.eliteAwake = false;
+  e.sprite = gkArt(e.sprite);   // 換成猴王專用的圖（另外複製一份，不要改到葫蘆猴共用的設定）
+  if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(gkArt) : gkArt(f)]));
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * B.hp);
   e.reward = Math.round((e.reward || 0) * B.rewardMul); e.crystals = Math.round((e.crystals ?? 5) * B.crystalMul);
   e.drawWidth = Math.round(base.width * B.scale); e.drawHeight = Math.round(base.height * B.scale);
