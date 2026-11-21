@@ -141753,15 +141753,6 @@ const BATTLE_MAPS = [
         "ox": 10
       },
       {
-        "id": "tile_interactive_storage_locker",
-        "c": 19,
-        "r": 17,
-        "layer": "object6",
-        "fx": true,
-        "oy": 30,
-        "ox": 30
-      },
-      {
         "id": "tile_mrt_ticket_gate",
         "c": 43,
         "r": 21,
@@ -143897,6 +143888,14 @@ const BATTLE_MAPS = [
           "id": "youyou-card",
           "qty": 1
         },
+        "oy": 20
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 20,
+        "r": 17,
+        "layer": "object3",
+        "ox": 20,
         "oy": 20
       }
     ],
