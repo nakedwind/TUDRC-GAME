@@ -435,8 +435,10 @@ function lineOfSightRaw(x0, y0, x1, y1) {
     const ax = x0 + ox, ay = y0 + oy, bx = x1 + ox, by = y1 + oy;
     const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 6));
     for (let i = 1; i < n; i++) {
-      const k = i / n;
-      if (solidBlocksPoint(ax + (bx - ax) * k, ay + (by - ay) * k)) return false;
+      const k = i / n, x = ax + (bx - ax) * k, y = ay + (by - ay) * k;
+      // 捷運軌道上的碰撞格不擋視線、子彈（算光照時照舊擋，不改燈光；js/mrt-train.js 的 mrtSeeThroughCell）
+      if (!losNoFloors && typeof mrtSeeThroughCell === 'function' && mrtSeeThroughCell(...cellAt(x, y))) continue;
+      if (solidBlocksPoint(x, y)) return false;
     }
     return true;
   };
