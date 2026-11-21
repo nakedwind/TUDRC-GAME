@@ -1870,7 +1870,7 @@ function pickSentryTarget(t, R) {
     if (distance > R) continue;
     if (!hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 隔著牆看不到就不能打
     const urgent = (e.attackingObstacle && e.attackingObstacle.isBase) || (p && p.underAttackT > 0 && p.lastAttacker === e);
-    const score = urgent ? distance - 100000 : distance;
+    const score = (urgent ? distance - 100000 : distance) + (typeof ratKingTargetBias === 'function' ? ratKingTargetBias(e) : 0);   // 花蓮老鼠王：先清小怪、先救被抓的人（js/rat-king.js）
     if (score < bestScore) { best = e; bestScore = score; }
   }
   if (best || t.guardSummoned) return best;

@@ -66,8 +66,9 @@ const RAT_KING = {
   //   slowMo＝撞上去那一刻的慢動作：持續幾秒（現實時間）、變成幾倍速
   ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 } },
   // 死亡表演的節奏：daze＝血量歸零後先暈幾秒才響到站音樂；musicLead＝音樂響了幾秒後列車才從隧道進站；
+  //   （musicLead 31＝橘線到站音樂的長度，音樂完整播完列車才進站；換了音樂要跟著改）
   //   brakeLead＝撞上前幾秒響煞車聲（音效「mrtBrake」）；musicGain＝到站音樂的音量；slowMo＝血量歸零那一刻的慢動作
-  finale: { daze: 2.5, musicLead: 5, brakeLead: 1.6, musicGain: .8, slowMo: { time: .5, scale: .5 } },
+  finale: { daze: 2.5, musicLead: 31, brakeLead: 1.6, musicGain: .8, slowMo: { time: .5, scale: .5 } },
   // 拳頭（老鼠王專用的紫藍版）；fistFront＝只有前面手指的那一層，握住人／核心時蓋在上面（拳頭 → 人／核心 → 手指）
   art: { fist: 'images/monster/rat-king/left-fist.png', fistFront: 'images/monster/rat-king/left-fist-02.png' },
   // 握在拳頭裡的人／核心放在原圖（110×90）的哪一點：held＝人身體的中心（人橫躺、頭朝外露出拳頭），core＝核心的中心
@@ -709,6 +710,7 @@ function rkThrowLand(cap, wall) {
 function rkStartFinale(e) {
   const K = G.ratKing;
   e.hp = 1; e.rkHp = 1; e.rkStunT = 99; e.rkDying = true;
+  e.hitT = 0; e.rkArmorFlash = 0;   // 最後一槍的受擊白光：本體離開怪物清單後就不會再倒數，不清掉會一直閃白
   G.enemies = G.enemies.filter(o => o !== e);   // 不再被瞄準
   for (const h of K.hands) { if (h.enemy) h.enemy.hp = 0; if (h.held) { rkRelease(h.held); h.held = null; } }
   for (const o of G.enemies) if (o.ratKingHand) { o.dead = true; }
@@ -826,11 +828,9 @@ function rkRamHit(K, e, dir = 1) {
   if (typeof onEnemyDeath === 'function') onEnemyDeath(e);
   if (typeof questEvent === 'function') questEvent('kill', { monster: e.type });
 }
-// 5. 飛遠之後：討伐成功的橫幅、金色碎光灑下來、到站音樂慢慢收掉
+// 5. 飛遠之後：討伐成功的橫幅、到站音樂慢慢收掉
 function rkVictory(K, e) {
   if (typeof coreBanner === 'function') coreBanner('討伐成功！', RAT_KING.name + '被列車撞飛了・列車恢復通行', '#ffd28a');
-  const p = G.player || e;
-  for (let i = 0; i < 40; i++) G.effects.push({ particle: true, kind: 'spark', x: p.x + rkRand(-260, 260), y: p.y - rkRand(120, 260), vx: rkRand(-20, 20), vy: rkRand(40, 120), r: 1.5 + Math.random() * 2, life: 1.2 + Math.random() * .6, life0: 1.8, color: ['#ffe36e', '#ffd28a', '#f0a3c8', '#ffffff'][i % 4] });
   if (typeof SFX !== 'undefined' && SFX.fadeOut) SFX.fadeOut('rat-king-arrive', 2.5);
   if (typeof sfx === 'function') sfx('win');
 }
@@ -859,6 +859,13 @@ function updateRkFx(K, dt) {
   if (K.digs) K.digs = K.digs.filter(d => d.age < d.life);
 }
 
+// ---- 隊友挑目標（js/game.js 的 pickSentryTarget 呼叫，回傳要加在「距離分數」上的數字，越小越優先）----
+//   老鼠王本體：射程裡還有別的怪物就先打牠們（小怪清完才打老鼠王）；抓著人的手：比小怪還優先（先救人）
+function ratKingTargetBias(e) {
+  if (e.ratKingHand) return -50000;
+  if (e.ratKing) return 50000;
+  return 0;
+}
 // ---- BOSS 血條（js/core-frenzy.js）、BOSS 音樂（js/boss-music.js）----
 function ratKingBars() {
   const K = G && G.ratKing, e = K && K.e;
@@ -890,7 +897,8 @@ function drawRatKing(c, e) {
     return;
   }
   c.beginPath(); c.rect(e.x - w, edge - h * 2, w * 2, h * 2); c.clip();   // 月台邊緣以下不畫（被月台擋住）
-  if (e.hitT > 0) c.translate((Math.random() * 2 - 1) * 3, 0);
+  const hitFx = e.hitT > 0 && !e.rkDying;   // 死亡表演中不畫受擊抖動、白光
+  if (hitFx) c.translate((Math.random() * 2 - 1) * 3, 0);
   if (rumble > 0) c.translate((Math.random() * 2 - 1) * 5 * rumble, (Math.random() * 2 - 1) * 1.5 * rumble);   // 列車越近，跟著地面抖得越厲害
   if (dizzy) { c.translate(e.x, edge); c.rotate(Math.sin(t * 5) * .05); c.translate(-e.x, -edge); }   // 暈頭轉向：慢慢左右晃
   // 核心護甲：身體外圍一圈紫光（越多核心越亮）；剛被護甲擋掉傷害時閃一下
@@ -900,7 +908,7 @@ function drawRatKing(c, e) {
   else if (e.rkEnraged) { c.shadowColor = 'rgba(255,80,60,' + (.55 + .3 * Math.sin(t * 7)) + ')'; c.shadowBlur = 26; }
   c.drawImage(img, e.x - w / 2, top, w, h);
   c.shadowBlur = 0;
-  if (e.hitT > 0) { c.globalAlpha = .35; c.globalCompositeOperation = 'lighter'; c.drawImage(img, e.x - w / 2, top, w, h); }
+  if (hitFx) { c.globalAlpha = .35; c.globalCompositeOperation = 'lighter'; c.drawImage(img, e.x - w / 2, top, w, h); }
   c.restore();
   if (dizzy && typeof drawBurrowDizzyStars === 'function') drawBurrowDizzyStars(c, e.x, top + 8 * S, S * .9, t);
 }
