@@ -168868,10 +168868,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_train_car_head",
-        "c": 13,
+        "c": 21,
         "r": 105,
         "layer": "object",
-        "cars": 2
+        "cars": 1,
+        "bothDoors": true
       },
       {
         "id": "tile_mrt_rail_track_objects",
@@ -168887,25 +168888,28 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_platform_screen_doors",
-        "c": 27,
-        "r": 105,
+        "c": 26,
+        "r": 104,
         "layer": "ground2",
-        "oy": -8.666667
+        "oy": 31.333332999999584,
+        "ox": 20
       },
       {
         "id": "tile_mrt_platform_screen_doors",
-        "c": 36,
-        "r": 105,
+        "c": 35,
+        "r": 104,
         "layer": "ground2",
         "fx": true,
-        "oy": -8.666667
+        "oy": 31.333332999999584,
+        "ox": 20
       },
       {
         "id": "tile_mrt_gate_card_readers",
-        "c": 33,
-        "r": 105,
+        "c": 32,
+        "r": 104,
         "layer": "ground2",
-        "oy": -8.666667
+        "oy": 31.333332999999584,
+        "ox": 20
       },
       {
         "id": "tile_mrt_floor_tile_1f",
