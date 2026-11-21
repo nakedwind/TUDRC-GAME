@@ -22,7 +22,7 @@
    關門時溫特在車上 → 搭車：車上的人（溫特、隊員、怪物）跟著列車一起開走，快開進隧道時畫面才變黑；
      在隧道裡黑一陣子、搖晃（rideTime），再載著大家開進站、停好開門。搭車時車上的人不能動。
      互通的捷運站（data/mrt-train.js 的 stations）：從其中一站搭車，會隨機開到「另一個」車站（換地圖，車上的隊員一起過去）；
-       不在名單裡的地圖照舊開回同一站。每站的到站音樂也在 stations 設（arrive）。
+       到站時一定坐離營地最近的那台車進站（mrtTrainNearCamp）。不在名單裡的地圖照舊開回同一站。每站的到站音樂也在 stations 設（arrive）。
      沒搭上車的隊員：留在原本那站，nextTrainTime 秒（預設 2 分鐘）後搭下一班車到溫特這站（隊員欄顯示「正在搭下班車」倒數）。
      溫特沒上車、隊員不小心留在車上：隊員跟著列車開走，nextTrainTime 秒後搭車回站（隊員欄顯示「不小心搭上車」倒數）。
        時間到了以後，等離溫特最近的那台車（同一層優先，mrtNearestReturnTrain）下一班進站時從車上走下來；在沒有捷運的地圖就直接回到營地；回應變中心就全員歸隊。
@@ -689,6 +689,19 @@ function mrtRideToStation(tr, dest) {
     setTimeout(() => { mapTransitioning = false; }, 300);
   }, 400);
 }
+// 這幾台車裡離營地最近的那台：照列車整個月台範圍到最近一格營地的距離（地圖沒設營地＝營地是最下面一排）
+function mrtTrainNearCamp(list) {
+  const camp = [...(typeof campCells !== 'undefined' ? campCells : [])].map(k => center(...k.split(',').map(Number)));
+  const dist = tr => {
+    if (!camp.length) return Math.max(0, OY + ROWS * CELL - tr.bottom);   // 沒設營地：離最下面一排多遠
+    let d = Infinity;
+    for (const [x, y] of camp) d = Math.min(d, Math.hypot(Math.max(tr.clipL, Math.min(tr.clipR, x)) - x, Math.max(tr.top, Math.min(tr.bottom, y)) - y));
+    return d;
+  };
+  let best = list[0], bd = Infinity;
+  for (const tr of list) { const d = dist(tr); if (d < bd) { bd = d; best = tr; } }
+  return best;
+}
 // 換到新車站之後：隨機一班列車載著溫特和同車的隊員，在隧道裡黑一陣子再進站
 function mrtArriveAtStation(mates) {
   const trains = G.mrtTrains || [];
@@ -698,9 +711,11 @@ function mrtArriveAtStation(mates) {
   const crew = [G.player, ...mates.map(id => G.towers.find(t => t.type === id)).filter(Boolean)];
   const dog = (G.npcs || []).find(n => n.id === 'ball');   // 球球跟著部隊一起來
   if (dog) crew.push(dog);
-  // 別站開過來：不挑被老鼠王卡住的車、不挑指定開去別處的車（例如 O666 的紅色列車）
-  const normal = trains.filter(t => !(t.variant && t.variant.dest) && !(typeof ratKingBlocksTrain === 'function' && ratKingBlocksTrain(t)));
-  const pick = normal.length ? normal : trains, tr = pick[Math.floor(Math.random() * pick.length)];
+  // 別站開過來：不挑被老鼠王卡住的車、不挑指定開去別處的車（例如 O666 的紅色列車）、不挑通道列車（一直停著不動）
+  // 剩下的車裡，一定挑離營地最近的那台（mrtTrainNearCamp），下車就在營地附近
+  const usable = t => !(t.variant && t.variant.dest) && !(typeof ratKingBlocksTrain === 'function' && ratKingBlocksTrain(t));
+  const normal = trains.filter(t => usable(t) && !t.fixed), loose = trains.filter(usable);
+  const pick = normal.length ? normal : loose.length ? loose : trains, tr = mrtTrainNearCamp(pick);
   Object.assign(tr, { riders: [], state: 'tunnel', off: -tr.inDist, door: 0, chimed: false, fadeT: 0,
     t: Math.max(MRT_TRAIN.arriveSoundLead + 1, MRT_TRAIN.rideTime * .6) });
   mrtTrainSeatRiders(tr, crew);
