@@ -7,7 +7,7 @@
        核心被打到 → 先震動 → 洞裡冒出手把核心抓住 → 拖進洞裡 → 從另一個洞冒出來放下。
        每次核心露出來，最多只會被打掉 core.exposeCap 成血量（打到上限就打不動了，等手來搬），所以要多打幾輪才打得破。
    - 一般的手（只在核心洞以外的地方冒出來，冒出來的地方會先裂開一個洞）：
-       1. 拳頭：在溫特或隊員腳下冒出握拳的手往上打，打中會被揍飛（飛出去、彈兩下、躺著暈，跟藤蔓丟人同一套）。
+       1. 拳頭：在溫特或隊員腳下冒出握拳的手往上打，一隻手只打一個人（範圍裡離洞口最近的），打中會被揍飛（飛出去、彈兩下、躺著暈，跟藤蔓丟人同一套）。
        2. 抓人：紫色預警圈。被抓到的人握在拳頭裡（頭露在外面），過 grab.hold 秒：
           溫特 → 被往外丟出去；隊員 → 有 grab.dragChance 的機會被拖進地底（過一陣子別的地方的地面裂開，從洞口被往上拋飛、落地暈眩），不然也是被丟出去。
           被揍飛、丟出去、躺在地上暈的時候不會受擊閃紅、發抖。
@@ -450,10 +450,11 @@ function updateRkHands(K, dt) {
 // 手完全冒出來的那一刻
 function rkHandUp(K, e, h) {
   const P = RAT_KING.punch;
-  if (h.kind === 'punch') {   // 揍飛：打中的人飛出去、彈兩下、躺著暈
+  if (h.kind === 'punch') {   // 揍飛：一隻手只打一個人（範圍裡離洞口最近的那個），打中的人飛出去、彈兩下、躺著暈
     const o = rkHandSpot(h), within = a => a && a.hp > 0 && !a.rkHeld && !a.eatenBy && !a.vineCap && Math.hypot(a.x - o.x, a.y - o.y) <= P.radius * CELL;
-    if (within(G.player)) { const hp0 = G.player.hp; e.playerTouchCd = 0; enemyAttackPlayer(e, 0); if (G.player.hp < hp0 && G.player.hp > 0) rkLaunch(G.player, o, P.launch); }
-    for (const t of G.towers) if (within(t)) { const hp0 = t.hp; e.atkCd = 0; enemyAttackSentry(e, t, 0); if (t.hp < hp0 && t.hp > 0) rkLaunch(t, o, P.launch); }
+    const a = [G.player, ...G.towers].filter(within).sort((p, q) => Math.hypot(p.x - o.x, p.y - o.y) - Math.hypot(q.x - o.x, q.y - o.y))[0];
+    if (a === G.player) { const hp0 = a.hp; e.playerTouchCd = 0; enemyAttackPlayer(e, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
+    else if (a) { const hp0 = a.hp; e.atkCd = 0; enemyAttackSentry(e, a, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
     if (typeof addShake === 'function') addShake(4);
   } else if (h.kind === 'grab') {
     const a = h.target, o = rkHandSpot(h);
