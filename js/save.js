@@ -75,14 +75,22 @@ window.addEventListener('beforeunload', () => saveGame());
 const settingsMenu = document.getElementById('settingsMenu');
 let settingsOpen = false;
 const SAVE_SLOT_COUNT = 6;
-const saveSlotKey = n => 'tudrc-save-slot-v1-' + n;
+// 存檔欄位放在 IndexedDB（js/new-game.js 的 SlotDB）：讀取要等，所以先讀進 saveSlotCache，畫面照它畫
+const saveSlotCache = {};
+let saveSlotsLoaded = false;
 function readSaveSlot(n) {
+  const slot = saveSlotCache[n];
+  return slot && slot.values && typeof slot.values === 'object' ? slot : null;
+}
+async function refreshSaveSlots() {
   try {
-    const slot = JSON.parse(localStorage.getItem(saveSlotKey(n)) || 'null');
-    return slot && slot.values && typeof slot.values === 'object' ? slot : null;
-  } catch (_) { return null; }
+    await window.slotMigration;   // 舊的 localStorage 欄位先搬好
+    for (let n = 1; n <= SAVE_SLOT_COUNT; n++) saveSlotCache[n] = await window.SlotDB.get(n);
+  } catch (error) { console.warn('讀不到存檔欄位', error); }
+  saveSlotsLoaded = true; renderSaveSlots();
 }
 function renderSaveSlots() {
+  if (!saveSlotsLoaded) { refreshSaveSlots(); return; }
   const box = document.getElementById('saveSlots'); if (!box) return;
   box.replaceChildren();
   for (let n = 1; n <= SAVE_SLOT_COUNT; n++) {
@@ -104,10 +112,12 @@ function renderSaveSlots() {
     box.append(row);
   }
 }
-function storeSaveSlot(n) {
-  if (!Number.isInteger(n) || n < 1 || n > SAVE_SLOT_COUNT) return;
+let saveSlotBusy = false;   // 存入／讀取中：不要連按好幾次
+async function storeSaveSlot(n) {
+  if (!Number.isInteger(n) || n < 1 || n > SAVE_SLOT_COUNT || saveSlotBusy) return;
   if (window.TEST_MODE) { systemNotice('測試模式不能存入存檔', true); sfx('error'); return; }
   if (readSaveSlot(n) && !confirm('覆寫存檔 ' + n + '？')) return;
+  saveSlotBusy = true;
   try {
     saveGame();
     for (const fn of [saveEquipment, saveQuests, saveMissions, saveSortie]) fn();
@@ -115,17 +125,34 @@ function storeSaveSlot(n) {
     const scene = { mapId: MAP?.id, mapName: MAP?.name, x: G.player?.x, y: G.player?.y };
     try { scene.battle = typeof snapshotSceneForSlot === 'function' ? snapshotSceneForSlot() : null; }   // 現場整份（怪物、建築、隊友位置…，js/combat-progress.js）
     catch (error) { console.warn('記錄現場失敗', error); }
-    localStorage.setItem(saveSlotKey(n), JSON.stringify({ v: 1, at: Date.now(), values, scene }));
+    const slot = JSON.parse(JSON.stringify({ v: 1, at: Date.now(), values, scene }));   // 先轉成純資料（現場裡可能有 IndexedDB 存不了的東西）
+    await window.SlotDB.put(n, slot);
+    saveSlotCache[n] = slot;
     systemNotice('已存入存檔 ' + n); sfx('button'); renderSaveSlots();
-  } catch (_) { systemNotice('存檔失敗：儲存空間不足或無法使用', true); }
+  } catch (error) { console.warn('存檔欄位存入失敗', error); systemNotice('存檔失敗：瀏覽器不允許儲存或空間不足', true); sfx('error'); }
+  finally { saveSlotBusy = false; }
+}
+async function loadSaveSlot(n) {
+  if (saveSlotBusy || !readSaveSlot(n) || !confirm('讀取存檔 ' + n + '？目前未存入的進度將被取代。')) return;
+  saveSlotBusy = true;
+  try {
+    const slot = await window.SlotDB.get(n);
+    if (!slot?.values) throw new Error('存檔是空的');
+    if (window.TEST_MODE) {   // 測試模式裡讀存檔：先放回測試前的正式進度、離開測試模式（不然重新整理時會再把測試前的備份寫回來，蓋掉剛讀的存檔）
+      const normal = JSON.parse(localStorage.getItem('tudrc-before-test-v1') || 'null');
+      if (normal?.values) window.restoreGameProgress(normal.values);
+      sessionStorage.removeItem('tudrc-test-mode-v1'); localStorage.removeItem('tudrc-test-active-v1');
+    }
+    window.restoreGameProgress(slot.values);   // 進度現在就寫回去（js/new-game.js）
+    window.freezeProgressWrites();             // 重新整理前不准再寫進度，免得關網頁前的自動存檔蓋掉
+    sessionStorage.setItem('tudrc-new-game-request-v1', 'slot:' + n);
+    location.reload();
+  } catch (error) { saveSlotBusy = false; console.warn('讀取存檔欄位失敗', error); systemNotice('無法讀取存檔', true); }
 }
 document.getElementById('saveSlots').addEventListener('click', e => {
   const button = e.target.closest('[data-slot-action]'); if (!button) return;
   const n = Number(button.dataset.slot);
-  if (button.dataset.slotAction === 'save') { storeSaveSlot(n); return; }
-  if (!readSaveSlot(n) || !confirm('讀取存檔 ' + n + '？目前未存入的進度將被取代。')) return;
-  try { sessionStorage.setItem('tudrc-new-game-request-v1', 'slot:' + n); location.reload(); }
-  catch (_) { systemNotice('無法讀取存檔', true); }
+  if (button.dataset.slotAction === 'save') storeSaveSlot(n); else loadSaveSlot(n);
 });
 const settingsTabs = [...document.querySelectorAll('[data-settings-page]')];
 function selectSettingsPage(id) {

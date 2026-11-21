@@ -39,15 +39,57 @@
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
   let resumeScene = null;
+  let pendingSlot = 0;   // 要讀的存檔欄位：進度已經在按「讀取」時寫回去了，這裡只剩把當下的現場放回去（從 IndexedDB 讀）
   window.TEST_MODE = false;
   // 把備份（測試前、開新遊戲前、存檔欄位）寫回去；備份裡沒有記錄的鍵（清單後來才加的）不動，免得舊備份把現在的資料刪掉
+  // 先把要換掉的鍵全部清掉再寫：空出位置，寫的時候比較不會撞到瀏覽器空間上限
   function restoreProgress(values) {
+    progressKeys.forEach(key => { if (key in values) localStorage.removeItem(key); });
     progressKeys.forEach(key => {
       if (!(key in values)) return;
       const value = values[key];
-      if (typeof value === 'string') localStorage.setItem(key, value); else localStorage.removeItem(key);
+      if (typeof value === 'string') localStorage.setItem(key, value);
     });
   }
+  window.restoreGameProgress = restoreProgress;
+  // 讀存檔欄位時：進度寫回去之後到重新整理之前，不准再寫進度（關網頁前的自動存檔會把剛寫回去的進度蓋掉）
+  window.freezeProgressWrites = () => {
+    const keys = new Set(progressKeys), real = Storage.prototype, { setItem, removeItem } = real;
+    const mine = (store, key) => store === window.localStorage && keys.has(String(key));
+    real.setItem = function (key, value) { if (mine(this, key)) return; return setItem.call(this, key, value); };
+    real.removeItem = function (key) { if (mine(this, key)) return; return removeItem.call(this, key); };
+  };
+
+  // ---- 存檔欄位放在 IndexedDB ----
+  // 以前放在 localStorage：每個網站只有約 5MB（GitHub Pages 同一個帳號底下的網站還共用這 5MB），
+  // 每個欄位都是整份進度＋戰場現場的複本，存幾個就滿了，會跳「存檔失敗：儲存空間不足」。IndexedDB 的空間大很多。
+  const SLOT_DB = 'tudrc-save-slots', SLOT_STORE = 'slots', OLD_SLOT_KEY = n => 'tudrc-save-slot-v1-' + n;
+  let slotDbOpen = null;
+  const slotDb = () => slotDbOpen || (slotDbOpen = new Promise((ok, fail) => {
+    if (!window.indexedDB) { fail(new Error('這個瀏覽器不能用 IndexedDB')); return; }
+    const req = indexedDB.open(SLOT_DB, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(SLOT_STORE);
+    req.onsuccess = () => ok(req.result);
+    req.onerror = () => { slotDbOpen = null; fail(req.error); };
+  }));
+  const slotTx = (mode, fn) => slotDb().then(db => new Promise((ok, fail) => {
+    const tx = db.transaction(SLOT_STORE, mode), req = fn(tx.objectStore(SLOT_STORE));
+    tx.oncomplete = () => ok(req && req.result); tx.onerror = () => fail(tx.error); tx.onabort = () => fail(tx.error);
+  }));
+  window.SlotDB = {
+    get: n => slotTx('readonly', s => s.get(n)).then(v => v || null),
+    put: (n, data) => slotTx('readwrite', s => s.put(data, n)),
+    // 舊的 localStorage 存檔欄位搬進 IndexedDB，搬好才刪掉舊的（空出 localStorage 的空間）
+    migrate: async () => {
+      for (let n = 1; n <= 6; n++) {
+        const raw = localStorage.getItem(OLD_SLOT_KEY(n)); if (!raw) continue;
+        let data = null; try { data = JSON.parse(raw); } catch (_) {}
+        if (data && data.values && !(await window.SlotDB.get(n))) await window.SlotDB.put(n, data);
+        localStorage.removeItem(OLD_SLOT_KEY(n));
+      }
+    },
+  };
+  window.slotMigration = window.SlotDB.migrate().catch(error => console.warn('存檔欄位搬到 IndexedDB 失敗，先留在原處', error));
   if (window.STORY_PREVIEW) return;   // 回憶預覽不處理待執行的新遊戲／讀檔／測試要求。
   // ---- 地圖編輯器的「▶ 預覽遊戲」（網址帶 ?preview=1）：物品全解鎖 ----
   // 預覽分頁跟正式遊戲共用同一份瀏覽器存檔，所以預覽時「進度」那些存檔只寫在這個分頁的記憶體裡，
@@ -97,12 +139,12 @@
         localStorage.setItem(BACKUP, JSON.stringify({ at: Date.now(), values }));
         progressKeys.forEach(key => localStorage.removeItem(key));
         startedFresh = true;
+      } else if (request.startsWith('slot:')) {
+        pendingSlot = Number(request.split(':')[1]); startedFresh = true;   // 進度在按「讀取」時就寫回去了（js/save.js），現場等一下從 IndexedDB 讀
       } else {
-        const isSlot = request.startsWith('slot:');
-        const backup = JSON.parse(localStorage.getItem(isSlot ? 'tudrc-save-slot-v1-' + request.split(':')[1] : BACKUP) || 'null');
+        const backup = JSON.parse(localStorage.getItem(BACKUP) || 'null');
         if (!backup?.values) throw new Error('沒有可還原的存檔');
         restoreProgress(backup.values);
-        if (isSlot) { resumeScene = backup.scene; startedFresh = true; }
       }
     }
   } catch (error) {
@@ -177,7 +219,11 @@
       restore.addEventListener('click', () => requestRestart('restore'));
     }
     // 等所有載入存檔的 DOMContentLoaded 處理完成後才進場。
-    if (startedFresh) setTimeout(() => {
+    if (startedFresh) setTimeout(async () => {
+      if (pendingSlot) {   // 讀存檔欄位：存的時候在哪張地圖、站哪裡、戰場現場
+        try { const slot = await window.SlotDB.get(pendingSlot); resumeScene = slot && slot.scene || null; }
+        catch (error) { console.warn('讀不到存檔欄位的現場', error); }
+      }
       if (window.TEST_MODE) grantEverything();
       if (resumeScene && typeof MAPS_DEFAULT !== 'undefined' && !PREVIEW) {
         const index = MAPS_DEFAULT.findIndex(m => m.id === resumeScene.mapId);
