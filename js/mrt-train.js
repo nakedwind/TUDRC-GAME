@@ -192,6 +192,13 @@ function mrtTrackCells() {
   return set;
 }
 const mrtTrackCell = (c, r) => mrtTrackCells().has(c + ',' + r);
+// 視線、子彈能不能穿過這格：軌道上的碰撞格只擋走路（人不能跳下軌道），不擋射擊，隔著軌道可以打到對面月台的怪物。
+// 列車停在站上（車廂擋路格加好了）時，車廂蓋住的格子照樣擋（js/maploader.js 的 lineOfSightRaw 呼叫）
+function mrtSeeThroughCell(c, r) {
+  if (!mrtTrackCell(c, r)) return false;
+  const k = c + ',' + r;
+  return !((G && G.mrtTrains) || []).some(tr => tr.solidKey && tr.cover && tr.cover.has(k));
+}
 
 // 這站的列車能不能開：捷運站裡放了發電機，就要全部打開（js/storage-lockers.js）；沒放發電機、或不是捷運站的地圖一律可以
 function mrtPowered() {
@@ -399,6 +406,7 @@ function mrtTrainUpdateSolid(tr) {
       if (out(c + 1, r)) tr.edges.push(c + ',' + r + ',R');
     }
     tr.bottomRow = rMax; tr.topRow = rMin;
+    tr.cover = new Set(type.keys());   // 停著的車廂蓋住的格子：擋視線、子彈（mrtSeeThroughCell）
     mrtTrainUnstick(tr, wasOff, type);
     if (!open) mrtTrainClearSill(tr, type);   // 車門關上：站在門檻上的人推進車裡或推回月台
   }
