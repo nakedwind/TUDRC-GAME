@@ -105,7 +105,7 @@ const BESTIARY_ELITES = [
   { of: 'pearl_kid', def: () => typeof PEARL_ELDER !== 'undefined' ? PEARL_ELDER : { name: '珍珠大童', artDir: 'images/monster/pearl-elder/' } },   // js/pearl-elder.js
   { of: 'hangi_bao', def: () => typeof CAP_KING !== 'undefined' ? CAP_KING.big : { name: '大夯吉寶' } },   // 順順宮主帽子裡的大夯吉寶（js/elite-cap-king.js）
   { of: 'loofah_lady', def: () => typeof LOOFAH_QUEEN !== 'undefined' ? LOOFAH_QUEEN : { name: '絲瓜女王', artDir: 'images/monster/loofah-queen/' } },   // js/loofah-queen.js
-  { of: 'golden_banana_king', def: () => typeof BANANA_EMPEROR !== 'undefined' ? BANANA_EMPEROR : { name: '金蕉大王' } },   // js/banana-emperor.js
+  { of: 'golden_banana_king', def: () => typeof BANANA_EMPEROR !== 'undefined' ? BANANA_EMPEROR : { name: '金蕉大王', artDir: 'images/monster/banana-emperor/' } },   // js/banana-emperor.js
 ];
 // ---- 遊戲裡有哪些怪物：怪物編輯器的怪物＋史萊姆變體＋菁英怪 ----
 function bestiaryBaseList() {

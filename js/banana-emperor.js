@@ -21,6 +21,7 @@
 */
 const BANANA_EMPEROR = {
   name: '金蕉大王',
+  artDir: 'images/monster/banana-emperor/',   // 專用的圖（披風紫藍、身體偏紅的橘金色）：檔名跟金蕉王一樣，只換資料夾；用 tools/recolor-banana-emperor.py 從金蕉王的圖換色產生
   maps: { map_f307boss: { c: 19, r: 58 }, map_mw2dn6re: { c: 18, r: 94 } },   // 核心在哪一格（測試：F307 BOSS 場地、F307 本圖的大草地房，都在房間下面）；他站在核心右邊 standOff 格
   standOff: 3.5,                 // 一開始站在核心右邊幾格（太近權杖會被核心擋住；體型越大要站越遠）
   wander: {                      // 沒在施法的時候：在核心旁邊慢慢走來走去
@@ -82,10 +83,12 @@ const BANANA_EMPEROR = {
     kings: 2,                    // 普通金蕉王幾隻（只負責補血）
   },
 };
+// 金蕉王的圖片路徑 → 大王專用的那張（同檔名、換到 BANANA_EMPEROR.artDir 資料夾）
+const beArt = f => typeof f === 'string' && /\.png$/i.test(f) && BANANA_EMPEROR.artDir ? BANANA_EMPEROR.artDir + f.split('/').pop() : f;
 const BE_ART = {
-  stand: 'images/monster/golden-banana-king/golden-banana-king-cast-01.png',
-  raise: 'images/monster/golden-banana-king/golden-banana-king-cast-02.png',
-  tap: 'images/monster/golden-banana-king/golden-banana-king-cast-02-tap.png',
+  stand: beArt('images/monster/golden-banana-king/golden-banana-king-cast-01.png'),
+  raise: beArt('images/monster/golden-banana-king/golden-banana-king-cast-02.png'),
+  tap: beArt('images/monster/golden-banana-king/golden-banana-king-cast-02-tap.png'),
 };
 const beSpot = () => typeof MAP !== 'undefined' && MAP ? BANANA_EMPEROR.maps[MAP.id] || null : null;
 const beAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
@@ -118,6 +121,8 @@ function seedBananaEmperor() {
   const at = lqFreeSpot(core.x + B.standOff * CELL, core.y) || { x: core.x + CELL, y: core.y };
   const e = createMonster(base, at.x, at.y);
   e.bananaEmperor = true; e.eliteName = B.name; e.bkSquad = true;   // bkSquad：不要再叫普通金蕉王的那種隊員
+  e.sprite = beArt(e.sprite);   // 換成大王專用的圖（另外複製一份，不要改到金蕉王共用的設定）
+  if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(beArt) : beArt(f)]));
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * B.hp);
   e.reward = Math.round(e.reward * B.rewardMul); e.crystals = Math.round((e.crystals ?? 5) * B.crystalMul);
   e.drawWidth = Math.round(base.width * B.scale); e.drawHeight = Math.round(base.height * B.scale);
