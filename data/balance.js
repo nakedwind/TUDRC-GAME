@@ -15,7 +15,7 @@ const START = {
 const SOOTHE = {
   cost: 30,   // 每次疏導花多少嚮導能量
   heal: 55,   // 每次疏導降多少汙染值
-  time: 3,    // 溫特疏導隊員要幾秒（進度條跑完才算成功；期間溫特和隊員都不能動，js/channel-actions.js）
+  time: 1.5,  // 溫特疏導隊員要幾秒（進度條跑完才算成功；期間溫特和隊員都不能動，js/channel-actions.js）
 };
 // 玩家親自補血、疏導的方式（疏導、急救包、醫療包都算）：乘在上面的 SOOTHE、data/equipment.js 的 FIRST_AID、醫療包的恢復量上
 //   time：花的時間 ×幾倍（小＝比較快）　amount：補的血／降的負荷 ×幾倍
