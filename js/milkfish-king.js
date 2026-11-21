@@ -209,6 +209,7 @@ function mkStep(e, dt) {
       if (!core || core.dead || core.carried) { mkSet(e, 'hunt'); return; }
       mfPose(e, null);
       if (mkDist(core, e) <= CELL * 1.4) { mkSet(e, 'coreGulp', F.coreGulpTime); e.faceRight = core.x > e.x; return; }
+      if (mkStuck(e, core, dt)) { mkSet(e, 'hunt'); return; }   // 身體太寬走不到核心旁邊：先去做別的事，stuckSkip 秒後再試（不然會一直站著不動）
       const [gc, gr] = cellAt(core.x, core.y);
       const nav = enemyNavigate(e, gc, gr, dt * (mk.state === 'rushCore' ? C.rushSpeedMul : 1), 'mk-core:' + gc + ',' + gr, true);
       if (nav.blocker) mkBlocked(e, nav.blocker, dt);
@@ -264,6 +265,7 @@ function mkStep(e, dt) {
     case 'return': {   // 被引開太遠：走回原位
       mfPose(e, null);
       if (mkDist(e, mk.home) <= C.leash * CELL * .5) { mkSet(e, 'hunt'); return; }
+      if (mkStuck(e, mk.home, dt)) { mk.home = { x: e.x, y: e.y }; mkSet(e, 'hunt'); return; }   // 走不回去（被窄道擋住）：就把現在的位置當原位，不要一直站著
       const [hc, hr] = cellAt(mk.home.x, mk.home.y);
       const nav = enemyNavigate(e, hc, hr, dt * 1.2, 'mk-home', true);
       if (nav.blocker) mkBlocked(e, nav.blocker, dt);
@@ -280,7 +282,7 @@ function mkHunt(e, dt) {
   // 1. 血量掉到一段：把核心吐出來（表演）
   if (mk.coreIn && e.hp / e.maxhp <= mk.nextCoreSpit) { mk.nextCoreSpit -= C.coreSpitHp; mkSet(e, 'coreWind', F.coreSpitWindup); return; }
   // 核心還在地上（例如吞的時候被打斷）：先去吞回來
-  if (mk.core && !mk.core.dead && !mk.coreIn && !mk.core.carried && !mkCoreFlying() && mk.core.awake) { mkSet(e, 'rushCore'); return; }
+  if (mk.core && !mk.core.dead && !mk.coreIn && !mk.core.carried && !mkCoreFlying() && mk.core.awake && !mkSkipped(e, mk.core)) { mkSet(e, 'rushCore'); return; }
   // 2. 含太久的隊友：吐出來
   const done = mk.prey.find(pr => pr.left <= 0);
   if (done) { mkStartSpit(e, { mate: done.t }, mkPick(mkSpitTargets(e, done.t))); return; }
@@ -325,7 +327,9 @@ function mkHunt(e, dt) {
     return;
   }
   // 6. 溫特看得到：走過去
-  if (p && p.hp > 0 && sameFloor(e, p) && mkDist(p, e) <= C.noticeRange * 1.5 * CELL && hasLineOfSight(e.x, e.y, p.x, p.y)) { mkGo(e, p, dt, 'mk-player'); return; }
+  if (p && p.hp > 0 && sameFloor(e, p) && !mkSkipped(e, p) && mkDist(p, e) <= C.noticeRange * 1.5 * CELL && hasLineOfSight(e.x, e.y, p.x, p.y)) {
+    if (mkDist(p, e) <= F.biteReach || !mkStuck(e, p, dt)) { mkGo(e, p, dt, 'mk-player'); return; }   // 已經貼在旁邊（只是咬人還在冷卻）不算卡住   // 看得到溫特卻走不過去（例如隔著欄杆）：stuckGive 秒後先放棄，去晃一晃，不要一直站著
+  }
   // 6b. 嘴裡含著隊友、附近又沒人：主動去找人準備吐（以前會在原位慢慢晃、停很久，看起來像卡住）
   if (mk.prey.length && mkSeekSpitTarget(e, dt)) return;
   // 7. 沒事做：在原位附近晃
@@ -441,7 +445,7 @@ function mkSpitCore(e) {
     const base = p ? Math.atan2(p.y - e.y, p.x - e.x) : 0, a = base + (Math.random() * 2 - 1) * (i < 20 ? 1 : Math.PI);
     const d = (F.coreSpitDist[0] + Math.random() * (F.coreSpitDist[1] - F.coreSpitDist[0])) * CELL;
     const x = e.x + Math.cos(a) * d, y = e.y + Math.sin(a) * d, [c, r] = cellAt(x, y);
-    if (inGrid(c, r) && !isWall(c, r) && !G.grid[c + ',' + r] && !enemyBlocked(x, y) && hasLineOfSight(e.x, e.y, x, y)) to = { x, y };
+    if (inGrid(c, r) && !isWall(c, r) && !G.grid[c + ',' + r] && !enemyBlocked(x, y) && (!e.wide || enemyWideAt(c, r)) && hasLineOfSight(e.x, e.y, x, y)) to = { x, y };   // enemyWideAt：牠身體很寬，落點要是牠走得過去的寬地方，不然撿不回來
   }
   if (!to) to = { x: e.x, y: e.y + CELL };
   core.carried = true; core.hidden = true;   // 飛在空中：還打不到（落地才打得到）
