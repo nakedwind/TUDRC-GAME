@@ -788,6 +788,8 @@ function hasImageAt(c, r) {
 //   剩下扁平的（多半是地板）留在地面、永遠在角色下面。
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
+// 用格子筆刷畫的小圖有沒有勾「平貼地面」：勾了就算放在物件圖層，也當地板畫在角色下面（跟大圖的規則一樣）
+const cellTileFlat = id => !!(mapTileById(id) || {}).flat;
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
 // 這張圖是不是 2 樓的圖：照圖片的 level（地圖編輯器的「🏢 樓層」選單）；沒寫就跟著所在圖層的樓層（js/map-levels.js）
 const stampOn2F = s => s && s.level != null ? s.level !== 1 : MAP_FLOOR2_LAYERS.has((s && s.layer) || 'top');
@@ -933,12 +935,14 @@ function stampInDrawRect(s) {
   return b.x1 > v.x0 && b.x0 < v.x1 && b.y1 > v.y0 && b.y0 < v.y1;
 }
 // 畫某一層範圍內的小圖（格子）
-function drawLayerCellsInView(ctx, lid) {
+// onlyFlat＝true：只畫勾了「平貼地面」的小圖（物件圖層用：其他立體的小圖要跟角色排前後，不在這裡畫）
+function drawLayerCellsInView(ctx, lid, onlyFlat) {
   const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
   const { c0, r0, c1, r1 } = mapDrawCells();
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
     const key = c + ',' + r, id = layer[key];
     if (!id || G.mapDestroyed.has(lid + ':' + key) || chairConfig(id)) continue;
+    if (onlyFlat && !cellTileFlat(id)) continue;
     drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL, lid);
   }
 }
@@ -973,7 +977,10 @@ function drawMapGround(ctx) {
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
     if (mapGroupedLayer(lid)) { drawMapLayerGroup(ctx, lid); continue; }   // 整層混合：整層當成一張圖
-    if (!isOccLayer(lid) && !MAP_FLOOR2_LAYERS.has(lid)) drawLayerCellsInView(ctx, lid);   // 2 樓圖層的小圖改走排序（蓋在一樓的人上面）
+    if (!MAP_FLOOR2_LAYERS.has(lid)) {   // 2 樓圖層的小圖改走排序（蓋在一樓的人上面）
+      if (!isOccLayer(lid)) drawLayerCellsInView(ctx, lid);
+      else drawLayerCellsInView(ctx, lid, true);   // 物件圖層裡用格子筆刷畫的「平貼地面」小圖（例如水池邊的磁磚）也是地板，畫在角色下面
+    }
     for (const s of ground.get(lid) || []) if (stampInDrawRect(s)) drawMapStampImg(ctx, s);
   }
   if (typeof drawOpenDoorsGround === 'function') drawOpenDoorsGround(ctx);   // 打開的挖空門：門洞的地板＋門框（在角色下面，js/doors.js）
@@ -1018,6 +1025,7 @@ function mapOccluders() {
       const chair = chairConfig(layer[key]);
       if (!chair && mapGroupedLayer(lid)) continue;   // 整層混合：整層一起畫
       if (!chair && !(MAP_FLOOR2_LAYERS.has(lid) && lid !== 'top') && (lid === 'top' || !isOccLayer(lid))) continue;
+      if (!chair && !MAP_FLOOR2_LAYERS.has(lid) && cellTileFlat(layer[key])) continue;   // 平貼地面的小圖：已經在地面那一輪畫過（drawMapGround），不跟角色排前後
       const [c, r] = key.split(',').map(Number), id = layer[key];
       const y0 = r * CELL;
       items.push({ li, x0: c * CELL, y0, x1: (c + 1) * CELL, y1: (r + 1) * CELL,
@@ -1068,7 +1076,8 @@ function mapOccluders() {
   // 標了「2樓」的圖（陸橋）：排在所有一樓的東西後面（蓋在一樓的人上面）；地板類的排在二樓的人後面、牆柱類的照底部Y跟二樓的人排前後
   for (const it of items) {
     const lid = MAP_LAYER_ORDER[it.li];
-    const flat = it.kind === 'stamp' && (it.part ? stampIsStairs(it.stamp) : !!(mapTileById(it.stamp.id) || {}).flat);   // 平貼的圖（樓梯、手扶梯、地上的線）：人是踩在上面的，不能蓋住人
+    const flat = it.kind === 'stamp' ? (it.part ? stampIsStairs(it.stamp) : !!(mapTileById(it.stamp.id) || {}).flat)
+      : !it.fixedDepth && cellTileFlat(it.id);   // 平貼的圖（樓梯、手扶梯、地上的線，格子筆刷畫的也算）：人是踩在上面的，不能蓋住人
     it.floor = 1; it.band = DRAW_BAND.obj;   // 預設：一樓的物件，照底部 Y 跟人排前後（js/pathfinding.js 的 drawOrder）
     if (it.part === 'lower') { if (flat) { it.band = DRAW_BAND.ground; it.y = it.li; } continue; }   // 樓梯的下半段：一樓的地面，永遠在一樓的人下面
     if (it.part === 'upper') { it.floor = 2; if (flat) { it.band = DRAW_BAND.ground; it.y = it.li; } else it.y = it.splitY; continue; }   // 上半段：樓梯＝二樓的地面；柱子＝從分界那條線起算，跟二樓的人排前後
