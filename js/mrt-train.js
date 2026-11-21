@@ -600,9 +600,13 @@ function mrtTrainSeats(tr) {
 function mrtTrainSeatRiders(tr, actors) {
   const seats = mrtTrainSeats(tr);
   tr.riders = tr.riders || [];
+  const f = mrtTrainFloor(tr) === 2 ? 2 : 1;   // 這班車停在幾樓
   actors.forEach((a, i) => {
     const [x, y] = seats[i % Math.max(1, seats.length)] || [tr.x, tr.bottom - CELL / 2];
     Object.assign(a, { mrtRide: true, navPath: null, navGoal: null, moving: false, y, x: x + tr.off * tr.dir });
+    // 坐上車的人改成「這班車那一層」。不然從 B56（列車停在 2 樓）搭到 R89（列車停在 1 樓）時，人還記著 2 樓，
+    // 下車走到 1 樓月台就會整個卡住：溫特走不動也不能放東西、隊員說「部隊長在 1 樓，找不到上下樓的路」
+    if (hasFloors) { a.floor = f; a._fk = null; a.escSide = null; }
     if (a !== G.player) a.target = null;
     tr.riders.push({ a, x });
   });

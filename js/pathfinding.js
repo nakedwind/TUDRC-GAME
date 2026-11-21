@@ -150,6 +150,11 @@ function updateActorFloor(a) {
   // 站在「只有 2 樓、沒有 1 樓」的格子上（js/maploader.js 的 floor2OnlyCells）：一定是 2 樓的人。
   // 從別張地圖的出入口走進來、一開局就站在 2 樓的人沒有經過樓層出入口，以前會被當成一樓：2 樓的物件、2 樓碰撞都擋不到他，放的燈也算一樓
   if (a.floor !== 2 && typeof floor2OnlyCells === 'function' && MAP && floor2OnlyCells().has(k)) a.floor = 2;
+  // 反過來：記著 2 樓、腳下卻是「只有 1 樓」的地面（不是 2 樓地面、不是樓層出入口）＝記錯了，改回 1 樓。
+  // 2 樓的規則裡這種格子全是牆，記錯的人會被困住（例如搭捷運換站後、被推到平台外）：溫特走不動、隊員找不到路。
+  // 正在搭側面手扶梯、搭捷運、站在手扶梯靠 2 樓那半的人不算（他們本來就會短暫經過這種格子）
+  else if (a.floor === 2 && !deckCells.has(k) && !rampCells.has(k) && !rampUpperCells.has(k) && !a.escSide && !a.mrtRide
+    && !(typeof inStairUpper === 'function' && inStairUpper(a.x, a.y))) a.floor = 1;
   if (a._fk !== k) {
     if (a._fk && rampCells.has(a._fk) && !rampCells.has(k)) a.floor = deckCells.has(k) ? 2 : 1;
     a._fk = k;
