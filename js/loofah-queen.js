@@ -338,6 +338,7 @@ function lqStompFx(e) {
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, S.shake, .08); else addShake(8);
   (G.eliteCracks = G.eliteCracks || []).push({ size: S.crack, power: 1, life: 6, x: e.x, y: e.y + 12, at: performance.now() / 1000 });   // 畫在 js/elite-bird-head.js 的 drawEliteGround
   if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y + 12, S.rocks);
+  if (typeof sfxAt === 'function') sfxAt('loofahLeaves', e.x, e.y, 1, 'loofah-queen-leaves');   // 樹葉被震下來的沙沙聲（音效編輯器「絲瓜女王重踏：樹葉被震下來」）
   const rows = typeof FOG_FX_V2 !== 'undefined' ? FOG_FX_V2.leafRows : [0, 1, 2, 3];
   const list = (G.lqLeaves = G.lqLeaves || []);
   for (let i = 0; i < S.leaves; i++) {   // 葉子一口氣被震下來：往下衝、越掉越快，邊掉邊亂翻，只有一點點左右晃
