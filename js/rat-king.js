@@ -64,8 +64,9 @@ const RAT_KING = {
   mice: { every: [9, 13], count: [1, 2], max: 4 },   // 暴怒後叫出小老鼠：隔幾秒、一次幾隻、場上最多幾隻
   // 最後一擊：列車進站的速度（減速度倍率，越大衝越快；1＝平常進站的速度）、老鼠王被撞飛幾秒
   //   slowMo＝撞上去那一刻的慢動作：持續幾秒（現實時間）、變成幾倍速；flyDir＝被撞飛往哪邊（1＝右、-1＝左、0＝跟著列車開的方向）；
-  //   flyAngle＝往上飛的角度（度，0＝水平、10＝稍微往上）；flyDist＝飛多遠（格）
-  ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 }, flyDir: 1, flyAngle: 10, flyDist: 16 },
+  //   flyAngle＝往上飛的角度（度，0＝水平、10＝稍微往上）；flyDist＝飛多遠（格；一開始最快、越飛越慢，要比列車快才不會被車身蓋住）
+  //   reach＝車頭碰到老鼠王圖的哪裡就算撞上（老鼠王圖寬度的幾成，.55＝剛碰到圖的邊緣就算，不會先壓進去）
+  ram: { decelMul: 2, fly: 2.2, slowMo: { time: 1, scale: .3 }, flyDir: 1, flyAngle: 10, flyDist: 34, reach: .55 },
   // 死亡表演的節奏：daze＝血量歸零後先暈幾秒才響到站音樂；musicLead＝音樂響了幾秒後列車才從隧道進站；
   //   （現在：暈 2.5 秒＋音樂 17 秒＋列車衝進來約 0.7 秒 ≒ 血量歸零後 20 秒撞上）
   //   brakeLead＝撞上前幾秒響煞車聲（音效「mrtBrake」）；musicGain＝到站音樂的音量；slowMo＝血量歸零那一刻的慢動作
@@ -740,7 +741,7 @@ function rkStartFinale(e) {
 function rkRamHitTime(tr, e, decelMul) {
   const a = MRT_TRAIN.arriveDecel * decelMul, D = tr.inDist, v0 = Math.sqrt(2 * a * D);
   const head = tr.dir > 0 ? Math.max(...tr.cars.map(c => c.x + c.w)) : Math.min(...tr.cars.map(c => c.x));   // 停好時車頭的位置
-  const reachX = tr.dir > 0 ? e.x - e.drawWidth * .3 : e.x + e.drawWidth * .3;
+  const R = RAT_KING.ram.reach, reachX = tr.dir > 0 ? e.x - e.drawWidth * R : e.x + e.drawWidth * R;
   const d = Math.max(0, Math.min(D, D - (head - reachX) * (tr.dir > 0 ? 1 : -1)));   // 從隧道口開始要走多遠才碰到
   const disc = v0 * v0 - 2 * a * d;
   return disc <= 0 ? v0 / a : (v0 - Math.sqrt(disc)) / a;
@@ -795,7 +796,7 @@ function updateRkRam(K, dt) {
     if (!tr) { rkRamHit(K, e); return; }
     // 車頭的位置：往右開的車頭在右邊（off 是負的＝還在隧道裡）
     const front = tr.dir > 0 ? Math.max(...tr.cars.map(c => c.x + c.w)) + tr.off * tr.dir : Math.min(...tr.cars.map(c => c.x)) + tr.off * tr.dir;
-    const reach = tr.dir > 0 ? front >= e.x - e.drawWidth * .3 : front <= e.x + e.drawWidth * .3;
+    const R = RAT_KING.ram.reach, reach = tr.dir > 0 ? front >= e.x - e.drawWidth * R : front <= e.x + e.drawWidth * R;
     if (reach || tr.state !== 'arrive') rkRamHit(K, e, tr.dir || 1);
     return;
   }
@@ -841,7 +842,7 @@ function rkSlowMo(cfg) { if (cfg && cfg.time > 0) { G.slowMoT = cfg.time; G.slow
 function rkFlyPos(K, e) {
   const B = RAT_KING, k = Math.min(1, K.t / B.ram.fly), dir = K.flyDir || 1;
   const top = rkEdgeY() - B.showRow * B.scale, h = 90 * B.scale;
-  const dist = k * (B.ram.flyDist || 16) * CELL;   // 沿著 flyAngle 的斜線直直飛出去
+  const dist = (1 - (1 - k) * (1 - k)) * (B.ram.flyDist || 16) * CELL;   // 沿著 flyAngle 的斜線直直飛出去：一被撞到最快（比列車快，不會被車身蓋住），越飛越慢
   return { k, x: e.x + dir * dist, y: top + h / 2 - dist * Math.tan((B.ram.flyAngle || 0) * Math.PI / 180) };
 }
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）----
