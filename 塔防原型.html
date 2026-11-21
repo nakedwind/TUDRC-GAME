@@ -299,7 +299,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=mkfix3-20261121"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=mkwalk-20261121"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=mkintro-20261121"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -393,7 +393,7 @@
   <script src="js/fog.js?v=sentryfloor-20261115"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
   <script src="js/vines.js?v=vine30-20261117"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
   <script src="js/loofah-queen.js?v=giantfall2-20261121"></script> <!-- 9n4. 菁英絲瓜小姐「絲瓜女王」：踏地垂下藤蔓、核心吊在頭上、農田長藤蔓 -->
-  <script src="js/milkfish-king.js?v=mkfront-20261121"></script> <!-- 9n5. 菁英 BOSS「虱目魚王」：吞核心保護、吃建築和隊友再吐出來砸人（G11區） -->
+  <script src="js/milkfish-king.js?v=mkland-20261121"></script> <!-- 9n5. 菁英 BOSS「虱目魚王」：吞核心保護、吃建築和隊友再吐出來砸人（G11區） -->
   <script src="js/banana-emperor.js?v=bridgefloor-20261121"></script> <!-- 9n5. 菁英金蕉王「金蕉大王」：守核心、舉杖敲地施法（補血／加攻／加防／加速／香蕉皮雨）、大隻隊員 -->
   <script src="js/leaf-piles.js?v=leafpile4-20261106"></script> <!-- 9n4. 森林的樹葉堆：燒掉露出道具或小史萊姆（地圖編輯器擺放） -->
   <script src="js/lifeform.js?v=levels3-20261115"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->

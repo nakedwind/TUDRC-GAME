@@ -378,9 +378,7 @@ const MONSTERS_DEFAULT = [
       "front": "images/monster/milkfish-kid/milkfish-kid-front.png",
       "walkFront": [
         "images/monster/milkfish-kid/milkfish-kid-walk-01.png",
-        "images/monster/milkfish-kid/milkfish-kid-walk-02.png",
-        "images/monster/milkfish-kid/milkfish-kid-walk-03.png",
-        "images/monster/milkfish-kid/milkfish-kid-walk-02.png"
+        "images/monster/milkfish-kid/milkfish-kid-walk-03.png"
       ]
     },
     "behavior": "milkfishKing",

@@ -57,6 +57,8 @@ const MILKFISH_KING_FX = {
     sink: .85,               // 一開始沉在水面下多深（身體高度的幾成）
     waveUntil: .62,          // 水浪跟到飛行的哪裡（0～1）才斷掉落回水裡
     waveWrap: .28,           // 浪頭包住牠身體下面多高（身體高度的幾成）
+    landBehind: 2,           // 落在核心後面（畫面上方）幾格：核心在牠前面看得到，再走過去吞
+    riseDy: -34,             // 冒泡、竄出的位置從水池那格的正中間往上挪幾像素（負的＝往上）
     bubbleEvery: .07 },      // 震動時水面每隔幾秒冒一個泡泡
 };
 // 走路一頓一頓的時候，為了讓平均速度不變要乘的倍數（照 gaitMin 先算好）
@@ -108,10 +110,10 @@ function mkInit(e, core) {
   e.mkCfg = typeof validMilkfishKingCfg === 'function' ? validMilkfishKingCfg(spec && spec.mfKing) : {};
   e.eliteName = MILKFISH_KING_FX.name;
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true; e.mineEater = true;
-  e.walkStride = MILKFISH_KING_FX.stepEvery / 2;   // 走路圖兩張換一步，跟落腳（震動、腳步聲）同步（js/render.js 的 monsterWalkFrame）   // mineEater：踩到地雷不會引爆（會把地雷吃掉，js/landmine.js）
+  e.walkStride = MILKFISH_KING_FX.stepEvery;   // 走路圖每踩一步換一張（左腳、右腳輪流），換圖的時間由 mkFootsteps 對齊落腳（js/render.js 的 monsterWalkFrame）   // mineEater：踩到地雷不會引爆（會把地雷吃掉，js/landmine.js）
   if (core === undefined) core = G.cores.filter(k => !k.dead).reduce((best, k) => !best || mkDist(k, e) < mkDist(best, e) ? k : best, null);
   e.mk = { state: 'guard', t: 0, home: { x: e.x, y: e.y }, core: core || null, coreIn: false,
-    belly: [], prey: [], spitCd: 2, biteCd: 0, wait: 1, spot: null, stepDist: 0, stunSeen: 0,
+    belly: [], prey: [], spitCd: 2, biteCd: 0, wait: 1, spot: null, stepDist: 0, stepCount: 0, stunSeen: 0,
     nextCoreSpit: 1 - mkCfg(e).coreSpitHp, poolT: 0, lastPool: null,
     baseDmg: { p: e.playerDamage, s: e.sentryDamage, b: e.buildingDamage } };   // baseDmg：原本的攻擊力（核心在肚子裡時乘上倍數）
   (G.mkKings = G.mkKings || []).push(e);
@@ -733,13 +735,18 @@ function mkDown(e) {
   if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 10, .08);
 }
 
+// 走路圖用第幾張：照「踩了幾步」決定，不用畫面自己累積的走路距離（那個會跟落腳差半步，換圖和震動就對不上）
+// render.js 的 monsterWalkFrame 用 floor(walkDist / walkStride) 選圖，所以把 walkDist 設成「步數 × 步長 ＋ 這一步走了多少」
+function mkSyncWalkFrame(e) { e.walkDist = e.mk.stepCount * e.walkStride + Math.min(e.walkStride - 1, e.mk.stepDist * .5); }
 // ---- 腳步：每一步震動、腳步聲、揚塵、小裂痕 ----
 function mkFootsteps(e, moved) {
   const F = MILKFISH_KING_FX, mk = e.mk, C = mkCfg(e);
   if (moved <= 0) return;
   mk.stepDist += moved;
+  mkSyncWalkFrame(e);
   if (mk.stepDist < F.stepEvery) return;
   mk.stepDist %= F.stepEvery;
+  mk.stepCount++; mkSyncWalkFrame(e);   // 落腳：走路圖換成另一隻腳（跟下面的震動、腳步聲同一刻）
   const p = G.player;
   if (p) { const d = mkDist(p, e) / CELL, k = 1 - d / F.shakeRange; if (d < F.shakeRange) mkRumble(C.stepShake * (.2 + .8 * k * k), F.stepShakeTime); }   // 越近震越大
   e.hitSquashT = .12;   // 落腳時身體被壓扁一下再彈回
@@ -885,10 +892,26 @@ function mkIntroSetup(e) {
   // 往水池裡面再挪一格（不要剛好在池邊，水花才不會噴到岸上一半）
   const dc = Math.sign(best[0] - hc), dr = Math.sign(best[1] - hr);
   if (inGrid(best[0] + dc, best[1] + dr) && deepWaterBlocksCell(best[0] + dc, best[1] + dr)) { best[0] += dc; best[1] += dr; }
-  const [fx, fy] = center(best[0], best[1]);
+  const [fx, fy0] = center(best[0], best[1]), fy = fy0 + F.riseDy;
+  // 落地點：核心後面（畫面上方）landBehind 格、牠身體站得下的地方 → 核心在牠前面看得到，落地後再走過去吞
+  const core = e.mk.core, land = core ? mkWideCellNear(core.x, core.y - F.landBehind * CELL) : null;
+  if (land) { const [lx, ly] = center(land[0], land[1]); e.x = lx; e.y = ly; e.mk.home = { x: lx, y: ly }; }
   G.mkKings = G.mkKings.filter(k => k !== e);   // mkInit 放進去的：還沒上場，先拿掉
   G.mkIntro = { e, phase: 'hidden', t: 0, from: { x: fx, y: fy }, to: { x: e.x, y: e.y }, bubbleT: 0 };
   return true;
+}
+// 離 (x, y) 最近、牠（大體型）站得下的空格：不是牆、沒有建築、不是深水、夠寬
+function mkWideCellNear(x, y) {
+  const [c0, r0] = cellAt(x, y);
+  for (let rad = 0; rad <= 4; rad++) for (let dr = -rad; dr <= rad; dr++) for (let dc = -rad; dc <= rad; dc++) {
+    if (Math.max(Math.abs(dc), Math.abs(dr)) !== rad) continue;
+    const c = c0 + dc, r = r0 + dr;
+    if (!inGrid(c, r) || isWall(c, r) || G.grid[c + ',' + r] || (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r))) continue;
+    if (typeof enemyWideAt === 'function' && !enemyWideAt(c, r)) continue;
+    const [cx, cy] = center(c, r);
+    if (!enemyBlocked(cx, cy)) return [c, r];
+  }
+  return null;
 }
 // 溫特開槍打中核心（js/game.js 呼叫）：還躲在水裡就開始登場
 function milkfishKingCoreShot(core) {
