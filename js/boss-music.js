@@ -3,6 +3,7 @@
 //  兩首各自獨立，條件都符合時一起播：
 //  ・鳥頭大隊長盯上玩家（醒著、有追打目標）、大夯吉寶盯上溫特（js/elite-cap-king.js）→ 淡入「中BOSS」（每場戰鬥第一次被盯上時晚 startDelay 秒才開始）；
 //    失去仇恨（走回原位、目標跑掉）但畫面上方的 BOSS 血條還在 → 降成很小聲（quiet）繼續播；BOSS 全部倒下、血條消失 → 淡出。
+//    人面蝶后（js/moth-boss.js）醒著就播，但溫特離牠越遠越小聲（最小＝quiet，跟順順宮主沒在追溫特時一樣），見 mothBossMusicK。
 //  ・異質核心甦醒 → 馬上淡入「異質核心甦醒」，播放中音量慢慢忽大忽小；核心被打破 → 淡出。
 //  ・音檔、各自的音量在「音效編輯器」的「音樂」分類（bossElite、bossCore）調整；
 //    整體再乘上設定裡的「音樂」音量，設定裡勾選靜音時也一起靜音。回到基地、劇情地圖時全部停掉。
@@ -55,7 +56,6 @@ const BossMusic = (() => {
     if (typeof ratKingHunting === 'function' && ratKingHunting()) return true;   // 花蓮老鼠王（js/rat-king.js）   // 葫蘆猴王（js/gourd-king.js）   // 金蕉大王（js/banana-emperor.js）   // 絲瓜女王的 BOSS 戰（js/loofah-queen.js）
     if (typeof pearlBossHunting === 'function' && pearlBossHunting()) return true;
     if (typeof milkfishKingHunting === 'function' && milkfishKingHunting()) return true;   // 虱目魚王（js/milkfish-king.js）
-    if (typeof mothBossHunting === 'function' && mothBossHunting()) return true;   // 人面蝶后（js/moth-boss.js）
     if (typeof poolBossHunting === 'function' && poolBossHunting() && !poolBossFar) return true;   // 池核的巨大比基尼小丑魚（js/pool-boss.js）；離太遠不算   // 珍珠大童的 BOSS 戰（js/pearl-elder.js）
     if (typeof capKingHunting === 'function' && capKingHunting()) return true;   // 大夯吉寶盯上溫特（js/elite-cap-king.js）
     return (G.enemies || []).some(e => e.elite && e.eliteAwake && e.hp > 0 && !e.dead && e.eb
@@ -80,7 +80,9 @@ const BossMusic = (() => {
     if (!unlocked) return;
     const battle = inBattle();
     if (battle) updatePoolBossFar();
-    if (battle && eliteHunting()) eliteHateT = B.loseDelay; else eliteHateT = Math.max(0, eliteHateT - dt);
+    const hunting = battle && eliteHunting();
+    const mothK = battle && typeof mothBossMusicK === 'function' ? mothBossMusicK() : null;   // 人面蝶后醒著：離溫特多近（0～1）
+    if (hunting || mothK != null) eliteHateT = B.loseDelay; else eliteHateT = Math.max(0, eliteHateT - dt);
     if (!battle || G !== battleG) { battleG = battle ? G : null; eliteHeard = false; eliteWaitT = 0; }   // 離開戰鬥、新的一場：重算「第一次」
     const claw = typeof clawOpen !== 'undefined' && clawOpen;   // 夾娃娃機開著：放機台自己的音樂（js/claw-machine.js）
     const want = { elite: battle && !claw && eliteHateT > 0, core: battle && !claw && coreAwake() };
@@ -92,7 +94,8 @@ const BossMusic = (() => {
         if (on && !eliteHeard && eliteWaitT < B.startDelay) on = false;
         if (on) eliteHeard = true;
       }
-      const goal = on ? 1 : key === 'elite' && bars ? B.quiet : 0;   // 中BOSS：血條還在就小聲播著，不會完全消失
+      let goal = on ? 1 : key === 'elite' && bars ? B.quiet : 0;   // 中BOSS：血條還在就小聲播著，不會完全消失
+      if (key === 'elite' && on && !hunting && mothK != null) goal = B.quiet + (1 - B.quiet) * mothK;   // 只有人面蝶后在：照距離，越遠越小聲
       if (!goal && !tracks[key]) continue;   // 還沒播過的不用建
       const t = track(key); if (!t) continue;
       t.level = t.level < goal ? Math.min(goal, t.level + dt / B.fadeIn) : Math.max(goal, t.level - dt / B.fadeOut);

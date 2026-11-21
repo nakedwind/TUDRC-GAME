@@ -3,7 +3,7 @@
    - 驚醒：溫特走到 wakeRange 格內（看得到）、或打中牠 → 尖叫，核心跟著甦醒（異質體狂暴化），
            畫面上方出現 BOSS 血條，然後牠抱著核心飛走。
    - 換區：照 route 的順序飛往下一個區域（飛得過牆），一路灑下下一區顏色的鱗粉當路標（也是陷阱，吸滿一樣會中招）。
-           飛行中很難打（受到的傷害 × flyDefense）。系統訊息會說牠往哪一區飛。
+           飛行中很難打（受到的傷害 × flyDefense）。系統訊息只說牠飛走了，不說去哪一區。
    - 築巢：飛到那一區後把核心放在地上（這時候核心打得到），在附近繞著目標飛、撒那一區的鱗粉：
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
    - 大面積撒粉：築巢時有人在這一區，每隔幾秒翅膀發光、地上出現那一區顏色的圓圈預告，接著把整個區域撒滿鱗粉（MOTH_BOSS.burst）。
@@ -55,6 +55,7 @@ const MOTH_BOSS = {
   // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
   burst: { every: [7, 10], first: 2.5, telegraph: 1.6, time: 1.2, puffs: 16, cover: .95 },
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
+  music: { near: 8, far: 32 },   // BOSS 音樂（js/boss-music.js）：溫特離牠 near 格以內全音量，越遠越小聲，far 格以外降到最小（BOSS_MUSIC.quiet，跟順順宮主沒在追溫特時一樣）
 };
 const mbSpot = () => typeof MAP !== 'undefined' && MAP ? MOTH_BOSS.maps[MAP.id] || null : null;
 const mothBosses = () => (G && G.enemies ? G.enemies.filter(e => e.mothBoss && !e.dead && e.hp > 0) : []);
@@ -130,7 +131,7 @@ function mothBossWake(e) {
   if (core && !core.dead && !core.awake) { wakeCore(core); core.lastHp = core.hp; mbCorePool(core, false); }
   mbScream(e, MOTH_BOSS.name + '驚醒了');
   mb.next = 'fly';
-  systemNotice(MOTH_BOSS.name + '抱著異質核心飛走了！往' + mbZone(e, mb.stage).name + '去了', true);
+  systemNotice(MOTH_BOSS.name + '抱著異質核心飛走了！', true);   // 不說飛去哪一區（讓玩家自己找）
 }
 // 這一段打完：尖叫、回去撿核心、往下一區飛
 function mothBossLeave(e) {
@@ -139,9 +140,8 @@ function mothBossLeave(e) {
   mbScream(e, null);
   mb.next = e.carryCore && !e.carryCore.dead && !e.carryCore.carried ? 'grab' : 'fly';
   e.mo.spray = null; mb.burst = null;
-  const z = mbZone(e, mb.stage);
-  systemNotice(MOTH_BOSS.name + (mb.next === 'grab' ? '撿起核心，' : '') + '往' + z.name + '飛走了！', true);
-  if (typeof coreBanner === 'function') coreBanner(MOTH_BOSS.name + '往' + z.name + '飛走了', '', '#f4d9ff');
+  systemNotice(MOTH_BOSS.name + (mb.next === 'grab' ? '撿起核心' : '') + '飛走了！', true);   // 不說飛去哪一區（讓玩家自己找）
+  if (typeof coreBanner === 'function') coreBanner(MOTH_BOSS.name + '飛走了', '', '#f4d9ff');
 }
 function mbScream(e, banner) {
   mbSet(e, 'scream', MOTH_BOSS.scream);
@@ -409,8 +409,14 @@ function mothBossBars() {
   }
   return out;
 }
-// 中BOSS 音樂（js/boss-music.js）
-const mothBossHunting = () => mothBosses().some(e => e.eliteAwake);
+// 中BOSS 音樂（js/boss-music.js）：醒著的人面蝶后離溫特多近（1＝near 格以內，0＝far 格以外）；沒有醒著的就是 null（不播）
+function mothBossMusicK() {
+  const list = mothBosses().filter(e => e.eliteAwake), p = G && G.player;
+  if (!list.length) return null;
+  if (!p) return 0;
+  const M = MOTH_BOSS.music, d = Math.min(...list.map(e => mbDist(e, p))) / CELL;
+  return Math.max(0, Math.min(1, (M.far - d) / (M.far - M.near)));
+}
 
 // ---- 畫面：抱在懷裡的核心（render.js 畫完身體後呼叫，dx～dh＝身體實際畫的位置）----
 const MOTH_BOSS_CORE_ART = { x: .10, y: .42, angle: -8 };   // 核心捧在兩隻手中間：中心位置（圖寬、圖高的比例）、旋轉角度（度）；大小＝核心原本的大小（CORE.w × CORE.h），不跟著牠的體型縮放
