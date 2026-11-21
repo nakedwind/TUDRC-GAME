@@ -1012,14 +1012,19 @@ function mkIntroDraw(ctx, I) {
     shape(1); ctx.stroke();
     // 邊上一顆顆的浪花泡沫
     ctx.fillStyle = '#f4fcff';
+    const blob = typeof splashBlobPath === 'function', shapes = I.foamShapes || (I.foamShapes = Array.from({ length: 18 }, () => typeof splashShape === 'function' ? splashShape(7, .35) : null));   // 每團浪花固定一個歪歪的形狀（js/pool-boss.js）
     for (let i = 0; i <= 10; i++) {
       const k = i / 10, side = i % 2 ? 1 : -1;
-      const x = bx + (tx - bx) * k + side * (baseW + (topW - baseW) * k) / 2, y = by + (ty - by) * k;
-      ctx.beginPath(); ctx.arc(x + Math.sin(now * 12 + i) * 3, y, 5 + 5 * (1 - k) + Math.sin(now * 9 + i * 2) * 1.5, 0, Math.PI * 2); ctx.fill();
+      const x = bx + (tx - bx) * k + side * (baseW + (topW - baseW) * k) / 2 + Math.sin(now * 12 + i) * 3, y = by + (ty - by) * k;
+      const r = 5 + 5 * (1 - k) + Math.sin(now * 9 + i * 2) * 1.5;
+      if (blob) splashBlobPath(ctx, x, y, r * 1.3, r * .85, shapes[i], now * 2 + i); else { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); }
+      ctx.fill();
     }
     // 水面上一大圈白沫
     ctx.globalAlpha = .9 * fade; ctx.fillStyle = 'rgba(240,250,255,.95)';
-    ctx.beginPath(); ctx.ellipse(bx, by, baseW * .75, baseW * .2, 0, 0, Math.PI * 2); ctx.fill();
+    if (blob) {   // 好幾團歪歪的白沫疊成一圈（不是一個正橢圓）
+      for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + .3, ox = Math.cos(a) * baseW * .42, oy = Math.sin(a) * baseW * .1; splashBlobPath(ctx, bx + ox, by + oy, baseW * (.28 + (i % 3) * .06), baseW * .11, shapes[12 + i] || shapes[i], i * 1.3 + now); ctx.fill(); }
+    } else { ctx.beginPath(); ctx.ellipse(bx, by, baseW * .75, baseW * .2, 0, 0, Math.PI * 2); ctx.fill(); }
     ctx.restore();
   }
   // 牠的身體：還在水面下的部分不畫（腳底那條線以下＝水裡）
@@ -1034,9 +1039,15 @@ function mkIntroDraw(ctx, I) {
     const g2 = ctx.createLinearGradient(0, cy - 20, 0, cy + 24);
     g2.addColorStop(0, 'rgba(255,255,255,1)'); g2.addColorStop(1, 'rgba(120,195,240,.0)');
     ctx.fillStyle = g2;
-    ctx.beginPath(); ctx.ellipse(e.x, cy + 6, cw, 22, 0, 0, Math.PI * 2); ctx.fill();
+    const blob = typeof splashBlobPath === 'function' && I.foamShapes && I.foamShapes[0];
+    if (blob) splashBlobPath(ctx, e.x, cy + 6, cw, 22, I.foamShapes[11], .4); else { ctx.beginPath(); ctx.ellipse(e.x, cy + 6, cw, 22, 0, 0, Math.PI * 2); }
+    ctx.fill();
     ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 7; i++) { const k = i / 6 - .5; ctx.beginPath(); ctx.arc(e.x + k * cw * 1.8, cy - 4 + Math.abs(k) * 10 + Math.sin(now * 14 + i) * 2, 7 + (1 - Math.abs(k) * 2) * 5, 0, Math.PI * 2); ctx.fill(); }
+    for (let i = 0; i < 7; i++) {   // 浪頭上一團團的白沫：大小、形狀都不一樣
+      const k = i / 6 - .5, x = e.x + k * cw * 1.8, y = cy - 4 + Math.abs(k) * 10 + Math.sin(now * 14 + i) * 2, r = 7 + (1 - Math.abs(k) * 2) * 5;
+      if (blob) splashBlobPath(ctx, x, y, r * 1.35, r * .9, I.foamShapes[(i + 12) % 18] || I.foamShapes[0], now * 3 + i * 1.7); else { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); }
+      ctx.fill();
+    }
     ctx.restore();
   }
 }

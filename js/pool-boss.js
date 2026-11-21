@@ -227,40 +227,67 @@ function updatePoolSplash(dt) {
   }
   G.poolSplash = list.filter(d => d.t < d.life);
 }
-// js/render.js 畫完角色後呼叫：水波、水沫、水霧、水滴
+// ---- 不規則的水花形狀（虱目魚王登場也用，js/milkfish-king.js）----
+// 每個水花第一次畫的時候，隨機決定「每個方向要凸出去多少」（n 個方向、jag＝最多差幾成），之後一直用同一組，形狀才不會每一幀亂跳
+function splashShape(n, jag) { const a = []; for (let i = 0; i < n; i++) a.push(1 - jag + Math.random() * jag * 2); return a; }
+// 照 shape 畫一個邊緣圓滑、但凹凹凸凸的團塊路徑（rx、ry＝左右、上下的大小；rot＝轉幾度，讓同一組形狀看起來不一樣）
+function splashBlobPath(ctx, x, y, rx, ry, shape, rot = 0) {
+  const n = shape.length, pts = [];
+  for (let i = 0; i < n; i++) { const a = rot + i / n * Math.PI * 2; pts.push([x + Math.cos(a) * rx * shape[i], y + Math.sin(a) * ry * shape[i]]); }
+  const mid = i => { const a = pts[i % n], b = pts[(i + 1) % n]; return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; };
+  const m0 = mid(n - 1);
+  ctx.beginPath(); ctx.moveTo(m0[0], m0[1]);
+  for (let i = 0; i < n; i++) { const m = mid(i); ctx.quadraticCurveTo(pts[i][0], pts[i][1], m[0], m[1]); }
+  ctx.closePath();
+}
+// js/render.js 畫完角色後呼叫：水波、水沫、水霧、水滴（形狀都不規則：水滴順著飛的方向拉長、水波斷斷續續又歪歪的、水沫是好幾團疊在一起）
 function drawPoolSplash(ctx) {
   const list = typeof G !== 'undefined' && G && G.poolSplash; if (!list || !list.length) return;
   ctx.save();
   for (const d of list) {
     if (d.t < 0) continue;   // 還沒輪到的水波
     const p = d.t / d.life, k = 1 - p;
-    if (d.ring) {   // 水波：扁扁的橢圓，越擴越淡
+    if (d.ring) {   // 水波：歪歪的扁圈、斷成好幾段，越擴越淡
       const r = d.r0 + (d.r1 - d.r0) * (1 - Math.pow(1 - p, 2));
-      ctx.globalAlpha = .7 * k; ctx.strokeStyle = '#e8f8ff'; ctx.lineWidth = 2 + 5 * k;
-      ctx.beginPath(); ctx.ellipse(d.x, d.y, r, r * .42, 0, 0, Math.PI * 2); ctx.stroke();
+      if (!d.shape) { d.shape = splashShape(14, .16); d.rot = Math.random() * Math.PI * 2; d.dash = [.9 + Math.random() * .8, .15 + Math.random() * .3, .3 + Math.random() * .6, .1 + Math.random() * .25]; d.dashOff = Math.random() * 3; }
+      ctx.globalAlpha = .7 * k; ctx.strokeStyle = '#e8f8ff'; ctx.lineWidth = 2 + 5 * k; ctx.lineCap = 'round';
+      ctx.setLineDash(d.dash.map(v => v * r)); ctx.lineDashOffset = d.dashOff * r;
+      splashBlobPath(ctx, d.x, d.y, r, r * .42, d.shape, d.rot); ctx.stroke();
+      ctx.setLineDash([]);
       continue;
     }
-    if (d.foam) {   // 水沫：白色一大片，冒出來再散掉
+    if (d.foam) {   // 水沫：好幾團大小不一的白沫疊在一起，冒出來再散開
       const r = d.r * (.6 + .6 * p);
-      ctx.save(); ctx.translate(d.x, d.y); ctx.scale(1, .45);
-      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-      g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(.6, 'rgba(220,244,255,.55)'); g.addColorStop(1, 'rgba(200,235,255,0)');
-      ctx.globalAlpha = k; ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      if (!d.lobes) { d.lobes = []; const n = 5 + Math.floor(Math.random() * 3); for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, rr = Math.random() * .55; d.lobes.push({ dx: Math.cos(a) * rr, dy: Math.sin(a) * rr, s: .35 + Math.random() * .4, shape: splashShape(8, .3), rot: Math.random() * 6 }); } }
+      for (const L of d.lobes) {
+        const lx = d.x + L.dx * r * (1 + p * .5), ly = d.y + L.dy * r * .45 * (1 + p * .5), lr = r * L.s;   // 散開：每團往外飄一點
+        ctx.globalAlpha = .55 * k; ctx.fillStyle = 'rgb(220,244,255)';
+        splashBlobPath(ctx, lx, ly, lr, lr * .45, L.shape, L.rot); ctx.fill();
+        ctx.globalAlpha = .75 * k; ctx.fillStyle = '#ffffff';
+        splashBlobPath(ctx, lx - lr * .1, ly - lr * .06, lr * .55, lr * .25, L.shape, L.rot + 1); ctx.fill();
+      }
       continue;
     }
-    if (d.mist) {   // 水霧：柔柔的白團
-      const cy = d.y - d.z, g = ctx.createRadialGradient(d.x, cy, 0, d.x, cy, d.r);
-      g.addColorStop(0, 'rgba(240,250,255,.5)'); g.addColorStop(1, 'rgba(240,250,255,0)');
-      ctx.globalAlpha = k * Math.min(1, p * 6); ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(d.x, cy, d.r, 0, Math.PI * 2); ctx.fill();
+    if (d.mist) {   // 水霧：兩三團柔柔的白霧疊成一朵
+      const cy = d.y - d.z;
+      if (!d.puffs) { d.puffs = []; const n = 2 + Math.floor(Math.random() * 2); for (let i = 0; i < n; i++) d.puffs.push({ dx: (Math.random() - .5) * .9, dy: (Math.random() - .5) * .5, s: .5 + Math.random() * .5 }); }
+      ctx.globalAlpha = k * Math.min(1, p * 6);
+      for (const P of d.puffs) {
+        const px = d.x + P.dx * d.r, py = cy + P.dy * d.r, pr = d.r * P.s, g = ctx.createRadialGradient(px, py, 0, px, py, pr);
+        g.addColorStop(0, 'rgba(240,250,255,.45)'); g.addColorStop(1, 'rgba(240,250,255,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI * 2); ctx.fill();
+      }
       continue;
     }
-    ctx.globalAlpha = .9 * Math.min(1, k * 1.6);   // 水滴：亮白＋一點藍
-    ctx.fillStyle = '#eefaff';
-    ctx.beginPath(); ctx.arc(d.x, d.y - d.z, d.r, 0, Math.PI * 2); ctx.fill();
+    // 水滴：順著飛的方向拉長（飛越快拉越長）、邊緣歪歪的，像甩出去的水
+    if (!d.shape) { d.shape = splashShape(6, .28); d.rot = Math.random() * 6; }
+    const sx = d.vx || 0, sy = (d.vy || 0) - (d.vz || 0), sp = Math.hypot(sx, sy), stretch = 1 + Math.min(1.8, sp / 260);
+    ctx.save(); ctx.translate(d.x, d.y - d.z); ctx.rotate(Math.atan2(sy, sx));
+    ctx.globalAlpha = .9 * Math.min(1, k * 1.6); ctx.fillStyle = '#eefaff';
+    splashBlobPath(ctx, -d.r * (stretch - 1) * .5, 0, d.r * stretch, d.r / Math.sqrt(stretch), d.shape, d.rot); ctx.fill();   // 尾巴拖在後面
     ctx.globalAlpha *= .5; ctx.fillStyle = '#7fc4ef';
-    ctx.beginPath(); ctx.arc(d.x + d.r * .3, d.y - d.z + d.r * .3, d.r * .6, 0, Math.PI * 2); ctx.fill();
+    splashBlobPath(ctx, d.r * .15, d.r * .25, d.r * .6 * stretch, d.r * .5 / Math.sqrt(stretch), d.shape, d.rot + 2); ctx.fill();
+    ctx.restore();
   }
   ctx.restore();
 }
