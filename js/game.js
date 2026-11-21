@@ -2053,6 +2053,8 @@ function updatePlayerAttack(dt) {
   if (vineMate) { shootVine(p, vineMate, aim, aimAng); return; }
   const hungMate = !paint && typeof vineHangShotTarget === 'function' ? vineHangShotTarget(aim) : null;   // 游標點在被森林倒吊藤蔓吊著的隊友身上：子彈打藤蔓（js/vines.js）
   if (hungMate) { shootHangVine(p, hungMate, aim, aimAng); return; }
+  const lqCoreVine = !paint && typeof loofahCoreShotTarget === 'function' ? loofahCoreShotTarget(aim) : null;   // 游標點在絲瓜女王吊著的核心上：子彈打吊著它的藤蔓（js/loofah-queen.js）
+  if (lqCoreVine) { shootLoofahCoreVine(p, lqCoreVine, aim, aimAng); return; }
   const sleepMate = !paint && typeof mothSleepShotTarget === 'function' ? mothSleepShotTarget(aim) : null;   // 游標點在吸了睡眠鱗粉、睡著的隊友身上：開槍把他打醒（js/human-face-butterfly.js）
   if (sleepMate) { shootWakeMate(p, sleepMate, aim, aimAng); return; }
   // 朝游標方向、射程內、照亮的最近怪。
@@ -2700,6 +2702,7 @@ function update(dt) {
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if ((e.ratKing || e.ratKingHand) && typeof ratKingHoldDeath === 'function' && ratKingHoldDeath(e)) continue;   /* 花蓮老鼠王：先照核心護甲算、沒血了等列車撞飛；抓人的手被打掉只放人（js/rat-king.js） */ if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
+  if (typeof lqShieldCore === 'function') lqShieldCore();   // 絲瓜女王活著：掉在地上的核心少受傷（js/loofah-queen.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起

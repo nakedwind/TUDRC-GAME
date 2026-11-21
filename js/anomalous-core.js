@@ -189,6 +189,7 @@ function keepCoreScorch(core) {
 function updateCores(dt) {
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 菁英怪活著：核心少受傷（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
+  if (typeof lqShieldCore === 'function') lqShieldCore();   // 絲瓜女王活著：掉在地上的核心少受傷（js/loofah-queen.js）
   for (const core of G.cores) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;
