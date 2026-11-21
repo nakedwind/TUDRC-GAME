@@ -13,7 +13,8 @@
      buff：全隊加多少（atk 攻擊力、def 防禦率、spd 攻擊速度；0.15＝+15%），time：加幾秒
      cast：詠唱幾秒（期間嚮導站著不動、不攻擊、不做一般疏導；被打暈就取消，不扣 SP）
      sp：花多少 SP（詠唱完才扣；SP 不夠就不會發動）　cd：冷卻幾秒（放完才開始算）
-     「全隊」＝場上所有活著的隊友（包含嚮導自己），不限距離
+     range：距離幾格（只有嚮導身邊這幾格內的隊友吃得到、也只看這幾格內的人決定要不要放；沒寫或 0＝不限距離）
+     「全隊」＝場上所有活著的隊友（包含嚮導自己）；有設 range 就只算範圍內的
 
    GUIDE_SKILL_TEXTS：技能樹上顯示的名稱、說明，和不會自己發動的技能（mods：直接改數值）
      「Y102隊員裝備／技能編輯器」改過、存過的格子會用編輯器的（data/squad-skills.js），這裡就只是預設
@@ -24,9 +25,9 @@
      改完存到專案就好（存在 data/squad-skills.js 的 active，會蓋過這裡的預設） */
 const GUIDE_SKILLS = {
   eldrin: {
-    'a-1': { when: 'hpBelow', at: .5, heal: 15, cast: 2.5, sp: 10, cd: 20 },                    // 群體補血
-    'b-1': { when: 'combat', buff: { def: .15 }, time: 5, cd: 30 },                             // 守護祝福：防禦率
-    'ult': { when: 'hpBelow', at: .35, heal: 40, cast: 3, sp: 20, cd: 60 },                     // 生命之泉
+    'a-1': { when: 'hpBelow', at: .5, heal: 15, cast: 2.5, sp: 10, cd: 20, range: 5 },         // 群體補血
+    'b-1': { when: 'combat', buff: { def: .15 }, time: 5, cd: 30, range: 5 },                  // 守護祝福：防禦率
+    'ult': { when: 'hpBelow', at: .35, heal: 40, cast: 3, sp: 20, cd: 60, range: 5 },          // 生命之泉
   },
   taana: {
     'a-1': { when: 'taintAbove', at: 30, soothe: 25, cast: 2.5, sp: 15, cd: 20 },              // 群體疏導（門檻跟被動疏導一樣 30：比被動疏導先判斷，才放得出來）

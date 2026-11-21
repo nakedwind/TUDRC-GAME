@@ -10,9 +10,13 @@ const GUIDE_COMBAT_RANGE = 8;   // 'combat'：嚮導 8 格內有怪物才算戰�
 // 場上活著的隊友（包含嚮導自己；倒下、被吃掉、坐在溫特沒坐的捷運上被載走的不算）
 const guideSkillAllies = () => ((typeof G !== 'undefined' && G && G.towers) || []).filter(o => o.hp > 0 && !o.eatenBy && !(typeof mrtSeparated === 'function' && mrtSeparated(o)));
 
-// 這招現在需不需要放（條件成立）
+// 這招有設距離（range 格）：只算嚮導身邊這幾格內的隊友（嚮導自己一定算）；沒設＝全場
+const guideSkillInRange = (t, s, o) => !(s && s.range > 0) || o === t || Math.hypot(o.x - t.x, o.y - t.y) <= s.range * CELL;
+const guideSkillAlliesNear = (t, s) => guideSkillAllies().filter(o => guideSkillInRange(t, s, o));
+
+// 這招現在需不需要放（條件成立）：有設距離的話，範圍內有人需要才放
 function guideSkillWanted(t, s) {
-  const allies = guideSkillAllies();
+  const allies = guideSkillAlliesNear(t, s);
   if (s.when === 'hpBelow') return allies.some(o => o.maxhp > 0 && o.hp / o.maxhp < s.at);
   if (s.when === 'taintAbove') return allies.some(o => !TYPES[o.type].guide && ((o.taint || 0) >= s.at || (s.orBerserk && o.berserk)));
   if (s.when === 'combat') return ((G && G.enemies) || []).some(e => !e.dead && e.hp > 0 && Math.hypot(e.x - t.x, e.y - t.y) <= GUIDE_COMBAT_RANGE * CELL);
@@ -23,7 +27,7 @@ function guideSkillWanted(t, s) {
 function guideSkillFire(t, s) {
   const sc = (typeof SOOTHE_COLORS !== 'undefined' && (SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin)) || [128, 222, 112];
   const color = `rgb(${sc[0]},${sc[1]},${sc[2]})`;
-  let targets = guideSkillAllies();
+  let targets = guideSkillAlliesNear(t, s);   // 有設距離：只有範圍內的人吃得到
   if (s.one) {   // 只幫最需要的那一個人：有降負荷＝負荷最高的哨兵；只有補血＝HP 比例最低的隊友
     const worst = s.soothe ? targets.filter(o => !TYPES[o.type].guide).sort((a, b) => (b.taint || 0) - (a.taint || 0))[0]
       : targets.slice().sort((a, b) => a.hp / a.maxhp - b.hp / b.maxhp)[0];
@@ -68,7 +72,7 @@ function updateGuideSkills(t, dt) {
     const s = list[t.gsCast.id];
     t.gsCast.left -= dt;
     t.soothingT = Math.max(t.soothingT || 0, t.gsCast.left);   // 站定、閉眼、不攻擊
-    t.sootheTargets = guideSkillAllies().filter(o => o !== t);   // 詠唱時全隊身上飄小光點
+    t.sootheTargets = guideSkillAlliesNear(t, s).filter(o => o !== t);   // 詠唱時吃得到的隊友身上飄小光點（有設距離就只有範圍內的）
     if (t.gsCast.left > 0) return;
     const id = t.gsCast.id; t.gsCast = null; t.soothingT = 0;
     if (!s || (s.sp && !spendGuideSP(t, s.sp))) return;
