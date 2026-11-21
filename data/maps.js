@@ -66211,7 +66211,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_exit_2_sealed",
         "c": 76,
         "r": 1,
-        "layer": "object"
+        "layer": "object",
+        "sortDepth": 3.25
       },
       {
         "id": "tile_bg_backroom_floor_l",
@@ -69266,7 +69267,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_glass_railing",
         "c": 81,
         "r": 9,
-        "layer": "object2",
+        "layer": "overlay",
         "ox": 0,
         "oy": 4
       },
@@ -71147,10 +71148,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_street_capsule_toy_machines",
         "c": 81,
-        "r": 5,
+        "r": 4,
         "layer": "object2",
-        "ox": 16,
-        "oy": -12
+        "ox": 6,
+        "oy": 28
       },
       {
         "id": "tile_bg_backroom_floor_l",
@@ -75067,10 +75068,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_field_ammo_crate",
-        "c": 74,
-        "r": 5,
+        "c": 81,
+        "r": 8,
         "layer": "object2",
-        "ox": 0,
+        "ox": 20,
         "oy": 16,
         "lockerLoot": {
           "kind": "bullet",
@@ -76873,7 +76874,8 @@ const BATTLE_MAPS = [
         "id": "tile_street_sign_no_entry",
         "c": 83,
         "r": 7,
-        "layer": "object"
+        "layer": "object3",
+        "oy": 20
       },
       {
         "id": "tile_street_sign_no_entry",
@@ -77358,6 +77360,21 @@ const BATTLE_MAPS = [
         "layer": "floor",
         "ox": 30,
         "oy": 10
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 34,
+        "r": 10,
+        "layer": "object2",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 74,
+        "r": 4,
+        "layer": "object2",
+        "oy": 20
       }
     ],
     "solid": [
@@ -88469,7 +88486,8 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_exit_2",
         "c": 66,
         "r": 111,
-        "layer": "object2"
+        "layer": "object2",
+        "sortDepth": 3.5
       },
       {
         "id": "tile_mrt_floor_tile_1f",
