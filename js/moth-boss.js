@@ -18,6 +18,7 @@
 */
 const MOTH_BOSS = {
   name: '人面蝶后',
+  artDir: 'images/monster/moth-queen/',   // 專用的圖（翅膀紫藍、紅斑和身體紫紅）：檔名跟人面蝶一樣（含「-前方手」圖），只換資料夾；用 tools/recolor-moth-queen.py 從人面蝶的圖換色產生
   maps: {
     // B56區-藍線捷運站：起點是右下區的核心候選點；四個角落的大房間（都在 2 樓）
     map_mwizzi7s: {
@@ -86,6 +87,11 @@ function seedMothBoss() {
   }
   const P = MOTH_BOSS, e = createMonster(base, x, y);
   e.mothBoss = true; e.eliteName = P.name;
+  if (P.artDir) {   // 換成蝶后專用的圖（另外複製一份，不要改到人面蝶共用的設定；前方手圖照同名加「-前方手」找，會跟著換資料夾）
+    const swap = f => typeof f === 'string' && /\.png$/i.test(f) ? P.artDir + f.split('/').pop() : f;
+    e.sprite = swap(e.sprite);
+    if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(swap) : swap(f)]));
+  }
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是一般人面蝶血量 × 整體難度：換成 BOSS 的血量，難度照樣乘
   e.reward = Math.round(e.reward * P.rewardMul); e.crystals = Math.round((e.crystals ?? 5) * P.crystalMul);
   e.drawWidth = e.mbW = Math.round(base.width * P.scale); e.drawHeight = e.mbH = Math.round(base.height * P.scale);   // mbW、mbH：原本的大小（飛向鏡頭時會暫時變大）
