@@ -242,7 +242,7 @@ function capKingBossBars() {
 }
 // 倒下（combat-feel.js 的 onEnemyDeath 呼叫）
 function capKingBigDown(e) {
-  nearbyImpact(e.x, e.y, 10, .08);
+  nearbyImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
   e.deathSound = 'capKingDeath';   // 死掉的聲音：這裡先大聲播（有回音）；game.js 接著用同一個來源（monster-death）播的那聲會被去重吃掉，不會疊兩次
   if (typeof sfxAt === 'function') sfxAt('capKingDeath', e.x, e.y, 2.2, 'monster-death');
   // 只說倒下了：不提還有幾隻（含躲在帽子裡的）、也不提核心護盾消失（全部倒下時護盾會默默解除，讓玩家自己發現）

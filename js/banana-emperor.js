@@ -53,6 +53,7 @@ const BANANA_EMPEROR = {
     spd:  { name: '速度下降',   mul: .6,  time: 8 },          // 紫：走路速度 × mul
   },
   shake: 7,                      // 敲地時畫面震多大
+  step: { every: 56, shake: 4.5, range: 18 },   // 走路：每走幾像素踩一步、每一步畫面震多大（貼身時）、溫特在幾格內才感覺得到（越近越大）
   cracks: {                      // 地上的裂痕（整場戰鬥都在，越敲越多）
     count: 8, len: [55, 120],    // 每片幾條裂縫、每條多長（像素）
     extra: 2, extraScale: .7,    // 每敲一次，魔法陣裡另外再裂幾片小的、小的是幾倍大
@@ -123,6 +124,7 @@ function seedBananaEmperor() {
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true;
   e.faceRight = false; e.forceFrame = BE_ART.stand;
   e.speed = base.speed * B.wander.speed;
+  e.walkStride = B.step.every / 2;   // 走路圖兩張換一步，跟落腳（震動、腳步聲）同步（js/render.js 的 monsterWalkFrame）
   e.be = { cd: B.firstCast, phase: null, t: 0, spell: null, last: null, hp0: e.hp };
   G.enemies.push(e);
   const anchor = { anchor: true, x: core.x, y: core.y, leash: B.squad.leash, regroup: B.squad.regroup, roam: B.squad.roam };
@@ -208,12 +210,27 @@ function beWander(e, rec, dt) {
   if (!be.goal) be.goal = beWanderSpot(rec);
   if (!be.goal) { be.wait = 1; return; }
   e.forceFrame = null;   // 用金蕉王的走路圖
-  const [gc, gr] = cellAt(be.goal.x, be.goal.y);
+  const [gc, gr] = cellAt(be.goal.x, be.goal.y), x0 = e.x, y0 = e.y;
   const nav = enemyNavigate(e, gc, gr, dt, 'bemperor-walk:' + gc + ',' + gr, true);
+  beFootsteps(e, Math.hypot(e.x - x0, e.y - y0));
   if ((nav && (nav.reached || nav.blocker)) || Math.hypot(be.goal.x - e.x, be.goal.y - e.y) < CELL * .4) {
     be.goal = null; e.aiPath = null; e.moving = false;
     be.wait = W.pause[0] + Math.random() * (W.pause[1] - W.pause[0]);
   }
+}
+// 沉重的腳步：每一步畫面震一下（溫特離越近震越大）、身體壓扁一下、腳邊揚灰、低沉的腳步聲
+function beFootsteps(e, moved) {
+  const S = BANANA_EMPEROR.step, be = e.be;
+  if (!(moved > 0)) return;
+  be.stepDist = (be.stepDist || 0) + moved;
+  if (be.stepDist < S.every) return;
+  be.stepDist %= S.every;
+  const p = G.player;
+  if (p) { const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, k = 1 - d / S.range; if (d < S.range) addShake(S.shake * (.2 + .8 * k * k)); }
+  e.hitSquashT = .08;
+  G.effects.push({ ring: true, x: e.x, y: e.y + 13, r: 6, r2: 34, life: .3, life0: .3, color: '#b9b2a2' });
+  for (let i = 0; i < 3; i++) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() * 2 - 1) * 18, y: e.y + 13, vx: (Math.random() * 2 - 1) * 60, vy: -15 - Math.random() * 25, r: 2 + Math.random() * 2, life: .35, life0: .35, color: '#a9a292' });
+  if (typeof sfxAt === 'function') sfxAt('eliteStep', e.x, e.y, .9, 'banana-emperor-step');   // 借用鳥頭大隊長的腳步聲（音效編輯器的「鳥頭大隊長腳步聲」）
 }
 function beWanderSpot(rec) {
   const W = BANANA_EMPEROR.wander, c = rec.core;
@@ -656,7 +673,7 @@ function drawBananaEmperorAir(ctx) {
 function bananaEmperorDown(e) {
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#ffe27a');
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 10, .1);
+  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
 }
 // ---- BOSS 血條（js/core-frenzy.js）、中BOSS 音樂（js/boss-music.js）----
 function bananaEmperorBars() {

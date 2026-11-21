@@ -554,7 +554,7 @@ function loofahQueenDown(e) {
   if (typeof sfxAt === 'function') sfxAt('loofahDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著播的那聲會被去重吃掉
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#d9f5b8');   // 不提示要用火燒
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 12, .1);
+  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
 }
 
 // ---- 農田的絲瓜藤（放進 G.loofahVines，farm 標記；畫法、掙扎、開槍幫隊友都跟絲瓜小姐的藤蔓一樣，js/loofah-lady.js）----
