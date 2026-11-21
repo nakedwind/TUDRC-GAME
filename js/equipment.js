@@ -1082,6 +1082,10 @@ function downedTeammateNear() {
 }
 // 現在頭上有選項的那位隊員（暴走的優先，再來倒下的，最後是旁邊的隊員）
 function promptTeammate() {
+  const t = promptTeammate0();
+  return t && typeof mrtSeparated === 'function' && mrtSeparated(t) ? null : t;   // 坐在溫特沒坐的捷運上被載走：不能急救、疏導（js/mrt-train.js）
+}
+function promptTeammate0() {
   if (!G || !G.player || G.player.sitting) return null;
   if (MAP_SAFE && !(typeof onSootheRoom === 'function' && onSootheRoom())) return null;   // 應變中心裡只有 2F疏導室可以疏導隊員（js/vitals.js）
   const urgent = typeof urgentSootheTarget === 'function' && urgentSootheTarget(); if (urgent) return urgent;

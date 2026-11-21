@@ -1072,7 +1072,7 @@ function draw() {
   const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色
   // 🙈 完全遮住區（js/hide-zones.js）：腳踩進去就不畫，靠近邊緣慢慢淡出
-  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a, kind) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a, kind); wadeDraw0(a, kind, fn); ctx.restore(); };
+  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a, kind) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a, kind); if (typeof mrtRiderClip === 'function' && !mrtRiderClip(ctx, a)) { ctx.restore(); return; } wadeDraw0(a, kind, fn); ctx.restore(); };   // mrtRiderClip：坐在捷運上的人只畫在軌道範圍裡（js/mrt-train.js）
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ floor: stampDrawFloor(d.stamp), y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫

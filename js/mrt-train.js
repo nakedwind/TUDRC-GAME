@@ -147,9 +147,11 @@ function setupMrtTrains() {
     const left = Math.min(...cars.map(c => c.x)), right = Math.max(...cars.map(c => c.x + c.w));
     const top = Math.min(...cars.map(c => c.y)), bottom = Math.max(...cars.map(c => c.y + c.h));
     // 軌道範圍：跟列車上下重疊的軌道，最左到最右（沒擺軌道就用整張地圖）
+    // 軌道圖不只一種（一般軌道、有雜物的軌道、mrt-rail-track25…）都要算，跟 mrtTrackCells 一樣。
+    // 以前只認一般軌道那張圖：鋪別張軌道圖的列車（G11 綠線大多是）找不到軌道，就變成整張地圖寬都畫得出來，看起來像穿牆
     let clipL = Infinity, clipR = -Infinity;
     for (const s of MAP.stamps || []) {
-      if (s.id !== MRT_TRAIN.railTile) continue;
+      if (!mrtIsRailTile(s.id)) continue;
       const t = mapTileById(s.id); if (!t) continue;
       const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
       if (y < bottom && y + h > top) { clipL = Math.min(clipL, x); clipR = Math.max(clipR, x + w); }
@@ -172,11 +174,12 @@ function setupMrtTrains() {
 // 軌道＝地圖上鋪了軌道素材（圖檔 mrt-rail-track*.png：一般軌道、有雜物的軌道、mrt-rail-track25…，大圖或格子小圖都算）蓋到的格子；
 // 列車＝每班列車停好時車廂蓋住的格子（不管現在車在不在站上）。換地圖、重開時自動重算
 const MRT_RAIL_FILE = /\/mrt-rail-track[^/]*\.png$/i;
+function mrtIsRailTile(id) { const t = id && mapTileById(id); return !!t && (id === MRT_TRAIN.railTile || MRT_RAIL_FILE.test(String(t.file || ''))); }
 let mrtTrackCache = { map: null, trains: null, set: new Set() };
 function mrtTrackCells() {
   const trains = (G && G.mrtTrains) || null;
   if (mrtTrackCache.map === MAP && mrtTrackCache.trains === trains) return mrtTrackCache.set;
-  const set = new Set(), isRail = id => { const t = id && mapTileById(id); return !!t && (id === MRT_TRAIN.railTile || MRT_RAIL_FILE.test(String(t.file || ''))); };
+  const set = new Set(), isRail = mrtIsRailTile;
   for (const s of (MAP && MAP.stamps) || []) {
     if (!isRail(s.id)) continue;
     const t = mapTileById(s.id), c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
@@ -462,6 +465,17 @@ function mrtSeparated(a) {
   if (!a || !a.mrtRide || !G || a === G.player) return false;
   const tr = (G.mrtTrains || []).find(x => x.riders && x.riders.some(r => r.a === a));
   return !tr || !mrtPlayerAboard(tr);
+}
+// 坐在車上的人（溫特、隊員、怪物）跟列車一樣只畫在軌道範圍裡：開進隧道的部分看不到。
+// 以前列車有裁切、人沒有，被載走的隊員會畫在軌道外面的黑色地方、蓋在牆前面（js/render.js 的 wadeDraw 呼叫）
+// 回傳 false＝整個人都在軌道外面，不用畫；其他時候把畫布裁切好（呼叫的人負責 save／restore）
+function mrtRiderClip(ctx, a) {
+  if (!a || !a.mrtRide || !G || !G.mrtTrains) return true;
+  const tr = G.mrtTrains.find(x => x.riders && x.riders.some(r => r.a === a));
+  if (!tr) return true;
+  if (a.x + 2 * CELL <= tr.clipL || a.x - 2 * CELL >= tr.clipR) return false;
+  ctx.beginPath(); ctx.rect(tr.clipL, tr.top - 3 * CELL, tr.clipR - tr.clipL, tr.bottom - tr.top + 6 * CELL); ctx.clip();
+  return true;
 }
 // 溫特在不在這班車上（tr.riders 也可能只有不小心搭上車的隊員、或搭下班車回來的隊員）
 const mrtPlayerAboard = tr => !!(tr.riders && G.player && tr.riders.some(r => r.a === G.player));
