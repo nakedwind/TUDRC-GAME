@@ -97,7 +97,7 @@ function incendiaryLandNow(s) {
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, 6);
   if (s.lv.ignite) for (const e of G.enemies) {   // ignite：被炸到的怪物身上著火
     if (e.dead || !blastHits(e) || Math.hypot(e.x - x, (e.y - y) / .7) > R) continue;
-    e.burnT = Math.max(e.burnT || 0, foeMul(s.lv.ignite)); e.burnDmg = Math.max(1, Math.round(foeMul(S.burnDmg) * (typeof waterDamageMul === 'function' ? waterDamageMul(e, 'fire') : 1))); e.burnTick = 1;   // 水系怪物燒傷 ×0.75
+    e.burnT = Math.max(e.burnT || 0, foeMul(s.lv.ignite)); e.burnDmg = Math.max(1, Math.round(foeMul(S.burnDmg) * (typeof elementHitMul === 'function' ? elementHitMul(e, 'fire') : 1))); e.burnTick = 1;   // 屬性相剋：水系燒傷 ×0.75、草系 ×1.25
   }
   for (let i = 0; i < 7; i++) { const a = Math.random() * Math.PI * 2, rr = Math.random() * R * .7; spawnFlameBurst(x + Math.cos(a) * rr, y + Math.sin(a) * rr * .6, 1); }
   G.effects.push({ ring: true, x, y, r: 6, r2: R, life: .3, life0: .3, color: '#ff9a3c' });
@@ -278,7 +278,7 @@ function fireShock(p, aim, b) {
       hits.push(next);
     }
     hits.forEach((e, i) => {
-      const dmg = Math.round(foeMul(b.dmg) * (i ? .7 : 1) * (e.shockResist ?? 1) * (typeof waterDamageMul === 'function' ? waterDamageMul(e, 'shock') : 1));   // 水系怪物雷電傷害 ×1.25   // 波及隊員的傷害在下面，照原本   // 跳出去的弱一點；不怕電的（小丑魚）只吃 shockResist 倍
+      const dmg = Math.round(foeMul(b.dmg) * (i ? .7 : 1) * (e.shockResist ?? 1) * (typeof elementHitMul === 'function' ? elementHitMul(e, 'shock') : 1));   // 水系怪物雷電傷害 ×1.25   // 波及隊員的傷害在下面，照原本   // 跳出去的弱一點；不怕電的（小丑魚）只吃 shockResist 倍
       bulletHurtEnemy(e, dmg, b.color, p);
       if (!e.noStun && e.shockResist == null) { e.stunT = Math.max(e.stunT || 0, foeMul(b.stun)); e.shockT = Math.max(e.shockT || 0, foeMul(b.stun)); }
       if (typeof waterShockStun === 'function') waterShockStun(e);   // 水系怪物：麻痺 1.5 秒、打斷正在出的招   // 不怕電的不會麻痺

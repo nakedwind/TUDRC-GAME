@@ -273,7 +273,9 @@ const difficultyOf = key => (typeof DIFFICULTY !== 'undefined' && Number(DIFFICU
 // 一般攻擊、大招、範圍波及、燃燒每秒的傷害都算
 // 哪些怪物是水系：在「怪物編輯器」每隻怪物的「屬性」選（存在 data/monsters.js 的 element: 'water'）
 //   目前是魚頭君、虱目魚小子（大、小）、比基尼小丑魚（大、小）；池核 BOSS 巨大比基尼小丑魚是用小丑魚做的，也算
-// 水系怪物（怪物編輯器「屬性」選水的：魚頭君、虱目魚小子、虱目魚王、比基尼小丑魚…）的相剋：
+// 怪物屬性相剋（怪物編輯器「屬性」）
+// 草系（絲瓜小姐／絲瓜女王、金蕉王／金蕉大王…）：怕火，火焰傷害 ×fireVsGrass
+// 水系怪物（魚頭君、虱目魚小子、虱目魚王、比基尼小丑魚、珍珠小童…）的相剋：
 //   火焰（希奧妮的火、燒傷、燃燒彈、油火）、爆炸（油桶、油箱、地雷）比較不痛；雷電（安柏、雷電彈）比較痛，而且會被麻痺打斷正在出的招
 //   例外：怪物編輯器設了「不怕電」（shockResist，例如比基尼小丑魚、池核的巨大小丑魚）的照自己的設定，不吃雷電加成、不會被麻痺；
 //         魚頭君有自己的抗火、怕電倍率（js/fish-head.js 的 FISH_HEAD.fireMul／shockMul），傷害照牠自己的，只多了被雷電麻痺
@@ -282,14 +284,17 @@ const ELEMENT_RULES = {
   blastVsWater: 0.75,     // 爆炸打水系：傷害 ×
   shockVsWater: 1.25,     // 雷電打水系：傷害 ×
   shockStunWater: 1.5,    // 雷電打到水系：麻痺幾秒（BOSS 正在出的招也會被打斷）
+  fireVsGrass: 1.25,      // 火焰打草系：傷害 ×
 };
 // 這隻怪物的屬性（怪物編輯器設定的；沒設＝null）
 const monsterElement = e => { const m = e && typeof ACTIVE_MONSTERS !== 'undefined' && ACTIVE_MONSTERS.find(x => x.id === e.type); return (m && m.element) || null; };
 // 這個角色打這隻怪物，攻擊力要乘多少（沒有相剋＝1）
-const elementDamageMul = (spec, e) => !spec ? 1 : spec.ability === '火焰' ? waterDamageMul(e, 'fire') : spec.ability === '雷電' ? waterDamageMul(e, 'shock') : 1;
-// 水系怪物吃這種傷害要乘多少（kind：'fire' 火焰、'blast' 爆炸、'shock' 雷電）；不是水系、或有自己規則的＝1
-function waterDamageMul(e, kind) {
-  if (!e || monsterElement(e) !== 'water' || e.behavior === 'fishhead') return 1;   // 魚頭君：照 js/fish-head.js 自己的倍率
+const elementDamageMul = (spec, e) => !spec ? 1 : spec.ability === '火焰' ? elementHitMul(e, 'fire') : spec.ability === '雷電' ? elementHitMul(e, 'shock') : 1;
+// 這隻怪物吃這種傷害要乘多少（kind：'fire' 火焰、'blast' 爆炸、'shock' 雷電）；沒有相剋＝1
+function elementHitMul(e, kind) {
+  const el = e && monsterElement(e);
+  if (el === 'grass') return kind === 'fire' ? ELEMENT_RULES.fireVsGrass : 1;   // 草系：怕火
+  if (el !== 'water' || e.behavior === 'fishhead') return 1;   // 魚頭君：照 js/fish-head.js 自己的倍率
   if (kind === 'fire') return ELEMENT_RULES.fireVsWater;
   if (kind === 'blast') return ELEMENT_RULES.blastVsWater;
   if (kind === 'shock') return e.shockResist != null ? 1 : ELEMENT_RULES.shockVsWater;   // 設了不怕電的：照自己的 shockResist

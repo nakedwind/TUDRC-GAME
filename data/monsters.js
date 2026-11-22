@@ -93,6 +93,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "pearl_kid",
     "name": "珍珠小童",
+    "element": "water",
     "sprite": "images/monster/pearl-kid/pearl-kid.png",
     "hp": 80,
     "speed": 28,
@@ -275,6 +276,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "loofah_lady",
     "name": "絲瓜小姐",
+    "element": "grass",
     "sprite": "images/monster/loofah-lady/loofah-lady.png",
     "hp": 140,
     "speed": 40,
@@ -544,6 +546,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "golden_banana_king",
     "name": "金蕉王",
+    "element": "grass",
     "sprite": "images/monster/golden-banana-king/golden-banana-king-front.png",
     "hp": 300,
     "speed": 40,

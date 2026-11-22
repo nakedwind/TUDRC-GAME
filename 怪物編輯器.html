@@ -80,7 +80,7 @@
           <label>圖片寬度 px<input id="f_width" data-field="width" type="number" min="8"></label>
           <label>圖片高度 px<input id="f_height" data-field="height" type="number" min="8"></label>
           <label class="wide" title="身體太大：只有一格寬的通道（門口、窄走廊）擠不過去，會被擋在門外"><span><input id="f_wide" type="checkbox"> 大體型（一格寬的門口擠不過去）</span></label>
-          <label class="wide" title="水系怪物：火焰（希奧妮的火、燒傷、燃燒彈、油火）和爆炸（油桶、油箱、地雷）傷害打折；雷電（安柏、雷電彈）傷害加成，而且會被麻痺打斷招式。設了「不怕電」的照自己的設定（倍率在 data/balance.js 的 ELEMENT_RULES）">屬性<select id="f_element"><option value="">無</option><option value="water">水系（火焰、爆炸 −25%；雷電 +25% 並麻痺 1.5 秒）</option></select></label>
+          <label class="wide" title="草系怪物：怕火，火焰傷害加成。水系怪物：火焰（希奧妮的火、燒傷、燃燒彈、油火）和爆炸（油桶、油箱、地雷）傷害打折；雷電（安柏、雷電彈）傷害加成，而且會被麻痺打斷招式。設了「不怕電」的照自己的設定（倍率在 data/balance.js 的 ELEMENT_RULES）">屬性<select id="f_element"><option value="">無</option><option value="water">水系（火焰、爆炸 −25%；雷電 +25% 並麻痺 1.5 秒）</option><option value="grass">草系（火焰 +25%）</option></select></label>
         </div></div>
       <div id="chargerBox" hidden>
         <h3 id="behaviorTitle">行為</h3>
@@ -111,9 +111,9 @@
     <small style="display:block;margin-top:10px">場上同時最多一隻巨型；上一隻沒倒，下一隻會等。</small>
   </section>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
-  <script src="data/monsters.js?v=mkcharge-20261122"></script>
+  <script src="data/monsters.js?v=grass-20261122"></script>
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/monster-data.js?v=mkchase-20261122"></script>
+  <script src="js/monster-data.js?v=grass-20261122"></script>
   <script src="js/sfx.js?v=brake-20261122"></script>
   <script src="js/burrowing-mouse.js?v=holdgrip-20261122"></script>
   <script src="js/ui-feedback.js"></script>

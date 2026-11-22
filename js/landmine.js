@@ -47,7 +47,7 @@ function detonateMineNow(o) {
     if (e.dead || e.hp <= 0 || !blastHits(e)) continue;   // blastHits：不同樓層炸不到
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
-    const dmg = power * (1 - .4 * d / R) * (typeof waterDamageMul === 'function' ? waterDamageMul(e, 'blast') : 1);   // 水系怪物爆炸傷害 ×0.75（data/balance.js）
+    const dmg = power * (1 - .4 * d / R) * (typeof elementHitMul === 'function' ? elementHitMul(e, 'blast') : 1);   // 水系怪物爆炸傷害 ×0.75（data/balance.js 的 ELEMENT_RULES）
     e.hp -= dmg; e.hitT = .2; e.hitColor = '#ff9a3c';
     flashDmg('-' + Math.round(dmg), e.x, e.y - 26, '#ff9a3c');
     enemyHitReact(e, x, y, true);
