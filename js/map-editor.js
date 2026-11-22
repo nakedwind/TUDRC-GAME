@@ -521,6 +521,7 @@ function fixMap(m) {
   if (Array.isArray(m.vinesFerry)) m.vinesFerry = m.vinesFerry.filter(f => f && typeof f.at === 'string' && typeof f.to === 'string');   // 🌿➡ 傳送藤蔓：[{ at: '欄,列', to: '落點欄,列' }]（js/vines.js）
   if (!(m.vinesFerry && m.vinesFerry.length)) delete m.vinesFerry;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
   if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
+  if (Array.isArray(m.bossDrops) && m.bossDrops.length) m.bossDrops = [...new Set(m.bossDrops)]; else delete m.bossDrops;   // 🦋 BOSS 丟人落點：['欄,列'…]（js/moth-boss.js 人面蝶后抓人後只丟在這些格子）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   if (Array.isArray(m.deck) && m.deck.length) m.deck = [...new Set(m.deck)]; else delete m.deck;   // 🌉 2樓地面：['欄,列'…]（js/pathfinding.js）
   if (typeof MapLevels !== 'undefined' && typeof tileById === 'function') MapLevels.syncDeck(m, tileById);   // 2 樓地面自動從圖層算的地圖：照現在的圖層、牆地板標記重算（js/map-levels.js）
@@ -1484,6 +1485,20 @@ function drawLeafPileMarks(m) {
   ctx.fillStyle = '#ffb36b'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('🍂 樹葉堆 ' + piles.length + ' 堆', OX + 6, OY + 88);
 }
+// 🦋 BOSS 丟人落點：會抓人丟的 BOSS（人面蝶后）只會把人丟在這些格子（js/moth-boss.js 的 mbSafeDrop）
+function drawBossDropMarks(m) {
+  const list = (m.bossDrops || []).map(k => k.split(',').map(Number));
+  if (!list.length && brush.mode !== 'bossdrop') return;
+  for (const [c, r] of list) {
+    const x = OX + c * CELL, y = OY + r * CELL;
+    ctx.fillStyle = 'rgba(255,120,190,.35)'; ctx.fillRect(x, y, CELL, CELL);
+    ctx.strokeStyle = '#ff9fd0'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🦋', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
+  }
+  ctx.fillStyle = '#ff9fd0'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('🦋 BOSS 丟人落點 ' + list.length + ' 個' + (list.length ? '' : '（沒放＝BOSS 自己找站得住的地方丟）'), OX + 6, OY + 106);
+}
 // ⚡ 地圖底圖快取：棋盤底＋所有圖層的圖（大地圖上千個物件，整張重畫要好幾十毫秒）畫好後存一份。
 // 滑鼠只是移動（懸停預覽）時直接貼這份底圖，再畫上面的記號、預覽；其他任何呼叫 draw() 的地方（改地圖、換圖層、選取…）都照常整張重畫並更新底圖。
 let editorBaseCv = null, editorBaseFor = null, editorBaseReuse = false, drawHoverFrame = 0;
@@ -1636,6 +1651,7 @@ function draw() {
   drawFogTreeMarks(m);
   drawVineMarks(m);
   drawLeafPileMarks(m);
+  drawBossDropMarks(m);
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
   // 素材碰撞方框（物件編輯器「🧱 素材碰撞」設定，js/tile-collisions.js）：「🟧 橘框」開關打開時畫成橘色，同一張素材貼幾個都一樣
@@ -2030,6 +2046,15 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (piles.length) m.leafPiles = piles; else delete m.leafPiles;
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這堆樹葉（剩 ' + piles.length + ' 堆）' : '已放上第 ' + piles.length + ' 堆樹葉：用燃燒彈或油桶的火燒掉，會露出小道具、跳出小史萊姆，或什麼都沒有', '#ffb36b');
+    return;
+  } else if (brush.mode === 'bossdrop') {   // 🦋 BOSS 丟人落點：點一格放一個、再點一次拿掉
+    if (!isDown) return;
+    const list = m.bossDrops || [], i = list.indexOf(key);
+    if (i < 0 && (m.solid.includes(key) || m.breakable.includes(key) || (m.solid2 || []).includes(key))) { setStatus('落點要放在走得到的空地（不能放紅格、可破壞格、2樓碰撞）', '#ff8f8f'); return; }
+    if (i >= 0) list.splice(i, 1); else list.push(key);
+    if (list.length) m.bossDrops = list; else delete m.bossDrops;
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已拿掉這個落點（剩 ' + list.length + ' 個）' : '已放上第 ' + list.length + ' 個 BOSS 丟人落點：人面蝶后抓人後會飛到最近的落點丟下來。請放在空地中間、離牆遠一點', '#ff9fd0');
     return;
   } else if (brush.mode === 'vineferry') {   // 🌿➡ 傳送藤蔓：點一格放藤蔓、再點落點；點已經放好的藤蔓＝拿掉
     if (!isDown) return;
@@ -4140,7 +4165,7 @@ document.getElementById('clearSolid')?.addEventListener('click', () => {
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.solid2; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear();
+  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.bossDrops; delete m.solid2; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear(); solidNudgeDeep.clear();
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -4276,6 +4301,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.vinesHang) m.vinesHang = m.vinesHang.map(shiftKey);
   if (m.vinesFerry) m.vinesFerry = m.vinesFerry.map(f => ({ ...f, at: shiftKey(f.at), to: shiftKey(f.to) }));
   if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
+  if (m.bossDrops) m.bossDrops = m.bossDrops.map(shiftKey);
   if (m.deck) m.deck = m.deck.map(shiftKey);
   if (m.deckAdd) m.deckAdd = m.deckAdd.map(shiftKey);   // 2 樓地面自動模式的例外
   if (m.deckDel) m.deckDel = m.deckDel.map(shiftKey);
@@ -4330,6 +4356,7 @@ function dropOutsideContent(m) {
   if (m.deepWaterOffsets) { for (const k in m.deepWaterOffsets) if (!insideKey(k)) delete m.deepWaterOffsets[k]; if (!Object.keys(m.deepWaterOffsets).length) delete m.deepWaterOffsets; }
   for (const k of [...solidNudgeDeep]) if (!insideKey(k)) solidNudgeDeep.delete(k);
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
+  if (m.bossDrops) { const n = m.bossDrops.length; m.bossDrops = m.bossDrops.filter(insideKey); removed += n - m.bossDrops.length; if (!m.bossDrops.length) delete m.bossDrops; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
     m[key] = (m[key] || []).filter(insideKey);

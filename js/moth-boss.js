@@ -38,14 +38,7 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
         lt: { name: '左上區', c: 17, r: 25, radius: 8 },
         rt: { name: '右上區', c: 71, r: 25, radius: 8 },
       },
-      // 抓人後丟下來的地方：只會丟在這幾格（格子座標 [欄, 列]），挑「離牆、櫃子至少 4 格」的空地，不會丟到牆邊卡住或掉到 1 樓。
-      // 2026-11-23 使用者說：被丟到牆邊會卡在碰撞邊緣動不了、還被判定成 1 樓 → 改成固定幾個絕對安全的點（每區 4 個，在 2 樓房間中間）
-      drops: [
-        [12, 61], [19, 61], [12, 65], [19, 65],   // 左下區
-        [14, 24], [20, 24], [14, 28], [20, 28],   // 左上區
-        [68, 24], [74, 24], [68, 28], [74, 28],   // 右上區
-        [70, 61], [77, 61], [70, 65], [77, 65],   // 右下區
-      ],
+      // 抓人後丟下來的地方：改在地圖編輯器用「🦋 BOSS 丟人落點」工具放（存在地圖的 bossDrops），這裡不再寫
       // 飛的順序和每一區撒的鱗粉（poison 毒、confuse 混亂、sleep 睡眠、mix 三種輪流）
       route: [
         { zone: 'lb', kind: 'sleep' },
@@ -86,7 +79,7 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、carrySpeedMul＝抓著人繞圈時的飛行速度倍率、
   // playerCircleMul＝抓到溫特時在空中多繞幾倍時間（2＝溫特繞 circle × 2 秒）、
   // mateAway＝抓到隊員時：蝶后帶著隊員往鏡頭飛走（跟換區的「飛向鏡頭」一樣變大、淡出），消失後隊員幾秒才從空中掉下來、
-  // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠（地圖有設定固定落點 drops 時不用，B56 有設定）、
+  // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠（地圖編輯器有放「🦋 BOSS 丟人落點」時不用，B56 有放）、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手、
   // struggleAngle＝溫特被抓在手上時左右掙扎的角度（度，以手抓的地方為支點、腳左右甩；跟著蝶后拍翅膀的圖換格，在左右兩個姿勢之間切換）、struggleShake＝掙扎時身體往左右偏幾像素
   grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
@@ -704,11 +697,15 @@ function mbDropOk(a, x, y, anyFloor) {
   const save = a.floor; if (anyFloor) a.floor = fl;
   try { return !onFloorDo(a, () => blocked(x, y)); } finally { a.floor = save; }
 }
-// 固定的安全落點（MOTH_BOSS.maps 的 drops）：挑離 (x, y) 最近、現在沒被建築擋住的那一個；random＝從最近的 3 個裡隨機挑
-//   回傳 { x, y, floor }。這張地圖沒設定 drops（或全部被擋住）才退回舊的找法
+// 固定的安全落點（地圖編輯器「🦋 BOSS 丟人落點」放的格子，存在地圖的 bossDrops：['欄,列'…]）：
+//   挑離 (x, y) 最近、現在沒被建築擋住的那一個；random＝從最近的 3 個裡隨機挑
+//   回傳 { x, y, floor }。這張地圖沒放落點（或全部被擋住）才退回舊的找法
+//   2026-11-23 使用者說：被丟到牆邊會卡在碰撞邊緣動不了、還被判定成 1 樓 → 改成只丟在固定的安全點
 function mbSafeDrop(a, x, y, random) {
-  const s = mbSpot(), list = [];
-  for (const [c, r] of (s && s.drops) || []) {
+  const list = [];
+  for (const k of (typeof MAP !== 'undefined' && MAP && MAP.bossDrops) || []) {
+    const [c, r] = String(k).split(',').map(Number);
+    if (!inGrid(c, r)) continue;
     const [px, py] = center(c, r);
     if (mbDropOk(a, px, py, true)) list.push({ x: px, y: py, floor: spawnFloorAt(c, r), d: Math.hypot(px - x, py - y) });
   }
