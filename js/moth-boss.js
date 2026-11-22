@@ -12,6 +12,7 @@
    - 平常飛在高空：近戰隊員打不到（meleeLift），只能靠槍；俯衝下來抓人、睡覺時飛得低才打得到。
    - 抓人：築巢時偶爾盯上溫特或隊員（一半機率抓溫特、一半抓隊員；MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
            用手（抱核心的地方）抓著飛到高空繞圈幾秒（grab.circle）再丟下來（落點一定是走得到的地方，不會丟進牆裡；摔下來借用藤蔓丟人那一套：彈兩下、躺著暈、扣血）。
+           睡著的人（睡眠鱗粉、麻醉彈）也會被抓，一抓起來就在空中醒過來。
            抓著人的時候被打到一定的傷害（grab.breakDmg）就會鬆手，提早把人丟下來。
    - 核心護盾：人面蝶后活著的時候，牠的核心受到的傷害 × (1 - coreShield)。
    - 每掉 1/4 血 → 尖叫、先在原地把整區撒滿鱗粉（驚醒時也一樣），再飛回去撿起核心，抱著飛往下一區（同一區打不死牠，血會停在那一段的底線）。
@@ -504,7 +505,8 @@ function mbTryGrab(e, dt, home) {
   const C = MOTH_BOSS.grab, mb = e.mb;
   mb.grabCd = (mb.grabCd ?? C.first) - dt;
   if (mb.grabCd > 0) return false;
-  const ok = a => mbCanGrab(e, a) && mbDist(a, e) <= C.range * CELL && mbDist(a, home) <= (MOTH_BOSS.leash + 2) * CELL;
+  const asleep = a => !!(a && a.mothSleep && a.sleepT > 0);   // 睡著的人（睡眠鱗粉、麻醉彈）：睡在巢的範圍外也照樣抓
+  const ok = a => mbCanGrab(e, a) && mbDist(a, e) <= C.range * CELL && (asleep(a) || mbDist(a, home) <= (MOTH_BOSS.leash + 2) * CELL);
   // 一半機率抓溫特、一半抓隊員（隊員從抓得到的裡面隨機挑一個）；想抓的那一邊沒人可抓，就抓另一邊
   const mates = (G.towers || []).filter(ok), playerOk = ok(G.player);
   const pickMate = () => mates.length ? mates[Math.floor(Math.random() * mates.length)] : null;
@@ -540,6 +542,7 @@ function mbGrabVictim(e, a) {
   if (isPlayer && typeof cancelChannel === 'function' && typeof playerChannel !== 'undefined' && playerChannel) cancelChannel();
   if (isPlayer && a.sitting && typeof standUp === 'function') standUp();
   const v = { x: a.x, y: a.y, kind: 'toss', state: 'grab', t: 0, len: 1, seed: 0, twitch: 0, temp: true };   // 假的藤蔓（不放進 G.vines、不會畫出來）
+  if (a.mothSleep && a.sleepT > 0 && typeof mothWake === 'function') { mothWake(a); a.mothWakeT = 0; a.mothWakeFell = false; }   // 睡著的人被抓起來：在空中馬上醒過來（js/human-face-butterfly.js；不播從地上爬起來的動畫）
   const cap = { v, actor: a, isPlayer, mode: 'toss', wind: true, mothCarry: true, phase: 'mothCarry', t: 0, h: 0, x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y, topH: 0 };
   G.vineCaps.push(cap);
   a.vineCap = true; a.dashT = 0; a.knockT = 0;
