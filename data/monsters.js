@@ -1405,9 +1405,8 @@ const BOSS_SETTINGS_DEFAULT = {
       "mateDropMin": 2,
       "mateDropMax": 5,
       "breakDmg": 0.05,
-      "struggleAngle": 14,
-      "struggleSpeed": 2.2,
-      "struggleShake": 3
+      "struggleAngle": 8,
+      "struggleShake": 2
     },
     "coreShield": 0.5,
     "sound": {

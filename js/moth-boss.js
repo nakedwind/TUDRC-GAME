@@ -80,8 +80,8 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // mateAway＝抓到隊員時：蝶后帶著隊員往鏡頭飛走（跟換區的「飛向鏡頭」一樣變大、淡出），消失後隊員幾秒才從空中掉下來、
   // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手、
-  // struggleAngle＝溫特被抓在手上時左右晃動掙扎的角度（度，以手抓的地方為支點、腳左右甩）、struggleSpeed＝掙扎多快（每秒晃幾下）、struggleShake＝掙扎時左右扭動幾像素
-  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 14, struggleSpeed: 2.2, struggleShake: 3 },
+  // struggleAngle＝溫特被抓在手上時左右掙扎的角度（度，以手抓的地方為支點、腳左右甩；跟著蝶后拍翅膀的圖換格，在左右兩個姿勢之間切換）、struggleShake＝掙扎時身體往左右偏幾像素
+  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
   coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });
@@ -787,12 +787,10 @@ function drawMothHeld(ctx, e, a, dx, dy, dw, dh) {
   }
   const grow = e.mbH ? e.drawHeight / e.mbH : 1;   // 飛向鏡頭變大時，抓著的人跟著一起變大（假 3D）
   ctx.translate(hx, hy); ctx.scale(grow, grow);
-  if (a === G.player) {   // 溫特被抓：以手抓的地方為支點左右晃動掙扎（腳甩來甩去、身體扭動），偶爾用力踢一下晃得比較大
-    const C = MOTH_BOSS.grab, t = performance.now() / 1000, w = t * Math.PI * 2 * (C.struggleSpeed || 0);
-    const kick = 1 + .6 * Math.max(0, Math.sin(t * 1.7) - .55) / .45;   // 一陣一陣用力掙扎
-    const sway = Math.sin(w) * .8 + Math.sin(w * 2.3 + 1) * .2;          // 主要的左右擺動，加一點不規則
-    ctx.rotate(sway * kick * (C.struggleAngle || 0) * Math.PI / 180);
-    ctx.translate(Math.sin(w * 2 + .5) * (C.struggleShake || 0), 0);
+  if (a === G.player) {   // 溫特被抓：像逐格動畫一樣在「往左」「往右」兩個姿勢之間切換，跟蝶后拍翅膀換圖同一拍（翅膀換一張，溫特就換一邊）
+    const C = MOTH_BOSS.grab, side = Math.floor((e.mo && e.mo.flapT) || 0) % 2 ? 1 : -1;
+    ctx.rotate(side * (C.struggleAngle || 0) * Math.PI / 180);
+    ctx.translate(side * (C.struggleShake || 0), 0);
   }
   ctx.translate(-hx, -hy);
   ctx.translate(hx - a.x, hy + A.feet - a.y);   // 人的腳底在兩隻手中間往下 feet 像素（身體夾在兩隻手中間）
