@@ -576,8 +576,11 @@ function updateTeamButton() {
   }
   if (!safe) closeSquadPanel();
   if (safe) closeFieldCommandMenu();
-  renderFieldSquadHud();
+  // 隊員欄：只有安全區／戰鬥區切換時才重畫；戰鬥中每 0.3 秒由下面的計時器更新就好
+  // （updateHUD 每一幀都會呼叫這裡，以前每幀整個重寫隊員欄，一秒寫 60 次，會讓遊戲掉幀）
+  if (teamBtnSafeWas !== safe) { teamBtnSafeWas = safe; renderFieldSquadHud(); }
 }
+let teamBtnSafeWas = null;
 
 // 點選單以外的地方（頭像除外，頭像有自己的開關）就關閉隊員指令選單
 document.addEventListener('pointerdown', e => {

@@ -969,8 +969,10 @@ function updateMrtTrains(dt) {
 // 後層（對面的門＋車廂內部）跟車廂上緣排；前層（外側的門＋外殼）排在車廂下緣往下 frontSortDy：
 // 車內走道上的人（腳底最多到車廂下緣）會畫在兩層中間，月台上的人畫在最前面
 function mrtTrainSortables(list) {
+  const v = typeof mapDrawFull !== 'undefined' && !mapDrawFull && typeof mapDrawRect !== 'undefined' ? mapDrawRect : null;   // 這一幀畫面看得到的範圍（js/maploader.js）
   for (const tr of G.mrtTrains || []) {
     if (tr.state === 'away') continue;
+    if (v && (tr.bottom + 3 * CELL < v.y0 || tr.top - 3 * CELL > v.y1 || !mrtTrainCars(tr, v).length)) continue;   // 整班車都在畫面外：不畫（以前 8 班車不管在哪都畫三遍，會讓 G11 這種大捷運站掉幀）
     const floor = mrtTrainFloor(tr);   // 列車在幾樓：照車頭那張圖的樓層
     list.push({ floor, y: tr.top, draw: () => drawMrtTrain(ctx, tr, 'back') });
     // 車廂裡的地雷：畫在車廂內部（後層）上面、人的下面
@@ -996,12 +998,18 @@ function mrtMapItemSortY(it, y) {
 }
 // 門開的程度 0～1 → 先快後慢滑開（關門時倒過來）
 const mrtDoorEase = k => 1 - Math.pow(1 - Math.max(0, Math.min(1, k)), 2);
+// 這班車有哪幾節車廂在畫面範圍 v 裡（左右看車廂現在開到的位置；開進隧道、超出軌道範圍的也不算）
+function mrtTrainCars(tr, v) {
+  const shift = tr.off * tr.dir;
+  return tr.cars.filter(car => { const x0 = Math.max(tr.clipL, car.x + shift), x1 = Math.min(tr.clipR, car.x + car.w + shift); return x1 > x0 && x1 >= v.x0 && x0 <= v.x1; });
+}
 function drawMrtTrain(ctx, tr, part) {
   const T = MRT_TRAIN, V = tr.variant || {}, inside = mrtTrainImg(T.inside), outer = mrtTrainImg(V.outerDoor || T.outerDoor.file), far = mrtTrainImg(V.farDoor || T.farDoor.file);   // 別種顏色的列車用自己的車門圖
   const shift = tr.off * tr.dir, open = mrtDoorEase(tr.door);
   ctx.save();
   ctx.beginPath(); ctx.rect(tr.clipL, tr.top - 2 * CELL, tr.clipR - tr.clipL, tr.bottom - tr.top + 4 * CELL); ctx.clip();
-  for (const car of tr.cars) {
+  const v = typeof mapDrawFull !== 'undefined' && !mapDrawFull && typeof mapDrawRect !== 'undefined' ? mapDrawRect : null;
+  for (const car of v ? mrtTrainCars(tr, v) : tr.cars) {   // 只畫畫面看得到的車廂
     const shell = tileImage(car.tile); if (!shell) continue;
     const k = car.w / shell.naturalWidth;   // 原圖像素 → 畫面像素
     ctx.save();

@@ -124,14 +124,17 @@ function sanityGrayFilter() {
 // 遊戲世界畫完、還沒畫頭上的泡泡和互動提示之前呼叫（js/render.js）：只把已經畫好的地圖、角色變灰變暗。
 // 之後才畫的對話泡泡、提示框維持原本的顏色，在池核（SP 會掉）跟在應變中心看起來一樣
 let sanityGrayCv = null;
+// 做法：直接在畫面上疊兩層顏色——「飽和度」混合疊一層灰（褪色）、「相乘」混合疊一層淺灰（變暗）。
+// 以前是把整張畫面複製到另一張畫布、再套 grayscale/brightness 濾鏡畫回來：每一幀都很吃顯示卡，SP 一低於 80 遊戲就掉幀
 function sanityGrayWorld(ctx) {
-  const filter = sanityGrayFilter(); if (!filter || !('filter' in ctx)) return;
-  const cv = ctx.canvas;
-  const tmp = sanityGrayCv || (sanityGrayCv = document.createElement('canvas'));
-  if (tmp.width !== cv.width || tmp.height !== cv.height) { tmp.width = cv.width; tmp.height = cv.height; }
-  const g = tmp.getContext('2d'); g.clearRect(0, 0, tmp.width, tmp.height); g.drawImage(cv, 0, 0);
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'copy'; ctx.filter = filter;
-  ctx.drawImage(tmp, 0, 0);
+  if (typeof G === 'undefined' || !G) return;
+  const loss = (SANITY.grayFrom > 0 ? Math.max(0, Math.min(1, (SANITY.grayFrom - G.guide) / SANITY.grayFrom)) : 0) * sanityCalm();
+  if (loss <= .005) return;
+  const cv = ctx.canvas, W = cv.width, H = cv.height;
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.filter = 'none';
+  ctx.globalCompositeOperation = 'saturation'; ctx.globalAlpha = Math.min(1, loss * SANITY.grayMax); ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, W, H);   // 褪色（跟 grayscale 一樣的程度）
+  const v = Math.round(255 * (1 - loss * SANITY.dimMax));
+  ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = 1; ctx.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')'; ctx.fillRect(0, 0, W, H);   // 變暗（跟 brightness 一樣的程度）
   ctx.restore();
 }
 
