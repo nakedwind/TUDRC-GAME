@@ -22,7 +22,7 @@ function updateLandmines(dt) {
       if (o.fuseT <= 0) detonateMine(o);
       continue;
     }
-    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && !e.flying && !e.mineEater && sameFloor(e, o) && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL);   // 飄在空中的（珍珠小童）踩不到；虱目魚王踩到不會爆（會把地雷吃掉，js/milkfish-king.js）
+    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && !e.flying && !e.airborne && !e.mineEater && sameFloor(e, o) && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL + (e.wide ? (e.drawWidth || 0) * .15 : 0));   // wide：大體型（虱目魚王、葫蘆猴王…）身體壓到就算踩到   // 飄在空中的（珍珠小童）、正在跳的（虱目魚王跳過軌道）踩不到；mineEater＝踩到不會爆（目前沒有怪物用）
     if (stepped) {
       o.fuseT = LANDMINE.fuse;
       if (typeof sfxAt === 'function') sfxAt('mineBeep', p.x, p.y, .8, 'mine-beep');   // 先「嗶嗶」，引信 1 秒後才爆
@@ -47,7 +47,7 @@ function detonateMineNow(o) {
     if (e.dead || e.hp <= 0 || !blastHits(e)) continue;   // blastHits：不同樓層炸不到
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
-    const dmg = power * (1 - .4 * d / R);
+    const dmg = power * (1 - .4 * d / R) * (typeof waterDamageMul === 'function' ? waterDamageMul(e, 'blast') : 1);   // 水系怪物爆炸傷害 ×0.75（data/balance.js）
     e.hp -= dmg; e.hitT = .2; e.hitColor = '#ff9a3c';
     flashDmg('-' + Math.round(dmg), e.x, e.y - 26, '#ff9a3c');
     enemyHitReact(e, x, y, true);

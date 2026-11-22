@@ -129,7 +129,7 @@ function oilExplode(x, y, it) {
     if (e.dead || e.hp <= 0 || !blastHits(e)) continue;   // blastHits：不同樓層炸不到
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
-    const k = 1 - .4 * d / R;   // 越靠近中心越痛
+    const k = (1 - .4 * d / R) * (typeof waterDamageMul === 'function' ? waterDamageMul(e, 'blast') : 1);   // 越靠近中心越痛；水系怪物爆炸傷害 ×0.75（data/balance.js）
     e.hp -= B.enemy * k; e.hitT = .2; e.hitColor = '#ff9a3c';
     if (it.fire || it.gas) e.fireHitAt = performance.now() / 1000;   // 油桶、油箱與爐具的爆焰都能燒死生命體
     flashDmg('-' + Math.round(B.enemy * k), e.x, e.y - 26, '#ff9a3c');
@@ -315,7 +315,8 @@ function updateOil(dt) {
   }
   for (const e of G.enemies) {
     if (e.dead) continue;
-    const d = fireTick(e, true); if (!d) continue;
+    const d0 = fireTick(e, true); if (!d0) continue;
+    const d = d0 * (typeof waterDamageMul === 'function' ? waterDamageMul(e, 'fire') : 1);   // 水系怪物火焰傷害 ×0.75（data/balance.js）
     e.hp -= d; e.fireDmg = (e.fireDmg || 0) + d; e.hitT = Math.max(e.hitT || 0, .16); e.hitColor = '#ff8a3a'; e.fireHitAt = performance.now() / 1000;   // 被火燒到（生命體會被燒死）
     flashDmg('-' + Math.round(d), e.x, e.y - 26, '#ff9a3c');
   }

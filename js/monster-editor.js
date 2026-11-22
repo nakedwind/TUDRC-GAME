@@ -146,7 +146,7 @@ document.getElementById('f_wide').addEventListener('change', e => {   // 大體�
   if (e.target.checked) monster.wide = true; else delete monster.wide;
   saveMonsters();
 });
-document.getElementById('f_element').addEventListener('change', e => {   // 屬性：水系＝火系角色打牠攻擊力打折（data/balance.js 的 ELEMENT_RULES）
+document.getElementById('f_element').addEventListener('change', e => {   // 屬性：水系＝火焰、爆炸傷害打折，雷電傷害加成並麻痺（data/balance.js 的 ELEMENT_RULES）
   const monster = currentMonster();
   if (e.target.value) monster.element = e.target.value; else delete monster.element;
   saveMonsters();

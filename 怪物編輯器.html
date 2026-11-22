@@ -80,7 +80,7 @@
           <label>圖片寬度 px<input id="f_width" data-field="width" type="number" min="8"></label>
           <label>圖片高度 px<input id="f_height" data-field="height" type="number" min="8"></label>
           <label class="wide" title="身體太大：只有一格寬的通道（門口、窄走廊）擠不過去，會被擋在門外"><span><input id="f_wide" type="checkbox"> 大體型（一格寬的門口擠不過去）</span></label>
-          <label class="wide" title="火系角色（異能力「火焰」，例如希奧妮）打水系的怪物：攻擊力、燃燒傷害都打折（倍率在 data/balance.js 的 ELEMENT_RULES）">屬性<select id="f_element"><option value="">無</option><option value="water">水系（火系攻擊 −20%）</option></select></label>
+          <label class="wide" title="水系怪物：火焰（希奧妮的火、燒傷、燃燒彈、油火）和爆炸（油桶、油箱、地雷）傷害打折；雷電（安柏、雷電彈）傷害加成，而且會被麻痺打斷招式。設了「不怕電」的照自己的設定（倍率在 data/balance.js 的 ELEMENT_RULES）">屬性<select id="f_element"><option value="">無</option><option value="water">水系（火焰、爆炸 −25%；雷電 +25% 並麻痺 1.5 秒）</option></select></label>
         </div></div>
       <div id="chargerBox" hidden>
         <h3 id="behaviorTitle">行為</h3>
@@ -117,7 +117,7 @@
   <script src="js/sfx.js?v=brake-20261122"></script>
   <script src="js/burrowing-mouse.js?v=holdgrip-20261122"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=mfking-20261120"></script>
+  <script src="js/monster-editor.js?v=water-20261122"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=bullets-20261121"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

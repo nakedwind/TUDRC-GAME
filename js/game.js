@@ -2612,6 +2612,7 @@ function update(dt) {
             if (spec.ability === '火焰') e.fireDmg = (e.fireDmg || 0) + amt; else e.shockDmg = (e.shockDmg || 0) + amt;
           }
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=Math.max(1, Math.round(spec.burn.damage * elemMul(e))); e.burnTick=1; }   // 水系怪物：燃燒每秒的傷害也 −20%
+          if (spec.ability === '雷電' && typeof waterShockStun === 'function') waterShockStun(e);   // 水系怪物被雷電打到：麻痺 1.5 秒、打斷正在出的招（data/balance.js 的 ELEMENT_RULES）
           if (spec.stun && !e.noStun && !(spec.ability === '雷電' && e.shockResist != null)) {   // noStun 的怪物（生命體）不會被停住；不怕電的（小丑魚）不會被雷擊麻痺
             e.stunT=Math.max(e.stunT||0,spec.stun);
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）

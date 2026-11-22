@@ -22,6 +22,7 @@
        走得到就走過去；走不到（例如人穿過列車躲到軌道另一邊的月台、列車開走了）→ 走到月台邊緣的起跳點，
        蓄力後跳過去落在目標旁邊（落地砸到的人受傷、被撞開，地上不畫提示）。列車停在中間時，牠太大隻穿不過車廂，會站在月台邊等車開走才跳。範圍內都沒人 → 走回水池旁（走不回去也用跳的），
        途中有人走進範圍就再追。追人時，建築要比目標近、而且在 2.5 格內才會先停下來吃。
+   ・水系：火焰、爆炸傷害 ×0.75，雷電傷害 ×1.25，被雷電打到會麻痺 1.5 秒、打斷正在出的招（數值在 data/balance.js 的 ELEMENT_RULES，所有水系怪物共用）。踩到地雷會爆。
    ・從水池登場（地圖設定 intro: 'pool'，G11 有開）：一開始不在場上，躲在旁邊的深水區裡。溫特開槍打到核心 →
        畫面越震越大、水池冒泡（introRumble 秒）→ 從水池最靠近原位的那格竄出來，水花炸開、一道水浪跟著牠衝上來，
        在空中一路滴水 → 重重落在原位（大震動、水花、地上留一攤水）→ 吼叫，走去把核心吞進肚子。
@@ -129,8 +130,8 @@ function mkInit(e, core) {
     if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(swap) : swap(f)]));
     e.mkArtSwapped = true;
   }
-  e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true; e.mineEater = true;
-  e.walkStride = MILKFISH_KING_FX.stepEvery;   // 走路圖每踩一步換一張（左腳、右腳輪流），換圖的時間由 mkFootsteps 對齊落腳（js/render.js 的 monsterWalkFrame）   // mineEater：踩到地雷不會引爆（會把地雷吃掉，js/landmine.js）
+  e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true;   // 踩到地雷會爆（以前 mineEater 踩了不會爆）；牠是水系，爆炸傷害 ×0.75（data/balance.js 的 ELEMENT_RULES）
+  e.walkStride = MILKFISH_KING_FX.stepEvery;   // 走路圖每踩一步換一張（左腳、右腳輪流），換圖的時間由 mkFootsteps 對齊落腳（js/render.js 的 monsterWalkFrame）
   if (core === undefined) core = G.cores.filter(k => !k.dead).reduce((best, k) => !best || mkDist(k, e) < mkDist(best, e) ? k : best, null);
   if (core && !core.mkHpSet) {   // 牠守的核心：血量照怪物編輯器的 coreHp（再乘地圖難度）
     const difficulty = Math.max(1, Math.min(5, Number(MAP && MAP.difficulty) || 1));
@@ -150,6 +151,7 @@ function mkSet(e, state, t = 0) { e.mk.state = state; e.mk.t = t; }
 // ---- 能吃的東西 ----
 function mkEdibleItem(e, o) {
   if (!o || o.kind !== 'obstacle' || o.hp <= 0 || !o.type || o.isBase || o.ore || o.type === 'irongate' || o.mrtHidden) return false;
+  if (o.trap && o.fuseT > 0) return false;   // 已經被踩到、在倒數的地雷：不吃，讓它爆
   if (!G.obstacles.includes(o) || !sameFloor(e, o)) return false;
   const cells = obstacleSolidCells(o).length;
   if (cells > MILKFISH_KING_FX.itemMaxCells || (o.w || 1) > 3 || (o.h || 1) > 3) return false;
@@ -206,6 +208,7 @@ function stepMilkfishKing(e, dt) {
   mk.t -= dt; mk.spitCd -= dt; mk.biteCd -= dt; if (e.eliteAwake) mk.chargeCd = (mk.chargeCd ?? 4) - dt;
   for (const pr of mk.prey) pr.left -= dt;
   if (!mk.enraged && e.eliteAwake && e.hp > 0 && e.hp / e.maxhp <= C.enrageHp) mkEnrage(e);   // 血量掉到一半（enrageHp）：暴怒
+  if (e.shockStunT > 0) mkShockInterrupt(e);   // 被雷電打到（水系）：不管在出什麼招都打斷、麻痺 1.5 秒（data/balance.js 的 waterShockStun）
   // 吼叫、吐東西、吞核心中：打不斷（霸體）；其他時候暈眩只算一半時間
   const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp', 'chargeWind', 'charge', 'jumpWind', 'jump'].includes(mk.state);
   e.superArmor = armored;
@@ -1496,4 +1499,21 @@ function mkTrainBlocksJump(e, to) {
     if (rects.some(R => x >= R.x0 - pad && x <= R.x1 + pad && y >= R.y0 && y <= R.y1)) return true;
   }
   return false;
+}
+
+// 被雷電打到：打斷正在出的招（衝撞、吐東西、吐核心、起跳、吞東西…），整整麻痺 shockStunT 秒（不打折）；在空中跳的時候等落地再麻痺
+function mkShockInterrupt(e) {
+  const mk = e.mk, C = mkCfg(e);
+  if (e.airborne || mk.state === 'jump') return;
+  const s = e.shockStunT; e.shockStunT = 0;
+  if (mk.state === 'spitWind' && mk.spit && mk.spit.item) mk.belly.unshift(mk.spit.item);   // 吐到一半被打斷：東西吞回肚子
+  if (mk.state === 'coreWind') mk.nextCoreSpit += C.coreSpitHp;   // 吐核心被打斷：下次照樣會吐
+  if (mk.state === 'chargeWind' || mk.state === 'charge') { mk.charge = null; mk.chargeLeft = 0; mk.chargeCd = C.chargeCooldown; }
+  if (mk.state === 'jumpWind') { mk.jump = null; e.slimeLift = 0; }
+  mk.spit = null; mk.aim = null; mk.chewing = null;
+  if (mk.state !== 'hunt') mkSet(e, 'hunt');
+  e.superArmor = false; e.tremble = false;
+  e.stunT = Math.max(e.stunT || 0, s); e.shockT = Math.max(e.shockT || 0, s);
+  mk.stunSeen = e.stunT;   // 不要被「暈眩只算一半」打折
+  flash('麻痺！', e.x, e.y - (e.drawHeight || 240) - 10, '#d8f4ff');
 }
