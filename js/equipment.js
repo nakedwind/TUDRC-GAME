@@ -313,7 +313,7 @@ function useEyeDrops() {
 // ・R 平常是手動裝填彈匣（js/game.js）；有「R 修理」提示時 R 改成修理。
 // ・地雷不算；地圖上本來就有的障礙物、礦石、被打壞（HP 歸零）的也不修。數值都在 data/equipment.js 的 TOOLBOX。
 const toolboxRepairable = o => (o.isBase || (o.playerBuilt && !o.trap)) && o.hp > 0 && o.maxhp > 0 && o.hp < o.maxhp;
-const toolboxRect = o => ({ x: OX + o.c * CELL, y: OY + o.r * CELL, w: (o.w || 1) * CELL, h: (o.h || 1) * CELL });
+const toolboxRect = o => ({ x: o.artX ?? OX + o.c * CELL, y: o.artY ?? OY + o.r * CELL, w: (o.w || 1) * CELL, h: (o.h || 1) * CELL });   // artX／artY：基地本體照圖的位置（微調過也對齊）
 // 溫特到建築最近的那一點有多遠（px）：大建築站在任何一邊都算得到
 function toolboxDist(o, p) {
   const r = toolboxRect(o), dx = Math.max(r.x - p.x, 0, p.x - (r.x + r.w)), dy = Math.max(r.y - p.y, 0, p.y - (r.y + r.h));
@@ -1082,6 +1082,10 @@ function downedTeammateNear() {
 }
 // 現在頭上有選項的那位隊員（暴走的優先，再來倒下的，最後是旁邊的隊員）
 function promptTeammate() {
+  const t = promptTeammate0();
+  return t && typeof mrtSeparated === 'function' && mrtSeparated(t) ? null : t;   // 坐在溫特沒坐的捷運上被載走：不能急救、疏導（js/mrt-train.js）
+}
+function promptTeammate0() {
   if (!G || !G.player || G.player.sitting) return null;
   if (MAP_SAFE && !(typeof onSootheRoom === 'function' && onSootheRoom())) return null;   // 應變中心裡只有 2F疏導室可以疏導隊員（js/vitals.js）
   const urgent = typeof urgentSootheTarget === 'function' && urgentSootheTarget(); if (urgent) return urgent;

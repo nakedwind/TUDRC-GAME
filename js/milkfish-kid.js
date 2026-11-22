@@ -57,7 +57,9 @@ const MILKFISH_LEGS = {
   guide: [1, 2, 3].map(i => MILKFISH_ART + 'legs-guide-0' + i + '.png'),
 };
 const mfRand = (a, b) => a + Math.random() * (b - a);
-const mfArt = e => e.behavior === 'milkfishSmall' ? MILKFISH_SMALL_ART : MILKFISH_ART;
+const mfArt = e => e.behavior === 'milkfishSmall' ? MILKFISH_SMALL_ART
+  : e.behavior === 'milkfishKing' && typeof MILKFISH_KING_FX !== 'undefined' && MILKFISH_KING_FX.artDir ? MILKFISH_KING_FX.artDir + 'milkfish-kid-'   // 虱目魚王：用專用的紫藍版（js/milkfish-king.js）
+  : MILKFISH_ART;
 // 指定這一幀用哪張動作圖（js/render.js 的 monsterWalkFrame 讀 forceFrame／forceFlip／forceAttack）
 // 攻擊圖（attack）：尺寸跟站姿圖不同，用原本的像素比例畫、腳底中央對齊；原圖朝左，目標在右邊就左右翻
 function mfPose(e, name, towardX) {
@@ -102,7 +104,7 @@ function mfEdible(o) {
   if ((o.w || 1) !== 1 || (o.h || 1) !== 1) return false;
   return obstacleSolidCells(o).length <= 1 && G.obstacles.includes(o);
 }
-const mfItemCenter = o => ({ x: OX + (o.c + .5) * CELL, y: OY + (o.r + .5) * CELL });
+const mfItemCenter = o => ({ x: OX + (o.c + .5) * CELL + obstacleOff(o)[0], y: OY + (o.r + .5) * CELL + obstacleOff(o)[1] });   // 微調過位置的地圖物件也對齊
 // 可以吃的隊友：活著、沒暴走、沒被吃、看得到
 const mfEdibleMate = (e, t) => t.hp > 0 && !t.berserk && !t.eatenBy && enemyNoticesSentry(e, t);
 function mfPickMate(e) {
@@ -166,7 +168,7 @@ function stepMilkfishEnemy(e, dt) {
   let mate = mf.mate && mfEdibleMate(e, mf.mate) && Math.hypot(mf.mate.x - e.x, mf.mate.y - e.y) <= C.loseRange * CELL ? mf.mate : null;
   if (!mate && mf.cd <= 0) mate = mfPickMate(e);
   mf.mate = mate;
-  const p = G.player, pd = p && p.hp > 0 && !mfIsSmall(e) ? Math.hypot(p.x - e.x, p.y - e.y) : Infinity;
+  const p = G.player, pd = p && p.hp > 0 && !mfIsSmall(e) && sameFloor(e, p) ? Math.hypot(p.x - e.x, p.y - e.y) : Infinity;
   const mateD = mate ? Math.hypot(mate.x - e.x, mate.y - e.y) : Infinity;
   const seesPlayer = Number.isFinite(pd) && hasLineOfSight(e.x, e.y, p.x, p.y);
   if (mf.playerChasing) {

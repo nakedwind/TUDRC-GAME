@@ -528,15 +528,16 @@ document.querySelector('#buildToolbar .build-fold')?.addEventListener('wheel', e
 
 // ---- 減速建築（鐵絲網）：站在上面的速度倍率（data/balance.js 的 SLOW_BUILDINGS）----
 // who：'enemy' 怪物、'ally' 溫特和隊員。疊好幾個也只算最慢的那個
-function slowFactorAt(x, y, who, actor) {   // actor：誰在走（黏著彈的黏膠要知道是不是飛在空中；沒給＝當成在地上）
+function slowFactorAt(x, y, who, actor) {   // actor：誰在走（黏著彈的黏膠要知道是不是飛在空中；坑洞、土堆、黏膠、鐵絲網都只影響同一樓層的人；沒給＝當成在地上、不分樓層）
   if (!G || !G.obstacles) return 1;
   const [c, r] = cellAt(x, y);
   let k = 1;
   for (const o of G.obstacles) {
     if (!o.slow || o.hp <= 0) continue;
+    if (actor && !fieldHits(o.floor || 1, actor)) continue;   // 陸橋上／下：別層的鐵絲網踩不到
     if (c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)) k = Math.min(k, o.slow[who] ?? 1);
   }
-  if (typeof burrowMouseSlowAt === 'function') k = Math.min(k, burrowMouseSlowAt(x, y));   // 版權老鼠死後的洞（js/burrowing-mouse.js）
+  if (typeof burrowMouseSlowAt === 'function') k = Math.min(k, burrowMouseSlowAt(x, y, actor));   // 版權老鼠死後的洞（js/burrowing-mouse.js）
   const swim = typeof swimRingSpeedAt === 'function' ? swimRingSpeedAt(x, y) : 1;   // 坐救生圈在深水區划水：用地圖設定的划水速度（js/swim-ring.js），不再算水素材的速度
   if (swim < 1) k = Math.min(k, swim);
   else if (typeof waterSlowAt === 'function') k = Math.min(k, waterSlowAt(x, y));   // 走在水裡（js/water.js：素材勾了「這是水」，速度 % 在編輯器填）

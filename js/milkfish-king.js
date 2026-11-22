@@ -1,28 +1,47 @@
 /* ===== 菁英 BOSS「虱目魚王」（behavior: "milkfishKing"；G11區-綠線捷運站，守在核心旁）=====
    ・外型：虱目魚小子放大、頭上戴王冠（之後有專屬圖再換）。走路很重：每一步震動畫面、大聲的腳步聲、地上踩出小裂痕。
+   ・走路的重量感（參考鳥頭大隊長）：每一步先跨出去、落腳時慢下來（一頓一頓的），身體跟著上下起伏，
+           走路圖兩張換一步、跟落腳同步；落腳時壓扁一下、揚起煙塵。數值在下面的 MILKFISH_KING_FX（gaitMin、bobHeight）。
    ・守衛：一開始站在核心旁邊不動。溫特走近（看得到）、牠被打、或核心被叫醒 → 吼叫，核心跟著甦醒，
            牠走過去把核心「吞進肚子裡」保護（肚子透出紫光）。核心在肚子裡：打不到、炸不到；牠自己的防禦力不變。
+   ・核心在肚子裡的時候：攻擊力變高（coreAtkMul 倍：咬人、打建築、吐東西砸人、隊友摔傷都算），
+           每一步在腳下留一攤腐蝕池（溫特、隊友踩到扣血；怪物不怕），站著不動也會一直冒在腳下。核心吐出來就恢復。
    ・吃建築：燈、路障、油箱、油桶、地雷……兩格以內的建築都吃（基地、礦石、鐵門不吃），存在肚子裡。
    ・吐建築攻擊：瞄準隊友或溫特把肚子裡的東西吐出去（地上先出現紅圈），砸到的人受傷、被撞開。
-       地雷 → 落地爆炸；油箱、油桶、郵筒 → 撞破漏出一灘油；露營燈 → 燒一小團火；其他 → 砸碎。
+       地雷 → 落地爆炸；油桶、油箱、瓦斯爐 → 落地爆炸（跟被溫特打爆一樣，會起火）；郵筒 → 撞破漏出一灘油；
+       露營燈 → 燒一小團火。地雷以外的東西落地都會碎成好幾塊往外飛（碎掉動畫）。
        （在肚子裡不會爆炸）
-   ・吃隊友：最多同時含 maxPrey 個（嘴裡露出腳），含 holdTime 秒後瞄準別的隊友或溫特吐出來：
+   ・吃隊友：最多同時含 maxPrey 個（整個人看不見，肚子那裡冒出他說的話，每 preyTalkEvery 秒一句），含 holdTime 秒後瞄準別的隊友或溫特吐出來；
+       含著隊友時附近沒人，就主動走去找人準備吐。追隊友／建築走不過去（身體太寬）時，stuckGive 秒後先放棄，去做別的事：
        隊友飛到地上受傷、躺著暈眩（借用 js/vines.js 被藤蔓丟下來的動畫），落點旁邊的人也會被砸到。
+   ・衝撞（跟鳥頭大隊長類似）：每 chargeCooldown 秒一輪，對準溫特或隊友蓄力（鼓起來發抖，地上不畫路線）後用正面跑步快速衝過去、快到底才張嘴撲咬，
+       一輪連續衝 chargeChain 次（每次重新瞄準），路上撞到的人受傷、被撞飛；碰到牆或建築就停下來（不會暈），繼續追人。
    ・吐核心（表演）：血量每掉 coreSpitHp，就把核心吐到地上，喘 coreOutTime 秒後急著衝回去吞回來；核心在地上時打得到。
    ・倒下：核心掉在原地，嘴裡的隊友獲救（直接放出來）。
+   ・追人（地圖設定 chase: true，G11 有開）：以水池為中心 chaseRadius 格內的溫特、隊友都追（挑最近的，追著同一個人時不會一直換）。
+       走得到就走過去；走不到（例如人穿過列車躲到軌道另一邊的月台、列車開走了）→ 走到月台邊緣的起跳點，
+       蓄力後跳過去落在目標旁邊（落地砸到的人受傷、被撞開，地上不畫提示）。列車停在中間時，牠太大隻穿不過車廂，會站在月台邊等車開走才跳。範圍內都沒人 → 走回水池旁（走不回去也用跳的），
+       途中有人走進範圍就再追。追人時，建築要比目標近、而且在 2.5 格內才會先停下來吃。
+   ・水系：火焰、爆炸傷害 ×0.75，雷電傷害 ×1.25，被雷電打到會麻痺 1.5 秒、打斷正在出的招（數值在 data/balance.js 的 ELEMENT_RULES，所有水系怪物共用）。踩到地雷會爆。
+   ・從水池登場（地圖設定 intro: 'pool'，G11 有開）：一開始不在場上，躲在旁邊的深水區裡。溫特開槍打到核心 →
+       畫面越震越大、水池冒泡（introRumble 秒）→ 從水池最靠近原位的那格竄出來，水花炸開、一道水浪跟著牠衝上來，
+       在空中一路滴水 → 重重落在原位（大震動、水花、地上留一攤水）→ 吼叫，走去把核心吞進肚子。
+       在空中的時候還不算在場上（打不到、不會被瞄準）。數值在怪物編輯器「虱目魚王」的「登場」那幾格。
    數值：怪物編輯器的「虱目魚王」（data/monsters.js 的 milkfish_king；行為欄位表在 js/monster-data.js 的 MILKFISH_KING_FIELDS）。
    哪張地圖有牠：下面的 MILKFISH_KING_MAPS。
    必須在 milkfish-kid.js、vines.js、landmine.js、oil-barrels.js 之後、game.js 之前載入。
 */
-// 地圖 id → 出生位置（{ c, r }；空的 {}＝站在地圖核心下方 2 格）
+// 地圖 id → 出生位置（{ c, r }；沒寫＝站在地圖核心下方 2 格）；intro: 'pool'＝一開始躲在旁邊的深水區，溫特開槍打核心才竄出來
 const MILKFISH_KING_MAPS = {
-  map_mwm655e8: {},   // G11區-綠線捷運站
+  map_mwm655e8: { intro: 'pool', roam: 'area', chase: true },   // G11區-綠線捷運站：右邊的水池；roam: 'area'＝可以在原位所在的那一整區（上面那一整區）跑，不受守備範圍限制
 };
 // 不想給編輯器調的細節（動畫、特效）
 const MILKFISH_KING_FX = {
   name: '虱目魚王',
-  stepEvery: 70,          // 每走幾像素踩一步（震動、腳步聲）
-  shakeRange: 18,         // 溫特在幾格內才感覺得到震動
+  artDir: 'images/monster/milkfish-king/',   // 專用的圖（上衣紫藍、短褲和頭髮深紫藍）：檔名跟虱目魚小子一樣，只換資料夾；用 tools/recolor-milkfish-king.py 換色產生
+  stepEvery: 35,          // 每走幾像素踩一步（震動、腳步聲）；2026-11-21 使用者指定 35（原本 70）
+  shakeRange: 18,         // （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
+  stepShakeTime: .3,      // 每一步的震動維持幾秒再慢慢停（震動大小是怪物編輯器的「腳步震動大小」；以前只震一瞬間、牠又走很慢，幾乎感覺不到）
   eatReach: 95,           // 離隊友幾像素內可以吞
   gulpWindup: .45,        // 吞隊友前張嘴（秒）
   biteReach: 80, biteWindup: .5, biteHit: 100, biteCooldown: 1.4,   // 咬溫特
@@ -35,7 +54,32 @@ const MILKFISH_KING_FX = {
   coreSpitDist: [3, 4.5], // 核心吐多遠（格）
   mateArcTime: .9,        // 隊友在空中飛幾秒
   wanderRadius: 3,        // 閒晃範圍（格，以原位為中心）
+  roamDist: [6, 25],      // 有活動區（MILKFISH_KING_MAPS 的 roam: 'area'）時：沒事做就挑離自己幾～幾格的地方走過去逛
+  roamSpeed: .8,          // 逛的時候走路速度 ×
+  stuckGive: 2.5,         // 走向隊友／建築／溫特，幾秒都沒更靠近就放棄（身體太寬擠不過去時才不會卡在原地）
+  stuckSkip: 6,           // 放棄後幾秒內不再去追那個目標
+  preyTalkEvery: 3.5,     // 被吞進肚子的隊友每隔幾秒在肚子那裡冒一句話（對話編輯器「被虱目魚小子吞掉」那格的台詞）
+  gaitMin: .3,            // 落腳那一刻的速度只剩幾成（越小越「一頓一頓」）；平均速度還是怪物編輯器的「速度」
+  bobHeight: 5,           // 走路時身體上下起伏多高（像素）
+  shards: { cols: 3, rows: 3, gravity: 900, life: 1.2 },   // 吐出來的建築碎掉：切成幾塊、往下掉多快、碎片留幾秒
+  chaseEatNear: 2.5,      // 追人模式：建築在幾格內（而且比要追的人近）才先停下來吃
+  chaseStick: 3,          // 追人時：新的人要比現在追的人近幾格以上才換目標
+  chaseReplan: .5,        // 每隔幾秒重新判斷「走得到還是要跳」
+  chargeBiteAt: .25,      // 衝撞剩下幾成距離時換成張嘴的攻擊圖（前面是正面跑步）
+  chargeEndHold: .35,     // 衝完張嘴撲咬的樣子停幾秒
+  // 從水池登場的細節（秒數、高度、震動大小在怪物編輯器）
+  intro: { poolSearch: 10,   // 從原位往外找幾格內的深水
+    sink: .85,               // 一開始沉在水面下多深（身體高度的幾成）
+    waveUntil: .62,          // 水浪跟到飛行的哪裡（0～1）才斷掉落回水裡
+    waveWrap: .28,           // 浪頭包住牠身體下面多高（身體高度的幾成）
+    landBehind: 2,           // 落在核心後面（畫面上方）幾格：核心在牠前面看得到，再走過去吞
+    riseDy: -34,             // 冒泡、竄出的位置從水池那格的正中間往上挪幾像素（負的＝往上）
+    bubbleEvery: .07 },      // 震動時水面每隔幾秒冒一個泡泡
 };
+// 走路一頓一頓的時候，為了讓平均速度不變要乘的倍數（照 gaitMin 先算好）
+const MK_GAIT_NORM = (() => { const m = MILKFISH_KING_FX.gaitMin, n = 200; let s = 0; for (let i = 0; i < n; i++) s += 1 / (m + (1 - m) * Math.sin(Math.PI * (i + .5) / n)); return s / n; })();
+// 現在的攻擊力倍數：核心在肚子裡才變高
+const mkAtk = e => e && e.mk && e.mk.coreIn ? mkCfg(e).coreAtkMul : 1;
 const mkKings = () => (G && G.mkKings) || [];
 const mkDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const mkCfg = e => e.mkCfg || (typeof validMilkfishKingCfg === 'function' ? validMilkfishKingCfg(null) : {});
@@ -43,7 +87,7 @@ const mkAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
 
 // ---- 開場：照 MILKFISH_KING_MAPS 擺在核心旁（game.js 在 seedCores 之後呼叫）----
 function seedMilkfishKing() {
-  G.mkKings = []; G.mkShots = [];
+  G.mkKings = []; G.mkShots = []; G.mkShards = []; G.mkIntro = null;
   const cfg = typeof MAP !== 'undefined' && MAP ? MILKFISH_KING_MAPS[MAP.id] : null;
   if (!cfg || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'milkfish_king');
@@ -60,6 +104,7 @@ function seedMilkfishKing() {
   if (!inGrid(c, r) || isWall(c, r)) return;
   const [x, y] = center(c, r), e = createMonster(base, x, y);
   mkInit(e, core);
+  if (cfg.intro === 'pool' && mkIntroSetup(e)) return;   // 從水池登場：先躲起來，溫特開槍打核心才出來
   G.enemies.push(e);
 }
 // 離 (x, y) 最近、走得到的空格（一圈一圈往外找）
@@ -79,19 +124,34 @@ function mkInit(e, core) {
   const spec = ACTIVE_MONSTERS.find(m => m.id === e.type);
   e.mkCfg = typeof validMilkfishKingCfg === 'function' ? validMilkfishKingCfg(spec && spec.mfKing) : {};
   e.eliteName = MILKFISH_KING_FX.name;
-  e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true; e.mineEater = true;   // mineEater：踩到地雷不會引爆（會把地雷吃掉，js/landmine.js）
+  if (MILKFISH_KING_FX.artDir && !e.mkArtSwapped) {   // 換成魚王專用的圖（另外複製一份，不要改到共用的設定；笑、攻擊圖在 js/milkfish-kid.js 的 mfArt）
+    const swap = f => typeof f === 'string' && /\.png$/i.test(f) ? MILKFISH_KING_FX.artDir + f.split('/').pop() : f;
+    e.sprite = swap(e.sprite);
+    if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(swap) : swap(f)]));
+    e.mkArtSwapped = true;
+  }
+  e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true;   // 踩到地雷會爆（以前 mineEater 踩了不會爆）；牠是水系，爆炸傷害 ×0.75（data/balance.js 的 ELEMENT_RULES）
+  e.walkStride = MILKFISH_KING_FX.stepEvery;   // 走路圖每踩一步換一張（左腳、右腳輪流），換圖的時間由 mkFootsteps 對齊落腳（js/render.js 的 monsterWalkFrame）
   if (core === undefined) core = G.cores.filter(k => !k.dead).reduce((best, k) => !best || mkDist(k, e) < mkDist(best, e) ? k : best, null);
+  if (core && !core.mkHpSet) {   // 牠守的核心：血量照怪物編輯器的 coreHp（再乘地圖難度）
+    const difficulty = Math.max(1, Math.min(5, Number(MAP && MAP.difficulty) || 1));
+    core.hp = core.maxhp = core.lastHp = Math.round(mkCfg(e).coreHp * difficulty); core.mkHpSet = true;
+  }
   e.mk = { state: 'guard', t: 0, home: { x: e.x, y: e.y }, core: core || null, coreIn: false,
-    belly: [], prey: [], spitCd: 2, biteCd: 0, wait: 1, spot: null, stepDist: 0, stunSeen: 0,
-    nextCoreSpit: 1 - mkCfg(e).coreSpitHp };
+    belly: [], prey: [], spitCd: 2, biteCd: 0, wait: 1, spot: null, stepDist: 0, stepCount: 0, stunSeen: 0,
+    nextCoreSpit: 1 - mkCfg(e).coreSpitHp, poolT: 0, lastPool: null,
+    baseDmg: { p: e.playerDamage, s: e.sentryDamage, b: e.buildingDamage } };   // baseDmg：原本的攻擊力（核心在肚子裡時乘上倍數）
   (G.mkKings = G.mkKings || []).push(e);
   G.mkShots = G.mkShots || [];
 }
+// 正面站姿圖（出場竄出、落地、吼叫用）：不讓走路動畫換成側面
+function mkFront(e) { e.forceFrame = e.frames && e.frames.front || null; e.forceFlip = false; e.forceAttack = false; }
 function mkSet(e, state, t = 0) { e.mk.state = state; e.mk.t = t; }
 
 // ---- 能吃的東西 ----
 function mkEdibleItem(e, o) {
   if (!o || o.kind !== 'obstacle' || o.hp <= 0 || !o.type || o.isBase || o.ore || o.type === 'irongate' || o.mrtHidden) return false;
+  if (o.trap && o.fuseT > 0) return false;   // 已經被踩到、在倒數的地雷：不吃，讓它爆
   if (!G.obstacles.includes(o) || !sameFloor(e, o)) return false;
   const cells = obstacleSolidCells(o).length;
   if (cells > MILKFISH_KING_FX.itemMaxCells || (o.w || 1) > 3 || (o.h || 1) > 3) return false;
@@ -99,6 +159,7 @@ function mkEdibleItem(e, o) {
 }
 const mkItemCenter = o => ({ x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + (o.h || 1) - .5) * CELL });
 function mkEdibleMate(e, t) {
+  if (mkSkipped(e, t)) return false;   // 剛剛走不過去、先放棄的隊友
   return t.hp > 0 && !t.berserk && !t.eatenBy && !t.vineCap && !(t.vineDazeT > 0) && !t.grabbed && !t.mrtRide && enemyNoticesSentry(e, t);
 }
 // 可以瞄準吐東西的人：溫特、看得到的隊友（不包括嘴裡的、被丟在空中的）
@@ -113,23 +174,102 @@ function mkSpitTargets(e, except) {
 }
 const mkPick = list => list.length ? list[Math.floor(Math.random() * list.length)] : null;
 
+// ---- 活動範圍 ----
+// 地圖設了 roam: 'area'：原位所在、走得到的那一整區都能去（從原位往外一格一格找，碰到牆、地圖外就停）；沒設：離原位守備範圍（leash）格內
+function mkArea(e) {
+  const mk = e.mk, cfg = typeof MAP !== 'undefined' && MAP ? MILKFISH_KING_MAPS[MAP.id] : null;
+  if (!cfg || cfg.roam !== 'area') return null;
+  if (mk.area && mk.area.home === mk.home) return mk.area;
+  const floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null, [hc, hr] = cellAt(mk.home.x, mk.home.y);
+  const set = new Set([hc + ',' + hr]), list = [[hc, hr]], q = [[hc, hr]];
+  while (q.length && set.size < 5000) {
+    const [c, r] = q.shift();
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const cc = c + dc, rr = r + dr, k = cc + ',' + rr;
+      if (set.has(k) || !inGrid(cc, rr) || isWall(cc, rr) || (floor && !floor.has(k))) continue;
+      set.add(k); list.push([cc, rr]); q.push([cc, rr]);
+    }
+  }
+  return (mk.area = { home: mk.home, set, list });
+}
+// 這個點在不在牠能去的範圍裡
+function mkInRange(e, pt) {
+  if (mkChaseOn(e)) return mkInChase(e, pt);   // 追人模式：離水池 chaseRadius 格內都算
+  const A = mkArea(e);
+  if (A) { const [c, r] = cellAt(pt.x, pt.y); return A.set.has(c + ',' + r); }
+  return mkDist(pt, e.mk.home) <= mkCfg(e).leash * CELL;
+}
+
 // ---- 每幀（enemy-ai.js 的 stepEnemy 呼叫）----
 function stepMilkfishKing(e, dt) {
   if (!e.mk) mkInit(e);
   const C = mkCfg(e), F = MILKFISH_KING_FX, mk = e.mk;
   const x0 = e.x, y0 = e.y;
-  mk.t -= dt; mk.spitCd -= dt; mk.biteCd -= dt;
+  mk.t -= dt; mk.spitCd -= dt; mk.biteCd -= dt; if (e.eliteAwake) mk.chargeCd = (mk.chargeCd ?? 4) - dt;
   for (const pr of mk.prey) pr.left -= dt;
+  if (!mk.enraged && e.eliteAwake && e.hp > 0 && e.hp / e.maxhp <= C.enrageHp) mkEnrage(e);   // 血量掉到一半（enrageHp）：暴怒
+  if (e.shockStunT > 0) mkShockInterrupt(e);   // 被雷電打到（水系）：不管在出什麼招都打斷、麻痺 1.5 秒（data/balance.js 的 waterShockStun）
   // 吼叫、吐東西、吞核心中：打不斷（霸體）；其他時候暈眩只算一半時間
-  const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp'].includes(mk.state);
+  const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp', 'chargeWind', 'charge', 'jumpWind', 'jump'].includes(mk.state);
   e.superArmor = armored;
   if (armored) { e.stunT = 0; e.confuseT = 0; }
   else if ((e.stunT || 0) > mk.stunSeen) e.stunT = mk.stunSeen + (e.stunT - mk.stunSeen) * .5;
   mk.stunSeen = e.stunT || 0;
-  e.tremble = mk.state === 'spitWind' || mk.state === 'coreWind';
-  if (!armored && (e.stunT > 0 || e.confuseT > 0)) { mfPose(e, null); return; }
-  mkStep(e, dt);
-  mkFootsteps(e, Math.hypot(e.x - x0, e.y - y0));
+  e.tremble = mk.state === 'spitWind' || mk.state === 'coreWind' || mk.state === 'chargeWind' || mk.state === 'jumpWind';
+  mkApplyAtk(e);
+  if (mk.coreIn) mkPoolUnderFeet(e, dt);
+  if (!armored && (e.stunT > 0 || e.confuseT > 0)) { mfPose(e, null); mkBob(e, 0, dt); return; }
+  if (mk.state === 'jump') { mkJumpStep(e, dt); return; }   // 跳過軌道：在空中，自己控制位置（不踩腳步）
+  if (mk.state === 'charge') {   // 衝撞：自己控制移動（不照一頓一頓的步伐），腳步照樣震
+    mkChargeStep(e, dt);
+    const m = Math.hypot(e.x - x0, e.y - y0);
+    mkFootsteps(e, m); mkBob(e, m, dt);
+    return;
+  }
+  // 一頓一頓的步伐：這一幀的速度照「走到這一步的哪裡」變快變慢（跨出去快、落腳慢）
+  const sp = e.speed;
+  e.speed = sp * mkGait(e);
+  try { mkStep(e, dt); } finally { e.speed = sp; }
+  const moved = Math.hypot(e.x - x0, e.y - y0);
+  mkFootsteps(e, moved);
+  mkBob(e, moved, dt);
+}
+// 走到這一步的哪裡（0＝剛落腳 → 1＝下一步落腳）→ 速度倍數
+function mkGait(e) {
+  const F = MILKFISH_KING_FX, k = Math.min(1, (e.mk.stepDist || 0) / F.stepEvery);
+  return (F.gaitMin + (1 - F.gaitMin) * Math.sin(Math.PI * k)) * MK_GAIT_NORM;
+}
+// 身體上下起伏：跨步時抬高、落腳時落到地上；停下來慢慢放回地面（slimeLift：render.js 畫怪物時往上抬幾像素）
+function mkBob(e, moved, dt) {
+  const F = MILKFISH_KING_FX;
+  if (moved > .05) e.slimeLift = Math.sin(Math.PI * Math.min(1, (e.mk.stepDist || 0) / F.stepEvery)) * F.bobHeight;
+  else e.slimeLift = Math.max(0, (e.slimeLift || 0) - dt * 30);
+}
+// 攻擊力：核心在肚子裡就乘上倍數（咬人、打建築、碰到隊友），吐出來就恢復
+function mkApplyAtk(e) {
+  const b = e.mk.baseDmg, k = mkAtk(e);
+  if (!b) return;
+  e.playerDamage = Math.round(b.p * k); e.sentryDamage = Math.round(b.s * k); e.buildingDamage = Math.round(b.b * k);
+}
+// ---- 核心在肚子裡：腳下的腐蝕池 ----
+// 落腳時（mkFootsteps）、站著不動時（每隔一陣子）在腳下鋪一攤；附近已經有一攤還很新，就只把它的時間補滿
+function mkDropPool(e) {
+  const C = mkCfg(e), mk = e.mk, R = C.acidPoolR * CELL, x = e.x, y = e.y + 14;
+  mk.poolT = C.acidPoolLife * .5;
+  const last = mk.lastPool;
+  if (last && (G.acidPools || []).includes(last) && last.t > 0 && Math.hypot(last.x - x, last.y - y) < R * .6) { last.t = last.t0; return; }
+  const blobs = [];
+  for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * R * .5, dy: (Math.random() * 2 - 1) * R * .35, rr: R * (.55 + Math.random() * .5) });
+  const floor = typeof actorFloor === 'function' ? actorFloor(e) : 0;
+  const pool = { x, y, floor, r: R, t: C.acidPoolLife, t0: C.acidPoolLife, dps: C.acidPoolDps, blobs, fizz: 0, noEnemy: true, mkKing: true };   // noEnemy：怪物踩到不扣血（跟異質核心腳下的一樣，js/game.js）
+  (G.acidPools = G.acidPools || []).push(pool);
+  mk.lastPool = pool;
+  if (typeof addScorchMark === 'function') addScorchMark(x, y, R, pool, 'corrosion');   // 地上焦痕（腐蝕池還在時透紫光，js/attack-fx.js）
+  if (typeof pushCorrosionMist === 'function') for (let i = 0; i < 3; i++) { const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.4, sp = 6 + Math.random() * 12; pushCorrosionMist(x + (Math.random() * 2 - 1) * R * .4, y + (Math.random() * 2 - 1) * R * .2, Math.cos(a) * sp, Math.sin(a) * sp); }
+}
+function mkPoolUnderFeet(e, dt) {
+  e.mk.poolT -= dt;
+  if (e.mk.poolT <= 0) mkDropPool(e);
 }
 function mkStep(e, dt) {
   const C = mkCfg(e), F = MILKFISH_KING_FX, mk = e.mk, p = G.player;
@@ -140,12 +280,13 @@ function mkStep(e, dt) {
       if (see || e.hp < e.maxhp || (core && core.awake)) mkRoar(e);
       return;
     }
-    case 'roar': mfPose(e, 'attack', p ? p.x : null); if (mk.t <= 0) mkSet(e, mk.core && !mk.core.dead && !mk.coreIn ? 'toCore' : 'hunt'); return;
+    case 'roar': mkFront(e); if (mk.t <= 0) mkSet(e, mk.core && !mk.core.dead && !mk.coreIn ? 'toCore' : 'hunt'); return;
     case 'toCore': case 'rushCore': {   // 走過去（吐出來後：急著衝過去）把核心吞進肚子
       const core = mk.core;
       if (!core || core.dead || core.carried) { mkSet(e, 'hunt'); return; }
       mfPose(e, null);
       if (mkDist(core, e) <= CELL * 1.4) { mkSet(e, 'coreGulp', F.coreGulpTime); e.faceRight = core.x > e.x; return; }
+      if (mkStuck(e, core, dt)) { mkSet(e, 'hunt'); return; }   // 身體太寬走不到核心旁邊：先去做別的事，stuckSkip 秒後再試（不然會一直站著不動）
       const [gc, gr] = cellAt(core.x, core.y);
       const nav = enemyNavigate(e, gc, gr, dt * (mk.state === 'rushCore' ? C.rushSpeedMul : 1), 'mk-core:' + gc + ',' + gr, true);
       if (nav.blocker) mkBlocked(e, nav.blocker, dt);
@@ -198,9 +339,20 @@ function mkStep(e, dt) {
       return;
     }
     case 'recover': mfPose(e, null); if (mk.t <= 0) mkSet(e, 'hunt'); return;
+    case 'chargeEnd': mfPose(e, 'attack', mk.chargeEndX); if (mk.t <= 0) mkSet(e, 'recover', .3); return;
+    case 'jumpWind': mkJumpWindStep(e); return;   // 起跳前蹲低發抖（跟著目標調整落點）   // 衝撞收尾：張嘴撲咬的樣子停一下
+    case 'chargeWind': {   // 衝撞蓄力：前段跟著目標轉向，最後 0.2 秒鎖定方向
+      const tg = mk.charge && mk.charge.target;
+      if (tg && mk.t > .2 && tg.hp > 0) { const dx = tg.x - e.x, dy = tg.y - e.y, d = Math.hypot(dx, dy) || 1; mk.charge.dir = { x: dx / d, y: dy / d }; }
+      e.faceRight = mk.charge.dir.x > 0;
+      mfPose(e, Math.floor(mk.t * 10) % 2 ? 'smile-01' : 'smile-02');
+      if (mk.t <= 0) { mk.charge.left = C.chargeDist * CELL; mk.charge.hit = new Set(); mkSet(e, 'charge'); if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-charge'); }
+      return;
+    }
     case 'return': {   // 被引開太遠：走回原位
       mfPose(e, null);
-      if (mkDist(e, mk.home) <= C.leash * CELL * .5) { mkSet(e, 'hunt'); return; }
+      if (mkArea(e) ? mkInRange(e, e) : mkDist(e, mk.home) <= C.leash * CELL * .5) { mkSet(e, 'hunt'); return; }   // 回到能去的那一區就好（沒設活動區：走回守備範圍的一半）
+      if (mkStuck(e, mk.home, dt)) { mk.home = { x: e.x, y: e.y }; mkSet(e, 'hunt'); return; }   // 走不回去（被窄道擋住）：就把現在的位置當原位，不要一直站著
       const [hc, hr] = cellAt(mk.home.x, mk.home.y);
       const nav = enemyNavigate(e, hc, hr, dt * 1.2, 'mk-home', true);
       if (nav.blocker) mkBlocked(e, nav.blocker, dt);
@@ -217,7 +369,7 @@ function mkHunt(e, dt) {
   // 1. 血量掉到一段：把核心吐出來（表演）
   if (mk.coreIn && e.hp / e.maxhp <= mk.nextCoreSpit) { mk.nextCoreSpit -= C.coreSpitHp; mkSet(e, 'coreWind', F.coreSpitWindup); return; }
   // 核心還在地上（例如吞的時候被打斷）：先去吞回來
-  if (mk.core && !mk.core.dead && !mk.coreIn && !mk.core.carried && !mkCoreFlying() && mk.core.awake) { mkSet(e, 'rushCore'); return; }
+  if (mk.core && !mk.core.dead && !mk.coreIn && !mk.core.carried && !mkCoreFlying() && mk.core.awake && !mkSkipped(e, mk.core)) { mkSet(e, 'rushCore'); return; }
   // 2. 含太久的隊友：吐出來
   const done = mk.prey.find(pr => pr.left <= 0);
   if (done) { mkStartSpit(e, { mate: done.t }, mkPick(mkSpitTargets(e, done.t))); return; }
@@ -227,7 +379,12 @@ function mkHunt(e, dt) {
     if (tg) { mkStartSpit(e, { item: mk.belly.shift() }, tg); return; }
   }
   // 太遠就回去
-  if (mkDist(e, mk.home) > C.leash * CELL) { mkSet(e, 'return'); return; }
+  if (!mkChaseOn(e) && !mkInRange(e, e)) { mkSet(e, 'return'); return; }   // 追人模式：由 mkChaseStep 自己走（跳）回水池
+  // 衝撞：時間到、有人在衝得到的距離 → 蓄力衝過去（一輪連續衝 chargeChain 次）
+  if (mk.chargeCd <= 0) {
+    const tg = mkChargeTarget(e);
+    if (tg) { mk.chargeLeft = C.chargeChain; mkStartCharge(e, tg); return; }
+  }
   // 溫特貼太近：咬一口
   if (p && p.hp > 0 && sameFloor(e, p) && mkDist(p, e) <= F.biteReach && mk.biteCd <= 0) { e.faceRight = p.x > e.x; mkSet(e, 'bite', F.biteWindup); return; }
   // 4. 嘴巴還有空位：去吞隊友
@@ -236,7 +393,7 @@ function mkHunt(e, dt) {
     if (!mate) {
       let bestD = C.noticeRange * CELL;
       for (const t of G.towers) {
-        if (!mkEdibleMate(e, t) || mkDist(t, mk.home) > C.leash * CELL) continue;
+        if (!mkEdibleMate(e, t) || !mkInRange(e, t) || (mkChaseOn(e) && !mkCanWalkTo(e, t))) continue;   // 追人模式：走不到的隊友交給下面的追人（跳過去）
         const d = mkDist(t, e);
         if (d <= bestD && hasLineOfSight(e.x, e.y, t.x, t.y)) { mate = t; bestD = d; }
       }
@@ -244,25 +401,66 @@ function mkHunt(e, dt) {
     mk.mate = mate;
     if (mate) {
       if (mkDist(mate, e) <= F.eatReach) { mk.aim = mate; e.faceRight = mate.x > e.x; mkSet(e, 'gulp', F.gulpWindup); return; }
-      mkGo(e, mate, dt, 'mk-mate');
+      if (mkStuck(e, mate, dt)) mk.mate = null;   // 走不過去：先放棄這個隊友，下一幀找別的事做
+      else mkGo(e, mate, dt, 'mk-mate');
       return;
     }
   }
   // 5. 附近有建築：去吃
-  const item = mk.item && mkEdibleItem(e, mk.item) ? mk.item : mkPickItem(e);
+  let item = mk.item && mkEdibleItem(e, mk.item) && !mkSkipped(e, mk.item) ? mk.item : mkPickItem(e);
+  const chaseTg = mkChaseOn(e) ? mkChaseTarget(e) : null;   // 追人模式：建築要比要追的人近、而且 5 格內才先吃
+  if (item && chaseTg && mkDist(mkItemCenter(item), e) > Math.min(mkDist(chaseTg, e), MILKFISH_KING_FX.chaseEatNear * CELL)) item = null;
+  if (item && mkChaseOn(e) && !mkCanWalkTo(e, mkItemCenter(item))) { (mk.skip = mk.skip || new Map()).set(item, mkClock() + MILKFISH_KING_FX.stuckSkip); item = null; }   // 追人模式：走不到的建築（例如軌道另一邊）不去吃，不然會一直換著走不到的建築走，沒空回水池
   mk.item = item;
   if (item) {
     const ic = mkItemCenter(item);
     if (mkDist(ic, e) <= F.itemReach * CELL + ((item.w || 1) - 1) * CELL * .5) { mkStartChew(e, item); return; }
+    if (mkStuck(e, item, dt)) { mk.item = null; return; }   // 走不過去：先放棄這個建築
     const nav = enemyNavigate(e, item.c, item.r + (item.h || 1) - 1, dt, 'mk-item:' + item.c + ',' + item.r, true);
     if (nav.blocker) mkBlocked(e, nav.blocker, dt);
     else if (nav.reached) moveEnemyToward(e, ic, dt);
     return;
   }
+  // 6a. 追人模式：追最近的人（走不到就跳過去），沒人就回水池
+  if (mkChaseOn(e) && mkChaseStep(e, dt)) return;
   // 6. 溫特看得到：走過去
-  if (p && p.hp > 0 && sameFloor(e, p) && mkDist(p, e) <= C.noticeRange * 1.5 * CELL && hasLineOfSight(e.x, e.y, p.x, p.y)) { mkGo(e, p, dt, 'mk-player'); return; }
+  if (p && p.hp > 0 && sameFloor(e, p) && !mkSkipped(e, p) && mkDist(p, e) <= C.noticeRange * 1.5 * CELL && hasLineOfSight(e.x, e.y, p.x, p.y)) {
+    if (mkDist(p, e) <= F.biteReach || !mkStuck(e, p, dt)) { mkGo(e, p, dt, 'mk-player'); return; }   // 已經貼在旁邊（只是咬人還在冷卻）不算卡住   // 看得到溫特卻走不過去（例如隔著欄杆）：stuckGive 秒後先放棄，去晃一晃，不要一直站著
+  }
+  // 6b. 嘴裡含著隊友、附近又沒人：主動去找人準備吐（以前會在原位慢慢晃、停很久，看起來像卡住）
+  if (mk.prey.length && mkSeekSpitTarget(e, dt)) return;
   // 7. 沒事做：在原位附近晃
   mkWander(e, dt);
+}
+// ---- 走不過去就放棄：一直沒有更靠近目標（例如身體太寬擠不進窄道）超過 stuckGive 秒，就先不理牠 stuckSkip 秒，去做別的事 ----
+const mkClock = () => (G && G.battleTime) || 0;
+function mkSkipped(e, t) { const sk = e.mk && e.mk.skip; return !!(sk && sk.has(t) && sk.get(t) > mkClock()); }
+function mkStuck(e, t, dt) {
+  const mk = e.mk, F = MILKFISH_KING_FX, d = mkDist(t.x != null ? t : mkItemCenter(t), e);
+  if (!mk.stuck || mk.stuck.t !== t) mk.stuck = { t, best: d, time: 0 };
+  if (d < mk.stuck.best - 6) { mk.stuck.best = d; mk.stuck.time = 0; return false; }
+  mk.stuck.time += dt;
+  if (mk.stuck.time < F.stuckGive) return false;
+  (mk.skip = mk.skip || new Map()).set(t, mkClock() + F.stuckSkip);
+  mk.stuck = null;
+  return true;
+}
+// 嘴裡含著隊友時要找人吐：離原位守備範圍內最近的溫特或隊友（看不到也走過去，找到看得到、在射程內的位置就停下來）
+function mkSeekSpitTarget(e, dt) {
+  const C = mkCfg(e), mk = e.mk, p = G.player, cands = [];
+  if (p && p.hp > 0 && sameFloor(e, p)) cands.push(p);
+  for (const t of G.towers) if (t.hp > 0 && !t.eatenBy && !t.vineCap && sameFloor(e, t)) cands.push(t);
+  let best = null, bestD = Infinity;
+  for (const t of cands) {
+    if (mkSkipped(e, t) || !mkInRange(e, t)) continue;
+    const d = mkDist(t, e);
+    if (d < bestD) { best = t; bestD = d; }
+  }
+  if (!best) return false;
+  if (bestD <= C.spitRange * CELL * .6 && hasLineOfSight(e.x, e.y, best.x, best.y)) { e.faceRight = best.x > e.x; return true; }   // 夠近了：站著等吐
+  if (mkStuck(e, best, dt)) return false;
+  mkGo(e, best, dt, 'mk-seek');
+  return true;
 }
 function mkGo(e, t, dt, key) {
   const [gc, gr] = cellAt(t.x, t.y);
@@ -279,14 +477,29 @@ function mkPickItem(e) {
   const C = mkCfg(e), mk = e.mk;
   let best = null, bestD = C.eatSense * CELL;
   for (const o of G.obstacles) {
-    if (!mkEdibleItem(e, o)) continue;
+    if (!mkEdibleItem(e, o) || mkSkipped(e, o)) continue;
     const c = mkItemCenter(o), d = mkDist(c, e);
-    if (d < bestD && mkDist(c, mk.home) <= C.leash * CELL) { best = o; bestD = d; }
+    if (d < bestD && mkInRange(e, c)) { best = o; bestD = d; }
   }
   return best;
 }
 function mkWander(e, dt) {
-  const mk = e.mk, F = MILKFISH_KING_FX;
+  const mk = e.mk, F = MILKFISH_KING_FX, A = mkArea(e);
+  if (A) {   // 有活動區：在整區裡到處逛（走過去的路上看到建築、石頭就會去吃）
+    if (mk.spot) {
+      if (mkDist(mk.spot, e) <= CELL || mkStuck(e, mk.spot, dt)) { mk.spot = null; mk.wait = .5 + Math.random() * 1.2; return; }
+      mkGo(e, mk.spot, dt * F.roamSpeed, 'mk-roam');
+      return;
+    }
+    mk.wait -= dt;
+    if (mk.wait > 0) return;
+    for (let i = 0; i < 20; i++) {
+      const [c, r] = A.list[Math.floor(Math.random() * A.list.length)], [x, y] = center(c, r), d = mkDist({ x, y }, e) / CELL;
+      if (d >= F.roamDist[0] && d <= F.roamDist[1] && !enemyBlocked(x, y, e)) { mk.spot = { x, y }; break; }
+    }
+    mk.wait = .5;
+    return;
+  }
   if (mk.spot) {
     const moved = moveEnemyToward(e, mk.spot, dt * .5);
     if (!moved || mkDist(mk.spot, e) <= 3) { mk.spot = null; mk.wait = 1.5 + Math.random() * 2; }
@@ -309,12 +522,113 @@ function mkRoar(e) {
   e.alertT = typeof ENEMY_ALERT_TIME !== 'undefined' ? ENEMY_ALERT_TIME : 1;
   const core = mk.core;
   if (core && !core.awake && !core.dead) { wakeCore(core); core.lastHp = core.hp; }
-  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '甦醒了', '牠要把核心吞進肚子裡！', '#8fd3ff');
+  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '甦醒了', '', '#8fd3ff');
   systemNotice(e.eliteName + '甦醒了！', true);
   flash('咕嚕嚕——！！', e.x, e.y - e.drawHeight - 10, '#8fd3ff');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#8fd3ff' : '#ffffff' });
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 9, .06); else addShake(6);
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 9, .06); else addShake(6);
   if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-roar');
+}
+
+// ---- 衝撞（跟鳥頭大隊長類似，但撞到牆不會暈）----
+// 挑要衝的人：看得到、在 3～衝撞距離內的溫特優先，沒有就挑隊友
+function mkChargeTarget(e) {
+  const C = mkCfg(e), p = G.player, R = C.chargeDist * CELL;
+  const ok = a => a && a.hp > 0 && !a.eatenBy && !a.vineCap && sameFloor(e, a) && mkInRange(e, a) && mkDist(a, e) >= 3 * CELL && mkDist(a, e) <= R && hasLineOfSight(e.x, e.y, a.x, a.y);
+  if (ok(p)) return p;
+  return mkPick(G.towers.filter(ok));
+}
+function mkStartCharge(e, tg) {
+  const C = mkCfg(e), mk = e.mk, dx = tg.x - e.x, dy = tg.y - e.y, d = Math.hypot(dx, dy) || 1;
+  mk.charge = { target: tg, dir: { x: dx / d, y: dy / d } };
+  e.faceRight = dx > 0;
+  mkSet(e, 'chargeWind', C.chargeWindup);
+  G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 6, r2: 40, life: .3, life0: .3, color: '#d9d2c0' });
+}
+// 衝的時候每幀：一點一點往前推（4 像素一步），碰到牆、建築就停；路上撞到的人受傷、被撞飛
+function mkChargeStep(e, dt) {
+  const C = mkCfg(e), mk = e.mk, ch = mk.charge;
+  if (!ch) { mkSet(e, 'hunt'); return; }
+  // 跑步用正面走路圖（左右腳輪流，換腳跟腳步震動同步，mkFootsteps 管）；快衝到底才換張嘴的攻擊圖
+  if (ch.left <= C.chargeDist * CELL * MILKFISH_KING_FX.chargeBiteAt) mfPose(e, 'attack', e.x + ch.dir.x * 100);
+  else mfPose(e, null);
+  let move = Math.min(ch.left, C.chargeSpeed * dt), stop = false;
+  ch.left -= move;
+  while (move > 0 && !stop) {
+    const s = Math.min(4, move); move -= s;
+    const nx = e.x + ch.dir.x * s, ny = e.y + ch.dir.y * s;
+    if (enemyBlocked(nx, ny, e) || !mkInRange(e, { x: nx, y: ny }) || (typeof mrtTrackCell === 'function' && mrtTrackCell(...cellAt(nx, ny)))) { stop = true; break; }   // 軌道上（含停著的列車車廂）：停下來，牠太大隻進不去   // 碰到牆、建築，或要衝出活動區：停下來（不暈）
+    e.x = nx; e.y = ny;
+    mkChargeHits(e, ch);
+  }
+  if (Math.random() < .5) G.effects.push({ particle: true, kind: 'spark', x: e.x - ch.dir.x * 20 + (Math.random() * 2 - 1) * 14, y: e.y + 12, vx: -ch.dir.x * 70 + (Math.random() * 2 - 1) * 30, vy: -ch.dir.y * 70 - 15, r: 2 + Math.random() * 2.5, life: .35, life0: .35, color: '#b9b2a2' });   // 腳下噴灰
+  if (stop || ch.left <= 0) {
+    if (stop) { if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 6, .04); G.effects.push({ ring: true, x: e.x + ch.dir.x * 30, y: e.y + 6, r: 6, r2: 44, life: .3, life0: .3, color: '#c9c2b0' }); }
+    mk.chargeLeft = (mk.chargeLeft || 1) - 1;
+    const next = mk.chargeLeft > 0 ? mkChargeTarget(e) : null;
+    if (next) { mkStartCharge(e, next); mk.t = C.chargeWindup * .6; return; }   // 連衝：下一次蓄力短一點
+    mk.charge = null; mk.chargeCd = C.chargeCooldown;
+    mk.chargeEndX = e.x + ch.dir.x * 100;
+    mkSet(e, 'chargeEnd', MILKFISH_KING_FX.chargeEndHold);
+  }
+}
+function mkChargeHits(e, ch) {
+  const C = mkCfg(e), p = G.player, R = (e.drawWidth || 220) * .22, atk = mkAtk(e), dmg = C.chargeDamage * atk;
+  if (p && p.hp > 0 && !ch.hit.has(p) && !p.vineCap && sameFloor(e, p) && mkDist(p, e) <= R) {
+    ch.hit.add(p);
+    if (!(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
+      const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg;
+      p.hp = Math.max(0, p.hp - hurt); p.hitT = .35; G.damageVignetteT = .5;
+      flashDmg('-' + Math.round(hurt), p.x, p.y - 46, '#ff6b6b');
+      if (typeof playPlayerHit === 'function') playPlayerHit(1, true);
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + e.eliteName + '撞飛'); }
+    }
+    if (typeof knockActor === 'function') knockActor(p, ch.dir.x, ch.dir.y, C.chargeKnock * CELL, .36);
+    mkChargeHitFx(e, p);
+  }
+  for (const t of G.towers) {
+    if (t.hp <= 0 || t.eatenBy || t.vineCap || ch.hit.has(t) || !sameFloor(e, t) || mkDist(t, e) > R) continue;
+    ch.hit.add(t);
+    const hurt = dmg * (1 - (typeof sentryDefense === 'function' ? sentryDefense(t) : 0));
+    t.hp = Math.max(0, t.hp - hurt); t.hitT = Math.max(t.hitT || 0, .3);
+    flashDmg('-' + Math.round(hurt), t.x, t.y - 30, '#ff8f8f');
+    if (typeof knockActor === 'function') knockActor(t, ch.dir.x, ch.dir.y, C.chargeKnock * CELL * .8, .36);
+    t.navPath = null; t.navGoal = null;
+    if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+    mkChargeHitFx(e, t);
+  }
+}
+function mkChargeHitFx(e, a) {
+  G.effects.push({ ring: true, x: a.x, y: a.y - 10, r: 6, r2: 40, life: .25, life0: .25, color: '#ffd27a' });
+  if (typeof bossImpact === 'function') bossImpact(a.x, a.y, 7, .06);
+  if (typeof sfxAt === 'function') sfxAt('knock2', a.x, a.y, 1, 'milkfish-king-charge-hit');
+}
+
+// ---- 暴怒：血量掉到 enrageHp 以下，吼一聲、全身泛紅，吐東西的間隔變短（enrageSpitCooldown）----
+function mkEnrage(e) {
+  const mk = e.mk;
+  mk.enraged = true;
+  mk.spitCd = Math.min(mk.spitCd, mkCfg(e).enrageSpitCooldown);
+  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '暴怒了', '', '#ff6b5b');
+  flash('咕嚕嚕嚕——！！', e.x, e.y - e.drawHeight - 10, '#ff6b5b');
+  for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 120 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ff6b5b' : '#ffffff' });
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 9, .06); else addShake(6);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-enrage');
+}
+// ---- 核心護盾：牠活著時，核心（吐在地上那段時間）少受 coreShield 的傷害；在肚子裡一滴都不扣 ----
+// （js/game.js 判定核心破掉前、js/anomalous-core.js 的核心更新前都會呼叫，跟其他 BOSS 的核心護盾一樣）
+function mkShieldCore() {
+  const I = G.mkIntro, ic = I && I.e && I.e.mk && I.e.mk.core;   // 還在水池裡、登場表演中：核心一滴血都不扣（不然趁牠還沒出來就打破了）
+  if (ic && !ic.dead && I.phase !== 'done' && ic.hp < ic.lastHp) ic.hp = ic.lastHp;
+  for (const e of mkKings()) {
+    const core = e.mk && e.mk.core;
+    if (!core || core.dead || !core.awake || !(core.hp < core.lastHp) || !mkAlive(e)) continue;
+    if (core.carried) { core.hp = core.lastHp; continue; }
+    core.hp = core.lastHp - (core.lastHp - core.hp) * (1 - mkCfg(e).coreShield);
+    core.lastHp = core.hp; core.hitT = .16;
+    const now = performance.now();
+    if (now > (G.mkShieldNoteAt || 0)) { G.mkShieldNoteAt = now + 2500; flash('核心護盾', core.x, core.y - CORE.h - 14, '#8fd3ff'); }   // 偶爾提示一下
+  }
 }
 
 // ---- 核心：吞進肚子、吐出來 ----
@@ -325,7 +639,8 @@ function mkSwallowCore(e) {
   core.carried = true; core.hidden = true; core.x = e.x; core.y = e.y; core.lastHp = core.hp;   // carried＋hidden：打不到、炸不到、不畫（js/game.js、js/render.js）
   if (!core.awake) { wakeCore(core); core.lastHp = core.hp; }
   G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .45, r: 8, r2: 60, life: .4, life0: .4, color: '#c78bff' });
-  if (typeof coreBanner === 'function') coreBanner('核心被吞進肚子裡了', '打倒' + e.eliteName + '，或趁牠把核心吐出來的時候打！', '#c78bff');
+  if (typeof coreBanner === 'function') coreBanner('核心被吞進肚子裡了', '', '#c78bff');
+  mkApplyAtk(e); mkDropPool(e);
   flash('咕嚕！', e.x, e.y - e.drawHeight - 8, '#c78bff');
   if (typeof sfxAt === 'function') sfxAt('milkfishGulp', e.x, e.y, 1.3, 'milkfish-king-core');
   addShake(3);
@@ -335,6 +650,7 @@ function mkSpitCore(e) {
   const mk = e.mk, core = mk.core, F = MILKFISH_KING_FX;
   if (!core || core.dead || !mk.coreIn) return;
   mk.coreIn = false;
+  mkApplyAtk(e);   // 攻擊力恢復、不再鋪腐蝕池
   // 找一個走得到的落點：離牠 coreSpitDist 格，盡量在牠前面（離溫特近的那邊）
   const p = G.player;
   let to = null;
@@ -342,7 +658,7 @@ function mkSpitCore(e) {
     const base = p ? Math.atan2(p.y - e.y, p.x - e.x) : 0, a = base + (Math.random() * 2 - 1) * (i < 20 ? 1 : Math.PI);
     const d = (F.coreSpitDist[0] + Math.random() * (F.coreSpitDist[1] - F.coreSpitDist[0])) * CELL;
     const x = e.x + Math.cos(a) * d, y = e.y + Math.sin(a) * d, [c, r] = cellAt(x, y);
-    if (inGrid(c, r) && !isWall(c, r) && !G.grid[c + ',' + r] && !enemyBlocked(x, y) && hasLineOfSight(e.x, e.y, x, y)) to = { x, y };
+    if (inGrid(c, r) && !isWall(c, r) && !G.grid[c + ',' + r] && !enemyBlocked(x, y) && (!e.wide || enemyWideAt(c, r)) && hasLineOfSight(e.x, e.y, x, y)) to = { x, y };   // enemyWideAt：牠身體很寬，落點要是牠走得過去的寬地方，不然撿不回來
   }
   if (!to) to = { x: e.x, y: e.y + CELL };
   core.carried = true; core.hidden = true;   // 飛在空中：還打不到（落地才打得到）
@@ -355,8 +671,8 @@ function mkCoreLand(s) {
   const core = s.core;
   core.x = s.x1; core.y = s.y1; core.carried = false; core.hidden = false; core.lastHp = core.hp; core.hitT = .2;
   G.effects.push({ ring: true, x: core.x, y: core.y + 10, r: 6, r2: 50, life: .4, life0: .4, color: '#c78bff' });
-  if (typeof nearbyImpact === 'function') nearbyImpact(core.x, core.y, 6, .05);
-  if (typeof coreBanner === 'function') coreBanner('核心掉出來了', '趁牠還沒吞回去，快打核心！', '#ffd27a');
+  if (typeof bossImpact === 'function') bossImpact(core.x, core.y, 6, .05);
+  if (typeof coreBanner === 'function') coreBanner('核心掉出來了', '', '#ffd27a');
   if (typeof sfxAt === 'function') sfxAt('knock2', core.x, core.y, 1, 'milkfish-king-core-land');
 }
 
@@ -410,7 +726,7 @@ function mkStartSpit(e, what, target) {
 function mkLaunch(e) {
   const mk = e.mk, C = mkCfg(e), s = mk.spit; mk.spit = null;
   if (!s) return;
-  mk.spitCd = C.spitCooldown;
+  mk.spitCd = mk.enraged ? C.enrageSpitCooldown : C.spitCooldown;   // 暴怒：吐得更快
   // 落點：鎖定的位置附近，要是落在牆裡就往牠這邊拉回來
   let x1 = s.x + (Math.random() - .5) * CELL * .6, y1 = s.y + (Math.random() - .5) * CELL * .6;
   const ok = (x, y) => { const [c, r] = cellAt(x, y); return inGrid(c, r) && !isWall(c, r) && !(s.mate && typeof sentryBlocked === 'function' && sentryBlocked(x, y)); };
@@ -418,7 +734,7 @@ function mkLaunch(e) {
   if (!ok(x1, y1)) { x1 = s.x; y1 = s.y; }
   const mouth = { x: e.x + (e.faceRight ? 1 : -1) * e.drawWidth * .12, y: e.y - e.drawHeight * .3 };
   if (s.mate) mkLaunchMate(e, s.mate, x1, y1);
-  else G.mkShots.push({ kind: 'item', king: e, o: s.item, x0: mouth.x, y0: mouth.y, x1, y1, t: 0, T: C.spitFlight, peak: 80 + mkDist({ x: x1, y: y1 }, e) * .15, spin: 0, spinV: (Math.random() < .5 ? -1 : 1) * (6 + Math.random() * 4) });
+  else G.mkShots.push({ kind: 'item', king: e, atk: mkAtk(e), o: s.item, x0: mouth.x, y0: mouth.y, x1, y1, t: 0, T: C.spitFlight, peak: 80 + mkDist({ x: x1, y: y1 }, e) * .15, spin: 0, spinV: (Math.random() < .5 ? -1 : 1) * (6 + Math.random() * 4) });
   G.effects.push({ ring: true, x: mouth.x, y: mouth.y, r: 6, r2: 36, life: .25, life0: .25, color: '#cfe9ff' });
   for (let i = 0; i < 6; i++) G.effects.push({ particle: true, kind: 'spark', x: mouth.x, y: mouth.y, vx: (x1 - e.x) * .3 + (Math.random() - .5) * 80, vy: (y1 - e.y) * .3 - 30 - Math.random() * 40, r: 1.5 + Math.random() * 1.5, life: .35, life0: .35, color: '#9fd6ff' });   // 口水
   if (typeof sfxAt === 'function') sfxAt('milkfishKingSpit', e.x, e.y, 1.1, 'milkfish-king-spit');
@@ -439,17 +755,22 @@ function mkLaunchMate(e, t, x1, y1) {
     x0: sx, y0: sy, hp: t.hp, camX: cam.x, camY: cam.y, topH: 0, lieSide: x1 >= sx ? 1 : -1, mkSpit: true };
   G.vineCaps.push(cap);
   t.vineCap = true; t.navPath = null; t.navGoal = null; t.target = null;
-  G.mkShots.push({ kind: 'mate', king: e, t, cap, x0: sx, y0: sy, x1, y1, t0: 0, tt: 0, T });
+  G.mkShots.push({ kind: 'mate', king: e, atk: mkAtk(e), t, cap, x0: sx, y0: sy, x1, y1, t0: 0, tt: 0, T });
   if (typeof sentryStatus === 'function') sentryStatus(t, '被吐出來了！', '#ffd27a', true);
 }
 
 // ---- 每幀（milkfish-kid.js 的 updateMilkfish 呼叫）：嘴裡的人跟著走、飛行中的東西、BOSS 倒下 ----
 function updateMilkfishKing(dt) {
   if (!G) return;
+  mkIntroUpdate(dt);   // 從水池登場的表演
   for (const e of [...mkKings()]) {
     const mk = e.mk;
     if (!mkAlive(e)) { mkDown(e); continue; }
-    for (const pr of mk.prey) { pr.t.x = e.x; pr.t.y = e.y; pr.t.moving = false; }
+    for (const pr of mk.prey) {
+      pr.t.x = e.x; pr.t.y = e.y; pr.t.moving = false;
+      pr.talkT = (pr.talkT ?? MILKFISH_KING_FX.preyTalkEvery) - dt;   // 隔一陣子在肚子裡再冒一句（剛吞下去那句由 mkGulpMate 說）
+      if (pr.talkT <= 0) { pr.talkT = MILKFISH_KING_FX.preyTalkEvery; if (!(pr.t.say && pr.t.say.text) && typeof mateHurtSay === 'function') mateHurtSay(pr.t, 'swallowed'); }
+    }
     mk.prey = mk.prey.filter(pr => pr.t.eatenBy === e && G.towers.includes(pr.t));
     for (const t of G.towers) if (t.eatenBy === e && !mk.prey.some(pr => pr.t === t)) mfRelease(t, true);   // 保險：標記被吞、卻不在嘴裡名單上的人，直接放出來（不會永遠卡住）
     if (mk.coreIn && mk.core) {
@@ -457,7 +778,17 @@ function updateMilkfishKing(dt) {
       else { mk.core.x = e.x; mk.core.y = e.y; mk.core.carried = true; mk.core.hidden = true; mk.core.lastHp = mk.core.hp; }
     }
   }
+  // 腳步的震動：維持一小段時間、慢慢變小（mkRumble 設定的）
+  const Rb = G.mkRumble;
+  if (Rb && Rb.t > 0) { Rb.t -= dt; const k = Math.max(0, Rb.t / Rb.dur); if (k > 0) shakeAmt = Math.max(shakeAmt, Rb.amt * (.35 + .65 * k)); }
   mkUpdateShots(dt);
+}
+// 震一下：amt 像素、維持 dur 秒（一般的 addShake 一瞬間就衰減完了，巨物的腳步要震久一點才感覺得到）
+function mkRumble(amt, dur) {
+  const Rb = G.mkRumble;
+  if (Rb && Rb.t > 0 && Rb.amt * Rb.t / Rb.dur > amt) return;   // 正在震更大的：不要蓋掉
+  G.mkRumble = { amt, t: dur, dur };
+  addShake(amt);
 }
 function mkUpdateShots(dt) {
   const list = G.mkShots || [];
@@ -478,15 +809,62 @@ function mkUpdateShots(dt) {
     if (s.t >= s.T) { s.done = true; if (s.kind === 'core') mkCoreLand(s); else mkItemLand(s); }
   }
   G.mkShots = list.filter(s => !s.done);
+  mkUpdateShards(dt);
+}
+// ---- 吐出來的建築碎掉：把建築的圖切成幾塊，往外噴、翻滾、落地彈兩下、慢慢淡掉 ----
+function mkShatter(o, x, y) {
+  const S = MILKFISH_KING_FX.shards, img = mkItemImage(o);
+  const w = (o.w || 1) * CELL * .9, h = (o.h || 1) * CELL * .9, pw = w / S.cols, ph = h / S.rows;
+  const list = G.mkShards = G.mkShards || [];
+  for (let r = 0; r < S.rows; r++) for (let c = 0; c < S.cols; c++) {
+    const ox = (c + .5) * pw - w / 2, z = h - (r + .5) * ph;   // 這一塊原本在建築的哪裡（左右位置、離地多高）
+    const a = Math.atan2(-z * .3, ox || (Math.random() - .5)) + (Math.random() * 2 - 1) * .5, sp = 70 + Math.random() * 110;
+    list.push({ img, sx: c / S.cols, sy: r / S.rows, sw: 1 / S.cols, sh: 1 / S.rows, pw, ph, x: x + ox, y: y + (Math.random() * 2 - 1) * 4, z,
+      vx: Math.cos(a) * sp, vy: (Math.random() * 2 - 1) * 40, vz: 140 + Math.random() * 180 - r * 30,
+      rot: 0, vr: (Math.random() * 2 - 1) * 9, t: 0, T: S.life + Math.random() * .4, bounce: 0 });
+  }
+  while (list.length > 120) list.shift();
+  for (let i = 0; i < 6; i++) G.effects.push({ particle: true, kind: 'spark', x: x + (Math.random() * 2 - 1) * w * .4, y: y - Math.random() * h * .6, vx: (Math.random() * 2 - 1) * 90, vy: -30 - Math.random() * 60, r: 2.5 + Math.random() * 2.5, life: .5, life0: .5, color: '#bdb5a3' });   // 碎掉時的灰塵
+}
+function mkUpdateShards(dt) {
+  const S = MILKFISH_KING_FX.shards, list = G.mkShards || [];
+  for (const p of list) {
+    p.t += dt;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+    p.vz -= S.gravity * dt; p.z += p.vz * dt;
+    if (p.z <= 0) {   // 碰到地面：彈兩下，之後躺在地上滑一下停住
+      p.z = 0;
+      if (p.bounce < 2 && p.vz < -60) { p.vz = -p.vz * .35; p.vx *= .5; p.vy *= .5; p.vr *= .5; p.bounce++; }
+      else { p.vz = 0; p.vx *= Math.max(0, 1 - dt * 8); p.vy *= Math.max(0, 1 - dt * 8); p.vr = 0; }
+    }
+  }
+  G.mkShards = list.filter(p => p.t < p.T);
+}
+function mkDrawShards(ctx) {
+  for (const p of G.mkShards || []) {
+    const a = p.t > p.T - .4 ? Math.max(0, (p.T - p.t) / .4) : 1;
+    ctx.save();
+    ctx.globalAlpha = .22 * a; ctx.fillStyle = '#000';   // 地上的小影子
+    ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, p.pw * .4, p.pw * .15, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = a;
+    ctx.translate(p.x, p.y - p.z - p.ph / 2); ctx.rotate(p.rot);
+    const img = p.img;
+    if (img && img.naturalWidth) {
+      ctx.imageSmoothingEnabled = false;
+      const iw = img.naturalWidth, ih = img.naturalHeight;
+      ctx.drawImage(img, p.sx * iw, p.sy * ih, p.sw * iw, p.sh * ih, -p.pw / 2, -p.ph / 2, p.pw, p.ph);
+    } else { ctx.fillStyle = '#7a5a3a'; ctx.fillRect(-p.pw / 2, -p.ph / 2, p.pw, p.ph); }
+    ctx.restore();
+  }
 }
 // 隊友落地：自己摔傷（不會摔死），旁邊的人被砸到
 function mkMateLand(s) {
   const C = mkCfg(s.king), a = s.t, x = a.x, y = a.y;
-  const dmg = Math.min(C.mateLandDamage, Math.max(0, a.hp - 1));
+  const atk = s.atk || 1, dmg = Math.min(C.mateLandDamage * atk, Math.max(0, a.hp - 1));
   if (dmg > 0) { a.hp -= dmg; if (s.cap) s.cap.hp = a.hp; flashDmg('-' + Math.round(dmg), a.x, a.y - 50, '#ff6b6b'); }
-  mkSplash(s.king, x, y, C.spitDamage * .6, a);
+  mkSplash(s.king, x, y, C.spitDamage * .6 * atk, a);
   G.effects.push({ ring: true, x, y: y + 12, r: 6, r2: C.spitRadius * CELL, life: .35, life0: .35, color: '#cfe9ff' });
-  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 5, .05);
+  if (typeof bossImpact === 'function') bossImpact(x, y, 5, .05);
 }
 // 建築落地：依種類爆炸、漏油、起火或砸碎
 function mkItemLand(s) {
@@ -495,18 +873,20 @@ function mkItemLand(s) {
   o.c = c - Math.floor(((o.w || 1) - 1) / 2); o.r = r - ((o.h || 1) - 1); o.hp = 0;   // 落點：讓物品的「站立格」對在落點上
   const floorOf = typeof actorFloor === 'function' ? actorFloor(e) : undefined;
   const run = fn => typeof withBlastFloor === 'function' ? withBlastFloor(floorOf, fn) : fn();
-  mkSplash(e, x, y, C.spitDamage, null);
+  mkSplash(e, x, y, C.spitDamage * (s.atk || 1), null);
   G.effects.push({ ring: true, x, y: y + 6, r: 6, r2: C.spitRadius * CELL, life: .35, life0: .35, color: '#d9d2c0' });
   for (let i = 0; i < 10; i++) { const a = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 120; G.effects.push({ particle: true, kind: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 40, r: 2 + Math.random() * 2.5, life: .45, life0: .45, color: '#9a9283' }); }
-  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 6, .05); else addShake(4);
+  if (typeof bossImpact === 'function') bossImpact(x, y, 6, .05); else addShake(4);
   if (typeof sfxAt === 'function') sfxAt('knock2', x, y, 1.1, 'milkfish-king-land');
   const name = String(o.type || '') + ' ' + String((typeof mapTileById === 'function' && o.mapTileId && (mapTileById(o.mapTileId) || {}).name) || '');
   if (o.trap) {   // 地雷：落地就爆
     if (typeof detonateMineNow === 'function') run(() => detonateMineNow(o));
     return;
   }
-  if (typeof oilItem === 'function' && oilItem(o)) {   // 油桶、油箱、露營燈、瓦斯爐：當作被怪物打壞（油桶油箱漏油、燈起小火、瓦斯爐爆）
-    o.lastHitBy = 'monster';
+  mkShatter(o, x, y);   // 其他東西：碎成好幾塊往外飛
+  const oil = typeof oilItem === 'function' && oilItem(o);
+  if (oil) {   // 油桶、油箱、瓦斯爐：落地爆炸（'explosion'＝跟被爆炸波及一樣會炸開、起火，js/oil-barrels.js）；露營燈：燒一小團火
+    o.lastHitBy = oil.smallFire ? 'monster' : 'explosion';
     run(() => removeBarrier(o));
     return;
   }
@@ -549,21 +929,28 @@ function mkDown(e) {
   mk.coreIn = false;
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '核心掉出來了，趁現在打破核心！', '#8fd3ff');
   systemNotice(e.eliteName + '倒下了！核心掉出來了', true);
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 10, .08);
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 10, .08);
 }
 
+// 走路圖用第幾張：照「踩了幾步」決定，不用畫面自己累積的走路距離（那個會跟落腳差半步，換圖和震動就對不上）
+// render.js 的 monsterWalkFrame 用 floor(walkDist / walkStride) 選圖，所以把 walkDist 設成「步數 × 步長 ＋ 這一步走了多少」
+function mkSyncWalkFrame(e) { e.walkDist = e.mk.stepCount * e.walkStride + Math.min(e.walkStride - 1, e.mk.stepDist * .5); }
 // ---- 腳步：每一步震動、腳步聲、揚塵、小裂痕 ----
 function mkFootsteps(e, moved) {
   const F = MILKFISH_KING_FX, mk = e.mk, C = mkCfg(e);
   if (moved <= 0) return;
   mk.stepDist += moved;
+  mkSyncWalkFrame(e);
   if (mk.stepDist < F.stepEvery) return;
   mk.stepDist %= F.stepEvery;
+  mk.stepCount++; mkSyncWalkFrame(e);   // 落腳：走路圖換成另一隻腳（跟下面的震動、腳步聲同一刻）
   const p = G.player;
-  if (p) { const d = mkDist(p, e) / CELL, k = 1 - d / F.shakeRange; if (d < F.shakeRange) addShake(C.stepShake * (.2 + .8 * k * k)); }
-  e.hitSquashT = .08;
-  G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 6, r2: 40, life: .3, life0: .3, color: '#b9b2a2' });
-  (G.eliteCracks = G.eliteCracks || []).push({ x: e.x + (Math.random() * 2 - 1) * 8, y: e.y + 14, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .5, flip: Math.random() < .5 });   // 跟鳥頭大隊長共用的小裂痕（js/elite-bird-head.js 的 drawEliteGround）
+  if (p) { const d = mkDist(p, e) / CELL, R = bossShakeRange(), k = 1 - d / R; if (d < R) mkRumble(C.stepShake * (.2 + .8 * k * k), F.stepShakeTime); }   // 越近震越大
+  e.hitSquashT = .12;   // 落腳時身體被壓扁一下再彈回
+  G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 6, r2: 48, life: .32, life0: .32, color: '#b9b2a2' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);   // 跟鳥頭大隊長跑步一樣揚起一團煙塵（js/gourd-monkey.js）
+  if (mk.coreIn) mkDropPool(e);   // 核心在肚子裡：踩一步留一攤腐蝕池
+  (G.eliteCracks = G.eliteCracks || []).push({ size: .42, x: e.x + (Math.random() * 2 - 1) * 8, y: e.y + 14, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .5, flip: Math.random() < .5 });   // 跟鳥頭大隊長共用的小裂痕（js/elite-bird-head.js 的 drawEliteGround）
   if (G.eliteCracks.length > 40) G.eliteCracks.shift();
   for (let i = 0; i < 4; i++) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() * 2 - 1) * 22, y: e.y + 14, vx: (Math.random() * 2 - 1) * 70, vy: -20 - Math.random() * 30, r: 2 + Math.random() * 2.5, life: .35, life0: .35, color: '#a9a292' });
   if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 1.2, 'milkfish-king-step');
@@ -574,6 +961,10 @@ function mkFootsteps(e, moved) {
 function drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, frameImg) {
   const mk = e.mk; if (!mk) return;
   const now = performance.now() / 1000;
+  if (mk.enraged && frameImg && frameImg.naturalWidth && typeof flashSprite === 'function') {   // 暴怒：全身一明一暗泛紅光
+    const red = flashSprite(frameImg, '#ff3b2a');
+    if (red) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .18 + .14 * Math.sin(now * 7); ctx.drawImage(red, dx, dy, dw, dh); ctx.restore(); }
+  }
   if (mk.coreIn) {   // 肚子透出紫光（跟著心跳一樣慢慢脈動）
     const cx = dx + dw / 2, cy = dy + dh * .62, k = .55 + .45 * Math.sin(now * 3.2), R = dw * .3;
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
@@ -582,16 +973,15 @@ function drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, frameImg) {
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
-  // 嘴裡的隊友：一個在中間，兩個就左右分開
-  const n = mk.prey.length;
-  mk.prey.forEach((pr, i) => {
-    const off = n > 1 ? (i - (n - 1) / 2) * dw * .14 : 0;
-    if (typeof drawMilkfishPrey === 'function') drawMilkfishPrey(ctx, { mf: { prey: pr.t }, forceFrame: e.forceFrame, drawHeight: e.drawHeight, drawWidth: e.drawWidth }, dx + off, dy, dw, dh, frameImg);
-  });
-  // 王冠：畫在頭頂上（像素風的小金冠）
-  const s = Math.max(2, Math.round(dw / 60)), cw = 9 * s, cx = Math.round(dx + dw / 2 - cw / 2), cy = Math.round(dy - 5 * s + (e.forceFrame && /attack/.test(e.forceFrame) ? 0 : 2 * s));
+  // 吞進去的隊友：整個人看不見（不畫嘴裡的腳），說的話畫在肚子上（js/render.js 的 drawTower 呼叫 milkfishKingBellySpot）
+  mkDrawCrown(ctx, dx, dy, dw, !!(e.forceFrame && /attack/.test(e.forceFrame)));
+}
+// 王冠：畫在頭頂上（像素風的小金冠）；raised＝張嘴攻擊圖（頭比較高）；dark＝倒下時變黑的程度 0～1
+function mkDrawCrown(ctx, dx, dy, dw, raised, dark = 0) {
+  const s = Math.max(2, Math.round(dw / 60)), cw = 9 * s, cx = Math.round(dx + dw / 2 - cw / 2), cy = Math.round(dy - 5 * s + (raised ? 0 : 2 * s));
   const rows = ['1...1...1', '11.111.11', '111111111', '121212121', '111111111'];
   ctx.save();
+  if (dark > 0) ctx.filter = 'brightness(' + Math.max(0, 1 - dark).toFixed(2) + ')';
   for (let r = 0; r < rows.length; r++) for (let c = 0; c < 9; c++) {
     const ch = rows[r][c]; if (ch === '.') continue;
     ctx.fillStyle = ch === '2' ? '#e8423f' : r === 0 ? '#fff1a8' : '#f2c230';
@@ -599,6 +989,16 @@ function drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, frameImg) {
   }
   ctx.fillStyle = '#9a6a10'; ctx.fillRect(cx, cy + 5 * s, cw, s);
   ctx.restore();
+}
+// 倒下的屍體上的王冠（js/bird-head.js 的巨物倒下呼叫；座標已經轉到屍體腳底）
+function milkfishKingCorpseCrown(ctx, c, dark) { mkDrawCrown(ctx, -c.w / 2, -c.h, c.w, false, dark); }
+// 被吞進肚子的隊友說話泡泡要畫在哪裡：肚子的位置；吞了兩個就左右分開（js/render.js 的 drawTower 呼叫）
+function milkfishKingBellySpot(t) {
+  const e = t.eatenBy, mk = e && e.mk;
+  if (!mk) return null;
+  const n = mk.prey.length, i = Math.max(0, mk.prey.findIndex(pr => pr.t === t));
+  const off = n > 1 ? (i - (n - 1) / 2) * e.drawWidth * .32 : 0;
+  return { x: e.x + off, y: e.y - (e.drawHeight || 264) * .38 };
 }
 function mkItemImage(o) {
   if (o.mapTileId && typeof mapTileById === 'function' && typeof tileImage === 'function') { const img = tileImage(mapTileById(o.mapTileId)); if (img) return img; }
@@ -613,6 +1013,8 @@ function mkItemImage(o) {
 function drawMilkfishKingFx(ctx) {
   if (!G) return;
   const now = performance.now() / 1000;
+  mkDrawShards(ctx);   // 吐出來的建築碎片
+  // 衝撞蓄力：地上不畫路線（使用者要的，只看牠鼓起來發抖判斷）
   for (const e of mkKings()) {   // 鼓起來要吐：目標腳下的紅圈
     const s = e.mk && e.mk.state === 'spitWind' && e.mk.spit;
     if (s) mkDrawTarget(ctx, s.x, s.y, mkCfg(e).spitRadius * CELL, 1 - Math.max(0, e.mk.t) / mkCfg(e).spitWindup, s.locked);
@@ -674,3 +1076,444 @@ function milkfishKingBars() {
 }
 // BOSS 音樂（js/boss-music.js）：醒著、活著就算在戰鬥
 const milkfishKingHunting = () => mkKings().some(e => e.eliteAwake && mkAlive(e) && e.mk.state !== 'return');
+
+
+// ===== 從水池登場（MILKFISH_KING_MAPS 的 intro: 'pool'）=====
+// G.mkIntro = { e, phase: 'hidden'→'rumble'→'leap', t, from: 竄出的水面, to: 落地點（原位） }
+// 躲著的時候牠不在 G.enemies、也不在 G.mkKings（打不到、不畫、沒有血條）；落地那一刻才放上場。
+function mkIntroSetup(e) {
+  const F = MILKFISH_KING_FX.intro, [hc, hr] = cellAt(e.x, e.y);
+  if (typeof deepWaterBlocksCell !== 'function') return false;
+  let best = null, bestD = Infinity;   // 離原位最近的深水格
+  for (let r = hr - F.poolSearch; r <= hr + F.poolSearch; r++) for (let c = hc - F.poolSearch; c <= hc + F.poolSearch; c++) {
+    if (!inGrid(c, r) || !deepWaterBlocksCell(c, r)) continue;
+    const d = Math.hypot(c - hc, r - hr);
+    if (d < bestD) { best = [c, r]; bestD = d; }
+  }
+  if (!best) return false;   // 附近沒有水池：照舊直接站在原位
+  // 往水池裡面再挪一格（不要剛好在池邊，水花才不會噴到岸上一半）
+  const dc = Math.sign(best[0] - hc), dr = Math.sign(best[1] - hr);
+  if (inGrid(best[0] + dc, best[1] + dr) && deepWaterBlocksCell(best[0] + dc, best[1] + dr)) { best[0] += dc; best[1] += dr; }
+  const [fx, fy0] = center(best[0], best[1]), fy = fy0 + F.riseDy;
+  // 落地點：核心後面（畫面上方）landBehind 格、牠身體站得下的地方 → 核心在牠前面看得到，落地後再走過去吞
+  const core = e.mk.core, land = core ? mkWideCellNear(core.x, core.y - F.landBehind * CELL) : null;
+  if (land) { const [lx, ly] = center(land[0], land[1]); e.x = lx; e.y = ly; e.mk.home = { x: lx, y: ly }; }
+  G.mkKings = G.mkKings.filter(k => k !== e);   // mkInit 放進去的：還沒上場，先拿掉
+  e.mk.pool = { x: fx, y: fy0 };   // 水池中心：追人範圍（chaseRadius）從這裡算
+  G.mkIntro = { e, phase: 'hidden', t: 0, from: { x: fx, y: fy }, to: { x: e.x, y: e.y }, bubbleT: 0 };
+  return true;
+}
+// 離 (x, y) 最近、牠（大體型）站得下的空格：不是牆、沒有建築、不是深水、夠寬
+function mkWideCellNear(x, y) {
+  const [c0, r0] = cellAt(x, y);
+  for (let rad = 0; rad <= 4; rad++) for (let dr = -rad; dr <= rad; dr++) for (let dc = -rad; dc <= rad; dc++) {
+    if (Math.max(Math.abs(dc), Math.abs(dr)) !== rad) continue;
+    const c = c0 + dc, r = r0 + dr;
+    if (!inGrid(c, r) || isWall(c, r) || G.grid[c + ',' + r] || (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r))) continue;
+    if (typeof enemyWideAt === 'function' && !enemyWideAt(c, r)) continue;
+    const [cx, cy] = center(c, r);
+    if (!enemyBlocked(cx, cy)) return [c, r];
+  }
+  return null;
+}
+// 溫特開槍打中核心（js/game.js 呼叫）：還躲在水裡就開始登場
+function milkfishKingCoreShot(core) {
+  const I = G && G.mkIntro;
+  if (!I || I.phase !== 'hidden' || (I.e.mk.core && I.e.mk.core !== core)) return;
+  I.phase = 'rumble'; I.t = 0;
+  if (typeof systemNotice === 'function') systemNotice('水池裡好像有什麼東西……！', true);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', I.from.x, I.from.y, 1.2, 'milkfish-king-intro-rumble');   // 水底傳來低沉的吼聲
+}
+function mkIntroUpdate(dt) {
+  const I = G.mkIntro;
+  if (G.poolSplash && G.poolSplash.length && typeof updatePoolSplash === 'function' && !(typeof poolTideActive === 'function' && poolTideActive())) updatePoolSplash(dt);   // 水花（池核地圖以外由這裡更新；池核自己會更新）
+  if (!I || I.phase === 'hidden') return;
+  const e = I.e, C = mkCfg(e), F = MILKFISH_KING_FX.intro;
+  I.t += dt;
+  if (I.phase === 'rumble') {   // 越震越大、水面冒泡
+    const k = Math.min(1, I.t / C.introRumble);
+    mkRumble(C.introShake * (.25 + .75 * k), .25);
+    I.bubbleT -= dt;
+    while (I.bubbleT <= 0) {
+      I.bubbleT += F.bubbleEvery / (.4 + k);   // 越接近竄出越密
+      const a = Math.random() * Math.PI * 2, rr = Math.random() * CELL * (.6 + 1.2 * k), x = I.from.x + Math.cos(a) * rr, y = I.from.y + Math.sin(a) * rr * .5;
+      const list = G.poolSplash || (G.poolSplash = []);
+      list.push({ ring: true, x, y, r0: 2, r1: 10 + Math.random() * 16 * (1 + k), t: 0, life: .5 + Math.random() * .3 });   // 泡泡破掉的小水波
+      if (Math.random() < .5 + .5 * k) list.push({ x, y, z: 0, vx: (Math.random() - .5) * 30, vy: (Math.random() - .5) * 12, vz: 80 + Math.random() * 140 * (1 + k), r: 1.5 + Math.random() * 2.5, t: 0, life: 1 });   // 小水珠彈起來
+    }
+    if (I.t >= C.introRumble) mkIntroLeap(I);
+    return;
+  }
+  if (I.phase === 'leap') {
+    const p = Math.min(1, I.t / C.introLeapTime);
+    e.x = I.from.x + (I.to.x - I.from.x) * p; e.y = I.from.y + (I.to.y - I.from.y) * p;
+    e.slimeLift = mkIntroLift(e, p);
+    e.faceRight = I.to.x > I.from.x;
+    mkFront(e);   // 出場一路都是正面（攻擊圖只在吞核心、咬人、吐東西時用）
+    // 身上一路往下滴水
+    const w = e.drawWidth || 200, h = e.drawHeight || 240, list = G.poolSplash || (G.poolSplash = []);
+    if (e.slimeLift > 0) for (let i = 0; i < 2; i++) list.push({ x: e.x + (Math.random() - .5) * w * .5, y: e.y, z: e.slimeLift + Math.random() * h * .7, vx: (Math.random() - .5) * 40, vy: 0, vz: -20 + Math.random() * 60, r: 2 + Math.random() * 3, t: 0, life: 1.5 });
+    // 水浪斷掉的那一刻：上半截散成水珠落回去
+    if (!I.waveBroke && p >= F.waveUntil) { I.waveBroke = true; mkIntroWaveBreak(I); }
+    if (p >= 1) mkIntroLand(I);
+  }
+}
+// 高度：一開始沉在水面下，往上衝出去，畫一道拋物線落在原位（0＝站在地上）
+function mkIntroLift(e, p) {
+  const C = mkCfg(e), sink = (e.drawHeight || 240) * MILKFISH_KING_FX.intro.sink;
+  return 4 * C.introLeapHeight * p * (1 - p) - sink * Math.pow(1 - p, 4);
+}
+function mkIntroLeap(I) {
+  const e = I.e;
+  I.phase = 'leap'; I.t = 0;
+  e.x = I.from.x; e.y = I.from.y; e.slimeLift = mkIntroLift(e, 0);
+  const w = e.drawWidth || 200;
+  if (typeof poolBossSplash === 'function') poolBossSplash({ x: I.from.x, y: I.from.y - 8, drawWidth: w * 1.3 }, 'up');   // 水花炸開（跟池核 BOSS 出水同一套，會震、有水聲）
+  if (typeof sfxAt === 'function') sfxAt('poolBossDive', I.from.x, I.from.y, 1.2, 'milkfish-king-intro-splash');
+  mkRumble(mkCfg(e).introShake * 1.3, .5);
+  flash('嘩啦——！！', I.from.x, I.from.y - 120, '#9fd6ff');
+}
+// 水浪斷掉：沿著水浪散成一大堆水珠往下掉
+function mkIntroWaveBreak(I) {
+  const e = I.e, list = G.poolSplash || (G.poolSplash = []), w = e.drawWidth || 200, topZ = Math.max(0, e.slimeLift);
+  for (let i = 0; i < 70; i++) {
+    const k = Math.random(), x = I.from.x + (e.x - I.from.x) * k, y = I.from.y + (e.y - I.from.y) * k, z = topZ * k * (.6 + Math.random() * .5);
+    list.push({ x: x + (Math.random() - .5) * w * .35, y: y + (Math.random() - .5) * 10, z, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 20, vz: -20 + Math.random() * 120, r: 2.5 + Math.random() * 4, t: 0, life: 1.6 });
+  }
+}
+function mkIntroLand(I) {
+  const e = I.e, C = mkCfg(e), w = e.drawWidth || 200;
+  G.mkIntro = null;
+  e.x = I.to.x; e.y = I.to.y; e.slimeLift = 0; e.hitSquashT = .16;   // 落地壓扁一下
+  e.mk.home = { x: e.x, y: e.y };
+  G.enemies.push(e);
+  if (!G.mkKings.includes(e)) G.mkKings.push(e);
+  // 重重落地：大震動、塵土、裂痕，身上的水濺開、地上留一攤水
+  mkRumble(C.introLandShake, .6);
+  if (typeof addHitstop === 'function') addHitstop(.06);
+  if (typeof poolBossSplash === 'function') poolBossSplash({ x: e.x, y: e.y + 6, drawWidth: w }, 'land');
+  for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 10 + i * 8, r2: 90 + i * 40, life: .45 + i * .12, life0: .45 + i * .12, color: i ? '#b9b2a2' : '#ffffff' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
+  const cracks = G.eliteCracks = G.eliteCracks || [];   // 跟鳥頭大隊長共用的小裂痕
+  cracks.push({ size: 1, power: 1, life: 6, x: e.x, y: e.y + 14, at: performance.now() / 1000 });   // 重重落地：中間一大片裂痕
+  for (let i = 0; i < 4; i++) cracks.push({ size: .5, life: 6, x: e.x + (Math.random() * 2 - 1) * 40, y: e.y + 12 + (Math.random() * 2 - 1) * 10, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
+  if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
+  if (typeof addPuddle === 'function') { const pd = addPuddle(e.x, e.y + 11, 14, 12); if (pd) pd.growTo = 46; }   // 地上一攤水（魚頭君的水漬，js/fish-head.js）
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 2, 'milkfish-king-intro-land');
+  mkRoar(e);   // 吼叫 → 走去把核心吞進肚子
+}
+// 畫在空中的牠＋跟著衝上來的水浪（js/render.js 收集要排前後的東西時呼叫）
+function milkfishKingSortables(list) {
+  const I = G && G.mkIntro;
+  if (!I || I.phase !== 'leap') return;
+  list.push({ floor: typeof visualFloor === 'function' ? visualFloor(I.e) : 1, band: typeof DRAW_BAND !== 'undefined' ? DRAW_BAND.obj : 2, y: Math.max(I.e.y, I.from.y) + 13, draw: () => mkIntroDraw(ctx, I) });   // 跟一般怪物一樣排在人物那一層
+}
+function mkIntroDraw(ctx, I) {
+  const e = I.e, F = MILKFISH_KING_FX.intro, C = mkCfg(e), p = Math.min(1, I.t / C.introLeapTime);
+  const w = e.drawWidth || 200, footY = e.y + 13, bodyBottom = footY - e.slimeLift;
+  // 水浪：從水面往上捲到牠身體下面的一道水，越往上越細；飛到 waveUntil 就斷掉（散成水珠由 mkIntroWaveBreak 做）
+  const h = e.drawHeight || 240, now = performance.now() / 1000;
+  const fade = p < F.waveUntil ? 1 - Math.max(0, (p - F.waveUntil * .6) / (F.waveUntil * .4)) : 0;
+  // 浪頭的位置：包住牠下半身（身體下緣往上 waveWrap 的高度）
+  const crestY = Math.min(I.from.y + 10, bodyBottom - h * F.waveWrap);
+  if (fade > 0) {
+    const bx = I.from.x, by = I.from.y + 12, tx = e.x, ty = crestY;
+    const baseW = w * .95, topW = w * .62, midX = bx + (tx - bx) * .4, midY = by - (by - ty) * .55;   // 底下寬、往上收、中間往前鼓
+    const wob = Math.sin(now * 18) * 4;   // 水在流動：邊緣微微抖
+    const shape = (k, dy = 0) => {   // k＝寬度倍數（畫內層亮光用）
+      ctx.beginPath();
+      ctx.moveTo(bx - baseW * k / 2, by + dy);
+      ctx.quadraticCurveTo(midX - (baseW + topW) * k / 4 - wob, midY, tx - topW * k / 2, ty + dy);
+      ctx.quadraticCurveTo(tx, ty - 26 * k + dy, tx + topW * k / 2, ty + dy);   // 頂端圓圓鼓起的浪頭
+      ctx.quadraticCurveTo(midX + (baseW + topW) * k / 4 + wob, midY, bx + baseW * k / 2, by + dy);
+      ctx.closePath();
+    };
+    ctx.save();
+    // 外層：深一點的水藍
+    ctx.globalAlpha = .9 * fade;
+    const g = ctx.createLinearGradient(0, by, 0, ty - 26);
+    g.addColorStop(0, 'rgba(40,120,200,1)'); g.addColorStop(.55, 'rgba(90,175,235,1)'); g.addColorStop(1, 'rgba(200,240,255,1)');
+    ctx.fillStyle = g; shape(1); ctx.fill();
+    // 內層：亮一點，像水裡透光
+    ctx.globalAlpha = .55 * fade; ctx.fillStyle = 'rgba(200,240,255,1)'; shape(.45, -6); ctx.fill();
+    // 兩邊白色浪花邊
+    ctx.globalAlpha = .95 * fade; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    shape(1); ctx.stroke();
+    // 邊上一顆顆的浪花泡沫
+    ctx.fillStyle = '#f4fcff';
+    const blob = typeof splashBlobPath === 'function', shapes = I.foamShapes || (I.foamShapes = Array.from({ length: 18 }, () => typeof splashShape === 'function' ? splashShape(7, .35) : null));   // 每團浪花固定一個歪歪的形狀（js/pool-boss.js）
+    for (let i = 0; i <= 10; i++) {
+      const k = i / 10, side = i % 2 ? 1 : -1;
+      const x = bx + (tx - bx) * k + side * (baseW + (topW - baseW) * k) / 2 + Math.sin(now * 12 + i) * 3, y = by + (ty - by) * k;
+      const r = 5 + 5 * (1 - k) + Math.sin(now * 9 + i * 2) * 1.5;
+      if (blob) splashBlobPath(ctx, x, y, r * 1.3, r * .85, shapes[i], now * 2 + i); else { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); }
+      ctx.fill();
+    }
+    // 水面上一大圈白沫
+    ctx.globalAlpha = .9 * fade; ctx.fillStyle = 'rgba(240,250,255,.95)';
+    if (blob) {   // 好幾團歪歪的白沫疊成一圈（不是一個正橢圓）
+      for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + .3, ox = Math.cos(a) * baseW * .42, oy = Math.sin(a) * baseW * .1; splashBlobPath(ctx, bx + ox, by + oy, baseW * (.28 + (i % 3) * .06), baseW * .11, shapes[12 + i] || shapes[i], i * 1.3 + now); ctx.fill(); }
+    } else { ctx.beginPath(); ctx.ellipse(bx, by, baseW * .75, baseW * .2, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+  // 牠的身體：還在水面下的部分不畫（腳底那條線以下＝水裡）
+  ctx.save();
+  if (e.slimeLift < 0) { ctx.beginPath(); ctx.rect(e.x - w * 2, footY - 2000, w * 4, 2000); ctx.clip(); }
+  drawEnemy(e);
+  ctx.restore();
+  // 浪頭的白沫蓋在牠身體前面：看起來像被水浪托著、包著衝上來
+  if (fade > 0) {
+    ctx.save(); ctx.globalAlpha = .92 * fade;
+    const cw = w * .62 / 2, cy = crestY + 4;
+    const g2 = ctx.createLinearGradient(0, cy - 20, 0, cy + 24);
+    g2.addColorStop(0, 'rgba(255,255,255,1)'); g2.addColorStop(1, 'rgba(120,195,240,.0)');
+    ctx.fillStyle = g2;
+    const blob = typeof splashBlobPath === 'function' && I.foamShapes && I.foamShapes[0];
+    if (blob) splashBlobPath(ctx, e.x, cy + 6, cw, 22, I.foamShapes[11], .4); else { ctx.beginPath(); ctx.ellipse(e.x, cy + 6, cw, 22, 0, 0, Math.PI * 2); }
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 7; i++) {   // 浪頭上一團團的白沫：大小、形狀都不一樣
+      const k = i / 6 - .5, x = e.x + k * cw * 1.8, y = cy - 4 + Math.abs(k) * 10 + Math.sin(now * 14 + i) * 2, r = 7 + (1 - Math.abs(k) * 2) * 5;
+      if (blob) splashBlobPath(ctx, x, y, r * 1.35, r * .9, I.foamShapes[(i + 12) % 18] || I.foamShapes[0], now * 3 + i * 1.7); else { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); }
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+
+// ===== 追人＋跳過軌道（MILKFISH_KING_MAPS 的 chase: true）=====
+const mkChaseOn = e => { const cfg = typeof MAP !== 'undefined' && MAP ? MILKFISH_KING_MAPS[MAP.id] : null; return !!(cfg && cfg.chase); };
+const mkPoolPt = e => e.mk.pool || e.mk.home;   // 水池中心（沒有水池登場的地圖：原位）
+const mkInChase = (e, pt) => mkDist(pt, mkPoolPt(e)) <= mkCfg(e).chaseRadius * CELL;
+// 要追誰：離水池 chaseRadius 格內、離牠最近的溫特或隊友；正在追的人只要沒被別人近 chaseStick 格以上就繼續追
+function mkChaseTarget(e) {
+  const mk = e.mk, F = MILKFISH_KING_FX;
+  const ok = a => a && a.hp > 0 && !a.eatenBy && !a.vineCap && !a.mrtRide && !a.berserk && sameFloor(e, a) && mkInChase(e, a) && !mkSkipped(e, a);
+  const list = [G.player, ...G.towers].filter(ok);
+  if (!list.length) return null;
+  let best = null, bd = Infinity;
+  for (const a of list) { const d = mkDist(a, e); if (d < bd) { bd = d; best = a; } }
+  if (mk.chaseT && list.includes(mk.chaseT) && mkDist(mk.chaseT, e) <= bd + F.chaseStick * CELL) return mk.chaseT;
+  return best;
+}
+// 從某一格出發、牠（大體型）走得到的那一整區：身體夠寬、不是牆、不是深水；建築可以吃掉／打掉，算走得過
+// 回傳 { set: 格子集合, edge: 邊緣的格子（旁邊有走不到的格子＝月台邊、牆邊）}
+let mkOpenMemo = null;
+function mkFlood(c0, r0) {
+  // 每一格「牠站不站得下」記起來，地形沒變（mkWorldKey 一樣）就直接沿用：逐格判斷很花時間，不記的話每次掃都會卡一下
+  const wk = mkWorldKey();
+  if (!mkOpenMemo || mkOpenMemo.wk !== wk || mkOpenMemo.map !== MAP) mkOpenMemo = { wk, map: MAP, cells: new Map() };
+  const memo = mkOpenMemo.cells;
+  const open = (c, r) => { const k = c * 4096 + r; let v = memo.get(k); if (v === undefined) {
+    v = inGrid(c, r) && !enemyWallCell(c, r) && enemyWideAt(c, r) && !(typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r)) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r))
+      && !(typeof mrtTrackCell === 'function' && mrtTrackCell(c, r));   // 軌道（含停著的列車車廂）：牠太大隻，不能把列車當路走，要等車開走再跳過去
+    memo.set(k, v); } return v; };
+  const k0 = c0 + ',' + r0, set = new Set([k0]), q = [[c0, r0]], edge = [];
+  for (let i = 0; i < q.length && set.size < 8000; i++) {
+    const [c, r] = q[i];
+    let side = false;
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const cc = c + dc, rr = r + dr, k = cc + ',' + rr;
+      if (set.has(k)) continue;
+      if (!open(cc, rr) || edgeBetween(c, r, cc, rr)) { side = true; continue; }
+      set.add(k); q.push([cc, rr]);
+    }
+    if (side) edge.push([c, r]);
+  }
+  return { set, edge };
+}
+// 地形有沒有變：建築數量、被打掉的地圖物件數量、開著的門數量（有變才重算走得到的範圍，不然要掃上千格，會讓遊戲每秒卡一下）
+const mkWorldKey = () => (G.obstacles ? G.obstacles.length : 0) + ':' + (G.mapDestroyed ? G.mapDestroyed.size : 0) + ':' + (typeof mapDoors !== 'undefined' ? mapDoors.reduce((n, d) => n + (d.open ? 1 : 0), 0) : 0);
+// 牠現在走得到的那一區：地形沒變、牠還在同一區就沿用（最多 8 秒重算一次保險）
+function mkReachInfo(e) {
+  const mk = e.mk, now = mkClock(), [c0, r0] = cellAt(e.x, e.y), k0 = c0 + ',' + r0, wk = mkWorldKey();
+  if (mk.reach && mk.reach.wk === wk && mk.reach.at > now - 8 && mk.reach.set.has(k0)) return mk.reach;
+  return (mk.reach = { at: now, wk, ...mkFlood(c0, r0) });
+}
+const mkReach = e => mkReachInfo(e).set;
+// 走得到這個人（或點）嗎：看離他最近、牠站得下的那格在不在走得到的範圍裡
+function mkCanWalkTo(e, pt) { const land = mkWideCellNear(pt.x, pt.y); return !!land && mkReach(e).has(land[0] + ',' + land[1]); }
+// 怎麼去 goal：{ walk: true }＝走過去；{ from, land }＝先走到起跳點 from（自己這一區的邊緣），再跳到 land；null＝去不了
+// 落點：目標那一區（例如軌道另一邊的月台）的邊緣或目標旁邊，離起跳點 jumpRange 格內；落地後再走過去
+function mkJumpPlan(e, goal) {
+  const C = mkCfg(e), mk = e.mk, me = mkReachInfo(e), land0 = mkWideCellNear(goal.x, goal.y);
+  if (!land0) return null;
+  const lk = land0[0] + ',' + land0[1];
+  if (me.set.has(lk)) return { walk: true };
+  const wk = mkWorldKey();
+  let other = mk.region && mk.region.wk === wk && mk.region.at > mkClock() - 8 && mk.region.set.has(lk) ? mk.region : null;   // 目標那一區（地形沒變就沿用）
+  if (!other) other = mk.region = { at: mkClock(), wk, ...mkFlood(land0[0], land0[1]) };
+  const R = C.jumpRange * CELL, R2 = R * R, minD2 = (CELL * 1.5) ** 2;
+  // 落點先算好位置、濾掉超出追擊範圍的；「落地後還要走多遠」也先算好（不然兩邊邊緣每一對格子都要重算，會卡）
+  const lands = [];
+  for (const [lc, lr] of [land0, ...other.edge]) { const [lx, ly] = center(lc, lr); if (mkInChase(e, { x: lx, y: ly })) lands.push([lx, ly, Math.hypot(goal.x - lx, goal.y - ly) * .8]); }
+  // 落點大概在哪一塊：起跳點離這一塊太遠就整個略過
+  let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+  for (const [lx, ly] of lands) { bx0 = Math.min(bx0, lx); bx1 = Math.max(bx1, lx); by0 = Math.min(by0, ly); by1 = Math.max(by1, ly); }
+  let best = null, bs = Infinity;
+  for (const [tc, tr] of me.edge) {
+    const [tx, ty] = center(tc, tr);
+    if (tx < bx0 - R || tx > bx1 + R || ty < by0 - R || ty > by1 + R) continue;
+    const walk = Math.hypot(tx - e.x, ty - e.y);
+    if (walk >= bs) continue;
+    let bl = null, bsl = Infinity;
+    for (const L of lands) {
+      const dx = L[0] - tx, dy = L[1] - ty; if (dx > R || dx < -R || dy > R || dy < -R) continue;
+      const d2 = dx * dx + dy * dy; if (d2 > R2 || d2 < minD2) continue;
+      const sc = L[2] + Math.sqrt(d2) * .3;   // 落地後還要走多遠＋跳多遠
+      if (sc < bsl) { bsl = sc; bl = L; }
+    }
+    if (!bl || walk + bsl >= bs || enemyBlocked(tx, ty, e)) continue;   // 走過去＋落地後還要走多遠＋跳多遠，挑最短的
+    bs = walk + bsl; best = { from: { c: tc, r: tr, x: tx, y: ty }, land: { x: bl[0], y: bl[1] } };
+  }
+  return best;
+}
+// 每幀（mkHunt 呼叫）：追人或回水池；回傳 false＝沒事做（在水池旁、沒人），照舊閒晃
+function mkChaseStep(e, dt) {
+  const mk = e.mk, F = MILKFISH_KING_FX;
+  const tg = mkChaseTarget(e);
+  mk.chaseT = tg;
+  const goal = tg || (mkDist(e, mk.home) > CELL * 2.5 ? mk.home : null);   // 沒人追：回原位（水池旁）
+  if (!goal) return false;
+  let plan = mk.plan && mk.plan.goal === goal && mk.plan.at > mkClock() - F.chaseReplan ? mk.plan.v : undefined;
+  if (plan === undefined) { plan = mkJumpPlan(e, goal); mk.plan = { goal, at: mkClock(), v: plan }; }
+  if (!plan) { if (tg) (mk.skip = mk.skip || new Map()).set(tg, mkClock() + 3); return false; }   // 去不了：先不理這個人
+  if (plan.walk) {
+    if (tg && mkDist(tg, e) <= F.biteReach) { e.faceRight = tg.x > e.x; return true; }   // 已經貼著：等咬（咬在 mkHunt 前面處理）
+    const [gc, gr] = cellAt(goal.x, goal.y), nav = enemyNavigate(e, gc, gr, dt, (tg ? 'mk-chase:' : 'mk-home:') + gc + ',' + gr, true);
+    if (nav.blocker) { mkBlocked(e, nav.blocker, dt); if (mk.stuck) mk.stuck.time = 0; return true; }   // 路被石頭、建築擋住：吃掉或打掉，這段時間不算卡住
+    if (nav.reached) moveEnemyToward(e, goal, dt);
+    if (tg && mkStuck(e, tg, dt)) return false;   // 走半天沒更靠近：先放棄這個人
+    return true;
+  }
+  const f = plan.from;   // 要跳：先走到起跳點（月台邊緣）
+  if (Math.hypot(f.x - e.x, f.y - e.y) <= CELL * .6) {
+    if (mkTrainBlocksJump(e, plan.land)) { mfPose(e, null); if (tg) e.faceRight = tg.x > e.x; return true; }   // 列車停在中間：牠太大隻穿不過車廂，站在月台邊等車開走
+    mkStartJump(e, tg, plan); return true;
+  }
+  const nav = enemyNavigate(e, f.c, f.r, dt, 'mk-jumpfrom:' + f.c + ',' + f.r, true);
+  if (nav.blocker) mkBlocked(e, nav.blocker, dt);
+  else if (nav.reached) moveEnemyToward(e, f, dt);
+  return true;
+}
+function mkStartJump(e, tg, plan) {
+  const mk = e.mk, C = mkCfg(e);
+  mk.jump = { target: tg, to: { x: plan.land.x, y: plan.land.y } };
+  e.faceRight = plan.land.x > e.x;
+  mkSet(e, 'jumpWind', C.jumpWindup);
+}
+// 起跳前：蹲低發抖，落點跟著目標移動（還是要在 jumpRange 內、牠站得下的地方）
+function mkJumpWindStep(e) {
+  const mk = e.mk, C = mkCfg(e), J = mk.jump;
+  mfPose(e, Math.floor(mk.t * 10) % 2 ? 'smile-01' : 'smile-02');
+  e.slimeLift = -4;   // 蹲低一點
+  if (J && J.target && J.target.hp > 0) {
+    const land = mkWideCellNear(J.target.x, J.target.y);
+    if (land) { const [lx, ly] = center(land[0], land[1]); if (Math.hypot(lx - e.x, ly - e.y) <= C.jumpRange * CELL && mkInChase(e, { x: lx, y: ly })) J.to = { x: lx, y: ly }; }
+    e.faceRight = J.to.x > e.x;
+  }
+  if (mk.t > 0) return;
+  if (mkTrainBlocksJump(e, J.to)) { mk.jump = null; e.slimeLift = 0; mkSet(e, 'hunt'); return; }   // 蓄力時列車進站擋住了：先不跳，回去等
+  J.from = { x: e.x, y: e.y }; J.t = 0;
+  e.airborne = true;
+  mkSet(e, 'jump');
+  G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 60, life: .35, life0: .35, color: '#d9d2c0' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-jump');
+  mkRumble(mkCfg(e).stepShake, .25);
+}
+// 在空中：照拋物線飛到落點（正面）
+function mkJumpStep(e, dt) {
+  const mk = e.mk, C = mkCfg(e), J = mk.jump;
+  if (!J) { e.airborne = false; mkSet(e, 'hunt'); return; }
+  J.t += dt;
+  const p = Math.min(1, J.t / C.jumpTime);
+  e.x = J.from.x + (J.to.x - J.from.x) * p; e.y = J.from.y + (J.to.y - J.from.y) * p;
+  e.slimeLift = 4 * C.jumpHeight * p * (1 - p);
+  mkFront(e);
+  if (p >= 1) mkJumpLand(e);
+}
+// 落地：大震動、塵土、裂痕；落點附近的人受傷、被撞開
+function mkJumpLand(e) {
+  const mk = e.mk, C = mkCfg(e), R = C.jumpSlamR * CELL, dmg = C.jumpDamage * mkAtk(e);
+  e.airborne = false; e.slimeLift = 0; e.hitSquashT = .16;
+  e.lastSafeX = e.x; e.lastSafeY = e.y;
+  mk.jump = null; mk.reach = null; mk.plan = null; mk.stuck = null;
+  resetEnemyNavigation(e);
+  const hurt = a => {
+    const dx = a.x - e.x, dy = a.y - e.y, d = Math.hypot(dx, dy) || 1;
+    if (typeof knockActor === 'function') knockActor(a, dx / d, dy / d, C.jumpKnock * CELL * (a === G.player ? 1 : .8), .36);
+    if (typeof mkChargeHitFx === 'function') mkChargeHitFx(e, a);
+  };
+  const p = G.player;
+  if (p && p.hp > 0 && !p.vineCap && sameFloor(e, p) && mkDist(p, e) <= R) {
+    if (!(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
+      const h = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg;
+      p.hp = Math.max(0, p.hp - h); p.hitT = .35; G.damageVignetteT = .5;
+      flashDmg('-' + Math.round(h), p.x, p.y - 46, '#ff6b6b');
+      if (typeof playPlayerHit === 'function') playPlayerHit(1, true);
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + e.eliteName + '砸中'); }
+    }
+    hurt(p);
+  }
+  for (const t of G.towers) {
+    if (t.hp <= 0 || t.eatenBy || t.vineCap || !sameFloor(e, t) || mkDist(t, e) > R) continue;
+    const h = dmg * (1 - (typeof sentryDefense === 'function' ? sentryDefense(t) : 0));
+    t.hp = Math.max(0, t.hp - h); t.hitT = Math.max(t.hitT || 0, .3);
+    flashDmg('-' + Math.round(h), t.x, t.y - 30, '#ff8f8f');
+    t.navPath = null; t.navGoal = null;
+    if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+    hurt(t);
+  }
+  mkRumble(Math.max(C.stepShake * 1.6, 8), .5);
+  if (typeof addHitstop === 'function') addHitstop(.05);
+  for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 10 + i * 8, r2: R + 20 + i * 30, life: .4 + i * .1, life0: .4 + i * .1, color: i ? '#b9b2a2' : '#ffffff' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
+  const cracks = G.eliteCracks = G.eliteCracks || [];
+  for (let i = 0; i < 3; i++) cracks.push({ x: e.x + (Math.random() * 2 - 1) * 30, y: e.y + 12 + (Math.random() * 2 - 1) * 8, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
+  if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 2, 'milkfish-king-jump-land');
+  mkSet(e, 'recover', .45);
+}
+
+// 列車現在佔的範圍（每節車廂一個方框；開進隧道、還沒進站的不算）
+function mkTrainRects() {
+  const out = [];
+  for (const tr of (G && G.mrtTrains) || []) {
+    if (tr.state === 'away' || tr.state === 'tunnel') continue;
+    const shift = (tr.off || 0) * (tr.dir || 1);
+    for (const car of tr.cars || []) {
+      const x0 = Math.max(tr.clipL, car.x + shift), x1 = Math.min(tr.clipR, car.x + car.w + shift);
+      if (x1 > x0) out.push({ x0, x1, y0: tr.top, y1: tr.bottom });
+    }
+  }
+  return out;
+}
+// 從牠現在的位置跳到 to，中間有沒有列車擋著（牠身體寬，左右多算一點）
+function mkTrainBlocksJump(e, to) {
+  const rects = mkTrainRects(); if (!rects.length) return false;
+  const pad = (e.drawWidth || 220) * .18, n = Math.max(2, Math.ceil(Math.hypot(to.x - e.x, to.y - e.y) / 8));
+  for (let i = 0; i <= n; i++) {
+    const x = e.x + (to.x - e.x) * i / n, y = e.y + (to.y - e.y) * i / n;
+    if (rects.some(R => x >= R.x0 - pad && x <= R.x1 + pad && y >= R.y0 && y <= R.y1)) return true;
+  }
+  return false;
+}
+
+// 被雷電打到：打斷正在出的招（衝撞、吐東西、吐核心、起跳、吞東西…），整整麻痺 shockStunT 秒（不打折）；在空中跳的時候等落地再麻痺
+function mkShockInterrupt(e) {
+  const mk = e.mk, C = mkCfg(e);
+  if (e.airborne || mk.state === 'jump') return;
+  const s = e.shockStunT; e.shockStunT = 0;
+  if (mk.state === 'spitWind' && mk.spit && mk.spit.item) mk.belly.unshift(mk.spit.item);   // 吐到一半被打斷：東西吞回肚子
+  if (mk.state === 'coreWind') mk.nextCoreSpit += C.coreSpitHp;   // 吐核心被打斷：下次照樣會吐
+  if (mk.state === 'chargeWind' || mk.state === 'charge') { mk.charge = null; mk.chargeLeft = 0; mk.chargeCd = C.chargeCooldown; }
+  if (mk.state === 'jumpWind') { mk.jump = null; e.slimeLift = 0; }
+  mk.spit = null; mk.aim = null; mk.chewing = null;
+  if (mk.state !== 'hunt') mkSet(e, 'hunt');
+  e.superArmor = false; e.tremble = false;
+  e.stunT = Math.max(e.stunT || 0, s); e.shockT = Math.max(e.shockT || 0, s);
+  mk.stunSeen = e.stunT;   // 不要被「暈眩只算一半」打折
+  flash('麻痺！', e.x, e.y - (e.drawHeight || 240) - 10, '#d8f4ff');
+}

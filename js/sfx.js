@@ -59,6 +59,7 @@ const SFX = (() => {
     mrtDoorWarn: '環境/門與機關/車門即將關閉.mp3',            // 捷運列車：「車門即將關閉」
     mrtDoorClose: '環境/門與機關/台北捷運關門聲.mp3',         // 捷運列車：車門關上
     mrtDepart: '環境/門與機關/列車啟動音.m4a',                // 捷運列車：開走（列車啟動音）
+    mrtBrake: '設施/捷運煞車.mp3',                           // 捷運列車：煞車來不及、撞飛花蓮老鼠王前的煞車聲（js/rat-king.js 的死亡表演）
     mrtHorn: '環境/門與機關/列車啟動音.m4a',                  // 捷運列車：鳴笛衝進站撞飛花蓮老鼠王（js/rat-king.js；還沒有鳴笛音檔，先用列車啟動音，可在音效編輯器換）
     elevator: '環境/門與機關/電梯.mp3',
     storyDoor: '環境/門與機關/電梯.mp3',   // 回憶劇情的自動門開關（data/story-scenes.js 的 sfx；先借電梯聲，可在音效編輯器換）
@@ -190,6 +191,7 @@ const SFX = (() => {
     loofahStep: '怪物/絲瓜小姐/絲瓜小姐走路.mp3',
     loofahHurt: '怪物/絲瓜小姐/絲瓜小姐被打.mp3',
     loofahDeath: '怪物/絲瓜小姐/絲瓜小姐死掉.mp3',
+    loofahLeaves: '怪物/絲瓜小姐/葉子掉下來.mp3',   // 絲瓜女王重踏：震得樹上的葉子掉下來（js/loofah-queen.js 的 lqStompFx）
     // 比基尼小丑魚：落地（兩種跳躍聲輪流）、被打、死掉；生蛋和孵化用 pop（js/clownfish.js）
     clownfishHop1: '怪物/小丑魚/小丑魚跳躍01.mp3',
     clownfishHop2: '怪物/小丑魚/小丑魚跳躍02.mp3',
@@ -290,7 +292,7 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'pearlElderDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'mothFlap', 'mothSpray', 'mothHurt', 'mothDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'vineGrab', 'vineLift', 'vineLand', 'eliteStep', 'capKingStep', 'capKingClose', 'capKingShuffle', 'pop', 'playerHit', 'playerHitMonster',
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'pearlElderDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'loofahLeaves', 'milkfishHurt', 'milkfishDeath', 'mothFlap', 'mothSpray', 'mothHurt', 'mothDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'vineGrab', 'vineLift', 'vineLand', 'eliteStep', 'capKingStep', 'capKingClose', 'capKingShuffle', 'pop', 'playerHit', 'playerHitMonster',
     'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotConfuse', 'hitConfuse', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall', 'storyPunch', 'storyPartyPopper', 'storyPartyHorn']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音

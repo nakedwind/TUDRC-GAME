@@ -75,8 +75,21 @@ const oreByFile = file => Object.entries(ORE_TYPES).find(([, spec]) => file.ends
 const oreCenter = o => {
   const sol = Array.isArray(o.solid) && o.solid.length ? o.solid : null;
   const ry = sol ? sol.reduce((sum, [, r]) => sum + r + .5, 0) / sol.length : (o.h || 1) / 2;
-  return { x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + ry) * CELL };
+  // o.off：地圖編輯器用方向鍵微調過、不到半格的像素（js/maploader.js），中心也跟著挪，判定才會跟畫面上的礦對齊
+  const off = o.off || [0, 0];
+  return { x: OX + (o.c + (o.w || 1) / 2) * CELL + off[0], y: OY + (o.r + ry) * CELL + off[1] };
 };
+// 這個點（滑鼠瞄準的位置）有沒有點在礦的圖上：跟 js/render.js 的 drawObstacle 畫礦用同一套位置
+// （地圖編輯器的微調、大小 %、角度都照算；格子素材的礦固定一格大）
+function oreArtHit(o, x, y) {
+  const s = o.mapSource && typeof o.mapSource === 'object' ? o.mapSource : null, t = o.mapTileId ? mapTileById(o.mapTileId) : null;
+  if (s && t) {
+    const sx = OX + s.c * CELL + (s.ox || 0), sy = OY + s.r * CELL + (s.oy || 0), sw = mapStampW(s, t) * CELL, sh = mapStampH(s, t) * CELL;
+    return typeof stampHitTest === 'function' ? stampHitTest(s, sx, sy, sw, sh, x, y) : x >= sx && x <= sx + sw && y >= sy && y <= sy + sh;
+  }
+  const [dx, dy] = obstacleOff(o), left = OX + o.c * CELL + dx, top = OY + o.r * CELL + dy, w = (t ? 1 : (o.w || 1)) * CELL, h = (t ? 1 : (o.h || 1)) * CELL;
+  return x >= left && x <= left + w && y >= top && y <= top + h;
+}
 // 礦物還藏在沒炸開的隱藏區裡：不發光，免得露餡；探測器照常顯示，算是找隱藏區的線索（js/breakable-walls.js、js/equipment.js）
 // 除了看位置，也看礦物圖本身是不是畫在隱藏區圖層上（mapSource：圖章物件，或格子素材的 "圖層:c,r" 字串）
 function oreConcealed(o) {

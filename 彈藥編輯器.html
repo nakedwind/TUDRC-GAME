@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>彈藥編輯器｜Y102 應變中心</title>
+  <link rel="stylesheet" href="css/ui-feedback.css">
+  <style>
+    :root { color-scheme:dark; font-family:system-ui,"Microsoft JhengHei",sans-serif; color:#e8f1fa; background:#0d131b }
+    * { box-sizing:border-box }
+    body { margin:0; padding:28px; max-width:1440px; margin-inline:auto; background:radial-gradient(circle at 85% 0%,#3a2414 0,transparent 37%) }
+    h1,h2,p { margin-top:0 } h1 { font-size:27px; margin-bottom:5px }
+    p,small { color:#9eb0c0; line-height:1.5 }
+    button,input { font:inherit }
+    button { cursor:pointer; color:#eaf5ff; background:#263d50; border:1px solid #52718a; border-radius:9px; padding:8px 12px }
+    button.primary { background:#2b6581; border-color:#6abce3; font-weight:700 } button.danger { color:#ffd0c9; border-color:#925d5b; background:#4b3035 }
+    button.small { padding:4px 10px; font-size:12px; border-radius:7px }
+    code { color:#b6ddf5; background:#0e1b29; border-radius:4px; padding:1px 4px; font-size:12px }
+    .notice { border:1px solid #6b4a2a; border-left:4px solid #f0a05a; border-radius:10px; background:#21180f; padding:12px 15px; margin-bottom:18px; font-size:13px; line-height:1.6 }
+    .notice strong { color:#ffd9a6 }
+    .layout { display:grid; grid-template-columns:minmax(160px,200px) minmax(0,1fr); gap:18px; align-items:start }
+    .layout > * { min-width:0 }
+    .panel { background:#18232e; border:1px solid #344d61; border-radius:15px; box-shadow:0 12px 38px #0005 }
+    .sidebar { padding:14px; position:sticky; top:14px; display:flex; flex-direction:column; gap:4px }
+    .sidebar h2 { font-size:15px; margin-bottom:6px }
+    #toc a { display:block; padding:7px 10px; border-radius:8px; color:#cfe3f3; text-decoration:none; font-size:14px }
+    #toc a:hover { background:#22384a } #toc a.changed::after { content:' ●'; color:#f0a05a }
+    .content { padding:20px 22px }
+    .global { margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid #344e62 }
+    .global h2, .bullet h2 { font-size:17px; margin:0; color:#ffd7a6 }
+    .ref { font-size:12px; color:#9eb0c0; line-height:1.7; margin:8px 0 0 } .ref b { color:#cfe3f3 }
+    .fields { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px 14px; margin-top:12px }
+    .field { display:flex; flex-direction:column; gap:4px; font-size:13px; color:#cfe0ec; min-width:0 }
+    .f-label { display:flex; align-items:center; gap:5px; flex-wrap:wrap; font-weight:600 } .f-label em { font-style:normal; color:#7f97aa; font-weight:400; font-size:12px }
+    .tag { font-size:10px; font-weight:600; border-radius:20px; padding:1px 6px } .tag.foe { background:#3b2418; color:#ffb98a } .tag.big { background:#232a44; color:#a9b8ff }
+    .field input { width:100%; min-width:0; color:#edf7ff; background:#0e1822; border:1px solid #3d596e; border-radius:8px; padding:7px 10px; outline:none; font-size:15px }
+    .field input:focus { border-color:#f0a05a; box-shadow:0 0 0 2px #f0a05a33 }
+    .field small { font-size:11.5px; line-height:1.45 }
+    .field.changed input { border-color:#f0a05a; background:#231a10 } .was { color:#f0a05a }
+    .bullet { margin:0 0 14px; padding:14px 16px; background:#111d28; border:1px solid #2b4559; border-left:4px solid var(--c); border-radius:12px; scroll-margin-top:14px }
+    .bullet header { display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+    .b-icon { width:48px; height:24px; display:flex; align-items:center; justify-content:center; font-size:18px }
+    .b-icon img { max-width:48px; max-height:24px; image-rendering:pixelated }
+    .bullet header code { color:#6d8ea5 } .bullet header .revert { margin-left:auto }
+    .summary { margin:12px 0 0; padding:8px 11px; border-radius:8px; background:#0c1620; font-size:13px; color:#d9e8f3 } .summary b { color:var(--c) }
+    .foot { border-top:1px solid #344e62; padding-top:18px; margin-top:8px }
+    .actions { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:9px }
+    #dirty { font-size:13px; color:#8ce0be; margin-bottom:8px } #dirty.warn { color:#f0a05a }
+    #status { min-height:22px; color:#8ce0be; font-size:13px; margin-top:8px }
+    #exportOut { width:100%; min-height:160px; margin-top:12px; background:#0b151f; color:#a9cbdb; border:1px solid #345065; border-radius:8px; padding:10px; font:11px/1.45 Consolas,monospace }
+    @media(max-width:700px) { body { padding:14px } .layout { grid-template-columns:minmax(0,1fr) } .sidebar { position:static } .content { padding:16px } #toc { display:flex; flex-wrap:wrap; gap:2px } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔫 彈藥編輯器</h1>
+    <p>調整特殊子彈的數值：射擊間隔、傷害、範圍、秒數。名字、圖、說明在背包編輯器；價錢在開發工坊編輯器。</p>
+  </header>
+  <div class="notice"><strong>編輯方式：</strong>修改會先自動保存在這台瀏覽器。按「💾 存到專案」（或下載 <code>bullet-tuning.js</code> 取代 <code>data/bullet-tuning.js</code>）後，遊戲按 Ctrl+F5 重新整理就會套用。<br>
+    標 <b style="color:#ffb98a">×倍率</b> 的數字，打到怪物時會乘上最上面的「對怪物倍率」；打到溫特、隊員照原本的數字。標 <b style="color:#a9b8ff">大型減半</b> 的秒數，遇到大型怪物只有一半。每張卡片最下面的「對怪物實際」就是算好的結果。橘色框＝跟專案檔不一樣。</div>
+  <main class="layout">
+    <aside class="panel sidebar"><h2>子彈</h2><nav id="toc" aria-label="子彈清單"></nav></aside>
+    <section class="panel content">
+      <div class="global">
+        <h2>全部子彈共用</h2>
+        <div class="fields" id="globalFields"></div>
+        <p class="ref" id="bigList"></p>
+        <p class="ref" id="pistolRef"></p>
+      </div>
+      <div id="bulletList"></div>
+      <div class="foot">
+        <div id="dirty"></div>
+        <div class="actions"><button id="download" class="primary">⬇ 下載 bullet-tuning.js</button><button id="showExport">查看匯出內容</button><button id="reset" class="danger">丟掉修改、改回專案檔</button></div>
+        <div id="status" role="status" aria-live="polite"></div>
+        <textarea id="exportOut" readonly hidden aria-label="彈藥數值匯出內容"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
+  <script>document.write('<script src="data/bullet-tuning.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 目前存在檔案裡的子彈數值；每次都讀最新的 -->
+  <script src="data/equipment.js?v=heal10-20261121"></script>   <!-- 子彈的名字、圖、顏色；手槍傷害當參考 -->
+  <script src="data/monsters.js?v=ratfrenzy2-20261122"></script>   <!-- 怪物血量：列出哪些算大型怪物 -->
+  <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
+  <script src="js/bullet-editor.js?v=init-20261121"></script>
+  <script src="js/editor-nav.js?v=bullets-20261121"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+</body>
+</html>

@@ -18,11 +18,14 @@
    出現在哪張地圖、生在哪一格：PEARL_ELDER.maps（地圖 id → 欄、列）；牠自己帶一顆核心，地圖上原本的核心照樣留著（全部打破才過關）。
    數值都在下面的 PEARL_ELDER。必須在 pearl-kid.js、anomalous-core.js 之後、game.js 之前載入。
 */
-const PEARL_ELDER = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const PEARL_ELDER = applyBossSettings('PEARL_ELDER', {
   name: '珍珠大童',
   maps: { map_mvvdbiyx: { c: 91, r: 32 } },   // 出現在哪幾張地圖、生在哪一格（K56區-地下街：右邊有斑馬線、電梯的大房間，斑馬線上方的中間；地圖改成 106×96 之後的座標）
   hp: 3000, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hp：血量（再乘整體難度）
   scale: 2.6,                    // 體型放大倍率
+  artDir: 'images/monster/pearl-elder/',   // 專用的圖（貝殼、帽子紫藍，眼睛紅）：檔名跟珍珠小童一樣，只換資料夾；用 tools/recolor-pearl-elder.py 從珍珠小童的圖換色產生
   speedMul: 1.2,                 // 飄的速度倍率（以珍珠小童為基準）
   hover: 26,                     // 張殼時飄多高（像素）
   wakeRange: 6,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
@@ -77,8 +80,9 @@ const PEARL_ELDER = {
     trigger: 14,                 // 離滾珠幾像素算踩到
     safe: 2,                     // 滑倒（含頭暈）結束後幾秒內不會再被滾珠滑倒（避免被卡在牆邊連續滑倒）
   },
+  shake: { land: 11, bounce: 11, bump: 14 },   // 畫面震動（貼身時；越遠越小，距離是所有 BOSS 共用的 BOSS_SHAKE.range）：閉殼掉到地上、滾動撞牆反彈、撞牆停下（2026-11-21 加強：原本 5／6／7）
   land: { shakeMax: 10, shakeMin: 3, shakeRange: 12 },   // 大珍珠落地的畫面震動：就在旁邊、shakeRange 格外圍的強度（上限 16）
-};
+});
 
 const pearlElderSpot = () => typeof MAP !== 'undefined' && MAP ? PEARL_ELDER.maps[MAP.id] || null : null;
 const pearlBosses = () => (G && G.enemies ? G.enemies.filter(e => e.pearlBoss && !e.dead && e.hp > 0) : []);
@@ -99,6 +103,11 @@ function seedPearlElder() {
   G.cores.push(core);
   const P = PEARL_ELDER, S = P.scatter, e = createMonster(base, x, y);
   e.pearlBoss = true; e.eliteName = P.name;
+  if (P.artDir) {   // 換成大童專用的圖（另外複製一份，不要改到珍珠小童共用的設定）
+    const swap = f => typeof f === 'string' ? P.artDir + f.split('/').pop() : f;
+    e.sprite = swap(e.sprite);
+    if (e.art) e.art = Object.fromEntries(Object.entries(e.art).map(([k, f]) => [k, swap(f)]));
+  }
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是珍珠小童血量 × 整體難度：換成大童的血量，難度照樣乘
   e.playerDamage = Math.round(e.playerDamage * P.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * P.dmgMul);
@@ -138,7 +147,7 @@ function pearlBossWake(e) {
   systemNotice(PEARL_ELDER.name + '發現你了！', true);
   const top = e.y - e.slimeLift - e.drawHeight * .6;
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: top, r: 8 + i * 6, r2: 100 + i * 36, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#f1dcff' : '#ffffff' });
-  nearbyImpact(e.x, e.y, 7, .05);
+  bossImpact(e.x, e.y, 7, .05);
   if (typeof sfxAt === 'function') sfxAt('pearlHurt', e.x, e.y, 1.8, 'pearl-elder-wake');
 }
 // ---- 閉殼：掉到地上、開始降珍珠 ----
@@ -159,7 +168,7 @@ function pearlBossRammed(e, bp, speed) {
   e.hitT = .2; e.hitColor = '#ffffff';
   flashCrit('-' + dmg, e.x, e.y - e.drawHeight * .6, true);
   flash('撞開貝殼！', e.x, e.y - e.drawHeight - 10, '#fff2b0');
-  nearbyImpact(e.x, e.y, 10, .08);
+  bossImpact(e.x, e.y, 10, .08);
   if (typeof sfxAt === 'function') { sfxAt('knock2', e.x, e.y, 1.3, 'pearl-elder-ram'); sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-ram2'); }
   shatterBigPearl(bp);
 }
@@ -283,8 +292,9 @@ function stepPearlBossState(e, dt) {
     if (e.slimeLift <= 0 && !pk.landed) {   // 落地：揚起一圈灰塵、震一下
       pk.landed = true; pk.vz = 0;
       G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 10, r2: 70, life: .3, life0: .3, color: '#d8d0c0' });
-      nearbyImpact(e.x, e.y, 5, 0);
-      if (typeof sfxAt === 'function') sfxAt('pearlHit', e.x, e.y, 1, 'pearl-elder-land');
+      bossImpact(e.x, e.y, P.shake.land, .05);
+      if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y + 12, { rocks: 6, speed: [50, 130], up: [90, 170], dust: 6, dustRise: 2, size: .8 });   // 重重摔在地上：揚起灰塵、小石頭（js/gourd-monkey.js）
+      if (typeof sfxAt === 'function') { sfxAt('pearlHit', e.x, e.y, 1, 'pearl-elder-land'); sfxAt('gourdSlam', e.x, e.y, .6, 'pearl-elder-land2'); }
     }
   } else {
     const want = e.stunT > 0 ? 6 : P.hover + Math.sin(pk.bob * 2.1) * 4;
@@ -420,7 +430,8 @@ function pearlBossRollBounce(e, rl, wall) {
   rl.dir = { x: vx / len, y: vy / len };
   rl.bounces--; rl.left = R.len * CELL * R.bounceLen; rl.hit.clear();
   G.effects.push({ ring: true, x: e.x + nx * 40, y: e.y + ny * 20, r: 6, r2: 46, life: .25, life0: .25, color: '#c9c2b0' });
-  nearbyImpact(e.x, e.y, 6, .04);
+  bossImpact(e.x, e.y, PEARL_ELDER.shake.bounce, .05);
+  if (typeof rockBurstFx === 'function') rockBurstFx(e.x + nx * 40, e.y + ny * 20 + 10, { rocks: 6, speed: [50, 140], up: [80, 160], dust: 5, dustRise: 2, size: .75 });   // 撞到牆：牆邊噴出碎石灰塵
   if (typeof sfxAt === 'function') sfxAt('gourdSlam', e.x, e.y, .7, 'pearl-elder-roll-bounce');
 }
 // 蓄力時畫的路線：沿著方向往前找第一道牆（建築不算，會被撞爛）；回傳距離（像素），最多 maxLen
@@ -449,7 +460,8 @@ function pearlBossRollBump(e) {
   const R = PEARL_ELDER.roll, pk = e.pk;
   pk.roll = null; pk.rollCd = R.every;
   G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 6, r2: 50, life: .3, life0: .3, color: '#c9c2b0' });
-  nearbyImpact(e.x, e.y, 7, .06);
+  bossImpact(e.x, e.y, PEARL_ELDER.shake.bump, .08);
+  if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y + 10, { rocks: 10, speed: [60, 170], up: [100, 200], dust: 8, dustRise: 3, size: .9 });   // 狠狠撞上牆停下：大量碎石灰塵
   if (typeof sfxAt === 'function') sfxAt('gourdSlam', e.x, e.y, .9, 'pearl-elder-roll-bump');
   if (R.wallStun > 0) pearlBossSet(e, 'stunned', R.wallStun);
 }
@@ -537,7 +549,7 @@ function bigPearlLandFx(x, y) {
   if (typeof gourdImpactFx === 'function') gourdImpactFx(x, gy);
   if (typeof GOURD !== 'undefined') (G.gourdCracks = G.gourdCracks || []).push({ x, y: gy, life: GOURD.crackLife, life0: GOURD.crackLife, seed: Math.random() * 9, flip: Math.random() < .5 });
   G.effects.push({ ring: true, x, y: gy, r: 10, r2: PEARL_ELDER.rain.bigR + 26, life: .38, life0: .38, color: '#b49a6c' });
-  const p = G.player, pd = p ? Math.hypot(p.x - x, p.y - y) : Infinity, near = Math.max(0, 1 - pd / (L.shakeRange * CELL));
+  const p = G.player, pd = p ? Math.hypot(p.x - x, p.y - y) : Infinity, near = Math.max(0, 1 - pd / (bossShakeRange() * CELL));   // BOSS 共用的震動距離（js/combat-feel.js 的 BOSS_SHAKE）
   if (near > 0) addShake(L.shakeMin + (L.shakeMax - L.shakeMin) * near);
   if (pd <= PEARL_ELDER.rain.bigR + PLAYER.r) addHitstop(.05);
   if (typeof sfxAt === 'function') { sfxAt('gourdSlam', x, y, .9, 'pearl-big-land'); sfxAt('pearlHit', x, y, .8, 'pearl-big-land2'); }
@@ -783,7 +795,7 @@ function pearlBossDown(e) {
   if (typeof sfxAt === 'function') sfxAt('pearlElderDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著用同一個來源播的那聲會被 70ms 去重吃掉
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#f4d9ff');   // 不提示核心可以打了
-  nearbyImpact(e.x, e.y, 10, .08);
+  bossImpact(e.x, e.y, 10, .08);
 }
 
 // ---- 畫面上方的 BOSS 血條（core-frenzy.js 的 drawCoreBossUI 呼叫）：大童＋牠身上的核心 ----

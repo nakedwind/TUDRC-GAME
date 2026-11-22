@@ -17,11 +17,14 @@
    - 體型：一般葫蘆猴的 scale 倍（2 倍）。不會硬直、打不退、推不動（跟一般葫蘆猴一樣）。
    必須在 gourd-monkey.js、breakable-walls.js 之後、game.js 之前載入。
 */
-const GOURD_KING = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const GOURD_KING = applyBossSettings('GOURD_KING', {
   name: '葫蘆猴王',
   // 哪張地圖、哪一面牆是 BOSS 牆：[牆左上角的欄, 列]（地圖編輯器裡那張「捷運高牆X6」圖章的位置）
   maps: { map_mvxz356e: { wall: [37, 13] } },   // R89區-紅線捷運站：上方的隱藏牆
   scale: 2,                      // 體型：一般葫蘆猴的幾倍
+  artDir: 'images/monster/gourd-king/',   // 專用的圖（葫蘆紫藍）：檔名跟葫蘆猴一樣，只換資料夾；用 tools/recolor-gourd-king.py 從葫蘆猴的圖換色產生
   hp: 3600,                      // 血量（再乘整體難度）
   atk: 1.6,                      // 攻擊力：一般葫蘆猴的幾倍（壓到溫特、隊友、建築）
   speedMul: 1.1,                 // 拖行速度：一般葫蘆猴的幾倍
@@ -87,6 +90,13 @@ const GOURD_KING = {
     monsterDamage: 60,           // 不分敵我：砸到怪物也會扣血（葫蘆猴王自己不會被砸）
     hitKing: false,              // true＝葫蘆猴王自己也會被落石砸到
     quick: 1,                    // 暴怒連跳的小壓頂：每下掉幾顆
+    big: {                       // 大顆落石（2026-11-21）：只有沒瞄準人的那幾顆會是大顆；落地後變成擋路的大石頭
+      chance: .5,                // 沒瞄準的落石有幾成是大顆
+      radius: 46,                // 大顆砸到的範圍（像素）
+      damageMul: 1.6,            // 大顆的傷害是小顆的幾倍
+      hp: 400,                   // 落地的大石頭有多硬（怪物被擋住會去打它）；爆炸（油桶、地雷、自爆史萊姆、希奧妮大招）一炸就碎（gkBlastBoulders）
+      life: 25,                  // 落地後留幾秒就碎掉（免得 BOSS 場地被塞滿）
+    },
   },
   // ---- 壓碎礦石：壓頂砸到的普通礦石 ----
   ores: {
@@ -103,7 +113,7 @@ const GOURD_KING = {
     crouch: .25, rise: .42, hang: .16, height: 130,   // 連跳的小壓頂：蓄力、升空、停住都比較短，跳比較低
     tired: 2.4,                  // 連跳完陷在地上喘氣幾秒
   },
-};
+});
 // 撞破後可以走的格子（[第幾欄, 第幾列]，從牆左上角算）：全破的圖中間四欄都打通；第一格是洞口正中間（球球、提示用）
 const GK_WALL_OPEN = [[2, 5], [3, 5], [1, 5], [4, 5]], GK_WALL_SOLID = [];
 for (let r = 4; r >= 1; r--) GK_WALL_OPEN.push([1, r], [2, r], [3, r], [4, r]);
@@ -121,7 +131,9 @@ function gourdKingWallSpec(s) {
   return spot && s.c === spot.wall[0] && s.r === spot.wall[1] && /^tile_mrt_room_highwallx6/.test(s.id) ? 'gourd_king_wall' : null;
 }
 // 葫蘆猴王壓頂用的數值：一般葫蘆猴的 GOURD 蓋上 slam；暴怒連跳的小壓頂再蓋上 combo
-const GK_SLAM = Object.assign({}, GOURD, GOURD_KING.slam);
+// 葫蘆猴的圖片路徑 → 猴王專用的那張（同檔名、換到 GOURD_KING.artDir 資料夾）
+const gkArt = f => typeof f === 'string' && /\.png$/i.test(f) && GOURD_KING.artDir ? GOURD_KING.artDir + f.split('/').pop() : f;
+const GK_SLAM = Object.assign({}, GOURD, GOURD_KING.slam, { art: Object.fromEntries(Object.entries(GOURD.art).map(([k, f]) => [k, gkArt(f)])) });   // art：壓扁／拉長圖換成猴王的
 const GK_SLAM_QUICK = Object.assign({}, GK_SLAM, { crouch: GOURD_KING.combo.crouch, rise: GOURD_KING.combo.rise, hang: GOURD_KING.combo.hang, height: GOURD_KING.combo.height });
 function gourdKingCfg(e) { return e.gm && e.gm.slam && e.gm.slam.quick ? GK_SLAM_QUICK : GK_SLAM; }
 const gkRand = (a, b) => a + Math.random() * (b - a);
@@ -139,12 +151,12 @@ function gkWallBox(s) {
 // ---- 開場（game.js 在 newGame 裡呼叫，要在 setupBreakableWalls 之後）----
 // G.gourdKing：{ stamp, phase: 'sleep'｜'knock'｜'breach'（撞破了、還沒踏出來）｜'out'｜'dead', t, hits, e }
 function seedGourdKing() {
-  G.gourdKing = null; G.gkRocks = []; G.gkSift = [];
+  G.gourdKing = null; G.gkRocks = []; G.gkSift = []; G.gkBoulders = [];
   if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const s = gkWallStamp(); if (!s) return;
   G.gourdKing = { stamp: s, phase: 'sleep', t: 0, hits: 0, e: null, jitter: 0, jitterT: 0 };
   const base = ACTIVE_MONSTERS.find(m => m.id === 'gourd_monkey');
-  if (base) [base.sprite, GOURD.art.squash, GOURD.art.tall].forEach(monsterImage);   // 先載好圖，踏出來那一下才不會閃空白
+  if (base) [gkArt(base.sprite), GK_SLAM.art.squash, GK_SLAM.art.tall].forEach(monsterImage);   // 先載好圖，踏出來那一下才不會閃空白
   GOURD_KING.wall.stages.forEach(id => { const t = mapTileById(id); if (t && typeof tileImage === 'function') tileImage(t); });
 }
 
@@ -271,6 +283,8 @@ function gkEmerge(K) {
   const sx = box.cx, sy = OY + (box.r0 + 5.5) * CELL;   // 破洞最下排（牆腳）：整隻站在牆前面，看得清楚
   const e = createMonster(base, sx, sy);
   e.gourdKing = true; e.eliteName = B.name; e.eliteAwake = false;
+  e.sprite = gkArt(e.sprite);   // 換成猴王專用的圖（另外複製一份，不要改到葫蘆猴共用的設定）
+  if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(gkArt) : gkArt(f)]));
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * B.hp);
   e.reward = Math.round((e.reward || 0) * B.rewardMul); e.crystals = Math.round((e.crystals ?? 5) * B.crystalMul);
   e.drawWidth = Math.round(base.width * B.scale); e.drawHeight = Math.round(base.height * B.scale);
@@ -391,10 +405,13 @@ function gkDropRocks(e, n) {
       x = null;
     }
     if (x == null) continue;
-    G.gkRocks.push({ x, y, floor: gkRockFloor(x, y), t: -gkRand(R.delay[0], R.delay[1]), seed: Math.random() * 9, size: gkRand(.9, 1.3) });
+    const big = !aim && Math.random() < R.big.chance;   // 大顆只掉在沒瞄準人的地方（落地要擋路，不能砸在人身上）
+    G.gkRocks.push({ x, y, floor: gkRockFloor(x, y), t: -gkRand(R.delay[0], R.delay[1]), seed: Math.random() * 9, size: big ? 1 : gkRand(.9, 1.3), big,
+      art: big ? ROCK_ART.big[Math.floor(Math.random() * ROCK_ART.big.length)] : ROCK_ART.small[Math.floor(Math.random() * ROCK_ART.small.length)] });
   }
 }
 function updateGkRocks(dt) {
+  gkUpdateBoulders(dt);   // 落地的大石頭：時間到就碎掉（沒有落石在掉的時候也要算）
   if (!G.gkRocks || !G.gkRocks.length) return;
   const R = GOURD_KING.rocks;
   for (const k of G.gkRocks) {
@@ -405,6 +422,54 @@ function updateGkRocks(dt) {
   }
   G.gkRocks = G.gkRocks.filter(k => !k.hit || k.t < R.fall + .05);
 }
+// 大石頭落地：照落點擺一個 2×2 格的障礙物（擋路的是下面那一排 2 格）；落點有牆、有東西、有人站著就直接碎掉
+function gkPlaceBoulder(k) {
+  const R = GOURD_KING.rocks, [c1, r1] = cellAt(k.x - CELL / 2, k.y), c0 = c1, r0 = r1 - 1;
+  const cells = [[c0, r1], [c0 + 1, r1]];
+  const people = [G.player, ...(G.towers || []), ...(G.enemies || [])].filter(a => a && a.hp > 0 && !a.dead);
+  const free = cells.every(([c, r]) => inGrid(c, r) && !isWall(c, r) && !G.grid[c + ',' + r] &&
+    !people.some(a => a.x > OX + c * CELL - 14 && a.x < OX + (c + 1) * CELL + 14 && a.y > OY + r * CELL - 14 && a.y < OY + (r + 1) * CELL + 14));
+  if (!free) return false;
+  const o = { kind: 'obstacle', type: k.art === ROCK_ART.big[1] ? 'gkBoulder2' : 'gkBoulder', c: c0, r: r0, w: 2, h: 2, solid: [[0, 1], [1, 1]], hp: R.big.hp, maxhp: R.big.hp, gkArt: k.art, floor: k.floor };
+  G.obstacles.push(o);
+  for (const [c, r] of cells) G.grid[c + ',' + r] = o;
+  for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }
+  for (const e of G.enemies) { e.aiPath = null; e.aiGoal = null; e.aiRouteTimer = 0; }
+  if (typeof computeFlow === 'function') computeFlow();
+  (G.gkBoulders = G.gkBoulders || []).push({ o, t: R.big.life });
+  return true;
+}
+// 落地的大石頭的圖：掛在 obstacleImgs 上（render.js 的 drawObstacle 照 o.type 找圖，整張畫滿 2×2 格）；兩種圖輪流用不同的 type
+window.addEventListener('load', () => {
+  if (typeof obstacleImgs === 'undefined' || typeof monsterImage !== 'function') return;
+  obstacleImgs.gkBoulder = { h: monsterImage(ROCK_ART.big[0]) };
+  obstacleImgs.gkBoulder2 = { h: monsterImage(ROCK_ART.big[1]) };
+});
+// 爆炸炸到落地的大石頭：直接碎掉（js/breakable-walls.js 的 blastWalls 呼叫——會炸開牆的爆炸都算）
+function gkBlastBoulders(x, y, R) {
+  let hit = false;
+  for (const b of G.gkBoulders || []) {
+    const cx = OX + (b.o.c + 1) * CELL, cy = OY + (b.o.r + 1.5) * CELL;
+    if (Math.hypot(cx - x, cy - y) > R + CELL) continue;
+    b.o.hp = 0; hit = true;
+  }
+  if (hit) gkUpdateBoulders(0);
+}
+// 落地的大石頭：時間到（或被打爛）就碎掉
+function gkUpdateBoulders(dt) {
+  if (!G.gkBoulders || !G.gkBoulders.length) return;
+  for (const b of G.gkBoulders) {
+    b.t -= dt;
+    const gone = !G.obstacles.includes(b.o);
+    if (b.t > 0 && !gone && b.o.hp > 0) continue;
+    const x = OX + (b.o.c + 1) * CELL, y = OY + (b.o.r + 2) * CELL - 6;
+    if (!gone) { b.o.lastHitBy = 'demolish'; if (typeof destroyObstacleNow === 'function') destroyObstacleNow(b.o); else removeBarrier(b.o); }
+    if (typeof rockBurstFx === 'function') rockBurstFx(x, y, { rocks: 12, speed: [50, 140], up: [90, 180], dust: 8, dustRise: 2, size: 1 });
+    if (typeof sfxAt === 'function') sfxAt('gourdTossLand', x, y, .5, 'gk-boulder-break');
+    b.done = true;
+  }
+  G.gkBoulders = G.gkBoulders.filter(b => !b.done);
+}
 // 落石從天花板掉下來：落在最上面那層地面（陸橋、2 樓地面上＝2 樓；其他＝1 樓），橋下的人不會被砸到
 function gkRockFloor(x, y) {
   if (!hasFloors) return 0;
@@ -412,10 +477,13 @@ function gkRockFloor(x, y) {
   return deckCells.has(k) && !rampCells.has(k) ? 2 : 1;
 }
 function gkRockLand(k, R) {
+  if (k.big) R = { ...R, radius: R.big.radius, playerDamage: Math.round(R.playerDamage * R.big.damageMul), sentryDamage: Math.round(R.sentryDamage * R.big.damageMul), monsterDamage: Math.round(R.monsterDamage * R.big.damageMul) };
   {
-    rockBurstFx(k.x, k.y, { rocks: 7, speed: [40, 120], up: [90, 180], dust: 4, dustRise: 1, size: .8 * k.size, spread: 10 });
+    const stays = k.big && gkPlaceBoulder(k);   // 大顆：落地變成擋路的大石頭（放不下就碎掉）
+    rockBurstFx(k.x, k.y, { rocks: k.big ? 14 : 7, speed: [40, 120], up: [90, 180], dust: k.big ? 9 : 4, dustRise: 1, size: (k.big ? 1.1 : .8) * k.size, spread: k.big ? 22 : 10 });
+    if (k.big) { (G.gourdCracks = G.gourdCracks || []).push({ x: k.x, y: k.y + 2, floor: k.floor, life: 6, life0: 6, scale: .9, power: .8 }); if (!stays) G.effects.push({ ring: true, x: k.x, y: k.y, r: 6, r2: 60, life: .35, life0: .35, color: '#c9b88f' }); }
     G.effects.push({ ring: true, x: k.x, y: k.y, r: 4, r2: R.radius * 1.3, life: .3, life0: .3, color: '#a8936c' });
-    if (typeof nearbyImpact === 'function') nearbyImpact(k.x, k.y, 4, 0);
+    if (typeof bossImpact === 'function') bossImpact(k.x, k.y, k.big ? 9 : 4, k.big ? .05 : 0);
     if (typeof sfxAt === 'function') sfxAt('gourdTossLand', k.x, k.y, .5, 'gk-rock');
     const p = G.player;
     if (p && p.hp > 0 && blastHits(p) && Math.hypot(p.x - k.x, p.y - k.y) <= R.radius + 10 && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
@@ -456,11 +524,11 @@ function drawGourdKingGround(ctx) {
   ctx.save();
   for (const k of G.gkRocks) {
     if (k.t < 0 || k.hit || (typeof isVisible === 'function' && !isVisible(k.x, k.y))) continue;
-    const u = Math.min(1, k.t / R.fall), r = R.radius * (.45 + .55 * u) * k.size;
+    const RR = k.big ? R.big.radius : R.radius, u = Math.min(1, k.t / R.fall), r = RR * (.45 + .55 * u) * k.size;
     ctx.globalAlpha = .15 + .45 * u; ctx.fillStyle = '#120c08';
     ctx.beginPath(); ctx.ellipse(k.x, k.y, r, r * .45, 0, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = .35 + .4 * u; ctx.strokeStyle = u > .75 && Math.sin(k.t * 40) > 0 ? '#ffd2c4' : '#ff8665'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.ellipse(k.x, k.y, R.radius * k.size, R.radius * .45 * k.size, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(k.x, k.y, RR * k.size, RR * .45 * k.size, 0, 0, Math.PI * 2); ctx.stroke();
   }
   ctx.restore();
 }
@@ -477,7 +545,9 @@ function drawGourdKingTop(ctx) {
   for (const k of G.gkRocks || []) {
     if (k.t < R.fall * .35 || k.hit || (typeof isVisible === 'function' && !isVisible(k.x, k.y))) continue;
     const u = (k.t - R.fall * .35) / (R.fall * .65), z = R.height * (1 - u * u), s = 9 * k.size;
-    ctx.globalAlpha = 1; ctx.save(); ctx.translate(k.x, k.y - z); ctx.rotate(k.seed + k.t * 4);
+    ctx.globalAlpha = 1;
+    if (k.art && typeof drawRockArt === 'function' && drawRockArt(ctx, k.art, k.x, k.y - z, k.big ? 1 : k.size, k.big ? Math.sin(k.t * 3 + k.seed) * .15 : k.seed + k.t * 4)) continue;   // 落石的點陣圖（js/combat-feel.js 的 ROCK_ART；大顆轉得慢）
+    ctx.save(); ctx.translate(k.x, k.y - z); ctx.rotate(k.seed + k.t * 4);
     ctx.beginPath();
     for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, rr = s * (.75 + .3 * Math.sin(k.seed * 7 + i * 2.3)); i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); }
     ctx.closePath(); ctx.fillStyle = '#8a7f70'; ctx.fill(); ctx.strokeStyle = '#3b352e'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -509,7 +579,7 @@ function gourdKingDown(e) {
   if (G.gourdKing) G.gourdKing.phase = 'dead';
   systemNotice(GOURD_KING.name + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(GOURD_KING.name + '倒下了', '', '#e8c27a');
-  if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 12, .1);
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 12, .1);
 }
 // ---- BOSS 血條（js/core-frenzy.js）、中BOSS 音樂（js/boss-music.js）----
 function gourdKingBars() {

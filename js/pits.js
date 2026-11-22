@@ -25,19 +25,20 @@ function pitIndex() {
   const n = (MAP.stamps || []).length;
   if (pitCache.map === MAP && pitCache.n === n) return pitCache.list;
   const list = [];
-  const add = (x0, y0, w, h, spec) => list.push({ cx: x0 + w / 2, cy: y0 + h / 2, rx: w * PIT.area / 2, ry: h * PIT.area / 2, spec });
+  // floor：坑洞在幾樓（2 樓圖層／2 樓的圖＝2，其他＝1）；陸橋底下的坑洞不會讓橋上的人變慢
+  const add = (x0, y0, w, h, spec, floor) => list.push({ cx: x0 + w / 2, cy: y0 + h / 2, rx: w * PIT.area / 2, ry: h * PIT.area / 2, spec, floor });
   const order = typeof MAP_LAYER_ORDER !== 'undefined' ? MAP_LAYER_ORDER : Object.keys(MAP.layers || {});
   for (const lid of order) {   // 一格一格放的小圖
     const layer = (MAP.layers || {})[lid] || {};
     for (const key in layer) {
       const t = mapTileById(layer[key]), spec = pitSpecOf(t); if (!spec) continue;
       const [c, r] = key.split(',').map(Number);
-      add(OX + c * CELL, OY + r * CELL, mapTileW(t) * CELL, mapTileH(t) * CELL, spec);
+      add(OX + c * CELL, OY + r * CELL, mapTileW(t) * CELL, mapTileH(t) * CELL, spec, typeof MAP_FLOOR2_LAYERS !== 'undefined' && MAP_FLOOR2_LAYERS.has(lid) ? 2 : 1);
     }
   }
   for (const s of MAP.stamps || []) {   // 大張的物件（會跟著物件的大小 %、旋轉）
     const t = mapTileById(s.id), spec = pitSpecOf(t); if (!spec) continue;
-    add(OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), mapStampW(s, t) * CELL, mapStampH(s, t) * CELL, spec);
+    add(OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), mapStampW(s, t) * CELL, mapStampH(s, t) * CELL, spec, typeof stampDrawFloor === 'function' ? stampDrawFloor(s) : 1);
   }
   pitCache = { map: MAP, n, list };
   return list;
@@ -50,6 +51,7 @@ function pitSlowAt(x, y, who, actor) {
   const fy = y + PIT.footDy;
   let k = 1;
   for (const p of list) {
+    if (actor && !fieldHits(p.floor, actor)) continue;   // 別層的坑洞踩不到
     const dx = (x - p.cx) / p.rx, dy = (fy - p.cy) / p.ry;
     if (dx * dx + dy * dy <= 1) k = Math.min(k, who === 'enemy' ? p.spec.enemy : p.spec.ally);
   }

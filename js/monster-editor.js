@@ -8,10 +8,12 @@ function status(text, error = false) {
   el.textContent = text; el.style.color = error ? '#ffb4b4' : '#84ddbd';
 }
 let slimeCfg = slimeSettings(true);
+let bossCfg = bossSettings(true);   // BOSS 數值（data/monsters.js 的 BOSS_SETTINGS_DEFAULT）
 function saveMonsters() {
   try {
     localStorage.setItem(MONSTER_STORAGE_KEY, JSON.stringify(monsters));
     localStorage.setItem(SLIME_SETTINGS_STORAGE_KEY, JSON.stringify(slimeCfg));
+    localStorage.setItem(BOSS_SETTINGS_STORAGE_KEY, JSON.stringify(bossCfg));
     status('已自動儲存到這台瀏覽器。');
   } catch (_) { status('儲存失敗：瀏覽器暫存空間不足。', true); }
 }
@@ -146,7 +148,7 @@ document.getElementById('f_wide').addEventListener('change', e => {   // 大體�
   if (e.target.checked) monster.wide = true; else delete monster.wide;
   saveMonsters();
 });
-document.getElementById('f_element').addEventListener('change', e => {   // 屬性：水系＝火系角色打牠攻擊力打折（data/balance.js 的 ELEMENT_RULES）
+document.getElementById('f_element').addEventListener('change', e => {   // 屬性：水系＝火焰、爆炸傷害打折，雷電傷害加成並麻痺（data/balance.js 的 ELEMENT_RULES）
   const monster = currentMonster();
   if (e.target.value) monster.element = e.target.value; else delete monster.element;
   saveMonsters();
@@ -155,7 +157,9 @@ function exportText() {
   return '/* 怪物種類資料：由怪物編輯器匯出。地圖只記錄種類 ID 與權重。 */\n'
     + 'const MONSTERS_DEFAULT = ' + JSON.stringify(validMonsterCatalog(monsters), null, 2) + ';\n'
     + '/* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */\n'
-    + 'const SLIME_SETTINGS_DEFAULT = ' + JSON.stringify(validSlimeSettings(slimeCfg), null, 2) + ';\n';
+    + 'const SLIME_SETTINGS_DEFAULT = ' + JSON.stringify(validSlimeSettings(slimeCfg), null, 2) + ';\n'
+    + '\n/* BOSS 數值（由怪物編輯器匯出）：每隻 BOSS 程式檔裡設定的數字，遊戲開場時用這裡的蓋過去（js/monster-data.js 的 applyBossSettings）。 */\n'
+    + 'const BOSS_SETTINGS_DEFAULT = ' + JSON.stringify(validBossSettings(bossCfg), null, 2) + ';\n';
 }
 
 // ================= 史萊姆種類 =================
@@ -242,9 +246,9 @@ document.getElementById('previewGame').addEventListener('click', () => {
 });
 document.getElementById('resetMonsters').addEventListener('click', () => {
   if (!confirm('丟棄這台瀏覽器裡尚未匯出的怪物設定，重新載入 data/monsters.js？')) return;
-  localStorage.removeItem(MONSTER_STORAGE_KEY); localStorage.removeItem(SLIME_SETTINGS_STORAGE_KEY);
-  monsters = monsterCatalog(false); selectedId = monsters[0].id; slimeCfg = slimeSettings(false);
-  render(); renderSlimeTable(); status('已從檔案重新載入。');
+  localStorage.removeItem(MONSTER_STORAGE_KEY); localStorage.removeItem(SLIME_SETTINGS_STORAGE_KEY); localStorage.removeItem(BOSS_SETTINGS_STORAGE_KEY);
+  monsters = monsterCatalog(false); selectedId = monsters[0].id; slimeCfg = slimeSettings(false); bossCfg = bossSettings(false);
+  render(); renderSlimeTable(); renderBossPanel(); status('已從檔案重新載入。');
 });
 // 與遊戲共用素材、出土選圖、手部前搖；只繪圖，不寫入遊戲存檔。
 const burrowPreviewImages = new Map();
@@ -291,5 +295,117 @@ function drawBurrowEditorPreview(now) {
   requestAnimationFrame(drawBurrowEditorPreview);
 }
 requestAnimationFrame(drawBurrowEditorPreview);
+// ================= 👑 BOSS 數值 =================
+// 欄位和說明來自 js/boss-fields.js（tools/build-boss-fields.py 從 BOSS 程式檔的註解產生），數字存在 bossCfg。
+// 常見欄位名稱的中文（小字顯示；沒列到的就顯示原本的英文名稱）
+const BOSS_KEY_ZH = {
+  hp: '血量', hpMul: '血量倍率', coreHp: '核心血量', coreHpMul: '核心血量倍率', dmgMul: '攻擊倍率', atk: '攻擊倍率',
+  rewardMul: '經費倍率', crystalMul: '結晶倍率', scale: '體型', speedMul: '速度倍率', speed: '速度', wakeRange: '甦醒距離',
+  loseRange: '放棄距離', leash: '離原位上限', windup: '預警', cooldown: '冷卻', time: '秒數', count: '數量', radius: '半徑',
+  range: '範圍', shake: '震動', every: '間隔', first: '第一次', delay: '延遲', hold: '停住', rise: '上升', sink: '縮回',
+  height: '高度', life: '持續', damage: '傷害', dmg: '傷害', mul: '倍率', max: '最多', min: '最少', near: '最近', far: '最遠',
+  playerDamage: '打溫特', sentryDamage: '打隊員', monsterDamage: '打怪物', chance: '機率', knockback: '擊退', dist: '距離', up: '往上',
+  keepDistance: '保持距離', enrageAt: '暴怒血量', stunResist: '暈眩抗性', coreShield: '核心護盾',
+};
+let bossSel = BOSS_LIST[0].key;
+const bossPick = (root, key, path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), root[key]);
+const bossGet = (key, path) => bossPick(bossCfg, key, path);
+const bossFileVal = (key, path) => bossPick(typeof BOSS_SETTINGS_DEFAULT !== 'undefined' ? BOSS_SETTINGS_DEFAULT : {}, key, path);
+function bossSet(key, path, v) {
+  const parts = path.split('.'); let o = bossCfg[key];
+  for (const k of parts.slice(0, -1)) o = o[k];
+  o[parts[parts.length - 1]] = v;
+}
+function bossThumb(b) {   // 列表的圖：基準怪物的圖換成 BOSS 專用資料夾（找不到就用原圖）
+  const m = monsters.find(x => x.id === b.base), src = m ? m.sprite : '';
+  const img = new Image(); img.alt = '';
+  img.onerror = () => { img.onerror = null; img.src = src; };
+  img.src = b.artDir && src ? b.artDir + src.split('/').pop() : src;
+  return img;
+}
+function bossListButton(img, title, note, onClick, selected) {
+  const btn = document.createElement('button'); btn.type = 'button';
+  if (selected) btn.classList.add('selected');
+  const label = document.createElement('span'), name = document.createElement('b'), small = document.createElement('small');
+  name.textContent = title; small.textContent = note; label.append(name, small);
+  btn.append(img, label); btn.addEventListener('click', onClick);
+  return btn;
+}
+function renderBossList() {
+  const box = document.getElementById('bossList'); box.replaceChildren();
+  for (const b of BOSS_LIST) box.append(bossListButton(bossThumb(b), b.name, b.file, () => { bossSel = b.key; renderBossPanel(); }, b.key === bossSel));
+  const km = monsters.find(m => m.id === 'milkfish_king');   // 虱目魚王是怪物列表裡的一隻，點了跳過去
+  if (km) {
+    const img = new Image(); img.src = km.sprite; img.alt = '';
+    box.append(bossListButton(img, km.name, '在上方怪物列表（點這裡跳過去）', () => { selectedId = km.id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, false));
+  }
+}
+const bossRowText = r => (r.t + ' ' + r.k.map(([p, c]) => p + ' ' + c + ' ' + (BOSS_KEY_ZH[p.split('.').pop()] || '')).join(' ')).toLowerCase();
+function renderBossFields() {
+  const b = BOSS_LIST.find(x => x.key === bossSel), wrap = document.getElementById('bossFields');
+  const term = document.getElementById('bossSearch').value.trim().toLowerCase();
+  wrap.replaceChildren();
+  const rows = BOSS_FIELD_ROWS[b.key] || [];
+  rows.forEach((r, i) => {
+    if (term) {
+      if (r.h) {   // 標題：自己符合、或底下有符合的才顯示
+        let end = rows.findIndex((x, j) => j > i && x.d <= r.d); if (end < 0) end = rows.length;
+        if (!bossRowText(r).includes(term) && !rows.slice(i + 1, end).some(x => !x.h && bossRowText(x).includes(term))) return;
+      } else if (!bossRowText(r).includes(term)) return;
+    }
+    const row = document.createElement('div'); row.className = 'boss-row' + (r.h ? ' head' : '');
+    row.style.paddingLeft = (r.d * 18) + 'px';
+    const text = document.createElement('div'); text.textContent = r.t || '（同上）'; row.append(text);
+    if (r.k.length) {
+      const ins = document.createElement('div'); ins.className = 'ins';
+      const first = r.k[0][1].split('．')[0] + '．';   // 一整行都是同一個小物件（例如 hands．every、hands．count）：前面那段重複就省掉
+      const same = r.k.length > 1 && r.k.every(([, c]) => c.startsWith(first));
+      for (const [path, cap0] of r.k) {
+        const cap = same ? cap0.slice(first.length) : cap0;
+        const cell = document.createElement('label'); cell.className = 'in';
+        const last = path.split('.').pop(), zh = BOSS_KEY_ZH[last];
+        cell.textContent = zh && cap.endsWith(last) ? cap.slice(0, -last.length) + zh + '（' + last + '）' : cap;
+        const box = document.createElement('span');
+        const val = bossGet(b.key, path), fileV = bossFileVal(b.key, path);
+        (Array.isArray(val) ? val : [val]).forEach((v, idx) => {
+          const input = document.createElement('input'); input.type = 'number';
+          const f = Array.isArray(fileV) ? fileV[idx] : fileV;
+          input.step = Math.abs(f) >= 20 ? 1 : Math.abs(f) >= 2 ? .1 : .01;
+          if (f >= 0) input.min = 0;
+          input.value = v; input.title = '檔案裡的數字：' + f;
+          const mark = () => input.classList.toggle('changed', Number(input.value) !== f);   // 黃框＝跟檔案不一樣（還沒存到專案）
+          mark();
+          input.addEventListener('change', () => {
+            let n = Number(input.value); if (!Number.isFinite(n) || input.value === '') n = f;
+            if (f >= 0) n = Math.max(0, n);
+            if (Array.isArray(val)) { const arr = bossGet(b.key, path).slice(); arr[idx] = n; bossSet(b.key, path, arr); }
+            else bossSet(b.key, path, n);
+            input.value = n; mark(); saveMonsters();
+          });
+          box.append(input);
+        });
+        cell.append(box); ins.append(cell);
+      }
+      row.append(ins);
+    }
+    wrap.append(row);
+  });
+  if (!wrap.children.length) wrap.textContent = '沒有符合的欄位';
+}
+function renderBossPanel() {
+  const b = BOSS_LIST.find(x => x.key === bossSel);
+  document.getElementById('bossTitle').textContent = b.name;
+  document.getElementById('bossDesc').textContent = b.desc.replace(/^=+\s*|\s*=+$/gm, '');
+  renderBossList(); renderBossFields();
+}
+document.getElementById('bossSearch').addEventListener('input', renderBossFields);
+document.getElementById('bossReset').addEventListener('click', () => {
+  const b = BOSS_LIST.find(x => x.key === bossSel);
+  if (!confirm('把「' + b.name + '」的數字全部改回 data/monsters.js 檔案裡的數字？')) return;
+  bossCfg[b.key] = validBossSettings(null)[b.key];
+  saveMonsters(); renderBossFields();
+});
+
 render();
 renderSlimeTable();
+renderBossPanel();

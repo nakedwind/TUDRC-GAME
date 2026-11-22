@@ -93,8 +93,8 @@ function bkHurtAlly(e) {
 // ---- 看得到的我方（溫特、隊友）----
 function bkThreats(e) {
   const C = BANANA_KING, R = C.noticeRange * CELL, list = [];
-  const seen = t => { if (!t || t.hp <= 0) return false; const d = Math.hypot(t.x - e.x, t.y - e.y); return d <= C.feelRange * CELL || (d <= R && hasLineOfSight(e.x, e.y, t.x, t.y)); };
-  if (seen(G.player) || ((e.playerAggroT || 0) > 0 && G.player && G.player.hp > 0)) list.push(G.player);   // 被開槍打中：就算沒看到也知道要跑
+  const seen = t => { if (!t || t.hp <= 0 || !sameFloor(e, t)) return false; const d = Math.hypot(t.x - e.x, t.y - e.y); return d <= C.feelRange * CELL || (d <= R && hasLineOfSight(e.x, e.y, t.x, t.y)); };
+  if (seen(G.player) || ((e.playerAggroT || 0) > 0 && G.player && G.player.hp > 0 && sameFloor(e, G.player))) list.push(G.player);   // 不同樓層（陸橋上／下）的看不到、打不到（js/pathfinding.js）   // 被開槍打中：就算沒看到也知道要跑
   for (const t of G.towers) if (!t.berserk && seen(t)) list.push(t);
   return list;
 }

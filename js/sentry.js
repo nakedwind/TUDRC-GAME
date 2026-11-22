@@ -409,14 +409,18 @@ function escapeDarkness(actor, dt) {
   if (actor.groundTrip || nearFollowedPlayer(actor)) return false;
   // 被叫來跟隨護衛、而且找得到路過去：中間暗也照走（不然走進暗處就逃回燈下、再往前又逃回來，看起來像站在原地不動）
   // 每秒重新確認一次「找得到路」（穿過黑暗也算），路被擋住時才照舊躲回燈下
-  if (actor.mode === 'escort' && G && G.player && !MAP_SAFE) {
+  // 自由走動、平常就跟著別人走的隊員也一樣（跟著溫特的大家、跟著艾德林的阿瓦倫）：溫特走進沒開燈的地方（例如 B56 沒開燈的路橋）時，
+  // 不然隊員一踩進暗處就被拉回燈下，整隊停在最後一盞燈旁邊不跟（sentryCompanionRule）
+  const followAnchor = actor.mode === 'escort' ? G && G.player
+    : (actor.mode === 'free' && G && G.towers && G.towers.includes(actor) ? sentryCompanionRule(actor)?.anchor : null);
+  if (followAnchor && G && G.player && !MAP_SAFE) {
     actor.escortRouteT = (actor.escortRouteT || 0) - dt;
     if (actor.escortRouteT <= 0) {
       actor.escortRouteT = 1;
-      actor.escortRouteOk = buildSentryPath(actor, G.player.x, G.player.y, true, hasFloors ? actorFloor(G.player) : null) !== null;
+      actor.escortRouteOk = buildSentryPath(actor, followAnchor.x, followAnchor.y, true, hasFloors ? actorFloor(followAnchor) : null) !== null;
     }
     if (actor.escortRouteOk) return false;
-    if (typeof watchSentryProgress === 'function' && !personnelInLight(actor.x, actor.y)) watchSentryProgress(actor, dt, leaderLabel(), () => sentryLeaderBlockReason(actor));   // 過不去又待在暗處：一樣說出原因（js/sentry-blocked.js）
+    if (actor.mode === 'escort' && typeof watchSentryProgress === 'function' && !personnelInLight(actor.x, actor.y)) watchSentryProgress(actor, dt, leaderLabel(), () => sentryLeaderBlockReason(actor));   // 過不去又待在暗處：一樣說出原因（js/sentry-blocked.js）
   }
   if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
     if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
@@ -726,7 +730,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
     [moveX, moveY] = sentryCellPos(...goal);
   }
   if (waypoint) [moveX, moveY] = sentryCellPos(waypoint.c, waypoint.r);
-  const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally') : 1);   // 走在鐵絲網上變慢
+  const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally', t) : 1);   // 走在鐵絲網上變慢（給 t：別層的坑洞、黏膠不算）
   if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY, dark)) {
     t.x = moveX; t.y = moveY;
     if (waypoint) t.navPath.shift();
@@ -805,6 +809,7 @@ function hasAggroTarget(t) {
     if (e.dead || e.awake === false || e.hidden || e.carried || (typeof poolCoreSubmerged === 'function' && G.cores.includes(e) && poolCoreSubmerged(e))) continue;   // 泡在深水裡的核心也不算（js/pool-tide.js）；沉睡的核心不算目標；躲在順順宮帽裡、抱在珍珠大童身上的也不算（js/elite-cap-king.js、js/pearl-elder.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不主動接敵（js/elite-bird-head.js）
     if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
+    if (!cores.includes(e) && !sameFloor(e, t)) continue;   // 陸橋上／下不同樓層的怪物打不到：不算（不然橋上的隊員會一直站在橋下怪物的正上方不走、也不跟溫特）
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
   }
   return false;
@@ -907,7 +912,7 @@ function updateSentryMain(t, dt) {
   if (menuSentry === t) return;                       // 選單開著時先站好
   // 漆彈標記的怪物（js/special-guns.js）：自由走動、跟隨護衛的哨兵會追過去；原地巡邏、指派位置的不追；不追進黑暗；嚮導不追（有空時在射程內才打）
   const marked = !ownSpec.guide && (t.mode === 'free' || t.mode === 'escort') && typeof paintTarget === 'function' ? paintTarget() : null;
-  if (marked && personnelInLight(marked.x, marked.y) && (Math.hypot(marked.x - t.x, marked.y - t.y) > ownSpec.range * CELL - 6 || !hasLineOfSight(t.x, t.y, marked.x, marked.y))) {
+  if (marked && sameFloor(marked, t) && personnelInLight(marked.x, marked.y) && (Math.hypot(marked.x - t.x, marked.y - t.y) > ownSpec.range * CELL - 6 || !hasLineOfSight(t.x, t.y, marked.x, marked.y))) {
     t.target = null; t.waitT = 0;
     moveSentryWithPath(t, marked.x, marked.y, (ownSpec.walkSpeed || 80) * 1.2, dt);
     return;
@@ -918,7 +923,7 @@ function updateSentryMain(t, dt) {
   if (ownSpec.guide && G.enemies.length) {
     let threat = null, threatD = Infinity;
     for (const e of G.enemies) {
-      if (e.dead || e.confuseT > 0) continue;
+      if (e.dead || e.confuseT > 0 || !sameFloor(e, t)) continue;   // 陸橋上／下不同樓層的怪物碰不到，不用躲
       const d = Math.hypot(e.x - t.x, e.y - t.y);
       if (d < threatD) { threat = e; threatD = d; }
     }
@@ -975,11 +980,24 @@ function updateSentryMain(t, dt) {
       t.leftBehindT = (t.leftBehindT || 0) - dt;
       if (t.leftBehindT <= 0) { t.leftBehindT = 1; if (buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, hasFloors ? actorFloor(companion.anchor) : null) !== null) t.leftBehind = false; }
     } else t.leftBehind = false;
-    if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
+    // 直線上很近、實際卻要繞一大圈（例如隔著停在月台的通道列車、隔著牆）：不算跟上了，要繞過去。
+    // 不然隊員站在列車另一邊的月台，直線距離不到跟隨範圍就停下來，永遠不跟過來。每秒用找路算一次實際要走幾格
+    let detour = false;
+    if (!t.leftBehind && !otherFloor && companionDistance <= companion.radius) {
+      t.detourCheckT = (t.detourCheckT || 0) - dt;
+      if (t.detourCheckT <= 0) {
+        t.detourCheckT = 1;
+        const path = buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, hasFloors ? actorFloor(companion.anchor) : null);
+        t.followDetour = !!(path && path.length * CELL > companion.radius * 1.5);   // 要走的格數比跟隨範圍多一半以上＝要繞路
+      }
+      detour = !!t.followDetour;
+    } else t.followDetour = false;
+    if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || detour || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
       t.target = null; t.waitT = 0;
-      t.followDark = companion.anchor === G.player || inDoorway;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）；站在門口：門外暗也要走出來，不然會一直堵在門裡
+      t.followDark = true;   // 跟著別人走（溫特、或阿瓦倫跟著艾德林）：中間是暗的也照走（溫特身上有燈）；站在門口：門外暗也要走出來，不然會一直堵在門裡
       // 站在門口、對方就在旁邊：直接走到對方站的地方（對方常常就停在門口外面一格，只靠近到一格內的話會停在門裡）；一走出門口就照平常停下來
-      followTarget(t, companion.anchor, { dist: inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
+      // 要繞路：直接走到對方身邊（直線距離本來就在範圍內，照平常的停止距離會原地不動），走到了找路距離變短就恢復平常
+      followTarget(t, companion.anchor, { dist: detour ? CELL * 1.5 : inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
       if (t.mode === 'escort' && typeof watchSentryProgress === 'function') watchSentryProgress(t, dt, leaderLabel(), () => sentryLeaderBlockReason(t));   // 叫來護衛卻過不來：說出原因（js/sentry-blocked.js）
       return;
     }
@@ -1006,6 +1024,7 @@ function updateSentryMain(t, dt) {
       if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不去追
       if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
       if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心
+      if (!G.cores.includes(e) && !sameFloor(e, t)) continue;   // 不同樓層（陸橋上／下）的怪物打不到，不去追（以前會走到牠正上方一直站著）
       if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
       const d = Math.hypot(e.x - t.x, e.y - t.y);
       if (d < fd && d <= detectR) { fd = d; foe = e; }

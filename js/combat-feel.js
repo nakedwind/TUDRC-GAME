@@ -44,6 +44,17 @@ const SLIME_SPIT = { range: 5, minRange: 1.5, windup: .75, flySpeed: 6.5, cooldo
 const HIT_FEEL = { knock: 5, heavyKnock: 16, stagger: .3 };
 // 畫面震動只在玩家附近發生：range 格以內才震，越近越強
 const SHAKE_FEEL = { range: 6 };
+// BOSS 的震動（走路、敲地、砸地、倒下……）：溫特在 range 格內都感覺得到，越近越大。所有 BOSS 共用這一個數字，要調遠近改這裡
+const BOSS_SHAKE = { range: 30 };
+const bossShakeRange = () => BOSS_SHAKE.range;
+// BOSS 用的大型衝擊：跟 nearbyImpact 一樣的強度算法，只是傳得比較遠；頓格只在很近（3 格內）才有
+function bossImpact(x, y, shake, stop) {
+  if (!G.player) return;
+  const d = Math.hypot(G.player.x - x, G.player.y - y) / CELL, R = BOSS_SHAKE.range;
+  if (d > R) return;
+  addShake(shake * (.25 + .75 * Math.pow(1 - d / R, 2)));   // 平方衰減：貼身最大，越遠越小
+  if (stop && d < SHAKE_FEEL.range * .5) addHitstop(stop);
+}
 
 // 大型衝擊（巨型倒下、自爆）：依玩家距離決定震動強度，太遠就完全不震、不頓格
 function nearbyImpact(x, y, shake, stop) {
@@ -53,6 +64,62 @@ function nearbyImpact(x, y, shake, stop) {
   const k = 1 - d / SHAKE_FEEL.range;
   addShake(shake * (.35 + .65 * k));
   if (stop && k > .5) addHitstop(stop);
+}
+
+// ---- 地面裂痕（素材圖）：BOSS 踩地、砸地、敲地、倒下、藤蔓鑽地都用這一套 ----
+// 從 images/破損建築/ 的裂痕圖隨機挑；破壞越大（power 0～1）疊越多張、放越大，大破壞再蓋一層碎土灰（debris-dust）
+const CRACK_ART = {
+  files: ['crack04', 'crack05', 'crack06', 'crack07', 'floor-crack-cross', 'floor-crack-fork'].map(n => 'images/破損建築/' + n + '.png'),
+  dust: 'images/破損建築/debris-dust.png',
+  spread: 30,   // 疊上去的小裂痕離中心多遠（像素，再乘 size）
+};
+// 落石的圖（tools/draw-falling-rocks.py 畫的）：小顆＝絲瓜女王重踏震下來的碎石（不擋路）；大顆＝葫蘆猴王震下來的大石頭（落地擋路）
+const ROCK_ART = {
+  small: [1, 2, 3].map(i => 'images/破損建築/falling-rock-small-0' + i + '.png'),
+  big: [1, 2].map(i => 'images/破損建築/falling-rock-big-0' + i + '.png'),
+};
+// 先載好裂痕圖、落石圖：等所有程式載完（monsterImage 在別的檔案）才開始載，第一次裂開才不會閃空白
+window.addEventListener('load', () => { if (typeof monsterImage === 'function') CRACK_ART.files.concat(CRACK_ART.dust, ROCK_ART.small, ROCK_ART.big).forEach(f => monsterImage(f)); });
+// 畫一顆落石的圖：x, y＝石頭底部中央；s＝放大倍率（點陣圖照原本像素畫）；rot＝旋轉
+function drawRockArt(ctx, file, x, y, s = 1, rot = 0, alpha = 1) {
+  const img = monsterImage(file);
+  if (!img.complete || !img.naturalWidth || alpha <= 0) return false;
+  const w = img.naturalWidth * s, h = img.naturalHeight * s, prev = ctx.imageSmoothingEnabled;
+  ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha *= alpha;
+  ctx.translate(x, y - h / 2); ctx.rotate(rot); ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore(); ctx.imageSmoothingEnabled = prev;
+  return true;
+}
+// 做一組裂痕：size＝大小（1＝原圖大小，大約 80～120 像素寬），power＝破壞多大（0＝一張，1＝三張再加碎土灰）
+function makeCrackArt(size = 1, power = 0) {
+  const P = Math.max(0, Math.min(1, power)), pick = () => CRACK_ART.files[Math.floor(Math.random() * CRACK_ART.files.length)];
+  const rot = () => (Math.random() * 2 - 1) * .35;
+  const out = [{ file: pick(), dx: 0, dy: 0, s: size * (1 + P * .35), rot: rot(), flip: Math.random() < .5 }];
+  for (let i = 1, n = 1 + Math.round(P * 2); i < n; i++) {
+    const a = Math.random() * Math.PI * 2, d = CRACK_ART.spread * size * (.5 + Math.random() * .6);
+    out.push({ file: pick(), dx: Math.cos(a) * d, dy: Math.sin(a) * d * .55, s: size * (.55 + Math.random() * .3), rot: rot(), flip: Math.random() < .5 });
+  }
+  if (P >= .5) out.push({ file: CRACK_ART.dust, dx: 0, dy: 0, s: size * (1.2 + P), rot: 0, flip: Math.random() < .5 });
+  return out;
+}
+// 畫一組裂痕；tint／tintA：裂縫透出的光（例如金蕉大王的法術顏色）
+function drawCrackArt(ctx, x, y, art, alpha = 1, tint = null, tintA = 0) {
+  if (!art || alpha <= 0) return;
+  const prev = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  for (const p of art) {
+    const img = monsterImage(p.file);
+    if (!img.complete || !img.naturalWidth) continue;
+    const w = img.naturalWidth * p.s, h = img.naturalHeight * p.s;
+    ctx.save(); ctx.translate(x + p.dx, y + p.dy); ctx.rotate(p.rot); if (p.flip) ctx.scale(-1, 1);
+    ctx.globalAlpha = alpha; ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    if (tint && tintA > 0 && p.file !== CRACK_ART.dust) {
+      const glow = flashSprite(img, tint);
+      if (glow) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alpha * tintA; ctx.drawImage(glow, -w / 2, -h / 2, w, h); }
+    }
+    ctx.restore();
+  }
+  ctx.imageSmoothingEnabled = prev;
 }
 
 function rollSlimeVariant() {
@@ -227,7 +294,7 @@ function slimeExplodeNow(e, mul) {
   for (const o of [...G.obstacles]) {
     if (!blastHits(o)) continue;   // 不同樓層的建築炸不到
     if (o.trap) {   // 地雷：被炸到會跟著爆（連鎖）
-      if (o.hp > 0 && !(o.fuseT > 0) && Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15;
+      if (o.hp > 0 && !(o.fuseT > 0) && (() => { const m = mineCenter(o); return Math.hypot(m.x - x, m.y - y); })() <= R) o.fuseT = .15;
       continue;
     }
     if (typeof oilItem === 'function' && oilItem(o)) {   // 油桶：被炸到會跟著爆（連鎖）
@@ -273,7 +340,7 @@ function onEnemyDeath(e) {
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.elite && typeof eliteBirdDown === 'function') eliteBirdDown(e);   // 菁英鳥頭人：橫幅提示核心護盾消失（js/elite-bird-head.js）
   if (e.capKing && typeof capKingBigDown === 'function') capKingBigDown(e);   // 大夯吉寶：橫幅提示核心護盾消失（js/elite-cap-king.js）
-  if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
+  if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭大隊長（elite）：巨物倒下（js/bird-head.js 的 isGiantFallBoss 決定哪些 BOSS 用巨物倒下）   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
   if (e.mothBoss && typeof mothBossDown === 'function') mothBossDown(e);   // 人面蝶后：抱著的核心掉在原地（js/moth-boss.js）
   if (e.behavior === 'moth' && typeof mothDeathBurst === 'function') { mothDeathBurst(e); return; }   // 人面蝶：炸出一大團鱗粉，從空中掉下來化成灰（js/human-face-butterfly.js）
   if (e.pearlBoss && typeof pearlBossDown === 'function') pearlBossDown(e);   // 珍珠大童：核心掉在原地、大珍珠碎掉（js/pearl-elder.js）
@@ -283,9 +350,10 @@ function onEnemyDeath(e) {
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童
   if (e.behavior === 'gourd') { gourdDeathCorpse(e); return; }   // 葫蘆猴：不倒下，原地閉眼變黑、碎成灰燼飄散（跟珍珠小童一樣；js/gourd-monkey.js）   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
-  if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall') {   // 虱目魚小子：倒下變黑（跟鳥頭人一樣）
+  if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall' || e.behavior === 'milkfishKing') {   // 虱目魚小子：倒下變黑（跟鳥頭人一樣）；虱目魚王：巨物倒下（王冠跟著倒）
     if (e.forceAttack && e.frames) { e.lastFrameFile = e.frames.front; e.lastFrameFlip = false; }   // 死在撲咬的瞬間：攻擊圖尺寸不同，改用站姿圖倒下才不會變形
-    pushFallCorpse(e); return;
+    const king = e.behavior === 'milkfishKing';
+    pushFallCorpse(e, king ? { giant: true, extra: typeof milkfishKingCorpseCrown === 'function' ? milkfishKingCorpseCrown : null } : {}); return;
   }
   if (e.behavior === 'healer') { if (typeof bananaKingDeath === 'function') bananaKingDeath(e); pushFallCorpse(e); return; }   // 金蕉王：倒下、掉香蕉（js/golden-banana-king.js）
   if (e.behavior === 'boomerang' || e.behavior === 'fishhead' || e.behavior === 'vine' || e.behavior === 'clownfish') { pushFallCorpse(e); return; }   // 比基尼小丑魚也跟絲瓜小姐一樣倒下（js/clownfish.js）   // 魚頭君也倒下   // 夯吉寶：倒下變黑（跟鳥頭人一樣）

@@ -38,6 +38,7 @@ function hangiCapSpot(minFromPlayer) {
     const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
     if (!inGrid(c, r) || spawnWallAt(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;   // spawnWallAt：照那一格的樓層（js/pathfinding.js）
     if (cellNearLight(c, r, CELL)) continue;                        // 要在黑暗裡（離光源至少一格）
+    if (typeof mrtTrackCell === 'function' && mrtTrackCell(c, r)) continue;   // 不能在捷運軌道上、列車車廂裡（js/mrt-train.js）
     let nearWall = false;                                           // 周圍 wallGap 格內不能有牆（不要貼著牆）
     for (let dc = -HANGI_CAP.wallGap; dc <= HANGI_CAP.wallGap && !nearWall; dc++)
       for (let dr = -HANGI_CAP.wallGap; dr <= HANGI_CAP.wallGap; dr++)
@@ -215,12 +216,12 @@ function stepBoomerangEnemy(e, dt) {
     hb.windup -= dt;
     if (hb.windup <= 0) {
       const t = hb.target;
-      if (t && t.hp > 0 && hasLineOfSight(e.x, e.y, t.x, t.y)) throwCap(e, t);
+      if (t && t.hp > 0 && sameFloor(e, t) && hasLineOfSight(e.x, e.y, t.x, t.y)) throwCap(e, t);   // 準備丟的時候對方換了樓層：不丟
     }
     return;
   }
   let target = hbPickTarget(e);
-  if (!target && hb.target && hb.target.hp > 0 && Math.hypot(hb.target.x - e.x, hb.target.y - e.y) <= cfg.loseRange * CELL) target = hb.target;   // 還在追的目標先不放
+  if (!target && hb.target && hb.target.hp > 0 && sameFloor(e, hb.target) && Math.hypot(hb.target.x - e.x, hb.target.y - e.y) <= cfg.loseRange * CELL) target = hb.target;   // 還在追的目標先不放
   hb.target = target;
   if (target) {
     const d = Math.hypot(target.x - e.x, target.y - e.y), see = hasLineOfSight(e.x, e.y, target.x, target.y);

@@ -17,9 +17,10 @@
      被牠打到的怪物會回手打牠 brawl 秒（自相殘殺）。大型怪物一半時間；頭目、生命體沒有效果。子彈會穿過隊員。
    - 數量存在 equipState.bullets（js/flare.js 的 bulletCount／addBullets）；每種的數值在 data/equipment.js 的 BULLETS。
 */
+// 射程、火海／著火每秒傷害、大型怪物門檻：數字在 data/bullet-tuning.js（🔫 彈藥編輯器改），這裡只是照著拿；飛行秒數、拋物線高度、飛行速度、命中半徑是手感，留在這裡
 const SPECIAL_GUN = {
-  incendiary: { range: 8, flight: [.32, .7], arc: [24, 70], fireDps: 10, burnDmg: 4 },   // 最遠幾格、飛行秒數（近～遠）、拋物線高度、火海每秒傷害、著火每秒傷害
-  tranq: { range: 9, speed: 1100, hitR: 16, bigHp: 150 },   // 最遠幾格、飛行速度、命中判定半徑、血量多少以上算大型怪物
+  incendiary: { range: BULLETS.incendiary.range, flight: [.32, .7], arc: [24, 70], fireDps: BULLETS.incendiary.fireDps, burnDmg: BULLETS.incendiary.burnDmg },   // 最遠幾格、飛行秒數（近～遠）、拋物線高度、火海每秒傷害、著火每秒傷害
+  tranq: { range: BULLETS.tranq.range, speed: 1100, hitR: 16, bigHp: BULLET_TUNING.bigHp },   // 最遠幾格、飛行速度（混亂彈也用這個）、命中判定半徑、血量多少以上算大型怪物
 };
 // 對怪物的效果倍率（data/equipment.js 的 BULLET_FOE_MUL）：只用在打怪物的數字上，打到隊員、溫特的照原本
 const foeMul = v => v * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1);
@@ -29,21 +30,23 @@ function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; if (w && w.removed) re
 
 // ---- 取得：上鎖的置物箱打開時（js/storage-lockers.js 呼叫）----
 // chance：找到的機率（沒給＝置物櫃的 GUN_FINDS.ammo；彈藥箱傳 AMMO_CRATE_LOOT.ammo）；where：飄字說在哪裡找到
-function tryGunFind(x, y, chance = GUN_FINDS.ammo, where = '置物箱') {
+// count：一次給幾發（沒給＝照 GUN_FINDS.ammoFind，置物櫃用；彈藥箱傳 AMMO_CRATE_LOOT.ammoCount＝一組）
+function tryGunFind(x, y, chance = GUN_FINDS.ammo, where = '置物箱', count) {
   if (MAP_SAFE || Math.random() >= chance) return false;
   const kinds = GUN_FINDS.kinds.filter(id => BULLETS[id] && !BULLETS[id].removed && bulletRoom(id) > 0);   // 彈藥包放不下的不會再找到
   if (!kinds.length) return false;
   const id = kinds[Math.floor(Math.random() * kinds.length)];
-  return grantBullets(id, GUN_FINDS.ammoFind[id] || 1, '在' + where + '裡找到', x, y) > 0;   // 真的拿到回傳 true（置物櫃一次只給一樣）
+  return grantBullets(id, count || GUN_FINDS.ammoFind[id] || 1, '在' + where + '裡找到', x, y) > 0;   // 真的拿到回傳 true（置物櫃一次只給一樣）
 }
 // 拿到子彈：第一次拿到跳說明；回傳加了幾發
 function grantBullets(id, n, how, x, y) {
   const b = BULLETS[id]; if (!b) return 0;
   const first = !bulletOwned(id), got = addBullets(id, n);
-  if (first && typeof itemIntroForBullet === 'function') itemIntroForBullet(id, got);
+  // 第一次拿到跳說明；從置物櫃、彈藥箱開出來的每次都跳（不然開到拿過的子彈會被當成「空的」）
+  if ((first || (typeof itemIntroFromLocker !== 'undefined' && itemIntroFromLocker)) && typeof itemIntroForBullet === 'function') itemIntroForBullet(id, got);
   if (typeof battleGot === 'function') battleGot(b.icon + ' ' + b.name, null, got);
   systemNotice((how || '找到') + b.icon + ' ' + b.name + ' +' + got + (first ? '！滾輪可以換成這種子彈' : '（現在 ' + bulletCount(id) + ' 發）'));
-  if (x != null) flash(b.icon + ' ' + b.name + ' +' + got, x, y - 40, b.color, 1.2);
+  if (x != null) flash(b.icon + ' ' + b.name + ' +' + got, x, y - 10, b.color, 1.2);   // 飄字位置：箱子上緣往上 10px（原本 40px 太高）
   if (first) SFX.play('favorUp', .8, 'gun-get');
   return got;
 }
@@ -94,7 +97,7 @@ function incendiaryLandNow(s) {
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, 6);
   if (s.lv.ignite) for (const e of G.enemies) {   // ignite：被炸到的怪物身上著火
     if (e.dead || !blastHits(e) || Math.hypot(e.x - x, (e.y - y) / .7) > R) continue;
-    e.burnT = Math.max(e.burnT || 0, foeMul(s.lv.ignite)); e.burnDmg = foeMul(S.burnDmg); e.burnTick = 1;
+    e.burnT = Math.max(e.burnT || 0, foeMul(s.lv.ignite)); e.burnDmg = Math.max(1, Math.round(foeMul(S.burnDmg) * (typeof elementHitMul === 'function' ? elementHitMul(e, 'fire') : 1))); e.burnTick = 1;   // 屬性相剋：水系燒傷 ×0.75、草系 ×1.25
   }
   for (let i = 0; i < 7; i++) { const a = Math.random() * Math.PI * 2, rr = Math.random() * R * .7; spawnFlameBurst(x + Math.cos(a) * rr, y + Math.sin(a) * rr * .6, 1); }
   G.effects.push({ ring: true, x, y, r: 6, r2: R, life: .3, life0: .3, color: '#ff9a3c' });
@@ -275,9 +278,10 @@ function fireShock(p, aim, b) {
       hits.push(next);
     }
     hits.forEach((e, i) => {
-      const dmg = Math.round(foeMul(b.dmg) * (i ? .7 : 1) * (e.shockResist ?? 1));   // 波及隊員的傷害在下面，照原本   // 跳出去的弱一點；不怕電的（小丑魚）只吃 shockResist 倍
+      const dmg = Math.round(foeMul(b.dmg) * (i ? .7 : 1) * (e.shockResist ?? 1) * (typeof elementHitMul === 'function' ? elementHitMul(e, 'shock') : 1));   // 水系怪物雷電傷害 ×1.25   // 波及隊員的傷害在下面，照原本   // 跳出去的弱一點；不怕電的（小丑魚）只吃 shockResist 倍
       bulletHurtEnemy(e, dmg, b.color, p);
-      if (!e.noStun && e.shockResist == null) { e.stunT = Math.max(e.stunT || 0, foeMul(b.stun)); e.shockT = Math.max(e.shockT || 0, foeMul(b.stun)); }   // 不怕電的不會麻痺
+      if (!e.noStun && e.shockResist == null) { e.stunT = Math.max(e.stunT || 0, foeMul(b.stun)); e.shockT = Math.max(e.shockT || 0, foeMul(b.stun)); }
+      if (typeof waterShockStun === 'function') waterShockStun(e);   // 水系怪物：麻痺 1.5 秒、打斷正在出的招   // 不怕電的不會麻痺
       const bp = bodyPoint(e); spawnLightningBolt(bp.x, bp.y + 10, .6); struck.push(e);
     });
   } else struck.push({ x: end.x, y: end.y });
@@ -481,7 +485,8 @@ function incShotPos(s) {
 
 // ---- 混亂彈：直線打出去，只打怪物（穿過隊員），打中的怪物陷入混亂 ----
 // 頭目（大隊長、宮主、珍珠大童、絲瓜女王、金蕉大王…）、生命體、鑽在地底的版權老鼠沒有效果
-const confuseImmune = e => !!(e.noStun || e.elite || e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.ratKing || e.ratKingHand || e.superArmor || e.dummy || (typeof burrowUnderground === 'function' && burrowUnderground(e)));
+// 虱目魚王、人面蝶后也不會混亂：以前漏掉，被阿瓦倫的腐蝕（每次攻擊混亂 3 秒）一直打，就會整場站在原地發呆、不攻擊
+const confuseImmune = e => !!(e.noStun || e.elite || e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.ratKing || e.ratKingHand || e.behavior === 'milkfishKing' || e.mothBoss || e.superArmor || e.dummy || (typeof burrowUnderground === 'function' && burrowUnderground(e)));
 function fireConfuse(p, aim, b) {
   const S = SPECIAL_GUN.tranq, ang = Math.atan2(aim.y - p.y, aim.x - p.x);
   aimPose(p, ang);

@@ -147,9 +147,7 @@ window.runFloorTests = async function (report) {
     for (const s of MAP.stamps || []) {
       const cfg = (propCollisionList().find(o => o.tile === s.id) || {}).h; if (!cfg || !(s.ox || s.oy)) continue;
       const f = stampOn2F(s) && s.level !== 'span' ? 2 : 1;
-      for (const [dc, dr] of cfg.solid || []) {
-        if (dc < 0 || dr < 0 || dc >= cfg.w || dr >= cfg.h) continue;
-        const c = s.c + (s.fx ? cfg.w - 1 - dc : dc), r = s.r + (s.fy ? cfg.h - 1 - dr : dr);
+      for (const [c, r] of propStampCells(s, cfg, s.c, s.r)) {   // 照轉向、翻轉（js/prop-collisions.js）
         const k = (c + Math.round((s.ox || 0) / CELL)) + ',' + (r + Math.round((s.oy || 0) / CELL));
         if (!(f === 2 ? propAddedWalls2F.has(k) : propAddedWalls.has(k))) continue;   // 那格本來就被別的東西擋住：不算
         checked++;

@@ -12,7 +12,7 @@ const CORE = {
   w: 80, h: 120,                 // 圖片大小（像素）
   hp: 600,                       // 每一級難度的血量
   reward: 100,                   // 每一級難度的結晶獎勵
-  wakeAvarenCells: 4,            // 阿瓦倫走到幾格內，核心就會醒來
+  wakeAvarenCells: 0,            // 阿瓦倫走到幾格內，核心就會醒來；0＝關掉（現在只有溫特開槍打核心才會叫醒它）
   float: { height: 18, bob: 5, rise: .9 },   // 甦醒後浮起的高度、上下飄動幅度、浮起需要幾秒
   pool: { r: 46, dps: 8 },       // 腳下腐蝕痕跡：半徑（像素）、每秒傷害
   phase2At: .5,                  // 血量比例低於多少進入第二階段
@@ -66,7 +66,8 @@ function mapFloorCells() {
   for (const layer of Object.values((MAP && MAP.layers) || {})) if (layer) for (const k of Object.keys(layer)) if (layer[k]) set.add(k);
   for (const st of (MAP && MAP.stamps) || []) {
     const t = mapTileById(st.id); if (!t) continue;
-    for (let dc = 0; dc < mapStampW(st, t); dc++) for (let dr = 0; dr < mapStampH(st, t); dr++) set.add((st.c + dc) + ',' + (st.r + dr));
+    const c0 = st.c + Math.round((st.ox || 0) / CELL), r0 = st.r + Math.round((st.oy || 0) / CELL);   // 微調過的物件：照圖實際蓋到的格子
+    for (let dc = 0; dc < mapStampW(st, t); dc++) for (let dr = 0; dr < mapStampH(st, t); dr++) set.add((c0 + dc) + ',' + (r0 + dr));
   }
   floorCellsCache = { map: MAP, set };
   return set;
@@ -189,6 +190,8 @@ function keepCoreScorch(core) {
 function updateCores(dt) {
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 菁英怪活著：核心少受傷（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
+  if (typeof lqShieldCore === 'function') lqShieldCore();   // 絲瓜女王活著：掉在地上的核心少受傷（js/loofah-queen.js）
+  if (typeof mkShieldCore === 'function') mkShieldCore();   // 虱目魚王活著：吐出來的核心少受傷（js/milkfish-king.js）
   for (const core of G.cores) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;
@@ -197,7 +200,7 @@ function updateCores(dt) {
       else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）；躲在順順宮帽裡、抱在珍珠大童身上也不會（js/elite-cap-king.js、js/pearl-elder.js 自己扣）
     }
     core.lastHp = core.hp;
-    if (!core.awake && !core.hidden && !core.carried && G.towers.some(t => t.type === 'avaren' && t.hp > 0 && Math.hypot(t.x - core.x, t.y - core.y) <= CORE.wakeAvarenCells * CELL)) wakeCore(core);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
+    if (CORE.wakeAvarenCells > 0 && !core.awake && !core.hidden && !core.carried && G.towers.some(t => t.type === 'avaren' && t.hp > 0 && Math.hypot(t.x - core.x, t.y - core.y) <= CORE.wakeAvarenCells * CELL)) wakeCore(core);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
     if (core.awake && !core.hidden && !core.carried) {   // 躲在順順宮帽裡、抱在珍珠大童身上：不冒粒子、沒有腐蝕痕跡（js/elite-cap-king.js、js/pearl-elder.js）
       core.awakeT += dt;
       if (core.phase === 1 && core.hp > 0 && core.hp <= core.maxhp * CORE.phase2At) enterPhase2(core);   // 一擊打破時不再跳第二階段

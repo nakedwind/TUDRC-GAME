@@ -373,14 +373,11 @@ function drawLoofahGround(ctx) {
       ctx.beginPath(); ctx.ellipse(v.x, v.y + 6, 16 * grow + 4, 6 * grow + 2, 0, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
-    ctx.save(); ctx.strokeStyle = '#4a3b26'; ctx.lineCap = 'round';
-    for (const k of v.cracks) {
+    ctx.save();
+    for (const k of v.cracks) {   // 鑽過的地方留下小裂痕（素材圖，js/combat-feel.js 的 CRACK_ART）
       if (!isVisible(k.x, k.y)) continue;
-      ctx.globalAlpha = Math.min(1, k.life / .6) * .7; ctx.lineWidth = 2;
-      const L = 7;
-      ctx.beginPath(); ctx.moveTo(k.x - Math.cos(k.a) * L, k.y - Math.sin(k.a) * L * .5);
-      ctx.lineTo(k.x + Math.cos(k.a + .5) * 3, k.y + Math.sin(k.a + .5) * 2);
-      ctx.lineTo(k.x + Math.cos(k.a) * L, k.y + Math.sin(k.a) * L * .5); ctx.stroke();
+      k.art = k.art || makeCrackArt(.2, 0);
+      drawCrackArt(ctx, k.x, k.y, k.art, Math.min(1, k.life / .6) * .8);
     }
     if (v.state === 'dig' && isVisible(v.x, v.y)) {   // 鑽地的前端：隆起的小土堆
       ctx.globalAlpha = .85; ctx.fillStyle = '#7a6545';

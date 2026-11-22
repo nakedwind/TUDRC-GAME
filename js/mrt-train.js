@@ -22,10 +22,10 @@
    關門時溫特在車上 → 搭車：車上的人（溫特、隊員、怪物）跟著列車一起開走，快開進隧道時畫面才變黑；
      在隧道裡黑一陣子、搖晃（rideTime），再載著大家開進站、停好開門。搭車時車上的人不能動。
      互通的捷運站（data/mrt-train.js 的 stations）：從其中一站搭車，會隨機開到「另一個」車站（換地圖，車上的隊員一起過去）；
-       不在名單裡的地圖照舊開回同一站。每站的到站音樂也在 stations 設（arrive）。
+       到站時一定坐離營地最近的那台車進站（mrtTrainNearCamp）。不在名單裡的地圖照舊開回同一站。每站的到站音樂也在 stations 設（arrive）。
      沒搭上車的隊員：留在原本那站，nextTrainTime 秒（預設 2 分鐘）後搭下一班車到溫特這站（隊員欄顯示「正在搭下班車」倒數）。
      溫特沒上車、隊員不小心留在車上：隊員跟著列車開走，nextTrainTime 秒後搭車回站（隊員欄顯示「不小心搭上車」倒數）。
-       時間到了以後，等下一班車進站時從車上走下來；在沒有捷運的地圖就直接回到營地；回應變中心就全員歸隊。
+       時間到了以後，等離溫特最近的那台車（同一層優先，mrtNearestReturnTrain）下一班進站時從車上走下來；在沒有捷運的地圖就直接回到營地；回應變中心就全員歸隊。
      發電機：捷運站裡的發電機（js/storage-lockers.js 的 dynamo）全部打開之前，列車停在月台、車門關著不動（狀態 idle）；
        全部打開後開門、照常一班一班來（mrtPowered）。溫特還在車上時不會關門停住（避免被關在車裡出不去）。地圖上沒放發電機就不用開。
    車廂裡蓋的建築（燈、路障…，地雷除外）：列車開走時跟著車廂一起走（燈光也跟著動），下次停好時放回原本的格子。
@@ -101,6 +101,12 @@ function mrtTrainRestoreCleared(tr) {
   const solid2 = new Set((MAP && MAP.solid2) || []);
   for (const k of tr.cleared2 || []) if (solid2.has(k) && typeof floor2Solid !== 'undefined') floor2Solid.add(k);
   tr.cleared2 = [];
+  // 2 樓的列車：停著時暫時當成 2 樓地面的車內格子，拿掉（列車開走、門開關時重算）
+  // （換地圖後這兩份會換成新的一份：只還原到當初改的那一份，不會弄到新地圖）
+  if (typeof deckCells !== 'undefined' && tr.deckRef === deckCells) for (const k of tr.addedDeck || []) deckCells.delete(k);
+  tr.addedDeck = [];
+  if (typeof floor2WallFace !== 'undefined' && tr.faceRef === floor2WallFace) for (const k of tr.clearedFace || []) floor2WallFace.add(k);   // 拿掉的平台邊緣牆面放回去
+  tr.clearedFace = [];
 }
 function mrtTrainApplyEdges() {
   const all = new Set(), up = new Set();   // all：擋一樓的人；up：停在 2 樓的列車（例如 B56 上面那班），只擋 2 樓的人
@@ -141,9 +147,11 @@ function setupMrtTrains() {
     const left = Math.min(...cars.map(c => c.x)), right = Math.max(...cars.map(c => c.x + c.w));
     const top = Math.min(...cars.map(c => c.y)), bottom = Math.max(...cars.map(c => c.y + c.h));
     // 軌道範圍：跟列車上下重疊的軌道，最左到最右（沒擺軌道就用整張地圖）
+    // 軌道圖不只一種（一般軌道、有雜物的軌道、mrt-rail-track25…）都要算，跟 mrtTrackCells 一樣。
+    // 以前只認一般軌道那張圖：鋪別張軌道圖的列車（G11 綠線大多是）找不到軌道，就變成整張地圖寬都畫得出來，看起來像穿牆
     let clipL = Infinity, clipR = -Infinity;
     for (const s of MAP.stamps || []) {
-      if (s.id !== MRT_TRAIN.railTile) continue;
+      if (!mrtIsRailTile(s.id)) continue;
       const t = mapTileById(s.id); if (!t) continue;
       const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
       if (y < bottom && y + h > top) { clipL = Math.min(clipL, x); clipR = Math.max(clipR, x + w); }
@@ -162,6 +170,39 @@ function setupMrtTrains() {
   }
   setupMrtGates();
 }
+// ---- 軌道、列車停靠範圍：這一格是不是（順順宮帽等「不能出現在軌道上、車廂裡」的東西用；js/hangi-bao.js）----
+// 軌道＝地圖上鋪了軌道素材（圖檔 mrt-rail-track*.png：一般軌道、有雜物的軌道、mrt-rail-track25…，大圖或格子小圖都算）蓋到的格子；
+// 列車＝每班列車停好時車廂蓋住的格子（不管現在車在不在站上）。換地圖、重開時自動重算
+const MRT_RAIL_FILE = /\/mrt-rail-track[^/]*\.png$/i;
+function mrtIsRailTile(id) { const t = id && mapTileById(id); return !!t && (id === MRT_TRAIN.railTile || MRT_RAIL_FILE.test(String(t.file || ''))); }
+let mrtTrackCache = { map: null, trains: null, set: new Set() };
+function mrtTrackCells() {
+  const trains = (G && G.mrtTrains) || null;
+  if (mrtTrackCache.map === MAP && mrtTrackCache.trains === trains) return mrtTrackCache.set;
+  const set = new Set(), isRail = mrtIsRailTile;
+  for (const s of (MAP && MAP.stamps) || []) {
+    if (!isRail(s.id)) continue;
+    const t = mapTileById(s.id), c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+    const w = typeof mapStampW === 'function' ? mapStampW(s, t) : mapTileW(t), h = typeof mapStampH === 'function' ? mapStampH(s, t) : mapTileH(t);
+    for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) set.add((c0 + dc) + ',' + (r0 + dr));
+  }
+  for (const L of Object.values((MAP && MAP.layers) || {})) for (const k in L) if (isRail(L[k])) set.add(k);
+  for (const tr of trains || []) for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
+    const cx = OX + x.c * CELL;
+    if (cx >= tr.clipL - 1 && cx + CELL <= tr.clipR + 1) set.add(x.c + ',' + x.r);   // 隧道裡（畫面外）的車廂不算
+  }
+  mrtTrackCache = { map: MAP, trains, set };
+  return set;
+}
+const mrtTrackCell = (c, r) => mrtTrackCells().has(c + ',' + r);
+// 視線、子彈能不能穿過這格：軌道上的碰撞格只擋走路（人不能跳下軌道），不擋射擊，隔著軌道可以打到對面月台的怪物。
+// 列車停在站上（車廂擋路格加好了）時，車廂蓋住的格子照樣擋（js/maploader.js 的 lineOfSightRaw 呼叫）
+function mrtSeeThroughCell(c, r) {
+  if (!mrtTrackCell(c, r)) return false;
+  const k = c + ',' + r;
+  return !((G && G.mrtTrains) || []).some(tr => tr.solidKey && tr.cover && tr.cover.has(k));
+}
+
 // 這站的列車能不能開：捷運站裡放了發電機，就要全部打開（js/storage-lockers.js）；沒放發電機、或不是捷運站的地圖一律可以
 function mrtPowered() {
   if (!MAP || typeof dynamoCount !== 'function' || typeof dynamoStationMap !== 'function' || !dynamoStationMap(MAP)) return true;
@@ -355,6 +396,11 @@ function mrtTrainUpdateSolid(tr) {
       tr.floor.push(k);
       if (mapWalls.has(k)) { mapWalls.delete(k); tr.cleared.push(k); }   // 軌道上的碰撞格：列車停著時是車內地板
       if (up && floor2Solid.has(k)) { floor2Solid.delete(k); (tr.cleared2 ||= []).push(k); }   // 2 樓的列車：軌道上的 2 樓碰撞也一樣
+      // 2 樓的列車：車內走得進去的格子都要算「2 樓地面」，不然只有剛好疊在 2 樓月台上的那幾格走得過，
+      // 隊員、怪物找路會把車廂其他地方（含車門）當成牆
+      if (up && typeof deckCells !== 'undefined' && !deckCells.has(k)) { deckCells.add(k); (tr.addedDeck ||= []).push(k); tr.deckRef = deckCells; }
+      // 2 樓平台邊緣自動算出來的牆面（js/map-levels.js 的 wallFaceCells）剛好落在車廂裡：列車停著時也拿掉，不然會把車廂切成兩半
+      if (up && typeof floor2WallFace !== 'undefined' && floor2WallFace.has(k)) { floor2WallFace.delete(k); (tr.clearedFace ||= []).push(k); tr.faceRef = floor2WallFace; }
       // 走得進去的格子跟車外之間放薄牆：外側門口往下、對面通道往上，門開著時不擋
       const out = (cc, rr) => !type.has(cc + ',' + rr);
       if (out(c, r + 1) && !(t === 'D' && open)) tr.edges.push(c + ',' + r + ',B');
@@ -363,6 +409,7 @@ function mrtTrainUpdateSolid(tr) {
       if (out(c + 1, r)) tr.edges.push(c + ',' + r + ',R');
     }
     tr.bottomRow = rMax; tr.topRow = rMin;
+    tr.cover = new Set(type.keys());   // 停著的車廂蓋住的格子：擋視線、子彈（mrtSeeThroughCell）
     mrtTrainUnstick(tr, wasOff, type);
     if (!open) mrtTrainClearSill(tr, type);   // 車門關上：站在門檻上的人推進車裡或推回月台
   }
@@ -411,6 +458,24 @@ function mrtTrainUnload(tr) {
   const platformY = OY + (tr.bottomRow + 1.5) * CELL;
   for (const a of mrtTrainActors()) if (a !== G.player && (!G.towers.includes(a) || a.mrtArrivedOn === tr.soundId) && mrtOnTrain(tr, a)) { a.y = platformY; a.navPath = null; a.navGoal = null; }   // 坐這班車來、還沒走下車的隊員也請下車
   for (const t of G.towers) if (t.mrtArrivedOn === tr.soundId) delete t.mrtArrivedOn;
+}
+// 這位隊員是不是坐在「溫特沒坐的那班車」上（被載走、正在開走，或搭下班車正要進站）：跟溫特分開了，
+// 嚮導技能、隨身疏導都不能放、也補不到他（js/guide-skills.js、js/game.js）。跟溫特坐同一班車的不算
+function mrtSeparated(a) {
+  if (!a || !a.mrtRide || !G || a === G.player) return false;
+  const tr = (G.mrtTrains || []).find(x => x.riders && x.riders.some(r => r.a === a));
+  return !tr || !mrtPlayerAboard(tr);
+}
+// 坐在車上的人（溫特、隊員、怪物）跟列車一樣只畫在軌道範圍裡：開進隧道的部分看不到。
+// 以前列車有裁切、人沒有，被載走的隊員會畫在軌道外面的黑色地方、蓋在牆前面（js/render.js 的 wadeDraw 呼叫）
+// 回傳 false＝整個人都在軌道外面，不用畫；其他時候把畫布裁切好（呼叫的人負責 save／restore）
+function mrtRiderClip(ctx, a) {
+  if (!a || !a.mrtRide || !G || !G.mrtTrains) return true;
+  const tr = G.mrtTrains.find(x => x.riders && x.riders.some(r => r.a === a));
+  if (!tr) return true;
+  if (a.x + 2 * CELL <= tr.clipL || a.x - 2 * CELL >= tr.clipR) return false;
+  ctx.beginPath(); ctx.rect(tr.clipL, tr.top - 3 * CELL, tr.clipR - tr.clipL, tr.bottom - tr.top + 6 * CELL); ctx.clip();
+  return true;
 }
 // 溫特在不在這班車上（tr.riders 也可能只有不小心搭上車的隊員、或搭下班車回來的隊員）
 const mrtPlayerAboard = tr => !!(tr.riders && G.player && tr.riders.some(r => r.a === G.player));
@@ -564,16 +629,37 @@ function mrtTrainSeats(tr) {
 function mrtTrainSeatRiders(tr, actors) {
   const seats = mrtTrainSeats(tr);
   tr.riders = tr.riders || [];
+  const f = mrtTrainFloor(tr) === 2 ? 2 : 1;   // 這班車停在幾樓
   actors.forEach((a, i) => {
     const [x, y] = seats[i % Math.max(1, seats.length)] || [tr.x, tr.bottom - CELL / 2];
     Object.assign(a, { mrtRide: true, navPath: null, navGoal: null, moving: false, y, x: x + tr.off * tr.dir });
+    // 坐上車的人改成「這班車那一層」。不然從 B56（列車停在 2 樓）搭到 R89（列車停在 1 樓）時，人還記著 2 樓，
+    // 下車走到 1 樓月台就會整個卡住：溫特走不動也不能放東西、隊員說「部隊長在 1 樓，找不到上下樓的路」
+    if (hasFloors) { a.floor = f; a._fk = null; a.escSide = null; }
     if (a !== G.player) a.target = null;
     tr.riders.push({ a, x });
   });
 }
+// 隊員回站要搭哪台車：離溫特最近的那台（同一層的優先）。
+// 不算：通道列車（不會開走再進站）、指定開去別處的車（例如 O666 紅色列車）、被花蓮老鼠王卡住的車、溫特正坐著的車、沒電停著的車
+function mrtNearestReturnTrain() {
+  const p = G.player, trains = G.mrtTrains || [];
+  if (!p) return null;
+  const ok = trains.filter(tr => !tr.fixed && !(tr.variant && tr.variant.dest) && tr.state !== 'idle' && tr.state !== 'tunnel'
+    && !mrtPlayerAboard(tr) && !(typeof ratKingBlocksTrain === 'function' && ratKingBlocksTrain(tr)));
+  const pf = p.floor === 2 ? 2 : 1;
+  const dist = tr => Math.hypot(Math.max(tr.clipL, Math.min(tr.clipR, p.x)) - p.x, Math.max(tr.top, Math.min(tr.bottom, p.y)) - p.y)
+    + (hasFloors && (mrtTrainFloor(tr) === 2 ? 2 : 1) !== pf ? 1e6 : 0);   // 不同層的車排到後面
+  let best = null, bd = Infinity;
+  for (const tr of ok) { const d = dist(tr); if (d < bd) { bd = d; best = tr; } }
+  return best;
+}
 // 列車進站前：搭下班車的隊員時間到了，就坐這班車來（停好開門後走下車）
+// 只坐離溫特最近的那台車（不然綠線 8 台車，常常從很遠的月台下車）；別台車進站就繼續等
 function mrtTrainBringBack(tr) {
   if (MAP_SAFE || !mrtAway.some(m => m.t <= 0)) return;
+  const near = mrtNearestReturnTrain();
+  if (near && near !== tr) return;   // 這台不是最近的：等最近那台進站
   const due = mrtAway.filter(m => m.t <= 0);
   mrtAway = mrtAway.filter(m => m.t > 0);
   const back = mrtRejoin(due.map(m => m.type));
@@ -617,6 +703,19 @@ function mrtRideToStation(tr, dest) {
     setTimeout(() => { mapTransitioning = false; }, 300);
   }, 400);
 }
+// 這幾台車裡離營地最近的那台：照列車整個月台範圍到最近一格營地的距離（地圖沒設營地＝營地是最下面一排）
+function mrtTrainNearCamp(list) {
+  const camp = [...(typeof campCells !== 'undefined' ? campCells : [])].map(k => center(...k.split(',').map(Number)));
+  const dist = tr => {
+    if (!camp.length) return Math.max(0, OY + ROWS * CELL - tr.bottom);   // 沒設營地：離最下面一排多遠
+    let d = Infinity;
+    for (const [x, y] of camp) d = Math.min(d, Math.hypot(Math.max(tr.clipL, Math.min(tr.clipR, x)) - x, Math.max(tr.top, Math.min(tr.bottom, y)) - y));
+    return d;
+  };
+  let best = list[0], bd = Infinity;
+  for (const tr of list) { const d = dist(tr); if (d < bd) { bd = d; best = tr; } }
+  return best;
+}
 // 換到新車站之後：隨機一班列車載著溫特和同車的隊員，在隧道裡黑一陣子再進站
 function mrtArriveAtStation(mates) {
   const trains = G.mrtTrains || [];
@@ -626,9 +725,11 @@ function mrtArriveAtStation(mates) {
   const crew = [G.player, ...mates.map(id => G.towers.find(t => t.type === id)).filter(Boolean)];
   const dog = (G.npcs || []).find(n => n.id === 'ball');   // 球球跟著部隊一起來
   if (dog) crew.push(dog);
-  // 別站開過來：不挑被老鼠王卡住的車、不挑指定開去別處的車（例如 O666 的紅色列車）
-  const normal = trains.filter(t => !(t.variant && t.variant.dest) && !(typeof ratKingBlocksTrain === 'function' && ratKingBlocksTrain(t)));
-  const pick = normal.length ? normal : trains, tr = pick[Math.floor(Math.random() * pick.length)];
+  // 別站開過來：不挑被老鼠王卡住的車、不挑指定開去別處的車（例如 O666 的紅色列車）、不挑通道列車（一直停著不動）
+  // 剩下的車裡，一定挑離營地最近的那台（mrtTrainNearCamp），下車就在營地附近
+  const usable = t => !(t.variant && t.variant.dest) && !(typeof ratKingBlocksTrain === 'function' && ratKingBlocksTrain(t));
+  const normal = trains.filter(t => usable(t) && !t.fixed), loose = trains.filter(usable);
+  const pick = normal.length ? normal : loose.length ? loose : trains, tr = mrtTrainNearCamp(pick);
   Object.assign(tr, { riders: [], state: 'tunnel', off: -tr.inDist, door: 0, chimed: false, fadeT: 0,
     t: Math.max(MRT_TRAIN.arriveSoundLead + 1, MRT_TRAIN.rideTime * .6) });
   mrtTrainSeatRiders(tr, crew);
@@ -645,7 +746,7 @@ function mrtRamArrive(tr, decelMul = 3) {
 }
 // 每次開始一張地圖（js/game.js 的 begin）：回應變中心＝全員歸隊；其他地圖：不在身邊的隊員先不出現
 function mrtAwayOnBegin() {
-  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { mrtAway = []; if (typeof dynamoForget === 'function') dynamoForget(); return; }   // 捷運站的發電機也全部關回去
+  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { mrtAway = []; if (typeof dynamoForget === 'function') dynamoForget(); return; }   // 捷運站的發電機不會關回去（打開過就永遠開著，js/storage-lockers.js）
   if (!mrtAway.length || !G || !Array.isArray(G.towers)) return;
   const away = new Set(mrtAway.map(m => m.type));
   G.towers = G.towers.filter(t => !away.has(t.type));
@@ -715,32 +816,42 @@ function mrtRollMonsters(tr) {
 }
 function mrtSpawnMonsters(tr, n) {
   if (!n || typeof createMonster !== 'function' || typeof chooseMonster !== 'function' || typeof ACTIVE_MONSTERS === 'undefined') return;
-  // 出生點：每一扇車門（同一排連在一起的門口格 D）的正中間，怪物才不會卡在門框上
-  const floorSet = new Set(tr.floor || []), doorCells = [], inside = [];
+  // 出生點：每一扇車門的正中間，怪物才不會卡在門框上。
+  //   下方車門＝最下面一排連在一起的門口格 D（往下走出去）；兩側都開的班次再加上方車門＝最上面一排的對面通道格 F（往上走出去）
+  //   只挑門外是月台的門（門外是牆、地圖邊緣的不挑）：例如 B56 下面那班車貼著地圖下緣，怪物只會從上方車門出來
+  const floorSet = new Set(tr.floor || []), f = mrtTrainFloor(tr), doorCells = { 1: [], '-1': [] }, inside = [];
   for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
     const k = x.c + ',' + x.r; if (!floorSet.has(k)) continue;
-    (x.t === 'D' ? doorCells : inside).push([x.c, x.r]);
+    if (x.t === 'D') doorCells[1].push([x.c, x.r]);
+    else if (x.t === 'F' && tr.bothDoors && x.r === tr.topRow) doorCells[-1].push([x.c, x.r]);
+    else inside.push([x.c, x.r]);
   }
-  const has = new Set(doorCells.map(d => d.join(','))), doors = [];
-  for (const [c, r] of doorCells.sort((a, b) => a[1] - b[1] || a[0] - b[0])) {
-    if (has.has((c - 1) + ',' + r)) continue;   // 不是這扇門最左邊那格
-    let w = 1; while (has.has((c + w) + ',' + r)) w++;
-    doors.push({ x: OX + (c + w / 2) * CELL, c: c + Math.floor(w / 2), r });
+  const outsideFree = (c, rr) => inGrid(c, rr) && !floorSet.has(c + ',' + rr) && !onFloorDo(f, () => isWall(c, rr));   // 車外這格是不是月台（照列車那一層的牆）
+  const doors = [];
+  for (const dir of [1, -1]) {
+    const has = new Set(doorCells[dir].map(d => d.join(',')));
+    for (const [c, r] of doorCells[dir].sort((a, b) => a[1] - b[1] || a[0] - b[0])) {
+      if (has.has((c - 1) + ',' + r)) continue;   // 不是這扇門最左邊那格
+      let w = 1; while (has.has((c + w) + ',' + r)) w++;
+      const mc = c + Math.floor(w / 2);
+      doors.push({ x: OX + (c + w / 2) * CELL, c: mc, r, dir, out: outsideFree(mc, r + dir) });
+    }
   }
-  if (!doors.length) for (const [c, r] of inside) doors.push({ x: center(c, r)[0], c, r });
-  if (!doors.length) return;
-  const f = mrtTrainFloor(tr);
+  const usable = doors.filter(d => d.out);
+  const pick = usable.length ? usable : doors;   // 每扇門外面都是牆：照舊隨便挑一扇（怪物自己找路）
+  if (!pick.length) for (const [c, r] of inside) pick.push({ x: center(c, r)[0], c, r, dir: 1 });
+  if (!pick.length) return;
   for (let i = 0; i < n; i++) {
-    const d = doors[Math.floor(Math.random() * doors.length)];   // 隨機挑一扇門
+    const d = pick[Math.floor(Math.random() * pick.length)];   // 隨機挑一扇門
     const y = OY + (d.r + .5) * CELL;
     const m = createMonster(chooseMonster(MAP, ACTIVE_MONSTERS), d.x, y);
     if (hasFloors) m.floor = f === 2 ? 2 : 1;
     m.mrtFrom = tr.soundId;
-    // 下車：從車門口直直走到月台上（車外 2 格；月台在上面或下面都可以，看哪一邊不是車廂、不是牆）
-    for (const dir of [1, -1]) {
-      const r1 = d.r + dir, r2 = d.r + dir * 2, free = rr => inGrid(d.c, rr) && !floorSet.has(d.c + ',' + rr) && !mapWalls.has(d.c + ',' + rr);
-      if (!free(r1)) continue;
-      m.mrtExit = { x: d.x, y: OY + ((free(r2) ? r2 : r1) + .5) * CELL, t: 3 }; break;   // 車外只剩一格（例如列車貼著地圖邊）：走出去一格就好
+    // 下車：從車門口直直走到月台上（車外 2 格；先照這扇門朝的方向，走不出去再試另一邊）
+    for (const dir of [d.dir, -d.dir]) {
+      const r1 = d.r + dir, r2 = d.r + dir * 2;
+      if (!outsideFree(d.c, r1)) continue;
+      m.mrtExit = { x: d.x, y: OY + ((outsideFree(d.c, r2) ? r2 : r1) + .5) * CELL, t: 3 }; break;   // 車外只剩一格（例如列車貼著地圖邊）：走出去一格就好
     }
     G.enemies.push(m);
   }
@@ -809,7 +920,7 @@ function updateMrtTrains(dt) {
     } else if (tr.state === 'closed') {
       if (tr.t <= 0 && !mrtPowered()) {   // 沒電開不走：停在月台；溫特在車上就重新開門讓他下車
         if (mrtOnTrain(tr, G.player)) { tr.state = 'opening'; tr.t = T.doorTime; mrtTrainSound(tr, 'open'); }
-        else tr.state = 'idle';
+        else tr.state = 'idle';   // 溫特已經下車：關著門停在月台。還在車上的隊員會被關在裡面，這是故意的（要趕快找發電機救他們出來），不要放他們下車
       } else if (tr.t <= 0) {
         mrtTrainSound(tr, 'depart');
         if (mrtOnTrain(tr, G.player)) mrtTrainBoard(tr);   // 溫特在車上：車上的人跟著列車開走（搭車）
@@ -858,8 +969,10 @@ function updateMrtTrains(dt) {
 // 後層（對面的門＋車廂內部）跟車廂上緣排；前層（外側的門＋外殼）排在車廂下緣往下 frontSortDy：
 // 車內走道上的人（腳底最多到車廂下緣）會畫在兩層中間，月台上的人畫在最前面
 function mrtTrainSortables(list) {
+  const v = typeof mapDrawFull !== 'undefined' && !mapDrawFull && typeof mapDrawRect !== 'undefined' ? mapDrawRect : null;   // 這一幀畫面看得到的範圍（js/maploader.js）
   for (const tr of G.mrtTrains || []) {
     if (tr.state === 'away') continue;
+    if (v && (tr.bottom + 3 * CELL < v.y0 || tr.top - 3 * CELL > v.y1 || !mrtTrainCars(tr, v).length)) continue;   // 整班車都在畫面外：不畫（以前 8 班車不管在哪都畫三遍，會讓 G11 這種大捷運站掉幀）
     const floor = mrtTrainFloor(tr);   // 列車在幾樓：照車頭那張圖的樓層
     list.push({ floor, y: tr.top, draw: () => drawMrtTrain(ctx, tr, 'back') });
     // 車廂裡的地雷：畫在車廂內部（後層）上面、人的下面
@@ -885,12 +998,18 @@ function mrtMapItemSortY(it, y) {
 }
 // 門開的程度 0～1 → 先快後慢滑開（關門時倒過來）
 const mrtDoorEase = k => 1 - Math.pow(1 - Math.max(0, Math.min(1, k)), 2);
+// 這班車有哪幾節車廂在畫面範圍 v 裡（左右看車廂現在開到的位置；開進隧道、超出軌道範圍的也不算）
+function mrtTrainCars(tr, v) {
+  const shift = tr.off * tr.dir;
+  return tr.cars.filter(car => { const x0 = Math.max(tr.clipL, car.x + shift), x1 = Math.min(tr.clipR, car.x + car.w + shift); return x1 > x0 && x1 >= v.x0 && x0 <= v.x1; });
+}
 function drawMrtTrain(ctx, tr, part) {
   const T = MRT_TRAIN, V = tr.variant || {}, inside = mrtTrainImg(T.inside), outer = mrtTrainImg(V.outerDoor || T.outerDoor.file), far = mrtTrainImg(V.farDoor || T.farDoor.file);   // 別種顏色的列車用自己的車門圖
   const shift = tr.off * tr.dir, open = mrtDoorEase(tr.door);
   ctx.save();
   ctx.beginPath(); ctx.rect(tr.clipL, tr.top - 2 * CELL, tr.clipR - tr.clipL, tr.bottom - tr.top + 4 * CELL); ctx.clip();
-  for (const car of tr.cars) {
+  const v = typeof mapDrawFull !== 'undefined' && !mapDrawFull && typeof mapDrawRect !== 'undefined' ? mapDrawRect : null;
+  for (const car of v ? mrtTrainCars(tr, v) : tr.cars) {   // 只畫畫面看得到的車廂
     const shell = tileImage(car.tile); if (!shell) continue;
     const k = car.w / shell.naturalWidth;   // 原圖像素 → 畫面像素
     ctx.save();

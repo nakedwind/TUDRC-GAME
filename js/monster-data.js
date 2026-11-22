@@ -25,6 +25,41 @@ function slimeSettings(useBrowserDraft = false) {
   }
   return validSlimeSettings(null);
 }
+// ---- BOSS 數值（怪物編輯器「👑 BOSS 數值」）----
+// 每隻 BOSS 程式檔裡的設定（ELITE_BIRD、CAP_KING…）寫成 applyBossSettings('名字', {...})：
+// 開場時用 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 裡的數字蓋過去（預覽模式用編輯器的暫存）。
+// 只認「程式檔裡本來就是數字」的格子，名稱、圖片路徑、地圖位置不會被改到。
+const BOSS_SETTINGS_STORAGE_KEY = 'tudrc_boss_settings_v1';
+function validBossSettings(raw) {
+  const base = typeof BOSS_SETTINGS_DEFAULT !== 'undefined' ? BOSS_SETTINGS_DEFAULT : {};
+  const fix = (def, own) => {   // 照檔案的格子一格一格檢查：不是數字就用檔案的；原本不是負數的不能填負數
+    if (typeof def === 'number') { const n = Number(own); return Number.isFinite(n) && own !== null && own !== '' ? (def >= 0 ? Math.max(0, n) : n) : def; }
+    if (Array.isArray(def)) return def.map((d, i) => fix(d, Array.isArray(own) ? own[i] : undefined));
+    if (def && typeof def === 'object') { const o = own && typeof own === 'object' ? own : {}; return Object.fromEntries(Object.keys(def).map(k => [k, fix(def[k], o[k])])); }
+    return def;
+  };
+  return fix(base, raw && typeof raw === 'object' ? raw : {});
+}
+function bossSettings(useBrowserDraft = false) {
+  if (useBrowserDraft) {
+    try { const saved = (typeof DraftSync !== 'undefined' ? DraftSync.load(BOSS_SETTINGS_STORAGE_KEY, (typeof BOSS_SETTINGS_DEFAULT !== 'undefined' ? BOSS_SETTINGS_DEFAULT : undefined), { label: 'BOSS 數值' }) : JSON.parse(localStorage.getItem(BOSS_SETTINGS_STORAGE_KEY) || 'null')); if (saved) return validBossSettings(saved); } catch (_) {}
+  }
+  return validBossSettings(null);
+}
+let bossSettingsCache = null;
+function applyBossSettings(key, cfg) {
+  if (!bossSettingsCache) bossSettingsCache = bossSettings(typeof location !== 'undefined' && /[?&](preview|previewMonsters)=1(&|$)/.test(location.search));
+  const put = (dst, src) => {
+    for (const [k, v] of Object.entries(src || {})) {
+      if (!(k in dst)) continue;
+      if (typeof v === 'number' && typeof dst[k] === 'number') dst[k] = v;
+      else if (Array.isArray(v) && Array.isArray(dst[k]) && v.length === dst[k].length && dst[k].every(x => typeof x === 'number')) dst[k] = v.slice();
+      else if (v && typeof v === 'object' && !Array.isArray(v) && dst[k] && typeof dst[k] === 'object' && !Array.isArray(dst[k])) put(dst[k], v);
+    }
+  };
+  put(cfg, bossSettingsCache[key]);
+  return cfg;
+}
 function validMonsterCatalog(list) {
   if (!Array.isArray(list)) return [];
   const ids = new Set();
@@ -64,7 +99,7 @@ function validMonsterCatalog(list) {
     ...(typeof monster.deathSound === 'string' && monster.deathSound ? { deathSound: monster.deathSound } : {}),
     ...(monster.undying ? { undying: true } : {}),
     ...(monster.wide ? { wide: true } : {}),   // 大體型：一格寬的通道（門口）擠不過去（js/enemy-ai.js 的 enemyWideAt）
-    ...(monster.element === 'water' ? { element: 'water' } : {}),   // 屬性：water＝水系（火系角色打牠攻擊力打折，data/balance.js 的 ELEMENT_RULES）
+    ...(monster.element === 'water' || monster.element === 'grass' ? { element: monster.element } : {}),   // 屬性：water＝水系、grass＝草系（相剋倍率在 data/balance.js 的 ELEMENT_RULES）
     ...(monster.noHitSquash ? { noHitSquash: true } : {}),   // 被打中時不要壓扁回彈
     ...(Number.isFinite(+monster.stagger) ? { stagger: Math.max(0, Math.min(2, +monster.stagger)) } : {}),
     ...(monster.noStun ? { noStun: true } : {}),
@@ -129,6 +164,36 @@ const MILKFISH_KING_FIELDS = [
   { key: 'coreOutTime',    label: '吐完核心喘氣幾秒',             min: .5,  max: 15,  step: .5,  def: 4 },
   { key: 'rushSpeedMul',   label: '衝回去吞核心的速度 ×',         min: .5,  max: 5,   step: .1,  def: 2.2 },
   { key: 'stepShake',      label: '腳步震動大小',                 min: 0,   max: 20,  step: .5,  def: 6 },
+  { key: 'coreAtkMul',     label: '核心在肚子裡時攻擊力 ×',       min: 1,   max: 5,   step: .05, def: 1.5 },
+  { key: 'acidPoolR',      label: '核心在肚子裡：腳下腐蝕池大小（格）', min: .3, max: 4, step: .1, def: 1.1 },
+  { key: 'acidPoolLife',   label: '腐蝕池留在地上幾秒',           min: .5,  max: 30,  step: .5,  def: 5 },
+  { key: 'acidPoolDps',    label: '腐蝕池每秒傷害（溫特、隊友）', min: 0,   max: 100, step: 1,   def: 8 },
+  // 從水池登場（地圖有開才會用到，見 js/milkfish-king.js 的 MILKFISH_KING_MAPS）：溫特開槍打核心 → 震動 → 從水池竄出 → 落地
+  { key: 'enrageHp',       label: '血量剩幾 % 以下暴怒',          min: 0,   max: 1,   step: .05, def: .5, pct: true },
+  { key: 'enrageSpitCooldown', label: '暴怒時吐東西的間隔（秒）', min: .2,  max: 20,  step: .1,  def: 1 },
+  { key: 'chargeCooldown', label: '衝撞：兩輪衝撞的間隔（秒）',  min: 1,   max: 60,  step: .5,  def: 7 },
+  { key: 'chargeChain',    label: '衝撞：一輪連續衝幾次',         min: 1,   max: 6,   step: 1,   def: 2 },
+  { key: 'chargeWindup',   label: '衝撞：衝之前蓄力（秒）',       min: .1,  max: 3,   step: .05, def: .6 },
+  { key: 'chargeSpeed',    label: '衝撞：速度（像素／秒）',       min: 60,  max: 900, step: 10,  def: 320 },
+  { key: 'chargeDist',     label: '衝撞：一次衝幾格',             min: 2,   max: 30,  step: .5,  def: 10 },
+  { key: 'chargeDamage',   label: '衝撞：撞到人的傷害',           min: 0,   max: 300, step: 1,   def: 35 },
+  { key: 'chargeKnock',    label: '衝撞：撞飛幾格',               min: 0,   max: 10,  step: .5,  def: 3 },
+  // 追人（地圖設了 chase 才用，見 js/milkfish-king.js 的 MILKFISH_KING_MAPS）：以水池為中心幾格內的人都追；走不到就走到月台邊跳過去
+  { key: 'chaseRadius',    label: '追擊：離水池幾格內的人都追',   min: 5,   max: 120, step: 1,   def: 50 },
+  { key: 'jumpRange',      label: '追擊：最遠跳幾格',             min: 2,   max: 20,  step: .5,  def: 8 },
+  { key: 'jumpWindup',     label: '追擊：起跳前蓄力（秒）',       min: .1,  max: 3,   step: .05, def: .5 },
+  { key: 'jumpTime',       label: '追擊：跳在空中幾秒',           min: .3,  max: 4,   step: .05, def: 1 },
+  { key: 'jumpHeight',     label: '追擊：跳多高（像素）',         min: 20,  max: 600, step: 10,  def: 150 },
+  { key: 'jumpDamage',     label: '追擊：落地砸到人的傷害',       min: 0,   max: 300, step: 1,   def: 35 },
+  { key: 'jumpSlamR',      label: '追擊：落地砸人的範圍（格）',   min: .3,  max: 6,   step: .1,  def: 1.8 },
+  { key: 'jumpKnock',      label: '追擊：落地撞開幾格',           min: 0,   max: 10,  step: .5,  def: 2 },
+  { key: 'coreHp',         label: '牠守的核心血量（地圖難度 1，越難照比例加）', min: 100, max: 20000, step: 100, def: 2000 },
+  { key: 'coreShield',     label: '核心護盾：牠活著時核心少受幾 % 傷害', min: 0, max: 1, step: .05, def: .85, pct: true },
+  { key: 'introRumble',    label: '登場：竄出前震動幾秒',         min: 0,   max: 8,   step: .1,  def: 2.2 },
+  { key: 'introShake',     label: '登場：竄出前震動大小',         min: 0,   max: 16,  step: .5,  def: 7 },
+  { key: 'introLeapTime',  label: '登場：竄出後在空中幾秒',       min: .3,  max: 4,   step: .05, def: 1.2 },
+  { key: 'introLeapHeight',label: '登場：跳多高（像素）',         min: 20,  max: 600, step: 10,  def: 180 },
+  { key: 'introLandShake', label: '登場：落地震動大小',           min: 0,   max: 16,  step: .5,  def: 12 },
 ];
 function validMilkfishKingCfg(raw) {
   const src = raw && typeof raw === 'object' ? raw : {}, out = {};

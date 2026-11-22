@@ -1649,7 +1649,7 @@ function updatePlayer(dt) {
   else if (dy) p.dir = dy < 0 ? 'back' : 'front';
   p.anim += dt;
   const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dashMul(p) * dt   // 輕量跑鞋、腎上腺素（js/equipment.js）× 衝刺
-    * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally') : 1);   // 走在鐵絲網上變慢
+    * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally', p) : 1);   // 走在鐵絲網上變慢（給 p：別層的坑洞、黏膠不算）
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   const pushing = typeof bigPearlPlayerPush === 'function' && bigPearlPlayerPush(p, nx, ny, dx / len, dy / len);   // 頂到大珍珠：往前推，不自動往旁邊滑開（js/pearl-elder.js）
   // edgeWallCrossed：一步走太遠（衝刺、畫面卡一下）時，不會直接跳過薄牆（js/pathfinding.js）
@@ -1870,7 +1870,7 @@ function pickSentryTarget(t, R) {
     if (distance > R) continue;
     if (!hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 隔著牆看不到就不能打
     const urgent = (e.attackingObstacle && e.attackingObstacle.isBase) || (p && p.underAttackT > 0 && p.lastAttacker === e);
-    const score = urgent ? distance - 100000 : distance;
+    const score = (urgent ? distance - 100000 : distance) + (typeof ratKingTargetBias === 'function' ? ratKingTargetBias(e) : 0);   // 花蓮老鼠王：先清小怪、先救被抓的人（js/rat-king.js）
     if (score < bestScore) { best = e; bestScore = score; }
   }
   if (best || t.guardSummoned) return best;
@@ -2053,6 +2053,8 @@ function updatePlayerAttack(dt) {
   if (vineMate) { shootVine(p, vineMate, aim, aimAng); return; }
   const hungMate = !paint && typeof vineHangShotTarget === 'function' ? vineHangShotTarget(aim) : null;   // 游標點在被森林倒吊藤蔓吊著的隊友身上：子彈打藤蔓（js/vines.js）
   if (hungMate) { shootHangVine(p, hungMate, aim, aimAng); return; }
+  const lqCoreVine = !paint && typeof loofahCoreShotTarget === 'function' ? loofahCoreShotTarget(aim) : null;   // 游標點在絲瓜女王吊著的核心上：子彈打吊著它的藤蔓（js/loofah-queen.js）
+  if (lqCoreVine) { shootLoofahCoreVine(p, lqCoreVine, aim, aimAng); return; }
   const sleepMate = !paint && typeof mothSleepShotTarget === 'function' ? mothSleepShotTarget(aim) : null;   // 游標點在吸了睡眠鱗粉、睡著的隊友身上：開槍把他打醒（js/human-face-butterfly.js）
   if (sleepMate) { shootWakeMate(p, sleepMate, aim, aimAng); return; }
   // 朝游標方向、射程內、照亮的最近怪。
@@ -2071,10 +2073,13 @@ function updatePlayerAttack(dt) {
     if ((!isOil && !isOre) || o.hp <= 0) continue;
     const c = isOil ? oilCenter(o) : oreCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
     if (d > playerGun().range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
-    if (isOil) {
-      const left = o.artX ?? OX + o.c * CELL, top = o.artY ?? OY + o.r * CELL;
-      if (aim.x >= left && aim.x <= left + (o.w || 1) * CELL && aim.y >= top && aim.y <= top + (o.h || 1) * CELL) {
-        best = oilProxy(o); bestD = d; bestOnBody = true; continue;
+    // 點在油桶、異質礦的圖上：一定打它（不看扇形角度）。異質礦的「中心」算在底下擋路那排格子，
+    // 站在礦旁邊時點礦圖的上半部或邊緣，跟中心的角度會差很多，不這樣做的話子彈會直接飛過去、礦也不會閃白
+    {
+      const left = o.artX ?? OX + o.c * CELL + obstacleOff(o)[0], top = o.artY ?? OY + o.r * CELL + obstacleOff(o)[1];
+      const onArt = isOre ? oreArtHit(o, aim.x, aim.y) : aim.x >= left && aim.x <= left + (o.w || 1) * CELL && aim.y >= top && aim.y <= top + (o.h || 1) * CELL;   // 礦：照畫出來的圖（微調、大小、角度，js/ore.js）
+      if ((isOil || !bestOnBody) && onArt) {   // 礦：點在怪物身上的話還是打怪物（油桶照舊優先）
+        best = isOil ? oilProxy(o) : oreProxy(o); bestD = d; bestOnBody = true; continue;
       }
     }
     if (bestOnBody) continue;
@@ -2085,7 +2090,9 @@ function updatePlayerAttack(dt) {
   if (pearlShot) { best = pearlShot; bestD = pearlShot.d; bestOnBody = pearlShot.onBody; }
   const crystalShot = paint || typeof fogCrystalShotTarget !== 'function' ? null : fogCrystalShotTarget(p, aim, angDiff, playerGun().range * CELL);   // 霧樹上的紫水晶（js/fog.js）
   if (crystalShot && ((crystalShot.onBody && !bestOnBody) || (crystalShot.onBody === bestOnBody && crystalShot.d < bestD))) { best = crystalShot.proxy; bestD = crystalShot.d; bestOnBody = crystalShot.onBody; }
-  const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef && !best.fogTreeRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
+  const rockShot = paint || typeof rockShotTarget !== 'function' ? null : rockShotTarget(p, aim, playerGun().range * CELL);   // 地圖上的石頭：游標點在石頭圖上才打（點在怪物身上還是打怪物；js/rocks.js）
+  if (rockShot && !bestOnBody) { best = rockShot.proxy; bestD = rockShot.d; bestOnBody = true; }
+  const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef && !best.fogTreeRef && !best.rockRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
   let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * playerGun().range * CELL;
   let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * playerGun().range * CELL;
   if (paint) {   // 漆彈：螢光綠的彈道（BULLETS.paint.color），打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
@@ -2117,11 +2124,13 @@ function updatePlayerAttack(dt) {
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
   if (best && best.oilRef) { damageOil(best.oilRef, Math.round(playerGun().dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
   if (best && best.oreRef) { pistolHitOre(best.oreRef, playerGun().dmg); best = null; }   // 打到異質礦：累積傷害，打夠了才碎（js/ore.js）
+  if (best && best.rockRef) { const cm = rollCrit('player'); damageRock(best.rockRef, Math.round(playerGun().dmg * (cm || 1)), 'player'); markHit(cm); best = null; }   // 打到石頭：扣血，打完就碎（js/rocks.js）
   if (best && best.fogTreeRef) { const cm = rollCrit('player'); damageFogCrystal(best.fogTreeRef, Math.round(playerGun().dmg * (cm || 1))); markHit(cm); best = null; }   // 打到霧樹的水晶：打破就散霧（js/fog.js）
   if (best && best.bigPearlRef) { shootBigPearl(best.bigPearlRef, p.x, p.y); best = null; }   // 打到大珍珠：往子彈的方向推（js/pearl-elder.js）
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
     const critMul = rollCrit('player'), shotDmg = Math.round(playerGun().dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
+    if (typeof milkfishKingCoreShot === 'function') milkfishKingCoreShot(best);   // 虱目魚王還躲在水池裡：開始登場表演（js/milkfish-king.js）
     best.hp -= shotDmg; markHit(critMul);
     if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
     if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60, true); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');
@@ -2347,6 +2356,7 @@ function update(dt) {
   G.navClock = (G.navClock || 0) + dt;   // 遊戲時間（秒）：隊員找路「找不到等一下再找」用（js/sentry.js 的 sentryNavClock）
   floorAudit(dt);   // 樓層體檢：測試模式下，場上有東西沒記樓層就在主控台提醒（js/pathfinding.js）
   if (typeof updateBurrowingMouseFx === 'function') updateBurrowingMouseFx(dt);
+  if (typeof updateMothBossAway === 'function') updateMothBossAway(dt);   // 人面蝶后飛到畫面外時不在怪物清單裡：倒數、飛回來（js/moth-boss.js）
   if (typeof updateRatKing === 'function') updateRatKing(dt);   // 花蓮老鼠王：冒出來、手、搬核心、列車撞飛（js/rat-king.js）
   if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);
@@ -2454,14 +2464,14 @@ function update(dt) {
       if (!t.resting) { t.resting = true; sendSentryRest(t); }
     } else if (t.taint <= 80) t.resting = false;
     // 應變中心（安全區）裡嚮導不幫人補血、疏導：負荷高的哨兵要叫去 2F疏導室，由溫特（C）或亞許疏導（js/vitals.js）；受傷的去醫院休養
-    if (spec.aura && !t.berserk && !t.gsCast && !inHospital && !MAP_SAFE) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
+    if (spec.aura && !t.berserk && !t.gsCast && !inHospital && !MAP_SAFE && !(typeof mrtSeparated === 'function' && mrtSeparated(t))) {   // 坐在溫特沒坐的捷運上被載走：不疏導。嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
       t.auraCd = Math.max(0, (t.auraCd || 0) - dt);
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
         const soothed = [];
         let usedSP = false, usedMedkit = false;   // 同一次範圍疏導只扣一次 SP；治療消耗一個急救包
         for (const o of G.towers) {
-          if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
+          if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL || (typeof mrtSeparated === 'function' && mrtSeparated(o))) continue;   // 被捷運載走的人補不到
           // 疏導消耗 SP；補血消耗急救包，兩項資源各自檢查。
           const needSoothe = !TYPES[o.type].guide && (o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1));
           const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1) && !(typeof hospitalResting === 'function' && hospitalResting(o));   // 住院的人不靠嚮導補血
@@ -2602,6 +2612,7 @@ function update(dt) {
             if (spec.ability === '火焰') e.fireDmg = (e.fireDmg || 0) + amt; else e.shockDmg = (e.shockDmg || 0) + amt;
           }
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=Math.max(1, Math.round(spec.burn.damage * elemMul(e))); e.burnTick=1; }   // 水系怪物：燃燒每秒的傷害也 −20%
+          if (spec.ability === '雷電' && typeof waterShockStun === 'function') waterShockStun(e);   // 水系怪物被雷電打到：麻痺 1.5 秒、打斷正在出的招（data/balance.js 的 ELEMENT_RULES）
           if (spec.stun && !e.noStun && !(spec.ability === '雷電' && e.shockResist != null)) {   // noStun 的怪物（生命體）不會被停住；不怕電的（小丑魚）不會被雷擊麻痺
             e.stunT=Math.max(e.stunT||0,spec.stun);
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
@@ -2650,7 +2661,7 @@ function update(dt) {
     }
     // 隊友也會被腐蝕：哨兵（依防禦減免，歸 0 失去戰鬥能力）。阿瓦倫本人對自己的腐蝕免疫。
     for (const t of G.towers) {
-      if (t.hp <= 0 || t.berserk || t.type === 'avaren') continue;
+      if (t.hp <= 0 || t.berserk || t.type === 'avaren' || t.eatenBy || t.vineCap) continue;   // eatenBy：被虱目魚（王）吞在嘴裡，不會被牠腳下的腐蝕池燙到；vineCap：被藤蔓吊在半空中
       const dmgAmt = acidTick(t);
       if (!dmgAmt) continue;
       const def = sentryDefense(t);
@@ -2696,6 +2707,9 @@ function update(dt) {
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if ((e.ratKing || e.ratKingHand) && typeof ratKingHoldDeath === 'function' && ratKingHoldDeath(e)) continue;   /* 花蓮老鼠王：先照核心護甲算、沒血了等列車撞飛；抓人的手被打掉只放人（js/rat-king.js） */ if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
+  if (typeof lqShieldCore === 'function') lqShieldCore();   // 絲瓜女王活著：掉在地上的核心少受傷（js/loofah-queen.js）
+  if (typeof mkShieldCore === 'function') mkShieldCore();   // 虱目魚王活著：吐出來的核心少受傷（js/milkfish-king.js）
+  if (typeof ratKingShieldCore === 'function') ratKingShieldCore();   // 花蓮老鼠王：核心每露出來一次最多被打掉幾成、被打到就震動叫手來搬（js/rat-king.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -2744,6 +2758,7 @@ function update(dt) {
   if (typeof updateStreetVehicles === 'function') updateStreetVehicles(dt);   // K56 路邊會暴衝的機車、腳踏車（js/street-vehicles.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
+  if (typeof updateRocks === 'function') updateRocks(dt);   // 石頭被打中的閃白倒數（js/rocks.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateLoofahQueen === 'function') updateLoofahQueen(dt);
   if (typeof updateBananaEmperor === 'function') updateBananaEmperor(dt);   // 金蕉大王的 BUFF：計時、防禦減傷（js/banana-emperor.js）   // 絲瓜女王：垂下來的藤蔓收回、吊著的核心、農田藤蔓怕火（js/loofah-queen.js）

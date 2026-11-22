@@ -24,9 +24,9 @@ const CLAW_MACHINE = {
   ballR: 43,             // 膠囊半徑
   costumeGrip: .4,       // N 服裝的夾力
   machines: [
-    { stock: { medkit: 2, 'almond-water': 2, firstaid: 2, thermos: 1, 'anomaly-firstaid': 1, 'shards-5': 1 }, costumes: 1 },   // 第 1 台：補給
-    { stock: { battery: 2, 'youyou-card': 2, 'graffiti': 2, toolbox: 1, 'eye-drops': 1, 'shards-5': 1 }, costumes: 1 },   // 第 2 台：探索
-    { stock: { 'almond-water': 1, battery: 1, 'graffiti': 1, adrenaline: 2, charm: 1, 'bird-green': 1, 'shards-10': 1 }, costumes: 2 },   // 第 3 台：稀有，大獎在這台
+    { stock: { medkit: 2, 'almond-water': 2, firstaid: 2, thermos: 1, 'anomaly-firstaid': 1, 'shards-5': 1, 'youyou-card': 1, 'storage-locker-key': 1, 'swim-ring': 1 }, costumes: 1 },   // 第 1 台：補給
+    { stock: { battery: 2, 'youyou-card': 3, 'graffiti': 2, toolbox: 1, 'eye-drops': 1, 'shards-5': 1, 'storage-locker-key': 1, 'swim-ring': 1 }, costumes: 1 },   // 第 2 台：探索
+    { stock: { 'almond-water': 1, battery: 1, 'graffiti': 1, adrenaline: 2, charm: 1, 'bird-green': 1, 'shards-10': 1, 'youyou-card': 1, 'storage-locker-key': 1, 'swim-ring': 1 }, costumes: 2 },   // 第 3 台：稀有，大獎在這台
   ],
   prizes: [
     { id: 'battery',          grip: .68, tier: 'common' },
@@ -34,14 +34,16 @@ const CLAW_MACHINE = {
     { id: 'almond-water',     grip: .64, tier: 'common' },
     { id: 'medkit',           grip: .60, tier: 'common' },
     { id: 'youyou-card',      grip: .52, tier: 'common' },
+    { id: 'storage-locker-key', grip: .46, tier: 'common' },   // 置物櫃鑰匙
+    { id: 'swim-ring',        grip: .50, tier: 'common' },   // 救生圈
     { id: 'firstaid',         grip: .46, tier: 'common' },
     { id: 'toolbox',          grip: .46, tier: 'common' },
     { id: 'thermos',          grip: .42, tier: 'common' },
-    { id: 'shards-5',         grip: .45, tier: 'common', crystals: 5 },
+    { id: 'shards-5',         grip: .45, tier: 'common', crystals: 30 },   // id 是舊名字（原本 5 個），改 id 會讓已經擺好的機台裡的這顆不見，所以先不改
     { id: 'adrenaline',       grip: .36, tier: 'rare' },
     { id: 'eye-drops',        grip: .32, tier: 'rare' },
     { id: 'charm',            grip: .28, tier: 'rare' },
-    { id: 'shards-10',        grip: .25, tier: 'rare', crystals: 10 },
+    { id: 'shards-10',        grip: .25, tier: 'rare', crystals: 30 },
     { id: 'anomaly-firstaid', grip: .17, tier: 'rare' },
     { id: 'bird-green',       grip: .10, tier: 'jackpot', costume: true, r: 50 },   // 小鳥頭飾（綠繡眼）：大獎
   ],

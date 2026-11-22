@@ -15,7 +15,7 @@ const START = {
 const SOOTHE = {
   cost: 30,   // 每次疏導花多少嚮導能量
   heal: 55,   // 每次疏導降多少汙染值
-  time: 3,    // 溫特疏導隊員要幾秒（進度條跑完才算成功；期間溫特和隊員都不能動，js/channel-actions.js）
+  time: 1.5,  // 溫特疏導隊員要幾秒（進度條跑完才算成功；期間溫特和隊員都不能動，js/channel-actions.js）
 };
 // 玩家親自補血、疏導的方式（疏導、急救包、醫療包都算）：乘在上面的 SOOTHE、data/equipment.js 的 FIRST_AID、醫療包的恢復量上
 //   time：花的時間 ×幾倍（小＝比較快）　amount：補的血／降的負荷 ×幾倍
@@ -62,7 +62,7 @@ const NEWBIE_START = {
 const isNewbieMap = () => typeof MAP !== 'undefined' && MAP?.id === NEWBIE_START.mapId;
 // ---- 建築的開發：一開始只能蓋 NEWBIE_START.builds 那幾種；其他的要到諾亞的開發工坊開發（js/build.js 的 buildWorkshopEntries）----
 // shards＝要花幾個異質碎片；money＝經費（不寫＝照碎片自動算，跟裝備一樣）；沒列到的建築（物件編輯器新增的）用 default
-const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence']);   // 暫時不能蓋的建築（鐵圍籬先停用）；遊戲和開發工坊編輯器都讀這裡
+const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence','rock_small_01','rock_small_02','rock_small_03','rock_medium_01','rock_medium_02','rock_big_01','rock_big_02']);   // rock_*：地圖上擺的石頭（地圖編輯器的「小石頭／大石頭」，物件編輯器調碰撞、血量），只能擺、不能蓋   // 暫時不能蓋的建築（鐵圍籬先停用）；遊戲和開發工坊編輯器都讀這裡
 const BUILD_DEV = {
   default: { shards: 50 },
   camping_lights: { shards: 30 },   // 露營燈
@@ -273,10 +273,36 @@ const difficultyOf = key => (typeof DIFFICULTY !== 'undefined' && Number(DIFFICU
 // 一般攻擊、大招、範圍波及、燃燒每秒的傷害都算
 // 哪些怪物是水系：在「怪物編輯器」每隻怪物的「屬性」選（存在 data/monsters.js 的 element: 'water'）
 //   目前是魚頭君、虱目魚小子（大、小）、比基尼小丑魚（大、小）；池核 BOSS 巨大比基尼小丑魚是用小丑魚做的，也算
+// 怪物屬性相剋（怪物編輯器「屬性」）
+// 草系（絲瓜小姐／絲瓜女王、金蕉王／金蕉大王…）：怕火，火焰傷害 ×fireVsGrass
+// 水系怪物（魚頭君、虱目魚小子、虱目魚王、比基尼小丑魚、珍珠小童…）的相剋：
+//   火焰（希奧妮的火、燒傷、燃燒彈、油火）、爆炸（油桶、油箱、地雷）比較不痛；雷電（安柏、雷電彈）比較痛，而且會被麻痺打斷正在出的招
+//   例外：怪物編輯器設了「不怕電」（shockResist，例如比基尼小丑魚、池核的巨大小丑魚）的照自己的設定，不吃雷電加成、不會被麻痺；
+//         魚頭君有自己的抗火、怕電倍率（js/fish-head.js 的 FISH_HEAD.fireMul／shockMul），傷害照牠自己的，只多了被雷電麻痺
 const ELEMENT_RULES = {
-  fireVsWater: 0.8,
+  fireVsWater: 0.75,      // 火焰打水系：傷害 ×
+  blastVsWater: 0.75,     // 爆炸打水系：傷害 ×
+  shockVsWater: 1.25,     // 雷電打水系：傷害 ×
+  shockStunWater: 1.5,    // 雷電打到水系：麻痺幾秒（BOSS 正在出的招也會被打斷）
+  fireVsGrass: 1.25,      // 火焰打草系：傷害 ×
 };
 // 這隻怪物的屬性（怪物編輯器設定的；沒設＝null）
 const monsterElement = e => { const m = e && typeof ACTIVE_MONSTERS !== 'undefined' && ACTIVE_MONSTERS.find(x => x.id === e.type); return (m && m.element) || null; };
 // 這個角色打這隻怪物，攻擊力要乘多少（沒有相剋＝1）
-const elementDamageMul = (spec, e) => spec && spec.ability === '火焰' && monsterElement(e) === 'water' ? ELEMENT_RULES.fireVsWater : 1;
+const elementDamageMul = (spec, e) => !spec ? 1 : spec.ability === '火焰' ? elementHitMul(e, 'fire') : spec.ability === '雷電' ? elementHitMul(e, 'shock') : 1;
+// 這隻怪物吃這種傷害要乘多少（kind：'fire' 火焰、'blast' 爆炸、'shock' 雷電）；沒有相剋＝1
+function elementHitMul(e, kind) {
+  const el = e && monsterElement(e);
+  if (el === 'grass') return kind === 'fire' ? ELEMENT_RULES.fireVsGrass : 1;   // 草系：怕火
+  if (el !== 'water' || e.behavior === 'fishhead') return 1;   // 魚頭君：照 js/fish-head.js 自己的倍率
+  if (kind === 'fire') return ELEMENT_RULES.fireVsWater;
+  if (kind === 'blast') return ELEMENT_RULES.blastVsWater;
+  if (kind === 'shock') return e.shockResist != null ? 1 : ELEMENT_RULES.shockVsWater;   // 設了不怕電的：照自己的 shockResist
+  return 1;
+}
+// 雷電打到水系怪物：麻痺 shockStunWater 秒（shockStunT：BOSS 的程式看到會打斷正在出的招，例如 js/milkfish-king.js）
+function waterShockStun(e) {
+  if (!e || monsterElement(e) !== 'water' || e.noStun || e.shockResist != null || e.dead || e.hp <= 0) return;
+  const s = ELEMENT_RULES.shockStunWater;
+  e.stunT = Math.max(e.stunT || 0, s); e.shockT = Math.max(e.shockT || 0, s); e.shockStunT = s;
+}

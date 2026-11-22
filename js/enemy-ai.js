@@ -31,7 +31,7 @@ function enemyAttackObstacle(e, o, dt) {
   if (o.type === 'camping_lights') { e.attackingObstacle = null; return; }
   e.attackingObstacle = o;
   e.atkCd = (e.atkCd || 0) - dt;
-  const ox = OX + (o.c + (o.w || 1) / 2) * CELL, oy = OY + (o.r + (o.h || 1) / 2) * CELL;
+  const ox = OX + (o.c + (o.w || 1) / 2) * CELL + obstacleOff(o)[0], oy = OY + (o.r + (o.h || 1) / 2) * CELL + obstacleOff(o)[1];   // 微調過位置的地圖物件：打在圖上
   monsterSwingCue(e, e.atkCd, ox, oy);
   if (e.atkCd > 0) return;
   e.atkCd = BARRIER.breakInterval;
@@ -349,7 +349,7 @@ function stepConfusedEnemy(e, dt) {
   foe.hp -= dmg; foe.hitT = Math.max(foe.hitT || 0, .14); foe.hitColor = '#c98bff';
   flashDmg('-' + Math.round(dmg), foe.x, foe.y - 26, '#d6a0ff');
   if (typeof sfxMonsterHit === 'function') sfxMonsterHit(foe, .4, 'monster');
-  if (!(foe.confuseT > 0) && foe.hp > 0) { foe.brawlWith = e; foe.brawlT = ((typeof BULLETS !== 'undefined' && BULLETS.confuse && BULLETS.confuse.brawl) || 3) * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1); }   // 被打的回手
+  if (!(foe.confuseT > 0) && foe.hp > 0 && !(typeof confuseImmune === 'function' && confuseImmune(foe))) { foe.brawlWith = e; foe.brawlT = ((typeof BULLETS !== 'undefined' && BULLETS.confuse && BULLETS.confuse.brawl) || 3) * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1); }   // 被打的回手（不會混亂的 BOSS 不回手，照自己的行為打人）
   return true;
 }
 
@@ -733,7 +733,7 @@ function stepEnemy(e, dt) {
   if (e.mothBoss) { stepMothBoss(e, dt); return; }   // 人面蝶后：抱著核心在幾個區域之間飛、築巢（js/moth-boss.js）
   if (e.behavior === 'moth') { stepMothEnemy(e, dt); return; }   // 人面蝶：在空中飛（飛得過牆，不用下面的卡牆檢查）、撒鱗粉、趨光（js/human-face-butterfly.js）
   const blocked = (x, y) => enemyBlocked(x, y, e);
-  if (blocked(e.x, e.y)) {
+  if (blocked(e.x, e.y) && !e.airborne) {   // airborne：跳在空中（例如虱目魚王跳過軌道，js/milkfish-king.js），飛過牆上方不算卡住
     const safeX = e.lastSafeX, safeY = e.lastSafeY;
     if (Number.isFinite(safeX) && Number.isFinite(safeY) && !blocked(safeX, safeY)) {
       e.x = safeX; e.y = safeY;
@@ -813,13 +813,13 @@ function stepEnemy(e, dt) {
   if (playerAggro && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
   // 被哨兵打中（仇恨中）：改追那位攻擊者，探照燈先不管。
   const attacker = !taunter && e.sentryAggroT > 0 ? e.sentryAggro : null;
-  if (attacker && attacker.hp > 0 && !attacker.berserk && G.towers.includes(attacker)) {
+  if (attacker && attacker.hp > 0 && !attacker.berserk && G.towers.includes(attacker) && sameFloor(e, attacker)) {   // 打牠的隊員在另一層（陸橋上／下）：追不到，不理
     const d = Math.hypot(attacker.x - e.x, attacker.y - e.y);
     if (d <= ENEMY_SENSE_RANGE) { enemyChaseSentry(e, attacker, d, moveDt, dt); return; }
   }
   // 發光建築是異質體的最高優先目標：先破壞探照燈，讓周圍重新陷入黑暗。
   const lightChoice = G.obstacles
-    .filter(o => o.hp > 0 && o.type !== 'camping_lights' && o.type && LIGHT.buildings && LIGHT.buildings[o.type])
+    .filter(o => o.hp > 0 && o.type !== 'camping_lights' && o.type && LIGHT.buildings && LIGHT.buildings[o.type] && sameFloor(e, o))   // 另一層（陸橋上／下）的燈打不到，不去
     .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
     .sort((a, b) => a.d - b.d)[0];
@@ -851,7 +851,7 @@ function stepEnemy(e, dt) {
 
   // 沒有哨兵時，才搜尋 18 格內由玩家建造的設施。
   const buildingChoice = G.obstacles
-    .filter(o => o.playerBuilt && o.hp > 0 && o.type !== 'camping_lights' && !o.trap && !o.slow)   // 露營燈、地雷、鐵絲網不會被主動攻擊
+    .filter(o => o.playerBuilt && o.hp > 0 && o.type !== 'camping_lights' && !o.trap && !o.slow && sameFloor(e, o))   // 另一層的建築打不到，不去   // 露營燈、地雷、鐵絲網不會被主動攻擊
     .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
     .sort((a, b) => a.d - b.d)[0];

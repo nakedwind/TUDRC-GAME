@@ -12,10 +12,14 @@
    （沒寫 c、r 就放在核心下方 2 格；wakeRow＝溫特走到這一列（含）以上就警戒，沒寫就用 wakeRange 格距離）。
    數值都在下面的 ELITE_BIRD。必須在 bird-head.js 之後、game.js 之前載入。
 */
-const ELITE_BIRD = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const ELITE_BIRD = applyBossSettings('ELITE_BIRD', {
   name: '鳥頭大隊長',
   hpMul: 12, dmgMul: 2.2, rewardMul: 5, crystalMul: 5,   // 以原型鳥頭人（data/monsters.js）的數值為基準；hpMul 12 → 血量 1800
-  scale: 2.5, hue: -35,         // 體型放大倍率、換色（色相旋轉角度）
+  scale: 2.5,                    // 體型放大倍率
+  artDir: 'images/monster/bird-head-elite/',   // 專用的圖（頭紫藍、眼睛紅）：檔名跟普通鳥頭人一樣，只換資料夾；用 tools/recolor-bird-elite.py 從鳥頭人的圖換色產生
+  eyeFlash: [255, 60, 70],       // 鎖定目標時眼睛閃的光（紅色；普通鳥頭人是藍光，js/bird-head.js 的 EYE_FLASH）
   speedMul: .5,                  // 走路速度倍率（以原型鳥頭人為基準；衝撞速度另外看 chargeSpeed）。動畫步伐、腳步聲照移動距離觸發，跟著一起變慢
   knockMul: 0,                   // 被隊員打時的擊退倍率：0＝推不動（雷德盾撞、大招擊退也推不動）
   stagger: 0,                    // 被重擊硬直幾秒：0＝不會硬直
@@ -47,10 +51,18 @@ const ELITE_BIRD = {
   returnRamCd: 1,                // 走回原位的路上撞到溫特：撞一次後幾秒內不再撞（傷害、擊退跟衝撞一樣）
   stepEvery: 60,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
   stepShake: 10, walkShake: 5,   // 衝撞、走路時每一步的畫面震動（貼身時的最大值；溫特在 shakeRange 格內才震，越近越大）
-  runCrack: { scale: .32, life: 3, image: 'images/破損建築/crack06.png' },   // 跑步（衝撞、衝回原位）時每一步踩出的小裂痕：大小（原圖 120×80 的幾倍）、留幾秒
+  runCrack: { scale: .32, life: 3 },   // 跑步時每一步踩出的小裂痕：大小（原圖的幾倍）、留幾秒；圖從 js/combat-feel.js 的 CRACK_ART 隨機挑   // 跑步（衝撞、衝回原位）時每一步踩出的小裂痕：大小（原圖 120×80 的幾倍）、留幾秒
   runDust: { rocks: 0, dust: 8, dustRise: 2, size: .6, spread: 10 },        // 跑步時每一步揚起的煙塵（js/gourd-monkey.js 的 rockBurstFx）
-  shakeRange: 20,
-};
+  shakeRange: 20,   // （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
+});
+
+// ---- 換成大隊長專用的圖：把普通鳥頭人的圖片路徑換到 ELITE_BIRD.artDir 資料夾（檔名不變）----
+const eliteBirdArtPath = file => typeof file === 'string' && ELITE_BIRD.artDir ? ELITE_BIRD.artDir + file.split('/').pop() : file;
+function eliteBirdUseArt(e) {
+  const swap = v => Array.isArray(v) ? v.map(swap) : typeof v === 'string' && /\.png$/i.test(v) ? eliteBirdArtPath(v) : v;
+  e.sprite = eliteBirdArtPath(e.sprite);
+  if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, v]) => [k, swap(v)]));
+}
 
 // ---- 開場：照地圖設定擺上場（game.js 在 seedCores 之後呼叫）----
 function seedEliteGuards() {
@@ -69,6 +81,7 @@ function seedEliteGuards() {
   if (!inGrid(c, r) || isWall(c, r)) return;
   const [x, y] = center(c, r);
   const E = ELITE_BIRD, e = createMonster(base, x, y);
+  eliteBirdUseArt(e);   // 換成大隊長專用的圖
   e.elite = true; e.eliteName = E.name;
   e.hp = e.maxhp = Math.round(e.maxhp * E.hpMul);
   e.playerDamage = Math.round(e.playerDamage * E.dmgMul);
@@ -78,7 +91,7 @@ function seedEliteGuards() {
   e.drawWidth = Math.round(base.width * E.scale); e.drawHeight = Math.round(base.height * E.scale);
   e.speed = base.speed * E.speedMul;
   e.shockResist = 1;   // 不怕電：雷電照樣吃全額傷害，但不會被麻痺停住（安柏的雷擊、雷電彈）
-  e.tint = E.hue; e.knockMul = E.knockMul; e.staggerTime = E.stagger; e.unpushable = true;   // unpushable：隊員的盾撞、大招擊退都推不動（game.js）
+  e.eyeFlashColor = E.eyeFlash; e.knockMul = E.knockMul; e.staggerTime = E.stagger; e.unpushable = true;   // unpushable：隊員的盾撞、大招擊退都推不動（game.js）
   e.noHitSquash = true;   // 被打中不壓扁回彈（js/combat-feel.js；落腳時的壓扁是 eliteBirdFootsteps 另外設的，不受影響）
   e.home = { x, y }; e.guardCore = core;
   e.faceRight = false; e.faceBack = true;   // 背對玩家、看著核心
@@ -201,7 +214,7 @@ function eliteBirdScream(e) {
   systemNotice(ELITE_BIRD.name + '發出尖叫！核心甦醒了', true);
   flash('嘎——！！', e.x, e.y - e.drawHeight - 10, '#ffd27a');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .6, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ffd27a' : '#ffffff' });
-  nearbyImpact(e.x, e.y, 9, .06);
+  bossImpact(e.x, e.y, 9, .06);
   if (typeof sfxAt === 'function') sfxAt('eliteScream', e.x, e.y, 2.2, 'elite-bird-scream');   // 尖叫：開大聲、有回音（js/sfx.js 的 SOUND_ECHO；音檔暫用鳥頭人被打，可在音效編輯器換）
 }
 
@@ -261,7 +274,7 @@ function eliteBirdStartCharge(e) {
 function eliteBirdDaze(e) {   // 不跳字：頭上冒星星（drawEliteTelegraphs 畫）
   eliteBirdSet(e, 'dazed', ELITE_BIRD.dazed);
   G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 6, r2: 40, life: .3, life0: .3, color: '#c9c2b0' });
-  nearbyImpact(e.x, e.y, 7, .08);
+  bossImpact(e.x, e.y, 7, .08);
 }
 function eliteBirdHitPlayer(e, p) {
   const E = ELITE_BIRD, dir = e.eb.dir;
@@ -361,7 +374,7 @@ function eliteBirdFootsteps(e, moved, loud) {
 // 畫面震動：溫特在 shakeRange 格內才震，越近越大（比一般衝擊的 6 格範圍遠，走廊另一頭也感覺得到）
 function eliteBirdShake(e, amount) {
   const p = G.player; if (!p) return;
-  const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, R = ELITE_BIRD.shakeRange;
+  const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, R = bossShakeRange();   // BOSS 共用的震動距離（js/combat-feel.js 的 BOSS_SHAKE）
   const k = 1 - d / R;
   if (d < R) addShake(amount * (.2 + .8 * k * k));   // 平方衰減：貼身震很大，越遠越小
 }
@@ -464,19 +477,15 @@ function stepEliteBird(e, dt) {
 function drawEliteGround(ctx) {
   const list = G.eliteCracks;
   if (!list || !list.length) return;
-  const C = ELITE_BIRD.runCrack, now = performance.now() / 1000, img = monsterImage(C.image);
-  G.eliteCracks = list.filter(k => now - k.at < C.life);
-  if (!img.complete || !img.naturalWidth) return;
-  const w = img.naturalWidth * C.scale, h = img.naturalHeight * C.scale, prev = ctx.imageSmoothingEnabled;
-  ctx.save(); ctx.imageSmoothingEnabled = false;
+  const C = ELITE_BIRD.runCrack, now = performance.now() / 1000;
+  G.eliteCracks = list.filter(k => now - k.at < (k.life || C.life));
+  ctx.save();
   for (const k of G.eliteCracks) {
     if (!isVisible(k.x, k.y)) continue;
-    ctx.globalAlpha = Math.min(1, (C.life - (now - k.at)) / 1) * .85;
-    ctx.save(); ctx.translate(k.x, k.y); ctx.rotate(k.rot); if (k.flip) ctx.scale(-1, 1);
-    ctx.drawImage(img, -w / 2, -h / 2, w, h);
-    ctx.restore();
+    k.art = k.art || makeCrackArt(k.size || C.scale, k.power || 0);   // size／power：這一處裂多大（巨物倒下、BOSS 登場會給比較大的）
+    drawCrackArt(ctx, k.x, k.y, k.art, Math.min(1, ((k.life || C.life) - (now - k.at)) / 1) * .85);
   }
-  ctx.restore(); ctx.imageSmoothingEnabled = prev;
+  ctx.restore();
 }
 function drawEliteTelegraphs(ctx) {
   if (!G || !G.enemies) return;
@@ -518,7 +527,7 @@ function eliteBossBars() {
 function eliteBirdDown(e) {
   systemNotice(e.eliteName + '倒下了！核心護盾消失', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '核心護盾消失，趁現在打破核心！', '#ffd27a');
-  nearbyImpact(e.x, e.y, 10, .08);
+  bossImpact(e.x, e.y, 10, .08);
   e.deathSound = 'eliteScream';   // 死掉也是那聲有回音的尖叫：這裡先大聲播；game.js 接著用同一個來源（monster-death）播的那聲會被 70ms 去重吃掉，不會疊兩次
   if (typeof sfxAt === 'function') sfxAt('eliteScream', e.x, e.y, 2.2, 'monster-death');
 }

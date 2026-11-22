@@ -69,11 +69,23 @@ function clawMachineState(spot) {
   if (!box[key]) {
     const index = Math.max(0, clawSpots().findIndex(s => s.x0 === spot.x0 && s.y0 === spot.y0));
     box[key] = clawNewStock(index, box);
+    if (clawSave.carry && clawSave.carry[key]) { box[key].credits = clawSave.carry[key]; delete clawSave.carry[key]; }   // 重新部署前沒用完的次數（clawResetMap）
     clawPersist();
   }
   const m = box[key];
   m.stock = m.stock.filter(clawPrizeDef);   // 設定拿掉的獎品就不留在機台裡
   return m;
+}
+// 重新部署戰場時（js/combat-progress.js 的 resetMapLoot）：這張地圖的夾娃娃機全部忘掉，
+// 下次打開時照 data/claw-machine.js 重新擺滿獎品（保夾累積歸零；花錢買了還沒用完的次數留著，記在 carry，重新擺好時還給那台）
+function clawResetMap(mapId) {
+  const box = clawSave.machines; if (!box || !mapId) return;
+  let changed = false;
+  for (const key of Object.keys(box)) if (key.startsWith(mapId + ':')) {
+    if (box[key].credits > 0) (clawSave.carry || (clawSave.carry = {}))[key] = box[key].credits;
+    delete box[key]; changed = true;
+  }
+  if (changed) clawPersist();
 }
 const clawMoney = () => Math.floor((typeof G !== 'undefined' && G && G.money) || 0);
 const clawPityOn = () => !!cw.m && cw.m.plays >= CLAW_MACHINE.pityPlays;

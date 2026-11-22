@@ -14,7 +14,9 @@
    地圖資料：maps.js 的 "capKing": { "caps": ["欄,列", …] }（🗺️ 地圖編輯器的「🎩 順順宮主帽子」標位置；至少 2 頂）。
    數值都在下面的 CAP_KING。必須在 hangi-bao.js、anomalous-core.js 之後、game.js 之前載入。
 */
-const CAP_KING = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const CAP_KING = applyBossSettings('CAP_KING', {
   name: '順順宮主',
   capScale: 2.3,           // 大宮帽的大小（順順宮帽原圖的幾倍；一般地上的帽子是 1.2）
   blockW: 3, blockH: 2,    // 擋路範圍：寬幾格、高幾格（以標的那一格為下方中間）
@@ -31,6 +33,7 @@ const CAP_KING = {
   coreShield: .9,          // 還有大夯吉寶活著（含還躲在帽子裡沒跳出來的）時，核心少受幾成傷害
   big: {                   // 大夯吉寶（以普通夯吉寶 data/monsters.js 的數值為基準）
     name: '大夯吉寶',
+    artDir: 'images/monster/hangi-bao-big/',   // 專用的圖（身體紫藍）：檔名跟夯吉寶一樣，只換資料夾；順順宮主也用這組、再疊 coreTint；用 tools/recolor-hangi-bao-big.py 從夯吉寶的圖換色產生
     scale: 2.6, hpMul: 18, dmgMul: 1.8, rewardMul: 5, crystalMul: 5,   // hpMul 18 → 血量 810
     lordHp: 1800,          // 跟核心躲在同一頂帽子裡的那隻（順順宮主本人）的血量
     coreTint: '#ffb4a6',   // 跟核心躲在同一頂帽子裡的那隻：用色彩增值疊這個顏色，看起來稍微偏紅（越接近白色越淡，越紅越明顯）
@@ -39,9 +42,9 @@ const CAP_KING = {
     capSpread: { n: 3, angle: 22, scale: 1.8, hitR: 28 },   // 一次丟幾頂、相鄰兩頂差幾度、帽子放大、打中判定半徑（像素）
     boomerang: { noticeRange: 12, loseRange: 20, throwRange: 6.5, keepDistance: 2.5, windup: .55, cooldown: 2.2, capSpeed: 230 },   // 覆蓋普通夯吉寶的迴力鏢數值（欄位見 js/monster-data.js 的 BOOMERANG_FIELDS）
     stepEvery: 46,         // 每走幾像素踩一步（震動、揚塵、腳步聲）
-    stepShake: 6, shakeRange: 16,   // 每一步的畫面震動（貼身時最大），溫特在幾格內才震
+    stepShake: 6, shakeRange: 16,   // 每一步的畫面震動（貼身時最大）；shakeRange （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
   },
-};
+});
 const ckRand = ([a, b]) => Math.round(a + Math.random() * (b - a));
 
 // ---- 開場：照地圖設定擺上大宮帽，把核心藏進其中一頂（game.js 在 seedCores 之後呼叫）----
@@ -108,7 +111,7 @@ function openCapKingCap(cap) {
   if (typeof sfxAt === 'function') sfxAt('capKingPop', cap.x, cap.y, 1, 'hangi-cap');
   G.effects.push({ ring: true, x: cap.x, y: cap.y, r: 10, r2: 80, life: .4, life0: .4, color: hasCore ? '#c77bff' : '#ffd479' });
   if (typeof addLightFlash === 'function') addLightFlash('muzzle', cap.x, cap.y - 40);
-  nearbyImpact(cap.x, cap.y, 3, 0);
+  bossImpact(cap.x, cap.y, 3, 0);
   if (first) {
     if (typeof questEvent === 'function') questEvent('openCap');   // 支線進度（js/quests.js）
     if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮平安符（js/equipment.js）
@@ -178,6 +181,11 @@ function capKingSpawnBig(cap) {
   const withCore = cap === G.capKing.coreCap;
   e.capKing = true; e.eliteName = withCore ? CAP_KING.name : B.name;   // 跟核心躲在一起的那隻就是「順順宮主」本人（血條、倒下提示、擊殺統計都用這個名字）
   e.capKingLord = withCore;
+  if (B.artDir) {   // 換成大夯吉寶專用的圖（另外複製一份，不要改到普通夯吉寶共用的設定）
+    const swap = f => typeof f === 'string' && /\.png$/i.test(f) ? B.artDir + f.split('/').pop() : f;
+    e.sprite = swap(e.sprite);
+    if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(swap) : swap(f)]));
+  }
   e.hp = e.maxhp = withCore ? B.lordHp : Math.round(e.maxhp * B.hpMul);
   if (withCore && B.coreTint) e.tint = 'multiply:' + B.coreTint;   // 稍微偏紅（js/combat-feel.js 的 tintedSprite）
   e.playerDamage = Math.round(e.playerDamage * B.dmgMul);
@@ -195,7 +203,7 @@ function capKingSpawnBig(cap) {
   G.capKing.bigs.push(e);
   if (G.capKing.cycleT == null) G.capKing.cycleT = CAP_KING.cycleTime;   // 第一隻跳出來：開始每 cycleTime 秒蓋帽洗牌
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: cap.x, y: cap.y - 40, r: 10 + i * 8, r2: 120 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ffd27a' : '#ffffff' });
-  nearbyImpact(cap.x, cap.y, 9, .06);
+  bossImpact(cap.x, cap.y, 9, .06);
   flash('！！', cap.x, cap.y - e.drawHeight - 20, '#ffd27a', 1.4);
   systemNotice(e.eliteName + '從帽子裡跳出來了！', true);
 }
@@ -209,8 +217,8 @@ function capKingBigSteps(e) {
   e.ckStep %= B.stepEvery;
   const p = G.player;
   if (p) {
-    const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, k = 1 - d / B.shakeRange;
-    if (d < B.shakeRange) addShake(B.stepShake * (.2 + .8 * k * k));   // 平方衰減：貼身震很大，越遠越小
+    const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, R = bossShakeRange(), k = 1 - d / R;   // BOSS 共用的震動距離（js/combat-feel.js 的 BOSS_SHAKE）
+    if (d < R) addShake(B.stepShake * (.2 + .8 * k * k));   // 平方衰減：貼身震很大，越遠越小
   }
   e.hitSquashT = .07;   // 落腳時身體被壓扁一下
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 46, life: .3, life0: .3, color: '#b9b2a2' });
@@ -242,7 +250,7 @@ function capKingBossBars() {
 }
 // 倒下（combat-feel.js 的 onEnemyDeath 呼叫）
 function capKingBigDown(e) {
-  nearbyImpact(e.x, e.y, 10, .08);
+  bossImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）
   e.deathSound = 'capKingDeath';   // 死掉的聲音：這裡先大聲播（有回音）；game.js 接著用同一個來源（monster-death）播的那聲會被去重吃掉，不會疊兩次
   if (typeof sfxAt === 'function') sfxAt('capKingDeath', e.x, e.y, 2.2, 'monster-death');
   // 只說倒下了：不提還有幾隻（含躲在帽子裡的）、也不提核心護盾消失（全部倒下時護盾會默默解除，讓玩家自己發現）

@@ -194,7 +194,7 @@ function activeHtml(a) {
     '<div class="two">' + num('buff.atk', '增益：攻擊力 +%', pct(b.atk)) + num('buff.def', '增益：防禦率 +%', pct(b.def)) + '</div>' +
     '<div class="two">' + num('buff.spd', '增益：攻擊速度 +%', pct(b.spd)) + num('time', '增益持續幾秒', a.time, .5) + '</div>' +
     '<div class="two">' + num('cast', '詠唱幾秒（0＝馬上放）', a.cast, .5) + num('sp', '花多少 SP', a.sp) + '</div>' +
-    num('cd', a.when === 'combat' ? '每幾秒發動一次' : '冷卻幾秒', a.cd, .5);
+    '<div class="two">' + num('cd', a.when === 'combat' ? '每幾秒發動一次' : '冷卻幾秒', a.cd, .5) + num('range', '距離幾格（嚮導身邊幾格內吃得到；0＝不限距離）', a.range, .5) + '</div>';
 }
 function readActive(box) {
   const v = k => { const el = box.querySelector('[data-act="' + k + '"]'); return !el ? 0 : el.type === 'checkbox' ? el.checked : el.tagName === 'SELECT' ? el.value : Math.max(0, +el.value || 0); };
@@ -204,7 +204,7 @@ function readActive(box) {
   put('heal', v('heal')); put('soothe', v('soothe')); put('one', v('one')); put('wake', v('wake'));
   const buff = {}; for (const k of ['atk', 'def', 'spd']) if (v('buff.' + k)) buff[k] = v('buff.' + k) / 100;
   if (Object.keys(buff).length) { a.buff = buff; put('time', v('time')); }
-  put('cast', v('cast')); put('sp', v('sp')); put('cd', v('cd'));
+  put('cast', v('cast')); put('sp', v('sp')); put('cd', v('cd')); put('range', v('range'));
   return a;
 }
 // ---- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用同一份裝備清單 ----

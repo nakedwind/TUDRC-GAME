@@ -52,6 +52,25 @@
   .slime-thumb img { image-rendering:pixelated }
   .giant-fields { display:flex; gap:16px; flex-wrap:wrap; margin-top:14px }
   .giant-fields label { display:grid; gap:5px; font-size:13px; color:#b8c9da } .giant-fields input { width:120px }
+  .boss-panel { margin-top:18px }
+  .boss-layout { display:grid; grid-template-columns:minmax(200px,240px) 1fr; gap:18px; align-items:start }
+  #bossList { display:grid; gap:7px }
+  #bossList button { display:flex; gap:10px; align-items:center; width:100%; text-align:left; background:#15202b; border-color:#35485c }
+  #bossList button.selected { background:#213d50; border-color:#77c7d9 }
+  #bossList img { width:42px; height:42px; object-fit:contain; image-rendering:pixelated; background:#0e1721; border-radius:6px }
+  #bossList span { display:grid } #bossList small { font-size:11px }
+  #bossDescBox { margin:0 0 10px; font-size:13px; color:#aebccc } #bossDescBox summary { cursor:pointer }
+  #bossDesc { white-space:pre-wrap; font:12px/1.6 inherit; background:#121a23; border-radius:8px; padding:10px; margin:8px 0 0 }
+  #bossSearch { width:100%; margin:0 0 10px }
+  #bossFields { display:grid; gap:2px; max-height:720px; overflow:auto; padding-right:6px }
+  .boss-row { display:grid; grid-template-columns:minmax(200px,1fr) minmax(240px,1.1fr); gap:10px; align-items:center; padding:6px 0; border-bottom:1px solid #2b3a4a; font-size:13px; color:#b8c9da }
+  .boss-row.head { display:block; color:#e8edf5; font-weight:600; border-bottom-color:#3a4b60; padding-top:12px }
+  .boss-row .ins { display:flex; flex-wrap:wrap; gap:8px }
+  .boss-row .in { display:grid; gap:2px; font-size:11px; color:#8ea3b8 }
+  .boss-row .in > span { display:flex; gap:4px }
+  .boss-row input { width:84px; padding:5px 7px }
+  .boss-row input.changed { border-color:#e2b85c; background:#2a2414 }
+  @media(max-width:800px) { .boss-layout,.boss-row { grid-template-columns:1fr } }
   @media(max-width:800px) { .layout,.details { grid-template-columns:1fr } body { padding:16px } }
 </style>
 </head>
@@ -80,7 +99,7 @@
           <label>圖片寬度 px<input id="f_width" data-field="width" type="number" min="8"></label>
           <label>圖片高度 px<input id="f_height" data-field="height" type="number" min="8"></label>
           <label class="wide" title="身體太大：只有一格寬的通道（門口、窄走廊）擠不過去，會被擋在門外"><span><input id="f_wide" type="checkbox"> 大體型（一格寬的門口擠不過去）</span></label>
-          <label class="wide" title="火系角色（異能力「火焰」，例如希奧妮）打水系的怪物：攻擊力、燃燒傷害都打折（倍率在 data/balance.js 的 ELEMENT_RULES）">屬性<select id="f_element"><option value="">無</option><option value="water">水系（火系攻擊 −20%）</option></select></label>
+          <label class="wide" title="草系怪物：怕火，火焰傷害加成。水系怪物：火焰（希奧妮的火、燒傷、燃燒彈、油火）和爆炸（油桶、油箱、地雷）傷害打折；雷電（安柏、雷電彈）傷害加成，而且會被麻痺打斷招式。設了「不怕電」的照自己的設定（倍率在 data/balance.js 的 ELEMENT_RULES）">屬性<select id="f_element"><option value="">無</option><option value="water">水系（火焰、爆炸 −25%；雷電 +25% 並麻痺 1.5 秒）</option><option value="grass">草系（火焰 +25%）</option></select></label>
         </div></div>
       <div id="chargerBox" hidden>
         <h3 id="behaviorTitle">行為</h3>
@@ -97,6 +116,18 @@
         <div id="status" role="status"></div><textarea id="exportOut" readonly aria-label="怪物設定匯出內容"></textarea></div>
     </section>
   </div>
+  <section class="panel boss-panel">
+    <h2>👑 BOSS 數值</h2>
+    <p style="margin-bottom:14px">每隻 BOSS 的血量、招式、時間、範圍都在這裡改。每一行的說明直接取自 BOSS 程式裡的註解，小字是程式裡的欄位名稱；滑鼠停在格子上可以看原本的數字。
+      改動跟上面一起自動儲存，「下載 monsters.js」／「存到專案」也會一起存進去。虱目魚王在上方的怪物列表裡。</p>
+    <div class="boss-layout">
+      <div id="bossList"></div>
+      <div><div class="actions"><h3 style="flex:1;margin:0" id="bossTitle"></h3><button id="bossReset">這隻恢復檔案的數字</button></div>
+        <details id="bossDescBox"><summary>這隻 BOSS 怎麼打（程式裡的說明）</summary><pre id="bossDesc"></pre></details>
+        <input id="bossSearch" type="search" placeholder="搜尋說明或欄位名稱" aria-label="搜尋 BOSS 欄位">
+        <div id="bossFields"></div></div>
+    </div>
+  </section>
   <section class="panel slime-panel">
     <h2>🟢 史萊姆種類</h2>
     <p style="margin-bottom:14px">每種史萊姆都是用上面「史萊姆」的數值乘上倍率。生成一隻史萊姆時，依序擲出現機率，都沒中就是一般史萊姆。
@@ -111,15 +142,16 @@
     <small style="display:block;margin-top:10px">場上同時最多一隻巨型；上一隻沒倒，下一隻會等。</small>
   </section>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
-  <script src="data/monsters.js?v=mfking-20261120"></script>
+  <script src="data/monsters.js?v=ratfrenzy2-20261122"></script>
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/monster-data.js?v=mfking-20261120"></script>
-  <script src="js/sfx.js?v=mfking-20261120"></script>
-  <script src="js/burrowing-mouse.js?v=mouse-wallhide-20261023"></script>
+  <script src="js/monster-data.js?v=bosscfg-20261122"></script>
+  <script src="js/boss-fields.js?v=ratfrenzy2-20261122"></script>   <!-- 👑 BOSS 數值的欄位說明（tools/build-boss-fields.py 產生） -->
+  <script src="js/sfx.js?v=brake-20261122"></script>
+  <script src="js/burrowing-mouse.js?v=holdgrip-20261122"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=mfking-20261120"></script>
+  <script src="js/monster-editor.js?v=bosscfg-20261122"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
-  <script src="js/editor-nav.js?v=surftag-20261117"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+  <script src="js/editor-nav.js?v=bullets-20261121"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

@@ -54,6 +54,7 @@ function drawObstacle(o) {
     if (s && (s.fx || s.fy || rot || stampHasTransform(s))) { ctx.save(); applyStampTransform(ctx, s, sx, sy, sw, sh); ctx.translate(sx + sw / 2, sy + sh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); draw(-iw / 2, -ih / 2, iw, ih); ctx.restore(); }
     else draw(sx, sy, sw, sh);
   };
+  if (o.rockFlashT > 0 && typeof drawRockFlash === 'function') drawRockFlash(ctx, o);   // 地圖上的石頭被打中：閃白（js/rocks.js）
   if (o.ore && typeof drawOreGlow === 'function') inStamp((gx, gy, gw, gh) => drawOreGlow(ctx, o, gx, gy, gw, gh));   // 被照亮時結晶發出紫光（js/ore.js）
   // 手槍打中異質礦：礦石的形狀閃一下白（ORE_GUN_FLASH 毫秒內淡掉）
   const gunFlash = o.ore && o.gunFlashAt ? 1 - (performance.now() - o.gunFlashAt) / ORE_GUN_FLASH.ms : 0;
@@ -87,7 +88,7 @@ function drawObstacle(o) {
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)';
     const label = '基地 HP ' + Math.max(0, Math.ceil(o.hp)) + ' / ' + o.maxhp;
     ctx.strokeText(label, x + w / 2, barY - 4); ctx.fillStyle = '#fff'; ctx.fillText(label, x + w / 2, barY - 4);
-  } else if (o.hp < o.maxhp) {   // 一般障礙物受損才顯示血條
+  } else if (o.hp < o.maxhp && !(typeof isRock === 'function' && isRock(o))) {   // 一般障礙物受損才顯示血條；地圖上的石頭不顯示（js/rocks.js）
     ctx.fillStyle = '#000'; ctx.fillRect(x + 2, y + h - 6, w - 4, 4);
     ctx.fillStyle = '#c9a26a'; ctx.fillRect(x + 2, y + h - 6, (w - 4) * Math.max(0, o.hp) / o.maxhp, 4);
   }
@@ -182,14 +183,18 @@ function drawCharacterShadow(actor) {
   ctx.fillStyle = 'rgba(0,0,0,.3)';
   ctx.beginPath();
   const down = actor.hp <= 0;
-  ctx.ellipse(actor.x + (down ? 10 : 0), actor.y + (down ? 5 : 15), 15, 5, 0, 0, Math.PI * 2);
+  // 被麻醉針、睡眠鱗粉弄睡而側身倒在地上：影子往頭那一側挪 12 像素（倒下、爬起來的過程中跟著慢慢移；js/human-face-butterfly.js 的 mothSleepPose）
+  const pose = !down && (actor.mothSleep || actor.mothWakeT > 0) && typeof mothSleepPose === 'function' ? mothSleepPose(actor) : null;
+  const lieX = pose ? Math.sin(pose.angle || 0) * 12 : 0;   // 往左倒＝頭在左邊 → 影子往左；往右倒就往右
+  ctx.ellipse(actor.x + (down ? 10 : lieX), actor.y + (down ? 5 : 15), 15, 5, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
 function drawTower(t) {
   if (t.rkHeld) return;   // 被老鼠王的手抓住、拖進地底：看不到（js/rat-king.js）
   if (t.eatenBy) {   // 被虱目魚小子吃掉：只畫魚嘴裡露出的腳（js/milkfish-kid.js）；說的話畫在魚頭上
-    if (t.say && t.say.text) queueTowerBubble(t, t.eatenBy.x, t.eatenBy.y - (t.eatenBy.drawHeight || 120) - 6, t.say.text, t.say.col || BUBBLE_COLORS[t.type]);
+    const belly = t.eatenBy.mk && typeof milkfishKingBellySpot === 'function' ? milkfishKingBellySpot(t) : null;   // 被虱目魚王吞掉：泡泡畫在肚子上（js/milkfish-king.js）
+    if (t.say && t.say.text) queueTowerBubble(t, belly ? belly.x : t.eatenBy.x, belly ? belly.y : t.eatenBy.y - (t.eatenBy.drawHeight || 120) - 6, t.say.text, t.say.col || BUBBLE_COLORS[t.type]);
     return;
   }
   drawCharacterShadow(t);
@@ -424,7 +429,7 @@ function drawEnemy(e) {
   const bodyX = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleX || 1), bodyY = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleY || 1);
   const slimeW = (e.drawWidth || 42) * bodyX * sqX, slimeH = (e.drawHeight || 33) * bodyY * sqY;
   const bottomY = e.y + 13 - lift;
-  const shadowScale = Math.max(.55, 1 - lift / 22) * size * (e.behavior === 'gourd' ? (e.drawWidth || 42) / 40 : 1);   // 葫蘆猴身體很寬：影子跟著變大
+  const shadowScale = Math.max(.55, 1 - lift / 22) * size * (e.behavior === 'gourd' ? (e.drawWidth || 42) / 40 : e.mk ? (e.drawWidth || 220) * .3 / 15 : 1);   // 葫蘆猴身體很寬：影子跟著變大；虱目魚王：影子半徑＝身體寬的 3 成（js/milkfish-king.js）
   ctx.globalAlpha = .28 * Math.min(1, shadowScale); ctx.fillStyle = '#071015';
   if (e.behavior !== 'burrow') { ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill(); }   // 版權老鼠從土堆裡出來，不畫腳下陰影
   // 撲擊落點警示：蓄力時由外往內縮的紅圈＋逐漸填滿，飛撲時保持顯示
@@ -1071,7 +1076,7 @@ function draw() {
   const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色
   // 🙈 完全遮住區（js/hide-zones.js）：腳踩進去就不畫，靠近邊緣慢慢淡出
-  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a, kind) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a, kind); wadeDraw0(a, kind, fn); ctx.restore(); };
+  const wadeDraw = (a, kind, fn) => { const hide = typeof hideZoneAlpha === 'function' ? hideZoneAlpha(a, kind) : 1; if (hide <= 0) return; ctx.save(); if (hide < 1) ctx.globalAlpha *= hide; if (typeof doorActorClip === 'function') doorActorClip(ctx, a, kind); if (typeof mrtRiderClip === 'function' && !mrtRiderClip(ctx, a)) { ctx.restore(); return; } wadeDraw0(a, kind, fn); ctx.restore(); };   // mrtRiderClip：坐在捷運上的人只畫在軌道範圍裡（js/mrt-train.js）
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ floor: stampDrawFloor(d.stamp), y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
@@ -1093,6 +1098,7 @@ function draw() {
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);
   if (typeof ratKingSortables === 'function') ratKingSortables(sortables);   // 花蓮老鼠王的手、被撞飛的本體（js/rat-king.js）   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof loofahQueenSortables === 'function') loofahQueenSortables(sortables);   // 絲瓜女王頭上吊著的核心（js/loofah-queen.js）
+  if (typeof milkfishKingSortables === 'function') milkfishKingSortables(sortables);   // 虱目魚王從水池竄出來、在空中的樣子＋水浪（js/milkfish-king.js）
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
   if (typeof escalatorSortables === 'function') escalatorSortables(sortables);   // 側面手扶梯前面的扶手外殼：蓋在站在上面的人身上（js/escalators.js）
   if (typeof mrtTrainSortables === 'function') mrtTrainSortables(sortables);   // 捷運列車（js/mrt-train.js）
@@ -1126,6 +1132,7 @@ function draw() {
     [() => typeof drawEliteGround === 'function' && drawEliteGround(ctx), false],   // 鳥頭大隊長跑步踩出的小裂痕（js/elite-bird-head.js）
     [() => typeof drawGourdGround === 'function' && drawGourdGround(ctx), true],   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
     [() => typeof drawLoofahGround === 'function' && drawLoofahGround(ctx), true],   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）
+    [() => typeof drawLoofahQueenGround === 'function' && drawLoofahQueenGround(ctx), false],   // 絲瓜女王重踏震下來的碎石：影子、落地的碎石（js/loofah-queen.js）
     [() => typeof drawHiddenTunnels === 'function' && drawHiddenTunnels(ctx), false],   // 球球找到的地道（js/rescue-dog.js）
     [() => drawCombatFeelGround(ctx), true],   // 黏液痕跡、自爆範圍警示（js/combat-feel.js）
     [() => typeof drawGluePools === 'function' && drawGluePools(ctx), true],   // 黏著彈的黏膠（js/special-guns.js）
@@ -1184,7 +1191,9 @@ function draw() {
   }
   // 人面蝶和牠的鱗粉霧：飛在空中，蓋在牆、屋簷、電梯等所有圖層上面（看起來是飛過牆，不是穿牆；js/human-face-butterfly.js）
   if (typeof drawMothClouds === 'function') drawMothClouds(ctx);
-  for (const e of G.enemies) if (e.behavior === 'moth' && enemyVisible(e)) { if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }
+  // 記下來的人面蝶，等一下「底下透出的地圖」蓋上來後要在空格那一塊再畫一次（js/under-map.js 的 redrawOverUnderMap），不然會被底圖切掉
+  const mothItems = G.enemies.filter(e => e.behavior === 'moth' && enemyVisible(e)).map(e => ({ who: e, draw: () => { if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); } }));
+  for (const it of mothItems) it.draw();
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
   // 在黑幕之後才畫（下面 drawInteractionPrompts()），暗處的門、物件提示才不會被黑幕蓋住
   const drawInteractionPrompts = () => {
@@ -1277,7 +1286,9 @@ function draw() {
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
   if (typeof drawUnderMap === 'function') drawUnderMap(ctx, 'above');   // 有黑幕的地圖：底下透出的另一張地圖畫在黑幕上面（只畫在沒鋪東西的格子，js/under-map.js）
-  if (typeof redrawOverUnderMap === 'function') redrawOverUnderMap(ctx, sortables);   // 站在亮處、身體伸進空格的怪物、人、建築：在空格那一塊再畫一次，底圖才會在它們下面
+  if (typeof redrawOverUnderMap === 'function') redrawOverUnderMap(ctx, sortables.concat(mothItems.filter(it => !it.who.mothBoss)));   // 站在亮處（人面蝶也算）、身體伸進空格的怪物、人、建築：在空格那一塊再畫一次，底圖才會在它們下面
+  // 人面蝶后體型大、飛得高，身體常常一半在亮處一半在暗處：看牠正下方的影子亮不亮，亮就整隻畫在黑幕上面，暗就整隻留在黑幕裡（js/moth-boss.js）
+  for (const it of mothItems) if (it.who.mothBoss && isVisible(it.who.x, it.who.y)) it.draw();
   if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
   for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);
@@ -1376,6 +1387,7 @@ function draw() {
     ctx.fillStyle = '#ffd479'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('🎯 點擊地圖，指定「' + TYPES[assigning.type].name + '」的巡邏位置（Esc 取消）', cv.width / 2, 29);
   }
+  if (typeof drawRatKingScreen === 'function') drawRatKingScreen(ctx);   // 花蓮老鼠王的死亡表演：電影黑邊、警示紅光、撞擊白光（js/rat-king.js）
   // 玩家受擊：畫面四周紅暈快速閃現後淡出（同《苦艾與甘露》的受擊回饋）。
   if ((G.damageVignetteT || 0) > 0) {
     const elapsed = 1 - G.damageVignetteT / .45;
@@ -1441,6 +1453,7 @@ function drawWorldEffects() {
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
   if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'air');   // 起霧 V2：還在空中飄的葉子（js/fog-fx-v2.js）
   if (typeof drawBananaEmperorAir === 'function') drawBananaEmperorAir(ctx);   // 金蕉大王的狂風捲起來的葉子（js/banana-emperor.js）
+  if (typeof drawLoofahQueenAir === 'function') drawLoofahQueenAir(ctx);   // 絲瓜女王重踏震下來的葉子（js/loofah-queen.js）
   if (typeof drawLootV2 === 'function') drawLootV2(ctx);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
   if (typeof drawMiscV2 === 'function') drawMiscV2(ctx);   // 槍、連刺、集氣等其他 V2（js/misc-fx-v2.js）
   for (const f of G.effects) {

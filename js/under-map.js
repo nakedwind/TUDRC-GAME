@@ -168,7 +168,18 @@ function redrawOverUnderMap(ctx, items) {
     return false;
   };
   let clipped = false;
-  for (const it of items) {
+  const clip = () => { if (!clipped) { ctx.save(); ctx.clip(path); clipped = true; } };
+  // 補畫的順序跟原本一樣：先地上的怪物、人、建築 → 人面蝶的鱗粉霧 → 人面蝶（飛在最上面）
+  const isMoth = it => it.who && it.who.behavior === 'moth';
+  redrawItems(items.filter(it => !isMoth(it)));
+  // 鱗粉霧（js/human-face-butterfly.js 的 drawMothClouds；它本來就只畫亮處的霧，暗處的霧另外畫在黑幕上面，不用補）
+  const clouds = (G.mothClouds || []).filter(c => !c.boom && isVisible(c.x, c.y));
+  if (typeof drawMothClouds === 'function' && clouds.some(c => touchesVoid(c.x - c.r, c.y - 6 - c.r, c.x + c.r, c.y - 6 + c.r))) { clip(); drawMothClouds(ctx); }
+  redrawItems(items.filter(isMoth));
+  if (clipped) ctx.restore();
+
+  function redrawItems(list) {
+  for (const it of list) {
     const w = it.who; if (!w) continue;
     let box, lit;
     if (w.kind === 'obstacle' || w.c != null && w.w != null && w.x == null) {   // 建築：照佔的格子，往上多算 2 格（圖通常比擋路格高）
@@ -177,12 +188,15 @@ function redrawOverUnderMap(ctx, items) {
       lit = isLit(x0 + (w.w || 1) * CELL / 2, y0 + (w.h || 1) * CELL / 2);
     } else {   // 怪物、隊員、溫特、NPC、核心：腳在 (x, y) 附近，身體往上大約 2.5 格
       if (w.mrtHidden) continue;
-      box = [w.x - CELL, w.y - 2.5 * CELL, w.x + CELL, w.y + .6 * CELL];
-      lit = isLit(w.x, w.y);
+      // 飛在空中的怪物（人面蝶等）：身體在腳下的影子上方 lift 像素，範圍要跟著往上、照圖的寬高放大
+      const lift = w.slimeLift || 0, size = w.sizeMul || 1;
+      const halfW = Math.max(CELL, (w.drawWidth || 40) * size / 2), up = Math.max(2.5 * CELL, lift + (w.drawHeight || 33) * size + 13);
+      box = [w.x - halfW, w.y - up, w.x + halfW, w.y + .6 * CELL];
+      lit = isLit(w.x, w.y) || (lift > 0 && isLit(w.x, w.y - lift));
     }
     if (!lit || !touchesVoid(...box)) continue;
-    if (!clipped) { ctx.save(); ctx.clip(path); clipped = true; }
+    clip();
     it.draw();
   }
-  if (clipped) ctx.restore();
+  }
 }

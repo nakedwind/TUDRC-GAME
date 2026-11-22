@@ -174,8 +174,8 @@ function useStoragePropNearPlayer(filter){
 // 做法：1. 先抽特殊子彈（ammoChance：置物櫃 GUN_FINDS.ammo；彈藥箱傳 AMMO_CRATE_LOOT.ammo，比較高），抽中就停
 //       2. 沒抽中子彈：把其他東西的順序打亂，一樣一樣抽（機率在 data/equipment.js 的 ITEM_DROPS 等），抽中一樣就停
 // 所以「開到子彈的機率」就是設定檔寫的那個數字；其他東西只在沒開到子彈時才有機會
-function rollRandomContainerLoot(x,y,where,ammoChance){
-  if(typeof tryGunFind==='function'&&tryGunFind(x,y,ammoChance??GUN_FINDS.ammo,where))return true;   // 特殊子彈（js/special-guns.js）
+function rollRandomContainerLoot(x,y,where,ammoChance,ammoCount){   // ammoCount：開到子彈給幾發（彈藥箱＝一組；沒給＝照 GUN_FINDS.ammoFind）
+  if(typeof tryGunFind==='function'&&tryGunFind(x,y,ammoChance??GUN_FINDS.ammo,where,ammoCount))return true;   // 特殊子彈（js/special-guns.js）
   const tries=[
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('thermos',x,y),   // 保溫瓶
     ()=>typeof tryEquipDrop==='function'&&tryEquipDrop('adrenaline',x,y),   // 腎上腺素
@@ -244,9 +244,8 @@ function grantLockerLoot(loot,where='置物櫃'){
     // 1 組子彈（地圖編輯器「子彈（1 組）」）：彈藥包放得下多少拿多少
     const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
     if(bulletRoom(loot.id)<=0){systemNotice('彈藥包已滿，放不下'+b.name);return;}
-    const first=!bulletOwned(loot.id),got=grantBullets(loot.id,b.max,'在'+where+'找到');
+    const got=grantBullets(loot.id,b.max,'在'+where+'找到');
     if(!got)return;
-    if(!first&&typeof itemIntroForBullet==='function')itemIntroForBullet(loot.id,got);   // 開出來的東西每次都跳視窗（第一次 grantBullets 已經跳過）
     showItemPickupNotice({name:b.name,image:b.image},got,false);
   }
 }
@@ -267,10 +266,14 @@ const DYNAMO_MAPS = ['map_mv1bzur4'];   // 04. 池核
 const dynamoStationMap=m=>!!(m&&typeof mrtStationOf==='function'&&mrtStationOf(m.id));
 const dynamoInteractiveMap=m=>!!(m&&(DYNAMO_MAPS.includes(m.id)||dynamoStationMap(m)));
 // 每一台各自開關（不分電路）。一進地圖全部是關的（地圖上放的是 open 圖也一樣當關的），玩家要自己去把它們打開。
-// 池核：換地圖再回來會重新關掉。捷運站：這次出勤打開過的會一直開著（搭捷運來回不用重開），回應變中心才全部關掉（dynamoForget）。
+// 池核：換地圖再回來會重新關掉。捷運站：打開過的就永遠開著（記在存檔 DYNAMO_STORE，搭捷運來回、回應變中心、重新整理、重新部署都不會關回去；
+// 不然搭車到一個發電機已經開過、卻又被關回去的車站，可能被困在走不到發電機的地方）。
 // 其他程式要知道「是不是全部打開了」：dynamoCount() 回傳 [開著幾台, 總共幾台]、dynamosAllOn()。
 let dynamoMap=null,dynamoOnSet=new Set();   // 開著的發電機（storagePropToken）
-const dynamoKeep=new Map();   // 捷運站：地圖 id → 開著的發電機
+const DYNAMO_STORE='tudrc_dynamos_v1';   // 捷運站：地圖 id → [開著的發電機…]
+const dynamoKeep=new Map();
+try{const d=JSON.parse(localStorage.getItem(DYNAMO_STORE)||'{}');if(d&&typeof d==='object')for(const [id,list] of Object.entries(d))if(Array.isArray(list))dynamoKeep.set(id,new Set(list));}catch(_){}
+function dynamoSaveKeep(){try{localStorage.setItem(DYNAMO_STORE,JSON.stringify(Object.fromEntries([...dynamoKeep].map(([id,set])=>[id,[...set]]))));}catch(_){}}
 function dynamoState(){
   if(dynamoMap!==MAP){
     dynamoMap=MAP;
@@ -279,9 +282,9 @@ function dynamoState(){
   }
   return dynamoOnSet;
 }
-function dynamoForget(){dynamoKeep.clear();dynamoMap=null;}   // 回應變中心（js/mrt-train.js 的 mrtAwayOnBegin）
+function dynamoForget(){dynamoMap=null;}   // 回應變中心（js/mrt-train.js 的 mrtAwayOnBegin）：捷運站的發電機不再關回去，只重新認一次現在的地圖
 const dynamoIsOn=token=>dynamoState().has(token);
-function toggleDynamo(token){const s=dynamoState();if(s.has(token))s.delete(token);else s.add(token);}
+function toggleDynamo(token){const s=dynamoState();if(s.has(token))s.delete(token);else s.add(token);if(dynamoStationMap(MAP))dynamoSaveKeep();}   // 捷運站：記進存檔
 function dynamoCount(){
   if(!MAP)return [0,0];
   const list=storagePropSpots().filter(s=>storagePropKindCached(s.id)==='dynamo');

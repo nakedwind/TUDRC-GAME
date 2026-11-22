@@ -93,6 +93,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "pearl_kid",
     "name": "珍珠小童",
+    "element": "water",
     "sprite": "images/monster/pearl-kid/pearl-kid.png",
     "hp": 80,
     "speed": 28,
@@ -243,7 +244,6 @@ const MONSTERS_DEFAULT = [
   {
     "id": "fish_head",
     "name": "魚頭君",
-    "element": "water",
     "sprite": "images/monster/fish-head/fish-head-front.png",
     "hp": 110,
     "speed": 70,
@@ -270,11 +270,13 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "fishhead",
     "hitSound": "fishHurt",
-    "deathSound": "fishDeath"
+    "deathSound": "fishDeath",
+    "element": "water"
   },
   {
     "id": "loofah_lady",
     "name": "絲瓜小姐",
+    "element": "grass",
     "sprite": "images/monster/loofah-lady/loofah-lady.png",
     "hp": 140,
     "speed": 40,
@@ -304,9 +306,7 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "milkfish_kid",
-    "wide": true,
     "name": "虱目魚小子",
-    "element": "water",
     "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
     "hp": 160,
     "speed": 45,
@@ -329,13 +329,14 @@ const MONSTERS_DEFAULT = [
     "behavior": "milkfish",
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
+    "wide": true,
+    "element": "water",
     "stagger": 0.15,
     "knockMul": 0.4
   },
   {
     "id": "milkfish_kid_small",
     "name": "小虱目魚小子",
-    "element": "water",
     "sprite": "images/monster/milkfish-kid-small/milkfish-kid-small-front.png",
     "hp": 60,
     "speed": 55,
@@ -357,16 +358,15 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "milkfishSmall",
     "hitSound": "milkfishHurt",
-    "deathSound": "milkfishDeath"
+    "deathSound": "milkfishDeath",
+    "element": "water"
   },
   {
     "id": "milkfish_king",
-    "wide": true,
     "name": "虱目魚王",
-    "element": "water",
     "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
-    "hp": 2400,
-    "speed": 34,
+    "hp": 4500,
+    "speed": 50,
     "playerDamage": 22,
     "sentryDamage": 20,
     "buildingDamage": 60,
@@ -378,18 +378,16 @@ const MONSTERS_DEFAULT = [
       "front": "images/monster/milkfish-kid/milkfish-kid-front.png",
       "walkFront": [
         "images/monster/milkfish-kid/milkfish-kid-walk-01.png",
-        "images/monster/milkfish-kid/milkfish-kid-walk-02.png",
-        "images/monster/milkfish-kid/milkfish-kid-walk-03.png",
-        "images/monster/milkfish-kid/milkfish-kid-walk-02.png"
+        "images/monster/milkfish-kid/milkfish-kid-walk-03.png"
       ]
     },
     "behavior": "milkfishKing",
     "mfKing": {
       "noticeRange": 8,
-      "leash": 14,
-      "eatSense": 7,
-      "chewTime": 1,
-      "bellyMax": 6,
+      "leash": 40,
+      "eatSense": 12,
+      "chewTime": 0.5,
+      "bellyMax": 10,
       "maxPrey": 2,
       "holdTime": 8,
       "mateLandDamage": 25,
@@ -397,16 +395,38 @@ const MONSTERS_DEFAULT = [
       "spitRange": 9,
       "spitWindup": 0.8,
       "spitFlight": 0.9,
-      "spitCooldown": 3.5,
+      "spitCooldown": 1,
       "spitRadius": 1.2,
       "spitDamage": 30,
-      "coreSpitHp": 0.33,
-      "coreOutTime": 4,
+      "coreSpitHp": 0.4,
+      "coreOutTime": 2,
       "rushSpeedMul": 2.2,
-      "stepShake": 6
+      "stepShake": 6,
+      "coreAtkMul": 1.5,
+      "acidPoolR": 1.1,
+      "acidPoolLife": 5,
+      "acidPoolDps": 8,
+      "enrageHp": 0.5,
+      "enrageSpitCooldown": 0.5,
+      "chargeCooldown": 7,
+      "chargeChain": 2,
+      "chargeWindup": 0.6,
+      "chargeSpeed": 320,
+      "chargeDist": 10,
+      "chargeDamage": 35,
+      "chargeKnock": 3,
+      "coreHp": 2000,
+      "coreShield": 0.9,
+      "introRumble": 7.2,
+      "introShake": 7,
+      "introLeapTime": 2.4,
+      "introLeapHeight": 180,
+      "introLandShake": 12
     },
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
+    "wide": true,
+    "element": "water",
     "noHitSquash": true,
     "stagger": 0,
     "knockMul": 0
@@ -462,9 +482,7 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "clownfish",
-    "wide": true,
     "name": "比基尼小丑魚",
-    "element": "water",
     "sprite": "images/monster/clownfish/clownfish-front.png",
     "hp": 120,
     "speed": 75,
@@ -494,13 +512,14 @@ const MONSTERS_DEFAULT = [
     "behavior": "clownfish",
     "hitSound": "clownfishHurt",
     "deathSound": "clownfishDeath",
+    "wide": true,
+    "element": "water",
     "shockResist": 0.6,
     "knockMul": 0.6
   },
   {
     "id": "clownfish_small",
     "name": "小丑魚幼體",
-    "element": "water",
     "sprite": "images/monster/clownfish/clownfish-small-front.png",
     "hp": 35,
     "speed": 120,
@@ -521,11 +540,13 @@ const MONSTERS_DEFAULT = [
     "behavior": "clownfish",
     "hitSound": "clownfishHurt",
     "deathSound": "clownfishSmallDeath",
+    "element": "water",
     "knockMul": 1.2
   },
   {
     "id": "golden_banana_king",
     "name": "金蕉王",
+    "element": "grass",
     "sprite": "images/monster/golden-banana-king/golden-banana-king-front.png",
     "hp": 300,
     "speed": 40,
@@ -552,7 +573,6 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "gourd_monkey",
-    "wide": true,
     "name": "葫蘆猴",
     "sprite": "images/monster/gourd-monkey/gourd-monkey-front.png",
     "hp": 700,
@@ -577,6 +597,7 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "gourd",
     "deathSound": "gourdDeath",
+    "wide": true,
     "noHitSquash": true,
     "stagger": 0,
     "noStun": true,
@@ -603,10 +624,10 @@ const MONSTERS_DEFAULT = [
       ]
     },
     "behavior": "moth",
-    "noHitSquash": true,
-    "knockMul": 0.5,
     "hitSound": "mothHurt",
-    "deathSound": "mothDeath"
+    "deathSound": "mothDeath",
+    "noHitSquash": true,
+    "knockMul": 0.5
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */
@@ -688,5 +709,930 @@ const SLIME_SETTINGS_DEFAULT = {
   "giant": {
     "first": 45,
     "every": 75
+  }
+};
+
+/* BOSS 數值（由怪物編輯器匯出）：每隻 BOSS 程式檔裡設定的數字，遊戲開場時用這裡的蓋過去（js/monster-data.js 的 applyBossSettings）。 */
+const BOSS_SETTINGS_DEFAULT = {
+  "ELITE_BIRD": {
+    "hpMul": 12,
+    "dmgMul": 2.2,
+    "rewardMul": 5,
+    "crystalMul": 5,
+    "scale": 2.5,
+    "speedMul": 0.5,
+    "knockMul": 0,
+    "stagger": 0,
+    "stunResist": 0.5,
+    "wakeRange": 7,
+    "guardTurn": [
+      0.15,
+      0.55
+    ],
+    "scream": 1.2,
+    "loseRange": 12,
+    "chargeRange": 8,
+    "leash": 24,
+    "windup": 1,
+    "aimLock": 0.55,
+    "chargeSpeed": 110,
+    "chargeStart": 0.3,
+    "chargeAccel": 0.6,
+    "chargeBrake": 1.4,
+    "dashCells": 20,
+    "hitWidth": 40,
+    "knockback": 140,
+    "sentryKnockMul": 0.8,
+    "knockTime": 0.36,
+    "redBlockDmgMul": 0.5,
+    "redBlockKnockMul": 0.35,
+    "redBlockSlow": 0.45,
+    "recoverHit": 1,
+    "recoverMiss": 0.8,
+    "dazed": 2.6,
+    "coreShield": 0.6,
+    "returnSpeedMul": 1.1,
+    "returnDashFrom": 1,
+    "returnRamCd": 1,
+    "stepEvery": 60,
+    "stepShake": 10,
+    "walkShake": 5,
+    "runCrack": {
+      "scale": 0.32,
+      "life": 3
+    },
+    "runDust": {
+      "rocks": 0,
+      "dust": 8,
+      "dustRise": 2,
+      "size": 0.6,
+      "spread": 10
+    }
+  },
+  "CAP_KING": {
+    "capScale": 2.3,
+    "blockW": 3,
+    "blockH": 2,
+    "coreHp": 1000,
+    "bigCaps": 4,
+    "bigCapHangi": 2,
+    "spawnCount": [
+      3,
+      5
+    ],
+    "reopenCount": [
+      1,
+      1
+    ],
+    "exposeTime": 10,
+    "cycleTime": 30,
+    "warnTime": 3,
+    "closeTime": 0.45,
+    "shuffle": {
+      "rounds": 7,
+      "pairs": 2,
+      "swapTime": 0.55,
+      "arc": 34,
+      "pause": 0.12,
+      "near": 1.5
+    },
+    "coreShield": 0.9,
+    "big": {
+      "scale": 2.6,
+      "hpMul": 18,
+      "dmgMul": 1.8,
+      "rewardMul": 5,
+      "crystalMul": 5,
+      "lordHp": 1800,
+      "speedMul": 1.5,
+      "walkStride": 18,
+      "capSpread": {
+        "n": 3,
+        "angle": 22,
+        "scale": 1.8,
+        "hitR": 28
+      },
+      "boomerang": {
+        "noticeRange": 12,
+        "loseRange": 20,
+        "throwRange": 6.5,
+        "keepDistance": 2.5,
+        "windup": 0.55,
+        "cooldown": 2.2,
+        "capSpeed": 230
+      },
+      "stepEvery": 46,
+      "stepShake": 6
+    }
+  },
+  "BANANA_EMPEROR": {
+    "standOff": 3.5,
+    "wander": {
+      "near": 3,
+      "far": 5.5,
+      "speed": 0.5,
+      "pause": [
+        1.5,
+        3.5
+      ]
+    },
+    "hp": 2000,
+    "rewardMul": 6,
+    "crystalMul": 6,
+    "scale": 2.3,
+    "wakeRange": 8,
+    "castEvery": 4.5,
+    "firstCast": 1.5,
+    "raiseTime": 0.9,
+    "tapHold": 0.45,
+    "circle": 9,
+    "healBelow": 0.85,
+    "spells": {
+      "heal": {
+        "amount": 80
+      },
+      "atk": {
+        "mul": 1.5,
+        "time": 12
+      },
+      "def": {
+        "cut": 0.2,
+        "time": 12
+      },
+      "spd": {
+        "mul": 1.5,
+        "time": 10
+      },
+      "peels": {
+        "count": 7,
+        "aimed": 3,
+        "near": 2,
+        "far": 7,
+        "fall": 1.1,
+        "height": 420
+      },
+      "wind": {
+        "dist": 8,
+        "away": 0.5,
+        "leaves": 36,
+        "leafRise": [
+          140,
+          260
+        ],
+        "leafLife": [
+          1.4,
+          2.4
+        ]
+      }
+    },
+    "debuffs": {
+      "heal": {
+        "drain": 10
+      },
+      "atk": {
+        "mul": 0.6,
+        "time": 8
+      },
+      "def": {
+        "mul": 1.4,
+        "time": 8
+      },
+      "spd": {
+        "mul": 0.6,
+        "time": 8
+      }
+    },
+    "shake": 16,
+    "tap1": {
+      "hold": 0.28,
+      "lift": 0.22,
+      "shake": 8,
+      "crack": 0.6
+    },
+    "step": {
+      "every": 30,
+      "shake": 4.5,
+      "range": 18
+    },
+    "cracks": {
+      "count": 8,
+      "len": [
+        55,
+        120
+      ],
+      "extra": 2,
+      "extraScale": 0.7,
+      "glow": 1.4,
+      "max": 30,
+      "slow": 0.5,
+      "fade": 3
+    },
+    "core": {
+      "adopt": 4,
+      "pull": 12
+    },
+    "squad": {
+      "leash": 6,
+      "regroup": 1.5,
+      "roam": 1,
+      "formation": {
+        "vertexDown": 1.5,
+        "armAngle": 30,
+        "spacing": 2.4,
+        "kingsUp": 2,
+        "kingsApart": 2.4
+      },
+      "kings": 2
+    }
+  },
+  "LOOFAH_QUEEN": {
+    "hp": 3000,
+    "dmgMul": 1.5,
+    "rewardMul": 6,
+    "crystalMul": 6,
+    "scale": 2.5,
+    "slow": 2,
+    "wakeRange": 7,
+    "loseRange": 16,
+    "leash": 9,
+    "stompRange": 13.5,
+    "stomp": {
+      "shake": 16,
+      "crack": 1,
+      "rocks": 9,
+      "leaves": 30,
+      "leafRange": 9,
+      "leafHigh": [
+        180,
+        320
+      ],
+      "leafDrop": [
+        240,
+        330
+      ],
+      "leafSlow": 129,
+      "leafDrag": 3.2,
+      "leafDelay": 0.25,
+      "leafRest": 2.5,
+      "rockFall": 0.9,
+      "rockDelay": [
+        0.05,
+        0.5
+      ],
+      "rockHeight": 360,
+      "rockRadius": 16,
+      "rockDamage": 5,
+      "rockAimed": 2,
+      "rockRest": 2
+    },
+    "keepDistance": 3,
+    "vines": {
+      "count": 7,
+      "aimed": 3,
+      "aimJitter": 0.5,
+      "spreadMin": 3,
+      "spreadMax": 10.5,
+      "down": 0.75,
+      "hangChance": 0.5,
+      "gap": 1.5,
+      "life": 6,
+      "ground": {
+        "count": 8,
+        "linger": 6,
+        "touchR": 26,
+        "warn": 0.9,
+        "grabR": 32,
+        "hold": 4,
+        "throwChance": 0.5,
+        "throwAfter": 3,
+        "windup": 0.6,
+        "throwRange": 8,
+        "throwSpeed": 430,
+        "throwUp": 160,
+        "wallDamage": 15
+      }
+    },
+    "core": {
+      "hp": 1000,
+      "adopt": 9,
+      "above": 26,
+      "hungH": 90,
+      "lowerSpeed": 110,
+      "fireR": 30,
+      "shotHits": 3,
+      "shield": 0.6,
+      "move": {
+        "grab": 0.45,
+        "up": 0.55,
+        "down": 0.75,
+        "high": 380,
+        "near": 3,
+        "far": 8,
+        "minMove": 3
+      },
+      "fall": 1700
+    },
+    "guards": {
+      "count": 3,
+      "radius": 2.5
+    },
+    "farm": {
+      "range": 16,
+      "cols": [
+        1.3,
+        2.4,
+        3.5,
+        4.6
+      ],
+      "rows": [
+        1.5,
+        2.6
+      ],
+      "catchR": 20,
+      "rootTime": 4,
+      "safeTime": 2,
+      "fireR": 20,
+      "burnTime": 25
+    }
+  },
+  "PEARL_ELDER": {
+    "hp": 3000,
+    "dmgMul": 0.75,
+    "rewardMul": 6,
+    "crystalMul": 6,
+    "scale": 2.6,
+    "speedMul": 1.2,
+    "hover": 26,
+    "wakeRange": 6,
+    "loseRange": 20,
+    "loseTime": 8,
+    "leash": 14,
+    "returnAt": 18,
+    "returnTo": 10,
+    "returnMax": 6,
+    "wanderRadius": 4,
+    "wanderSpeedMul": 0.6,
+    "idle": [
+      1.5,
+      3.5
+    ],
+    "keepDistance": 4,
+    "body": {
+      "x": 0.4,
+      "y": 0.16
+    },
+    "coreShare": 0.1,
+    "coreHp": 1000,
+    "coreArt": {
+      "x": 0.4,
+      "y": 0.7,
+      "len": 0.5,
+      "angle": -73
+    },
+    "scatter": {
+      "count": 7,
+      "spread": 70,
+      "speed": 220,
+      "range": 18,
+      "windup": 0.8,
+      "cooldown": 2.4
+    },
+    "shell": {
+      "time": 30,
+      "defense": 0.1,
+      "grace": 4
+    },
+    "stun": {
+      "time": 2.5,
+      "dmgMul": 1.3
+    },
+    "rain": {
+      "smallEvery": 0.35,
+      "bigEvery": 2.2,
+      "warn": 2.2,
+      "fall": 0.7,
+      "smallR": 24,
+      "bigR": 38,
+      "smallDmg": 12,
+      "bigDmg": 25,
+      "smallMin": 1,
+      "smallMax": 15,
+      "bigMin": 3,
+      "bigMax": 10
+    },
+    "big": {
+      "r": 34,
+      "max": 10,
+      "hp": 8,
+      "pushSpeed": 110,
+      "shotPush": 150,
+      "maxSpeed": 380,
+      "knockSpeed": 650,
+      "friction": 1.4,
+      "bounce": 0.45,
+      "hitSpeed": 40,
+      "ramSpeed": 140,
+      "nudge": 0.8,
+      "bossDmg": 0.08,
+      "monsterDmg": 60
+    },
+    "roll": {
+      "first": 2,
+      "every": 5,
+      "range": 18,
+      "windup": 0.9,
+      "speed": 300,
+      "len": 18,
+      "hitR": 46,
+      "dmg": 22,
+      "knock": 1.6,
+      "knockTime": 0.3,
+      "bounces": [
+        2,
+        3
+      ],
+      "bounceLen": 1,
+      "wallStun": 1.5
+    },
+    "beads": {
+      "chance": 0.6,
+      "per": 2,
+      "spread": 18,
+      "r": 4,
+      "life": 14,
+      "max": 24,
+      "trigger": 14,
+      "safe": 2
+    },
+    "shake": {
+      "land": 11,
+      "bounce": 11,
+      "bump": 14
+    },
+    "land": {
+      "shakeMax": 10,
+      "shakeMin": 3,
+      "shakeRange": 12
+    }
+  },
+  "GOURD_KING": {
+    "scale": 2,
+    "hp": 3600,
+    "atk": 1.6,
+    "speedMul": 1.1,
+    "rewardMul": 8,
+    "crystalMul": 8,
+    "knock": {
+      "delay": 2.2,
+      "gaps": [
+        3.4,
+        2.9,
+        2.4
+      ],
+      "shake": [
+        12,
+        15,
+        18,
+        24
+      ],
+      "rumble": [
+        0.55,
+        0.7,
+        0.9,
+        1.6
+      ],
+      "hitstop": [
+        0.03,
+        0.05,
+        0.07,
+        0.09
+      ],
+      "jitter": [
+        4,
+        6,
+        8,
+        0
+      ],
+      "pebbles": [
+        12,
+        20,
+        30
+      ],
+      "ceiling": [
+        5,
+        9,
+        14
+      ],
+      "dust": [
+        8,
+        13,
+        20
+      ],
+      "sift": [
+        36,
+        60,
+        90
+      ],
+      "haze": [
+        3,
+        6,
+        10
+      ],
+      "chunks": [
+        4,
+        8,
+        12
+      ],
+      "shakeRange": 30
+    },
+    "breach": {
+      "bursts": 5,
+      "smoke": 34,
+      "smokeLife": [
+        1.6,
+        2.6
+      ],
+      "pebbles": 26,
+      "flash": 0.35
+    },
+    "landing": {
+      "shake": 22,
+      "rumble": 1.1,
+      "smoke": 22,
+      "bursts": 3
+    },
+    "emerge": {
+      "wait": 1.8,
+      "growl": 0.9,
+      "hold": 0.4
+    },
+    "slam": {
+      "noticeRange": 14,
+      "loseRange": 40,
+      "slamRange": 6,
+      "maxLeap": 7,
+      "crouch": 0.6,
+      "rise": 0.75,
+      "hang": 0.45,
+      "drop": 0.14,
+      "recover": 1.6,
+      "cooldown": 3,
+      "height": 200,
+      "track": 70,
+      "hitRadius": 140,
+      "knockRadius": 270,
+      "knockMax": 3.2,
+      "knockMin": 1.2,
+      "tossHeight": 70,
+      "tossMinHeight": 30,
+      "shakeMax": 16,
+      "shakeMin": 6,
+      "shakeRange": 22,
+      "crackScale": 2.2,
+      "markEvery": 14
+    },
+    "rocks": {
+      "count": 6,
+      "aimed": 2,
+      "near": 2.5,
+      "far": 8,
+      "delay": [
+        0.15,
+        0.7
+      ],
+      "fall": 1.1,
+      "height": 420,
+      "radius": 30,
+      "playerDamage": 14,
+      "sentryDamage": 18,
+      "monsterDamage": 60,
+      "quick": 1,
+      "big": {
+        "chance": 0.5,
+        "radius": 46,
+        "damageMul": 1.6,
+        "hp": 400,
+        "life": 25
+      }
+    },
+    "ores": {
+      "crushPad": 0.6
+    },
+    "enrageAt": 0.5,
+    "enrage": {
+      "speed": 1.3
+    },
+    "combo": {
+      "hops": 2,
+      "gap": 0.3,
+      "crouch": 0.25,
+      "rise": 0.42,
+      "hang": 0.16,
+      "height": 130,
+      "tired": 2.4
+    }
+  },
+  "MOTH_BOSS": {
+    "hp": 2400,
+    "coreHp": 1500,
+    "rewardMul": 8,
+    "crystalMul": 8,
+    "scale": 2.16,
+    "height": 110,
+    "sleepHeight": 46,
+    "speedMul": 2,
+    "flySpeedMul": 2.4,
+    "wakeRange": 7,
+    "scream": 1.4,
+    "flyDefense": 0.35,
+    "flyFloor": 0.06,
+    "trailEvery": 0.55,
+    "sky": {
+      "chance": 0.5,
+      "up": 1.3,
+      "away": 1.6,
+      "down": 1.5,
+      "rise": 700,
+      "grow": 1.2
+    },
+    "leash": 8,
+    "orbit": {
+      "min": 1.6,
+      "max": 3.2
+    },
+    "nestOrbit": 2.2,
+    "burst": {
+      "every": [
+        7,
+        10
+      ],
+      "first": 2.5,
+      "telegraph": 1.6,
+      "time": 1.2,
+      "puffs": 16,
+      "cover": 0.95
+    },
+    "sound": {
+      "wake": 1.8,
+      "flap": 0.7
+    }
+  },
+  "RAT_KING": {
+    "scale": 4,
+    "showRow": 72,
+    "hp": 4200,
+    "atk": 1.4,
+    "rewardMul": 8,
+    "crystalMul": 8,
+    "sway": {
+      "cells": 1.5,
+      "speed": 0.35
+    },
+    "armor": {
+      "perCore": 0.25,
+      "max": 0.8
+    },
+    "stun": {
+      "time": 6,
+      "dmgMul": 2
+    },
+    "enrageAt": 0.5,
+    "emerge": {
+      "delay": 2.2,
+      "rumble": 2.4,
+      "rise": 2.4,
+      "hold": 1.2
+    },
+    "hands": {
+      "every": [
+        2.8,
+        4.2
+      ],
+      "count": [
+        1,
+        1
+      ],
+      "frenzyEvery": [
+        2.8,
+        4.2
+      ],
+      "frenzyCount": [
+        2,
+        3
+      ],
+      "frenzyTargets": 2,
+      "frenzySpeed": 0.75,
+      "grabChance": 0.6,
+      "scale": 2.5,
+      "riseSpeed": 0.5,
+      "coreHoleGap": 2.5,
+      "holdSway": {
+        "angle": 0.1,
+        "speed": 2.4
+      }
+    },
+    "dig": {
+      "size": 1,
+      "linger": 1.2
+    },
+    "punch": {
+      "windup": 0.95,
+      "rise": 0.18,
+      "hold": 0.35,
+      "sink": 0.3,
+      "radius": 2.2,
+      "launch": {
+        "dist": [
+          2.5,
+          3.8
+        ],
+        "up": 230
+      },
+      "monsterDamage": 40
+    },
+    "grab": {
+      "windup": 1.15,
+      "rise": 0.22,
+      "radius": 2,
+      "hold": 5,
+      "handHp": 260,
+      "under": 6,
+      "spitDamageMul": 1.2,
+      "daze": 1.4,
+      "cooldown": 3,
+      "dragChance": 0.5,
+      "throw": {
+        "dist": [
+          4.5,
+          7
+        ],
+        "up": 260,
+        "height": 100,
+        "wallDamage": 12,
+        "damageMul": 1
+      },
+      "pop": {
+        "warn": 0.7,
+        "up": 520,
+        "dist": [
+          1.5,
+          3
+        ]
+      }
+    },
+    "core": {
+      "react": {
+        "shake": 0.55,
+        "windup": 0.2
+      },
+      "exposeCap": 0.2,
+      "first": [
+        10,
+        14
+      ],
+      "every": [
+        16,
+        24
+      ],
+      "windup": 1,
+      "rise": 0.25,
+      "hold": 0.55,
+      "sink": 0.4,
+      "under": [
+        1.2,
+        2
+      ],
+      "popHold": 1,
+      "minMove": 6
+    },
+    "mice": {
+      "every": [
+        9,
+        13
+      ],
+      "count": [
+        1,
+        2
+      ],
+      "max": 4
+    },
+    "ram": {
+      "decelMul": 2,
+      "fly": 2.2,
+      "slowMo": {
+        "time": 1,
+        "scale": 0.3
+      },
+      "flyDir": 1,
+      "flyAngle": 10,
+      "flyDist": 34,
+      "reach": 0.55
+    },
+    "finale": {
+      "daze": 2.5,
+      "musicLead": 17,
+      "brakeLead": 1.6,
+      "musicGain": 0.8,
+      "slowMo": {
+        "time": 0.5,
+        "scale": 0.5
+      }
+    },
+    "grip": {
+      "held": [
+        33,
+        31
+      ],
+      "core": [
+        48,
+        31
+      ],
+      "coreSize": 1
+    }
+  },
+  "POOL_BOSS": {
+    "scale": 2.2,
+    "hp": 4800,
+    "coreHpMul": 2,
+    "rewardMul": 6,
+    "crystalMul": 6,
+    "swimSpeed": 190,
+    "surfacedSpeedMul": 0.4,
+    "leapSpeedMul": 0.8,
+    "dash": {
+      "every": [
+        1.5,
+        3.5
+      ],
+      "time": 0.6,
+      "mul": 1.8
+    },
+    "turnRate": 4,
+    "weave": {
+      "amp": 0.55,
+      "freq": 3.2
+    },
+    "dive": [
+      3,
+      6
+    ],
+    "surface": [
+      2.5,
+      4
+    ],
+    "wanderCells": 14,
+    "leapUp": {
+      "time": 1,
+      "height": 0.6
+    },
+    "leapDive": {
+      "time": 1.15,
+      "height": 0.5,
+      "sink": 0.45,
+      "splashAt": 0.62
+    },
+    "surfaceDepth": 0.5,
+    "silhouette": 0.35,
+    "defaultSee": 0.45,
+    "flop": [
+      1.2,
+      3
+    ],
+    "flopTime": 0.32,
+    "flopLift": 14,
+    "splash": {
+      "gravity": 700,
+      "up": {
+        "drops": 80,
+        "column": 30,
+        "mist": 12,
+        "up": 380,
+        "spread": 260,
+        "shake": 8
+      },
+      "dive": {
+        "drops": 70,
+        "column": 55,
+        "mist": 14,
+        "up": 560,
+        "spread": 200,
+        "shake": 10
+      },
+      "land": {
+        "drops": 36,
+        "column": 0,
+        "mist": 6,
+        "up": 200,
+        "spread": 200,
+        "shake": 4
+      }
+    },
+    "body": {
+      "rx": 0.3,
+      "ry": 0.14
+    },
+    "touchDamage": 18,
+    "nearSpawn": 14,
+    "hatchlingChance": 0.8
   }
 };
