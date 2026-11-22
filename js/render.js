@@ -54,6 +54,7 @@ function drawObstacle(o) {
     if (s && (s.fx || s.fy || rot || stampHasTransform(s))) { ctx.save(); applyStampTransform(ctx, s, sx, sy, sw, sh); ctx.translate(sx + sw / 2, sy + sh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); draw(-iw / 2, -ih / 2, iw, ih); ctx.restore(); }
     else draw(sx, sy, sw, sh);
   };
+  if (o.rockFlashT > 0 && typeof drawRockFlash === 'function') drawRockFlash(ctx, o);   // 地圖上的石頭被打中：閃白（js/rocks.js）
   if (o.ore && typeof drawOreGlow === 'function') inStamp((gx, gy, gw, gh) => drawOreGlow(ctx, o, gx, gy, gw, gh));   // 被照亮時結晶發出紫光（js/ore.js）
   // 手槍打中異質礦：礦石的形狀閃一下白（ORE_GUN_FLASH 毫秒內淡掉）
   const gunFlash = o.ore && o.gunFlashAt ? 1 - (performance.now() - o.gunFlashAt) / ORE_GUN_FLASH.ms : 0;

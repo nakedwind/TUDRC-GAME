@@ -2090,7 +2090,9 @@ function updatePlayerAttack(dt) {
   if (pearlShot) { best = pearlShot; bestD = pearlShot.d; bestOnBody = pearlShot.onBody; }
   const crystalShot = paint || typeof fogCrystalShotTarget !== 'function' ? null : fogCrystalShotTarget(p, aim, angDiff, playerGun().range * CELL);   // 霧樹上的紫水晶（js/fog.js）
   if (crystalShot && ((crystalShot.onBody && !bestOnBody) || (crystalShot.onBody === bestOnBody && crystalShot.d < bestD))) { best = crystalShot.proxy; bestD = crystalShot.d; bestOnBody = crystalShot.onBody; }
-  const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef && !best.fogTreeRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
+  const rockShot = paint || typeof rockShotTarget !== 'function' ? null : rockShotTarget(p, aim, playerGun().range * CELL);   // 地圖上的石頭：游標點在石頭圖上才打（點在怪物身上還是打怪物；js/rocks.js）
+  if (rockShot && !bestOnBody) { best = rockShot.proxy; bestD = rockShot.d; bestOnBody = true; }
+  const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef && !best.fogTreeRef && !best.rockRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
   let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * playerGun().range * CELL;
   let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * playerGun().range * CELL;
   if (paint) {   // 漆彈：螢光綠的彈道（BULLETS.paint.color），打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
@@ -2122,6 +2124,7 @@ function updatePlayerAttack(dt) {
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
   if (best && best.oilRef) { damageOil(best.oilRef, Math.round(playerGun().dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
   if (best && best.oreRef) { pistolHitOre(best.oreRef, playerGun().dmg); best = null; }   // 打到異質礦：累積傷害，打夠了才碎（js/ore.js）
+  if (best && best.rockRef) { const cm = rollCrit('player'); damageRock(best.rockRef, Math.round(playerGun().dmg * (cm || 1)), 'player'); markHit(cm); best = null; }   // 打到石頭：扣血，打完就碎（js/rocks.js）
   if (best && best.fogTreeRef) { const cm = rollCrit('player'); damageFogCrystal(best.fogTreeRef, Math.round(playerGun().dmg * (cm || 1))); markHit(cm); best = null; }   // 打到霧樹的水晶：打破就散霧（js/fog.js）
   if (best && best.bigPearlRef) { shootBigPearl(best.bigPearlRef, p.x, p.y); best = null; }   // 打到大珍珠：往子彈的方向推（js/pearl-elder.js）
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
@@ -2754,6 +2757,7 @@ function update(dt) {
   if (typeof updateStreetVehicles === 'function') updateStreetVehicles(dt);   // K56 路邊會暴衝的機車、腳踏車（js/street-vehicles.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
+  if (typeof updateRocks === 'function') updateRocks(dt);   // 石頭被打中的閃白倒數（js/rocks.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateLoofahQueen === 'function') updateLoofahQueen(dt);
   if (typeof updateBananaEmperor === 'function') updateBananaEmperor(dt);   // 金蕉大王的 BUFF：計時、防禦減傷（js/banana-emperor.js）   // 絲瓜女王：垂下來的藤蔓收回、吊著的核心、農田藤蔓怕火（js/loofah-queen.js）
