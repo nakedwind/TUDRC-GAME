@@ -1353,7 +1353,8 @@ const BOSS_SETTINGS_DEFAULT = {
       "away": 1.6,
       "down": 1.5,
       "rise": 700,
-      "grow": 1.2
+      "grow": 1.2,
+      "fadeFrom": 0.2
     },
     "leash": 8,
     "orbit": {
@@ -1421,6 +1422,7 @@ const BOSS_SETTINGS_DEFAULT = {
         3
       ],
       "frenzyTargets": 2,
+      "frenzyGrabs": 2,
       "frenzySpeed": 0.75,
       "grabChance": 0.6,
       "scale": 2.5,

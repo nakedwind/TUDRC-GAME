@@ -13,7 +13,7 @@
           被揍飛、丟出去、躺在地上暈的時候不會受擊閃紅、發抖。
           在這之前把那隻手打掉（手有血量），人就救出來了。
    - 最後一顆核心破掉：老鼠王暈倒 stun.time 秒（頭上轉星星），這段時間受到的傷害 ×stun.dmgMul，是爆發輸出的好時機。
-   - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻，而且同時打兩個不同的人（hands.frenzyTargets）；還會從洞裡叫出小的花蓮版權老鼠。
+   - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻，而且同時打兩個不同的人（hands.frenzyTargets）、抓人時一次抓兩個（hands.frenzyGrabs）；還會從洞裡叫出小的花蓮版權老鼠。
    - 血量歸零（死亡表演，節奏慢）：老鼠王卡在鐵軌上暈頭轉向 → 響起這個車站的到站音樂、隧道裡的車燈越來越亮、地面越震越大
      → 捷運煞車聲（煞車來不及）→ 紅色列車撞上去（白光、畫面頓住、慢動作、大震動、火花）→ 老鼠王邊轉邊往右飛出去 → 「討伐成功」。
      之後列車照常停靠，可以搭車（開往哪裡寫在 data/mrt-train.js 的 variants）。核心全破的結算畫面會等老鼠王被撞飛之後才跳。
@@ -40,9 +40,9 @@ const RAT_KING = applyBossSettings('RAT_KING', {
   // 手：every＝隔幾秒冒一波（最短～最長），count＝一波幾隻；frenzy＝暴怒時的版本
   //   scale＝手的大小（原圖 110×90 的幾倍）；riseSpeed＝往上舉、縮回去的速度（1＝原本的速度，.5＝一半的速度）
   //   coreHoleGap＝一般的手離核心洞至少幾格（核心洞只給搬核心的手用）
-  //   frenzyTargets＝暴怒時一波同時打幾個不同的人（場上人不夠就打全部）
+  //   frenzyTargets＝暴怒時一波同時打幾個不同的人（場上人不夠就打全部）；frenzyGrabs＝暴怒時這一波決定抓人的話，一次抓幾個人
   //   grabChance＝一波裡第一隻手用「抓」的機會（其他是拳頭）；holdSway＝抓住人時手左右搖晃：幅度（弧度，.1 約 6 度）、速度
-  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [2.8, 4.2], frenzyCount: [2, 3], frenzyTargets: 2, frenzySpeed: .75, grabChance: .6, scale: 2.5, riseSpeed: .5, coreHoleGap: 2.5, holdSway: { angle: .1, speed: 2.4 } },
+  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [2.8, 4.2], frenzyCount: [2, 3], frenzyTargets: 2, frenzyGrabs: 2, frenzySpeed: .75, grabChance: .6, scale: 2.5, riseSpeed: .5, coreHoleGap: 2.5, holdSway: { angle: .1, speed: 2.4 } },
   // 核心洞：地圖上鋪的這種洞素材就是核心會出現的地方（在地圖編輯器加減、搬動，核心出現的位置就跟著變）
   holeTile: 'tile_mvmo77lx',     // 地圖素材「hole02」
   // 一般的手冒出來時地上裂開的洞（用同一張 hole02 圖）：size＝大小倍率、linger＝手縮回去後洞還留幾秒才淡掉
@@ -417,11 +417,14 @@ function rkHandWave(K, e, n) {
   // 暴怒：一波同時打 frenzyTargets 個不同的人（前幾隻手各對準一個人的腳下），剩下的手落在這幾個人附近封走位
   const want = e.rkEnraged ? Math.min(RAT_KING.hands.frenzyTargets || 1, pool.length) : 1;
   const picks = e.rkEnraged ? [...pool].sort(() => Math.random() - .5).slice(0, want) : pool;
+  const maxGrabs = e.rkEnraged ? Math.max(1, RAT_KING.hands.frenzyGrabs || 1) : 1;
+  const grabWave = K.grabCd <= 0 && Math.random() < RAT_KING.hands.grabChance && K.hands.filter(h => h.kind === 'grab').length < maxGrabs;
   for (let i = 0; i < n; i++) {
     const direct = e.rkEnraged ? i < picks.length : i === 0;   // 這隻手直接打在某個人腳下
     const a = e.rkEnraged && direct ? picks[i] : picks[Math.floor(Math.random() * picks.length)];
     const s = rkHandSpotNear(K, a, direct ? 0 : rkRand(.6, 1.6) * CELL); if (!s) continue;
-    const grab = i === 0 && K.grabCd <= 0 && Math.random() < RAT_KING.hands.grabChance && !K.hands.some(h => h.kind === 'grab');
+    // 抓人：平常只有第一隻手有機會；暴怒時這一波擲中的話，直接對準人的前 frenzyGrabs 隻手都改成抓（同時最多抓這麼多個）
+    const grab = grabWave && direct && i < maxGrabs && K.hands.filter(h => h.kind === 'grab').length < maxGrabs;
     if (grab) { rkDigHand(K, 'grab', s.x, s.y, { target: a }); K.grabCd = RAT_KING.grab.cooldown; }
     else rkDigHand(K, 'punch', s.x, s.y);
     rkSound('mouseDig', s.x, s.y, .5);
