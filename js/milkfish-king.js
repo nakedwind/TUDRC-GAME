@@ -162,6 +162,7 @@ function stepMilkfishKing(e, dt) {
   const x0 = e.x, y0 = e.y;
   mk.t -= dt; mk.spitCd -= dt; mk.biteCd -= dt;
   for (const pr of mk.prey) pr.left -= dt;
+  if (!mk.enraged && e.eliteAwake && e.hp > 0 && e.hp / e.maxhp <= C.enrageHp) mkEnrage(e);   // 血量掉到一半（enrageHp）：暴怒
   // 吼叫、吐東西、吞核心中：打不斷（霸體）；其他時候暈眩只算一半時間
   const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp'].includes(mk.state);
   e.superArmor = armored;
@@ -441,6 +442,31 @@ function mkRoar(e) {
   if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-roar');
 }
 
+// ---- 暴怒：血量掉到 enrageHp 以下，吼一聲、全身泛紅，吐東西的間隔變短（enrageSpitCooldown）----
+function mkEnrage(e) {
+  const mk = e.mk;
+  mk.enraged = true;
+  mk.spitCd = Math.min(mk.spitCd, mkCfg(e).enrageSpitCooldown);
+  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '暴怒了', '', '#ff6b5b');
+  flash('咕嚕嚕嚕——！！', e.x, e.y - e.drawHeight - 10, '#ff6b5b');
+  for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 120 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ff6b5b' : '#ffffff' });
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 9, .06); else addShake(6);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-enrage');
+}
+// ---- 核心護盾：牠活著時，核心（吐在地上那段時間）少受 coreShield 的傷害；在肚子裡一滴都不扣 ----
+// （js/game.js 判定核心破掉前、js/anomalous-core.js 的核心更新前都會呼叫，跟其他 BOSS 的核心護盾一樣）
+function mkShieldCore() {
+  for (const e of mkKings()) {
+    const core = e.mk && e.mk.core;
+    if (!core || core.dead || !core.awake || !(core.hp < core.lastHp) || !mkAlive(e)) continue;
+    if (core.carried) { core.hp = core.lastHp; continue; }
+    core.hp = core.lastHp - (core.lastHp - core.hp) * (1 - mkCfg(e).coreShield);
+    core.lastHp = core.hp; core.hitT = .16;
+    const now = performance.now();
+    if (now > (G.mkShieldNoteAt || 0)) { G.mkShieldNoteAt = now + 2500; flash('核心護盾', core.x, core.y - CORE.h - 14, '#8fd3ff'); }   // 偶爾提示一下
+  }
+}
+
 // ---- 核心：吞進肚子、吐出來 ----
 function mkSwallowCore(e) {
   const mk = e.mk, core = mk.core;
@@ -536,7 +562,7 @@ function mkStartSpit(e, what, target) {
 function mkLaunch(e) {
   const mk = e.mk, C = mkCfg(e), s = mk.spit; mk.spit = null;
   if (!s) return;
-  mk.spitCd = C.spitCooldown;
+  mk.spitCd = mk.enraged ? C.enrageSpitCooldown : C.spitCooldown;   // 暴怒：吐得更快
   // 落點：鎖定的位置附近，要是落在牆裡就往牠這邊拉回來
   let x1 = s.x + (Math.random() - .5) * CELL * .6, y1 = s.y + (Math.random() - .5) * CELL * .6;
   const ok = (x, y) => { const [c, r] = cellAt(x, y); return inGrid(c, r) && !isWall(c, r) && !(s.mate && typeof sentryBlocked === 'function' && sentryBlocked(x, y)); };
@@ -771,6 +797,10 @@ function mkFootsteps(e, moved) {
 function drawMilkfishKingBody(ctx, e, dx, dy, dw, dh, frameImg) {
   const mk = e.mk; if (!mk) return;
   const now = performance.now() / 1000;
+  if (mk.enraged && frameImg && frameImg.naturalWidth && typeof flashSprite === 'function') {   // 暴怒：全身一明一暗泛紅光
+    const red = flashSprite(frameImg, '#ff3b2a');
+    if (red) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .18 + .14 * Math.sin(now * 7); ctx.drawImage(red, dx, dy, dw, dh); ctx.restore(); }
+  }
   if (mk.coreIn) {   // 肚子透出紫光（跟著心跳一樣慢慢脈動）
     const cx = dx + dw / 2, cy = dy + dh * .62, k = .55 + .45 * Math.sin(now * 3.2), R = dw * .3;
     ctx.save(); ctx.globalCompositeOperation = 'lighter';

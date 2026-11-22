@@ -1,6 +1,8 @@
 # 產生落石的點陣圖（參考 images/破損建築/rubble-rocks.png 的畫風：黑色外框、亮的頂面、暗的側面、一點雜點）
 #   小顆（絲瓜女王重踏震下來的碎石，不擋路）：images/破損建築/falling-rock-small-01～03.png（每張 1～2 塊）
 #   大顆（葫蘆猴王壓頂震下來的落石，落地擋路）：images/破損建築/falling-rock-big-01～02.png（直接畫大，不是放大）
+#   地圖編輯器擺的石頭（擋路、虱目魚王會吞來吐人）：images/item-obstacle/rock-small-01～03.png（40×40，1 格）、rock-big-01～02.png（80×80，2×2 格）
+#     ＝上面同一批圖放在剛好一格（兩格）大的畫布上、底部置中（素材在 data/tiles.js 的 tile_obstacle_rock_*）
 # 用法：python tools/draw-falling-rocks.py（固定亂數種子，每次產生一樣的圖）
 import math, random
 from PIL import Image, ImageDraw
@@ -108,6 +110,14 @@ imgs = [
     make('falling-rock-big-01.png', (80, 80), [(40, 34, 27, 15, 24, 7)], 21),
     make('falling-rock-big-02.png', (80, 80), [(34, 36, 24, 14, 22, 7), (62, 60, 9, 5, 7, 6)], 22),
 ]
+
+# 地圖物件版：放在格子大小的畫布上，底部置中（貼齊格子底線，跟其他擋路物件一樣）
+for i, im in enumerate(imgs):
+    small = i < 3
+    W = 40 if small else 80
+    pad = Image.new('RGBA', (W, W), (0, 0, 0, 0))
+    pad.paste(im, ((W - im.width) // 2, W - im.height - (2 if small else 0)), im)
+    pad.save('images/item-obstacle/' + ('rock-small-0%d.png' % (i + 1) if small else 'rock-big-0%d.png' % (i - 2)))
 
 # 給人看的預覽：放大 6 倍排在一起（不放進遊戲）
 import sys

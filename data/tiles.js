@@ -3835,6 +3835,46 @@ const SHARED_TILES = [
     "h": 4
   },
   {
+    "id": "tile_obstacle_rock_small_01",
+    "name": "小石頭 1",
+    "role": "floor",
+    "file": "images/item-obstacle/rock-small-01.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_obstacle_rock_small_02",
+    "name": "小石頭 2（兩塊）",
+    "role": "floor",
+    "file": "images/item-obstacle/rock-small-02.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_obstacle_rock_small_03",
+    "name": "小石頭 3（兩塊）",
+    "role": "floor",
+    "file": "images/item-obstacle/rock-small-03.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_obstacle_rock_big_01",
+    "name": "大石頭 1",
+    "role": "floor",
+    "file": "images/item-obstacle/rock-big-01.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_obstacle_rock_big_02",
+    "name": "大石頭 2（帶小塊）",
+    "role": "floor",
+    "file": "images/item-obstacle/rock-big-02.png",
+    "w": 2,
+    "h": 2
+  },
+  {
     "id": "tile_interactive_storage_locker",
     "name": "置物箱（鎖住）",
     "role": "floor",

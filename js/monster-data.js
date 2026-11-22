@@ -134,6 +134,9 @@ const MILKFISH_KING_FIELDS = [
   { key: 'acidPoolLife',   label: '腐蝕池留在地上幾秒',           min: .5,  max: 30,  step: .5,  def: 5 },
   { key: 'acidPoolDps',    label: '腐蝕池每秒傷害（溫特、隊友）', min: 0,   max: 100, step: 1,   def: 8 },
   // 從水池登場（地圖有開才會用到，見 js/milkfish-king.js 的 MILKFISH_KING_MAPS）：溫特開槍打核心 → 震動 → 從水池竄出 → 落地
+  { key: 'enrageHp',       label: '血量剩幾 % 以下暴怒',          min: 0,   max: 1,   step: .05, def: .5, pct: true },
+  { key: 'enrageSpitCooldown', label: '暴怒時吐東西的間隔（秒）', min: .2,  max: 20,  step: .1,  def: 1 },
+  { key: 'coreShield',     label: '核心護盾：牠活著時核心少受幾 % 傷害', min: 0, max: 1, step: .05, def: .85, pct: true },
   { key: 'introRumble',    label: '登場：竄出前震動幾秒',         min: 0,   max: 8,   step: .1,  def: 2.2 },
   { key: 'introShake',     label: '登場：竄出前震動大小',         min: 0,   max: 16,  step: .5,  def: 7 },
   { key: 'introLeapTime',  label: '登場：竄出後在空中幾秒',       min: .3,  max: 4,   step: .05, def: 1.2 },

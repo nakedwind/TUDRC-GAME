@@ -290,5 +290,161 @@ const OBSTACLES = [
         ]
       ]
     }
+  },
+  {
+    "id": "rock_small_01",
+    "name": "小石頭 1",
+    "cost": 0,
+    "hp": 150,
+    "h": {
+      "file": "images/item-obstacle/rock-small-01.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/rock-small-01.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "id": "rock_small_02",
+    "name": "小石頭 2（兩塊）",
+    "cost": 0,
+    "hp": 150,
+    "h": {
+      "file": "images/item-obstacle/rock-small-02.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/rock-small-02.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "id": "rock_small_03",
+    "name": "小石頭 3（兩塊）",
+    "cost": 0,
+    "hp": 150,
+    "h": {
+      "file": "images/item-obstacle/rock-small-03.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/rock-small-03.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "id": "rock_big_01",
+    "name": "大石頭 1",
+    "cost": 0,
+    "hp": 400,
+    "h": {
+      "file": "images/item-obstacle/rock-big-01.png",
+      "w": 2,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/rock-big-01.png",
+      "w": 2,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "rock_big_02",
+    "name": "大石頭 2（帶小塊）",
+    "cost": 0,
+    "hp": 400,
+    "h": {
+      "file": "images/item-obstacle/rock-big-02.png",
+      "w": 2,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/rock-big-02.png",
+      "w": 2,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    }
   }
 ];

@@ -2704,6 +2704,7 @@ function update(dt) {
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
   if (typeof lqShieldCore === 'function') lqShieldCore();   // 絲瓜女王活著：掉在地上的核心少受傷（js/loofah-queen.js）
+  if (typeof mkShieldCore === 'function') mkShieldCore();   // 虱目魚王活著：吐出來的核心少受傷（js/milkfish-king.js）
   if (typeof ratKingShieldCore === 'function') ratKingShieldCore();   // 花蓮老鼠王：核心每露出來一次最多被打掉幾成、被打到就震動叫手來搬（js/rat-king.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
