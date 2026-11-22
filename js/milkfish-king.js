@@ -20,7 +20,7 @@
    ・倒下：核心掉在原地，嘴裡的隊友獲救（直接放出來）。
    ・追人（地圖設定 chase: true，G11 有開）：以水池為中心 chaseRadius 格內的溫特、隊友都追（挑最近的，追著同一個人時不會一直換）。
        走得到就走過去；走不到（例如人穿過列車躲到軌道另一邊的月台、列車開走了）→ 走到月台邊緣的起跳點，
-       蓄力後跳過去落在目標旁邊（落地砸到的人受傷、被撞開，地上不畫提示）。範圍內都沒人 → 走回水池旁（走不回去也用跳的），
+       蓄力後跳過去落在目標旁邊（落地砸到的人受傷、被撞開，地上不畫提示）。列車停在中間時，牠太大隻穿不過車廂，會站在月台邊等車開走才跳。範圍內都沒人 → 走回水池旁（走不回去也用跳的），
        途中有人走進範圍就再追。追人時，建築要比目標近、而且在 2.5 格內才會先停下來吃。
    ・從水池登場（地圖設定 intro: 'pool'，G11 有開）：一開始不在場上，躲在旁邊的深水區裡。溫特開槍打到核心 →
        畫面越震越大、水池冒泡（introRumble 秒）→ 從水池最靠近原位的那格竄出來，水花炸開、一道水浪跟著牠衝上來，
@@ -554,7 +554,7 @@ function mkChargeStep(e, dt) {
   while (move > 0 && !stop) {
     const s = Math.min(4, move); move -= s;
     const nx = e.x + ch.dir.x * s, ny = e.y + ch.dir.y * s;
-    if (enemyBlocked(nx, ny, e) || !mkInRange(e, { x: nx, y: ny })) { stop = true; break; }   // 碰到牆、建築，或要衝出活動區：停下來（不暈）
+    if (enemyBlocked(nx, ny, e) || !mkInRange(e, { x: nx, y: ny }) || (typeof mrtTrackCell === 'function' && mrtTrackCell(...cellAt(nx, ny)))) { stop = true; break; }   // 軌道上（含停著的列車車廂）：停下來，牠太大隻進不去   // 碰到牆、建築，或要衝出活動區：停下來（不暈）
     e.x = nx; e.y = ny;
     mkChargeHits(e, ch);
   }
@@ -1297,7 +1297,8 @@ function mkChaseTarget(e) {
 // 從某一格出發、牠（大體型）走得到的那一整區：身體夠寬、不是牆、不是深水；建築可以吃掉／打掉，算走得過
 // 回傳 { set: 格子集合, edge: 邊緣的格子（旁邊有走不到的格子＝月台邊、牆邊）}
 function mkFlood(c0, r0) {
-  const open = (c, r) => inGrid(c, r) && !enemyWallCell(c, r) && enemyWideAt(c, r) && !(typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r)) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r));
+  const open = (c, r) => inGrid(c, r) && !enemyWallCell(c, r) && enemyWideAt(c, r) && !(typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r)) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r))
+    && !(typeof mrtTrackCell === 'function' && mrtTrackCell(c, r));   // 軌道（含停著的列車車廂）：牠太大隻，不能把列車當路走，要等車開走再跳過去
   const k0 = c0 + ',' + r0, set = new Set([k0]), q = [[c0, r0]], edge = [];
   for (let i = 0; i < q.length && set.size < 8000; i++) {
     const [c, r] = q[i];
@@ -1365,7 +1366,10 @@ function mkChaseStep(e, dt) {
     return true;
   }
   const f = plan.from;   // 要跳：先走到起跳點（月台邊緣）
-  if (Math.hypot(f.x - e.x, f.y - e.y) <= CELL * .6) { mkStartJump(e, tg, plan); return true; }
+  if (Math.hypot(f.x - e.x, f.y - e.y) <= CELL * .6) {
+    if (mkTrainBlocksJump(e, plan.land)) { mfPose(e, null); if (tg) e.faceRight = tg.x > e.x; return true; }   // 列車停在中間：牠太大隻穿不過車廂，站在月台邊等車開走
+    mkStartJump(e, tg, plan); return true;
+  }
   const nav = enemyNavigate(e, f.c, f.r, dt, 'mk-jumpfrom:' + f.c + ',' + f.r, true);
   if (nav.blocker) mkBlocked(e, nav.blocker, dt);
   else if (nav.reached) moveEnemyToward(e, f, dt);
@@ -1388,6 +1392,7 @@ function mkJumpWindStep(e) {
     e.faceRight = J.to.x > e.x;
   }
   if (mk.t > 0) return;
+  if (mkTrainBlocksJump(e, J.to)) { mk.jump = null; e.slimeLift = 0; mkSet(e, 'hunt'); return; }   // 蓄力時列車進站擋住了：先不跳，回去等
   J.from = { x: e.x, y: e.y }; J.t = 0;
   e.airborne = true;
   mkSet(e, 'jump');
@@ -1448,4 +1453,28 @@ function mkJumpLand(e) {
   if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
   if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 2, 'milkfish-king-jump-land');
   mkSet(e, 'recover', .45);
+}
+
+// 列車現在佔的範圍（每節車廂一個方框；開進隧道、還沒進站的不算）
+function mkTrainRects() {
+  const out = [];
+  for (const tr of (G && G.mrtTrains) || []) {
+    if (tr.state === 'away' || tr.state === 'tunnel') continue;
+    const shift = (tr.off || 0) * (tr.dir || 1);
+    for (const car of tr.cars || []) {
+      const x0 = Math.max(tr.clipL, car.x + shift), x1 = Math.min(tr.clipR, car.x + car.w + shift);
+      if (x1 > x0) out.push({ x0, x1, y0: tr.top, y1: tr.bottom });
+    }
+  }
+  return out;
+}
+// 從牠現在的位置跳到 to，中間有沒有列車擋著（牠身體寬，左右多算一點）
+function mkTrainBlocksJump(e, to) {
+  const rects = mkTrainRects(); if (!rects.length) return false;
+  const pad = (e.drawWidth || 220) * .18, n = Math.max(2, Math.ceil(Math.hypot(to.x - e.x, to.y - e.y) / 8));
+  for (let i = 0; i <= n; i++) {
+    const x = e.x + (to.x - e.x) * i / n, y = e.y + (to.y - e.y) * i / n;
+    if (rects.some(R => x >= R.x0 - pad && x <= R.x1 + pad && y >= R.y0 && y <= R.y1)) return true;
+  }
+  return false;
 }
