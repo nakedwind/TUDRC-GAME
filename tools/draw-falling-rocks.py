@@ -3,6 +3,7 @@
 #   大顆（葫蘆猴王壓頂震下來的落石，落地擋路）：images/破損建築/falling-rock-big-01～02.png（直接畫大，不是放大）
 #   地圖編輯器擺的石頭（擋路、虱目魚王會吞來吐人）：images/item-obstacle/rock-small-01～03.png（40×40，1 格）、rock-big-01～02.png（80×80，2×2 格）
 #     ＝上面同一批圖放在剛好一格（兩格）大的畫布上、底部置中（素材在 data/tiles.js 的 tile_obstacle_rock_*）
+#   中石頭（只有地圖物件版）：images/item-obstacle/rock-medium-01～02.png（40×40，1 格，石頭幾乎佔滿一格）
 # 用法：python tools/draw-falling-rocks.py（固定亂數種子，每次產生一樣的圖）
 import math, random
 from PIL import Image, ImageDraw
@@ -118,6 +119,16 @@ for i, im in enumerate(imgs):
     pad = Image.new('RGBA', (W, W), (0, 0, 0, 0))
     pad.paste(im, ((W - im.width) // 2, W - im.height - (2 if small else 0)), im)
     pad.save('images/item-obstacle/' + ('rock-small-0%d.png' % (i + 1) if small else 'rock-big-0%d.png' % (i - 2)))
+
+# 中石頭：直接畫在 40×40 的畫布上（比小石頭大、比大石頭小，佔滿一格）
+OUT_SAVE = OUT
+OUT = 'images/item-obstacle/'
+imgs_medium = [
+    make('rock-medium-01.png', (40, 40), [(20, 17, 15, 8.5, 12, 7)], 31),
+    make('rock-medium-02.png', (40, 40), [(17, 18, 13, 7.5, 11, 7), (32, 31, 5, 3, 4, 5)], 32),
+]
+OUT = OUT_SAVE
+imgs += imgs_medium
 
 # 給人看的預覽：放大 6 倍排在一起（不放進遊戲）
 import sys

@@ -62,7 +62,7 @@ const NEWBIE_START = {
 const isNewbieMap = () => typeof MAP !== 'undefined' && MAP?.id === NEWBIE_START.mapId;
 // ---- 建築的開發：一開始只能蓋 NEWBIE_START.builds 那幾種；其他的要到諾亞的開發工坊開發（js/build.js 的 buildWorkshopEntries）----
 // shards＝要花幾個異質碎片；money＝經費（不寫＝照碎片自動算，跟裝備一樣）；沒列到的建築（物件編輯器新增的）用 default
-const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence','rock_small_01','rock_small_02','rock_small_03','rock_big_01','rock_big_02']);   // rock_*：地圖上擺的石頭（地圖編輯器的「小石頭／大石頭」，物件編輯器調碰撞、血量），只能擺、不能蓋   // 暫時不能蓋的建築（鐵圍籬先停用）；遊戲和開發工坊編輯器都讀這裡
+const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence','rock_small_01','rock_small_02','rock_small_03','rock_medium_01','rock_medium_02','rock_big_01','rock_big_02']);   // rock_*：地圖上擺的石頭（地圖編輯器的「小石頭／大石頭」，物件編輯器調碰撞、血量），只能擺、不能蓋   // 暫時不能蓋的建築（鐵圍籬先停用）；遊戲和開發工坊編輯器都讀這裡
 const BUILD_DEV = {
   default: { shards: 50 },
   camping_lights: { shards: 30 },   // 露營燈

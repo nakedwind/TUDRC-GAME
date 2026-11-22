@@ -376,6 +376,62 @@ const OBSTACLES = [
     }
   },
   {
+    "id": "rock_medium_01",
+    "name": "中石頭 1",
+    "cost": 0,
+    "hp": 250,
+    "h": {
+      "file": "images/item-obstacle/rock-medium-01.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/rock-medium-01.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
+    "id": "rock_medium_02",
+    "name": "中石頭 2（帶小塊）",
+    "cost": 0,
+    "hp": 250,
+    "h": {
+      "file": "images/item-obstacle/rock-medium-02.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/rock-medium-02.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  {
     "id": "rock_big_01",
     "name": "大石頭 1",
     "cost": 0,

@@ -3859,6 +3859,22 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_obstacle_rock_medium_01",
+    "name": "中石頭 1",
+    "role": "floor",
+    "file": "images/item-obstacle/rock-medium-01.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_obstacle_rock_medium_02",
+    "name": "中石頭 2（帶小塊）",
+    "role": "floor",
+    "file": "images/item-obstacle/rock-medium-02.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_obstacle_rock_big_01",
     "name": "大石頭 1",
     "role": "floor",
