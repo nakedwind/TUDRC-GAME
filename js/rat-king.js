@@ -10,7 +10,7 @@
        3. 搬核心（打地鼠）：手會抓住異質核心拖進地洞，過幾秒再從月台別的地方冒出來把核心放下。
           核心在地底的時候打不到（但還是算護甲）。
    - 最後一顆核心破掉：老鼠王暈倒 stun.time 秒（頭上轉星星），這段時間受到的傷害 ×stun.dmgMul，是爆發輸出的好時機。
-   - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻；還會從洞裡叫出小的花蓮版權老鼠。
+   - 暴怒（血量剩一半）：手變多、變快，一次冒 2～3 隻，而且同時打兩個不同的人（hands.frenzyTargets）；還會從洞裡叫出小的花蓮版權老鼠。
    - 血量歸零：老鼠王卡在鐵軌上動不了 → 紅色列車鳴笛衝進站把牠撞飛 → 列車照常停靠，之後可以搭車（開往哪裡寫在 data/mrt-train.js 的 variants）。
      核心全破的結算畫面會等老鼠王被撞飛之後才跳。
    素材：本體沿用花蓮版權老鼠的圖（放大 scale 倍）；拳頭是 images/monster/burrowing-mouse/left-fist.png，抓核心張開的手是 left-hand.png。
@@ -32,7 +32,8 @@ const RAT_KING = {
   enrageAt: .5,                  // 血量剩幾成暴怒
   emerge: { delay: 2.2, rumble: 2.4, rise: 2.4, hold: 1.2 },   // 核心醒了幾秒後開始震、震幾秒才冒出來、冒出來花幾秒、亮相多停幾秒
   // 手：every＝隔幾秒冒一波（最短～最長），count＝一波幾隻；frenzy＝暴怒時的版本
-  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [1.4, 2.4], frenzyCount: [2, 3], frenzySpeed: .75, grabChance: .3 },
+  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [1.4, 2.4], frenzyCount: [2, 3], frenzyTargets: 2, frenzySpeed: .75, grabChance: .3 },
+  //   frenzyTargets＝暴怒時一波同時打幾個不同的人（場上人不夠就打全部）
   punch: { windup: .95, rise: .18, hold: .35, sink: .3, radius: 1.3 },   // 拳頭砸地：預警幾秒、冒出、停住、縮回；打中範圍（格）
   grab: { windup: 1.15, rise: .22, radius: 1.1, hold: 2.6, handHp: 260, under: 2.2, spitDamageMul: 1.2, daze: 1.4, cooldown: 7 },
   //   抓人：預警幾秒、打中範圍（格）、握住幾秒才拖下去（這段時間打掉手就救出來）、手的血量、在地底幾秒、吐出來的傷害倍率、暈幾秒、兩次抓人至少隔幾秒
@@ -240,9 +241,13 @@ function rkNewHand(K, kind, x, y, extra = {}) {
 function rkHandWave(K, e, n) {
   const pool = [G.player, ...(G.towers || [])].filter(a => a && a.hp > 0 && !a.eatenBy && !a.rkHeld && !a.mrtRide && rkInArea(a.x, a.y) && sameFloor(e, a));
   if (!pool.length) return;
+  // 暴怒：一波同時打 frenzyTargets 個不同的人（前幾隻手各對準一個人的腳下），剩下的手落在這幾個人附近封走位
+  const want = e.rkEnraged ? Math.min(RAT_KING.hands.frenzyTargets || 1, pool.length) : 1;
+  const picks = [...pool].sort(() => Math.random() - .5).slice(0, want);
   for (let i = 0; i < n; i++) {
-    const a = pool[Math.floor(Math.random() * pool.length)];
-    const lead = i === 0 ? 0 : rkRand(.6, 1.6) * CELL, ang = Math.random() * Math.PI * 2;   // 第二隻以後：落在目標附近，封走位
+    const direct = i < picks.length;   // 這隻手直接打在某個人腳下
+    const a = direct ? picks[i] : picks[Math.floor(Math.random() * picks.length)];
+    const lead = direct ? 0 : rkRand(.6, 1.6) * CELL, ang = Math.random() * Math.PI * 2;   // 其他的手：落在目標附近，封走位
     const x = a.x + Math.cos(ang) * lead, y = a.y + Math.sin(ang) * lead * .7;
     const [c, r] = cellAt(x, y);
     if (!inGrid(c, r) || isWall(c, r)) continue;
