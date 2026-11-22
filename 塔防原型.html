@@ -299,7 +299,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=mothswoop-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=mothmate-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=bosscfg-20261122"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -371,7 +371,7 @@
   <script src="js/gourd-king.js?v=gourdfall-20261122"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
   <script src="js/rat-king.js?v=ratgrab2-20261122"></script> <!-- 9f9c. 菁英花蓮版權老鼠「花蓮老鼠王」：O666 上方月台的 BOSS，從鐵軌冒出、手抓人搬核心、核心是護甲、列車撞飛 -->
   <script src="js/human-face-butterfly.js?v=mothswoop-20261123"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
-  <script src="js/moth-boss.js?v=mothwake-20261123"></script> <!-- 9f10b. 菁英人面蝶「人面蝶后」：抱著核心在 B56 四個區域之間飛、築巢、大面積撒粉 -->
+  <script src="js/moth-boss.js?v=mothmate-20261123"></script> <!-- 9f10b. 菁英人面蝶「人面蝶后」：抱著核心在 B56 四個區域之間飛、築巢、大面積撒粉 -->
   <script src="js/milkfish-kid.js?v=offaudit2-20261122"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
   <script src="js/render.js?v=mothfade-20261122"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
@@ -391,7 +391,7 @@
   <script src="js/oil-barrels.js?v=grass-20261122"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=ledflicker-20261113"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/fog.js?v=sentryfloor-20261115"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
-  <script src="js/vines.js?v=mkcharge-20261122"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
+  <script src="js/vines.js?v=mothmate-20261123"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
   <script src="js/loofah-queen.js?v=bosscfg-20261122"></script> <!-- 9n4. 菁英絲瓜小姐「絲瓜女王」：踏地垂下藤蔓、核心吊在頭上、農田長藤蔓 -->
   <script src="js/milkfish-king.js?v=water2-20261122"></script> <!-- 9n5. 菁英 BOSS「虱目魚王」：吞核心保護、吃建築和隊友再吐出來砸人（G11區） -->
   <script src="js/banana-emperor.js?v=bosscfg-20261122"></script> <!-- 9n5. 菁英金蕉王「金蕉大王」：守核心、舉杖敲地施法（補血／加攻／加防／加速／香蕉皮雨）、大隻隊員 -->
