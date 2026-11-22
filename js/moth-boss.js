@@ -569,7 +569,7 @@ function mbGrabVictim(e, a) {
   if (typeof sfxAt === 'function') sfxAt('mothGrab', a.x, a.y, 1, 'moth-boss-grab');   // 人面蝶后抓人（音效編輯器可換檔）
 }
 // 抓人時人在蝶后圖上的位置：x、y＝兩隻手中間（圖寬、圖高的比例），feet＝人的腳底在這個點下面幾像素（讓身體夾在兩隻手中間）
-const MOTH_BOSS_HOLD_ART = { x: .17, y: .43, feet: 24 };
+const MOTH_BOSS_HOLD_ART = { x: .127, y: .43, feet: 14 };   // 2026-11-23 使用者微調：往手指那邊 15px（352 寬的圖 ≈ 0.043）、往上 10px
 // 蝶后兩隻手中間在畫面上的位置（圖朝右時左右翻過來）
 function mbHandPoint(e) {
   const A = MOTH_BOSS_HOLD_ART, dw = e.drawWidth, dh = e.drawHeight;
