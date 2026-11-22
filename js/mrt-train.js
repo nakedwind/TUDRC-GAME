@@ -741,8 +741,46 @@ function mrtArriveAtStation(mates) {
     t: Math.max(MRT_TRAIN.arriveSoundLead + 1, MRT_TRAIN.rideTime * .6) });
   mrtTrainSeatRiders(tr, crew);
   mrtTrainUpdateSolid(tr);
+  tr.stationBanner = true;   // 進站、畫面亮回來時，出現「這是哪一站」的橫幅（mrtShowStationBanner）
   mrtRideFade(true);
   if (typeof updateCamera === 'function') updateCamera();
+}
+// ---- 搭車到別站：畫面上方出現「這是哪一站」的橫幅 ----
+// 站名、線的顏色在物件編輯器「🚇 捷運列車」的互通車站設（data/mrt-train.js 的 stations：name、color）；
+// 不在車站名單裡的地方（例如紅色列車開去的台北車站大廳）用地圖名稱，去掉前面的編號
+const MRT_STATION_BANNER = { time: 3.6, fadeIn: .4, fadeOut: .7 };   // 顯示幾秒、淡入、淡出秒數
+let mrtStationBannerNow = null;
+function mrtShowStationBanner() {
+  if (!MAP) return;
+  const st = mrtStationOf(MAP.id);
+  const name = (st && st.name) || String(MAP.name || '').replace(/^\s*\d+\s*[.、．]\s*/, '');
+  if (!name) return;
+  // 「R89區-紅線捷運站」拆成上下兩行：小字「R89區」、大字「紅線捷運站」
+  const cut = name.split(/\s*[-－–]\s*/);
+  mrtStationBannerNow = { area: cut.length > 1 ? cut[0] : '', title: cut.length > 1 ? cut.slice(1).join(' ') : name,
+    color: (st && st.color) || '#9aa4ad', start: performance.now() };
+}
+function drawMrtStationBanner(ctx, cv) {
+  const b = mrtStationBannerNow; if (!b) return;
+  const B = MRT_STATION_BANNER, t = (performance.now() - b.start) / 1000;
+  if (t > B.time) { mrtStationBannerNow = null; return; }
+  const k = t < B.fadeIn ? t / B.fadeIn : t > B.time - B.fadeOut ? (B.time - t) / B.fadeOut : 1;
+  const ease = 1 - (1 - k) * (1 - k), slide = (1 - ease) * 40;
+  const font = (s) => 'bold ' + s + 'px "Microsoft JhengHei", sans-serif';
+  ctx.save();
+  ctx.font = font(34);
+  const w = Math.max(320, ctx.measureText(b.title).width + 150), h = 92;
+  const x = (cv.width - w) / 2 + slide, y = cv.height * .16 - h / 2;
+  ctx.globalAlpha = ease;
+  ctx.fillStyle = 'rgba(14,18,22,.86)'; ctx.fillRect(x, y, w, h);   // 底板（像捷運站的站名牌）
+  ctx.fillStyle = b.color; ctx.fillRect(x, y, 12, h); ctx.fillRect(x, y + h - 5, w, 5);   // 左邊、下面的線色條
+  ctx.beginPath(); ctx.arc(x + 52, y + h / 2, 18, 0, Math.PI * 2); ctx.fill();   // 線色圓點
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x + 52, y + h / 2, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  const tx = x + 88;
+  ctx.font = font(15); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillText(b.area ? '抵達　' + b.area : '抵達', tx, y + 26);
+  ctx.font = font(34); ctx.fillStyle = '#fff'; ctx.fillText(b.title, tx, y + 58);
+  ctx.restore();
 }
 // 花蓮老鼠王血量歸零（js/rat-king.js）：這班車鳴笛、馬上從隧道衝進站（減速度 ×decelMul，所以進站比較快），撞飛老鼠王後照常停靠
 function mrtRamArrive(tr, decelMul = 3) {
@@ -910,6 +948,7 @@ function updateMrtTrains(dt) {
       tr.off = Math.min(0, tr.off + tr.v * dt);
       mrtTrainMoveRiders(tr);
       if (mrtPlayerAboard(tr) && mrtRiding && mrtPlayerInTunnel(tr, 'in')) mrtRideFade(false);   // 載著溫特進站：進到軌道範圍才亮回來
+      if (tr.stationBanner && !mrtRiding) { tr.stationBanner = false; mrtShowStationBanner(); }   // 搭車到別站：畫面亮回來就出現站名橫幅
       if (tr.off >= -.5 || tr.v <= 0) { tr.off = 0; tr.decelMul = 0; mrtTrainMoveRiders(tr); mrtTrainGetOff(tr); mrtTrainUnloadCargo(tr); tr.state = 'opening'; tr.t = T.doorTime; mrtTrainSound(tr, 'open'); }
     } else if (tr.state === 'opening') {
       tr.door = 1 - Math.max(0, tr.t) / T.doorTime;

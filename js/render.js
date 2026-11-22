@@ -1421,6 +1421,7 @@ function draw() {
   drawBaseHpTopBar(ctx, cv);   // 戰鬥區域：畫面最上方的基地血條
   if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
   if (typeof drawPoolTideNotice === 'function') drawPoolTideNotice(ctx, cv);   // 池核：「水位即將上升／下降……」（js/pool-tide.js）
+  if (typeof drawMrtStationBanner === 'function') drawMrtStationBanner(ctx, cv);   // 搭捷運到別站：「這是哪一站」的橫幅（js/mrt-train.js）
   drawFieldMemberLocator();
 }
 // 戰鬥區域：畫面最上方（離上緣 2px）的基地血條。規則跟基地身上的血條一樣（目前血量 / 總血量，依剩餘 HP 變色）
