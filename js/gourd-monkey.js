@@ -676,7 +676,7 @@ function gourdHopOffset(o) {
   return { z: 0, sx: 1 + q, sy: 1 - q };
 }
 
-// ---- 死掉：不倒下，原地閉上眼睛、變黑，再從頭頂碎成灰燼往上飄散（沿用珍珠小童的 drop 屍體，js/pearl-kid.js）----
+// ---- （舊的死法，目前沒用到：死掉改成變黑倒下，見 js/combat-feel.js）不倒下，原地閉上眼睛、變黑，再從頭頂碎成灰燼往上飄散（沿用珍珠小童的 drop 屍體，js/pearl-kid.js）----
 // 在空中被打死會先掉回地上再消散；站在地上死掉就不壓扁、直接開始變黑
 function gourdDeathCorpse(e) {
   const f = e.frames || {}, file = (f.blink && f.blink[f.blink.length - 1]) || f.front || e.sprite;   // 眨眼最後一張＝閉眼
