@@ -4,7 +4,8 @@
      落點會慢慢跟著目標移動）→ 泰山壓頂砸下來：圈內的溫特、隊友都會受傷，圈內的建築也會被壓壞。
    ・砸完會陷在地上喘一下（GOURD.recover 秒），這是反擊的好時機。
    ・很重：不會硬直、打不退、推不動、不會被停住（怪物資料的 stagger 0、knockMul 0、noStun）。
-     麻醉彈、閃光彈沒效果，電擊彈不會麻痺、擊退彈推不動；混亂彈有效（js/special-guns.js 的 confuseImmune）。
+     電擊彈不會麻痺、擊退彈推不動；麻醉彈、閃光彈、混亂彈有效（js/special-guns.js 的 sleepFlashProof、confuseImmune）。
+     被麻醉、閃到（stunT）時原地不動；正在壓頂的那一下會先做完。
    ・身體很寬：只有一格寬的通道擠不過去（gourdWide：要有 2×2 的空地才走得過）。被建築擋路就直接壓上去。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值在下面的 GOURD。
 */
@@ -119,6 +120,7 @@ function stepGourdEnemy(e, dt) {
   const g = e.gm;
   g.cd -= dt; g.laughCd = (g.laughCd || 0) - dt;
   if (g.slam) { stepGourdSlam(e, dt); return; }
+  if (e.stunT > 0 && !e.gourdKing) { e.moving = false; e.forceFrame = null; return; }   // 被麻醉彈打睡、被閃光彈閃到：原地不動（js/special-guns.js）；葫蘆猴王照舊不會被定住
   if (g.recover > 0) {   // 砸完陷在地上：先扁著，後半段慢慢回正
     g.recover -= dt; e.forceFrame = g.recover > C.recover * .45 ? C.art.squash : null;
     if (g.laughAt > 0 && (g.laughAt -= dt) <= 0) gourdLaugh(e, true);

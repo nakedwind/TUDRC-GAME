@@ -136,7 +136,7 @@ function tranqHit(o, lv) {
     return true;
   }
   if (o.dead || o.hp <= 0) return false;
-  if (o.noStun) { flash('沒有效果', o.x, o.y - 40, '#9aa4b2'); return false; }   // 生命體
+  if (sleepFlashProof(o)) { flash('沒有效果', o.x, o.y - 40, '#9aa4b2'); return false; }   // 生命體（葫蘆猴例外，見 sleepFlashProof）
   const dur = foeMul(lv.sleep) * ((o.maxhp || 0) >= SPECIAL_GUN.tranq.bigHp ? .5 : 1);   // 隊員睡的秒數在上面，照原本
   o.stunT = Math.max(o.stunT || 0, dur); o.sleepT = Math.max(o.sleepT || 0, dur); o.shockT = 0;
   o.hitT = Math.max(o.hitT || 0, .12); o.hitColor = '#b9a7ff';
@@ -235,7 +235,7 @@ function flashBangLand(s) {
   const x = s.x1, y = s.y1, R = s.lv.r * CELL, stun = s.lv.stun;
   for (const e of liveEnemies()) {
     if (!onFloor(s.floor, e) || Math.hypot(e.x - x, (e.y - y) / .8) > R) continue;   // 不同樓層閃不到
-    if (e.noStun) { flash('沒有效果', e.x, e.y - 40, '#9aa4b2'); continue; }   // 生命體
+    if (sleepFlashProof(e)) { flash('沒有效果', e.x, e.y - 40, '#9aa4b2'); continue; }   // 生命體（葫蘆猴例外，見 sleepFlashProof）
     const dur = foeMul(stun) * ((e.maxhp || 0) >= SPECIAL_GUN.tranq.bigHp ? .5 : 1);   // 隊員被閃到的秒數在下面，照原本
     e.stunT = Math.max(e.stunT || 0, dur); e.dazeT = Math.max(e.dazeT || 0, dur);
     e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = '#ffffff';
@@ -483,10 +483,13 @@ function incShotPos(s) {
   return { x: s.x0 + (s.x1 - s.x0) * k, y: s.y0 + (s.y1 - s.y0) * k - Math.sin(k * Math.PI) * s.h, gx: s.x0 + (s.x1 - s.x0) * k, gy: s.y0 + (s.y1 - s.y0) * k };
 }
 
+// 麻醉彈、閃光彈沒效果的怪物：「不會被定住」（noStun）的，但一般葫蘆猴例外（2026-11-22 使用者要求；葫蘆猴王照樣沒效果）
+// 電擊麻痺、擊退撞牆暈眩還是照 noStun（葫蘆猴不會）
+const sleepFlashProof = e => !!e.noStun && !(e.behavior === 'gourd' && !e.gourdKing);
 // ---- 混亂彈：直線打出去，只打怪物（穿過隊員），打中的怪物陷入混亂 ----
 // 頭目（大隊長、宮主、珍珠大童、絲瓜女王、金蕉大王…）、生命體、鑽在地底的版權老鼠沒有效果
 // 虱目魚王、人面蝶后也不會混亂：以前漏掉，被阿瓦倫的腐蝕（每次攻擊混亂 3 秒）一直打，就會整場站在原地發呆、不攻擊
-// 葫蘆猴雖然「不會被定住」（noStun：麻醉、閃光、電擊麻痺都沒用），混亂彈照樣有效（2026-11-22 使用者要求）；葫蘆猴王還是免疫
+// 葫蘆猴雖然「不會被定住」（noStun），混亂彈照樣有效（2026-11-22 使用者要求）；葫蘆猴王還是免疫
 const confuseImmune = e => !!((e.noStun && e.behavior !== 'gourd') || e.elite || e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.ratKing || e.ratKingHand || e.behavior === 'milkfishKing' || e.mothBoss || e.superArmor || e.dummy || (typeof burrowUnderground === 'function' && burrowUnderground(e)));
 function fireConfuse(p, aim, b) {
   const S = SPECIAL_GUN.tranq, ang = Math.atan2(aim.y - p.y, aim.x - p.x);
