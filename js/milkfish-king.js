@@ -18,6 +18,10 @@
        一輪連續衝 chargeChain 次（每次重新瞄準），路上撞到的人受傷、被撞飛；碰到牆或建築就停下來（不會暈），繼續追人。
    ・吐核心（表演）：血量每掉 coreSpitHp，就把核心吐到地上，喘 coreOutTime 秒後急著衝回去吞回來；核心在地上時打得到。
    ・倒下：核心掉在原地，嘴裡的隊友獲救（直接放出來）。
+   ・追人（地圖設定 chase: true，G11 有開）：以水池為中心 chaseRadius 格內的溫特、隊友都追（挑最近的，追著同一個人時不會一直換）。
+       走得到就走過去；走不到（例如人穿過列車躲到軌道另一邊的月台、列車開走了）→ 走到月台邊緣的起跳點，
+       蓄力後跳過去落在目標旁邊（落地砸到的人受傷、被撞開，地上不畫提示）。範圍內都沒人 → 走回水池旁（走不回去也用跳的），
+       途中有人走進範圍就再追。追人時，建築要比目標近、而且在 2.5 格內才會先停下來吃。
    ・從水池登場（地圖設定 intro: 'pool'，G11 有開）：一開始不在場上，躲在旁邊的深水區裡。溫特開槍打到核心 →
        畫面越震越大、水池冒泡（introRumble 秒）→ 從水池最靠近原位的那格竄出來，水花炸開、一道水浪跟著牠衝上來，
        在空中一路滴水 → 重重落在原位（大震動、水花、地上留一攤水）→ 吼叫，走去把核心吞進肚子。
@@ -28,7 +32,7 @@
 */
 // 地圖 id → 出生位置（{ c, r }；沒寫＝站在地圖核心下方 2 格）；intro: 'pool'＝一開始躲在旁邊的深水區，溫特開槍打核心才竄出來
 const MILKFISH_KING_MAPS = {
-  map_mwm655e8: { intro: 'pool', roam: 'area' },   // G11區-綠線捷運站：右邊的水池；roam: 'area'＝可以在原位所在的那一整區（上面那一整區）跑，不受守備範圍限制
+  map_mwm655e8: { intro: 'pool', roam: 'area', chase: true },   // G11區-綠線捷運站：右邊的水池；roam: 'area'＝可以在原位所在的那一整區（上面那一整區）跑，不受守備範圍限制
 };
 // 不想給編輯器調的細節（動畫、特效）
 const MILKFISH_KING_FX = {
@@ -57,6 +61,9 @@ const MILKFISH_KING_FX = {
   gaitMin: .3,            // 落腳那一刻的速度只剩幾成（越小越「一頓一頓」）；平均速度還是怪物編輯器的「速度」
   bobHeight: 5,           // 走路時身體上下起伏多高（像素）
   shards: { cols: 3, rows: 3, gravity: 900, life: 1.2 },   // 吐出來的建築碎掉：切成幾塊、往下掉多快、碎片留幾秒
+  chaseEatNear: 2.5,      // 追人模式：建築在幾格內（而且比要追的人近）才先停下來吃
+  chaseStick: 3,          // 追人時：新的人要比現在追的人近幾格以上才換目標
+  chaseReplan: .5,        // 每隔幾秒重新判斷「走得到還是要跳」
   chargeBiteAt: .25,      // 衝撞剩下幾成距離時換成張嘴的攻擊圖（前面是正面跑步）
   chargeEndHold: .35,     // 衝完張嘴撲咬的樣子停幾秒
   // 從水池登場的細節（秒數、高度、震動大小在怪物編輯器）
@@ -185,6 +192,7 @@ function mkArea(e) {
 }
 // 這個點在不在牠能去的範圍裡
 function mkInRange(e, pt) {
+  if (mkChaseOn(e)) return mkInChase(e, pt);   // 追人模式：離水池 chaseRadius 格內都算
   const A = mkArea(e);
   if (A) { const [c, r] = cellAt(pt.x, pt.y); return A.set.has(c + ',' + r); }
   return mkDist(pt, e.mk.home) <= mkCfg(e).leash * CELL;
@@ -199,15 +207,16 @@ function stepMilkfishKing(e, dt) {
   for (const pr of mk.prey) pr.left -= dt;
   if (!mk.enraged && e.eliteAwake && e.hp > 0 && e.hp / e.maxhp <= C.enrageHp) mkEnrage(e);   // 血量掉到一半（enrageHp）：暴怒
   // 吼叫、吐東西、吞核心中：打不斷（霸體）；其他時候暈眩只算一半時間
-  const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp', 'chargeWind', 'charge'].includes(mk.state);
+  const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp', 'chargeWind', 'charge', 'jumpWind', 'jump'].includes(mk.state);
   e.superArmor = armored;
   if (armored) { e.stunT = 0; e.confuseT = 0; }
   else if ((e.stunT || 0) > mk.stunSeen) e.stunT = mk.stunSeen + (e.stunT - mk.stunSeen) * .5;
   mk.stunSeen = e.stunT || 0;
-  e.tremble = mk.state === 'spitWind' || mk.state === 'coreWind' || mk.state === 'chargeWind';
+  e.tremble = mk.state === 'spitWind' || mk.state === 'coreWind' || mk.state === 'chargeWind' || mk.state === 'jumpWind';
   mkApplyAtk(e);
   if (mk.coreIn) mkPoolUnderFeet(e, dt);
   if (!armored && (e.stunT > 0 || e.confuseT > 0)) { mfPose(e, null); mkBob(e, 0, dt); return; }
+  if (mk.state === 'jump') { mkJumpStep(e, dt); return; }   // 跳過軌道：在空中，自己控制位置（不踩腳步）
   if (mk.state === 'charge') {   // 衝撞：自己控制移動（不照一頓一頓的步伐），腳步照樣震
     mkChargeStep(e, dt);
     const m = Math.hypot(e.x - x0, e.y - y0);
@@ -327,7 +336,8 @@ function mkStep(e, dt) {
       return;
     }
     case 'recover': mfPose(e, null); if (mk.t <= 0) mkSet(e, 'hunt'); return;
-    case 'chargeEnd': mfPose(e, 'attack', mk.chargeEndX); if (mk.t <= 0) mkSet(e, 'recover', .3); return;   // 衝撞收尾：張嘴撲咬的樣子停一下
+    case 'chargeEnd': mfPose(e, 'attack', mk.chargeEndX); if (mk.t <= 0) mkSet(e, 'recover', .3); return;
+    case 'jumpWind': mkJumpWindStep(e); return;   // 起跳前蹲低發抖（跟著目標調整落點）   // 衝撞收尾：張嘴撲咬的樣子停一下
     case 'chargeWind': {   // 衝撞蓄力：前段跟著目標轉向，最後 0.2 秒鎖定方向
       const tg = mk.charge && mk.charge.target;
       if (tg && mk.t > .2 && tg.hp > 0) { const dx = tg.x - e.x, dy = tg.y - e.y, d = Math.hypot(dx, dy) || 1; mk.charge.dir = { x: dx / d, y: dy / d }; }
@@ -366,7 +376,7 @@ function mkHunt(e, dt) {
     if (tg) { mkStartSpit(e, { item: mk.belly.shift() }, tg); return; }
   }
   // 太遠就回去
-  if (!mkInRange(e, e)) { mkSet(e, 'return'); return; }
+  if (!mkChaseOn(e) && !mkInRange(e, e)) { mkSet(e, 'return'); return; }   // 追人模式：由 mkChaseStep 自己走（跳）回水池
   // 衝撞：時間到、有人在衝得到的距離 → 蓄力衝過去（一輪連續衝 chargeChain 次）
   if (mk.chargeCd <= 0) {
     const tg = mkChargeTarget(e);
@@ -380,7 +390,7 @@ function mkHunt(e, dt) {
     if (!mate) {
       let bestD = C.noticeRange * CELL;
       for (const t of G.towers) {
-        if (!mkEdibleMate(e, t) || !mkInRange(e, t)) continue;
+        if (!mkEdibleMate(e, t) || !mkInRange(e, t) || (mkChaseOn(e) && !mkCanWalkTo(e, t))) continue;   // 追人模式：走不到的隊友交給下面的追人（跳過去）
         const d = mkDist(t, e);
         if (d <= bestD && hasLineOfSight(e.x, e.y, t.x, t.y)) { mate = t; bestD = d; }
       }
@@ -394,7 +404,10 @@ function mkHunt(e, dt) {
     }
   }
   // 5. 附近有建築：去吃
-  const item = mk.item && mkEdibleItem(e, mk.item) && !mkSkipped(e, mk.item) ? mk.item : mkPickItem(e);
+  let item = mk.item && mkEdibleItem(e, mk.item) && !mkSkipped(e, mk.item) ? mk.item : mkPickItem(e);
+  const chaseTg = mkChaseOn(e) ? mkChaseTarget(e) : null;   // 追人模式：建築要比要追的人近、而且 5 格內才先吃
+  if (item && chaseTg && mkDist(mkItemCenter(item), e) > Math.min(mkDist(chaseTg, e), MILKFISH_KING_FX.chaseEatNear * CELL)) item = null;
+  if (item && mkChaseOn(e) && !mkCanWalkTo(e, mkItemCenter(item))) { (mk.skip = mk.skip || new Map()).set(item, mkClock() + MILKFISH_KING_FX.stuckSkip); item = null; }   // 追人模式：走不到的建築（例如軌道另一邊）不去吃，不然會一直換著走不到的建築走，沒空回水池
   mk.item = item;
   if (item) {
     const ic = mkItemCenter(item);
@@ -405,6 +418,8 @@ function mkHunt(e, dt) {
     else if (nav.reached) moveEnemyToward(e, ic, dt);
     return;
   }
+  // 6a. 追人模式：追最近的人（走不到就跳過去），沒人就回水池
+  if (mkChaseOn(e) && mkChaseStep(e, dt)) return;
   // 6. 溫特看得到：走過去
   if (p && p.hp > 0 && sameFloor(e, p) && !mkSkipped(e, p) && mkDist(p, e) <= C.noticeRange * 1.5 * CELL && hasLineOfSight(e.x, e.y, p.x, p.y)) {
     if (mkDist(p, e) <= F.biteReach || !mkStuck(e, p, dt)) { mkGo(e, p, dt, 'mk-player'); return; }   // 已經貼在旁邊（只是咬人還在冷卻）不算卡住   // 看得到溫特卻走不過去（例如隔著欄杆）：stuckGive 秒後先放棄，去晃一晃，不要一直站著
@@ -1081,6 +1096,7 @@ function mkIntroSetup(e) {
   const core = e.mk.core, land = core ? mkWideCellNear(core.x, core.y - F.landBehind * CELL) : null;
   if (land) { const [lx, ly] = center(land[0], land[1]); e.x = lx; e.y = ly; e.mk.home = { x: lx, y: ly }; }
   G.mkKings = G.mkKings.filter(k => k !== e);   // mkInit 放進去的：還沒上場，先拿掉
+  e.mk.pool = { x: fx, y: fy0 };   // 水池中心：追人範圍（chaseRadius）從這裡算
   G.mkIntro = { e, phase: 'hidden', t: 0, from: { x: fx, y: fy }, to: { x: e.x, y: e.y }, bubbleT: 0 };
   return true;
 }
@@ -1260,4 +1276,176 @@ function mkIntroDraw(ctx, I) {
     }
     ctx.restore();
   }
+}
+
+
+// ===== 追人＋跳過軌道（MILKFISH_KING_MAPS 的 chase: true）=====
+const mkChaseOn = e => { const cfg = typeof MAP !== 'undefined' && MAP ? MILKFISH_KING_MAPS[MAP.id] : null; return !!(cfg && cfg.chase); };
+const mkPoolPt = e => e.mk.pool || e.mk.home;   // 水池中心（沒有水池登場的地圖：原位）
+const mkInChase = (e, pt) => mkDist(pt, mkPoolPt(e)) <= mkCfg(e).chaseRadius * CELL;
+// 要追誰：離水池 chaseRadius 格內、離牠最近的溫特或隊友；正在追的人只要沒被別人近 chaseStick 格以上就繼續追
+function mkChaseTarget(e) {
+  const mk = e.mk, F = MILKFISH_KING_FX;
+  const ok = a => a && a.hp > 0 && !a.eatenBy && !a.vineCap && !a.mrtRide && !a.berserk && sameFloor(e, a) && mkInChase(e, a) && !mkSkipped(e, a);
+  const list = [G.player, ...G.towers].filter(ok);
+  if (!list.length) return null;
+  let best = null, bd = Infinity;
+  for (const a of list) { const d = mkDist(a, e); if (d < bd) { bd = d; best = a; } }
+  if (mk.chaseT && list.includes(mk.chaseT) && mkDist(mk.chaseT, e) <= bd + F.chaseStick * CELL) return mk.chaseT;
+  return best;
+}
+// 從某一格出發、牠（大體型）走得到的那一整區：身體夠寬、不是牆、不是深水；建築可以吃掉／打掉，算走得過
+// 回傳 { set: 格子集合, edge: 邊緣的格子（旁邊有走不到的格子＝月台邊、牆邊）}
+function mkFlood(c0, r0) {
+  const open = (c, r) => inGrid(c, r) && !enemyWallCell(c, r) && enemyWideAt(c, r) && !(typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r)) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r));
+  const k0 = c0 + ',' + r0, set = new Set([k0]), q = [[c0, r0]], edge = [];
+  for (let i = 0; i < q.length && set.size < 8000; i++) {
+    const [c, r] = q[i];
+    let side = false;
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const cc = c + dc, rr = r + dr, k = cc + ',' + rr;
+      if (set.has(k)) continue;
+      if (!open(cc, rr) || edgeBetween(c, r, cc, rr)) { side = true; continue; }
+      set.add(k); q.push([cc, rr]);
+    }
+    if (side) edge.push([c, r]);
+  }
+  return { set, edge };
+}
+// 牠現在走得到的那一區（每秒最多重算一次）
+function mkReachInfo(e) {
+  const mk = e.mk, now = mkClock(), [c0, r0] = cellAt(e.x, e.y), k0 = c0 + ',' + r0;
+  if (mk.reach && mk.reach.at > now - 1 && mk.reach.set.has(k0)) return mk.reach;
+  return (mk.reach = { at: now, ...mkFlood(c0, r0) });
+}
+const mkReach = e => mkReachInfo(e).set;
+// 走得到這個人（或點）嗎：看離他最近、牠站得下的那格在不在走得到的範圍裡
+function mkCanWalkTo(e, pt) { const land = mkWideCellNear(pt.x, pt.y); return !!land && mkReach(e).has(land[0] + ',' + land[1]); }
+// 怎麼去 goal：{ walk: true }＝走過去；{ from, land }＝先走到起跳點 from（自己這一區的邊緣），再跳到 land；null＝去不了
+// 落點：目標那一區（例如軌道另一邊的月台）的邊緣或目標旁邊，離起跳點 jumpRange 格內；落地後再走過去
+function mkJumpPlan(e, goal) {
+  const C = mkCfg(e), mk = e.mk, me = mkReachInfo(e), land0 = mkWideCellNear(goal.x, goal.y);
+  if (!land0) return null;
+  const lk = land0[0] + ',' + land0[1];
+  if (me.set.has(lk)) return { walk: true };
+  let other = mk.region && mk.region.at > mkClock() - 1 && mk.region.set.has(lk) ? mk.region : null;   // 目標那一區（每秒最多重算一次）
+  if (!other) other = mk.region = { at: mkClock(), ...mkFlood(land0[0], land0[1]) };
+  const R = C.jumpRange * CELL, lands = [land0, ...other.edge];
+  let best = null, bs = Infinity;
+  for (const [tc, tr] of me.edge) {
+    const [tx, ty] = center(tc, tr);
+    if (enemyBlocked(tx, ty, e)) continue;
+    const walk = Math.hypot(tx - e.x, ty - e.y);
+    if (walk >= bs) continue;
+    for (const [lc, lr] of lands) {
+      const [lx, ly] = center(lc, lr), d = Math.hypot(lx - tx, ly - ty);
+      if (d > R || d < CELL * 1.5 || !mkInChase(e, { x: lx, y: ly })) continue;
+      const sc = walk + Math.hypot(goal.x - lx, goal.y - ly) * .8 + d * .3;   // 走過去＋落地後還要走多遠＋跳多遠
+      if (sc < bs) { bs = sc; best = { from: { c: tc, r: tr, x: tx, y: ty }, land: { x: lx, y: ly } }; }
+    }
+  }
+  return best;
+}
+// 每幀（mkHunt 呼叫）：追人或回水池；回傳 false＝沒事做（在水池旁、沒人），照舊閒晃
+function mkChaseStep(e, dt) {
+  const mk = e.mk, F = MILKFISH_KING_FX;
+  const tg = mkChaseTarget(e);
+  mk.chaseT = tg;
+  const goal = tg || (mkDist(e, mk.home) > CELL * 2.5 ? mk.home : null);   // 沒人追：回原位（水池旁）
+  if (!goal) return false;
+  let plan = mk.plan && mk.plan.goal === goal && mk.plan.at > mkClock() - F.chaseReplan ? mk.plan.v : undefined;
+  if (plan === undefined) { plan = mkJumpPlan(e, goal); mk.plan = { goal, at: mkClock(), v: plan }; }
+  if (!plan) { if (tg) (mk.skip = mk.skip || new Map()).set(tg, mkClock() + 3); return false; }   // 去不了：先不理這個人
+  if (plan.walk) {
+    if (tg && mkDist(tg, e) <= F.biteReach) { e.faceRight = tg.x > e.x; return true; }   // 已經貼著：等咬（咬在 mkHunt 前面處理）
+    const [gc, gr] = cellAt(goal.x, goal.y), nav = enemyNavigate(e, gc, gr, dt, (tg ? 'mk-chase:' : 'mk-home:') + gc + ',' + gr, true);
+    if (nav.blocker) { mkBlocked(e, nav.blocker, dt); if (mk.stuck) mk.stuck.time = 0; return true; }   // 路被石頭、建築擋住：吃掉或打掉，這段時間不算卡住
+    if (nav.reached) moveEnemyToward(e, goal, dt);
+    if (tg && mkStuck(e, tg, dt)) return false;   // 走半天沒更靠近：先放棄這個人
+    return true;
+  }
+  const f = plan.from;   // 要跳：先走到起跳點（月台邊緣）
+  if (Math.hypot(f.x - e.x, f.y - e.y) <= CELL * .6) { mkStartJump(e, tg, plan); return true; }
+  const nav = enemyNavigate(e, f.c, f.r, dt, 'mk-jumpfrom:' + f.c + ',' + f.r, true);
+  if (nav.blocker) mkBlocked(e, nav.blocker, dt);
+  else if (nav.reached) moveEnemyToward(e, f, dt);
+  return true;
+}
+function mkStartJump(e, tg, plan) {
+  const mk = e.mk, C = mkCfg(e);
+  mk.jump = { target: tg, to: { x: plan.land.x, y: plan.land.y } };
+  e.faceRight = plan.land.x > e.x;
+  mkSet(e, 'jumpWind', C.jumpWindup);
+}
+// 起跳前：蹲低發抖，落點跟著目標移動（還是要在 jumpRange 內、牠站得下的地方）
+function mkJumpWindStep(e) {
+  const mk = e.mk, C = mkCfg(e), J = mk.jump;
+  mfPose(e, Math.floor(mk.t * 10) % 2 ? 'smile-01' : 'smile-02');
+  e.slimeLift = -4;   // 蹲低一點
+  if (J && J.target && J.target.hp > 0) {
+    const land = mkWideCellNear(J.target.x, J.target.y);
+    if (land) { const [lx, ly] = center(land[0], land[1]); if (Math.hypot(lx - e.x, ly - e.y) <= C.jumpRange * CELL && mkInChase(e, { x: lx, y: ly })) J.to = { x: lx, y: ly }; }
+    e.faceRight = J.to.x > e.x;
+  }
+  if (mk.t > 0) return;
+  J.from = { x: e.x, y: e.y }; J.t = 0;
+  e.airborne = true;
+  mkSet(e, 'jump');
+  G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 60, life: .35, life0: .35, color: '#d9d2c0' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-jump');
+  mkRumble(mkCfg(e).stepShake, .25);
+}
+// 在空中：照拋物線飛到落點（正面）
+function mkJumpStep(e, dt) {
+  const mk = e.mk, C = mkCfg(e), J = mk.jump;
+  if (!J) { e.airborne = false; mkSet(e, 'hunt'); return; }
+  J.t += dt;
+  const p = Math.min(1, J.t / C.jumpTime);
+  e.x = J.from.x + (J.to.x - J.from.x) * p; e.y = J.from.y + (J.to.y - J.from.y) * p;
+  e.slimeLift = 4 * C.jumpHeight * p * (1 - p);
+  mkFront(e);
+  if (p >= 1) mkJumpLand(e);
+}
+// 落地：大震動、塵土、裂痕；落點附近的人受傷、被撞開
+function mkJumpLand(e) {
+  const mk = e.mk, C = mkCfg(e), R = C.jumpSlamR * CELL, dmg = C.jumpDamage * mkAtk(e);
+  e.airborne = false; e.slimeLift = 0; e.hitSquashT = .16;
+  e.lastSafeX = e.x; e.lastSafeY = e.y;
+  mk.jump = null; mk.reach = null; mk.plan = null; mk.stuck = null;
+  resetEnemyNavigation(e);
+  const hurt = a => {
+    const dx = a.x - e.x, dy = a.y - e.y, d = Math.hypot(dx, dy) || 1;
+    if (typeof knockActor === 'function') knockActor(a, dx / d, dy / d, C.jumpKnock * CELL * (a === G.player ? 1 : .8), .36);
+    if (typeof mkChargeHitFx === 'function') mkChargeHitFx(e, a);
+  };
+  const p = G.player;
+  if (p && p.hp > 0 && !p.vineCap && sameFloor(e, p) && mkDist(p, e) <= R) {
+    if (!(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
+      const h = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg;
+      p.hp = Math.max(0, p.hp - h); p.hitT = .35; G.damageVignetteT = .5;
+      flashDmg('-' + Math.round(h), p.x, p.y - 46, '#ff6b6b');
+      if (typeof playPlayerHit === 'function') playPlayerHit(1, true);
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + e.eliteName + '砸中'); }
+    }
+    hurt(p);
+  }
+  for (const t of G.towers) {
+    if (t.hp <= 0 || t.eatenBy || t.vineCap || !sameFloor(e, t) || mkDist(t, e) > R) continue;
+    const h = dmg * (1 - (typeof sentryDefense === 'function' ? sentryDefense(t) : 0));
+    t.hp = Math.max(0, t.hp - h); t.hitT = Math.max(t.hitT || 0, .3);
+    flashDmg('-' + Math.round(h), t.x, t.y - 30, '#ff8f8f');
+    t.navPath = null; t.navGoal = null;
+    if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+    hurt(t);
+  }
+  mkRumble(Math.max(C.stepShake * 1.6, 8), .5);
+  if (typeof addHitstop === 'function') addHitstop(.05);
+  for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 10 + i * 8, r2: R + 20 + i * 30, life: .4 + i * .1, life0: .4 + i * .1, color: i ? '#b9b2a2' : '#ffffff' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
+  const cracks = G.eliteCracks = G.eliteCracks || [];
+  for (let i = 0; i < 3; i++) cracks.push({ x: e.x + (Math.random() * 2 - 1) * 30, y: e.y + 12 + (Math.random() * 2 - 1) * 8, at: performance.now() / 1000, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
+  if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, 2, 'milkfish-king-jump-land');
+  mkSet(e, 'recover', .45);
 }

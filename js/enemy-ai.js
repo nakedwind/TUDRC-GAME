@@ -733,7 +733,7 @@ function stepEnemy(e, dt) {
   if (e.mothBoss) { stepMothBoss(e, dt); return; }   // 人面蝶后：抱著核心在幾個區域之間飛、築巢（js/moth-boss.js）
   if (e.behavior === 'moth') { stepMothEnemy(e, dt); return; }   // 人面蝶：在空中飛（飛得過牆，不用下面的卡牆檢查）、撒鱗粉、趨光（js/human-face-butterfly.js）
   const blocked = (x, y) => enemyBlocked(x, y, e);
-  if (blocked(e.x, e.y)) {
+  if (blocked(e.x, e.y) && !e.airborne) {   // airborne：跳在空中（例如虱目魚王跳過軌道，js/milkfish-king.js），飛過牆上方不算卡住
     const safeX = e.lastSafeX, safeY = e.lastSafeY;
     if (Number.isFinite(safeX) && Number.isFinite(safeY) && !blocked(safeX, safeY)) {
       e.x = safeX; e.y = safeY;
