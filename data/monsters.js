@@ -1353,7 +1353,8 @@ const BOSS_SETTINGS_DEFAULT = {
       "away": 1.6,
       "down": 1.5,
       "rise": 700,
-      "grow": 1.2
+      "grow": 1.2,
+      "fadeFrom": 0.2
     },
     "leash": 8,
     "orbit": {
@@ -1372,6 +1373,26 @@ const BOSS_SETTINGS_DEFAULT = {
       "puffs": 16,
       "cover": 0.95
     },
+    "leaveTelegraph": 0.9,
+    "grab": {
+      "every": [
+        10,
+        14
+      ],
+      "first": 4,
+      "range": 6,
+      "warn": 0.8,
+      "dive": 1.3,
+      "diveSpeedMul": 1.6,
+      "diveLift": 40,
+      "reach": 0.8,
+      "carry": 2.4,
+      "carryLift": 170,
+      "dropMin": 3,
+      "dropMax": 6,
+      "breakDmg": 0.05
+    },
+    "coreShield": 0.5,
     "sound": {
       "wake": 1.8,
       "flap": 0.7
