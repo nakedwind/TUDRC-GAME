@@ -102,7 +102,7 @@ const MrtTrainEditor = (() => {
       save(); draw();
     });
     panel.querySelectorAll('[data-num]').forEach(inp => inp.onchange = () => { data[inp.dataset.num] = +inp.value || 0; save(); draw(); });
-    // 互通的捷運站：每一列＝一站（名稱、地圖 id、到站音樂）
+    // 互通的捷運站：每一列＝一站（名稱＝到站橫幅的站名、地圖 id、到站音樂、橫幅線的顏色）
     $('mrtStations').oninput = e => {
       const row = e.target.closest('[data-st]'); if (!row) return;
       data.stations[+row.dataset.st][e.target.dataset.k] = e.target.value.trim(); save();
@@ -113,7 +113,7 @@ const MrtTrainEditor = (() => {
       if (!confirm('刪掉車站「' + (st.name || st.map || '') + '」？')) return;
       data.stations.splice(+del.dataset.del, 1); save(); refresh();
     };
-    $('mrtStationAdd').onclick = () => { data.stations.push({ map: '', name: '', arrive: '' }); save(); refresh(); };
+    $('mrtStationAdd').onclick = () => { data.stations.push({ map: '', name: '', arrive: '', color: '#888888' }); save(); refresh(); };
     $('mrtReset').onclick = () => { if (!confirm('確定丟棄瀏覽器裡的捷運列車設定，從正式資料（data/mrt-train.js）重新載入？')) return; data = clone(defaults); localStorage.removeItem(STORE); refresh(); };
     // 左邊清單下面的按鈕
     const btn = document.createElement('button'); btn.id = 'mrtOpenBtn'; btn.className = 'btn'; btn.textContent = '🚇 捷運列車'; btn.style.cssText = 'width:100%;margin:10px 0 0';
@@ -144,7 +144,8 @@ const MrtTrainEditor = (() => {
     const esc = v => String(v || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     $('mrtStations').innerHTML = data.stations.map((st, i) => `<div class="mrt-grid" data-st="${i}" style="margin-bottom:8px;align-items:end">` +
       `<label>名稱<input data-k="name" value="${esc(st.name)}"></label><label>地圖 id<input data-k="map" value="${esc(st.map)}"></label>` +
-      `<label>到站音樂<input data-k="arrive" value="${esc(st.arrive)}"></label><button class="btn" data-del="${i}">刪除</button></div>`).join('') || '<p class="help">還沒有車站</p>';
+      `<label>到站音樂<input data-k="arrive" value="${esc(st.arrive)}"></label>` +
+      `<label title="搭車到這站時，畫面橫幅上那條線的顏色">線的顏色<input type="color" data-k="color" value="${esc(st.color || '#888888')}"></label><button class="btn" data-del="${i}">刪除</button></div>`).join('') || '<p class="help">還沒有車站</p>';
     draw();
   }
   function draw() {
@@ -188,7 +189,8 @@ const MrtTrainEditor = (() => {
     return `/* 捷運列車的設定：由物件編輯器「🚇 捷運列車」匯出（js/mrt-train.js 讀）。
    門洞位置是原圖像素（車廂圖 1040×160）：x＝三個門洞的左緣；y、w、h＝門洞的上緣、寬、高；art＝門的圖裡門板的範圍 [x, y, w, h]。
    cells＝車廂的格子圖（一列一串字，由上往下）：# 擋路、. 車內地板、D 外側門口、F 對面通道（兩側車門都開時才走得過）。
-   stations＝互通的捷運站（搭上車會隨機開到「另一個」車站；arrive＝這個車站的到站音樂，音效編輯器裡的名稱）。
+   stations＝互通的捷運站（搭上車會隨機開到「另一個」車站；arrive＝這個車站的到站音樂，音效編輯器裡的名稱；
+     name＝搭車到這站時畫面橫幅顯示的站名；color＝橫幅上那條線的顏色）。
    nextTrainTime＝沒搭上車／不小心搭上車的隊員，幾秒後才搭下一班車到站。
    秒數、速度的意思見 js/mrt-train.js 最上面的 MRT_TRAIN。 */
 const MRT_TRAIN_SETTINGS = {
