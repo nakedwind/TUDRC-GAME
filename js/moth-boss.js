@@ -38,6 +38,14 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
         lt: { name: '左上區', c: 17, r: 25, radius: 8 },
         rt: { name: '右上區', c: 71, r: 25, radius: 8 },
       },
+      // 抓人後丟下來的地方：只會丟在這幾格（格子座標 [欄, 列]），挑「離牆、櫃子至少 4 格」的空地，不會丟到牆邊卡住或掉到 1 樓。
+      // 2026-11-23 使用者說：被丟到牆邊會卡在碰撞邊緣動不了、還被判定成 1 樓 → 改成固定幾個絕對安全的點（每區 4 個，在 2 樓房間中間）
+      drops: [
+        [12, 61], [19, 61], [12, 65], [19, 65],   // 左下區
+        [14, 24], [20, 24], [14, 28], [20, 28],   // 左上區
+        [68, 24], [74, 24], [68, 28], [74, 28],   // 右上區
+        [70, 61], [77, 61], [70, 65], [77, 65],   // 右下區
+      ],
       // 飛的順序和每一區撒的鱗粉（poison 毒、confuse 混亂、sleep 睡眠、mix 三種輪流）
       route: [
         { zone: 'lb', kind: 'sleep' },
@@ -78,7 +86,7 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、carrySpeedMul＝抓著人繞圈時的飛行速度倍率、
   // playerCircleMul＝抓到溫特時在空中多繞幾倍時間（2＝溫特繞 circle × 2 秒）、
   // mateAway＝抓到隊員時：蝶后帶著隊員往鏡頭飛走（跟換區的「飛向鏡頭」一樣變大、淡出），消失後隊員幾秒才從空中掉下來、
-  // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠、
+  // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠（地圖有設定固定落點 drops 時不用，B56 有設定）、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手、
   // struggleAngle＝溫特被抓在手上時左右掙扎的角度（度，以手抓的地方為支點、腳左右甩；跟著蝶后拍翅膀的圖換格，在左右兩個姿勢之間切換）、struggleShake＝掙扎時身體往左右偏幾像素
   grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
@@ -616,7 +624,7 @@ function mbToDrop(e, dt) {
   const C = MOTH_BOSS.grab, mb = e.mb, c = mb.carry;
   if (!c || !G.vineCaps || !G.vineCaps.includes(c.cap)) { mb.carry = null; mbSet(e, 'nest'); return; }
   const a = c.cap.actor;
-  if (!c.drop) c.drop = mbNearestDrop(a, c.cap.x0, e.y) || { x: c.from.x, y: c.from.y };
+  if (!c.drop) c.drop = mbSafeDrop(a, c.cap.x0, e.y);   // 飛到最近的安全落點上方
   c.t += dt; c.dropT += dt;
   const hand = mbHandPoint(e), off = hand.x - e.x;   // 手在身體左邊還是右邊（抓著時不轉身，固定）
   mothFlyToward(e, c.drop.x - off, c.drop.y, dt, C.carrySpeedMul);
@@ -664,7 +672,8 @@ function mbMateAway(e) {
   mb.carry = null; mb.grabCd = mothRand(C.every[0], C.every[1]);
   const cap = c.cap, a = cap.actor;
   if (!G.vineCaps || !G.vineCaps.includes(cap) || cap.phase !== 'mothCarry') return;
-  const spot = mbDropSpot(a, c.from.x, c.from.y, C.mateDropMin, C.mateDropMax, c.from);   // 落點：走得到、同一層、不會在牆裡
+  const spot = mbSafeDrop(a, c.from.x, c.from.y, true);   // 落點：固定的安全落點（隨機挑離被抓的地方近的一個）
+  a.floor = spot.floor || a.floor;
   cap.phase = 'away'; cap.t = 0; cap.awayT = C.mateAway; cap.h = 0;
   cap.dropX = spot.x; cap.dropY = spot.y; cap.cut = false;   // cut false：掉下來時照藤蔓那樣從靠近鏡頭的大小縮回來
 }
@@ -676,20 +685,39 @@ function mbRelease(e) {
   if (mb.state === 'carry' || mb.state === 'toDrop') mbSet(e, 'nest');
   const cap = c.cap, a = cap.actor;
   if (!G.vineCaps || !G.vineCaps.includes(cap) || cap.phase !== 'mothCarry') return;
-  const gx = cap.x0, gy = cap.y0;   // 人現在正下方的地面（手的下面）
-  const spot = mbDropOk(a, gx, gy) ? { x: gx, y: gy } : mbDropSpot(a, gx, gy, 0, 3, c.from);
+  // 落點：一定是固定的安全落點（繞完圈時已經飛到它正上方；被打到提早鬆手時，就近挑一個，人直接落在那裡）
+  const spot = c.drop && mbDropOk(a, c.drop.x, c.drop.y, true) ? c.drop : mbSafeDrop(a, cap.x0, cap.y0);
   a.x = cap.x0 = spot.x; a.y = cap.y0 = spot.y;
+  if (spot.floor) a.floor = spot.floor;   // 樓層照落點那一格設好（不會被當成在 1 樓）
   cap.phase = 'fall'; cap.t = 0; cap.fallV = 0; cap.cut = true;   // cut：從半空中掉下來（不往鏡頭靠近）
   cap.fallH0 = Math.max(1, cap.h); cap.lieSide = Math.random() < .5 ? -1 : 1;
   if (cap.isPlayer) flash('被丟下來了！', a.x, a.y - 60, '#ff8fb0', .8);
 }
 // 這裡能不能讓這個人落地：在地圖裡、不在隱藏區、跟他同一層的地面、他走得進去（不會卡在牆、建築裡）
-function mbDropOk(a, x, y) {
+//   anyFloor＝不管這個人現在算在哪一層，用那一格自己的樓層來判斷（固定落點用）
+function mbDropOk(a, x, y, anyFloor) {
   const [c, r] = cellAt(x, y);
   if (!inGrid(c, r) || (typeof inHiddenArea === 'function' && inHiddenArea(x, y))) return false;
-  if (typeof hasFloors !== 'undefined' && hasFloors && spawnFloorAt(c, r) !== actorFloor(a)) return false;
+  const fl = spawnFloorAt(c, r);
+  if (!anyFloor && typeof hasFloors !== 'undefined' && hasFloors && fl !== actorFloor(a)) return false;
   const blocked = a === G.player ? playerBlocked : (typeof sentryBlocked === 'function' ? sentryBlocked : playerBlocked);
-  return !onFloorDo(a, () => blocked(x, y));
+  const save = a.floor; if (anyFloor) a.floor = fl;
+  try { return !onFloorDo(a, () => blocked(x, y)); } finally { a.floor = save; }
+}
+// 固定的安全落點（MOTH_BOSS.maps 的 drops）：挑離 (x, y) 最近、現在沒被建築擋住的那一個；random＝從最近的 3 個裡隨機挑
+//   回傳 { x, y, floor }。這張地圖沒設定 drops（或全部被擋住）才退回舊的找法
+function mbSafeDrop(a, x, y, random) {
+  const s = mbSpot(), list = [];
+  for (const [c, r] of (s && s.drops) || []) {
+    const [px, py] = center(c, r);
+    if (mbDropOk(a, px, py, true)) list.push({ x: px, y: py, floor: spawnFloorAt(c, r), d: Math.hypot(px - x, py - y) });
+  }
+  if (list.length) {
+    list.sort((p, q) => p.d - q.d);
+    return list[random ? Math.floor(Math.random() * Math.min(3, list.length)) : 0];
+  }
+  const C = MOTH_BOSS.grab, old = random ? mbDropSpot(a, x, y, C.mateDropMin, C.mateDropMax, { x, y }) : (mbNearestDrop(a, x, y) || { x: a.x, y: a.y });
+  return { x: old.x, y: old.y, floor: actorFloor(a) };
 }
 // 找落點：離 (x, y) minD～maxD 格隨機找；找不到就從 (x, y) 一圈一圈往外找最近的；再找不到就丟回 fallback（被抓的地方）
 function mbDropSpot(a, x, y, minD, maxD, fallback) {
