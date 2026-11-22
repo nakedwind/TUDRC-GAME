@@ -387,7 +387,7 @@ const MONSTERS_DEFAULT = [
       "leash": 40,
       "eatSense": 12,
       "chewTime": 1,
-      "bellyMax": 6,
+      "bellyMax": 10,
       "maxPrey": 2,
       "holdTime": 8,
       "mateLandDamage": 25,
