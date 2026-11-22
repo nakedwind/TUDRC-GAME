@@ -10,8 +10,9 @@
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
    - 大面積撒粉：築巢時有人在這一區，每隔幾秒翅膀發光、地上出現那一區顏色的圓圈預告，接著把整個區域撒滿鱗粉（MOTH_BOSS.burst）。
    - 平常飛在高空：近戰隊員打不到（meleeLift），只能靠槍；俯衝下來抓人、睡覺時飛得低才打得到。
-   - 抓人：築巢時偶爾盯上溫特或隊員（一半機率抓溫特、一半抓隊員；MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
+   - 抓人（畫法跟抱核心一樣：人畫在身體和前方手中間，js/vines.js 那邊只畫地上的影子）：築巢時偶爾盯上溫特或隊員（一半機率抓溫特、一半抓隊員；MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
            用手（抱核心的地方）抓著飛到高空繞圈幾秒（grab.circle）再丟下來（落點一定是走得到的地方，不會丟進牆裡；摔下來借用藤蔓丟人那一套：彈兩下、躺著暈、扣血）。
+           抓到隊員時改成帶著他飛向鏡頭（往上、變大、淡出消失），grab.mateAway 秒後隊員從空中掉下來（js/vines.js 摔人那一套），蝶后再飛回巢。
            睡著的人（睡眠鱗粉、麻醉彈）也會被抓，一抓起來就在空中醒過來。
            抓著人的時候被打到一定的傷害（grab.breakDmg）就會鬆手，提早把人丟下來。
    - 核心護盾：人面蝶后活著的時候，牠的核心受到的傷害 × (1 - coreShield)。
@@ -75,8 +76,11 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // warn＝俯衝前預告幾秒（尖叫、地上紅圈）、dive＝俯衝最久幾秒（沒碰到就撲空）、diveSpeedMul＝俯衝的速度倍率、diveLift＝俯衝時飛多低（像素）、
   // reach＝離目標幾格內算抓到、circle＝抓起來後在高空繞幾秒才丟下、carryLift＝抓著人時飛多高（像素）、
   // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、carrySpeedMul＝抓著人繞圈時的飛行速度倍率、
+  // playerCircleMul＝抓到溫特時在空中多繞幾倍時間（2＝溫特繞 circle × 2 秒）、
+  // mateAway＝抓到隊員時：蝶后帶著隊員往鏡頭飛走（跟換區的「飛向鏡頭」一樣變大、淡出），消失後隊員幾秒才從空中掉下來、
+  // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手
-  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: 1.8, carrySpeedMul: 2.4, breakDmg: .05 },
+  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05 },
   coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });
@@ -143,7 +147,7 @@ function mothBossArmor() {
     if (mb.state === 'fly' || mb.state === 'grab' || mb.state === 'skyUp' || mb.state === 'skyDown') lost *= MOTH_BOSS.flyDefense;
     e.hp = e.mbHp - lost;
     if (mb.state === 'sleep') mothBossWake(e);
-    if (mb.state === 'carry' && mb.carry) mb.carry.hurt += lost;   // 抓著人時被打：打夠了就鬆手（mbCarry）
+    if ((mb.state === 'carry' || mb.state === 'skyUp') && mb.carry) mb.carry.hurt += lost;   // 抓著人時被打：打夠了就鬆手（mbCarry、飛向鏡頭時也一樣）
     const floor = mbStageFloor(e, mb.stage);
     if (mb.state === 'nest' || mb.state === 'swoop' || mb.state === 'carry') {
       if (floor > 0 && e.hp <= floor) { e.hp = floor; mothBossLeave(e); }   // 這一段打完：換區（最後一區的底線是 0，照常打死）
@@ -310,12 +314,18 @@ function stepMothBoss(e, dt) {
     }
     case 'fly': mbFly(e, dt); return;
     case 'skyUp': {   // 往上飛、越來越大，時間到就飛出畫面外（移出怪物清單，打不到）
+      const c = mb.carry;
+      if (c) {   // 抓著隊員一起飛走：隊員跟著手；被打夠了就鬆手（從半空中掉下來）
+        c.t += dt; mbCarryHold(e, dt);
+        if (c.hurt >= e.maxhp * P.grab.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); }
+      }
       if (mb.t <= 0) mbSkyLeave(e);
       return;
     }
     case 'skyDown': {   // 從畫面外飛回來，邊降邊變回原本大小
       if (mb.t <= 0) {
         e.drawWidth = e.mbW; e.drawHeight = e.mbH;
+        if (mb.skyCarry) { mb.skyCarry = false; mbSet(e, 'nest'); return; }   // 丟完隊員飛回來：直接回到巢上
         mbSet(e, e.carryCore && e.carryCore.carried ? 'land' : 'nest');
         if (!e.carryCore || !e.carryCore.carried) mbArrive(e);
       }
@@ -363,6 +373,7 @@ function mbSkyLook(e) {
 // 飛出畫面外：移出怪物清單（子彈、隊員都打不到），位置直接換到下一區的巢，等 away 秒再飛回來
 function mbSkyLeave(e) {
   const P = MOTH_BOSS.sky, mb = e.mb;
+  mbMateAway(e);   // 抓著隊員：隊員留在畫面外，過幾秒從空中掉下來
   const i = G.enemies.indexOf(e);
   if (i >= 0) G.enemies.splice(i, 1);
   (G.mothBossAway || (G.mothBossAway = [])).push(e);
@@ -547,9 +558,10 @@ function mbGrabVictim(e, a) {
   G.vineCaps.push(cap);
   a.vineCap = true; a.dashT = 0; a.knockT = 0;
   if (!isPlayer) { a.navPath = null; a.navGoal = null; a.meleeSwing = null; a.gunSwing = null; a.target = null; }
-  mb.carry = { cap, t: 0, hurt: 0, from: { x: a.x, y: a.y }, ang: Math.atan2(e.y - a.y, e.x - a.x) };   // ang：繞圈現在轉到哪
+  mb.carry = { cap, t: 0, hurt: 0, from: { x: a.x, y: a.y }, ang: Math.atan2(e.y - a.y, e.x - a.x), face: !!e.faceRight };   // ang：繞圈現在轉到哪；face：抓著的時候一直朝同一邊（不然繞圈時一直轉身，人會在兩隻手之間跳來跳去）
   mb.victim = null;
-  mbSet(e, 'carry');
+  if (isPlayer) mbSet(e, 'carry');   // 溫特：抓到高空繞圈再丟下
+  else { mb.skyCarry = true; mbSet(e, 'skyUp', MOTH_BOSS.sky.up); }   // 隊員：帶著飛向鏡頭、變大淡出（mbSkyLeave 把隊員交給 js/vines.js 的「吊在畫面外 → 掉下來」）
   flash(isPlayer ? '被' + MOTH_BOSS.name + '抓走了！' : '隊員被抓走了！', a.x, a.y - 60, '#ff8fb0', .9);
   if (isPlayer && typeof addShake === 'function') addShake(3);
   G.effects.push({ ring: true, x: a.x, y: a.y + 8, r: 8, r2: 46, life: .35, life0: .35, color: '#ff8fb0' });
@@ -589,9 +601,21 @@ function mbCarry(e, dt) {
   c.ang += C.circleSpeed * dt;
   const R = C.circleR * CELL;
   mothFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, C.carrySpeedMul);
+  e.faceRight = c.face; e.forceFlip = c.face;   // 抓著的時候不轉身
   mbCarryHold(e, dt);
   if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }
-  if (c.t >= C.circle) mbRelease(e);
+  if (c.t >= C.circle * (c.cap.isPlayer ? C.playerCircleMul : 1)) mbRelease(e);
+}
+// 帶著隊員飛出畫面：隊員交給 js/vines.js（跟藤蔓摔隊友一樣：在畫面外吊 mateAway 秒 → 從畫面上方掉下來、彈兩下、躺著暈、扣血）
+function mbMateAway(e) {
+  const C = MOTH_BOSS.grab, mb = e.mb, c = mb.carry;
+  if (!c) return;
+  mb.carry = null; mb.grabCd = mothRand(C.every[0], C.every[1]);
+  const cap = c.cap, a = cap.actor;
+  if (!G.vineCaps || !G.vineCaps.includes(cap) || cap.phase !== 'mothCarry') return;
+  const spot = mbDropSpot(a, c.from.x, c.from.y, C.mateDropMin, C.mateDropMax, c.from);   // 落點：走得到、同一層、不會在牆裡
+  cap.phase = 'away'; cap.t = 0; cap.awayT = C.mateAway; cap.h = 0;
+  cap.dropX = spot.x; cap.dropY = spot.y; cap.cut = false;   // cut false：掉下來時照藤蔓那樣從靠近鏡頭的大小縮回來
 }
 // 把抓著的人丟下來：落點在蝶后正下方附近、走得到的地方（不會丟進牆裡）；交給 js/vines.js 的「掉下來」（彈兩下、躺著暈、扣血）
 function mbRelease(e) {
@@ -687,7 +711,39 @@ const mothBossHunting = () => mothBosses().some(e => e.eliteAwake);
 const MOTH_BOSS_CORE_ART = { x: .10, y: .42, angle: -8 };   // 核心捧在兩隻手中間：中心位置（圖寬、圖高的比例）、旋轉角度（度）；大小＝核心原本的大小（CORE.w × CORE.h），不跟著牠的體型縮放
 function drawMothBossCore(ctx, e, dx, dy, dw, dh) {
   const core = e.carryCore;
-  if (!core || core.dead || !core.carried || !coreImg.complete || !coreImg.naturalWidth) return;
+  const coreOn = core && !core.dead && core.carried && coreImg.complete && coreImg.naturalWidth;
+  const held = mbHeldActor(e);
+  if (!coreOn && !held) return;
+  if (held) drawMothHeld(ctx, e, held, dx, dy, dw, dh);   // 抓著的人：畫在身體和前方手中間（跟核心一樣）
+  if (coreOn) drawMothCoreArt(ctx, e, core, dx, dy, dw, dh);
+  drawMothFrontHand(ctx, e, dx, dy, dw, dh);
+}
+// 現在抓在手上的人（還在空中、還沒丟下來）
+function mbHeldActor(e) {
+  const c = e.mb && e.mb.carry, cap = c && c.cap;
+  return cap && cap.phase === 'mothCarry' && G.vineCaps && G.vineCaps.includes(cap) ? cap.actor : null;
+}
+// 把抓著的人畫在手的位置：手抓在他的肩膀（跟核心同一個點），整個人跟著蝶后的圖一起動（被打發抖、上下飄都一起）
+//   一般畫人的地方（js/vines.js 的 drawVineActor）這時候只畫地上的影子，人在這裡畫
+function drawMothHeld(ctx, e, a, dx, dy, dw, dh) {
+  const A = MOTH_BOSS_CORE_ART;
+  let hx = dx + dw * A.x;
+  const hy = dy + dh * A.y;
+  ctx.save();
+  if (e.forceFlip) {   // 蝶后的圖是左右翻過來畫的：人不要跟著翻（名字、血條的字才不會反過來），換算回沒翻的位置
+    ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0);
+    hx = 2 * e.x - hx;
+  }
+  const grow = e.mbH ? e.drawHeight / e.mbH : 1;   // 飛向鏡頭變大時，抓著的人跟著一起變大（假 3D）
+  ctx.translate(hx, hy); ctx.scale(grow, grow); ctx.translate(-hx, -hy);
+  ctx.translate(hx - a.x, hy + MB_HELD_SHOULDER - a.y);   // 人的腳底在手下面 MB_HELD_SHOULDER 像素（手抓在肩膀）
+  const base = a === G.player ? (typeof vineBaseDrawPlayer === 'function' ? vineBaseDrawPlayer : drawPlayer) : (typeof vineBaseDrawTower === 'function' ? vineBaseDrawTower : drawTower);
+  const shadow = typeof drawCharacterShadow === 'function' ? drawCharacterShadow : null;
+  if (shadow) drawCharacterShadow = () => {};   // 影子另外畫在地上
+  try { base(a); } finally { if (shadow) drawCharacterShadow = shadow; }
+  ctx.restore();
+}
+function drawMothCoreArt(ctx, e, core, dx, dy, dw, dh) {
   const grow = e.mbH ? e.drawHeight / e.mbH : 1;   // 飛向鏡頭變大時，核心跟著一起變大
   const A = MOTH_BOSS_CORE_ART, len = CORE.h * grow, w = CORE.w * grow, now = performance.now() / 1000;
   ctx.save();
@@ -702,7 +758,9 @@ function drawMothBossCore(ctx, e, dx, dy, dw, dh) {
   }
   if (core.hitT > 0) drawHitFlash(coreImg, Math.min(1, core.hitT / .16), '#d69bff', -w / 2, -len / 2, w, len);
   ctx.restore();
-  // 前方那隻手蓋在核心上面：每張動作圖都有一張同名加「-前方手」的圖（跟本體一樣大、只畫前面那隻手），疊在同一個位置
+}
+// 前方那隻手蓋在核心、抓著的人上面：每張動作圖都有一張同名加「-前方手」的圖（跟本體一樣大、只畫前面那隻手），疊在同一個位置
+function drawMothFrontHand(ctx, e, dx, dy, dw, dh) {
   const file = e.forceFrame || e.sprite;
   const hand = file && monsterImage(file.replace(/\.png$/i, '-前方手.png'));
   if (hand && hand.complete && hand.naturalWidth) {

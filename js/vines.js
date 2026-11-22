@@ -536,6 +536,7 @@ function drawVineActor(a, baseDraw, overlay = false) {
     ctx.beginPath(); ctx.ellipse(a.x, a.y + 15, Math.max(4, 15 - h * .05) + 12 * lieK * Math.max(0, 1 - h / 80), Math.max(2, 5 - h * .02), 0, 0, Math.PI * 2); ctx.fill();   // 躺的姿勢快落地時影子變寬
     if (air) return;   // 身體在 overlay 那一層畫
   } else if (!air) return;
+  if (cap.phase === 'mothCarry') return;   // 被人面蝶后抓在手上：身體由 js/moth-boss.js 的 drawMothHeld 跟著蝶后的圖一起畫
   if (alpha <= 0) return;
   // 被吊著左右晃、剛纏住時掙扎抖動
   const sx = cap.phase === 'fall' ? 0 : cap.phase === 'wrap' ? (Math.random() - .5) * 2.4
