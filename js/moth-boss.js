@@ -54,8 +54,9 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   flyFloor: .06,                 // 飛行途中血量最少留到「這一段的底線 + 幾成血」（才不會一到巢就馬上又飛走）
   trailEvery: .55,               // 飛行時每幾秒在身後灑一團鱗粉（路標）
   // 飛向鏡頭（換區時有機會用這種方式）：chance＝機率、up＝往上飛走幾秒、away＝消失在畫面外幾秒、down＝飛回來幾秒、
-  // rise＝最高再往上飛幾像素（要飛出畫面）、grow＝最大時體型再加幾倍（1.2＝變成 2.2 倍）
-  sky: { chance: .5, up: 1.3, away: 1.6, down: 1.5, rise: 700, grow: 1.2 },
+  // rise＝最高再往上飛幾像素（要飛出畫面）、grow＝最大時體型再加幾倍（1.2＝變成 2.2 倍）、
+  // fadeFrom＝飛走時飛到幾成開始淡出（0.2＝前 2 成清楚，之後越來越透明，飛出畫面時完全看不到）
+  sky: { chance: .5, up: 1.3, away: 1.6, down: 1.5, rise: 700, grow: 1.2, fadeFrom: .2 },
   leash: 8,                      // 築巢時離巢最遠飛幾格（目標跑太遠就回巢）
   orbit: { min: 1.6, max: 3.2 }, // 繞著目標飛：離目標最近、最遠幾格
   nestOrbit: 2.2,                // 沒有目標時繞著巢飛的半徑（格）
@@ -321,6 +322,8 @@ function mbSkyLook(e) {
   const P = MOTH_BOSS.sky, u = mbSkyAmount(e), k = u * u, grow = 1 + P.grow * u;
   e.slimeLift += P.rise * k;
   e.drawWidth = Math.round(e.mbW * grow); e.drawHeight = Math.round(e.mbH * grow);
+  // 飛走時淡出（js/render.js 畫人面蝶時讀 mbFade）；飛回來不淡入（從畫面外飛進來）
+  e.mbFade = e.mb.state === 'skyUp' ? Math.max(0, Math.min(1, (1 - u) / (1 - P.fadeFrom))) : 1;
 }
 // 飛出畫面外：移出怪物清單（子彈、隊員都打不到），位置直接換到下一區的巢，等 away 秒再飛回來
 function mbSkyLeave(e) {

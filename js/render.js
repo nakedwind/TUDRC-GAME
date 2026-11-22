@@ -1192,7 +1192,13 @@ function draw() {
   // 人面蝶和牠的鱗粉霧：飛在空中，蓋在牆、屋簷、電梯等所有圖層上面（看起來是飛過牆，不是穿牆；js/human-face-butterfly.js）
   if (typeof drawMothClouds === 'function') drawMothClouds(ctx);
   // 記下來的人面蝶，等一下「底下透出的地圖」蓋上來後要在空格那一塊再畫一次（js/under-map.js 的 redrawOverUnderMap），不然會被底圖切掉
-  const mothItems = G.enemies.filter(e => e.behavior === 'moth' && enemyVisible(e)).map(e => ({ who: e, draw: () => { if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); } }));
+  // 人面蝶后飛向鏡頭時淡出（e.mbFade，js/moth-boss.js）：用 filter 讓整隻（影子、身體、核心、手）一起變透明
+  const mothItems = G.enemies.filter(e => e.behavior === 'moth' && enemyVisible(e) && !(e.mbFade <= 0)).map(e => ({ who: e, draw: () => {
+    const fade = e.mbFade != null && e.mbFade < 1, prevFilter = ctx.filter;
+    if (fade) ctx.filter = 'opacity(' + Math.round(e.mbFade * 100) + '%)';
+    if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e);
+    if (fade) ctx.filter = prevFilter;
+  } }));
   for (const it of mothItems) it.draw();
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
   // 在黑幕之後才畫（下面 drawInteractionPrompts()），暗處的門、物件提示才不會被黑幕蓋住
