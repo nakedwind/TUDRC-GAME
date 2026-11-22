@@ -748,7 +748,7 @@ function mrtArriveAtStation(mates) {
 // ---- 搭車到別站：畫面上方出現「這是哪一站」的橫幅 ----
 // 站名、線的顏色在物件編輯器「🚇 捷運列車」的互通車站設（data/mrt-train.js 的 stations：name、color）；
 // 不在車站名單裡的地方（例如紅色列車開去的台北車站大廳）用地圖名稱，去掉前面的編號
-const MRT_STATION_BANNER = { time: 3.6, fadeIn: .4, fadeOut: .7 };   // 顯示幾秒、淡入、淡出秒數
+const MRT_STATION_BANNER = { time: 7.2, fadeIn: .4, fadeOut: .7 };   // 顯示幾秒、淡入、淡出秒數
 let mrtStationBannerNow = null;
 function mrtShowStationBanner() {
   if (!MAP) return;
