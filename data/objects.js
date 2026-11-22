@@ -295,17 +295,12 @@ const OBSTACLES = [
     "id": "rock_small_01",
     "name": "小石頭 1",
     "cost": 0,
-    "hp": 150,
+    "hp": 50,
     "h": {
       "file": "images/item-obstacle/rock-small-01.png",
       "w": 1,
       "h": 1,
-      "solid": [
-        [
-          0,
-          0
-        ]
-      ]
+      "solid": []
     },
     "v": {
       "file": "images/item-obstacle/rock-small-01.png",
@@ -323,17 +318,12 @@ const OBSTACLES = [
     "id": "rock_small_02",
     "name": "小石頭 2（兩塊）",
     "cost": 0,
-    "hp": 150,
+    "hp": 80,
     "h": {
       "file": "images/item-obstacle/rock-small-02.png",
       "w": 1,
       "h": 1,
-      "solid": [
-        [
-          0,
-          0
-        ]
-      ]
+      "solid": []
     },
     "v": {
       "file": "images/item-obstacle/rock-small-02.png",
@@ -351,17 +341,12 @@ const OBSTACLES = [
     "id": "rock_small_03",
     "name": "小石頭 3（兩塊）",
     "cost": 0,
-    "hp": 150,
+    "hp": 100,
     "h": {
       "file": "images/item-obstacle/rock-small-03.png",
       "w": 1,
       "h": 1,
-      "solid": [
-        [
-          0,
-          0
-        ]
-      ]
+      "solid": []
     },
     "v": {
       "file": "images/item-obstacle/rock-small-03.png",
@@ -379,7 +364,7 @@ const OBSTACLES = [
     "id": "rock_medium_01",
     "name": "中石頭 1",
     "cost": 0,
-    "hp": 250,
+    "hp": 150,
     "h": {
       "file": "images/item-obstacle/rock-medium-01.png",
       "w": 1,
@@ -407,7 +392,7 @@ const OBSTACLES = [
     "id": "rock_medium_02",
     "name": "中石頭 2（帶小塊）",
     "cost": 0,
-    "hp": 250,
+    "hp": 150,
     "h": {
       "file": "images/item-obstacle/rock-medium-02.png",
       "w": 1,
@@ -435,7 +420,7 @@ const OBSTACLES = [
     "id": "rock_big_01",
     "name": "大石頭 1",
     "cost": 0,
-    "hp": 400,
+    "hp": 300,
     "h": {
       "file": "images/item-obstacle/rock-big-01.png",
       "w": 2,
@@ -471,7 +456,7 @@ const OBSTACLES = [
     "id": "rock_big_02",
     "name": "大石頭 2（帶小塊）",
     "cost": 0,
-    "hp": 400,
+    "hp": 300,
     "h": {
       "file": "images/item-obstacle/rock-big-02.png",
       "w": 2,

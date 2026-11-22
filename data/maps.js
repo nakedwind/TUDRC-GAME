@@ -18395,7 +18395,15 @@ const BATTLE_MAPS = [
     "npcs": false,
     "portals": [],
     "solidOffsets": {},
-    "coreSpots": [],
+    "coreSpots": [
+      "21,47",
+      "28,43",
+      "36,44",
+      "43,43",
+      "12,43",
+      "48,34",
+      "24,36"
+    ],
     "coreCount": 1,
     "spawnZone": [],
     "hiddenPickups": [],
@@ -55191,12 +55199,6 @@ const BATTLE_MAPS = [
         "layer": "object"
       },
       {
-        "id": "tile_bg_backroom_wall02_dmg_heavy",
-        "c": 66,
-        "r": 55,
-        "layer": "object"
-      },
-      {
         "id": "tile_mrt_escalator_front_high",
         "c": 22,
         "r": 41,
@@ -57971,6 +57973,12 @@ const BATTLE_MAPS = [
         "r": 55,
         "layer": "ground",
         "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 66,
+        "r": 55,
+        "layer": "object"
       }
     ],
     "solid": [
@@ -152751,7 +152759,15 @@ const BATTLE_MAPS = [
       "floor": {},
       "ground": {},
       "ground2": {},
-      "ground3": {},
+      "ground3": {
+        "60,11": "tile_obstacle_rock_medium_01",
+        "70,15": "tile_obstacle_rock_medium_01",
+        "55,9": "tile_obstacle_rock_medium_02",
+        "46,13": "tile_obstacle_rock_medium_02",
+        "39,10": "tile_obstacle_rock_medium_02",
+        "72,10": "tile_obstacle_rock_medium_02",
+        "67,13": "tile_obstacle_rock_medium_02"
+      },
       "object": {
         "42,82": "tile_interactive_pickup_battery"
       },
@@ -161990,31 +162006,9 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_dmg_rubble_rocks",
-        "c": 58,
-        "r": 14,
-        "layer": "ground3",
-        "oy": 10
-      },
-      {
-        "id": "tile_dmg_rubble_rocks",
         "c": 44,
         "r": 10,
         "layer": "ground3"
-      },
-      {
-        "id": "tile_dmg_rubble_small",
-        "c": 58,
-        "r": 10,
-        "layer": "ground3",
-        "ox": 10,
-        "oy": 10
-      },
-      {
-        "id": "tile_dmg_rubble_small",
-        "c": 72,
-        "r": 14,
-        "layer": "ground3",
-        "ox": 10
       },
       {
         "id": "tile_dmg_rubble_small",
@@ -162048,6 +162042,45 @@ const BATTLE_MAPS = [
         "layer": "ground3",
         "oy": 30,
         "fx": true
+      },
+      {
+        "id": "tile_obstacle_rock_big_02",
+        "c": 58,
+        "r": 12,
+        "layer": "ground3",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_rock_big_01",
+        "c": 49,
+        "r": 12,
+        "layer": "ground3",
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_rock_big_02",
+        "c": 76,
+        "r": 14,
+        "layer": "ground3",
+        "fx": true,
+        "scale": 95
+      },
+      {
+        "id": "tile_dmg_rubble_scatter",
+        "c": 51,
+        "r": 11,
+        "layer": "ground3",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 65,
+        "r": 8,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 30
       }
     ],
     "solid": [

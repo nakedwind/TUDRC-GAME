@@ -43,7 +43,15 @@ const DIALOGUES = {
       "brief_y1": [],
       "mealInvite": [
         "好啊，一起去吃！"
-      ]
+      ],
+      "brief_f307": [],
+      "brief_r89": [],
+      "brief_b56": [],
+      "brief_g11": [],
+      "brief_o666": [],
+      "bounty_gourdKing": [],
+      "bounty_mothBoss": [],
+      "bounty_ratKing": []
     },
     "taana": {
       "idle": [
@@ -1152,7 +1160,7 @@ const DIALOGUES = {
       ],
       "bounty_pearl": [
         "隊長，中心確認珍珠大童已經討伐了。大家都平安回來，真是太好了。",
-        "上面特別撥了一筆獎金……{money} 元，已經幫您存進去了喔。"
+        "上面特別撥了一筆獎金{money} 元，已經幫您存進去了喔。"
       ],
       "brief_y25_entry": [],
       "fogThick": [
@@ -1163,6 +1171,23 @@ const DIALOGUES = {
         "Zzz……Zzz……",
         "呼……嗯……Zzz……",
         "（睡得很熟，叫不醒）Zzz……"
+      ],
+      "brief_f307": [],
+      "brief_r89": [],
+      "brief_b56": [],
+      "brief_g11": [],
+      "brief_o666": [],
+      "bounty_gourdKing": [
+        "隊長，中心確認葫蘆猴王已經討伐了。大家都平安回來，真是太好了。",
+        "上面特別撥了一筆獎金{money} 元，已經幫您存進去了喔。"
+      ],
+      "bounty_mothBoss": [
+        "隊長，中心確認人面蝶后已經討伐了。大家都平安回來，真是太好了。",
+        "上面特別撥了一筆獎金{money} 元，已經幫您存進去了喔。"
+      ],
+      "bounty_ratKing": [
+        "隊長，中心確認老鼠王已經討伐了。大家都平安回來，真是太好了。",
+        "上面特別撥了一筆獎金{money} 元，已經幫您存進去了喔。"
       ]
     },
     "chris": {

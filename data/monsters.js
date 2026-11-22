@@ -243,7 +243,6 @@ const MONSTERS_DEFAULT = [
   {
     "id": "fish_head",
     "name": "魚頭君",
-    "element": "water",
     "sprite": "images/monster/fish-head/fish-head-front.png",
     "hp": 110,
     "speed": 70,
@@ -270,7 +269,8 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "fishhead",
     "hitSound": "fishHurt",
-    "deathSound": "fishDeath"
+    "deathSound": "fishDeath",
+    "element": "water"
   },
   {
     "id": "loofah_lady",
@@ -304,9 +304,7 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "milkfish_kid",
-    "wide": true,
     "name": "虱目魚小子",
-    "element": "water",
     "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
     "hp": 160,
     "speed": 45,
@@ -329,13 +327,14 @@ const MONSTERS_DEFAULT = [
     "behavior": "milkfish",
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
+    "wide": true,
+    "element": "water",
     "stagger": 0.15,
     "knockMul": 0.4
   },
   {
     "id": "milkfish_kid_small",
     "name": "小虱目魚小子",
-    "element": "water",
     "sprite": "images/monster/milkfish-kid-small/milkfish-kid-small-front.png",
     "hp": 60,
     "speed": 55,
@@ -357,15 +356,14 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "milkfishSmall",
     "hitSound": "milkfishHurt",
-    "deathSound": "milkfishDeath"
+    "deathSound": "milkfishDeath",
+    "element": "water"
   },
   {
     "id": "milkfish_king",
-    "wide": true,
     "name": "虱目魚王",
-    "element": "water",
     "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
-    "hp": 2400,
+    "hp": 4500,
     "speed": 50,
     "playerDamage": 22,
     "sentryDamage": 20,
@@ -386,7 +384,7 @@ const MONSTERS_DEFAULT = [
       "noticeRange": 8,
       "leash": 40,
       "eatSense": 12,
-      "chewTime": 1,
+      "chewTime": 0.5,
       "bellyMax": 10,
       "maxPrey": 2,
       "holdTime": 8,
@@ -395,32 +393,38 @@ const MONSTERS_DEFAULT = [
       "spitRange": 9,
       "spitWindup": 0.8,
       "spitFlight": 0.9,
-      "spitCooldown": 2,
+      "spitCooldown": 1,
       "spitRadius": 1.2,
       "spitDamage": 30,
-      "coreSpitHp": 0.33,
-      "coreOutTime": 4,
+      "coreSpitHp": 0.4,
+      "coreOutTime": 2,
       "rushSpeedMul": 2.2,
       "stepShake": 6,
       "coreAtkMul": 1.5,
       "acidPoolR": 1.1,
       "acidPoolLife": 5,
       "acidPoolDps": 8,
-      "introRumble": 7.2,
       "enrageHp": 0.5,
-      "enrageSpitCooldown": 1,
-      "coreShield": 0.9,
-      "coreHp": 2000,
+      "enrageSpitCooldown": 0.5,
       "chargeCooldown": 7,
       "chargeChain": 2,
       "chargeWindup": 0.6,
       "chargeSpeed": 320,
       "chargeDist": 10,
       "chargeDamage": 35,
-      "chargeKnock": 3
+      "chargeKnock": 3,
+      "coreHp": 2000,
+      "coreShield": 0.9,
+      "introRumble": 7.2,
+      "introShake": 7,
+      "introLeapTime": 2.4,
+      "introLeapHeight": 180,
+      "introLandShake": 12
     },
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
+    "wide": true,
+    "element": "water",
     "noHitSquash": true,
     "stagger": 0,
     "knockMul": 0
@@ -476,9 +480,7 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "clownfish",
-    "wide": true,
     "name": "比基尼小丑魚",
-    "element": "water",
     "sprite": "images/monster/clownfish/clownfish-front.png",
     "hp": 120,
     "speed": 75,
@@ -508,13 +510,14 @@ const MONSTERS_DEFAULT = [
     "behavior": "clownfish",
     "hitSound": "clownfishHurt",
     "deathSound": "clownfishDeath",
+    "wide": true,
+    "element": "water",
     "shockResist": 0.6,
     "knockMul": 0.6
   },
   {
     "id": "clownfish_small",
     "name": "小丑魚幼體",
-    "element": "water",
     "sprite": "images/monster/clownfish/clownfish-small-front.png",
     "hp": 35,
     "speed": 120,
@@ -535,6 +538,7 @@ const MONSTERS_DEFAULT = [
     "behavior": "clownfish",
     "hitSound": "clownfishHurt",
     "deathSound": "clownfishSmallDeath",
+    "element": "water",
     "knockMul": 1.2
   },
   {
@@ -566,7 +570,6 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "gourd_monkey",
-    "wide": true,
     "name": "葫蘆猴",
     "sprite": "images/monster/gourd-monkey/gourd-monkey-front.png",
     "hp": 700,
@@ -591,6 +594,7 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "gourd",
     "deathSound": "gourdDeath",
+    "wide": true,
     "noHitSquash": true,
     "stagger": 0,
     "noStun": true,
@@ -617,10 +621,10 @@ const MONSTERS_DEFAULT = [
       ]
     },
     "behavior": "moth",
-    "noHitSquash": true,
-    "knockMul": 0.5,
     "hitSound": "mothHurt",
-    "deathSound": "mothDeath"
+    "deathSound": "mothDeath",
+    "noHitSquash": true,
+    "knockMul": 0.5
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */
