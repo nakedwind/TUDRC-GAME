@@ -20,7 +20,9 @@
    素材：本體沿用花蓮版權老鼠的圖（放大 scale 倍）；拳頭是 left-fist.png，抓核心張開的手是 left-hand.png（都用 images/monster/rat-king/ 的紫藍版，見 RAT_KING.artDir）。
    數值都在下面的 RAT_KING。必須在 burrowing-mouse.js 之後、game.js 之前載入。
 */
-const RAT_KING = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const RAT_KING = applyBossSettings('RAT_KING', {
   name: '花蓮老鼠王',
   // 哪張地圖：train＝被卡住的那班列車的車頭位置 [欄, 列]（地圖編輯器裡車頭圖章的位置）；
   // area＝手會冒出來的範圍 [左欄, 上列, 右欄, 下列]（只會冒在有地板、不是牆的格子）
@@ -76,7 +78,7 @@ const RAT_KING = {
   // 握在拳頭裡的人／核心放在原圖（110×90）的哪一點：held＝人身體的中心（人橫躺、頭朝外露出拳頭），core＝核心的中心
   grip: { held: [33, 31], core: [48, 31], coreSize: 1 },   // coreSize＝核心畫成原本大小的幾倍；核心橫躺握在拳頭裡、兩頭露出來
   artDir: 'images/monster/rat-king/',   // 專用的圖（黑毛深紫藍、領結袖子紫藍）：檔名跟花蓮版權老鼠一樣，只換資料夾；用 tools/recolor-rat-king.py 換色產生
-};
+});
 // 老鼠王用的整組圖：身體、眨眼、暈眩、手換成 RAT_KING.artDir 的紫藍版，地洞、土堆照用花蓮版權老鼠的（js/burrowing-mouse.js 的 BURROW_MOUSE_ART）
 const RK_ART_KEYS = ['body', 'bodyHalf', 'bodyClosed', 'dizzy1', 'dizzy2', 'dizzy3', 'dizzy4', 'hand'];
 let rkArtCache = null;

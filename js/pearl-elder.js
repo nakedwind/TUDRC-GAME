@@ -18,7 +18,9 @@
    出現在哪張地圖、生在哪一格：PEARL_ELDER.maps（地圖 id → 欄、列）；牠自己帶一顆核心，地圖上原本的核心照樣留著（全部打破才過關）。
    數值都在下面的 PEARL_ELDER。必須在 pearl-kid.js、anomalous-core.js 之後、game.js 之前載入。
 */
-const PEARL_ELDER = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const PEARL_ELDER = applyBossSettings('PEARL_ELDER', {
   name: '珍珠大童',
   maps: { map_mvvdbiyx: { c: 91, r: 32 } },   // 出現在哪幾張地圖、生在哪一格（K56區-地下街：右邊有斑馬線、電梯的大房間，斑馬線上方的中間；地圖改成 106×96 之後的座標）
   hp: 3000, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hp：血量（再乘整體難度）
@@ -80,7 +82,7 @@ const PEARL_ELDER = {
   },
   shake: { land: 11, bounce: 11, bump: 14 },   // 畫面震動（貼身時；越遠越小，距離是所有 BOSS 共用的 BOSS_SHAKE.range）：閉殼掉到地上、滾動撞牆反彈、撞牆停下（2026-11-21 加強：原本 5／6／7）
   land: { shakeMax: 10, shakeMin: 3, shakeRange: 12 },   // 大珍珠落地的畫面震動：就在旁邊、shakeRange 格外圍的強度（上限 16）
-};
+});
 
 const pearlElderSpot = () => typeof MAP !== 'undefined' && MAP ? PEARL_ELDER.maps[MAP.id] || null : null;
 const pearlBosses = () => (G && G.enemies ? G.enemies.filter(e => e.pearlBoss && !e.dead && e.hp > 0) : []);

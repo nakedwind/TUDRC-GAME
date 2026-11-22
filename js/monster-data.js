@@ -25,6 +25,41 @@ function slimeSettings(useBrowserDraft = false) {
   }
   return validSlimeSettings(null);
 }
+// ---- BOSS 數值（怪物編輯器「👑 BOSS 數值」）----
+// 每隻 BOSS 程式檔裡的設定（ELITE_BIRD、CAP_KING…）寫成 applyBossSettings('名字', {...})：
+// 開場時用 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 裡的數字蓋過去（預覽模式用編輯器的暫存）。
+// 只認「程式檔裡本來就是數字」的格子，名稱、圖片路徑、地圖位置不會被改到。
+const BOSS_SETTINGS_STORAGE_KEY = 'tudrc_boss_settings_v1';
+function validBossSettings(raw) {
+  const base = typeof BOSS_SETTINGS_DEFAULT !== 'undefined' ? BOSS_SETTINGS_DEFAULT : {};
+  const fix = (def, own) => {   // 照檔案的格子一格一格檢查：不是數字就用檔案的；原本不是負數的不能填負數
+    if (typeof def === 'number') { const n = Number(own); return Number.isFinite(n) && own !== null && own !== '' ? (def >= 0 ? Math.max(0, n) : n) : def; }
+    if (Array.isArray(def)) return def.map((d, i) => fix(d, Array.isArray(own) ? own[i] : undefined));
+    if (def && typeof def === 'object') { const o = own && typeof own === 'object' ? own : {}; return Object.fromEntries(Object.keys(def).map(k => [k, fix(def[k], o[k])])); }
+    return def;
+  };
+  return fix(base, raw && typeof raw === 'object' ? raw : {});
+}
+function bossSettings(useBrowserDraft = false) {
+  if (useBrowserDraft) {
+    try { const saved = (typeof DraftSync !== 'undefined' ? DraftSync.load(BOSS_SETTINGS_STORAGE_KEY, (typeof BOSS_SETTINGS_DEFAULT !== 'undefined' ? BOSS_SETTINGS_DEFAULT : undefined), { label: 'BOSS 數值' }) : JSON.parse(localStorage.getItem(BOSS_SETTINGS_STORAGE_KEY) || 'null')); if (saved) return validBossSettings(saved); } catch (_) {}
+  }
+  return validBossSettings(null);
+}
+let bossSettingsCache = null;
+function applyBossSettings(key, cfg) {
+  if (!bossSettingsCache) bossSettingsCache = bossSettings(typeof location !== 'undefined' && /[?&](preview|previewMonsters)=1(&|$)/.test(location.search));
+  const put = (dst, src) => {
+    for (const [k, v] of Object.entries(src || {})) {
+      if (!(k in dst)) continue;
+      if (typeof v === 'number' && typeof dst[k] === 'number') dst[k] = v;
+      else if (Array.isArray(v) && Array.isArray(dst[k]) && v.length === dst[k].length && dst[k].every(x => typeof x === 'number')) dst[k] = v.slice();
+      else if (v && typeof v === 'object' && !Array.isArray(v) && dst[k] && typeof dst[k] === 'object' && !Array.isArray(dst[k])) put(dst[k], v);
+    }
+  };
+  put(cfg, bossSettingsCache[key]);
+  return cfg;
+}
 function validMonsterCatalog(list) {
   if (!Array.isArray(list)) return [];
   const ids = new Set();

@@ -17,7 +17,9 @@
    - 體型：一般葫蘆猴的 scale 倍（2 倍）。不會硬直、打不退、推不動（跟一般葫蘆猴一樣）。
    必須在 gourd-monkey.js、breakable-walls.js 之後、game.js 之前載入。
 */
-const GOURD_KING = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const GOURD_KING = applyBossSettings('GOURD_KING', {
   name: '葫蘆猴王',
   // 哪張地圖、哪一面牆是 BOSS 牆：[牆左上角的欄, 列]（地圖編輯器裡那張「捷運高牆X6」圖章的位置）
   maps: { map_mvxz356e: { wall: [37, 13] } },   // R89區-紅線捷運站：上方的隱藏牆
@@ -111,7 +113,7 @@ const GOURD_KING = {
     crouch: .25, rise: .42, hang: .16, height: 130,   // 連跳的小壓頂：蓄力、升空、停住都比較短，跳比較低
     tired: 2.4,                  // 連跳完陷在地上喘氣幾秒
   },
-};
+});
 // 撞破後可以走的格子（[第幾欄, 第幾列]，從牆左上角算）：全破的圖中間四欄都打通；第一格是洞口正中間（球球、提示用）
 const GK_WALL_OPEN = [[2, 5], [3, 5], [1, 5], [4, 5]], GK_WALL_SOLID = [];
 for (let r = 4; r >= 1; r--) GK_WALL_OPEN.push([1, r], [2, r], [3, r], [4, r]);

@@ -19,7 +19,9 @@
    出現在哪張地圖、哪一格：BANANA_EMPEROR.maps（地圖 id → 核心那一格的欄、列）。附近有地圖本來的核心就用那顆（core.adopt／core.pull），沒有就自己帶一顆。
    數值都在下面的 BANANA_EMPEROR。必須在 golden-banana-king.js、vines.js、loofah-queen.js、attack-fx.js 之後、game.js 之前載入。
 */
-const BANANA_EMPEROR = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const BANANA_EMPEROR = applyBossSettings('BANANA_EMPEROR', {
   name: '金蕉大王',
   artDir: 'images/monster/banana-emperor/',   // 專用的圖（披風紫藍、身體偏紅的橘金色）：檔名跟金蕉王一樣，只換資料夾；用 tools/recolor-banana-emperor.py 從金蕉王的圖換色產生
   maps: { map_f307boss: { c: 19, r: 58 }, map_mw2dn6re: { c: 18, r: 94 } },   // 核心在哪一格（測試：F307 BOSS 場地、F307 本圖的大草地房，都在房間下面）；他站在核心右邊 standOff 格
@@ -84,7 +86,7 @@ const BANANA_EMPEROR = {
     ],
     kings: 2,                    // 普通金蕉王幾隻（只負責補血）
   },
-};
+});
 // 金蕉王的圖片路徑 → 大王專用的那張（同檔名、換到 BANANA_EMPEROR.artDir 資料夾）
 const beArt = f => typeof f === 'string' && /\.png$/i.test(f) && BANANA_EMPEROR.artDir ? BANANA_EMPEROR.artDir + f.split('/').pop() : f;
 const BE_ART = {

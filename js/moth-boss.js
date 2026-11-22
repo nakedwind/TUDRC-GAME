@@ -16,7 +16,9 @@
    出現在哪張地圖：MOTH_BOSS.maps（地圖 id → 起點、各區巢的位置）。起點會抱走離起點最近的那顆地圖核心。
    數值都在下面的 MOTH_BOSS。必須在 human-face-butterfly.js、anomalous-core.js 之後、game.js 之前載入。
 */
-const MOTH_BOSS = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   name: '人面蝶后',
   artDir: 'images/monster/moth-queen/',   // 專用的圖（翅膀紫藍、紅斑和身體紫紅）：檔名跟人面蝶一樣（含「-前方手」圖），只換資料夾；用 tools/recolor-moth-queen.py 從人面蝶的圖換色產生
   maps: {
@@ -61,7 +63,7 @@ const MOTH_BOSS = {
   // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
   burst: { every: [7, 10], first: 2.5, telegraph: 1.6, time: 1.2, puffs: 16, cover: .95 },
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
-};
+});
 const mbSpot = () => typeof MAP !== 'undefined' && MAP ? MOTH_BOSS.maps[MAP.id] || null : null;
 // 場上的人面蝶后（包括飛到畫面外、暫時不在怪物清單 G.enemies 裡的，見 G.mothBossAway）
 const mothBosses = () => (G && G.enemies ? [...G.enemies, ...(G.mothBossAway || [])].filter(e => e.mothBoss && !e.dead && e.hp > 0) : []);

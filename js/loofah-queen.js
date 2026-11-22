@@ -18,7 +18,9 @@
    出現在哪張地圖、生在哪一格：LOOFAH_QUEEN.maps（地圖 id → 欄、列）。那一格附近 core.adopt 格內有地圖本來的核心就用那顆，沒有就自己帶一顆。
    數值都在下面的 LOOFAH_QUEEN。必須在 loofah-lady.js、vines.js、anomalous-core.js 之後、game.js 之前載入。
 */
-const LOOFAH_QUEEN = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const LOOFAH_QUEEN = applyBossSettings('LOOFAH_QUEEN', {
   name: '絲瓜女王',
   maps: { map_f307boss: { c: 86, r: 15 }, map_mw2dn6re: { c: 113, r: 23 } },   // 出現在哪幾張地圖、生在哪一格（測試：F307 BOSS 場地、F307 本圖的農田房上方）
   hp: 3000, dmgMul: 1.5, rewardMul: 6, crystalMul: 6,   // 以絲瓜小姐（data/monsters.js）為基準；hp：血量（再乘整體難度）
@@ -99,7 +101,7 @@ const LOOFAH_QUEEN = {
     fireR: 20,                   // 火海離藤蔓多近算燒到（像素）
     burnTime: 25,                // 燒掉後幾秒再長出來
   },
-};
+});
 
 const lqSpot = () => typeof MAP !== 'undefined' && MAP ? LOOFAH_QUEEN.maps[MAP.id] || null : null;
 const lqAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));

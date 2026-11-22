@@ -14,7 +14,9 @@
    地圖資料：maps.js 的 "capKing": { "caps": ["欄,列", …] }（🗺️ 地圖編輯器的「🎩 順順宮主帽子」標位置；至少 2 頂）。
    數值都在下面的 CAP_KING。必須在 hangi-bao.js、anomalous-core.js 之後、game.js 之前載入。
 */
-const CAP_KING = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const CAP_KING = applyBossSettings('CAP_KING', {
   name: '順順宮主',
   capScale: 2.3,           // 大宮帽的大小（順順宮帽原圖的幾倍；一般地上的帽子是 1.2）
   blockW: 3, blockH: 2,    // 擋路範圍：寬幾格、高幾格（以標的那一格為下方中間）
@@ -42,7 +44,7 @@ const CAP_KING = {
     stepEvery: 46,         // 每走幾像素踩一步（震動、揚塵、腳步聲）
     stepShake: 6, shakeRange: 16,   // 每一步的畫面震動（貼身時最大）；shakeRange （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
   },
-};
+});
 const ckRand = ([a, b]) => Math.round(a + Math.random() * (b - a));
 
 // ---- 開場：照地圖設定擺上大宮帽，把核心藏進其中一頂（game.js 在 seedCores 之後呼叫）----

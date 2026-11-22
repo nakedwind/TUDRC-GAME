@@ -12,7 +12,9 @@
    （沒寫 c、r 就放在核心下方 2 格；wakeRow＝溫特走到這一列（含）以上就警戒，沒寫就用 wakeRange 格距離）。
    數值都在下面的 ELITE_BIRD。必須在 bird-head.js 之後、game.js 之前載入。
 */
-const ELITE_BIRD = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const ELITE_BIRD = applyBossSettings('ELITE_BIRD', {
   name: '鳥頭大隊長',
   hpMul: 12, dmgMul: 2.2, rewardMul: 5, crystalMul: 5,   // 以原型鳥頭人（data/monsters.js）的數值為基準；hpMul 12 → 血量 1800
   scale: 2.5,                    // 體型放大倍率
@@ -52,7 +54,7 @@ const ELITE_BIRD = {
   runCrack: { scale: .32, life: 3 },   // 跑步時每一步踩出的小裂痕：大小（原圖的幾倍）、留幾秒；圖從 js/combat-feel.js 的 CRACK_ART 隨機挑   // 跑步（衝撞、衝回原位）時每一步踩出的小裂痕：大小（原圖 120×80 的幾倍）、留幾秒
   runDust: { rocks: 0, dust: 8, dustRise: 2, size: .6, spread: 10 },        // 跑步時每一步揚起的煙塵（js/gourd-monkey.js 的 rockBurstFx）
   shakeRange: 20,   // （不再使用：震動距離改成所有 BOSS 共用 js/combat-feel.js 的 BOSS_SHAKE.range）
-};
+});
 
 // ---- 換成大隊長專用的圖：把普通鳥頭人的圖片路徑換到 ELITE_BIRD.artDir 資料夾（檔名不變）----
 const eliteBirdArtPath = file => typeof file === 'string' && ELITE_BIRD.artDir ? ELITE_BIRD.artDir + file.split('/').pop() : file;

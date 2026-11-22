@@ -9,7 +9,9 @@
    ・身體會擋路：溫特（坐救生圈也一樣）穿不過去；碰到牠就開戰，被牠撞到會受傷、被彈開（潛在水裡也一樣）
    ・開戰後，牠附近生出來的怪物有 8 成是小丑魚幼體（js/anomalous-core.js 的 spawnCoreGroup 問 poolBossSpawnSpec）
    ・數值都在下面的 POOL_BOSS；必須在 clownfish.js、anomalous-core.js 之後、game.js 之前載入 */
-const POOL_BOSS = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const POOL_BOSS = applyBossSettings('POOL_BOSS', {
   name: '巨大比基尼小丑魚',
   maps: ['map_mv1bzur4'],     // 04. 池核
   of: 'clownfish',            // 以哪隻怪物為基準（怪物編輯器的比基尼小丑魚）
@@ -45,7 +47,7 @@ const POOL_BOSS = {
   nearSpawn: 14,              // 開戰後，牠幾格內生出來的怪物
   hatchlingChance: .8,        // 有幾成是小丑魚幼體
   hatchlingId: 'clownfish_small',
-};
+});
 
 const poolBossState = () => (typeof G !== 'undefined' && G && G.poolBoss) || null;
 const poolBossAlive = pb => !!(pb && pb.e && pb.e.hp > 0 && !pb.e.dead);
