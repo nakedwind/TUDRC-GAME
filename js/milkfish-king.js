@@ -1296,9 +1296,16 @@ function mkChaseTarget(e) {
 }
 // 從某一格出發、牠（大體型）走得到的那一整區：身體夠寬、不是牆、不是深水；建築可以吃掉／打掉，算走得過
 // 回傳 { set: 格子集合, edge: 邊緣的格子（旁邊有走不到的格子＝月台邊、牆邊）}
+let mkOpenMemo = null;
 function mkFlood(c0, r0) {
-  const open = (c, r) => inGrid(c, r) && !enemyWallCell(c, r) && enemyWideAt(c, r) && !(typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r)) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r))
-    && !(typeof mrtTrackCell === 'function' && mrtTrackCell(c, r));   // 軌道（含停著的列車車廂）：牠太大隻，不能把列車當路走，要等車開走再跳過去
+  // 每一格「牠站不站得下」記起來，地形沒變（mkWorldKey 一樣）就直接沿用：逐格判斷很花時間，不記的話每次掃都會卡一下
+  const wk = mkWorldKey();
+  if (!mkOpenMemo || mkOpenMemo.wk !== wk || mkOpenMemo.map !== MAP) mkOpenMemo = { wk, map: MAP, cells: new Map() };
+  const memo = mkOpenMemo.cells;
+  const open = (c, r) => { const k = c * 4096 + r; let v = memo.get(k); if (v === undefined) {
+    v = inGrid(c, r) && !enemyWallCell(c, r) && enemyWideAt(c, r) && !(typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r)) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r))
+      && !(typeof mrtTrackCell === 'function' && mrtTrackCell(c, r));   // 軌道（含停著的列車車廂）：牠太大隻，不能把列車當路走，要等車開走再跳過去
+    memo.set(k, v); } return v; };
   const k0 = c0 + ',' + r0, set = new Set([k0]), q = [[c0, r0]], edge = [];
   for (let i = 0; i < q.length && set.size < 8000; i++) {
     const [c, r] = q[i];
@@ -1313,11 +1320,13 @@ function mkFlood(c0, r0) {
   }
   return { set, edge };
 }
-// 牠現在走得到的那一區（每秒最多重算一次）
+// 地形有沒有變：建築數量、被打掉的地圖物件數量、開著的門數量（有變才重算走得到的範圍，不然要掃上千格，會讓遊戲每秒卡一下）
+const mkWorldKey = () => (G.obstacles ? G.obstacles.length : 0) + ':' + (G.mapDestroyed ? G.mapDestroyed.size : 0) + ':' + (typeof mapDoors !== 'undefined' ? mapDoors.reduce((n, d) => n + (d.open ? 1 : 0), 0) : 0);
+// 牠現在走得到的那一區：地形沒變、牠還在同一區就沿用（最多 8 秒重算一次保險）
 function mkReachInfo(e) {
-  const mk = e.mk, now = mkClock(), [c0, r0] = cellAt(e.x, e.y), k0 = c0 + ',' + r0;
-  if (mk.reach && mk.reach.at > now - 1 && mk.reach.set.has(k0)) return mk.reach;
-  return (mk.reach = { at: now, ...mkFlood(c0, r0) });
+  const mk = e.mk, now = mkClock(), [c0, r0] = cellAt(e.x, e.y), k0 = c0 + ',' + r0, wk = mkWorldKey();
+  if (mk.reach && mk.reach.wk === wk && mk.reach.at > now - 8 && mk.reach.set.has(k0)) return mk.reach;
+  return (mk.reach = { at: now, wk, ...mkFlood(c0, r0) });
 }
 const mkReach = e => mkReachInfo(e).set;
 // 走得到這個人（或點）嗎：看離他最近、牠站得下的那格在不在走得到的範圍裡
@@ -1329,21 +1338,31 @@ function mkJumpPlan(e, goal) {
   if (!land0) return null;
   const lk = land0[0] + ',' + land0[1];
   if (me.set.has(lk)) return { walk: true };
-  let other = mk.region && mk.region.at > mkClock() - 1 && mk.region.set.has(lk) ? mk.region : null;   // 目標那一區（每秒最多重算一次）
-  if (!other) other = mk.region = { at: mkClock(), ...mkFlood(land0[0], land0[1]) };
-  const R = C.jumpRange * CELL, lands = [land0, ...other.edge];
+  const wk = mkWorldKey();
+  let other = mk.region && mk.region.wk === wk && mk.region.at > mkClock() - 8 && mk.region.set.has(lk) ? mk.region : null;   // 目標那一區（地形沒變就沿用）
+  if (!other) other = mk.region = { at: mkClock(), wk, ...mkFlood(land0[0], land0[1]) };
+  const R = C.jumpRange * CELL, R2 = R * R, minD2 = (CELL * 1.5) ** 2;
+  // 落點先算好位置、濾掉超出追擊範圍的；「落地後還要走多遠」也先算好（不然兩邊邊緣每一對格子都要重算，會卡）
+  const lands = [];
+  for (const [lc, lr] of [land0, ...other.edge]) { const [lx, ly] = center(lc, lr); if (mkInChase(e, { x: lx, y: ly })) lands.push([lx, ly, Math.hypot(goal.x - lx, goal.y - ly) * .8]); }
+  // 落點大概在哪一塊：起跳點離這一塊太遠就整個略過
+  let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+  for (const [lx, ly] of lands) { bx0 = Math.min(bx0, lx); bx1 = Math.max(bx1, lx); by0 = Math.min(by0, ly); by1 = Math.max(by1, ly); }
   let best = null, bs = Infinity;
   for (const [tc, tr] of me.edge) {
     const [tx, ty] = center(tc, tr);
-    if (enemyBlocked(tx, ty, e)) continue;
+    if (tx < bx0 - R || tx > bx1 + R || ty < by0 - R || ty > by1 + R) continue;
     const walk = Math.hypot(tx - e.x, ty - e.y);
     if (walk >= bs) continue;
-    for (const [lc, lr] of lands) {
-      const [lx, ly] = center(lc, lr), d = Math.hypot(lx - tx, ly - ty);
-      if (d > R || d < CELL * 1.5 || !mkInChase(e, { x: lx, y: ly })) continue;
-      const sc = walk + Math.hypot(goal.x - lx, goal.y - ly) * .8 + d * .3;   // 走過去＋落地後還要走多遠＋跳多遠
-      if (sc < bs) { bs = sc; best = { from: { c: tc, r: tr, x: tx, y: ty }, land: { x: lx, y: ly } }; }
+    let bl = null, bsl = Infinity;
+    for (const L of lands) {
+      const dx = L[0] - tx, dy = L[1] - ty; if (dx > R || dx < -R || dy > R || dy < -R) continue;
+      const d2 = dx * dx + dy * dy; if (d2 > R2 || d2 < minD2) continue;
+      const sc = L[2] + Math.sqrt(d2) * .3;   // 落地後還要走多遠＋跳多遠
+      if (sc < bsl) { bsl = sc; bl = L; }
     }
+    if (!bl || walk + bsl >= bs || enemyBlocked(tx, ty, e)) continue;   // 走過去＋落地後還要走多遠＋跳多遠，挑最短的
+    bs = walk + bsl; best = { from: { c: tc, r: tr, x: tx, y: ty }, land: { x: bl[0], y: bl[1] } };
   }
   return best;
 }
