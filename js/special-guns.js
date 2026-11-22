@@ -486,7 +486,8 @@ function incShotPos(s) {
 // ---- 混亂彈：直線打出去，只打怪物（穿過隊員），打中的怪物陷入混亂 ----
 // 頭目（大隊長、宮主、珍珠大童、絲瓜女王、金蕉大王…）、生命體、鑽在地底的版權老鼠沒有效果
 // 虱目魚王、人面蝶后也不會混亂：以前漏掉，被阿瓦倫的腐蝕（每次攻擊混亂 3 秒）一直打，就會整場站在原地發呆、不攻擊
-const confuseImmune = e => !!(e.noStun || e.elite || e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.ratKing || e.ratKingHand || e.behavior === 'milkfishKing' || e.mothBoss || e.superArmor || e.dummy || (typeof burrowUnderground === 'function' && burrowUnderground(e)));
+// 葫蘆猴雖然「不會被定住」（noStun：麻醉、閃光、電擊麻痺都沒用），混亂彈照樣有效（2026-11-22 使用者要求）；葫蘆猴王還是免疫
+const confuseImmune = e => !!((e.noStun && e.behavior !== 'gourd') || e.elite || e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.ratKing || e.ratKingHand || e.behavior === 'milkfishKing' || e.mothBoss || e.superArmor || e.dummy || (typeof burrowUnderground === 'function' && burrowUnderground(e)));
 function fireConfuse(p, aim, b) {
   const S = SPECIAL_GUN.tranq, ang = Math.atan2(aim.y - p.y, aim.x - p.x);
   aimPose(p, ang);
