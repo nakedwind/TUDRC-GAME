@@ -1341,7 +1341,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "height": 110,
     "sleepHeight": 46,
     "speedMul": 2,
-    "flySpeedMul": 2.4,
+    "flySpeedMul": 1.2,
     "wakeRange": 7,
     "scream": 1.4,
     "flyDefense": 0.35,
@@ -1349,7 +1349,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "trailEvery": 0.55,
     "sky": {
       "chance": 0.5,
-      "up": 1.3,
+      "up": 2.6,
       "away": 1.6,
       "down": 1.5,
       "rise": 700,
@@ -1373,6 +1373,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "puffs": 16,
       "cover": 0.95
     },
+    "meleeLift": 70,
     "leaveTelegraph": 0.9,
     "grab": {
       "every": [
@@ -1380,16 +1381,17 @@ const BOSS_SETTINGS_DEFAULT = {
         14
       ],
       "first": 4,
-      "range": 6,
+      "range": 10,
       "warn": 0.8,
-      "dive": 1.3,
-      "diveSpeedMul": 1.6,
+      "dive": 1.6,
+      "diveSpeedMul": 4,
       "diveLift": 40,
       "reach": 0.8,
       "circle": 3,
       "carryLift": 260,
       "circleR": 2.5,
       "circleSpeed": 1.8,
+      "carrySpeedMul": 2.4,
       "breakDmg": 0.05
     },
     "coreShield": 0.5,

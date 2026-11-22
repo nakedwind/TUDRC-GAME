@@ -624,6 +624,7 @@ function mothConfusedSay(t, victim) {
 // 近戰隊員打飛在空中的人面蝶：有 meleeMiss 的機率打不到
 const MOTH_MELEE_TYPES = new Set(['red', 'luther', 'avaren', 'colyn']);
 function mothDodgesMelee(t, target) {
+  if (target && target.mothBoss && typeof mothBossDodgesMelee === 'function') return MOTH_MELEE_TYPES.has(t.type) && mothBossDodgesMelee(target);   // 人面蝶后：飛得高就一定打不到、飛低才打得到（js/moth-boss.js）
   return !!(target && target.behavior === 'moth' && MOTH_MELEE_TYPES.has(t.type) && Math.random() < MOTH.meleeMiss);
 }
 

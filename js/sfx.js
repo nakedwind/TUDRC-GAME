@@ -245,6 +245,7 @@ const SFX = (() => {
     mothSpray: '怪物/人面蝶/撒麟粉.mp3',
     mothHurt: '怪物/人面蝶/人面蝶被打.mp3',
     mothDeath: '怪物/人面蝶/人面蝶死掉.mp3',
+    mothGrab: '怪物/人面蝶/人面蝶后抓人（暫用）.wav',   // 人面蝶后俯衝抓人（暫用合成的音效，之後在音效編輯器換）
     // 環境背景音：Y 區地圖一直循環播放（js/ambience.js）
     whiteNoise: '環境/白噪音.mp3',
     poolDrip: '滴水聲.mp3',

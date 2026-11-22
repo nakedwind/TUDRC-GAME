@@ -9,7 +9,8 @@
    - 築巢：飛到那一區後把核心放在地上（這時候核心打得到），在附近繞著目標飛、撒那一區的鱗粉：
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
    - 大面積撒粉：築巢時有人在這一區，每隔幾秒翅膀發光、地上出現那一區顏色的圓圈預告，接著把整個區域撒滿鱗粉（MOTH_BOSS.burst）。
-   - 抓人：築巢時偶爾盯上溫特或隊員（MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
+   - 平常飛在高空：近戰隊員打不到（meleeLift），只能靠槍；俯衝下來抓人、睡覺時飛得低才打得到。
+   - 抓人：築巢時偶爾盯上溫特或隊員（一半機率抓溫特、一半抓隊員；MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
            用手（抱核心的地方）抓著飛到高空繞圈幾秒（grab.circle）再丟下來（落點一定是走得到的地方，不會丟進牆裡；摔下來借用藤蔓丟人那一套：彈兩下、躺著暈、扣血）。
            抓著人的時候被打到一定的傷害（grab.breakDmg）就會鬆手，提早把人丟下來。
    - 核心護盾：人面蝶后活著的時候，牠的核心受到的傷害 × (1 - coreShield)。
@@ -51,7 +52,7 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   height: 110,                   // 平常飛多高（像素）
   sleepHeight: 46,               // 沉睡時停多高
   speedMul: 2,                   // 在巢附近飛的速度倍率（以一般人面蝶為基準）
-  flySpeedMul: 2.4,              // 換區時再乘這個倍率（抱著核心飛走）
+  flySpeedMul: 1.2,              // 換區時再乘這個倍率（抱著核心飛走；2026-11-23 使用者要慢一半：2.4 → 1.2）
   wakeRange: 7,                  // 溫特走到幾格內（看得到）就驚醒
   scream: 1.4,                   // 尖叫幾秒（驚醒、換區前）
   flyDefense: .35,               // 飛行換區時受到的傷害倍率
@@ -60,20 +61,21 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // 飛向鏡頭（換區時有機會用這種方式）：chance＝機率、up＝往上飛走幾秒、away＝消失在畫面外幾秒、down＝飛回來幾秒、
   // rise＝最高再往上飛幾像素（要飛出畫面）、grow＝最大時體型再加幾倍（1.2＝變成 2.2 倍）、
   // fadeFrom＝飛走時飛到幾成開始淡出（0.2＝前 2 成清楚，之後越來越透明，飛出畫面時完全看不到）
-  sky: { chance: .5, up: 1.3, away: 1.6, down: 1.5, rise: 700, grow: 1.2, fadeFrom: .2 },
+  sky: { chance: .5, up: 2.6, away: 1.6, down: 1.5, rise: 700, grow: 1.2, fadeFrom: .2 },
   leash: 8,                      // 築巢時離巢最遠飛幾格（目標跑太遠就回巢）
   orbit: { min: 1.6, max: 3.2 }, // 繞著目標飛：離目標最近、最遠幾格
   nestOrbit: 2.2,                // 沒有目標時繞著巢飛的半徑（格）
   // 大面積撒粉（築巢時、這一區有目標才會撒）：every＝每隔幾秒一次（最短～最長）、first＝到巢後第一次等幾秒、
   // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
   burst: { every: [7, 10], first: 2.5, telegraph: 1.6, time: 1.2, puffs: 16, cover: .95 },
+  meleeLift: 70,                 // 飛得比這個高（像素）時，近戰隊員（雷德、路德、阿瓦倫、柯林）打不到牠；俯衝抓人、睡覺時飛得低才打得到
   leaveTelegraph: .9,            // 飛走前在原地大範圍撒粉：預告幾秒（撒的團數、範圍跟 burst 一樣）
-  // 抓人：every＝每隔幾秒抓一次（最短～最長）、first＝到巢後第一次等幾秒、range＝離溫特／隊員幾格內才會去抓、
+  // 抓人：every＝每隔幾秒抓一次（最短～最長）、first＝到巢後第一次等幾秒、range＝離溫特／隊員幾格內才會去抓（一半機率抓溫特、一半抓隊員）、
   // warn＝俯衝前預告幾秒（尖叫、地上紅圈）、dive＝俯衝最久幾秒（沒碰到就撲空）、diveSpeedMul＝俯衝的速度倍率、diveLift＝俯衝時飛多低（像素）、
   // reach＝離目標幾格內算抓到、circle＝抓起來後在高空繞幾秒才丟下、carryLift＝抓著人時飛多高（像素）、
-  // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、
+  // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、carrySpeedMul＝抓著人繞圈時的飛行速度倍率、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手
-  grab: { every: [10, 14], first: 4, range: 6, warn: .8, dive: 1.3, diveSpeedMul: 1.6, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: 1.8, breakDmg: .05 },
+  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: 1.8, carrySpeedMul: 2.4, breakDmg: .05 },
   coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });
@@ -488,6 +490,9 @@ function mbBurst(e, dt, z, hasTarget, opt = {}) {
   }
   return true;
 }
+// 近戰打得到牠嗎（js/human-face-butterfly.js 的 mothDodgesMelee 呼叫）：飛得比 meleeLift 高就打不到，只能用槍
+function mothBossDodgesMelee(e) { return (e.slimeLift || 0) > MOTH_BOSS.meleeLift; }
+
 // ---- 抓人 ----
 // 這個人能不能被抓（借用 js/vines.js 的判斷：沒被藤蔓、狂風吊著，沒在暈、沒剛被丟下來…）
 function mbCanGrab(e, a) {
@@ -500,8 +505,10 @@ function mbTryGrab(e, dt, home) {
   mb.grabCd = (mb.grabCd ?? C.first) - dt;
   if (mb.grabCd > 0) return false;
   const ok = a => mbCanGrab(e, a) && mbDist(a, e) <= C.range * CELL && mbDist(a, home) <= (MOTH_BOSS.leash + 2) * CELL;
-  let a = ok(e.mo.target) ? e.mo.target : null;
-  if (!a) { let best = Infinity; for (const o of [G.player, ...(G.towers || [])]) if (ok(o) && mbDist(o, e) < best) { best = mbDist(o, e); a = o; } }
+  // 一半機率抓溫特、一半抓隊員（隊員從抓得到的裡面隨機挑一個）；想抓的那一邊沒人可抓，就抓另一邊
+  const mates = (G.towers || []).filter(ok), playerOk = ok(G.player);
+  const pickMate = () => mates.length ? mates[Math.floor(Math.random() * mates.length)] : null;
+  let a = Math.random() < .5 ? (playerOk ? G.player : pickMate()) : (pickMate() || (playerOk ? G.player : null));
   if (!a) { mb.grabCd = 1; return false; }   // 附近沒人：等一下再看
   mb.victim = a; mb.swoopT = 0; mb.ringT = 0;
   e.mo.spray = null;
@@ -543,7 +550,7 @@ function mbGrabVictim(e, a) {
   flash(isPlayer ? '被' + MOTH_BOSS.name + '抓走了！' : '隊員被抓走了！', a.x, a.y - 60, '#ff8fb0', .9);
   if (isPlayer && typeof addShake === 'function') addShake(3);
   G.effects.push({ ring: true, x: a.x, y: a.y + 8, r: 8, r2: 46, life: .35, life0: .35, color: '#ff8fb0' });
-  if (typeof sfxAt === 'function') sfxAt('vineGrab', a.x, a.y, .8, 'moth-boss-grab');
+  if (typeof sfxAt === 'function') sfxAt('mothGrab', a.x, a.y, 1, 'moth-boss-grab');   // 人面蝶后抓人（音效編輯器可換檔）
 }
 // 蝶后的手在畫面上的位置（跟抱核心同一個點 MOTH_BOSS_CORE_ART；圖朝右時左右翻過來）
 function mbHandPoint(e) {
@@ -561,10 +568,12 @@ function mbCarryHold(e, dt) {
   const hand = mbHandPoint(e), k = Math.min(1, c.t / .25);   // 剛抓到的 0.25 秒內從腳下慢慢抬到手上
   c.cap.x0 = c.from.x + (hand.x - c.from.x) * k; c.cap.y0 = c.from.y + (e.y - c.from.y) * k;
   c.cap.h = Math.max(0, c.cap.y0 - hand.y - MB_HELD_SHOULDER) * k;
-  if (c.cap.isPlayer && dt > 0 && typeof viewW === 'function') {   // 溫特被抓：鏡頭慢慢跟著他（js/vines.js 的 vineCameraHold 照 cap.camX、camY 擺鏡頭）
+  if (c.cap.isPlayer && dt > 0 && typeof viewW === 'function') {   // 溫特被抓：鏡頭跟著空中的溫特和蝶后（js/vines.js 的 vineCameraHold 照 cap.camX、camY 擺鏡頭）
     const mapW = COLS * CELL, mapH = ROWS * CELL, vw = viewW(), vh = viewH();
-    const tx = mapW <= vw ? (mapW - vw) / 2 : Math.max(0, Math.min(mapW - vw, e.x - vw / 2));
-    const ty = mapH <= vh ? (mapH - vh) / 2 : Math.max(0, Math.min(mapH - vh, e.y - vh / 2));
+    // 對準「溫特的腳」和「蝶后的頭頂」中間：兩個都在空中，只跟著地面的話會跑出畫面上方
+    const feetY = c.cap.y0 - c.cap.h, topY = e.y + 13 - e.slimeLift - e.drawHeight, fx = c.cap.x0, fy = (feetY + topY) / 2;
+    const tx = mapW <= vw ? (mapW - vw) / 2 : Math.max(0, Math.min(mapW - vw, fx - vw / 2));
+    const ty = mapH <= vh ? (mapH - vh) / 2 : Math.max(0, Math.min(mapH - vh, fy - vh / 2));
     const k = Math.min(1, dt * 4);
     c.cap.camX += (tx - c.cap.camX) * k; c.cap.camY += (ty - c.cap.camY) * k;
   }
@@ -576,7 +585,7 @@ function mbCarry(e, dt) {
   c.t += dt;
   c.ang += C.circleSpeed * dt;
   const R = C.circleR * CELL;
-  mothFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, MOTH_BOSS.flySpeedMul);
+  mothFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, C.carrySpeedMul);
   mbCarryHold(e, dt);
   if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }
   if (c.t >= C.circle) mbRelease(e);
