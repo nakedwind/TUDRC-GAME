@@ -654,7 +654,7 @@ function mkCoreLand(s) {
   core.x = s.x1; core.y = s.y1; core.carried = false; core.hidden = false; core.lastHp = core.hp; core.hitT = .2;
   G.effects.push({ ring: true, x: core.x, y: core.y + 10, r: 6, r2: 50, life: .4, life0: .4, color: '#c78bff' });
   if (typeof bossImpact === 'function') bossImpact(core.x, core.y, 6, .05);
-  if (typeof coreBanner === 'function') coreBanner('核心掉出來了', '趁牠還沒吞回去，快打核心！', '#ffd27a');
+  if (typeof coreBanner === 'function') coreBanner('核心掉出來了', '', '#ffd27a');
   if (typeof sfxAt === 'function') sfxAt('knock2', core.x, core.y, 1, 'milkfish-king-core-land');
 }
 

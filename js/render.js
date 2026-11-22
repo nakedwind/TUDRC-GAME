@@ -88,7 +88,7 @@ function drawObstacle(o) {
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)';
     const label = '基地 HP ' + Math.max(0, Math.ceil(o.hp)) + ' / ' + o.maxhp;
     ctx.strokeText(label, x + w / 2, barY - 4); ctx.fillStyle = '#fff'; ctx.fillText(label, x + w / 2, barY - 4);
-  } else if (o.hp < o.maxhp) {   // 一般障礙物受損才顯示血條
+  } else if (o.hp < o.maxhp && !(typeof isRock === 'function' && isRock(o))) {   // 一般障礙物受損才顯示血條；地圖上的石頭不顯示（js/rocks.js）
     ctx.fillStyle = '#000'; ctx.fillRect(x + 2, y + h - 6, w - 4, 4);
     ctx.fillStyle = '#c9a26a'; ctx.fillRect(x + 2, y + h - 6, (w - 4) * Math.max(0, o.hp) / o.maxhp, 4);
   }
