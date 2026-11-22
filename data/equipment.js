@@ -222,9 +222,10 @@ for (const id in BULLET_TUNING.bullets) if (BULLETS[id]) Object.assign(BULLETS[i
 // 沒指定內容物的彈藥箱（js/flare.js）：empty＝整箱是空的機率；ammo＝開出特殊子彈的機率（比置物櫃的 GUN_FINDS.ammo 高）；ammoCount＝開到特殊子彈時給幾發（一組＝BULLET_SET 發；置物櫃照下面 GUN_FINDS.ammoFind）；其他物品跟置物櫃一樣照 ITEM_DROPS
 const AMMO_CRATE_LOOT = { empty: .05, ammo: .8, ammoCount: BULLET_SET };
 // ammo＝置物櫃（沒指定內容物）開出特殊子彈的機率
+// ammoFind、start 都是一組（BULLET_SET＝20 發）：置物櫃不管是隨機開到、還是地圖上指定的內容物，開到子彈都給一整組
 const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal', 'sticky'],
-  ammoFind: { incendiary: 2, flash: 2, shock: 2, heal: 10, tranq: 3, paint: 4, sticky: 2, knock: 3, confuse: 3 },
-  start: { incendiary: 3, flash: 3, shock: 4, heal: 2, tranq: 5, paint: 6, sticky: 3, knock: 4, confuse: 4 } };
+  ammoFind: { incendiary: BULLET_SET, flash: BULLET_SET, shock: BULLET_SET, heal: BULLET_SET, tranq: BULLET_SET, paint: BULLET_SET, sticky: BULLET_SET, knock: BULLET_SET, confuse: BULLET_SET },
+  start: { incendiary: BULLET_SET, flash: BULLET_SET, shock: BULLET_SET, heal: BULLET_SET, tranq: BULLET_SET, paint: BULLET_SET, sticky: BULLET_SET, knock: BULLET_SET, confuse: BULLET_SET } };
 // ===== 彈匣（js/magazine.js）：在背包「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪只換得到彈匣裡的 =====
 // free：不佔彈匣、一定帶著；跟裝備一樣最高 Lv5（slots 要有 5 筆、cost 有 4 筆）；slots[等級-1]＝彈匣裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
 const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5, 6], cost: [150, 250, 380, 520], name: '彈匣', icon: '🧰', image: 'images/裝備/magazine.png' };   // image：開發工坊的圖（沒有就用 icon）
