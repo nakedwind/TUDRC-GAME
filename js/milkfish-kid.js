@@ -104,7 +104,7 @@ function mfEdible(o) {
   if ((o.w || 1) !== 1 || (o.h || 1) !== 1) return false;
   return obstacleSolidCells(o).length <= 1 && G.obstacles.includes(o);
 }
-const mfItemCenter = o => ({ x: OX + (o.c + .5) * CELL, y: OY + (o.r + .5) * CELL });
+const mfItemCenter = o => ({ x: OX + (o.c + .5) * CELL + obstacleOff(o)[0], y: OY + (o.r + .5) * CELL + obstacleOff(o)[1] });   // 微調過位置的地圖物件也對齊
 // 可以吃的隊友：活著、沒暴走、沒被吃、看得到
 const mfEdibleMate = (e, t) => t.hp > 0 && !t.berserk && !t.eatenBy && enemyNoticesSentry(e, t);
 function mfPickMate(e) {

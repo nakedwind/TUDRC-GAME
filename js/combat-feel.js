@@ -294,7 +294,7 @@ function slimeExplodeNow(e, mul) {
   for (const o of [...G.obstacles]) {
     if (!blastHits(o)) continue;   // 不同樓層的建築炸不到
     if (o.trap) {   // 地雷：被炸到會跟著爆（連鎖）
-      if (o.hp > 0 && !(o.fuseT > 0) && Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15;
+      if (o.hp > 0 && !(o.fuseT > 0) && (() => { const m = mineCenter(o); return Math.hypot(m.x - x, m.y - y); })() <= R) o.fuseT = .15;
       continue;
     }
     if (typeof oilItem === 'function' && oilItem(o)) {   // 油桶：被炸到會跟著爆（連鎖）

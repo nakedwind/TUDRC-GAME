@@ -31,7 +31,7 @@ function enemyAttackObstacle(e, o, dt) {
   if (o.type === 'camping_lights') { e.attackingObstacle = null; return; }
   e.attackingObstacle = o;
   e.atkCd = (e.atkCd || 0) - dt;
-  const ox = OX + (o.c + (o.w || 1) / 2) * CELL, oy = OY + (o.r + (o.h || 1) / 2) * CELL;
+  const ox = OX + (o.c + (o.w || 1) / 2) * CELL + obstacleOff(o)[0], oy = OY + (o.r + (o.h || 1) / 2) * CELL + obstacleOff(o)[1];   // 微調過位置的地圖物件：打在圖上
   monsterSwingCue(e, e.atkCd, ox, oy);
   if (e.atkCd > 0) return;
   e.atkCd = BARRIER.breakInterval;

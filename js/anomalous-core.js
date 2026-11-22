@@ -66,7 +66,8 @@ function mapFloorCells() {
   for (const layer of Object.values((MAP && MAP.layers) || {})) if (layer) for (const k of Object.keys(layer)) if (layer[k]) set.add(k);
   for (const st of (MAP && MAP.stamps) || []) {
     const t = mapTileById(st.id); if (!t) continue;
-    for (let dc = 0; dc < mapStampW(st, t); dc++) for (let dr = 0; dr < mapStampH(st, t); dr++) set.add((st.c + dc) + ',' + (st.r + dr));
+    const c0 = st.c + Math.round((st.ox || 0) / CELL), r0 = st.r + Math.round((st.oy || 0) / CELL);   // 微調過的物件：照圖實際蓋到的格子
+    for (let dc = 0; dc < mapStampW(st, t); dc++) for (let dr = 0; dr < mapStampH(st, t); dr++) set.add((c0 + dc) + ',' + (r0 + dr));
   }
   floorCellsCache = { map: MAP, set };
   return set;

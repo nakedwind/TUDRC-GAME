@@ -132,7 +132,8 @@ function mothLamps() {
   return B ? G.obstacles.filter(o => o.hp > 0 && B[o.type]) : [];
 }
 function mothLampSpot(o) {   // 停在燈頭上：腳底座標放在燈的最下排，飛高一點對準燈頭
-  return { x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + (o.h || 1)) * CELL - 2, lift: (o.h || 1) * CELL * .5 + 10 };
+  const [dx, dy] = obstacleOff(o);   // 地圖上微調過位置的燈
+  return { x: OX + (o.c + (o.w || 1) / 2) * CELL + dx, y: OY + (o.r + (o.h || 1)) * CELL - 2 + dy, lift: (o.h || 1) * CELL * .5 + 10 };
 }
 
 // ---- 行為（enemy-ai.js 的 stepEnemy 呼叫）----

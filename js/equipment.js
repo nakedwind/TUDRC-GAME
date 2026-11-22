@@ -313,7 +313,7 @@ function useEyeDrops() {
 // ・R 平常是手動裝填彈匣（js/game.js）；有「R 修理」提示時 R 改成修理。
 // ・地雷不算；地圖上本來就有的障礙物、礦石、被打壞（HP 歸零）的也不修。數值都在 data/equipment.js 的 TOOLBOX。
 const toolboxRepairable = o => (o.isBase || (o.playerBuilt && !o.trap)) && o.hp > 0 && o.maxhp > 0 && o.hp < o.maxhp;
-const toolboxRect = o => ({ x: OX + o.c * CELL, y: OY + o.r * CELL, w: (o.w || 1) * CELL, h: (o.h || 1) * CELL });
+const toolboxRect = o => ({ x: o.artX ?? OX + o.c * CELL, y: o.artY ?? OY + o.r * CELL, w: (o.w || 1) * CELL, h: (o.h || 1) * CELL });   // artX／artY：基地本體照圖的位置（微調過也對齊）
 // 溫特到建築最近的那一點有多遠（px）：大建築站在任何一邊都算得到
 function toolboxDist(o, p) {
   const r = toolboxRect(o), dx = Math.max(r.x - p.x, 0, p.x - (r.x + r.w)), dy = Math.max(r.y - p.y, 0, p.y - (r.y + r.h));

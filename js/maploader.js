@@ -72,6 +72,9 @@ const mapTileById = id => TILE_REGISTRY[id];
 const mapTileW = t => (t && t.w) || 1;
 const mapTileH = t => (t && t.h) || 1;
 const mapStampTurn = s => ((Number(s && s.rot) || 0) % 4 + 4) % 4;
+// 地圖物件變成的建築／礦物／油桶…：用方向鍵微調過位置時，c、r 是最近的格子，剩下不到半格的像素在 o.off（見下面 seedMapObstacles）。
+// 算這種東西的中心、光源、爆炸範圍時要加上這段像素，判定才會跟畫面上的圖對齊
+const obstacleOff = o => (o && o.off) || [0, 0];
 const mapStampW = (s, t) => mapStampTurn(s) % 2 ? mapTileH(t) : mapTileW(t);
 const mapStampH = (s, t) => mapStampTurn(s) % 2 ? mapTileW(t) : mapTileH(t);
 function mapStampCells(cells, w, h, rot) {
@@ -537,7 +540,9 @@ function seedOtherMapObstacles() {
     const glow = LIGHT.buildings && LIGHT.buildings[spec.type];
     if (glow && !(spec.solid || []).length) {   // 露營燈：不擋路，但要擺上場才會發光（跟玩家自己放的一樣）；同一格不同圖層各畫一盞只算一盞
       if (G.obstacles.some(o => o.mapSource && o.type === spec.type && o.c === c && o.r === r)) return;
-      G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w, h, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0 });
+      const lamp = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w, h, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0 };
+      if (stamp) { const ox = stamp.ox || 0, oy = stamp.oy || 0, off = [ox - Math.round(ox / CELL) * CELL, oy - Math.round(oy / CELL) * CELL]; if (off[0] || off[1]) lamp.off = off; }   // 微調過的燈：光跟著圖走
+      G.obstacles.push(lamp);
       return;
     }
     const solid0 = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))
@@ -780,7 +785,7 @@ function hasImageAt(c, r) {
   if (!MAP) return false;
   const key = c + ',' + r;
   for (const lid of MAP_LAYER_ORDER) if (MAP.layers && MAP.layers[lid] && MAP.layers[lid][key]) return true;
-  for (const s of (MAP.stamps || [])) { const t = mapTileById(s.id) || {}; if (c >= s.c && c < s.c + mapStampW(s, t) && r >= s.r && r < s.r + mapStampH(s, t)) return true; }
+  for (const s of (MAP.stamps || [])) { const t = mapTileById(s.id) || {}, sc = s.c + Math.round((s.ox || 0) / CELL), sr = s.r + Math.round((s.oy || 0) / CELL); if (c >= sc && c < sc + mapStampW(s, t) && r >= sr && r < sr + mapStampH(s, t)) return true; }   // 微調過的物件：照圖實際蓋到的格子
   return false;
 }
 

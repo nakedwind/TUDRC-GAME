@@ -15,6 +15,14 @@ function propCollisionList() {
   const base = typeof PROP_COLLISIONS !== 'undefined' ? PROP_COLLISIONS : [];
   return base.map(o => (Array.isArray(edited) && edited.find(e => e.id === o.id)) || o);
 }
+// 物件設定的擋路格放到地圖上：照轉向（地圖編輯器按 R 轉 90 度）、翻轉算出每一格；c0、r0＝物件左上角那一格（已含微調）
+// 跟障礙物、礦物一樣的轉法（js/maploader.js 的 mapStampCells），以前沒算轉向：轉過的販賣機擋的是沒轉時的格子
+function propStampCells(s, v, c0, r0) {
+  const rot = typeof mapStampTurn === 'function' ? mapStampTurn(s) : 0, W = rot % 2 ? v.h : v.w, H = rot % 2 ? v.w : v.h;
+  const inside = (v.solid || []).filter(([dc, dr]) => dc >= 0 && dr >= 0 && dc < v.w && dr < v.h);
+  const turned = typeof mapStampCells === 'function' ? mapStampCells(inside, v.w, v.h, rot) : inside;
+  return turned.map(([dc, dr]) => [c0 + (s.fx ? W - 1 - dc : dc), r0 + (s.fy ? H - 1 - dr : dr)]);
+}
 // 地圖上每個物件設定的每一個擋路格都叫一次 fn(格子, 像素微調, 是不是 2 樓地面上的格子, 是不是兩層都要擋)
 function eachPropSolidCell(fn) {
   const byTile = new Map(propCollisionList().map(o => [o.tile, o]));
@@ -26,9 +34,8 @@ function eachPropSolidCell(fn) {
     // 四捨五入到最近的格子，剩下的 ±半格用像素微調補上（往下取整的話，往上微調幾像素就會整塊跑到上一列，可能剛好疊在牆上被略過）
     const c0 = s.c + Math.round(ox / CELL), r0 = s.r + Math.round(oy / CELL);
     const off = [ox - Math.round(ox / CELL) * CELL, oy - Math.round(oy / CELL) * CELL];
-    for (const [dc, dr] of v.solid || []) {
-      if (dc < 0 || dr < 0 || dc >= v.w || dr >= v.h) continue;
-      const c = c0 + (s.fx ? v.w - 1 - dc : dc), r = r0 + (s.fy ? v.h - 1 - dr : dr), key = c + ',' + r;
+    for (const [c, r] of propStampCells(s, v, c0, r0)) {
+      const key = c + ',' + r;
       if (inGrid(c, r)) fn(key, off, on2F && deckCells.has(key), both);
     }
   }
@@ -38,11 +45,7 @@ function eachPropSolidCell(fn) {
 function propCellsOfStamp(s, tileId) {
   const cfg = propCollisionList().find(o => o.tile === tileId), v = cfg && cfg.h; if (!v) return [];
   const ox = s.ox || 0, oy = s.oy || 0, c0 = s.c + Math.round(ox / CELL), r0 = s.r + Math.round(oy / CELL), out = [];
-  for (const [dc, dr] of v.solid || []) {
-    if (dc < 0 || dr < 0 || dc >= v.w || dr >= v.h) continue;
-    const c = c0 + (s.fx ? v.w - 1 - dc : dc), r = r0 + (s.fy ? v.h - 1 - dr : dr);
-    if (inGrid(c, r)) out.push(c + ',' + r);
-  }
+  for (const [c, r] of propStampCells(s, v, c0, r0)) if (inGrid(c, r)) out.push(c + ',' + r);
   return out;
 }
 function setupPropCollisions() {

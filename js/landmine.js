@@ -8,7 +8,7 @@
 const LANDMINE = { trigger: .45, fuse: 1, radius: 1.6, damage: 150, sentry: 60, player: 40 };
 
 const isLandmine = o => !!(o && o.trap);
-function mineCenter(o) { return { x: OX + (o.c + .5) * CELL + (o.mrtShift || 0), y: OY + (o.r + .5) * CELL }; }   // mrtShift：放在捷運車廂裡、跟著列車移動（js/mrt-train.js）
+function mineCenter(o) { const [dx, dy] = obstacleOff(o); return { x: OX + (o.c + .5) * CELL + dx + (o.mrtShift || 0), y: OY + (o.r + .5) * CELL + dy }; }   // obstacleOff：地圖上微調過位置的地雷   // mrtShift：放在捷運車廂裡、跟著列車移動（js/mrt-train.js）
 function landmineAt(c, r) { return G.obstacles.find(o => isLandmine(o) && o.c === c && o.r === r) || null; }
 
 // ---- 每幀更新（在 update 裡呼叫）----

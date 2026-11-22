@@ -40,7 +40,8 @@ function oilItemByFile(file) {
 }
 // 油桶站立的位置（最下面那一格的中心）
 function oilCenter(o) {
-  return { x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + (o.h || 1) - .5) * CELL };
+  const [dx, dy] = obstacleOff(o);   // 地圖上微調過位置的油桶（js/maploader.js）
+  return { x: OX + (o.c + (o.w || 1) / 2) * CELL + dx, y: OY + (o.r + (o.h || 1) - .5) * CELL + dy };
 }
 // 給玩家瞄準用的「假目標」：跟怪物一樣有 x／y／hp，打中時轉成對油桶的傷害
 function oilProxy(o) {
@@ -164,7 +165,7 @@ function oilExplode(x, y, it) {
   }
   for (const o of G.obstacles) {   // 地雷也會被引爆（油桶炸不開礦物，但可以引爆旁邊的地雷去炸）
     if (!o.trap || o.hp <= 0 || o.fuseT > 0 || !blastHits(o)) continue;
-    if (Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15 + Math.random() * .1;
+    const c = mineCenter(o); if (Math.hypot(c.x - x, c.y - y) <= R) o.fuseT = .15 + Math.random() * .1;
   }
   igniteSlicksNear(x, y, R);
   if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 油桶、油箱、瓦斯爐爆炸皆可炸開附近異質礦物（js/ore.js）
