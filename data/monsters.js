@@ -384,8 +384,8 @@ const MONSTERS_DEFAULT = [
     "behavior": "milkfishKing",
     "mfKing": {
       "noticeRange": 8,
-      "leash": 14,
-      "eatSense": 7,
+      "leash": 40,
+      "eatSense": 12,
       "chewTime": 1,
       "bellyMax": 6,
       "maxPrey": 2,
