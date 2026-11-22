@@ -76,7 +76,7 @@ function landGrab(a) {
   if (!G.towers.includes(a)) return;
   Object.assign(a, { mode: 'hold', anchor: { x: a.x, y: a.y }, guardSummoned: false, guardBase: null, summonDark: false, darkResumeTarget: null });
   a.grabDark = typeof personnelInLight === 'function' && !personnelInLight(a.x, a.y);   // 掉在黑暗裡：走到亮處後改在那裡巡邏
-  if (a.hp > 0 && !a.berserk) sentryStatus(a, '在這裡巡邏');
+  if (a.hp > 0 && !a.berserk) sentryStatus(a, '在原地巡邏');
 }
 function grabLandFx(a, big, v = 0) {
   a.grabSquash = { t: 0, amp: Math.min(GRAB.squash, .06 + v * .0005) };   // 落地壓扁：撞得越用力扁越多
