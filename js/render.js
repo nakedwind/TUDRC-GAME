@@ -182,7 +182,10 @@ function drawCharacterShadow(actor) {
   ctx.fillStyle = 'rgba(0,0,0,.3)';
   ctx.beginPath();
   const down = actor.hp <= 0;
-  ctx.ellipse(actor.x + (down ? 10 : 0), actor.y + (down ? 5 : 15), 15, 5, 0, 0, Math.PI * 2);
+  // 被麻醉針、睡眠鱗粉弄睡而側身倒在地上：影子往頭那一側挪 12 像素（倒下、爬起來的過程中跟著慢慢移；js/human-face-butterfly.js 的 mothSleepPose）
+  const pose = !down && (actor.mothSleep || actor.mothWakeT > 0) && typeof mothSleepPose === 'function' ? mothSleepPose(actor) : null;
+  const lieX = pose ? Math.sin(pose.angle || 0) * 12 : 0;   // 往左倒＝頭在左邊 → 影子往左；往右倒就往右
+  ctx.ellipse(actor.x + (down ? 10 : lieX), actor.y + (down ? 5 : 15), 15, 5, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
