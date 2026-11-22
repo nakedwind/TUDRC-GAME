@@ -86653,7 +86653,8 @@ const BATTLE_MAPS = [
         "43,11": "tile_obstacle_ore_small"
       },
       "object13": {},
-      "object14": {}
+      "object14": {},
+      "object15": {}
     },
     "stamps": [
       {
@@ -88893,14 +88894,6 @@ const BATTLE_MAPS = [
         "c": 27,
         "r": 104,
         "layer": "object"
-      },
-      {
-        "id": "tile_obstacle_searchlight_h",
-        "c": 29,
-        "r": 92,
-        "layer": "object",
-        "ox": 10,
-        "oy": 10
       },
       {
         "id": "tile_obstacle_searchlight_h",
@@ -94993,14 +94986,13 @@ const BATTLE_MAPS = [
         "fx": true,
         "scale": 80,
         "ox": 10,
-        "oy": 20
+        "oy": 10
       },
       {
         "id": "tile_obstacle_ore_coal",
         "c": 33,
         "r": 28,
         "layer": "object3",
-        "oy": 10,
         "fx": true,
         "scale": 135,
         "ox": 10
@@ -95166,10 +95158,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_coal",
-        "c": 33,
+        "c": 32,
         "r": 24,
         "layer": "object3",
-        "oy": 30
+        "ox": 20
       },
       {
         "id": "tile_obstacle_ore_rare",
@@ -95194,11 +95186,9 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_obstacle_ore_limestone",
-        "c": 32,
+        "c": 33,
         "r": 37,
-        "layer": "object3",
-        "oy": 10,
-        "ox": 10
+        "layer": "object3"
       },
       {
         "id": "tile_obstacle_ore_manganese",
@@ -95925,15 +95915,6 @@ const BATTLE_MAPS = [
         "r": 76,
         "layer": "ground3",
         "ox": 10,
-        "fx": true
-      },
-      {
-        "id": "tile_obstacle_ore_small",
-        "c": 34,
-        "r": 38,
-        "layer": "ground3",
-        "ox": 10,
-        "oy": 20,
         "fx": true
       },
       {
@@ -96902,6 +96883,114 @@ const BATTLE_MAPS = [
         "r": 109,
         "layer": "object",
         "ox": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 61,
+        "r": 112,
+        "layer": "object15",
+        "ox": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 29,
+        "r": 106,
+        "layer": "object15",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 19,
+        "r": 93,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 59,
+        "r": 82,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 33,
+        "r": 70,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 45,
+        "r": 56,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 43,
+        "r": 36,
+        "layer": "object15",
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 38,
+        "r": 76,
+        "layer": "object15",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 38,
+        "r": 20,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 33,
+        "r": 60,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 75,
+        "r": 76,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_pickup_almond_water",
+        "c": 75,
+        "r": 89,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 18,
+        "r": 63,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 6,
+        "r": 39,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
       }
     ],
     "solid": [
@@ -104894,9 +104983,6 @@ const BATTLE_MAPS = [
     "hiddenPickups": [],
     "cols": 86,
     "rows": 124,
-    "edges": [
-      "53,115,B"
-    ],
     "layerOrder": [
       {
         "id": "floor",
@@ -104905,6 +104991,10 @@ const BATTLE_MAPS = [
       {
         "id": "object5",
         "name": "新圖層"
+      },
+      {
+        "id": "object15",
+        "name": "物資"
       },
       {
         "id": "ground",
@@ -106752,7 +106842,11 @@ const BATTLE_MAPS = [
       "49,47",
       "61,74",
       "61,77",
-      "61,78"
+      "61,78",
+      "66,28",
+      "66,29",
+      "67,29",
+      "67,28"
     ],
     "deckAuto": true,
     "deckAdd": [
@@ -143928,7 +144022,7 @@ const BATTLE_MAPS = [
         "id": "tile_street_claw_machine",
         "c": 20,
         "r": 17,
-        "layer": "object3",
+        "layer": "object6",
         "ox": 20,
         "oy": 20
       },
@@ -152557,7 +152651,20 @@ const BATTLE_MAPS = [
       "42,22",
       "49,22",
       "50,22",
-      "51,22"
+      "51,22",
+      "23,42",
+      "24,42",
+      "19,42",
+      "23,55",
+      "23,54",
+      "24,54",
+      "24,55",
+      "64,35",
+      "64,36",
+      "65,36",
+      "65,35",
+      "64,63",
+      "65,63"
     ],
     "deckAuto": true,
     "deckAdd": [
@@ -155005,7 +155112,8 @@ const BATTLE_MAPS = [
         "cars": 1,
         "fx": false,
         "ox": 10,
-        "oy": 30
+        "oy": 30,
+        "mrtFixed": true
       },
       {
         "id": "tile_mrt_pillar_large",
