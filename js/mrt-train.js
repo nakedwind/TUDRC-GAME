@@ -576,13 +576,20 @@ const mrtStationOf = id => (MRT_TRAIN.stations || []).find(st => st && st.map ==
 // 這站的到站音樂（stations 沒設就用音效編輯器的「捷運列車：到站音樂」）
 function mrtArriveSound() { const st = MAP && mrtStationOf(MAP.id); return (st && st.arrive) || MRT_TRAIN.sounds.arrive; }
 // 溫特搭車要開去哪：互通車站裡隨機一站（不是現在這站、地圖要存在）；現在這站不在名單裡、或沒有別站 → null（開回同一站）
+//   任務資料寫了 metroAfter 的站（data/missions.js，例如 O666）：那幾區「全部」控制了，才會被抽到
 function mrtPickDestination(tr) {
   if ((typeof PREVIEW !== 'undefined' && PREVIEW) || !MAP) return null;
   const fixed = tr && tr.variant && tr.variant.dest;   // 這班車有指定開去哪（data/mrt-train.js 的 variants）
   if (fixed && fixed !== MAP.id && mapIndexById(fixed) >= 0) return fixed;
   if (!mrtStationOf(MAP.id)) return null;
-  const list = (MRT_TRAIN.stations || []).filter(st => st && st.map !== MAP.id && mapIndexById(st.map) >= 0);
+  const list = (MRT_TRAIN.stations || []).filter(st => st && st.map !== MAP.id && mapIndexById(st.map) >= 0 && mrtStationReady(st.map));
   return list.length ? list[Math.floor(Math.random() * list.length)].map : null;
+}
+// 這站的捷運開放條件（data/missions.js 的 metroAfter）達成了沒；不是任務地圖、沒寫條件＝隨時可以到
+function mrtStationReady(mapId) {
+  const m = typeof missionOfMap === 'function' ? missionOfMap(mapId) : null;
+  if (!m || !Array.isArray(m.metroAfter) || !m.metroAfter.length) return true;
+  return m.metroAfter.every(id => missionCleared(missionById(id) || { id }));
 }
 // 不在溫特身邊的隊員：{ type, t: 還要幾秒, why: 'missed'＝沒搭上車（搭下班車到站）| 'rode'＝不小心搭上車（搭車回站） }
 // 換地圖也記得（不放在 G 裡）；回應變中心就清空（全員歸隊）。隊員欄（js/team.js 的 renderFieldSquadHud）照這份顯示倒數

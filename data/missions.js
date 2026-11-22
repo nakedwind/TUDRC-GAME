@@ -3,6 +3,9 @@
    ・主線＝依序攻略這幾區（暫定）；打贏一張地圖＝那一區「已控制」，after 裡的區域「任一個」控制了，下一區就會開放。
      作戰地圖上的連線也是照 after 畫的（after 裡的每一區各連一條線過來）。
    ・locked: true＝路線圖上單獨的點，還沒決定怎麼解鎖，先鎖著（進去過一次就會開放，例如從 R89 搭捷運到 B56）。
+   ・metroOnly: true＝只能搭捷運過去：就算開放了、控制了，作戰桌也不能直接出擊（例如 B56、G11、O666 要從 R89 搭捷運）。
+   ・metroAfter: [...]＝搭捷運要先控制「全部」這些區域，列車才可能開到這一站（例如 O666 要 R89、B56、G11 都控制）。
+     捷運互通的車站名單在 data/mrt-train.js 的 stations；搭車時從「條件達成的其他站」隨機挑一站（js/mrt-train.js 的 mrtPickDestination）。
    ・hidden: true＝鎖著的時候名字顯示成「？？？」，開放後才露出真名。
    ・off: true＝整個先藏起來：作戰地圖、T-Pad、主線進度、對話編輯器都當作沒有這一區（連線也不畫）。要顯示時拿掉 off 就好。
    ・支線（角色委託）在 data/quests.js。
@@ -80,19 +83,19 @@ const MISSIONS = [
     desc: '池核更深處的區域。應變中心還在收集情報。',
   },
   {
-    // B56 藍線捷運站：路線圖上單獨一個點（還沒決定從哪裡解鎖，先鎖著；從 R89 搭捷運進去過就會開放）
-    id: 'b56', map: 'map_mwizzi7s', name: 'B56區捷運站', x: 58, y: 31, after: [], locked: true,
+    // B56 藍線捷運站：路線圖上單獨一個點（先鎖著；從 R89 搭捷運進去過就會開放）。只能搭捷運去，作戰桌不能直接出擊（metroOnly）
+    id: 'b56', map: 'map_mwizzi7s', name: 'B56區捷運站', x: 58, y: 31, after: [], locked: true, metroOnly: true,
     desc: '藍線的捷運站，跟 R89 之間有捷運互通。',
   },
   {
-    // G11 綠線捷運站：B56 右下方單獨一個點（先鎖著；從別站搭捷運進去過就會開放）。BOSS 是虱目魚王（js/milkfish-king.js）
-    id: 'g11', map: 'map_mwm655e8', name: 'G11區捷運站', x: 76, y: 47, after: [], locked: true,
+    // G11 綠線捷運站：B56 右下方單獨一個點（先鎖著；從別站搭捷運進去過就會開放，只能搭捷運去）。BOSS 是虱目魚王（js/milkfish-king.js）
+    id: 'g11', map: 'map_mwm655e8', name: 'G11區捷運站', x: 76, y: 47, after: [], locked: true, metroOnly: true,
     desc: '綠線的捷運站，核心旁邊守著巨大的虱目魚王。',
   },
   {
-    // O666 橘線捷運站：右上角，連到 Y 區最深處（先鎖著；從別站搭捷運進去過就會開放）。BOSS 是花蓮老鼠王（js/rat-king.js）
+    // O666 橘線捷運站：右上角，連到 Y 區最深處（先鎖著；R89、B56、G11 都控制後，捷運才可能開到這站；只能搭捷運去）。BOSS 是花蓮老鼠王（js/rat-king.js）
     //   原本這個位置是「台北車站大廳」（id: station），搬到最右上角的 Y 區最深處（id: deep）了
-    id: 'o666', map: 'map_691cf40a-884b-423d-b1df-beef88b16f00', name: 'O666區捷運站', x: 76, y: 27, after: [], locked: true,
+    id: 'o666', map: 'map_691cf40a-884b-423d-b1df-beef88b16f00', name: 'O666區捷運站', x: 76, y: 27, after: [], locked: true, metroOnly: true, metroAfter: ['r89', 'b56', 'g11'],
     desc: '橘線的捷運站，上方月台的列車被花蓮老鼠王卡住了。',
   },
   {

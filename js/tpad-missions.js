@@ -56,7 +56,7 @@ function mainList(cleared) {
     '<div class="aa-list">' + MISSIONS.map(m => {
       const s = missionStatus(m), [ic, cls] = m.boss && s !== 'cleared' ? ['warn', 'red'] : MAPP_MAIN_ICON[s];
       return mappRow(m.id, mappIco(ic, cls), mappEsc(missionName(m)) + (next && next.id === m.id ? ' <em class="ma-pill orange">下一個</em>' : ''),
-        (m.boss ? 'BOSS 反應・' : '') + STATUS_TEXT[s], '');
+        (m.boss ? 'BOSS 反應・' : '') + missionStatusText(m, s), '');
     }).join('') + '</div>';
 }
 function mainDetail(m) {
@@ -67,12 +67,12 @@ function mainDetail(m) {
   const team = typeof getTeam === 'function' ? getTeam(squad) : [];   // 兵分兩路：負責這一區的那一隊
   const faces = team.map(id => { const p = teamProfile(id); return '<span class="mission-face" data-char="' + id + '" title="' + mappEsc(p.name) + '"><img src="' + memberPortraitPath(p) + '" alt="' + mappEsc(p.name) + '"></span>'; }).join('');
   return mappBack('主線') +
-    '<div class="ma-hero">' + mappIco(ic, cls + ' big') + '<div><em class="ma-pill ' + cls + '">' + (m.boss ? '⚠ BOSS 反應・' : '') + STATUS_TEXT[s] + '</em><h2 class="aa-title">' + mappEsc(missionName(m)) + '</h2></div></div>' +
-    '<div class="ma-card"><p>' + mappEsc(s === 'locked' ? '先控制前面的區域，才能前往這裡。' : m.desc) + '</p></div>' +
+    '<div class="ma-hero">' + mappIco(ic, cls + ' big') + '<div><em class="ma-pill ' + cls + '">' + (m.boss ? '⚠ BOSS 反應・' : '') + missionStatusText(m, s) + '</em><h2 class="aa-title">' + mappEsc(missionName(m)) + '</h2></div></div>' +
+    '<div class="ma-card"><p>' + mappEsc(s === 'locked' ? (m.metroOnly ? '要' + metroRideHint() + '才到得了這裡。' : '先控制前面的區域，才能前往這裡。') : m.desc) + '</p></div>' +
     (before.length ? '<h3 class="aa-sec">' + (before.length > 1 ? '要先控制（任一區）' : '要先控制') + '</h3><div class="aa-list">' + before.map(b => '<div class="ma-row static">' + mappIco(missionCleared(b) ? 'check' : 'lock', missionCleared(b) ? 'green' : 'gray') +
       '<span class="aa-txt"><b>' + mappEsc(missionName(b)) + '</b><small>' + (missionCleared(b) ? '已控制' : '尚未控制') + '</small></span></div>').join('') + '</div>' : '') +
     '<h3 class="aa-sec">' + (split ? mappEsc(SQUADS[squad].name) + '・' : '') + '出勤人員 ' + team.length + ' 位</h3><div class="ma-card ma-faces">' + (faces || '<small>尚未編入（到基地的「出勤配置」編入）</small>') + '</div>' +
-    mappNote(s === 'available' || s === 'cleared' ? '📍 出擊請到應變中心的作戰桌' : s === 'soon' ? '情報收集中，地圖還沒準備好。' : '');
+    mappNote(m.metroOnly && s !== 'locked' ? '🚇 這一區只能' + metroRideHint() : s === 'available' || s === 'cleared' ? '📍 出擊請到應變中心的作戰桌' : s === 'soon' ? '情報收集中，地圖還沒準備好。' : '');
 }
 
 // ---- 角色委託 ----

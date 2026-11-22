@@ -44,6 +44,8 @@ function missionStatus(m) {
   if (!missionOpen(m)) return 'locked';
   return m.map ? 'available' : 'soon';   // soon＝輪到它了，但地圖還沒做好
 }
+// 只能搭捷運去的區域（data/missions.js 的 metroOnly）：作戰桌不能直接出擊，要到 R89 搭捷運
+const metroRideHint = () => '從' + ((missionById('r89') || {}).name || 'R89區捷運站') + '搭捷運前往';
 // 下一個要打的任務（還沒控制、已開放的第一個）
 const nextMission = () => MISSIONS.find(m => !missionCleared(m) && missionOpen(m)) || null;
 // 通訊員（艾德林，data/missions.js 的 MISSION_BASE.briefer）有沒有新任務要報告
@@ -112,7 +114,7 @@ function missionHudText() {
     if (!m) return '目前任務：Y 區已全部控制';
     if (briefPending()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告下一個任務' : '聽' + brieferName() + '報告下一個任務');
     if (!m.map) return '目前任務：等待「' + m.name + '」的情報';
-    return '目前任務：到作戰桌出擊｜' + m.name;
+    return '目前任務：' + (m.metroOnly ? metroRideHint() : '到作戰桌出擊') + '｜' + m.name;
   }
   return null;
 }
@@ -228,6 +230,7 @@ function returnToBase() {
 }
 function sortieTo(m) {
   if (!m || !m.map) { sfx('error'); return; }
+  if (m.metroOnly) { sfx('error'); showBoardToast('這一區只能' + metroRideHint(), true); return; }   // 只能搭捷運去（按鈕已經鎖住，這裡再擋一次）
   const squad = squadOfMission(m), lead = SQUADS[squad].leader;
   if (lead !== 'winter' && typeof isHospitalized === 'function' && isHospitalized(lead)) { sfx('error'); showBoardToast(SQUADS[squad].name + '的隊長' + teamProfile(lead).name + '住院中，不能出擊', true); return; }
   if (!getTeam(squad).length) { sfx('error'); showBoardToast((twoSquads() ? SQUADS[squad].name : '') + '還沒有編入出勤人員', true); return; }   // 作戰桌開著：提示出現在作戰桌上
@@ -290,6 +293,8 @@ function onOverlayButton() {
 // ---- 作戰桌面板（外觀和商店、出勤配置同一套）----
 let missionBoard = null, missionBoardOpen = false, missionSel = null, boardTab = 'main';   // boardTab：main 主線／side 支線（js/quests.js）
 const STATUS_TEXT = { cleared: '已控制', available: '可出擊', locked: '未開放', soon: '情報收集中' };
+// 狀態文字：只能搭捷運去的區域，開放了顯示「搭捷運前往」而不是「可出擊」（T-Pad 也用這個）
+const missionStatusText = (m, s = missionStatus(m)) => m.metroOnly && s === 'available' ? '搭捷運前往' : STATUS_TEXT[s];
 function ensureMissionBoard() {
   if (missionBoard) return;
   missionBoard = document.createElement('div');
@@ -324,7 +329,7 @@ function renderMissionBoard() {
   const squad = squadOfMission(sel), lead = SQUADS[squad].leader, split = twoSquads();
   const team = getTeam(squad), cleared = MISSIONS.filter(missionCleared).length;
   const teamFaces = team.map(id => { const profile = teamProfile(id); return '<span class="mission-face" data-char="' + id + '" title="' + profile.name + '"><img src="' + memberPortraitPath(profile) + '" alt="' + profile.name + '"></span>'; }).join('');   // 胸像（裁切跟 Y102隊員面板的 .squad-portrait 一樣）
-  const canGo = !!sel.map && st !== 'locked';
+  const canGo = !!sel.map && st !== 'locked' && !sel.metroOnly;   // metroOnly：開放了也只能搭捷運去
   const paused = canGo && !!readCombatProgress()[sel.map];   // 有暫停中的戰場：出擊＝接續，另外可以重新部署（js/combat-progress.js）
   const side = boardTab === 'side' && typeof renderSideBoard === 'function';
   const ready = typeof readyCount === 'function' ? readyCount() : 0;
@@ -339,12 +344,13 @@ function renderMissionBoard() {
         '<div class="mission-map"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + lines + '</svg>' + nodes +
           '<span class="mission-progress"><small>主線進度</small><b>' + cleared + ' / ' + MISSIONS.length + '</b></span></div>' +   // 主線進度：放在地圖左上角
         '<aside class="mission-detail">' +
-          '<div class="mission-detail-main"><em class="mission-status ' + st + '">' + (sel.boss ? '⚠ BOSS 反應・' : '') + STATUS_TEXT[st] + '</em>' +
-            '<h3>' + missionName(sel) + '</h3><p>' + (st === 'locked' ? '先控制前面的區域，才能前往這裡。' : sel.desc) + '</p>' + (paused ? '<p class="mission-paused">⏸ 戰場暫停中：門、核心、建築都跟離開時一樣。</p>' : '') + '</div>' +
+          '<div class="mission-detail-main"><em class="mission-status ' + st + '">' + (sel.boss ? '⚠ BOSS 反應・' : '') + missionStatusText(sel, st) + '</em>' +
+            '<h3>' + missionName(sel) + '</h3><p>' + (st === 'locked' ? (sel.metroOnly ? '要' + metroRideHint() + '才到得了這裡。' : '先控制前面的區域，才能前往這裡。') : sel.desc) + '</p>' +
+            (sel.metroOnly && st !== 'locked' ? '<p class="mission-paused">🚇 這一區只能' + metroRideHint() + '，作戰桌不能直接出擊。</p>' : '') + (paused ? '<p class="mission-paused">⏸ 戰場暫停中：門、核心、建築都跟離開時一樣。</p>' : '') + '</div>' +
           '<div class="mission-team-row"><span>' + (split ? SQUADS[squad].name + (lead !== 'winter' ? '・隊長 ' + teamProfile(lead).name : '') + '<br>' : '') + '出勤人員 ' + team.length + ' 位</span><div class="mission-faces">' + (teamFaces || '<small>尚未編入</small>') + '</div>' +
             '<button type="button" class="mission-team">🧑‍🤝‍🧑 出勤配置</button></div>' +
           (paused ? '<button type="button" class="mission-redeploy">↺ 重新部署</button>' : '') +
-          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : STATUS_TEXT[st]) + '</button>' +
+          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : sel.metroOnly && st !== 'locked' ? '🚇 只能搭捷運前往' : STATUS_TEXT[st]) + '</button>' +
         '</aside>' +
       '</div>' +
     '</section>'));
