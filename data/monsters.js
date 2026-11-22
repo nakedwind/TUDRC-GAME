@@ -93,7 +93,6 @@ const MONSTERS_DEFAULT = [
   {
     "id": "pearl_kid",
     "name": "珍珠小童",
-    "element": "water",
     "sprite": "images/monster/pearl-kid/pearl-kid.png",
     "hp": 80,
     "speed": 28,
@@ -133,7 +132,8 @@ const MONSTERS_DEFAULT = [
       "pearl": "images/monster/pearl-kid/pearl.png"
     },
     "hitSound": "pearlHurt",
-    "deathSound": "pearlDeath"
+    "deathSound": "pearlDeath",
+    "element": "water"
   },
   {
     "id": "lifeform",
@@ -276,7 +276,6 @@ const MONSTERS_DEFAULT = [
   {
     "id": "loofah_lady",
     "name": "絲瓜小姐",
-    "element": "grass",
     "sprite": "images/monster/loofah-lady/loofah-lady.png",
     "hp": 140,
     "speed": 40,
@@ -302,7 +301,8 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "vine",
     "hitSound": "loofahHurt",
-    "deathSound": "loofahDeath"
+    "deathSound": "loofahDeath",
+    "element": "grass"
   },
   {
     "id": "milkfish_kid",
@@ -402,7 +402,7 @@ const MONSTERS_DEFAULT = [
       "coreOutTime": 2,
       "rushSpeedMul": 2.2,
       "stepShake": 6,
-      "coreAtkMul": 1.5,
+      "coreAtkMul": 1.3,
       "acidPoolR": 1.1,
       "acidPoolLife": 5,
       "acidPoolDps": 8,
@@ -415,6 +415,14 @@ const MONSTERS_DEFAULT = [
       "chargeDist": 10,
       "chargeDamage": 35,
       "chargeKnock": 3,
+      "chaseRadius": 50,
+      "jumpRange": 8,
+      "jumpWindup": 0.5,
+      "jumpTime": 1,
+      "jumpHeight": 150,
+      "jumpDamage": 35,
+      "jumpSlamR": 1.8,
+      "jumpKnock": 2,
       "coreHp": 2000,
       "coreShield": 0.9,
       "introRumble": 7.2,
@@ -546,7 +554,6 @@ const MONSTERS_DEFAULT = [
   {
     "id": "golden_banana_king",
     "name": "金蕉王",
-    "element": "grass",
     "sprite": "images/monster/golden-banana-king/golden-banana-king-front.png",
     "hp": 300,
     "speed": 40,
@@ -569,7 +576,8 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "healer",
     "hitSound": "bananaHurt",
-    "deathSound": "bananaDeath"
+    "deathSound": "bananaDeath",
+    "element": "grass"
   },
   {
     "id": "gourd_monkey",
@@ -1333,7 +1341,7 @@ const BOSS_SETTINGS_DEFAULT = {
     }
   },
   "MOTH_BOSS": {
-    "hp": 2400,
+    "hp": 3000,
     "coreHp": 1500,
     "rewardMul": 8,
     "crystalMul": 8,
