@@ -220,6 +220,12 @@ function mrtPowerOnFx() {
 }
 // 接續「保留進度」、劇情看完回原地圖（mapWalls 整份換回來，js/combat-progress.js 的 reclaimAddedWalls）：照每班車記的格子湊回總表
 function restoreMrtTrains() {
+  // 地圖編輯器的勾勾以地圖為準：存進度之後才勾（或取消）「停著不動（通道）」「會載怪物」，接續戰場也要照新的設定。
+  // 以前直接用存檔裡記的舊值：G11 綠線那台通道列車在勾勾不見時存了進度，之後補勾回去，接續戰場時還是會開走
+  for (const tr of (G && G.mrtTrains) || []) {
+    tr.fixed = (tr.cars || []).some(c => c.stamp && c.stamp.mrtFixed);
+    tr.monsterCar = (tr.cars || []).some(c => c.stamp && c.stamp.mrtMonsters);
+  }
   mrtTrainWalls = new Set();
   for (const tr of (G && G.mrtTrains) || []) for (const k of tr.walls || []) mrtTrainWalls.add(k);   // 閘門：下一幀照列車現在的狀態重新開關
   if (typeof floor2Solid !== 'undefined') for (const tr of (G && G.mrtTrains) || []) for (const k of tr.cleared2 || []) floor2Solid.delete(k);   // 停在 2 樓的列車：車廂底下的 2 樓碰撞照舊拿掉
