@@ -405,7 +405,8 @@ const MONSTERS_DEFAULT = [
       "coreAtkMul": 1.5,
       "acidPoolR": 1.1,
       "acidPoolLife": 5,
-      "acidPoolDps": 8
+      "acidPoolDps": 8,
+      "introRumble": 7.2
     },
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
