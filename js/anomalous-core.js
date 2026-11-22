@@ -90,6 +90,9 @@ function spawnReachCells() {
   }
   return seen;
 }
+// 深水裡不生怪：地面怪物生在水裡會在水中走來走去（已經在深水裡的怪物不受深水擋路，js/enemy-ai.js 的 enemyBlocked）。
+// 照「現在」的水位：抽水抽成淺水時一般深水區照樣能生，永遠深水不行（js/swim-ring.js 的 deepWaterBlocksCell）
+const spawnInDeepWater = (c, r) => typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r);
 function darkMonsterSpawnCells() {
   // 地圖編輯器畫了「👾 怪物出生區」：只從那些格子生（優先挑暗的，全部都被照亮就照樣從那裡生）
   const zone = MAP && Array.isArray(MAP.spawnZone) && MAP.spawnZone.length ? MAP.spawnZone : null;
@@ -99,7 +102,7 @@ function darkMonsterSpawnCells() {
   const candidates = [], fallback = [];
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
     const key = c + ',' + r;
-    if (isWall(c, r) || G.grid[key]) continue;
+    if (isWall(c, r) || G.grid[key] || spawnInDeepWater(c, r)) continue;
     // 要走得到營地才生怪：被牆圍死的區塊不生；門（開著關著都一樣）、鐵門、可打破的牆、障礙物都算走得過去
     if (!reach.has(key)) continue;
     if (!floor.has(key)) continue;   // 沒鋪地板的黑色空白區（地圖邊緣）不生怪
@@ -388,7 +391,7 @@ function zoneSpawnCells(zone) {
   const dark = [], lit = [], any = [];
   for (const key of zone) {
     const [c, r] = key.split(',').map(Number);
-    if (!inGrid(c, r) || spawnWallAt(c, r) || G.grid[key]) continue;   // 出生區畫在 2 樓的格子：照 2 樓的牆判斷，不是一律看一樓（js/pathfinding.js）
+    if (!inGrid(c, r) || spawnWallAt(c, r) || G.grid[key] || spawnInDeepWater(c, r)) continue;   // 出生區畫在 2 樓的格子：照 2 樓的牆判斷，不是一律看一樓（js/pathfinding.js）
     const [x, y] = center(c, r);
     if (typeof inHiddenArea === 'function' && inHiddenArea(x, y)) continue;   // 出生區畫到隱藏區裡也不生，免得露餡；炸開後才算（js/breakable-walls.js）
     any.push([c, r]);

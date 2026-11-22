@@ -198,7 +198,7 @@ function burrowMouseSurface(e, stun = 0) {
 }
 function burrowMouseTrail(e, b) {
   const [c, r] = cellAt(e.x, e.y), floor = typeof mapFloorCells !== 'function' || mapFloorCells().has(c + ',' + r);
-  if (!floor || isWall(c, r)) return;   // 穿過牆底下不留痕
+  if (!floor || isWall(c, r) || (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r))) return;   // 穿過牆、深水區底下不留痕（水面上不會冒土）
   (G.burrowTrails || (G.burrowTrails = [])).push({ x: e.x, y: e.y, floor: actorFloor(e), a: Math.atan2(b.dy || 0, b.dx || 1) + (Math.random() - .5) * .9, life: BURROW_UNDER.trailLife });
   const n = Math.random() < .4 ? 2 : 1;
   for (let i = 0; i < n; i++) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() - .5) * 14, y: e.y - 2,
@@ -294,7 +294,8 @@ function stepBurrowingMouse(e, dt) {
         const p = aim;
         const [cc, rr] = cellAt(p.x, p.y);
         const floor = typeof mapFloorCells !== 'function' || mapFloorCells().has(cc + ',' + rr);
-        if (floor && !isWall(cc, rr) && hasLineOfSight(e.x, e.y, p.x, p.y)) {
+        const inWater = typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(p.x, p.y);   // 目標坐救生圈泡在深水裡：手是從地底伸出來的，水裡伸不出來（js/swim-ring.js）
+        if (floor && !isWall(cc, rr) && !inWater && hasLineOfSight(e.x, e.y, p.x, p.y)) {
           b.hands.push({ x: p.x, y: p.y, side: p.x < e.x ? 'left' : 'right', age: 0, hit: false, confused: e.confuseT > 0 });
           b.attacked = true; b.cd = c.cooldown;
         }

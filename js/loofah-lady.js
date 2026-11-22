@@ -155,7 +155,7 @@ function updateLoofahVines(dt) {
         while (move > 0 && v.state === 'dig') {
           const s = Math.min(4, move); move -= s; v.left -= s; v.travel = (v.travel || 0) + s;
           const nx = v.x + v.ux * s, ny = v.y + v.uy * s, [c, r] = cellAt(nx, ny);
-          if (!inGrid(c, r) || isWall(c, r)) { v.left = 0; }   // 撞到牆：就在牆前冒出來
+          if (!inGrid(c, r) || isWall(c, r) || (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r))) { v.left = 0; }   // 撞到牆、碰到深水區：就在牆前、岸邊冒出來（藤蔓是從地底鑽的，水裡長不出來；js/swim-ring.js）
           else { v.x = nx; v.y = ny; }
           v.puff -= s;
           if (v.puff <= 0) { v.puff = 10; llDust(v.x, v.y, Math.random() < .4); v.cracks.push({ x: v.x, y: v.y, a: Math.atan2(v.uy, v.ux) + (Math.random() - .5) * .9, life: 1.4 }); }
@@ -208,7 +208,8 @@ function loofahErupt(v) {
 // 抓住藤蔓旁邊的人（冒出來那一刻，還有停在地上的這段時間都會呼叫；同一根藤蔓不會重複抓同一個人）
 function llCatchNearby(v) {
   const C = LOOFAH, e = v.owner;
-  const p = G.player, inR = a => (!e || sameFloor(a, e)) && Math.hypot(a.x - v.x, a.y - v.y) <= C.eruptRadius && !v.caught.includes(a) && !(a.rootT > 0);   // 只纏得到絲瓜女同一層的人
+  const p = G.player, inR = a => (!e || sameFloor(a, e)) && Math.hypot(a.x - v.x, a.y - v.y) <= C.eruptRadius && !v.caught.includes(a) && !(a.rootT > 0)
+    && !(typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(a.x, a.y));   // 只纏得到絲瓜女同一層的人；泡在深水裡（坐救生圈）的人纏不到（js/swim-ring.js）
   if (p && p.hp > 0 && inR(p)) {
     v.caught.push(p); p.rootT = C.rootTime; p.rootT0 = C.rootTime; p.struggleCount = 0; p.knockT = 0; p.moving = false;
     if (C.eruptDamage && e && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {   // 剛被打過：照樣被纏住，只是不扣血（js/combat-feel.js）
