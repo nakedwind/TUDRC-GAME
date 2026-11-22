@@ -152947,8 +152947,8 @@ const BATTLE_MAPS = [
         "9,81": "tile_obstacle_ore_small",
         "33,66": "tile_obstacle_ore_small",
         "71,48": "tile_obstacle_ore_small",
-        "37,51": "tile_obstacle_ore_small",
-        "48,74": "tile_obstacle_ore_small"
+        "48,74": "tile_obstacle_ore_small",
+        "36,50": "tile_obstacle_ore_small"
       },
       "object8": {
         "81,13": "tile_poolcore_deep_water",
@@ -155145,7 +155145,8 @@ const BATTLE_MAPS = [
         "fx": false,
         "ox": 10,
         "oy": 30,
-        "mrtFixed": true
+        "mrtFixed": true,
+        "bothDoors": true
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -159160,8 +159161,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_dmg_crack05",
         "c": 36,
-        "r": 50,
-        "layer": "ground"
+        "r": 48,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 30
       },
       {
         "id": "tile_dmg_crack05",
