@@ -168432,7 +168432,9 @@ const BATTLE_MAPS = [
         "50,60": "tile_interactive_storage_locker_key",
         "19,59": "tile_interactive_pickup_battery",
         "41,83": "tile_interactive_pickup_battery",
-        "48,11": "tile_obstacle_ore_small"
+        "48,11": "tile_obstacle_ore_small",
+        "55,48": "tile_obstacle_ore_small",
+        "20,47": "tile_obstacle_ore_small"
       },
       "object": {},
       "object2": {},
