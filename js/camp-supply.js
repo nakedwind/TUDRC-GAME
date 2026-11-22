@@ -87,6 +87,8 @@ function campSupplySpot() { return supplyBoxSpots()[0] || null; }
 // ---- 嚮導身上的補給 ----
 function guideKit(t) {
   if (!t.kit) {   // 這次出勤剛開始：從箱子拿（人就在營地）
+    const carried = typeof mrtTakeCarriedKit === 'function' && !MAP_SAFE ? mrtTakeCarriedKit(t.type) : null;
+    if (carried) { t.kit = carried; return t.kit; }   // 搭捷運過來的：身上的數量照上一張地圖（js/mrt-train.js 的 mrtKitCarry）
     if (isNewbieMap() && t.type === 'eldrin') {
       t.kit = { ...NEWBIE_START.guideKit };   // 自帶補給，不扣箱內的 6／7／7。
       return t.kit;

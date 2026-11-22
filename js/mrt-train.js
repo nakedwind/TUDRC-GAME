@@ -601,8 +601,15 @@ function mrtStationReady(mapId) {
 // 換地圖也記得（不放在 G 裡）；回應變中心就清空（全員歸隊）。隊員欄（js/team.js 的 renderFieldSquadHud）照這份顯示倒數
 let mrtAway = [];
 function mrtAwayList() { return mrtAway; }
+// 嚮導身上的急救包、杏仁水（t.kit）跟著搭捷運帶走：換地圖或晚一班車回來時隊員是重新生出來的，
+// 不帶著走的話會從新地圖的物資箱重拿（箱子空的就變 0 個）。type → { firstaid, 'almond-water' }；回應變中心就清空
+let mrtKitCarry = {};
+function mrtCarryKit(t) { if (t && t.kit && TYPES[t.type] && TYPES[t.type].guide) mrtKitCarry[t.type] = { ...t.kit }; }
+// 這位隊員有帶著走的補給：拿出來（只拿一次）。js/camp-supply.js 的 guideKit 生出隊員第一次要補給時呼叫
+function mrtTakeCarriedKit(type) { const k = mrtKitCarry[type]; if (!k) return null; delete mrtKitCarry[type]; return { ...k }; }
 function mrtSendAway(t, why) {
   if (!t || !TYPES[t.type] || t.type === PLAYER_CHARACTER || mrtAway.some(m => m.type === t.type)) return;
+  mrtCarryKit(t);   // 晚一班車回來時身上的補給照舊
   if (typeof vitalsMate === 'function') { const m = vitalsMate(t.type); m.hp = t.hp; m.taint = t.taint || 0; m.berserk = !!t.berserk; }   // HP、負荷照現在的帶走（回來時 spawnSentries 會套回去）
   mrtAway.push({ type: t.type, t: Math.max(1, +MRT_TRAIN.nextTrainTime || 120), why });
 }
@@ -699,6 +706,7 @@ function mrtTrainCarryAway(tr) {
 function mrtRideToStation(tr, dest) {
   const riders = (tr.riders || []).map(r => r.a);
   const mates = riders.filter(a => G.towers.includes(a) && TYPES[a.type]).map(a => a.type);
+  for (const t of G.towers) if (riders.includes(t)) mrtCarryKit(t);   // 同車的嚮導：身上的急救包、杏仁水帶到下一站
   for (const t of G.towers) if (!riders.includes(t)) mrtSendAway(t, 'missed');
   // 這張地圖的列車整理好（之後走回來接續戰場時才正常）：車上的人放回月台、車廂裡的建築放回去、列車回到隧道裡等下一班
   const platformY = OY + ((tr.bottomRow != null ? tr.bottomRow : Math.round((tr.bottom - OY) / CELL) - 1) + 1.5) * CELL;
@@ -735,6 +743,8 @@ function mrtArriveAtStation(mates) {
   for (const a of mrtTrainActors()) a.mrtRide = false;
   if (!trains.length) { mrtRideFade(false); return; }
   if (mates.length) mrtRejoin(mates);   // 接續的戰場裡沒有這位隊員：補上
+  // 接續「保留進度」的戰場時，隊員身上還是上次離開這裡時的補給：換成剛剛帶來的數量
+  for (const t of G.towers) if (mates.includes(t.type) && mrtKitCarry[t.type]) t.kit = mrtTakeCarriedKit(t.type);
   const crew = [G.player, ...mates.map(id => G.towers.find(t => t.type === id)).filter(Boolean)];
   const dog = (G.npcs || []).find(n => n.id === 'ball');   // 球球跟著部隊一起來
   if (dog) crew.push(dog);
@@ -797,7 +807,7 @@ function mrtRamArrive(tr, decelMul = 3) {
 }
 // 每次開始一張地圖（js/game.js 的 begin）：回應變中心＝全員歸隊；其他地圖：不在身邊的隊員先不出現
 function mrtAwayOnBegin() {
-  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { mrtAway = []; if (typeof dynamoForget === 'function') dynamoForget(); return; }   // 捷運站的發電機不會關回去（打開過就永遠開著，js/storage-lockers.js）
+  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { mrtAway = []; mrtKitCarry = {}; if (typeof dynamoForget === 'function') dynamoForget(); return; }   // 捷運站的發電機不會關回去（打開過就永遠開著，js/storage-lockers.js）
   if (!mrtAway.length || !G || !Array.isArray(G.towers)) return;
   const away = new Set(mrtAway.map(m => m.type));
   G.towers = G.towers.filter(t => !away.has(t.type));
