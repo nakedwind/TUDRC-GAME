@@ -10,7 +10,7 @@
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
    - 大面積撒粉：築巢時有人在這一區，每隔幾秒翅膀發光、地上出現那一區顏色的圓圈預告，接著把整個區域撒滿鱗粉（MOTH_BOSS.burst）。
    - 抓人：築巢時偶爾盯上溫特或隊員（MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
-           飛一段後丟下來（落點一定是走得到的地方，不會丟進牆裡；摔下來借用藤蔓丟人那一套：彈兩下、躺著暈、扣血）。
+           用手（抱核心的地方）抓著飛到高空繞圈幾秒（grab.circle）再丟下來（落點一定是走得到的地方，不會丟進牆裡；摔下來借用藤蔓丟人那一套：彈兩下、躺著暈、扣血）。
            抓著人的時候被打到一定的傷害（grab.breakDmg）就會鬆手，提早把人丟下來。
    - 核心護盾：人面蝶后活著的時候，牠的核心受到的傷害 × (1 - coreShield)。
    - 每掉 1/4 血 → 尖叫、先在原地把整區撒滿鱗粉（驚醒時也一樣），再飛回去撿起核心，抱著飛往下一區（同一區打不死牠，血會停在那一段的底線）。
@@ -70,9 +70,10 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   leaveTelegraph: .9,            // 飛走前在原地大範圍撒粉：預告幾秒（撒的團數、範圍跟 burst 一樣）
   // 抓人：every＝每隔幾秒抓一次（最短～最長）、first＝到巢後第一次等幾秒、range＝離溫特／隊員幾格內才會去抓、
   // warn＝俯衝前預告幾秒（尖叫、地上紅圈）、dive＝俯衝最久幾秒（沒碰到就撲空）、diveSpeedMul＝俯衝的速度倍率、diveLift＝俯衝時飛多低（像素）、
-  // reach＝離目標幾格內算抓到、carry＝抓著飛最久幾秒、carryLift＝抓著人時飛多高（像素）、dropMin／dropMax＝丟到離抓的地方幾格遠、
+  // reach＝離目標幾格內算抓到、circle＝抓起來後在高空繞幾秒才丟下、carryLift＝抓著人時飛多高（像素）、
+  // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手
-  grab: { every: [10, 14], first: 4, range: 6, warn: .8, dive: 1.3, diveSpeedMul: 1.6, diveLift: 40, reach: .8, carry: 2.4, carryLift: 170, dropMin: 3, dropMax: 6, breakDmg: .05 },
+  grab: { every: [10, 14], first: 4, range: 6, warn: .8, dive: 1.3, diveSpeedMul: 1.6, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: 1.8, breakDmg: .05 },
   coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });
@@ -536,7 +537,7 @@ function mbGrabVictim(e, a) {
   G.vineCaps.push(cap);
   a.vineCap = true; a.dashT = 0; a.knockT = 0;
   if (!isPlayer) { a.navPath = null; a.navGoal = null; a.meleeSwing = null; a.gunSwing = null; a.target = null; }
-  mb.carry = { cap, t: 0, hurt: 0, from: { x: a.x, y: a.y }, drop: mbDropSpot(a, a.x, a.y, C.dropMin, C.dropMax) };
+  mb.carry = { cap, t: 0, hurt: 0, from: { x: a.x, y: a.y }, ang: Math.atan2(e.y - a.y, e.x - a.x) };   // ang：繞圈現在轉到哪
   mb.victim = null;
   mbSet(e, 'carry');
   flash(isPlayer ? '被' + MOTH_BOSS.name + '抓走了！' : '隊員被抓走了！', a.x, a.y - 60, '#ff8fb0', .9);
@@ -544,11 +545,22 @@ function mbGrabVictim(e, a) {
   G.effects.push({ ring: true, x: a.x, y: a.y + 8, r: 8, r2: 46, life: .35, life0: .35, color: '#ff8fb0' });
   if (typeof sfxAt === 'function') sfxAt('vineGrab', a.x, a.y, .8, 'moth-boss-grab');
 }
-// 抓著的人掛在蝶后身體下面（js/vines.js 的 stepVineCap 每幀把人放在 cap.x0、cap.y0；畫的時候往上抬 cap.h）
+// 蝶后的手在畫面上的位置（跟抱核心同一個點 MOTH_BOSS_CORE_ART；圖朝右時左右翻過來）
+function mbHandPoint(e) {
+  const A = MOTH_BOSS_CORE_ART, dw = e.drawWidth, dh = e.drawHeight;
+  const dy = e.y + 13 - (e.slimeLift || 0) - dh;   // 身體圖的上緣（js/render.js 的 drawEnemy 同一套算法）
+  let x = e.x - dw / 2 + dw * A.x;
+  if (e.forceFlip) x = 2 * e.x - x;
+  return { x, y: dy + dh * A.y };
+}
+const MB_HELD_SHOULDER = 38;   // 被抓的人：手抓在他腳底往上幾像素的地方（大約肩膀）
+// 抓著的人用手抓著（js/vines.js 的 stepVineCap 每幀把人放在 cap.x0、cap.y0；畫的時候往上抬 cap.h）
+//   人的位置＝手的正下方、地面跟蝶后同一高度（影子在地上），往上抬到肩膀剛好在手的位置
 function mbCarryHold(e, dt) {
   const c = e.mb.carry; if (!c) return;
-  c.cap.x0 = e.x; c.cap.y0 = e.y;
-  c.cap.h = Math.min(1, c.t / .4) * Math.max(0, e.slimeLift - 55);
+  const hand = mbHandPoint(e), k = Math.min(1, c.t / .25);   // 剛抓到的 0.25 秒內從腳下慢慢抬到手上
+  c.cap.x0 = c.from.x + (hand.x - c.from.x) * k; c.cap.y0 = c.from.y + (e.y - c.from.y) * k;
+  c.cap.h = Math.max(0, c.cap.y0 - hand.y - MB_HELD_SHOULDER) * k;
   if (c.cap.isPlayer && dt > 0 && typeof viewW === 'function') {   // 溫特被抓：鏡頭慢慢跟著他（js/vines.js 的 vineCameraHold 照 cap.camX、camY 擺鏡頭）
     const mapW = COLS * CELL, mapH = ROWS * CELL, vw = viewW(), vh = viewH();
     const tx = mapW <= vw ? (mapW - vw) / 2 : Math.max(0, Math.min(mapW - vw, e.x - vw / 2));
@@ -557,15 +569,17 @@ function mbCarryHold(e, dt) {
     c.cap.camX += (tx - c.cap.camX) * k; c.cap.camY += (ty - c.cap.camY) * k;
   }
 }
-// 抓著飛到落點上空就丟下來；被打夠了、飛太久也會鬆手
+// 抓著飛到高空（carryLift），繞著抓人的地方轉 circle 秒，再丟下來；被打夠了會提早鬆手
 function mbCarry(e, dt) {
   const C = MOTH_BOSS.grab, mb = e.mb, c = mb.carry;
   if (!c || !G.vineCaps || !G.vineCaps.includes(c.cap)) { mb.carry = null; mbSet(e, 'nest'); return; }   // 人已經不在了（換地圖、被別的東西放開）
   c.t += dt;
-  const there = mothFlyToward(e, c.drop.x, c.drop.y, dt, MOTH_BOSS.flySpeedMul) || mbDist(e, c.drop) < 6;
+  c.ang += C.circleSpeed * dt;
+  const R = C.circleR * CELL;
+  mothFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, MOTH_BOSS.flySpeedMul);
   mbCarryHold(e, dt);
   if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }
-  if ((there && c.t >= 1) || c.t >= C.carry) mbRelease(e);
+  if (c.t >= C.circle) mbRelease(e);
 }
 // 把抓著的人丟下來：落點在蝶后正下方附近、走得到的地方（不會丟進牆裡）；交給 js/vines.js 的「掉下來」（彈兩下、躺著暈、扣血）
 function mbRelease(e) {
@@ -575,7 +589,8 @@ function mbRelease(e) {
   if (mb.state === 'carry') mbSet(e, 'nest');
   const cap = c.cap, a = cap.actor;
   if (!G.vineCaps || !G.vineCaps.includes(cap) || cap.phase !== 'mothCarry') return;
-  const spot = mbDropOk(a, e.x, e.y) ? { x: e.x, y: e.y } : mbDropSpot(a, e.x, e.y, 0, 3, c.from);
+  const gx = cap.x0, gy = cap.y0;   // 人現在正下方的地面（手的下面）
+  const spot = mbDropOk(a, gx, gy) ? { x: gx, y: gy } : mbDropSpot(a, gx, gy, 0, 3, c.from);
   a.x = cap.x0 = spot.x; a.y = cap.y0 = spot.y;
   cap.phase = 'fall'; cap.t = 0; cap.fallV = 0; cap.cut = true;   // cut：從半空中掉下來（不往鏡頭靠近）
   cap.fallH0 = Math.max(1, cap.h); cap.lieSide = Math.random() < .5 ? -1 : 1;
