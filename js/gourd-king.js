@@ -579,7 +579,7 @@ function gourdKingDown(e) {
   if (G.gourdKing) G.gourdKing.phase = 'dead';
   systemNotice(GOURD_KING.name + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(GOURD_KING.name + '倒下了', '', '#e8c27a');
-  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 12, .1);
+  // 畫面大震動改在巨物倒下「落地」那一下（js/bird-head.js 的 GIANT_FALL.shake），跟虱目魚王一樣；斷氣的瞬間只輕輕震一下
 }
 // ---- BOSS 血條（js/core-frenzy.js）、中BOSS 音樂（js/boss-music.js）----
 function gourdKingBars() {

@@ -308,8 +308,8 @@ function fallDirection(e) {
 }
 // giant：BOSS（鳥頭大隊長、虱目魚王）用「巨物倒下」：先站著左右搖晃、慢慢變黑，再重重倒下（地面大震動、煙塵）
 // extra：倒下時身上還要畫的東西（例如虱目魚王的王冠），用 (ctx, c, dark) 呼叫，dark＝變黑的程度 0～1
-// 這些 BOSS 倒下時都用巨物倒下：鳥頭大隊長、虱目魚王、大夯吉寶／順順宮主、金蕉大王、絲瓜女王、池核巨大比基尼小丑魚
-const isGiantFallBoss = e => !!(e.elite || e.mk || e.capKing || e.bananaEmperor || e.loofahQueen || e.poolBoss);
+// 這些 BOSS 倒下時都用巨物倒下：鳥頭大隊長、虱目魚王、大夯吉寶／順順宮主、金蕉大王、絲瓜女王、池核巨大比基尼小丑魚、葫蘆猴王
+const isGiantFallBoss = e => !!(e.elite || e.mk || e.capKing || e.bananaEmperor || e.loofahQueen || e.poolBoss || e.gourdKing);
 function pushFallCorpse(e, opt = {}) {
   const img = monsterImage(e.lastFrameFile || e.sprite), giant = opt.giant ?? isGiantFallBoss(e), G2 = GIANT_FALL;
   (G.fxCorpses = G.fxCorpses || []).push({
