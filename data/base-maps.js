@@ -2228,14 +2228,6 @@ const BASE_MAPS = [
         "oy": 2
       },
       {
-        "id": "tile_street_capsule_toy_machines",
-        "c": 24,
-        "r": 8,
-        "layer": "object",
-        "ox": -10,
-        "oy": 12
-      },
-      {
         "id": "tile_eoc_ball_bed",
         "c": 39,
         "r": 21,
@@ -2285,22 +2277,6 @@ const BASE_MAPS = [
         "oy": 10
       },
       {
-        "id": "tile_halloween_pumpkin_medium",
-        "c": 31,
-        "r": 18,
-        "layer": "overlay",
-        "ox": -12,
-        "oy": -26
-      },
-      {
-        "id": "tile_halloween_spider_web",
-        "c": 36,
-        "r": 13,
-        "layer": "overlay",
-        "ox": 6,
-        "oy": -6
-      },
-      {
         "id": "tile_halloween_spider_web",
         "c": 23,
         "r": 13,
@@ -2308,45 +2284,6 @@ const BASE_MAPS = [
         "fx": true,
         "ox": -8,
         "oy": -6
-      },
-      {
-        "id": "tile_halloween_spider_web",
-        "c": 39,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -6,
-        "oy": -6
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 40,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 28,
-        "r": 14,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 25,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 24,
-        "r": 14,
-        "layer": "overlay",
-        "fx": true,
-        "ox": 6,
-        "oy": -24
       },
       {
         "id": "tile_prop_shelf_locker_unit_02",
