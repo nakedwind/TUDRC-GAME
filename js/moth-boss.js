@@ -9,7 +9,11 @@
    - 築巢：飛到那一區後把核心放在地上（這時候核心打得到），在附近繞著目標飛、撒那一區的鱗粉：
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
    - 大面積撒粉：築巢時有人在這一區，每隔幾秒翅膀發光、地上出現那一區顏色的圓圈預告，接著把整個區域撒滿鱗粉（MOTH_BOSS.burst）。
-   - 每掉 1/4 血 → 尖叫、飛回去撿起核心，抱著飛往下一區（同一區打不死牠，血會停在那一段的底線）。
+   - 抓人：築巢時偶爾盯上溫特或隊員（MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
+           飛一段後丟下來（落點一定是走得到的地方，不會丟進牆裡；摔下來借用藤蔓丟人那一套：彈兩下、躺著暈、扣血）。
+           抓著人的時候被打到一定的傷害（grab.breakDmg）就會鬆手，提早把人丟下來。
+   - 核心護盾：人面蝶后活著的時候，牠的核心受到的傷害 × (1 - coreShield)。
+   - 每掉 1/4 血 → 尖叫、先在原地把整區撒滿鱗粉（驚醒時也一樣），再飛回去撿起核心，抱著飛往下一區（同一區打不死牠，血會停在那一段的底線）。
    - 最後一區被打倒 → 核心掉在牠倒下的地方；核心如果先被打破，牠照樣換區，只是沒有東西可抱。
    - 不會趨光（2026-11-21 拿掉）：一般人面蝶會飛去停在燈上，人面蝶后不會。
    - 鱗粉霧、粉塵爆炸、中毒／混亂／睡眠都沿用一般人面蝶（js/human-face-butterfly.js）。
@@ -63,6 +67,13 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // 大面積撒粉（築巢時、這一區有目標才會撒）：every＝每隔幾秒一次（最短～最長）、first＝到巢後第一次等幾秒、
   // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
   burst: { every: [7, 10], first: 2.5, telegraph: 1.6, time: 1.2, puffs: 16, cover: .95 },
+  leaveTelegraph: .9,            // 飛走前在原地大範圍撒粉：預告幾秒（撒的團數、範圍跟 burst 一樣）
+  // 抓人：every＝每隔幾秒抓一次（最短～最長）、first＝到巢後第一次等幾秒、range＝離溫特／隊員幾格內才會去抓、
+  // warn＝俯衝前預告幾秒（尖叫、地上紅圈）、dive＝俯衝最久幾秒（沒碰到就撲空）、diveSpeedMul＝俯衝的速度倍率、diveLift＝俯衝時飛多低（像素）、
+  // reach＝離目標幾格內算抓到、carry＝抓著飛最久幾秒、carryLift＝抓著人時飛多高（像素）、dropMin／dropMax＝丟到離抓的地方幾格遠、
+  // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手
+  grab: { every: [10, 14], first: 4, range: 6, warn: .8, dive: 1.3, diveSpeedMul: 1.6, diveLift: 40, reach: .8, carry: 2.4, carryLift: 170, dropMin: 3, dropMax: 6, breakDmg: .05 },
+  coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });
 const mbSpot = () => typeof MAP !== 'undefined' && MAP ? MOTH_BOSS.maps[MAP.id] || null : null;
@@ -128,8 +139,9 @@ function mothBossArmor() {
     if (mb.state === 'fly' || mb.state === 'grab' || mb.state === 'skyUp' || mb.state === 'skyDown') lost *= MOTH_BOSS.flyDefense;
     e.hp = e.mbHp - lost;
     if (mb.state === 'sleep') mothBossWake(e);
+    if (mb.state === 'carry' && mb.carry) mb.carry.hurt += lost;   // 抓著人時被打：打夠了就鬆手（mbCarry）
     const floor = mbStageFloor(e, mb.stage);
-    if (mb.state === 'nest') {
+    if (mb.state === 'nest' || mb.state === 'swoop' || mb.state === 'carry') {
       if (floor > 0 && e.hp <= floor) { e.hp = floor; mothBossLeave(e); }   // 這一段打完：換區（最後一區的底線是 0，照常打死）
     } else e.hp = Math.max(e.hp, floor + e.maxhp * MOTH_BOSS.flyFloor);   // 尖叫、換區途中打不死
     e.mbHp = e.hp;
@@ -145,11 +157,14 @@ function mothBossWake(e) {
   if (core && !core.dead && !core.awake) { wakeCore(core); core.lastHp = core.hp; mbCorePool(core, false); }
   mbScream(e, MOTH_BOSS.name + '驚醒了');
   mb.next = 'fly';
+  mb.farewell = { zone: mbZone(e, mbSpot().route.length - 1), home: { x: e.x, y: e.y } };   // 飛走前先在原地撒粉（起點＝路線最後一區）
   systemNotice(MOTH_BOSS.name + '抱著異質核心飛走了！', true);   // 不說飛去哪一區（讓玩家自己找）
 }
 // 這一段打完：尖叫、回去撿核心、往下一區飛
 function mothBossLeave(e) {
   const mb = e.mb;
+  mbRelease(e);   // 抓著人：先丟下來
+  mb.farewell = { zone: mbZone(e, mb.stage), home: mb.nest ? { x: mb.nest.x, y: mb.nest.y } : { x: e.x, y: e.y } };   // 飛走前先在這一區撒粉
   mb.stage++;
   mbScream(e, null);
   mb.next = e.carryCore && !e.carryCore.dead && !e.carryCore.carried ? 'grab' : 'fly';
@@ -244,7 +259,8 @@ function stepMothBoss(e, dt) {
   const flapRound = Math.floor(m.flapT / Math.max(wings.length, Math.round(MOTH.flapFps * MOTH.sound.flapEvery)));
   if (flapRound !== m.flapRound) { m.flapRound = flapRound; if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, P.sound.flap * (slow ? .5 : 1), 'moth-boss-flap'); }
   e.forceFlip = !!e.faceRight;   // 原圖朝左
-  const goalLift = mb.state === 'sleep' ? P.sleepHeight : P.height;
+  const diving = mb.state === 'swoop' && mb.swoopT >= P.grab.warn;
+  const goalLift = mb.state === 'sleep' ? P.sleepHeight : diving ? P.grab.diveLift : mb.state === 'carry' ? P.grab.carryLift : P.height;
   m.lift += (goalLift - m.lift) * Math.min(1, dt * 3);
   e.slimeLift = Math.max(4, m.lift + Math.sin(m.phase * MOTH.bobSpeed) * (slow ? 2 : MOTH.bob));
   if (mb.state === 'skyUp' || mb.state === 'skyDown') mbSkyLook(e);   // 飛向鏡頭：飛得更高、變大
@@ -252,7 +268,11 @@ function stepMothBoss(e, dt) {
   const core = e.carryCore;
   if (core && core.dead) e.carryCore = null;
   else if (core && core.carried) { core.x = e.x; core.y = e.y; }   // 核心抱在身上，跟著飛
-  if (e.stunT > 0) { m.spray = null; mb.burst = null; return; }   // 被麻醉、麻痺：停在空中（大面積撒粉也被打斷）
+  if (e.stunT > 0) {   // 被麻醉、麻痺：停在空中（大面積撒粉也被打斷；抓著的人跟著停在空中）
+    m.spray = null; if (mb.state !== 'farewell') mb.burst = null;
+    if (mb.state === 'carry') mbCarryHold(e, 0);
+    return;
+  }
   switch (mb.state) {
     case 'sleep': {
       const p = G.player;
@@ -261,8 +281,19 @@ function stepMothBoss(e, dt) {
     }
     case 'scream':
       e.tremble = true;
-      if (mb.t <= 0) { e.tremble = false; mbStartMove(e, mb.next || 'fly'); }
+      if (mb.t <= 0) {
+        e.tremble = false;
+        if (mb.farewell) { mb.burst = null; mbSet(e, 'farewell'); }   // 先在原地大範圍撒粉再走
+        else mbStartMove(e, mb.next || 'fly');
+      }
       return;
+    case 'farewell': {   // 飛走前：停在原地，把這一區撒滿鱗粉，撒完才去撿核心、飛走
+      const F = mb.farewell;
+      if (!F || !mbBurst(e, dt, F.zone, true, { home: F.home, force: true, telegraph: P.leaveTelegraph })) { mb.farewell = null; mbStartMove(e, mb.next || 'fly'); }
+      return;
+    }
+    case 'swoop': mbSwoop(e, dt); return;
+    case 'carry': mbCarry(e, dt); return;
     case 'grab': {   // 飛回巢把核心撿起來
       const c = e.carryCore;
       if (!c) { mbStartMove(e, 'fly'); return; }
@@ -366,6 +397,7 @@ function mbFly(e, dt) {
 function mbArrive(e) {
   const z = mbZone(e, e.mb.stage);
   e.mb.burstCd = MOTH_BOSS.burst.first; e.mb.burst = null;   // 到巢後等一下才第一次大面積撒粉
+  e.mb.grabCd = MOTH_BOSS.grab.first;   // 到巢後等一下才第一次抓人
   flash(MOTH_BOSS.name + '在' + z.name + '築巢', e.x, e.y - e.slimeLift - e.drawHeight - 6, '#f4d9ff');
 }
 function mbDropCore(e) {
@@ -397,6 +429,7 @@ function mbNest(e, dt) {
   let target = mothPickTarget(e);
   if (target && mbDist(target, home) > (P.leash + 3) * CELL) target = null;   // 跑出巢的範圍：不追
   m.target = target;
+  if (!mb.burst && mbTryGrab(e, dt, home)) return;   // 冷卻好了、附近有人：開始俯衝抓人
   if (!mbBurst(e, dt, z, !!target)) {   // 沒在大面積撒粉：照一般人面蝶一輪一輪撒
     const had = m.spray;
     mothSpray(e, dt, true);
@@ -416,33 +449,36 @@ function mbNest(e, dt) {
 }
 // 大面積撒粉：冷卻好了（而且這一區有人）→ 翅膀發光、地上圓圈預告 → 在 time 秒內把整區撒滿大團鱗粉。
 // 正在預告或撒的時候回傳 true（這時候不做一般的一輪一輪撒粉）
-function mbBurst(e, dt, z, hasTarget) {
-  const B = MOTH_BOSS.burst, m = e.mo, mb = e.mb, home = mb.nest;
+// opt.home＝撒在哪裡（沒給＝巢）、opt.force＝不管冷卻馬上撒（飛走前用）、opt.telegraph＝預告幾秒（沒給＝burst.telegraph）
+function mbBurst(e, dt, z, hasTarget, opt = {}) {
+  const B = MOTH_BOSS.burst, m = e.mo, mb = e.mb;
   if (!mb.burst) {
-    mb.burstCd = (mb.burstCd ?? B.first) - dt;
-    if (mb.burstCd > 0 || !hasTarget || e.burnT > 0) return false;
+    const home = opt.home || mb.nest;
+    if (!opt.force) mb.burstCd = (mb.burstCd ?? B.first) - dt;
+    if ((!opt.force && (mb.burstCd > 0 || !hasTarget)) || e.burnT > 0 || !home) return false;
+    const tele = opt.telegraph ?? B.telegraph;
     // 開始預告：用一般人面蝶的翅膀發光（m.spray 的 tele），顏色＝這一區的鱗粉
     const kind = mbKind(e, z), [r, g, b] = MOTH_COLORS[kind].rgb, R = z.radius * CELL * B.cover;
     mb.mixIdx++;
-    mb.burst = { kind, t: 0, done: 0, R, spots: mbBurstSpots(home, R, B.puffs) };
+    mb.burst = { kind, t: 0, done: 0, R, home, tele, spots: mbBurstSpots(home, R, B.puffs) };
     m.spray = { kind, phase: 'tele', t: 0, burst: true };
     const col = `rgb(${r},${g},${b})`;
-    for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: home.x, y: home.y, r: R * (.15 + i * .25), r2: R, life: B.telegraph - i * .3, life0: B.telegraph - i * .3, color: col });
+    for (let i = 0; i < 3; i++) { const life = Math.max(.3, tele - i * .3); G.effects.push({ ring: true, x: home.x, y: home.y, r: R * (.15 + i * .25), r2: R, life, life0: life, color: col }); }
     flash(MOTH_BOSS.name + '張開翅膀…', e.x, e.y - e.slimeLift - e.drawHeight - 6, MOTH_COLORS[kind].glow);
     if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake * .6, 'moth-boss-scream');
     return true;
   }
-  const s = mb.burst;
+  const s = mb.burst, home = s.home;
   if (e.burnT > 0) { mb.burst = null; m.spray = null; mb.burstCd = B.every[0]; return false; }   // 身上著火：鱗粉燒掉了，撒不出來
   s.t += dt;
-  if (m.spray && m.spray.burst) m.spray.t = Math.min(s.t, B.telegraph) / B.telegraph * MOTH.telegraph;   // 翅膀照預告進度越來越亮
-  if (s.t < B.telegraph) return true;
+  if (m.spray && m.spray.burst) m.spray.t = Math.min(s.t, s.tele) / s.tele * MOTH.telegraph;   // 翅膀照預告進度越來越亮
+  if (s.t < s.tele) return true;
   if (m.spray && m.spray.phase === 'tele') {   // 預告結束：開始撒（翅膀一閃一閃）
     m.spray.phase = 'spray';
     G.effects.push({ ring: true, x: home.x, y: home.y, r: 20, r2: s.R, life: .5, life0: .5, color: MOTH_COLORS[s.kind].glow });
     if (typeof sfxAt === 'function') sfxAt('mothSpray', e.x, e.y, 1, 'moth-boss-burst');
   }
-  const want = Math.min(s.spots.length, Math.ceil((s.t - B.telegraph) / B.time * s.spots.length));
+  const want = Math.min(s.spots.length, Math.ceil((s.t - s.tele) / B.time * s.spots.length));
   for (; s.done < want; s.done++) { const p = s.spots[s.done]; mothPuff(p.x, p.y, s.kind, true, actorFloor(e)); }
   if (s.done >= s.spots.length) {
     mb.burst = null; m.spray = null;
@@ -451,6 +487,137 @@ function mbBurst(e, dt, z, hasTarget) {
   }
   return true;
 }
+// ---- 抓人 ----
+// 這個人能不能被抓（借用 js/vines.js 的判斷：沒被藤蔓、狂風吊著，沒在暈、沒剛被丟下來…）
+function mbCanGrab(e, a) {
+  if (!a || a.hp <= 0 || !G.vineCaps || typeof vineCanGrab !== 'function') return false;
+  return vineCanGrab(a, a === G.player) && sameFloor(e, a);
+}
+// 築巢時：冷卻好了就挑附近的人（優先現在繞著飛的那個），開始預告、俯衝。開始了回傳 true
+function mbTryGrab(e, dt, home) {
+  const C = MOTH_BOSS.grab, mb = e.mb;
+  mb.grabCd = (mb.grabCd ?? C.first) - dt;
+  if (mb.grabCd > 0) return false;
+  const ok = a => mbCanGrab(e, a) && mbDist(a, e) <= C.range * CELL && mbDist(a, home) <= (MOTH_BOSS.leash + 2) * CELL;
+  let a = ok(e.mo.target) ? e.mo.target : null;
+  if (!a) { let best = Infinity; for (const o of [G.player, ...(G.towers || [])]) if (ok(o) && mbDist(o, e) < best) { best = mbDist(o, e); a = o; } }
+  if (!a) { mb.grabCd = 1; return false; }   // 附近沒人：等一下再看
+  mb.victim = a; mb.swoopT = 0; mb.ringT = 0;
+  e.mo.spray = null;
+  mbSet(e, 'swoop');
+  flash(a === G.player ? MOTH_BOSS.name + '盯上你了！' : MOTH_BOSS.name + '盯上了隊員！', a.x, a.y - 70, '#ff8fb0', .9);
+  if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake * .7, 'moth-boss-scream');
+  return true;
+}
+// 預告（發抖、目標腳下紅圈）→ 俯衝：碰到就抓起來，時間到沒碰到就撲空
+function mbSwoop(e, dt) {
+  const C = MOTH_BOSS.grab, mb = e.mb, a = mb.victim;
+  mb.swoopT += dt;
+  const miss = text => { mb.victim = null; e.tremble = false; mb.grabCd = C.every[0] * .5; mbSet(e, 'nest'); if (text) flash(text, e.x, e.y - e.slimeLift - e.drawHeight * .5, '#e7c8ff', .8); };
+  if (!mbCanGrab(e, a)) { miss(null); return; }   // 目標被藤蔓吊走、倒下、換樓層…：取消
+  if (mb.swoopT < C.warn) {   // 預告：在目標上方發抖，腳下紅圈一圈一圈縮
+    e.tremble = true;
+    mothFlyToward(e, a.x, a.y - 10, dt, .4);
+    if ((mb.ringT -= dt) <= 0) { mb.ringT = .25; G.effects.push({ ring: true, x: a.x, y: a.y + 10, r: 46, r2: 10, life: .3, life0: .3, color: '#ff5b7a' }); }
+    return;
+  }
+  e.tremble = false;
+  if (mbDist(e, a) <= C.reach * CELL && e.slimeLift <= C.diveLift + 30) { mbGrabVictim(e, a); return; }
+  mothFlyToward(e, a.x, a.y, dt, C.diveSpeedMul);
+  if (mb.swoopT >= C.warn + C.dive) miss('撲空了');
+}
+// 抓起來：借用 js/vines.js 的「被吊著」（不能動、怪物打不到；cap.wind＝不畫藤蔓），位置每幀跟著蝶后（mbCarryHold）
+function mbGrabVictim(e, a) {
+  const C = MOTH_BOSS.grab, mb = e.mb, isPlayer = a === G.player;
+  if (isPlayer && typeof cancelChannel === 'function' && typeof playerChannel !== 'undefined' && playerChannel) cancelChannel();
+  if (isPlayer && a.sitting && typeof standUp === 'function') standUp();
+  const v = { x: a.x, y: a.y, kind: 'toss', state: 'grab', t: 0, len: 1, seed: 0, twitch: 0, temp: true };   // 假的藤蔓（不放進 G.vines、不會畫出來）
+  const cap = { v, actor: a, isPlayer, mode: 'toss', wind: true, mothCarry: true, phase: 'mothCarry', t: 0, h: 0, x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y, topH: 0 };
+  G.vineCaps.push(cap);
+  a.vineCap = true; a.dashT = 0; a.knockT = 0;
+  if (!isPlayer) { a.navPath = null; a.navGoal = null; a.meleeSwing = null; a.gunSwing = null; a.target = null; }
+  mb.carry = { cap, t: 0, hurt: 0, from: { x: a.x, y: a.y }, drop: mbDropSpot(a, a.x, a.y, C.dropMin, C.dropMax) };
+  mb.victim = null;
+  mbSet(e, 'carry');
+  flash(isPlayer ? '被' + MOTH_BOSS.name + '抓走了！' : '隊員被抓走了！', a.x, a.y - 60, '#ff8fb0', .9);
+  if (isPlayer && typeof addShake === 'function') addShake(3);
+  G.effects.push({ ring: true, x: a.x, y: a.y + 8, r: 8, r2: 46, life: .35, life0: .35, color: '#ff8fb0' });
+  if (typeof sfxAt === 'function') sfxAt('vineGrab', a.x, a.y, .8, 'moth-boss-grab');
+}
+// 抓著的人掛在蝶后身體下面（js/vines.js 的 stepVineCap 每幀把人放在 cap.x0、cap.y0；畫的時候往上抬 cap.h）
+function mbCarryHold(e, dt) {
+  const c = e.mb.carry; if (!c) return;
+  c.cap.x0 = e.x; c.cap.y0 = e.y;
+  c.cap.h = Math.min(1, c.t / .4) * Math.max(0, e.slimeLift - 55);
+  if (c.cap.isPlayer && dt > 0 && typeof viewW === 'function') {   // 溫特被抓：鏡頭慢慢跟著他（js/vines.js 的 vineCameraHold 照 cap.camX、camY 擺鏡頭）
+    const mapW = COLS * CELL, mapH = ROWS * CELL, vw = viewW(), vh = viewH();
+    const tx = mapW <= vw ? (mapW - vw) / 2 : Math.max(0, Math.min(mapW - vw, e.x - vw / 2));
+    const ty = mapH <= vh ? (mapH - vh) / 2 : Math.max(0, Math.min(mapH - vh, e.y - vh / 2));
+    const k = Math.min(1, dt * 4);
+    c.cap.camX += (tx - c.cap.camX) * k; c.cap.camY += (ty - c.cap.camY) * k;
+  }
+}
+// 抓著飛到落點上空就丟下來；被打夠了、飛太久也會鬆手
+function mbCarry(e, dt) {
+  const C = MOTH_BOSS.grab, mb = e.mb, c = mb.carry;
+  if (!c || !G.vineCaps || !G.vineCaps.includes(c.cap)) { mb.carry = null; mbSet(e, 'nest'); return; }   // 人已經不在了（換地圖、被別的東西放開）
+  c.t += dt;
+  const there = mothFlyToward(e, c.drop.x, c.drop.y, dt, MOTH_BOSS.flySpeedMul) || mbDist(e, c.drop) < 6;
+  mbCarryHold(e, dt);
+  if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }
+  if ((there && c.t >= 1) || c.t >= C.carry) mbRelease(e);
+}
+// 把抓著的人丟下來：落點在蝶后正下方附近、走得到的地方（不會丟進牆裡）；交給 js/vines.js 的「掉下來」（彈兩下、躺著暈、扣血）
+function mbRelease(e) {
+  const mb = e.mb, c = mb && mb.carry;
+  if (!c) return;
+  mb.carry = null; mb.grabCd = mothRand(MOTH_BOSS.grab.every[0], MOTH_BOSS.grab.every[1]);
+  if (mb.state === 'carry') mbSet(e, 'nest');
+  const cap = c.cap, a = cap.actor;
+  if (!G.vineCaps || !G.vineCaps.includes(cap) || cap.phase !== 'mothCarry') return;
+  const spot = mbDropOk(a, e.x, e.y) ? { x: e.x, y: e.y } : mbDropSpot(a, e.x, e.y, 0, 3, c.from);
+  a.x = cap.x0 = spot.x; a.y = cap.y0 = spot.y;
+  cap.phase = 'fall'; cap.t = 0; cap.fallV = 0; cap.cut = true;   // cut：從半空中掉下來（不往鏡頭靠近）
+  cap.fallH0 = Math.max(1, cap.h); cap.lieSide = Math.random() < .5 ? -1 : 1;
+  if (cap.isPlayer) flash('被丟下來了！', a.x, a.y - 60, '#ff8fb0', .8);
+}
+// 這裡能不能讓這個人落地：在地圖裡、不在隱藏區、跟他同一層的地面、他走得進去（不會卡在牆、建築裡）
+function mbDropOk(a, x, y) {
+  const [c, r] = cellAt(x, y);
+  if (!inGrid(c, r) || (typeof inHiddenArea === 'function' && inHiddenArea(x, y))) return false;
+  if (typeof hasFloors !== 'undefined' && hasFloors && spawnFloorAt(c, r) !== actorFloor(a)) return false;
+  const blocked = a === G.player ? playerBlocked : (typeof sentryBlocked === 'function' ? sentryBlocked : playerBlocked);
+  return !onFloorDo(a, () => blocked(x, y));
+}
+// 找落點：離 (x, y) minD～maxD 格隨機找；找不到就從 (x, y) 一圈一圈往外找最近的；再找不到就丟回 fallback（被抓的地方）
+function mbDropSpot(a, x, y, minD, maxD, fallback) {
+  for (let i = 0; i < 60; i++) {
+    const ang = Math.random() * Math.PI * 2, d = (minD + Math.random() * (maxD - minD)) * CELL;
+    const px = x + Math.cos(ang) * d, py = y + Math.sin(ang) * d;
+    if (mbDropOk(a, px, py)) return { x: px, y: py };
+  }
+  const [c0, r0] = cellAt(x, y);
+  for (let R = 0; R <= 10; R++) for (let dr = -R; dr <= R; dr++) for (let dc = -R; dc <= R; dc++) {
+    if (Math.max(Math.abs(dc), Math.abs(dr)) !== R) continue;
+    const [px, py] = center(c0 + dc, r0 + dr);
+    if (mbDropOk(a, px, py)) return { x: px, y: py };
+  }
+  return fallback ? { x: fallback.x, y: fallback.y } : { x: a.x, y: a.y };
+}
+
+// ---- 核心護盾（game.js 在判定核心破掉前呼叫）：人面蝶后活著，牠的核心少受傷 ----
+function mothBossShieldCore() {
+  const list = mothBosses(); if (!list.length) return;
+  for (const e of list) {
+    const core = e.carryCore;
+    if (!core || core.dead || core.carried || !core.awake || !(core.hp < core.lastHp)) continue;
+    core.hp = core.lastHp - (core.lastHp - core.hp) * (1 - MOTH_BOSS.coreShield);
+    core.lastHp = core.hp; core.hitT = .16;
+    const now = performance.now();
+    if (now > (G.mothShieldNoteAt || 0)) { G.mothShieldNoteAt = now + 2500; flash('核心護盾', core.x, core.y - CORE.h - 14, '#e7c8ff'); }   // 偶爾提示一下
+  }
+}
+
 // 大面積撒粉的落點：從巢中心往外螺旋排開（平均鋪滿整個圓，再加一點亂數），飛不到的地方（地圖外）跳過
 function mbBurstSpots(home, R, n) {
   const out = [], turn = Math.PI * (3 - Math.sqrt(5));   // 黃金角：點會平均散開
@@ -465,6 +632,7 @@ function mbBurstSpots(home, R, n) {
 
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）：抱著的核心掉在原地 ----
 function mothBossDown(e) {
+  mbRelease(e);   // 抓著人：丟下來
   const c = e.carryCore;
   if (c && !c.dead && c.carried) {
     e.mb.nest = { x: e.x, y: e.y }; mbDropCore(e);
