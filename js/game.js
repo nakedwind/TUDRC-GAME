@@ -1289,6 +1289,7 @@ function openGroundMenu(c, r, clientX, clientY) {
 let cam = { x: 0, y: 0 };
 function updateCamera() {
   if (typeof vineCameraHold === 'function' && vineCameraHold()) return;   // 被藤蔓吊走：鏡頭停在原地（js/vines.js）
+  if (typeof mothCameraEase === 'function' && mothCameraEase()) return;   // 被人面蝶后丟下來：鏡頭慢慢跟過去，不要一下子切換（js/moth-boss.js）
   const p = G && G.player;
   const mapW = COLS * CELL, mapH = ROWS * CELL;
   const vw = viewW(), vh = viewH();                  // 相框換算成世界座標的大小（含縮放）

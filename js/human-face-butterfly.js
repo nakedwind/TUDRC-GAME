@@ -389,7 +389,7 @@ function mothExposure(dt) {
     const immune = a.mothImmune = a.mothImmune || { poison: 0, confuse: 0, sleep: 0 };
     const inside = { poison: 0, confuse: 0, sleep: 0 };
     for (const c of clouds) {
-      if (c.boom || !fieldHits(c.floor, a)) continue;   // 不同樓層的霧吸不到
+      if (c.boom || a.vineCap || !fieldHits(c.floor, a)) continue;   // 不同樓層的霧吸不到；被吊在空中（藤蔓、狂風、被人面蝶后抓著）也吸不到
       const d = Math.hypot(a.x - c.x, (a.y - c.y) / .7);
       if (d < c.r) inside[c.kind] = Math.max(inside[c.kind], mothCloudDensity(c) * (1 - .5 * d / c.r));
     }
