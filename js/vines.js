@@ -176,7 +176,7 @@ function stepVineCap(cap, a, dt) {
     cap.fallV += VINES.gravity * dt; cap.h -= cap.fallV * dt;
     if (cap.h <= 0) {
       const n = cap.bounces || 0;
-      if (n < VINES.bounces.length && cap.fallV > 120 && !cap.noBounce) {   // noBounce：被虱目魚王吐出來的人直接躺下（js/milkfish-king.js）   // 落地彈起來（一次比一次低），最後才倒下
+      if (n < VINES.bounces.length && cap.fallV > 120) {   // 落地彈起來（一次比一次低），最後才倒下
         cap.h = 0; cap.fallV = -cap.fallV * VINES.bounces[n]; cap.bounces = n + 1; a.vineBounced = true;
         if (n === 0) { G.effects.push({ ring: true, x: a.x, y: a.y + 14, r: 6, r2: 30, life: .35, life0: .35, color: '#d8dee6' }); vineHitSound(cap); }
         sfxAt('vineLand', a.x, a.y, (cap.isPlayer ? .8 : .55) * (n === 0 ? 1 : .45));

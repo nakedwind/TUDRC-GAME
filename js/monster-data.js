@@ -136,6 +136,13 @@ const MILKFISH_KING_FIELDS = [
   // 從水池登場（地圖有開才會用到，見 js/milkfish-king.js 的 MILKFISH_KING_MAPS）：溫特開槍打核心 → 震動 → 從水池竄出 → 落地
   { key: 'enrageHp',       label: '血量剩幾 % 以下暴怒',          min: 0,   max: 1,   step: .05, def: .5, pct: true },
   { key: 'enrageSpitCooldown', label: '暴怒時吐東西的間隔（秒）', min: .2,  max: 20,  step: .1,  def: 1 },
+  { key: 'chargeCooldown', label: '衝撞：兩輪衝撞的間隔（秒）',  min: 1,   max: 60,  step: .5,  def: 7 },
+  { key: 'chargeChain',    label: '衝撞：一輪連續衝幾次',         min: 1,   max: 6,   step: 1,   def: 2 },
+  { key: 'chargeWindup',   label: '衝撞：衝之前蓄力（秒）',       min: .1,  max: 3,   step: .05, def: .6 },
+  { key: 'chargeSpeed',    label: '衝撞：速度（像素／秒）',       min: 60,  max: 900, step: 10,  def: 320 },
+  { key: 'chargeDist',     label: '衝撞：一次衝幾格',             min: 2,   max: 30,  step: .5,  def: 10 },
+  { key: 'chargeDamage',   label: '衝撞：撞到人的傷害',           min: 0,   max: 300, step: 1,   def: 35 },
+  { key: 'chargeKnock',    label: '衝撞：撞飛幾格',               min: 0,   max: 10,  step: .5,  def: 3 },
   { key: 'coreHp',         label: '牠守的核心血量（地圖難度 1，越難照比例加）', min: 100, max: 20000, step: 100, def: 2000 },
   { key: 'coreShield',     label: '核心護盾：牠活著時核心少受幾 % 傷害', min: 0, max: 1, step: .05, def: .85, pct: true },
   { key: 'introRumble',    label: '登場：竄出前震動幾秒',         min: 0,   max: 8,   step: .1,  def: 2.2 },

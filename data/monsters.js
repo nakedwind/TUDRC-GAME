@@ -410,7 +410,14 @@ const MONSTERS_DEFAULT = [
       "enrageHp": 0.5,
       "enrageSpitCooldown": 1,
       "coreShield": 0.9,
-      "coreHp": 2000
+      "coreHp": 2000,
+      "chargeCooldown": 7,
+      "chargeChain": 2,
+      "chargeWindup": 0.6,
+      "chargeSpeed": 320,
+      "chargeDist": 10,
+      "chargeDamage": 35,
+      "chargeKnock": 3
     },
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",

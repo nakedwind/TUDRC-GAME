@@ -465,7 +465,7 @@ function pickCharacterFrame(set, who) {
   if (mothFrame) return mothFrame;
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
-  const ouchReady = set.ouch && set.ouch.complete && set.ouch.naturalWidth && !who.mkThrown;   // mkThrown：被虱目魚王吐出來摔在地上，閉著眼躺著、不換痛的表情（js/milkfish-king.js）
+  const ouchReady = set.ouch && set.ouch.complete && set.ouch.naturalWidth;
   if (ouchReady && !who.vineCap && who.vineDazeT > .2) return set.ouch;   // 摔在地上暈
   if (ouchReady && !set.ouchGroundOnly && who.vineCap) return set.ouch;   // 被藤蔓纏住、拉走、倒吊、掉下來、摔在地上暈：痛的表情（js/vines.js）
   if (ouchReady && !set.ouchGroundOnly && who.rootT > 0 && !(who.gunT > 0) && !who.meleeSwing) return set.ouch;   // 被絲瓜小姐的藤綁住（開槍、揮擊時照樣用攻擊圖；js/loofah-lady.js）
@@ -2657,7 +2657,7 @@ function update(dt) {
     }
     // 隊友也會被腐蝕：哨兵（依防禦減免，歸 0 失去戰鬥能力）。阿瓦倫本人對自己的腐蝕免疫。
     for (const t of G.towers) {
-      if (t.hp <= 0 || t.berserk || t.type === 'avaren') continue;
+      if (t.hp <= 0 || t.berserk || t.type === 'avaren' || t.eatenBy || t.vineCap) continue;   // eatenBy：被虱目魚（王）吞在嘴裡，不會被牠腳下的腐蝕池燙到；vineCap：被藤蔓吊在半空中
       const dmgAmt = acidTick(t);
       if (!dmgAmt) continue;
       const def = sentryDefense(t);

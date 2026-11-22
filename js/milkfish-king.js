@@ -14,6 +14,8 @@
    ・吃隊友：最多同時含 maxPrey 個（整個人看不見，肚子那裡冒出他說的話，每 preyTalkEvery 秒一句），含 holdTime 秒後瞄準別的隊友或溫特吐出來；
        含著隊友時附近沒人，就主動走去找人準備吐。追隊友／建築走不過去（身體太寬）時，stuckGive 秒後先放棄，去做別的事：
        隊友飛到地上受傷、躺著暈眩（借用 js/vines.js 被藤蔓丟下來的動畫），落點旁邊的人也會被砸到。
+   ・衝撞（跟鳥頭大隊長類似）：每 chargeCooldown 秒一輪，對準溫特或隊友蓄力（地上畫出衝的路線）後快速衝過去，
+       一輪連續衝 chargeChain 次（每次重新瞄準），路上撞到的人受傷、被撞飛；碰到牆或建築就停下來（不會暈），繼續追人。
    ・吐核心（表演）：血量每掉 coreSpitHp，就把核心吐到地上，喘 coreOutTime 秒後急著衝回去吞回來；核心在地上時打得到。
    ・倒下：核心掉在原地，嘴裡的隊友獲救（直接放出來）。
    ・從水池登場（地圖設定 intro: 'pool'，G11 有開）：一開始不在場上，躲在旁邊的深水區裡。溫特開槍打到核心 →
@@ -191,19 +193,25 @@ function stepMilkfishKing(e, dt) {
   if (!e.mk) mkInit(e);
   const C = mkCfg(e), F = MILKFISH_KING_FX, mk = e.mk;
   const x0 = e.x, y0 = e.y;
-  mk.t -= dt; mk.spitCd -= dt; mk.biteCd -= dt;
+  mk.t -= dt; mk.spitCd -= dt; mk.biteCd -= dt; if (e.eliteAwake) mk.chargeCd = (mk.chargeCd ?? 4) - dt;
   for (const pr of mk.prey) pr.left -= dt;
   if (!mk.enraged && e.eliteAwake && e.hp > 0 && e.hp / e.maxhp <= C.enrageHp) mkEnrage(e);   // 血量掉到一半（enrageHp）：暴怒
   // 吼叫、吐東西、吞核心中：打不斷（霸體）；其他時候暈眩只算一半時間
-  const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp'].includes(mk.state);
+  const armored = ['roar', 'spitWind', 'coreWind', 'coreGulp', 'chargeWind', 'charge'].includes(mk.state);
   e.superArmor = armored;
   if (armored) { e.stunT = 0; e.confuseT = 0; }
   else if ((e.stunT || 0) > mk.stunSeen) e.stunT = mk.stunSeen + (e.stunT - mk.stunSeen) * .5;
   mk.stunSeen = e.stunT || 0;
-  e.tremble = mk.state === 'spitWind' || mk.state === 'coreWind';
+  e.tremble = mk.state === 'spitWind' || mk.state === 'coreWind' || mk.state === 'chargeWind';
   mkApplyAtk(e);
   if (mk.coreIn) mkPoolUnderFeet(e, dt);
   if (!armored && (e.stunT > 0 || e.confuseT > 0)) { mfPose(e, null); mkBob(e, 0, dt); return; }
+  if (mk.state === 'charge') {   // 衝撞：自己控制移動（不照一頓一頓的步伐），腳步照樣震
+    mkChargeStep(e, dt);
+    const m = Math.hypot(e.x - x0, e.y - y0);
+    mkFootsteps(e, m); mkBob(e, m, dt);
+    return;
+  }
   // 一頓一頓的步伐：這一幀的速度照「走到這一步的哪裡」變快變慢（跨出去快、落腳慢）
   const sp = e.speed;
   e.speed = sp * mkGait(e);
@@ -317,6 +325,14 @@ function mkStep(e, dt) {
       return;
     }
     case 'recover': mfPose(e, null); if (mk.t <= 0) mkSet(e, 'hunt'); return;
+    case 'chargeWind': {   // 衝撞蓄力：前段跟著目標轉向，最後 0.2 秒鎖定方向
+      const tg = mk.charge && mk.charge.target;
+      if (tg && mk.t > .2 && tg.hp > 0) { const dx = tg.x - e.x, dy = tg.y - e.y, d = Math.hypot(dx, dy) || 1; mk.charge.dir = { x: dx / d, y: dy / d }; }
+      e.faceRight = mk.charge.dir.x > 0;
+      mfPose(e, Math.floor(mk.t * 10) % 2 ? 'smile-01' : 'smile-02');
+      if (mk.t <= 0) { mk.charge.left = C.chargeDist * CELL; mk.charge.hit = new Set(); mkSet(e, 'charge'); if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-charge'); }
+      return;
+    }
     case 'return': {   // 被引開太遠：走回原位
       mfPose(e, null);
       if (mkArea(e) ? mkInRange(e, e) : mkDist(e, mk.home) <= C.leash * CELL * .5) { mkSet(e, 'hunt'); return; }   // 回到能去的那一區就好（沒設活動區：走回守備範圍的一半）
@@ -348,6 +364,11 @@ function mkHunt(e, dt) {
   }
   // 太遠就回去
   if (!mkInRange(e, e)) { mkSet(e, 'return'); return; }
+  // 衝撞：時間到、有人在衝得到的距離 → 蓄力衝過去（一輪連續衝 chargeChain 次）
+  if (mk.chargeCd <= 0) {
+    const tg = mkChargeTarget(e);
+    if (tg) { mk.chargeLeft = C.chargeChain; mkStartCharge(e, tg); return; }
+  }
   // 溫特貼太近：咬一口
   if (p && p.hp > 0 && sameFloor(e, p) && mkDist(p, e) <= F.biteReach && mk.biteCd <= 0) { e.faceRight = p.x > e.x; mkSet(e, 'bite', F.biteWindup); return; }
   // 4. 嘴巴還有空位：去吞隊友
@@ -486,6 +507,77 @@ function mkRoar(e) {
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#8fd3ff' : '#ffffff' });
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 9, .06); else addShake(6);
   if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-roar');
+}
+
+// ---- 衝撞（跟鳥頭大隊長類似，但撞到牆不會暈）----
+// 挑要衝的人：看得到、在 3～衝撞距離內的溫特優先，沒有就挑隊友
+function mkChargeTarget(e) {
+  const C = mkCfg(e), p = G.player, R = C.chargeDist * CELL;
+  const ok = a => a && a.hp > 0 && !a.eatenBy && !a.vineCap && sameFloor(e, a) && mkInRange(e, a) && mkDist(a, e) >= 3 * CELL && mkDist(a, e) <= R && hasLineOfSight(e.x, e.y, a.x, a.y);
+  if (ok(p)) return p;
+  return mkPick(G.towers.filter(ok));
+}
+function mkStartCharge(e, tg) {
+  const C = mkCfg(e), mk = e.mk, dx = tg.x - e.x, dy = tg.y - e.y, d = Math.hypot(dx, dy) || 1;
+  mk.charge = { target: tg, dir: { x: dx / d, y: dy / d } };
+  e.faceRight = dx > 0;
+  mkSet(e, 'chargeWind', C.chargeWindup);
+  G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 6, r2: 40, life: .3, life0: .3, color: '#d9d2c0' });
+}
+// 衝的時候每幀：一點一點往前推（4 像素一步），碰到牆、建築就停；路上撞到的人受傷、被撞飛
+function mkChargeStep(e, dt) {
+  const C = mkCfg(e), mk = e.mk, ch = mk.charge;
+  if (!ch) { mkSet(e, 'hunt'); return; }
+  mfPose(e, 'attack', e.x + ch.dir.x * 100);
+  let move = Math.min(ch.left, C.chargeSpeed * dt), stop = false;
+  ch.left -= move;
+  while (move > 0 && !stop) {
+    const s = Math.min(4, move); move -= s;
+    const nx = e.x + ch.dir.x * s, ny = e.y + ch.dir.y * s;
+    if (enemyBlocked(nx, ny, e) || !mkInRange(e, { x: nx, y: ny })) { stop = true; break; }   // 碰到牆、建築，或要衝出活動區：停下來（不暈）
+    e.x = nx; e.y = ny;
+    mkChargeHits(e, ch);
+  }
+  if (Math.random() < .5) G.effects.push({ particle: true, kind: 'spark', x: e.x - ch.dir.x * 20 + (Math.random() * 2 - 1) * 14, y: e.y + 12, vx: -ch.dir.x * 70 + (Math.random() * 2 - 1) * 30, vy: -ch.dir.y * 70 - 15, r: 2 + Math.random() * 2.5, life: .35, life0: .35, color: '#b9b2a2' });   // 腳下噴灰
+  if (stop || ch.left <= 0) {
+    if (stop) { if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 6, .04); G.effects.push({ ring: true, x: e.x + ch.dir.x * 30, y: e.y + 6, r: 6, r2: 44, life: .3, life0: .3, color: '#c9c2b0' }); }
+    mk.chargeLeft = (mk.chargeLeft || 1) - 1;
+    const next = mk.chargeLeft > 0 ? mkChargeTarget(e) : null;
+    if (next) { mkStartCharge(e, next); mk.t = C.chargeWindup * .6; return; }   // 連衝：下一次蓄力短一點
+    mk.charge = null; mk.chargeCd = C.chargeCooldown;
+    mkSet(e, 'recover', .5);
+  }
+}
+function mkChargeHits(e, ch) {
+  const C = mkCfg(e), p = G.player, R = (e.drawWidth || 220) * .22, atk = mkAtk(e), dmg = C.chargeDamage * atk;
+  if (p && p.hp > 0 && !ch.hit.has(p) && !p.vineCap && sameFloor(e, p) && mkDist(p, e) <= R) {
+    ch.hit.add(p);
+    if (!(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
+      const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg;
+      p.hp = Math.max(0, p.hp - hurt); p.hitT = .35; G.damageVignetteT = .5;
+      flashDmg('-' + Math.round(hurt), p.x, p.y - 46, '#ff6b6b');
+      if (typeof playPlayerHit === 'function') playPlayerHit(1, true);
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + e.eliteName + '撞飛'); }
+    }
+    if (typeof knockActor === 'function') knockActor(p, ch.dir.x, ch.dir.y, C.chargeKnock * CELL, .36);
+    mkChargeHitFx(e, p);
+  }
+  for (const t of G.towers) {
+    if (t.hp <= 0 || t.eatenBy || t.vineCap || ch.hit.has(t) || !sameFloor(e, t) || mkDist(t, e) > R) continue;
+    ch.hit.add(t);
+    const hurt = dmg * (1 - (typeof sentryDefense === 'function' ? sentryDefense(t) : 0));
+    t.hp = Math.max(0, t.hp - hurt); t.hitT = Math.max(t.hitT || 0, .3);
+    flashDmg('-' + Math.round(hurt), t.x, t.y - 30, '#ff8f8f');
+    if (typeof knockActor === 'function') knockActor(t, ch.dir.x, ch.dir.y, C.chargeKnock * CELL * .8, .36);
+    t.navPath = null; t.navGoal = null;
+    if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+    mkChargeHitFx(e, t);
+  }
+}
+function mkChargeHitFx(e, a) {
+  G.effects.push({ ring: true, x: a.x, y: a.y - 10, r: 6, r2: 40, life: .25, life0: .25, color: '#ffd27a' });
+  if (typeof bossImpact === 'function') bossImpact(a.x, a.y, 7, .06);
+  if (typeof sfxAt === 'function') sfxAt('knock2', a.x, a.y, 1, 'milkfish-king-charge-hit');
 }
 
 // ---- 暴怒：血量掉到 enrageHp 以下，吼一聲、全身泛紅，吐東西的間隔變短（enrageSpitCooldown）----
@@ -636,8 +728,7 @@ function mkLaunchMate(e, t, x1, y1) {
   t.x = sx; t.y = sy;
   const cap = { v: { x: sx, y: sy, kind: 'hang', state: 'grab', t: 0, len: 1, seed: Math.random() * 10, twitch: 0, temp: true },
     actor: t, isPlayer: false, mode: 'hang', phase: 'fall', cut: true, t: 0, h: h0, fallV: -v0, fallH0: peak,
-    x0: sx, y0: sy, hp: t.hp, camX: cam.x, camY: cam.y, topH: 0, lieSide: x1 >= sx ? 1 : -1, mkSpit: true, noBounce: true };   // noBounce：落地直接躺下，不彈兩下（看起來像在發抖）
-  t.mkThrown = true;   // 飛出去、摔在地上躺著的這段時間不換「痛的表情」（看起來像閃紅），閉著眼躺著（js/game.js 的 pickCharacterFrame）
+    x0: sx, y0: sy, hp: t.hp, camX: cam.x, camY: cam.y, topH: 0, lieSide: x1 >= sx ? 1 : -1, mkSpit: true };
   G.vineCaps.push(cap);
   t.vineCap = true; t.navPath = null; t.navGoal = null; t.target = null;
   G.mkShots.push({ kind: 'mate', king: e, atk: mkAtk(e), t, cap, x0: sx, y0: sy, x1, y1, t0: 0, tt: 0, T });
@@ -651,7 +742,6 @@ function updateMilkfishKing(dt) {
   for (const e of [...mkKings()]) {
     const mk = e.mk;
     if (!mkAlive(e)) { mkDown(e); continue; }
-    for (const t of G.towers) if (t.mkThrown && !t.vineCap && !(t.vineDazeT > 0)) t.mkThrown = false;   // 爬起來了
     for (const pr of mk.prey) {
       pr.t.x = e.x; pr.t.y = e.y; pr.t.moving = false;
       pr.talkT = (pr.talkT ?? MILKFISH_KING_FX.preyTalkEvery) - dt;   // 隔一陣子在肚子裡再冒一句（剛吞下去那句由 mkGulpMate 說）
@@ -900,6 +990,15 @@ function drawMilkfishKingFx(ctx) {
   if (!G) return;
   const now = performance.now() / 1000;
   mkDrawShards(ctx);   // 吐出來的建築碎片
+  for (const e of mkKings()) {   // 衝撞蓄力：地上畫出要衝的路線（越來越紅、最後鎖定變實線）
+    const mk = e.mk; if (!mk || mk.state !== 'chargeWind' || !mk.charge) continue;
+    const C = mkCfg(e), d = mk.charge.dir, L = C.chargeDist * CELL, w = (e.drawWidth || 220) * .22, k = 1 - Math.max(0, mk.t) / C.chargeWindup;
+    ctx.save(); ctx.translate(e.x, e.y + 10); ctx.rotate(Math.atan2(d.y, d.x));
+    ctx.fillStyle = `rgba(255,75,58,${.08 + .18 * k})`; ctx.fillRect(0, -w, L * Math.min(1, .3 + k), w * 2);
+    ctx.strokeStyle = mk.t <= .2 ? 'rgba(255,106,77,.9)' : 'rgba(255,176,138,.55)'; ctx.lineWidth = 2; ctx.setLineDash(mk.t <= .2 ? [] : [8, 6]);
+    ctx.strokeRect(0, -w, L, w * 2);
+    ctx.restore();
+  }
   for (const e of mkKings()) {   // 鼓起來要吐：目標腳下的紅圈
     const s = e.mk && e.mk.state === 'spitWind' && e.mk.spit;
     if (s) mkDrawTarget(ctx, s.x, s.y, mkCfg(e).spitRadius * CELL, 1 - Math.max(0, e.mk.t) / mkCfg(e).spitWindup, s.locked);
