@@ -121,6 +121,10 @@ function mkInit(e, core) {
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true; e.mineEater = true;
   e.walkStride = MILKFISH_KING_FX.stepEvery;   // 走路圖每踩一步換一張（左腳、右腳輪流），換圖的時間由 mkFootsteps 對齊落腳（js/render.js 的 monsterWalkFrame）   // mineEater：踩到地雷不會引爆（會把地雷吃掉，js/landmine.js）
   if (core === undefined) core = G.cores.filter(k => !k.dead).reduce((best, k) => !best || mkDist(k, e) < mkDist(best, e) ? k : best, null);
+  if (core && !core.mkHpSet) {   // 牠守的核心：血量照怪物編輯器的 coreHp（再乘地圖難度）
+    const difficulty = Math.max(1, Math.min(5, Number(MAP && MAP.difficulty) || 1));
+    core.hp = core.maxhp = core.lastHp = Math.round(mkCfg(e).coreHp * difficulty); core.mkHpSet = true;
+  }
   e.mk = { state: 'guard', t: 0, home: { x: e.x, y: e.y }, core: core || null, coreIn: false,
     belly: [], prey: [], spitCd: 2, biteCd: 0, wait: 1, spot: null, stepDist: 0, stepCount: 0, stunSeen: 0,
     nextCoreSpit: 1 - mkCfg(e).coreSpitHp, poolT: 0, lastPool: null,
@@ -498,6 +502,8 @@ function mkEnrage(e) {
 // ---- 核心護盾：牠活著時，核心（吐在地上那段時間）少受 coreShield 的傷害；在肚子裡一滴都不扣 ----
 // （js/game.js 判定核心破掉前、js/anomalous-core.js 的核心更新前都會呼叫，跟其他 BOSS 的核心護盾一樣）
 function mkShieldCore() {
+  const I = G.mkIntro, ic = I && I.e && I.e.mk && I.e.mk.core;   // 還在水池裡、登場表演中：核心一滴血都不扣（不然趁牠還沒出來就打破了）
+  if (ic && !ic.dead && I.phase !== 'done' && ic.hp < ic.lastHp) ic.hp = ic.lastHp;
   for (const e of mkKings()) {
     const core = e.mk && e.mk.core;
     if (!core || core.dead || !core.awake || !(core.hp < core.lastHp) || !mkAlive(e)) continue;
@@ -630,7 +636,8 @@ function mkLaunchMate(e, t, x1, y1) {
   t.x = sx; t.y = sy;
   const cap = { v: { x: sx, y: sy, kind: 'hang', state: 'grab', t: 0, len: 1, seed: Math.random() * 10, twitch: 0, temp: true },
     actor: t, isPlayer: false, mode: 'hang', phase: 'fall', cut: true, t: 0, h: h0, fallV: -v0, fallH0: peak,
-    x0: sx, y0: sy, hp: t.hp, camX: cam.x, camY: cam.y, topH: 0, lieSide: x1 >= sx ? 1 : -1, mkSpit: true };
+    x0: sx, y0: sy, hp: t.hp, camX: cam.x, camY: cam.y, topH: 0, lieSide: x1 >= sx ? 1 : -1, mkSpit: true, noBounce: true };   // noBounce：落地直接躺下，不彈兩下（看起來像在發抖）
+  t.mkThrown = true;   // 飛出去、摔在地上躺著的這段時間不換「痛的表情」（看起來像閃紅），閉著眼躺著（js/game.js 的 pickCharacterFrame）
   G.vineCaps.push(cap);
   t.vineCap = true; t.navPath = null; t.navGoal = null; t.target = null;
   G.mkShots.push({ kind: 'mate', king: e, atk: mkAtk(e), t, cap, x0: sx, y0: sy, x1, y1, t0: 0, tt: 0, T });
@@ -644,6 +651,7 @@ function updateMilkfishKing(dt) {
   for (const e of [...mkKings()]) {
     const mk = e.mk;
     if (!mkAlive(e)) { mkDown(e); continue; }
+    for (const t of G.towers) if (t.mkThrown && !t.vineCap && !(t.vineDazeT > 0)) t.mkThrown = false;   // 爬起來了
     for (const pr of mk.prey) {
       pr.t.x = e.x; pr.t.y = e.y; pr.t.moving = false;
       pr.talkT = (pr.talkT ?? MILKFISH_KING_FX.preyTalkEvery) - dt;   // 隔一陣子在肚子裡再冒一句（剛吞下去那句由 mkGulpMate 說）

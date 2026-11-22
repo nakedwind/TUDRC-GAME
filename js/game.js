@@ -465,7 +465,7 @@ function pickCharacterFrame(set, who) {
   if (mothFrame) return mothFrame;
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
-  const ouchReady = set.ouch && set.ouch.complete && set.ouch.naturalWidth;
+  const ouchReady = set.ouch && set.ouch.complete && set.ouch.naturalWidth && !who.mkThrown;   // mkThrown：被虱目魚王吐出來摔在地上，閉著眼躺著、不換痛的表情（js/milkfish-king.js）
   if (ouchReady && !who.vineCap && who.vineDazeT > .2) return set.ouch;   // 摔在地上暈
   if (ouchReady && !set.ouchGroundOnly && who.vineCap) return set.ouch;   // 被藤蔓纏住、拉走、倒吊、掉下來、摔在地上暈：痛的表情（js/vines.js）
   if (ouchReady && !set.ouchGroundOnly && who.rootT > 0 && !(who.gunT > 0) && !who.meleeSwing) return set.ouch;   // 被絲瓜小姐的藤綁住（開槍、揮擊時照樣用攻擊圖；js/loofah-lady.js）

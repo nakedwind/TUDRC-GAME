@@ -409,7 +409,8 @@ const MONSTERS_DEFAULT = [
       "introRumble": 7.2,
       "enrageHp": 0.5,
       "enrageSpitCooldown": 1,
-      "coreShield": 0.85
+      "coreShield": 0.9,
+      "coreHp": 2000
     },
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
