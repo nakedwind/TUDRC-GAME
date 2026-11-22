@@ -109,7 +109,8 @@ function updateSmilers(dt) {
   for (const t of G.towers) if (t.hp > 0) victims.push(t);
   for (const v of victims) {
     v.smilerCd = Math.max(0, (v.smilerCd || 0) - dt);
-    if (isLit(v.x, v.y)) { v.darkT = 0; continue; }
+    // 照到光、或正坐在捷運上被載著走（a.mrtRide，js/mrt-train.js）：不會被咬，待在黑暗裡的時間也重算
+    if (v.mrtRide || isLit(v.x, v.y)) { v.darkT = 0; continue; }
     v.darkT = (v.darkT || 0) + dt;
     if (v.darkT < SMILER.grace || v.smilerCd > 0 || smilers.some(s => s.victim === v)) continue;
     const rate = Math.min(SMILER.biteMax, SMILER.biteRate + (v.darkT - SMILER.grace) * SMILER.biteRamp);
@@ -144,7 +145,7 @@ function startSmilerBite(v, charmed = false) {   // charmed：平安符擋下，
 }
 function smilerBite(v, s) {
   v.smilerCd = SMILER.biteCd;
-  if (v.hp <= 0) return;
+  if (v.hp <= 0 || v.mrtRide) return;   // 撲上來的時候剛好上了捷運：咬空
   if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(v)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const isPlayer = v === G.player, charmed = s && s.charmed;
   const dmg = charmed ? 0 : isPlayer ? (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SMILER.playerDmg) : SMILER.playerDmg) : SMILER.sentryDmg * (1 - sentryDefense(v));
