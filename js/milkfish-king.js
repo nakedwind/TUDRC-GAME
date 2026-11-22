@@ -14,7 +14,7 @@
    ・吃隊友：最多同時含 maxPrey 個（整個人看不見，肚子那裡冒出他說的話，每 preyTalkEvery 秒一句），含 holdTime 秒後瞄準別的隊友或溫特吐出來；
        含著隊友時附近沒人，就主動走去找人準備吐。追隊友／建築走不過去（身體太寬）時，stuckGive 秒後先放棄，去做別的事：
        隊友飛到地上受傷、躺著暈眩（借用 js/vines.js 被藤蔓丟下來的動畫），落點旁邊的人也會被砸到。
-   ・衝撞（跟鳥頭大隊長類似）：每 chargeCooldown 秒一輪，對準溫特或隊友蓄力（地上畫出衝的路線）後快速衝過去，
+   ・衝撞（跟鳥頭大隊長類似）：每 chargeCooldown 秒一輪，對準溫特或隊友蓄力（鼓起來發抖，地上不畫路線）後用正面跑步快速衝過去、快到底才張嘴撲咬，
        一輪連續衝 chargeChain 次（每次重新瞄準），路上撞到的人受傷、被撞飛；碰到牆或建築就停下來（不會暈），繼續追人。
    ・吐核心（表演）：血量每掉 coreSpitHp，就把核心吐到地上，喘 coreOutTime 秒後急著衝回去吞回來；核心在地上時打得到。
    ・倒下：核心掉在原地，嘴裡的隊友獲救（直接放出來）。
@@ -57,6 +57,8 @@ const MILKFISH_KING_FX = {
   gaitMin: .3,            // 落腳那一刻的速度只剩幾成（越小越「一頓一頓」）；平均速度還是怪物編輯器的「速度」
   bobHeight: 5,           // 走路時身體上下起伏多高（像素）
   shards: { cols: 3, rows: 3, gravity: 900, life: 1.2 },   // 吐出來的建築碎掉：切成幾塊、往下掉多快、碎片留幾秒
+  chargeBiteAt: .25,      // 衝撞剩下幾成距離時換成張嘴的攻擊圖（前面是正面跑步）
+  chargeEndHold: .35,     // 衝完張嘴撲咬的樣子停幾秒
   // 從水池登場的細節（秒數、高度、震動大小在怪物編輯器）
   intro: { poolSearch: 10,   // 從原位往外找幾格內的深水
     sink: .85,               // 一開始沉在水面下多深（身體高度的幾成）
@@ -325,6 +327,7 @@ function mkStep(e, dt) {
       return;
     }
     case 'recover': mfPose(e, null); if (mk.t <= 0) mkSet(e, 'hunt'); return;
+    case 'chargeEnd': mfPose(e, 'attack', mk.chargeEndX); if (mk.t <= 0) mkSet(e, 'recover', .3); return;   // 衝撞收尾：張嘴撲咬的樣子停一下
     case 'chargeWind': {   // 衝撞蓄力：前段跟著目標轉向，最後 0.2 秒鎖定方向
       const tg = mk.charge && mk.charge.target;
       if (tg && mk.t > .2 && tg.hp > 0) { const dx = tg.x - e.x, dy = tg.y - e.y, d = Math.hypot(dx, dy) || 1; mk.charge.dir = { x: dx / d, y: dy / d }; }
@@ -501,7 +504,7 @@ function mkRoar(e) {
   e.alertT = typeof ENEMY_ALERT_TIME !== 'undefined' ? ENEMY_ALERT_TIME : 1;
   const core = mk.core;
   if (core && !core.awake && !core.dead) { wakeCore(core); core.lastHp = core.hp; }
-  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '甦醒了', '牠要把核心吞進肚子裡！', '#8fd3ff');
+  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '甦醒了', '', '#8fd3ff');
   systemNotice(e.eliteName + '甦醒了！', true);
   flash('咕嚕嚕——！！', e.x, e.y - e.drawHeight - 10, '#8fd3ff');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#8fd3ff' : '#ffffff' });
@@ -528,7 +531,9 @@ function mkStartCharge(e, tg) {
 function mkChargeStep(e, dt) {
   const C = mkCfg(e), mk = e.mk, ch = mk.charge;
   if (!ch) { mkSet(e, 'hunt'); return; }
-  mfPose(e, 'attack', e.x + ch.dir.x * 100);
+  // 跑步用正面走路圖（左右腳輪流，換腳跟腳步震動同步，mkFootsteps 管）；快衝到底才換張嘴的攻擊圖
+  if (ch.left <= C.chargeDist * CELL * MILKFISH_KING_FX.chargeBiteAt) mfPose(e, 'attack', e.x + ch.dir.x * 100);
+  else mfPose(e, null);
   let move = Math.min(ch.left, C.chargeSpeed * dt), stop = false;
   ch.left -= move;
   while (move > 0 && !stop) {
@@ -545,7 +550,8 @@ function mkChargeStep(e, dt) {
     const next = mk.chargeLeft > 0 ? mkChargeTarget(e) : null;
     if (next) { mkStartCharge(e, next); mk.t = C.chargeWindup * .6; return; }   // 連衝：下一次蓄力短一點
     mk.charge = null; mk.chargeCd = C.chargeCooldown;
-    mkSet(e, 'recover', .5);
+    mk.chargeEndX = e.x + ch.dir.x * 100;
+    mkSet(e, 'chargeEnd', MILKFISH_KING_FX.chargeEndHold);
   }
 }
 function mkChargeHits(e, ch) {
@@ -990,15 +996,7 @@ function drawMilkfishKingFx(ctx) {
   if (!G) return;
   const now = performance.now() / 1000;
   mkDrawShards(ctx);   // 吐出來的建築碎片
-  for (const e of mkKings()) {   // 衝撞蓄力：地上畫出要衝的路線（越來越紅、最後鎖定變實線）
-    const mk = e.mk; if (!mk || mk.state !== 'chargeWind' || !mk.charge) continue;
-    const C = mkCfg(e), d = mk.charge.dir, L = C.chargeDist * CELL, w = (e.drawWidth || 220) * .22, k = 1 - Math.max(0, mk.t) / C.chargeWindup;
-    ctx.save(); ctx.translate(e.x, e.y + 10); ctx.rotate(Math.atan2(d.y, d.x));
-    ctx.fillStyle = `rgba(255,75,58,${.08 + .18 * k})`; ctx.fillRect(0, -w, L * Math.min(1, .3 + k), w * 2);
-    ctx.strokeStyle = mk.t <= .2 ? 'rgba(255,106,77,.9)' : 'rgba(255,176,138,.55)'; ctx.lineWidth = 2; ctx.setLineDash(mk.t <= .2 ? [] : [8, 6]);
-    ctx.strokeRect(0, -w, L, w * 2);
-    ctx.restore();
-  }
+  // 衝撞蓄力：地上不畫路線（使用者要的，只看牠鼓起來發抖判斷）
   for (const e of mkKings()) {   // 鼓起來要吐：目標腳下的紅圈
     const s = e.mk && e.mk.state === 'spitWind' && e.mk.spit;
     if (s) mkDrawTarget(ctx, s.x, s.y, mkCfg(e).spitRadius * CELL, 1 - Math.max(0, e.mk.t) / mkCfg(e).spitWindup, s.locked);
