@@ -26,7 +26,7 @@
 */
 // 地圖 id → 出生位置（{ c, r }；沒寫＝站在地圖核心下方 2 格）；intro: 'pool'＝一開始躲在旁邊的深水區，溫特開槍打核心才竄出來
 const MILKFISH_KING_MAPS = {
-  map_mwm655e8: { intro: 'pool' },   // G11區-綠線捷運站：右邊的水池
+  map_mwm655e8: { intro: 'pool', roam: 'area' },   // G11區-綠線捷運站：右邊的水池；roam: 'area'＝可以在原位所在的那一整區（上面那一整區）跑，不受守備範圍限制
 };
 // 不想給編輯器調的細節（動畫、特效）
 const MILKFISH_KING_FX = {
@@ -47,6 +47,8 @@ const MILKFISH_KING_FX = {
   coreSpitDist: [3, 4.5], // 核心吐多遠（格）
   mateArcTime: .9,        // 隊友在空中飛幾秒
   wanderRadius: 3,        // 閒晃範圍（格，以原位為中心）
+  roamDist: [6, 25],      // 有活動區（MILKFISH_KING_MAPS 的 roam: 'area'）時：沒事做就挑離自己幾～幾格的地方走過去逛
+  roamSpeed: .8,          // 逛的時候走路速度 ×
   stuckGive: 2.5,         // 走向隊友／建築／溫特，幾秒都沒更靠近就放棄（身體太寬擠不過去時才不會卡在原地）
   stuckSkip: 6,           // 放棄後幾秒內不再去追那個目標
   preyTalkEvery: 3.5,     // 被吞進肚子的隊友每隔幾秒在肚子那裡冒一句話（對話編輯器「被虱目魚小子吞掉」那格的台詞）
@@ -154,6 +156,31 @@ function mkSpitTargets(e, except) {
   return out;
 }
 const mkPick = list => list.length ? list[Math.floor(Math.random() * list.length)] : null;
+
+// ---- 活動範圍 ----
+// 地圖設了 roam: 'area'：原位所在、走得到的那一整區都能去（從原位往外一格一格找，碰到牆、地圖外就停）；沒設：離原位守備範圍（leash）格內
+function mkArea(e) {
+  const mk = e.mk, cfg = typeof MAP !== 'undefined' && MAP ? MILKFISH_KING_MAPS[MAP.id] : null;
+  if (!cfg || cfg.roam !== 'area') return null;
+  if (mk.area && mk.area.home === mk.home) return mk.area;
+  const floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null, [hc, hr] = cellAt(mk.home.x, mk.home.y);
+  const set = new Set([hc + ',' + hr]), list = [[hc, hr]], q = [[hc, hr]];
+  while (q.length && set.size < 5000) {
+    const [c, r] = q.shift();
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const cc = c + dc, rr = r + dr, k = cc + ',' + rr;
+      if (set.has(k) || !inGrid(cc, rr) || isWall(cc, rr) || (floor && !floor.has(k))) continue;
+      set.add(k); list.push([cc, rr]); q.push([cc, rr]);
+    }
+  }
+  return (mk.area = { home: mk.home, set, list });
+}
+// 這個點在不在牠能去的範圍裡
+function mkInRange(e, pt) {
+  const A = mkArea(e);
+  if (A) { const [c, r] = cellAt(pt.x, pt.y); return A.set.has(c + ',' + r); }
+  return mkDist(pt, e.mk.home) <= mkCfg(e).leash * CELL;
+}
 
 // ---- 每幀（enemy-ai.js 的 stepEnemy 呼叫）----
 function stepMilkfishKing(e, dt) {
@@ -288,7 +315,7 @@ function mkStep(e, dt) {
     case 'recover': mfPose(e, null); if (mk.t <= 0) mkSet(e, 'hunt'); return;
     case 'return': {   // 被引開太遠：走回原位
       mfPose(e, null);
-      if (mkDist(e, mk.home) <= C.leash * CELL * .5) { mkSet(e, 'hunt'); return; }
+      if (mkArea(e) ? mkInRange(e, e) : mkDist(e, mk.home) <= C.leash * CELL * .5) { mkSet(e, 'hunt'); return; }   // 回到能去的那一區就好（沒設活動區：走回守備範圍的一半）
       if (mkStuck(e, mk.home, dt)) { mk.home = { x: e.x, y: e.y }; mkSet(e, 'hunt'); return; }   // 走不回去（被窄道擋住）：就把現在的位置當原位，不要一直站著
       const [hc, hr] = cellAt(mk.home.x, mk.home.y);
       const nav = enemyNavigate(e, hc, hr, dt * 1.2, 'mk-home', true);
@@ -316,7 +343,7 @@ function mkHunt(e, dt) {
     if (tg) { mkStartSpit(e, { item: mk.belly.shift() }, tg); return; }
   }
   // 太遠就回去
-  if (mkDist(e, mk.home) > C.leash * CELL) { mkSet(e, 'return'); return; }
+  if (!mkInRange(e, e)) { mkSet(e, 'return'); return; }
   // 溫特貼太近：咬一口
   if (p && p.hp > 0 && sameFloor(e, p) && mkDist(p, e) <= F.biteReach && mk.biteCd <= 0) { e.faceRight = p.x > e.x; mkSet(e, 'bite', F.biteWindup); return; }
   // 4. 嘴巴還有空位：去吞隊友
@@ -325,7 +352,7 @@ function mkHunt(e, dt) {
     if (!mate) {
       let bestD = C.noticeRange * CELL;
       for (const t of G.towers) {
-        if (!mkEdibleMate(e, t) || mkDist(t, mk.home) > C.leash * CELL) continue;
+        if (!mkEdibleMate(e, t) || !mkInRange(e, t)) continue;
         const d = mkDist(t, e);
         if (d <= bestD && hasLineOfSight(e.x, e.y, t.x, t.y)) { mate = t; bestD = d; }
       }
@@ -379,7 +406,7 @@ function mkSeekSpitTarget(e, dt) {
   for (const t of G.towers) if (t.hp > 0 && !t.eatenBy && !t.vineCap && sameFloor(e, t)) cands.push(t);
   let best = null, bestD = Infinity;
   for (const t of cands) {
-    if (mkSkipped(e, t) || mkDist(t, mk.home) > C.leash * CELL) continue;
+    if (mkSkipped(e, t) || !mkInRange(e, t)) continue;
     const d = mkDist(t, e);
     if (d < bestD) { best = t; bestD = d; }
   }
@@ -406,12 +433,27 @@ function mkPickItem(e) {
   for (const o of G.obstacles) {
     if (!mkEdibleItem(e, o) || mkSkipped(e, o)) continue;
     const c = mkItemCenter(o), d = mkDist(c, e);
-    if (d < bestD && mkDist(c, mk.home) <= C.leash * CELL) { best = o; bestD = d; }
+    if (d < bestD && mkInRange(e, c)) { best = o; bestD = d; }
   }
   return best;
 }
 function mkWander(e, dt) {
-  const mk = e.mk, F = MILKFISH_KING_FX;
+  const mk = e.mk, F = MILKFISH_KING_FX, A = mkArea(e);
+  if (A) {   // 有活動區：在整區裡到處逛（走過去的路上看到建築、石頭就會去吃）
+    if (mk.spot) {
+      if (mkDist(mk.spot, e) <= CELL || mkStuck(e, mk.spot, dt)) { mk.spot = null; mk.wait = .5 + Math.random() * 1.2; return; }
+      mkGo(e, mk.spot, dt * F.roamSpeed, 'mk-roam');
+      return;
+    }
+    mk.wait -= dt;
+    if (mk.wait > 0) return;
+    for (let i = 0; i < 20; i++) {
+      const [c, r] = A.list[Math.floor(Math.random() * A.list.length)], [x, y] = center(c, r), d = mkDist({ x, y }, e) / CELL;
+      if (d >= F.roamDist[0] && d <= F.roamDist[1] && !enemyBlocked(x, y, e)) { mk.spot = { x, y }; break; }
+    }
+    mk.wait = .5;
+    return;
+  }
   if (mk.spot) {
     const moved = moveEnemyToward(e, mk.spot, dt * .5);
     if (!moved || mkDist(mk.spot, e) <= 3) { mk.spot = null; mk.wait = 1.5 + Math.random() * 2; }
