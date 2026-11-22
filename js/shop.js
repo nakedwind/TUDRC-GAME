@@ -91,16 +91,20 @@ function shopRoom(item) {
 function backroomStock(stock = BACKROOM_SHOP.stock) {
   return stock.map(s => {
     const base = supplyById(s.id) || (typeof itemById === 'function' ? itemById(s.id) : null); if (!base) return null;
-    return { ...base, price: s.price ?? base.price, kind: base.kind || base.category || 'material' };
+    return { ...base, price: s.price ?? base.price, kind: s.kind || base.kind || base.category || 'material' };   // s.kind：指定放在商店哪個分頁
   }).filter(Boolean);
 }
+// 基地（應變中心）便利商店另外加賣的道具（不在 data/supplies.js 的補給清單裡）：
+// 價錢跟後室商店同一份（BACKROOM_SHOP.stock 裡寫的 price），改那裡兩邊一起變；kind＝放在哪個分頁（medical＝🩹 補給）
+const BASE_SHOP_EXTRA = [{ id: 'battery', kind: 'medical' }];
+const baseShopExtra = () => backroomStock(BASE_SHOP_EXTRA.map(s => ({ ...s, price: (BACKROOM_SHOP.stock.find(b => b.id === s.id) || {}).price })));
 // 基地：便利商店賣一般商品、販賣機和飲料店只賣飲料；後室：販賣機、60BLUE 照上面的清單，便利商店多賣杏仁水
 // 後室道具（special）只有後室商店賣
 const shopItems = () => backroomMode ? [...backroomStock().filter(item => item.kind !== 'snack' && item.kind !== 'drink'), ...backroomBulletStock()]   // 後室商店暫不販售零食、飲料，保留補給與子彈
   : vendingMode && isEocVending() ? Object.keys(eocVendingState()[vendingColor] || {}).map(supplyById).filter(Boolean)   // 2F應變中心的販賣機：這次抽到的 6 種
   : vendingMode ? (vendingColor === 'purple' ? backroomStock(BACKROOM_VENDING) : SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)))   // 紫色後室販賣機：杏仁水；其他販賣機：只賣飲料
   : drinkShopMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_DRINKSHOP))
-  : [...SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id)))];   // 隊員裝備改到諾亞的開發工坊製作（js/squad-gear.js）
+  : [...SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id))), ...(MAP_SAFE ? baseShopExtra() : [])];   // 基地便利商店多賣電池（BASE_SHOP_EXTRA）；隊員裝備改到諾亞的開發工坊製作（js/squad-gear.js）
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
 // 賣掉一個能拿多少錢（0＝不能賣：重要物品、回憶碎片這類 noDrop 的、沒有價錢的）
 const CRYSTAL_SELL_ITEM = {id:'anomalous-crystals',name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png'};
