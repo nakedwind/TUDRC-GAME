@@ -67,7 +67,7 @@ const quickItem = id => (id && typeof itemById === 'function' ? itemById(id) : n
 function quickAllowed(item) { return !!item && (item.use === 'hp' || item.use === 'sp' || item.act === 'adrenaline' || item.act === 'eyedrops' || item.act === 'food' || item.act === 'toolbox' || item.act === 'graffiti' || item.act === 'firstaid'); }
 // 新拿到的道具：依拿到的順序（背包的先後）放進第一個空格。用完的從 seen 拿掉，下次拿到會再自動放
 // 用完的道具：從快捷欄拿掉（只拿這次遊戲中親眼看過還有剩、後來才用完的，免得背包還沒讀進來時把整排清空），並記住原本在哪一格
-const quickHad = new Set(), quickLastSlot = {};
+const quickHad = new Set(), quickLastSlot = {}, quickNever = new Set();   // quickNever：確定不能放進快捷欄的道具（道具種類不會變，查一次就好）
 function quickAutoFill() {
   let changed = false;
   for (const k of QUICK_KEYS) {
@@ -77,7 +77,8 @@ function quickAutoFill() {
     quickHad.delete(id); quickLastSlot[id] = k; quickSlots[k] = null; changed = true;
   }
   for (const [id, n] of supplyInventory) {
-    if (!(n > 0) || quickSeen.has(id) || !quickAllowed(quickItem(id))) continue;
+    if (!(n > 0) || quickSeen.has(id) || quickNever.has(id)) continue;
+    if (!quickAllowed(quickItem(id))) { quickNever.add(id); continue; }   // 不能放快捷欄的道具記下來，之後不用再查（每一幀都會跑這裡，背包東西多時一幀要查上千樣，會卡）
     quickSeen.add(id); changed = true;
     if (quickSlotOf(id)) continue;
     const back = quickLastSlot[id];   // 用完之前在哪一格：還空著就放回去
