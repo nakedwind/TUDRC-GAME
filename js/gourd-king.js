@@ -204,8 +204,7 @@ function gkStartCinema(K) {
     focus: { x: box.cx, y: OY + (box.r0 + BOSS_CINEMA.gourd.focusDown) * CELL },   // 牆和牆腳（牠踏出來亮相的地方）都在畫面裡
     tick(dt) {   // 停住的時候只跑：撞牆、煙霧、碎石、粉塵、跳出來壓頂、亮相
       updateGourdKing(dt);
-      if (typeof updateGourdDebris === 'function') updateGourdDebris(dt);   // 煙霧、碎石照常飄落（js/gourd-monkey.js，平常在 updateGourd 裡跑）
-      if (G.gourdCracks) for (const k of G.gourdCracks) k.life -= dt;
+      // 煙霧、碎石照常飄落：改由 js/boss-cinema.js 的 bossCinemaTick 統一更新（每隻 BOSS 的演出共用）
       // 跳出來之後：鏡頭慢慢往上移到「跳到最高的頭頂」和「落地的腳」之間，兩個都在畫面裡
       const e2 = K.e, C = bossCinema;
       if (e2 && e2.gkLeap && C && C.focus) {

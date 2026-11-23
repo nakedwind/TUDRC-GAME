@@ -88,6 +88,10 @@ function bossCinemaTick(dt) {
   if (typeof updateWorldEffects === 'function') updateWorldEffects(dt);
   if (typeof updateLightFlashes === 'function') updateLightFlashes(dt);
   if (typeof updateCombatFeel === 'function') updateCombatFeel(dt);
+  // 噴出來的碎石、灰塵、煙霧（js/gourd-monkey.js 的 rockBurstFx／G.gourdRocks／G.gourdDust：葫蘆猴王撞牆、老鼠王鑽出來都用這套）、地裂慢慢淡掉
+  // 平常在 updateGourd 裡更新，演出停住時那邊不會跑，不在這裡更新就會卡在半空
+  if (typeof updateGourdDebris === 'function') updateGourdDebris(dt);
+  if (G && G.gourdCracks && G.gourdCracks.length) { for (const k of G.gourdCracks) k.life -= dt; G.gourdCracks = G.gourdCracks.filter(k => k.life > 0); }
   if (G && G.coreBanner) { G.coreBanner.t += dt; if (typeof CORE_FRENZY !== 'undefined' && G.coreBanner.t > CORE_FRENZY.banner) G.coreBanner = null; }   // 「○○現身」大橫幅照常播完（平常在 js/core-frenzy.js 計時）
   G.effects = (G.effects || []).filter(f => f.life > 0);
 }
