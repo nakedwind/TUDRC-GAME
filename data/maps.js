@@ -122081,7 +122081,12 @@ const BATTLE_MAPS = [
         "r": 68,
         "layer": "object9",
         "ox": 20.666667,
-        "oy": 23.333333
+        "oy": 23.333333,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "backroom-door-key",
+          "qty": 1
+        }
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -122089,14 +122094,24 @@ const BATTLE_MAPS = [
         "r": 33,
         "layer": "object9",
         "ox": 10,
-        "oy": 30
+        "oy": 30,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "backroom-door-key",
+          "qty": 1
+        }
       },
       {
         "id": "tile_interactive_storage_locker",
         "c": 86,
         "r": 66,
         "layer": "object9",
-        "oy": -16
+        "oy": -16,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "anomaly-firstaid",
+          "qty": 1
+        }
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -122111,7 +122126,12 @@ const BATTLE_MAPS = [
         "c": 16,
         "r": 71,
         "layer": "object9",
-        "oy": 30
+        "oy": 30,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "backroom-door-key",
+          "qty": 1
+        }
       },
       {
         "id": "tile_interactive_storage_locker",
@@ -123458,9 +123478,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_dmg_crack06",
-        "c": 30,
+        "c": 29,
         "r": 56,
-        "layer": "ground8"
+        "layer": "ground8",
+        "ox": 10,
+        "oy": 10
       },
       {
         "id": "tile_dmg_crack05",
