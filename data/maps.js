@@ -97224,6 +97224,13 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "oy": 30,
         "circuit": 2
+      },
+      {
+        "id": "tile_obstacle_searchlight_h",
+        "c": 39,
+        "r": 18,
+        "layer": "object13",
+        "ox": 20
       }
     ],
     "solid": [
@@ -159121,7 +159128,8 @@ const BATTLE_MAPS = [
         "r": 63,
         "layer": "object3",
         "ox": 20,
-        "oy": 10
+        "oy": 10,
+        "circuit": 2
       },
       {
         "id": "tile_interactive_power_switch_off",
@@ -159130,6 +159138,15 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "oy": 10,
         "ox": 20
+      },
+      {
+        "id": "tile_interactive_power_switch_off",
+        "c": 74,
+        "r": 5,
+        "layer": "object3",
+        "oy": 30,
+        "ox": 10,
+        "circuit": 3
       },
       {
         "id": "tile_mrt_planter",
@@ -159315,21 +159332,21 @@ const BATTLE_MAPS = [
         "c": 52,
         "r": 2,
         "layer": "object2",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_bg_electric_light",
         "c": 56,
         "r": 2,
         "layer": "object2",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_bg_electric_light",
         "c": 60,
         "r": 2,
         "layer": "object2",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_bg_electric_light",
@@ -162198,7 +162215,8 @@ const BATTLE_MAPS = [
         "r": 5,
         "layer": "object2",
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "circuit": 3
       },
       {
         "id": "tile_interactive_electric_light_02",
@@ -162207,7 +162225,8 @@ const BATTLE_MAPS = [
         "layer": "object2",
         "ox": 10,
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "circuit": 3
       },
       {
         "id": "tile_interactive_electric_light_02",
@@ -162216,7 +162235,8 @@ const BATTLE_MAPS = [
         "layer": "object2",
         "ox": 20,
         "oy": 10,
-        "fx": true
+        "fx": true,
+        "circuit": 3
       },
       {
         "id": "tile_mwggq9a4",
@@ -163003,6 +163023,86 @@ const BATTLE_MAPS = [
         "r": 83,
         "layer": "object",
         "oy": -14
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 45,
+        "r": 4,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 34,
+        "r": 4,
+        "layer": "object2",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 24,
+        "r": 5,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 40,
+        "r": 4,
+        "layer": "object2",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 27,
+        "r": 50,
+        "layer": "object2",
+        "ox": 20,
+        "oy": 20,
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 20,
+        "r": 50,
+        "layer": "object2",
+        "ox": 20,
+        "oy": 20,
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 33,
+        "r": 50,
+        "layer": "object2",
+        "oy": 20,
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 21,
+        "r": 62,
+        "layer": "object2",
+        "ox": 10,
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 17,
+        "r": 56,
+        "layer": "object2",
+        "ox": 10,
+        "oy": 10,
+        "circuit": 2
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 22,
+        "r": 56,
+        "layer": "object2",
+        "ox": 10,
+        "oy": 10,
+        "circuit": 2
       }
     ],
     "solid": [
@@ -168279,7 +168379,6 @@ const BATTLE_MAPS = [
       "11,77",
       "10,77",
       "9,77",
-      "35,83",
       "49,33",
       "50,33",
       "51,33",
@@ -168680,7 +168779,57 @@ const BATTLE_MAPS = [
       "47,77",
       "46,77",
       "45,77",
-      "44,77"
+      "44,77",
+      "32,86",
+      "33,86",
+      "31,86",
+      "35,86",
+      "36,86",
+      "37,86",
+      "34,86",
+      "38,86",
+      "39,86",
+      "40,86",
+      "41,86",
+      "42,86",
+      "43,86",
+      "44,86",
+      "45,86",
+      "46,86",
+      "47,86",
+      "48,86",
+      "40,83",
+      "40,84",
+      "40,85",
+      "41,85",
+      "41,84",
+      "41,83",
+      "40,82",
+      "41,82",
+      "26,86",
+      "25,86",
+      "24,86",
+      "23,86",
+      "22,86",
+      "18,86",
+      "17,86",
+      "16,86",
+      "15,86",
+      "14,86",
+      "9,86",
+      "14,84",
+      "13,84",
+      "12,84",
+      "11,84",
+      "10,84",
+      "9,84",
+      "14,83",
+      "13,83",
+      "12,83",
+      "11,83",
+      "10,83",
+      "9,83",
+      "35,48"
     ],
     "breakable": [],
     "coreSpots": [
