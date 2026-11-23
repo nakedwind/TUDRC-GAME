@@ -12,7 +12,7 @@
        holdAfter: .4,              // 演完之後多停幾秒再滑回去
        maxTime: 15,                // 保險：最多演幾秒（出錯也不會永遠卡住）
      });
-   誰在用：js/milkfish-king.js（虱目魚王從水池竄出）、js/gourd-king.js（葫蘆猴王撞破牆）、js/rat-king.js（花蓮老鼠王從鐵軌鑽出來）。
+   誰在用：js/milkfish-king.js（虱目魚王從水池竄出）、js/gourd-king.js（葫蘆猴王撞破牆）、js/rat-king.js（花蓮老鼠王從鐵軌鑽出來）、js/moth-boss.js（人面蝶后從鏡頭俯衝下來）。
    接在 js/game.js 的 frame（停住時改跑 bossCinemaTick）、updateCamera（鏡頭），js/render.js 畫黑邊。
    自動測試要關掉演出：window.NO_BOSS_CINEMA = true（js/floor-tests.js）。
 */
@@ -40,6 +40,11 @@ const BOSS_CINEMA = applyBossSettings('BOSS_CINEMA', {
   rat: {          // 花蓮老鼠王
     focusUp: 2,   // 鏡頭對準月台邊緣再往上幾格
     holdAfter: .3,   // 鑽出來亮相完後多停幾秒才滑回溫特
+  },
+  moth: {         // 人面蝶后（js/moth-boss.js；黑影、俯衝的秒數在牠自己的「出場演出」欄位）
+    focusUp: 4,   // 鏡頭對準起點再往上幾格（上面留空間給牠從鏡頭俯衝下來）
+    zoom: .7,     // 這段的鏡頭拉遠倍率
+    holdAfter: .4,   // 落地亮相完後多停幾秒才滑回溫特
   },
 });
 let bossCinema = null;

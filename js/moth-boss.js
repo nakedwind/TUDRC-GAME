@@ -1,5 +1,7 @@
 /* ===== 菁英人面蝶「人面蝶后」（抱著異質核心在 4 個區域之間飛來飛去的地圖 BOSS）=====
-   - 沉睡：抱著還沒醒的異質核心，停在地圖的核心候選點上（核心原本的位置），翅膀慢慢拍。
+   - 出場演出：開場時不在場上；溫特走到起點 intro.range 格內 → 時間停住、鏡頭滑過去（js/boss-cinema.js）→ 巨大黑影掠過畫面 →
+           從鏡頭方向俯衝下來（越來越小、越來越清楚）→ 落地翅膀一拍、鱗粉炸開一圈、畫面震、核心亮起來 → 驚醒（見下）。
+   - 沉睡：（沒有出場演出時，例如自動測試）抱著還沒醒的異質核心，停在地圖的核心候選點上（核心原本的位置），翅膀慢慢拍。
    - 驚醒：溫特走到 wakeRange 格內（看得到）、或打中牠 → 尖叫，核心跟著甦醒（異質體狂暴化），
            畫面上方出現 BOSS 血條，然後牠抱著核心飛走。
    - 換區：照 route 的順序飛往下一個區域（飛得過牆），一路灑下下一區顏色的鱗粉當路標（也是陷阱，吸滿一樣會中招）。
@@ -72,6 +74,9 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
   burst: { every: [7, 10], first: 2.5, telegraph: 1.6, time: 1.2, puffs: 16, cover: .95 },
   meleeLift: 70,                 // 飛得比這個高（像素）時，近戰隊員（雷德、路德、阿瓦倫、柯林）打不到牠；俯衝抓人、睡覺時飛得低才打得到
+  // 出場演出：range＝溫特走到起點幾格內（同一層）就開演、shadow＝黑影掠過畫面幾秒、shadowScale＝黑影是本體的幾倍大、shadowAlpha＝黑影多黑（0～1）、
+  // dive＝從鏡頭俯衝下來幾秒、diveRise＝俯衝一開始比平常飛的高度再高幾像素（太高會在畫面外看不到）、diveAlpha＝俯衝一開始多透明（0～1，越小越透明）、land＝落地亮相停幾秒才開始戰鬥
+  intro: { range: 12, shadow: 1.6, shadowScale: 5, shadowAlpha: .55, dive: 1.8, diveRise: 80, diveAlpha: .35, land: .9 },
   leaveTelegraph: .9,            // 飛走前在原地大範圍撒粉：預告幾秒（撒的團數、範圍跟 burst 一樣）
   // 抓人：every＝每隔幾秒抓一次（最短～最長）、first＝到巢後第一次等幾秒、range＝離溫特／隊員幾格內才會去抓（一半機率抓溫特、一半抓隊員）、
   // warn＝俯衝前預告幾秒（尖叫、地上紅圈）、dive＝俯衝最久幾秒（沒碰到就撲空）、diveSpeedMul＝俯衝的速度倍率、diveLift＝俯衝時飛多低（像素）、
@@ -128,6 +133,10 @@ function seedMothBoss() {
   e.flying = true;
   e.mb = { state: 'sleep', t: 0, stage: 0, nest: null, path: null, trail: 0, mixIdx: 0 };
   e.mbHp = e.hp;
+  // 先把拍翅膀的圖（含前方手）載好：出場演出的黑影、俯衝第一格就要用，不然會閃一下空白
+  for (const f of [e.sprite, ...Object.values(e.frames || {}).flat()]) if (typeof f === 'string') { monsterImage(f); monsterImage(f.replace(/\.png$/i, '-前方手.png')); }
+  // 出場演出：一開始躲在畫面外（不在怪物清單裡，打不到），溫特走近才從鏡頭俯衝下來（mbIntroCheck）
+  if (typeof startBossCinema === 'function' && !window.NO_BOSS_CINEMA) { e.mb.state = 'hidden'; G.mothBossAway.push(e); return; }
   G.enemies.push(e);
 }
 
@@ -339,6 +348,7 @@ function stepMothBoss(e, dt) {
       return;
     }
     case 'nest': mbNest(e, dt); return;
+    case 'intro': case 'hidden': return;   // 出場演出中（mbIntroTick 在管）、還沒出場
     default: mbSet(e, 'nest');
   }
 }
@@ -393,6 +403,7 @@ function updateMothBossAway(dt) {
     const core = e.carryCore;
     if (core && core.carried) { core.x = e.x; core.y = e.y; }
     if (e.dead || e.hp <= 0) { G.mothBossAway = G.mothBossAway.filter(o => o !== e); continue; }
+    if (e.mb.state === 'hidden') { mbIntroCheck(e); continue; }   // 還沒出場：等溫特走近
     e.mb.t -= dt;
     if (e.mb.t > 0) continue;
     G.mothBossAway = G.mothBossAway.filter(o => o !== e);
@@ -401,6 +412,99 @@ function updateMothBossAway(dt) {
     if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-sky');
   }
 }
+// ===== 出場演出（js/boss-cinema.js 的共用演出：時間停住、溫特不能動、鏡頭滑過去、上下黑邊）=====
+// 開場時蝶后不在場上（躲在畫面外，G.mothBossAway、狀態 'hidden'），溫特走到起點 intro.range 格內（同一層）就開演：
+//   1. shadow：一個巨大的蝶后黑影從畫面一邊掠過整個畫面，伴隨拍翅聲
+//   2. dive：蝶后從鏡頭方向俯衝下來（一開始很大、很近、半透明，邊降邊縮小、變清楚），落到起點、原本的大小（跟「飛向鏡頭／飛回來」同一套 mbSkyLook）
+//   3. land：落地時翅膀一拍，鱗粉往外炸開一圈＋畫面震一下，手上的核心亮起來（核心甦醒），接著照原本的驚醒流程：尖叫 → 在原地撒粉 → 飛走
+// 自動測試關掉演出（window.NO_BOSS_CINEMA）時，直接出現並驚醒。
+function mbIntroCheck(e) {
+  const I = MOTH_BOSS.intro, p = G.player;
+  if (!p || p.hp <= 0 || !sameFloor(e, p) || mbDist(p, e) > I.range * CELL) return;
+  mbIntroStart(e);
+}
+function mbIntroStart(e) {
+  const I = MOTH_BOSS.intro, mb = e.mb;
+  G.mothBossAway = (G.mothBossAway || []).filter(o => o !== e);   // 放回怪物清單（演出期間時間停住，打不到也不會動）
+  if (!G.enemies.includes(e)) G.enemies.push(e);
+  mb.intro = { phase: 'pan', t: 0, flapT: 0, shadowDir: e.x < (G.player ? G.player.x : e.x) ? 1 : -1 };
+  mbSet(e, 'intro');
+  e.mbFade = 0;   // 黑影掠過的時候還看不到本體
+  const ok = typeof startBossCinema === 'function' && startBossCinema({
+    focus: { x: e.x, y: e.y - CELL * BOSS_CINEMA.moth.focusUp },   // 鏡頭對準起點再往上（上面留空間給牠從鏡頭俯衝下來）
+    tick: dt => mbIntroTick(e, dt),
+    done: () => !e.mb.intro,
+    holdAfter: BOSS_CINEMA.moth.holdAfter,
+    zoom: BOSS_CINEMA.moth.zoom,
+  });
+  if (!ok) { mb.intro = null; e.mbFade = 1; mbIntroLand(e); }   // 沒有演出（自動測試）：直接落地驚醒
+}
+// 停住的時候每一幀跑：黑影掠過 → 俯衝 → 落地
+function mbIntroTick(e, dt) {
+  const I = MOTH_BOSS.intro, S = MOTH_BOSS.sky, mb = e.mb, it = mb.intro;
+  if (!it) return;
+  it.t += dt;
+  mbIntroFlap(e, dt, it.phase === 'dive' ? 1.4 : 1);
+  if (it.phase === 'pan') {   // 鏡頭還在滑過去
+    if (it.t >= BOSS_CINEMA.pan) { it.phase = 'shadow'; it.t = 0; }
+  } else if (it.phase === 'shadow') {   // 巨大黑影掠過畫面
+    if ((it.flapT -= dt) <= 0) { it.flapT = .35; if (typeof sfxAt === 'function') sfxAt('mothFlap', cam.x + viewW() / 2, cam.y + viewH() / 2, MOTH_BOSS.sound.wake, 'moth-boss-intro-flap'); }
+    if (it.t >= I.shadow) { it.phase = 'dive'; it.t = 0; if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-scream'); }
+  } else if (it.phase === 'dive') {   // 從鏡頭方向俯衝下來：跟「飛回來」同一套（mbSkyLook 的 skyDown），一開始半透明
+    const u = Math.max(0, 1 - it.t / I.dive);   // 1＝最大最近、0＝原本的樣子
+    e.slimeLift = MOTH_BOSS.height + I.diveRise * u * u;
+    e.drawWidth = Math.round(e.mbW * (1 + S.grow * u)); e.drawHeight = Math.round(e.mbH * (1 + S.grow * u));
+    e.mbFade = I.diveAlpha + (1 - I.diveAlpha) * (1 - u);
+    if (it.t >= I.dive) { e.drawWidth = e.mbW; e.drawHeight = e.mbH; e.mbFade = 1; e.slimeLift = MOTH_BOSS.height; e.mo.lift = MOTH_BOSS.height; it.phase = 'land'; it.t = 0; mbIntroLand(e); }
+  } else if (it.phase === 'land') {   // 落地亮相：停一下才開始戰鬥
+    e.slimeLift = MOTH_BOSS.height + Math.sin(it.t * 9) * 4 * Math.max(0, 1 - it.t / I.land);
+    if (it.t >= I.land) mb.intro = null;   // 演完（js/boss-cinema.js 收尾、鏡頭滑回溫特）
+  }
+}
+// 演出中拍翅膀（平常在 stepMothBoss 做；演出時時間停住，這裡自己換圖）
+function mbIntroFlap(e, dt, mul) {
+  const f = e.frames || {}, m = e.mo, wings = f.walkFront && f.walkFront.length ? f.walkFront : [f.front || e.sprite];
+  m.flapT = (m.flapT || 0) + dt * MOTH.flapFps * mul;
+  e.forceFrame = wings[Math.floor(m.flapT) % wings.length];
+  e.forceFlip = !!e.faceRight;
+}
+// 落地：翅膀一拍、鱗粉往外炸開一圈（只是畫面，不會讓人中招）、畫面震一下、核心亮起來，然後照原本的驚醒流程
+function mbIntroLand(e) {
+  const top = e.y - (e.slimeLift || 0) - e.drawHeight * .5;
+  for (let i = 0; i < 4; i++) { const life = .5 + i * .15; G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 10 + i * 8, r2: (3 + i * 1.6) * CELL, life, life0: life, color: ['#e7c8ff', '#7dff6a', '#c98bff', '#7fc4ff'][i] }); }
+  for (let i = 0; i < 40; i++) {   // 鱗粉亮點往外噴（三種顏色）
+    const a = Math.random() * Math.PI * 2, sp = 120 + Math.random() * 260, col = MOTH_COLORS[MOTH_KINDS[i % 3]].glow;
+    G.effects.push({ ember: true, spark: true, x: e.x, y: top + 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6, r: 1.5 + Math.random() * 2.5, life: .6 + Math.random() * .5, life0: 1.1, color: col });
+  }
+  if (typeof sfxAt === 'function') sfxAt('mothSpray', e.x, e.y, 1.2, 'moth-boss-intro-land');
+  bossImpact(e.x, e.y, 10, .12);
+  const core = e.carryCore;
+  if (core && !core.dead) G.effects.push({ ring: true, x: e.x, y: top, r: 6, r2: 90, life: .6, life0: .6, color: '#b56bff' });   // 手上的核心亮一下
+  mothBossWake(e);   // 核心甦醒（異質體狂暴、核心發光）、橫幅；尖叫、撒粉、飛走在演出結束後照常進行
+}
+// 黑影（js/render.js 在黑幕上面畫）：巨大、半透明的蝶后剪影從畫面一邊掠過另一邊
+function drawMothBossIntro(ctx) {
+  for (const e of mothBosses()) {
+    const it = e.mb && e.mb.intro;
+    if (!it || it.phase !== 'shadow') continue;
+    const I = MOTH_BOSS.intro, k = Math.min(1, it.t / I.shadow), vw = viewW(), vh = viewH();
+    const f = e.frames || {}, wings = f.walkFront && f.walkFront.length ? f.walkFront : [f.front || e.sprite];
+    const img = monsterImage(wings[Math.floor((e.mo.flapT || 0)) % wings.length]);
+    const sil = img && img.complete && img.naturalWidth && typeof flashSprite === 'function' ? flashSprite(img, '#08040e') : null;
+    if (!sil) continue;
+    const w = e.mbW * I.shadowScale, h = e.mbH * I.shadowScale;
+    const x = it.shadowDir > 0 ? cam.x - w + (vw + w * 2) * k : cam.x + vw + w - (vw + w * 2) * k;
+    const y = cam.y + vh * .45 + Math.sin(k * Math.PI) * vh * .08;
+    ctx.save();
+    ctx.globalAlpha = I.shadowAlpha * Math.sin(k * Math.PI);   // 進來、出去時淡一點
+    ctx.translate(x, y);
+    if (it.shadowDir > 0) ctx.scale(-1, 1);   // 原圖朝左：往右飛要翻過來
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(sil, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+}
+
 // 飛往下一區：一路灑下一區顏色的鱗粉
 function mbFly(e, dt) {
   const P = MOTH_BOSS, mb = e.mb, z = mbZone(e, mb.stage);
