@@ -28,7 +28,7 @@ const BOSS_CINEMA = applyBossSettings('BOSS_CINEMA', {
   zoom: .8,       // 演出時鏡頭拉遠：放大倍率變成平常的幾倍（.8＝看到的範圍大 25%，大隻的 BOSS 跳起來才不會被切到）
   maxTime: 16,    // 保險：一段演出最多幾秒（出了問題也不會永遠停住）
   milkfish: {     // 虱目魚王
-    focusUp: 150, // 鏡頭對準核心再往上幾像素（上面留空間給牠跳起來）
+    focusUp: 120, // 鏡頭對準核心再往上幾像素（上面留空間給牠跳起來）
     holdAfter: .6,   // 吞完核心後多停幾秒才滑回溫特
   },
   gourd: {        // 葫蘆猴王
