@@ -25,6 +25,7 @@ BOSSES = [
     ('MOTH_BOSS', 'js/moth-boss.js', '人面蝶后', 'human_face_butterfly'),
     ('RAT_KING', 'js/rat-king.js', '花蓮老鼠王', 'burrowing_mouse'),
     ('POOL_BOSS', 'js/pool-boss.js', '巨大比基尼小丑魚', 'clownfish'),
+    ('BOSS_CINEMA', 'js/boss-cinema.js', '🎬 BOSS 出場演出（共用）', 'milkfish_king'),   # 不是一隻 BOSS：出場時停住時間、移鏡頭的共用數字
 ]
 SKIP_KEYS = {'maps', 'color', 'eyeFlash'}   # 地圖位置在地圖相關的地方改；顏色不放進編輯器
 

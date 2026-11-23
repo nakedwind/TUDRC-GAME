@@ -72,6 +72,14 @@ const BOSS_LIST = [
   "base": "clownfish",
   "artDir": "",
   "desc": "===== 池核 BOSS：巨大比基尼小丑魚（比基尼小丑魚放大 2.2 倍，守在深水區的異質核心旁）=====\n   ・守護：一開始浮在核心旁邊（露出上半身），不會動\n   ・開戰：牠被打到、或核心被叫醒 → 開始在深水區裡游來游去（畫面上方出現 BOSS 血條）\n   ・游泳：大部分時間潛在水裡（只看得到淡淡的影子，深水區的能見度越低越淡；這時候打不到），\n          在水裡快速穿梭：邊游邊左右擺、會轉彎，偶爾突然加速衝一段。\n          偶爾從水裡躍出來（大水花），落回水面露出上半身幾秒（打得到），再高高跳起、一頭栽進水裡（大水花）潛下去。浮上來時溫特坐救生圈不能開槍，只有岸上的遠程隊友打得到\n   ・水被抽乾（js/pool-tide.js）：在當下的位置擱淺，偶爾拍動身體；誰都打得到\n   ・水又漲起來：又開始游\n   ・身體會擋路：溫特（坐救生圈也一樣）穿不過去；碰到牠就開戰，被牠撞到會受傷、被彈開（潛在水裡也一樣）\n   ・開戰後，牠附近生出來的怪物有 8 成是小丑魚幼體（js/anomalous-core.js 的 spawnCoreGroup 問 poolBossSpawnSpec）\n   ・數值都在下面的 POOL_BOSS；必須在 clownfish.js、anomalous-core.js 之後、game.js 之前載入"
+ },
+ {
+  "key": "BOSS_CINEMA",
+  "name": "🎬 BOSS 出場演出（共用）",
+  "file": "js/boss-cinema.js",
+  "base": "milkfish_king",
+  "artDir": "",
+  "desc": "BOSS 出場時整個戰場停住、溫特不能動，鏡頭滑到出場的地方並稍微拉遠，畫面上下出現黑邊，演完才滑回溫特、遊戲繼續（不能跳過）。\n   目前有演出的：虱目魚王（溫特打到核心就開始，吞完核心結束）、葫蘆猴王（最後一下撞牆前開始，亮相完結束）、花蓮老鼠王（鐵軌下開始啃咬就開始，鑽出來開始戰鬥時結束）。\n   虱目魚王登場本身的秒數、跳多高在牠自己的「登場：」欄位。"
  }
 ];
 const BOSS_FIELD_ROWS = {"ELITE_BIRD":[{"d":0,"t":"以原型鳥頭人（data/monsters.js）的數值為基準；hpMul 12 → 血量 1800","k":[["hpMul","hpMul"],["dmgMul","dmgMul"],["rewardMul","rewardMul"],["crystalMul","crystalMul"]]},
@@ -447,4 +455,19 @@ const BOSS_FIELD_ROWS = {"ELITE_BIRD":[{"d":0,"t":"以原型鳥頭人（data/mon
 {"d":0,"t":"身體擋路的範圍：以腳底為中心的橢圓，左右半徑＝畫出來的寬 × rx、前後半徑＝寬 × ry","k":[["body.rx","body．rx"],["body.ry","body．ry"]]},
 {"d":0,"t":"被牠撞到扣多少血（再經過防護背心減傷）","k":[["touchDamage","touchDamage"]]},
 {"d":0,"t":"開戰後，牠幾格內生出來的怪物","k":[["nearSpawn","nearSpawn"]]},
-{"d":0,"t":"有幾成是小丑魚幼體","k":[["hatchlingChance","hatchlingChance"]]}]};
+{"d":0,"t":"有幾成是小丑魚幼體","k":[["hatchlingChance","hatchlingChance"]]}],
+"BOSS_CINEMA":[{"d":0,"t":"鏡頭滑過去幾秒","k":[["pan","pan"]]},
+{"d":0,"t":"演完滑回溫特幾秒（這段時間也還停著）","k":[["back","back"]]},
+{"d":0,"t":"上下黑邊各佔畫面高度的幾成","k":[["bars","bars"]]},
+{"d":0,"t":"演出時鏡頭拉遠：放大倍率變成平常的幾倍（.8＝看到的範圍大 25%，大隻的 BOSS 跳起來才不會被切到）","k":[["zoom","zoom"]]},
+{"d":0,"t":"保險：一段演出最多幾秒（出了問題也不會永遠停住）","k":[["maxTime","maxTime"]]},
+{"d":0,"h":1,"t":"虱目魚王","k":[]},
+{"d":1,"t":"鏡頭對準核心再往上幾像素（上面留空間給牠跳起來）","k":[["milkfish.focusUp","focusUp"]]},
+{"d":1,"t":"吞完核心後多停幾秒才滑回溫特","k":[["milkfish.holdAfter","holdAfter"]]},
+{"d":0,"h":1,"t":"葫蘆猴王","k":[]},
+{"d":1,"t":"最後一下撞破之前幾秒開始演出（前幾下撞牆照常打，不會停住）","k":[["gourd.lead","lead"]]},
+{"d":1,"t":"鏡頭對準牆頂往下幾格（牆和牠踏出來的牆腳都在畫面裡）","k":[["gourd.focusDown","focusDown"]]},
+{"d":1,"t":"亮相完後多停幾秒才滑回溫特","k":[["gourd.holdAfter","holdAfter"]]},
+{"d":0,"h":1,"t":"花蓮老鼠王","k":[]},
+{"d":1,"t":"鏡頭對準月台邊緣再往上幾格","k":[["rat.focusUp","focusUp"]]},
+{"d":1,"t":"鑽出來亮相完後多停幾秒才滑回溫特","k":[["rat.holdAfter","holdAfter"]]}]};

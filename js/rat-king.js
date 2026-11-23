@@ -245,10 +245,10 @@ function rkStartCinema(K) {
   if (K.cinema || typeof startBossCinema !== 'function') return;
   K.cinema = true;
   startBossCinema({
-    focus: { x: rkHomeX(), y: rkEdgeY() - CELL * 2 },   // 鐵軌和月台邊緣（牠鑽出來的地方）
+    focus: { x: rkHomeX(), y: rkEdgeY() - CELL * BOSS_CINEMA.rat.focusUp },   // 鐵軌和月台邊緣（牠鑽出來的地方；數字在怪物編輯器「👑 BOSS 數值」的 BOSS 出場演出）
     tick: dt => updateRatKing(dt),                      // 停住的時候只跑：震動、冒土、鑽出來亮相
     done: () => K.phase !== 'sleep' && K.phase !== 'rumble' && K.phase !== 'rise',
-    holdAfter: .3, maxTime: 14,
+    holdAfter: BOSS_CINEMA.rat.holdAfter,
   });
 }
 // 場上還沒打破的核心有幾顆（躲在地底的也算）

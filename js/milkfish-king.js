@@ -1128,10 +1128,10 @@ function milkfishKingCoreShot(core) {
   // BOSS 出場演出（js/boss-cinema.js）：整個戰場時間停住、鏡頭移到核心，看牠從水池竄出、落地、把核心吞進肚子才結束
   const king = I.e, kc = king.mk.core || core;
   if (typeof startBossCinema === 'function') startBossCinema({
-    focus: { x: kc.x, y: kc.y - 170 },   // 核心偏下、上面留空間給牠跳起來（跳到最高點才不會被切掉）
+    focus: { x: kc.x, y: kc.y - BOSS_CINEMA.milkfish.focusUp },   // 核心偏下、上面留空間給牠跳起來（數字在怪物編輯器「👑 BOSS 數值」的 BOSS 出場演出）
     tick: mkCinemaTick,
     done: () => !G.mkIntro && (king.mk.coreIn || !kc || kc.dead || !G.enemies.includes(king)),
-    holdAfter: .6, maxTime: 16,
+    holdAfter: BOSS_CINEMA.milkfish.holdAfter,
   });
 }
 // 出場演出中（戰場停住）每一幀：只跑牠自己的登場、落地後吼叫、走去吞核心

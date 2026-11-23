@@ -16,16 +16,35 @@
    接在 js/game.js 的 frame（停住時改跑 bossCinemaTick）、updateCamera（鏡頭），js/render.js 畫黑邊。
    自動測試要關掉演出：window.NO_BOSS_CINEMA = true（js/floor-tests.js）。
 */
-const BOSS_CINEMA = {
+/* BOSS 出場時整個戰場停住、溫特不能動，鏡頭滑到出場的地方並稍微拉遠，畫面上下出現黑邊，演完才滑回溫特、遊戲繼續（不能跳過）。
+   目前有演出的：虱目魚王（溫特打到核心就開始，吞完核心結束）、葫蘆猴王（最後一下撞牆前開始，亮相完結束）、花蓮老鼠王（鐵軌下開始啃咬就開始，鑽出來開始戰鬥時結束）。
+   虱目魚王登場本身的秒數、跳多高在牠自己的「登場：」欄位。 */
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const BOSS_CINEMA = applyBossSettings('BOSS_CINEMA', {
   pan: .8,        // 鏡頭滑過去幾秒
   back: .7,       // 演完滑回溫特幾秒（這段時間也還停著）
   bars: .1,       // 上下黑邊各佔畫面高度的幾成
   zoom: .8,       // 演出時鏡頭拉遠：放大倍率變成平常的幾倍（.8＝看到的範圍大 25%，大隻的 BOSS 跳起來才不會被切到）
-};
+  maxTime: 16,    // 保險：一段演出最多幾秒（出了問題也不會永遠停住）
+  milkfish: {     // 虱目魚王
+    focusUp: 170, // 鏡頭對準核心再往上幾像素（上面留空間給牠跳起來）
+    holdAfter: .6,   // 吞完核心後多停幾秒才滑回溫特
+  },
+  gourd: {        // 葫蘆猴王
+    lead: 1.2,    // 最後一下撞破之前幾秒開始演出（前幾下撞牆照常打，不會停住）
+    focusDown: 3.5,  // 鏡頭對準牆頂往下幾格（牆和牠踏出來的牆腳都在畫面裡）
+    holdAfter: .3,   // 亮相完後多停幾秒才滑回溫特
+  },
+  rat: {          // 花蓮老鼠王
+    focusUp: 2,   // 鏡頭對準月台邊緣再往上幾格
+    holdAfter: .3,   // 鑽出來亮相完後多停幾秒才滑回溫特
+  },
+});
 let bossCinema = null;
 function startBossCinema(opt) {
   if (bossCinema || window.NO_BOSS_CINEMA || !opt) return false;
-  bossCinema = { focus: opt.focus, tick: opt.tick, done: opt.done, holdAfter: opt.holdAfter ?? .4, maxTime: opt.maxTime ?? 15,
+  bossCinema = { focus: opt.focus, tick: opt.tick, done: opt.done, holdAfter: opt.holdAfter ?? .4, maxTime: opt.maxTime ?? BOSS_CINEMA.maxTime,
     zoom: opt.zoom ?? BOSS_CINEMA.zoom, baseScale: VIEW_SCALE, t: 0, phase: 'in', k: 0, doneT: null, outT: 0 };
   return true;
 }

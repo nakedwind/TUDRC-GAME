@@ -1672,5 +1672,25 @@ const BOSS_SETTINGS_DEFAULT = {
     "touchDamage": 18,
     "nearSpawn": 14,
     "hatchlingChance": 0.8
+  },
+  "BOSS_CINEMA": {
+    "pan": 0.8,
+    "back": 0.7,
+    "bars": 0.1,
+    "zoom": 0.8,
+    "maxTime": 16,
+    "milkfish": {
+      "focusUp": 170,
+      "holdAfter": 0.6
+    },
+    "gourd": {
+      "lead": 1.2,
+      "focusDown": 3.5,
+      "holdAfter": 0.3
+    },
+    "rat": {
+      "focusUp": 2,
+      "holdAfter": 0.3
+    }
   }
 };
