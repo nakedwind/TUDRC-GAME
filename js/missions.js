@@ -179,18 +179,22 @@ function missionArriveCell() {
 function drawMissionMarks(ctx) {
   if (!onBaseMap()) return;
   const now = performance.now() / 1000, bob = Math.sin(now * 3) * 2.5;
-  const mark = (x, y, text, bg) => {
+  const mark = (x, y, text, bg, tail = 0) => {   // tail＝框下面小三角形的長度（0＝不畫）
     ctx.save();
     ctx.font = 'bold 15px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const w = Math.max(22, ctx.measureText(text).width + 12), h = 22;
     ctx.fillStyle = bg; ctx.strokeStyle = 'rgba(40,30,20,.85)'; ctx.lineWidth = 1.5;
     roundRect(x - w / 2, y - h / 2, w, h, 11); ctx.fill(); ctx.stroke();
+    if (tail) {   // 向下的小三角形（跟對話泡泡一樣指著下面的東西）：先填底色、再描兩條斜邊，接縫處不會有框線
+      ctx.beginPath(); ctx.moveTo(x - 6, y + h / 2 - 1); ctx.lineTo(x, y + h / 2 + tail); ctx.lineTo(x + 6, y + h / 2 - 1); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x - 6, y + h / 2); ctx.lineTo(x, y + h / 2 + tail); ctx.lineTo(x + 6, y + h / 2); ctx.stroke();
+    }
     ctx.fillStyle = '#3b2304'; ctx.fillText(text, x, y + 1);
     ctx.restore();
   };
   const ash = brieferNpc();
   if (ash && (briefPending() || bossBountyReady())) mark(ash.x, ash.y - 70 + bob, '！', '#ffd479');
-  else if (nextMission() && nextMission().map && !missionTableNear()) { const t = missionTablePos(); mark(t.x, t.top - 4 + bob, '作戰', '#ffd479'); }
+  else if (nextMission() && nextMission().map && !missionTableNear()) { const t = missionTablePos(); mark(t.x, t.top + 11 + bob, '作戰', '#ffd479', 6); }   // 往下 15px（原本 t.top - 4）、加上向下的小三角形
 }
 
 // ---- 換地圖（黑幕淡入淡出，和走門一樣）----

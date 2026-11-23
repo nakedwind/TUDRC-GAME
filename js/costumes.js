@@ -155,7 +155,7 @@ function costumeSpots(test, safeOnly = true) {
   for (const s of MAP.stamps || []) {
     const t = mapTileById(s.id); if (!t || !test(s.id, t, s)) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
-    spots.push({ x0, y0, x1: x0 + w, y1: y0 + h, x: x0 + w / 2, top: y0 });
+    spots.push({ x0, y0, x1: x0 + w, y1: y0 + h, x: x0 + w / 2, top: y0, stamp: s });   // stamp：基地提示泡泡要對準圖上看得到的部分（js/first-hints.js）
   }
   return spots;
 }
