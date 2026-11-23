@@ -1351,13 +1351,13 @@ const BOSS_SETTINGS_DEFAULT = {
     "rewardMul": 8,
     "crystalMul": 8,
     "scale": 2.16,
-    "height": 110,
-    "sleepHeight": 46,
+    "height": 120,
+    "sleepHeight": 60,
     "speedMul": 2,
-    "flySpeedMul": 1.2,
-    "wakeRange": 7,
+    "flySpeedMul": 1.8,
+    "wakeRange": 2,
     "scream": 1.4,
-    "flyDefense": 0.35,
+    "flyDefense": 0.34,
     "flyFloor": 0.06,
     "trailEvery": 0.55,
     "sky": {
@@ -1366,10 +1366,10 @@ const BOSS_SETTINGS_DEFAULT = {
       "away": 1.6,
       "down": 1.5,
       "rise": 700,
-      "grow": 1.2,
-      "fadeFrom": 0.2
+      "grow": 1.4,
+      "fadeFrom": 0.5
     },
-    "leash": 8,
+    "leash": 16,
     "flight": {
       "accel": 260,
       "brake": 1.5,
@@ -1416,8 +1416,8 @@ const BOSS_SETTINGS_DEFAULT = {
       "first": 2.5,
       "telegraph": 1.6,
       "time": 1.2,
-      "puffs": 16,
-      "cover": 0.95
+      "puffs": 12,
+      "cover": 0.7
     },
     "meleeLift": 70,
     "intro": {
@@ -1445,7 +1445,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "leaveTelegraph": 0.9,
     "grab": {
       "every": [
-        10,
+        5,
         14
       ],
       "first": 4,
@@ -1455,7 +1455,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "diveSpeedMul": 4,
       "diveLift": 40,
       "reach": 0.8,
-      "circle": 3,
+      "circle": 1.5,
       "carryLift": 260,
       "circleR": 2.5,
       "circleSpeed": 0.9,
@@ -1477,7 +1477,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "coreShield": 0.5,
     "sound": {
       "wake": 1.8,
-      "flap": 0.7
+      "flap": 0.85
     }
   },
   "RAT_KING": {
