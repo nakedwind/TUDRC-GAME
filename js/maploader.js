@@ -109,7 +109,17 @@ const mapImgCache = {};
 function tileImage(t) {
   if (!t || !t.file) return null;
   let rec = mapImgCache[t.id];
-  if (!rec) { rec = mapImgCache[t.id] = { img: new Image(), loaded: false }; rec.img.onload = () => { rec.loaded = true; }; rec.img.src = t.file; }
+  if (!rec) {
+    rec = mapImgCache[t.id] = { img: new Image(), loaded: false, tries: 0 };
+    rec.img.onload = () => { rec.loaded = true; };
+    // 下載失敗（例如一次要下載太多張圖、伺服器來不及回）：隔一下再重抓，最多 5 次。
+    // 以前失敗一次就永遠不會再抓，地上就一直畫成一塊灰色方塊（F307 的地面裂痕 6 就是這樣）
+    rec.img.onerror = () => {
+      if (++rec.tries > 5) return;
+      setTimeout(() => { rec.img.src = t.file + (t.file.includes('?') ? '&' : '?') + 'retry=' + rec.tries; }, 400 * rec.tries);
+    };
+    rec.img.src = t.file;
+  }
   return rec.loaded ? rec.img : null;
 }
 // 預先下載素材：先只下載「這張地圖」用到的（載入畫面會等它們），

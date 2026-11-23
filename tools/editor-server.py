@@ -58,4 +58,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     print('編輯器小幫手已啟動：http://127.0.0.1:%d/  （這個視窗開著才能用；關掉視窗就停止）' % PORT)
+    # 一次可以排隊等的連線數：預設只有 5，遊戲一開就同時下載幾百張圖，排不進去的會直接失敗（圖變灰色方塊）
+    http.server.ThreadingHTTPServer.request_queue_size = 128
     http.server.ThreadingHTTPServer(('127.0.0.1', PORT), Handler).serve_forever()
