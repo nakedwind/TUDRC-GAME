@@ -766,6 +766,7 @@ function drawMapStampPlain(ctx, s) {
       if (hole) { ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.rect(x + hole[0] * w, y + hole[1] * h, hole[2] * w, hole[3] * h); ctx.clip('evenodd'); }
       ctx.drawImage(img, x, y, w, h);
       if (hole) ctx.restore();
+      if (typeof drawMrtTimeBoard === 'function') drawMrtTimeBoard(ctx, s, x, y, w, h);   // 捷運時間牌：下一班幾秒到、開往哪站（js/mrt-time-board.js）
     }
     ctx.restore();
     return;
