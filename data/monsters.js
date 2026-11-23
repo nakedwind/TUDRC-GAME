@@ -1640,6 +1640,13 @@ const BOSS_SETTINGS_DEFAULT = {
       "slowMo": {
         "time": 0.5,
         "scale": 0.5
+      },
+      "camera": {
+        "focusUp": 2,
+        "holdAfter": 1.5,
+        "zoom": 1,
+        "bars": 0,
+        "maxTime": 40
       }
     },
     "grip": {
