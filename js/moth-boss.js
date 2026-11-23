@@ -96,11 +96,12 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // reach＝離目標幾格內算抓到、circle＝抓起來後在高空繞幾秒才丟下、carryLift＝抓著人時飛多高（像素）、
   // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、carrySpeedMul＝抓著人繞圈時的飛行速度倍率、
   // playerCircleMul＝抓到溫特時在空中多繞幾倍時間（2＝溫特繞 circle × 2 秒）、
+  // eightW／eightH＝抓到溫特時飛「∞」字路線：左右多寬、上下多高（像素）、eightTime＝飛一整個 ∞ 要幾秒、eightSpeedMul＝飛 ∞ 的速度倍率、
   // mateAway＝抓到隊員時：蝶后帶著隊員往鏡頭飛走（跟換區的「飛向鏡頭」一樣變大、淡出），消失後隊員幾秒才從空中掉下來、
   // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠（地圖編輯器有放「🦋 BOSS 丟人落點」時不用，B56 有放）、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手、
   // struggleAngle＝溫特被抓在手上時左右掙扎的角度（度，以手抓的地方為支點、腳左右甩；跟著蝶后拍翅膀的圖換格，在左右兩個姿勢之間切換）、struggleShake＝掙扎時身體往左右偏幾像素
-  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
+  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, eightW: 720, eightH: 200, eightTime: 6, eightSpeedMul: 6, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
   coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });
@@ -808,10 +809,19 @@ function mbCarry(e, dt) {
   const C = MOTH_BOSS.grab, mb = e.mb, c = mb.carry;
   if (!c || !G.vineCaps || !G.vineCaps.includes(c.cap)) { mb.carry = null; mbSet(e, 'nest'); return; }   // 人已經不在了（換地圖、被別的東西放開）
   c.t += dt;
-  c.ang += C.circleSpeed * dt;
-  const R = C.circleR * CELL;
-  mbFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, C.carrySpeedMul);
-  e.faceRight = c.face; e.forceFlip = c.face;   // 抓著的時候不轉身
+  if (c.cap.isPlayer) {   // 抓到溫特：在空中飛「∞」字（以抓人的地方為中心，左右 eightW、上下 eightH），飛的方向會轉身
+    if (c.eight == null) c.eight = 0;
+    c.eight += Math.PI * 2 / C.eightTime * dt;
+    const tx = c.from.x + Math.sin(c.eight) * C.eightW / 2, ty = c.from.y + Math.sin(c.eight * 2) * C.eightH / 2;
+    mbFlyToward(e, tx, ty, dt, C.eightSpeedMul, true);
+    c.face = !!e.faceRight;
+  } else {
+    c.ang += C.circleSpeed * dt;
+    const R = C.circleR * CELL;
+    mbFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, C.carrySpeedMul);
+    e.faceRight = c.face; e.forceFlip = c.face;   // 抓著的時候不轉身
+  }
+  e.forceFlip = !!e.faceRight;
   mbCarryHold(e, dt);
   if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }
   if (c.t >= C.circle * (c.cap.isPlayer ? C.playerCircleMul : 1)) { mbSet(e, 'toDrop'); c.dropT = 0; c.drop = null; }   // 繞完：找站得住的地方，飛過去再丟
