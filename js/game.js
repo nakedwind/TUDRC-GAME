@@ -1954,7 +1954,7 @@ const LEADER_GUN = { aggro: 0.8 };
 function playerGun() {
   const s = PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER];
   const weak = typeof bananaDebuffAtk === 'function' ? bananaDebuffAtk(G && G.player) : 1;   // 金蕉大王紅色魔法陣：攻擊下降（js/banana-emperor.js）
-  const glove = typeof equipAtkMul === 'function' ? equipAtkMul() : 1;   // 強化戰術手套：攻擊力加成（js/equipment.js）
+  const glove = typeof equipAtkMul === 'function' ? equipAtkMul() : 1;   // 戰術手套：攻擊力加成（js/equipment.js）
   if (!s) return weak * glove === 1 ? PLAYER_ATK : { ...PLAYER_ATK, dmg: PLAYER_ATK.dmg * weak * glove };
   const p = G && G.player, buff = k => (p && typeof sortieBuff === 'function' ? sortieBuff(p, k) : 0);
   return { ...PLAYER_ATK, dmg: s.dmg * (1 + buff('atk')) * weak, range: s.range, rate: s.rate * (1 + buff('spd')), aggro: LEADER_GUN.aggro, mag: GUIDE_GUN.mag, reloadTime: GUIDE_GUN.reloadTime, double: 0 };
@@ -2954,7 +2954,7 @@ if (PREVIEW) {                 // 從地圖編輯器來的預覽：直接進場�
   // 預覽時溫特身上自動裝高亮度手電筒、電量補滿（不然黑暗的地圖一進去就嚇死）。只改這一次預覽，不存回真正的存檔
   if (typeof equipState !== 'undefined' && equipState.equipped) {
     equipState.owned.headlamp = Math.max(1, equipState.owned.headlamp | 0);
-    if (!isEquipped('headlamp')) equipState.equipped[['acc1', 'acc2'].find(k => !equipState.equipped[k]) || 'acc1'] = 'headlamp';
+    if (!isEquipped('headlamp')) equipState.equipped[['acc1', 'acc2', 'acc3'].find(k => !equipState.equipped[k]) || 'acc1'] = 'headlamp';
     equipState.battery = 100;
     saveEquipment = () => {};
   }

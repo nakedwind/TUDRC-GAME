@@ -1,6 +1,6 @@
 // ============================================================
 //  部隊長（溫特）的裝備
-//  ・背包左邊「部隊長裝備」：換裝（頭部、上身、下身 ×2、隨身物品 ×2），看武器等級、手電筒電量。
+//  ・背包左邊「部隊長裝備」：換裝（頭部、上身、下身、隨身物品 ×3），看武器等級、手電筒電量。
 //  ・照明：照明頭盔（頭部，身邊一小圈光）、高亮度手電筒（隨身物品，朝滑鼠方向的扇形光，要電池）。
 //  ・道具：急救包（H）、腎上腺素是背包裡的消耗品（data/supplies.js），下方資訊條也有按鈕（腎上腺素沒有快捷鍵，用快捷欄 1～0 或背包）。
 //  ・找諾亞對話 →「🔧 開發工坊」：用異質碎片開發新裝備、升級裝備和武器。
@@ -13,7 +13,7 @@ const WS_KEEP_WEAPON = 'pistol';   // 溫特一開始就持有的手槍：不能
 // gearTypeOf：從一件的代號看出它是哪一種裝備（舊版沒有 #，代號就是裝備 id）
 const gearTypeOf = key => String(key || '').split('#')[0];
 const gearIsInst = key => String(key || '').includes('#');
-const equipState = { inst: {}, instSeq: 0, owned: {}, equipped: { head: null, body: null, legs1: null, legs2: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: null }, gunAmmo: {}, bullets: null, battery: 100, scrapped: {}, bag: { items: 1, ammo: 1 }, builds: {}, buildLv: {}, buildQuick: null };   // builds：開發工坊開發好的建築；buildQuick：下方建築快捷欄 { n 幾格, ids 每格放哪個 }（js/build.js）   // scrapped：開發工坊分解掉的武器（一開始就有的也不會再補回來）
+const equipState = { inst: {}, instSeq: 0, owned: {}, equipped: { head: null, body: null, legs1: null, acc1: null, acc2: null, acc3: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: null }, gunAmmo: {}, bullets: null, battery: 100, scrapped: {}, bag: { items: 1, ammo: 1 }, builds: {}, buildLv: {}, buildQuick: null };   // builds：開發工坊開發好的建築；buildQuick：下方建築快捷欄 { n 幾格, ids 每格放哪個 }（js/build.js）   // scrapped：開發工坊分解掉的武器（一開始就有的也不會再補回來）
 const EQUIP_TO_ITEM = ['thermos', 'firstaid', 'adrenaline', 'charm'];   // 以前是裝備、現在改成道具：舊存檔有的話換成 1 個道具
 let equipLegacyItems = [];
 // 開發工坊編輯器刪掉的裝備／武器：對玩家來說就是永久從遊戲消失——存檔裡拿到的也清掉（之後就算在編輯器復原，也要重新取得）。
@@ -38,11 +38,13 @@ try {
   const oldLamp = (s.equipped && s.equipped.hand === 'headlamp') || equipState.equipped.head === 'headlamp';
   if (equipState.equipped.head === 'headlamp') equipState.equipped.head = null;
   if (oldLamp && equipState.owned.headlamp && !Object.values(equipState.equipped).includes('headlamp')) {
-    const free = ['acc1', 'acc2'].find(k => !equipState.equipped[k]); if (free) equipState.equipped[free] = 'headlamp';
+    const free = ['acc1', 'acc2', 'acc3'].find(k => !equipState.equipped[k]); if (free) equipState.equipped[free] = 'headlamp';
   }
-  // 舊存檔：鞋子以前穿在隨身物品（10/22 測試版是單一「下身」格 legs），現在有自己的「下身1／下身2」格 → 搬到空著的下身格（都滿了就卸下）
+  // 舊存檔：鞋子以前穿在隨身物品（10/22 測試版是單一「下身」格 legs），現在有自己的「下身」格 → 搬到空著的下身格（都滿了就卸下）
   if (s.equipped && s.equipped.legs && equipState.owned[s.equipped.legs] && !Object.values(equipState.equipped).includes(s.equipped.legs)) equipState.equipped.legs1 = equipState.equipped.legs1 || s.equipped.legs;
-  for (const k of ['acc1', 'acc2']) { const key = equipState.equipped[k], d = EQUIPMENT.find(e => e.id === gearTypeOf(key)); if (d && d.kind === 'legs') { const free = ['legs1', 'legs2'].find(x => !equipState.equipped[x]); if (free) equipState.equipped[free] = key; equipState.equipped[k] = null; } }
+  // 舊存檔：11/23 拿掉了「下身2」→ 下身空著就搬過去，不然卸下（新版裝備會自動放回背包，js/gear-v2.js 的 gearNormalize）
+  if (s.equipped && s.equipped.legs2 && !equipState.equipped.legs1 && equipState.owned[gearTypeOf(s.equipped.legs2)]) equipState.equipped.legs1 = s.equipped.legs2;
+  for (const k of ['acc1', 'acc2', 'acc3']) { const key = equipState.equipped[k], d = EQUIPMENT.find(e => e.id === gearTypeOf(key)); if (d && d.kind === 'legs') { if (!equipState.equipped.legs1) equipState.equipped.legs1 = key; equipState.equipped[k] = null; } }
   for (const slot of EQUIP_SLOTS) { const id = equipState.equipped[slot.id], d = id && EQUIPMENT.find(e => e.id === gearTypeOf(id)); if (d && !slot.kinds.includes(d.kind)) equipState.equipped[slot.id] = null; }
   if (s.scrapped && typeof s.scrapped === 'object') for (const k of Object.keys(s.scrapped)) if (WEAPON_UPGRADES[k] && k !== WS_KEEP_WEAPON) equipState.scrapped[k] = true;
   if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field || equipState.scrapped[k] ? 0 : 1, Math.min(WEAPON_UPGRADES[k].levels.length, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
@@ -131,7 +133,7 @@ function braceletBoost(who) {
 }
 // 疏導降負荷的倍率：嚮導（疏導的人）和哨兵（被疏導的人）身上的共感手環相加（溫特疏導、嚮導光環、嚮導技能都用這個）
 const equipSootheMul = (guide, sentry) => 1 + braceletBoost(guide) + braceletBoost(sentry);
-// 強化戰術手套：溫特的攻擊力（手槍、特殊子彈；艾德林帶隊時不算溫特的裝備）
+// 戰術手套：溫特的攻擊力（手槍、特殊子彈；艾德林帶隊時不算溫特的裝備）
 const equipAtkMul = () => { if (leaderSpec()) return 1; const v = equipLv('gloves'); return v && v.atk ? 1 + v.atk : 1; };
 // 急救腰包：溫特每秒回復的 HP（js/game.js 的 updatePlayer）
 const equipHpRegen = () => { if (leaderSpec()) return 0; const v = equipLv('pouch'); return (v && v.hpRegen) || 0; };
@@ -651,7 +653,7 @@ function renderEquipPanel() {
   renderEquipSlotMenu(box);
 }
 function renderEquipmentDoll(box) {
-  // 紙娃娃：溫特在上面，下面 2 欄：主武器、副武器／頭部、上身／下身1、下身2／隨身物品1、隨身物品2
+  // 紙娃娃：溫特在上面，下面 2 欄：主武器、副武器／頭部、上身／下身、隨身物品1／隨身物品2、隨身物品3
   const weaponSlots = WEAPON_SLOTS.map(s => {
     const id = equipState.loadout[s.id], w = id && WEAPON_UPGRADES[id];
     return '<button type="button" class="doll-slot weapon' + (w ? ' filled' + equipTier(equipState.weapons[id]) : '') + '" data-equip-slot="w:' + s.id + '" title="' + s.name + (w ? '：' + w.name : '：未裝備') + '">' +
@@ -1001,7 +1003,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   const count = pg => everything.filter(x => workshopOnPage(x, pg)).length;
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + workshopTabs().map(([id, label]) =>
     '<button type="button" role="tab" data-ws-tab="' + id + '" class="' + (page === id ? 'active' : '') + '" aria-selected="' + (page === id) + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
-  // 右側：跟背包一樣的紙娃娃（溫特＋主／副武器、頭部、上身、下身 ×2、隨身物品 ×2），點格子＝選它來分解
+  // 右側：跟背包一樣的紙娃娃（溫特＋主／副武器、頭部、上身、下身、隨身物品 ×3），點格子＝選它來分解
   const dollSlot = (key, slotName, icon, name, lv, weapon) => '<div class="doll-slot' + (weapon ? ' weapon' : '') + (key ? ' filled' + tier(lv) : '') + (key && wsScrapSel === key ? ' sel' : '') + '"' + (key ? ' data-scrap="' + key + '"' : '') + ' title="' + slotName + '：' + (key ? name + ' Lv' + lv : '未裝備') + '">' +
     '<span>' + (key ? icon : '＋') + (key ? '<em>Lv' + lv + '</em>' : '') + '</span><small>' + (key ? name : slotName) + '</small></div>';
   const dollSlots = WEAPON_SLOTS.map(s => {

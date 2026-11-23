@@ -20,7 +20,7 @@ const SQUAD_GEAR = [
   },
   {
     "id": "sg-gloves",
-    "name": "強化戰術手套",
+    "name": "戰術手套",
     "icon": "🧤",
     "image": "images/裝備/隊員裝備/gloves.png",
     "price": 140,

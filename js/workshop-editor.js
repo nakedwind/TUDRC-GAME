@@ -1034,7 +1034,7 @@ function pvRefund(key) {   // 跟遊戲同一套（js/workshop-config.js 的 wor
   if (!w) { if (GEAR_V2_ED) paid.push(gearV2MakeNow(key)); else if (!isField(key, def)) paid.push(step(0)); }   // 新版＝製作一件的費用；舊版＝開發費（戰鬥區域撿到的沒有）
   return workshopScrapRefund(paid);
 }
-function pvSideHtml() {   // 跟遊戲一樣的紙娃娃：溫特＋頭部、上身、下身 ×2、隨身物品 ×2；點格子＝穿上／卸下、選了可以分解
+function pvSideHtml() {   // 跟遊戲一樣的紙娃娃：溫特＋頭部、上身、下身、隨身物品 ×3；點格子＝穿上／卸下、選了可以分解
   for (const k of Object.keys(pv.equipped)) if (pv.equipped[k] && !pvOwned(pv.equipped[k])) pv.equipped[k] = null;   // 刪掉的、分解掉的：卸下
   const icon = key => { const v = itemView(key), d = getDef(key); return v.image ? '<img src="' + esc(v.image) + '" alt="">' : '<i>' + esc(d.icon || '') + '</i>'; };
   const slots = PV_SLOTS.map(sl => {

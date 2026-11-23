@@ -23,7 +23,7 @@ const SPECIAL_GUN = {
   tranq: { range: BULLETS.tranq.range, speed: 1100, hitR: 16, bigHp: BULLET_TUNING.bigHp },   // 最遠幾格、飛行速度（混亂彈也用這個）、命中判定半徑、血量多少以上算大型怪物
 };
 // 對怪物的效果倍率（data/equipment.js 的 BULLET_FOE_MUL）：只用在打怪物的數字上，打到隊員、溫特的照原本
-const foeMul = v => v * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1) * (typeof equipAtkMul === 'function' ? equipAtkMul() : 1);   // 強化戰術手套：溫特的攻擊力加成
+const foeMul = v => v * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1) * (typeof equipAtkMul === 'function' ? equipAtkMul() : 1);   // 戰術手套：溫特的攻擊力加成
 // 舊的：武器有沒有拿到（開發工坊、背包現在只有手槍）
 function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; if (w && w.removed) return false;
   return !w || !w.field || (typeof equipState !== 'undefined' && (equipState.weapons[id] || 0) > 0); }

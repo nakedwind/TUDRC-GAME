@@ -1,5 +1,5 @@
 /* 部隊長（溫特）的裝備
-   ・背包左邊的「部隊長裝備」可以換裝：頭部、上身各 1 格，下身 2 格，隨身物品 2 格。
+   ・背包左邊的「部隊長裝備」可以換裝：頭部、上身、下身各 1 格，隨身物品 3 格（11/23 拿掉下身2、隨身物品多 1 格）。
      kind（穿在哪裡）：head 頭部裝備（頭盔、帽子類）、body 上身裝備（背心、衣服類）、legs 下身裝備（鞋子類）、acc 隨身物品。
    ・急救包、腎上腺素、杏仁水保溫杯、順順宮平安符已經改成道具（data/supplies.js），不是裝備了。
    ・回基地找諾亞對話 →「🔧 開發工坊」：用異質碎片開發新裝備、把裝備和武器升級（最高 Lv5，見下面的 EQUIP_MAX_LV）。
@@ -21,7 +21,7 @@ const EQUIP_MAX_LV = 5;   // 裝備、武器最高幾級（每件的 levels 要�
       ・實體物品：開發時送 1 件；之後按「製作」再做（每件花 GEAR_MAKE 算出來的碎片＋經費），做好放進背包。一件只能給一個人穿。
       ・誰能穿（who）：'winter'＝只有部隊長（溫特）能穿（手電筒、防毒面具這類特殊效果）；'all'＝溫特和隊員都能穿；'squad'＝只有隊員能穿。
         沒寫＝'winter'。可以在開發工坊編輯器改。
-      ・格子：溫特＝頭部、上身、下身 ×2、隨身物品 ×2；隊員＝頭部、上身、隨身物品各 1 格（鞋子這類下身裝備穿在隨身物品格）。
+      ・格子：溫特＝頭部、上身、下身、隨身物品 ×3；隊員＝頭部、上身、隨身物品各 1 格（鞋子這類下身裝備穿在隨身物品格）。
       ・隊員穿上之後，裝備的數值照 GEAR_SQUAD_MODS 換成隊員的數值（例如 guard 減傷 → 隊員的防禦）。
       程式在 js/gear-v2.js；切回 1 時舊版的程式完全照舊（舊版的檔案也備份在 backups/gear-v1-20261109/）。
       注意：從舊版轉成新版時存檔會自動轉換一次；切回舊版時存檔「不會」轉回去。 */
@@ -30,10 +30,10 @@ const GEAR_SYSTEM = 2;
 const EQUIP_SLOTS = [
   { id: 'head', name: '頭部', kinds: ['head'] },
   { id: 'body', name: '上身', kinds: ['body'] },
-  { id: 'legs1', name: '下身1', kinds: ['legs'] },
-  { id: 'legs2', name: '下身2', kinds: ['legs'] },
+  { id: 'legs1', name: '下身', kinds: ['legs'] },   // 代號沿用 legs1（舊存檔才對得上）；以前的「下身2」11/23 拿掉了，舊存檔穿在那格的會搬到下身或放回背包
   { id: 'acc1', name: '隨身物品1', kinds: ['acc'] },
   { id: 'acc2', name: '隨身物品2', kinds: ['acc'] },
+  { id: 'acc3', name: '隨身物品3', kinds: ['acc'] },
 ];
 
 const EQUIPMENT = [
@@ -93,7 +93,7 @@ const EQUIPMENT = [
   // ---- 下面三件是新版（GEAR_SYSTEM＝2）才有的：原本的隊員裝備（data/squad-gear.js）；瞄準鏡只有隊員能穿，手套、急救腰包溫特也能穿（11-23）----
   //   舊版的「輕量防護背心」併進上面的輕型防護背心、「機動戰術靴」併進輕量跑鞋（舊存檔會自動換過去，見 GEAR_V1_SQUAD_MAP）
   //   atk：攻擊力加成（0.1＝+10%）、accuracy：命中率加成（0.1＝+10%）、atkRange：射程加幾格、hpRegen：每秒回復 HP
-  { id: 'gloves', name: '強化戰術手套', kind: 'acc', who: 'all', v2only: true, icon: '🧤', image: 'images/裝備/隊員裝備/gloves.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+  { id: 'gloves', name: '戰術手套', kind: 'acc', who: 'all', v2only: true, icon: '🧤', image: 'images/裝備/隊員裝備/gloves.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '加了護甲片的手套，出手更有力。',
     stat: lv => '攻擊力 +' + Math.round(lv.atk * 100) + '%', levels: [{ atk: .1 }, { atk: .13 }, { atk: .16 }, { atk: .2 }, { atk: .25 }] },
   { id: 'scope', name: '戰術瞄準鏡', kind: 'head', who: 'squad', v2only: true, icon: '🔭', image: 'images/裝備/隊員裝備/scope.png', source: 'develop', cost: [60, 120, 200, 290, 390],
