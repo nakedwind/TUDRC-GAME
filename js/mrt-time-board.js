@@ -12,7 +12,7 @@
    地圖編輯器：用同一個 drawMrtBoardFace 畫一個範例畫面（js/map-editor.js），看得到字放在哪、多大。 */
 const MRT_BOARD = {
   tile: 'tile_bg_road_signs',
-  screen: [4 / 200, 15 / 40, 192 / 200, 22 / 40],   // 黑色螢幕在圖裡的位置（左、上、寬、高，佔整張圖的幾成）
+  screen: [9 / 200, 15 / 40, 182 / 200, 22 / 40],   // 黑色螢幕在圖裡的位置（左、上、寬、高，佔整張圖的幾成）
   amber: '#ffb32c', red: '#e24b4a', gray: '#8a8a8a',   // 一般字、暫停服務、通道列車的字色
   soonSec: 10,   // 剩幾秒開始顯示「即將進站」
   pageSec: 3,    // 停靠中幾秒換一頁
