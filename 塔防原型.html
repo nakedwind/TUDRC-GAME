@@ -299,7 +299,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=gkleap4-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=mkcam-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=bosscfg-20261122"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -368,7 +368,7 @@
   <script src="js/pool-boss.js?v=bosscfg-20261122"></script> <!-- 9f7b. 池核 BOSS：巨大比基尼小丑魚（守核心、深水區游泳潛水、抽水時擱淺） -->
   <script src="js/golden-banana-king.js?v=bridgefloor-20261121"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
   <script src="js/gourd-monkey.js?v=gourdfall-20261122"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
-  <script src="js/boss-cinema.js?v=gkleap4-20261123"></script> <!-- 9f9a. BOSS 出場演出：時間停住、鏡頭移到出場的地方、上下黑邊（虱目魚王、葫蘆猴王、花蓮老鼠王共用） -->
+  <script src="js/boss-cinema.js?v=mkcam-20261123"></script> <!-- 9f9a. BOSS 出場演出：時間停住、鏡頭移到出場的地方、上下黑邊（虱目魚王、葫蘆猴王、花蓮老鼠王共用） -->
   <script src="js/gourd-king.js?v=gkleap4-20261123"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
   <script src="js/rat-king.js?v=cinemacfg-20261123"></script> <!-- 9f9c. 菁英花蓮版權老鼠「花蓮老鼠王」：O666 上方月台的 BOSS，從鐵軌冒出、手抓人搬核心、核心是護甲、列車撞飛 -->
   <script src="js/human-face-butterfly.js?v=mothdrop-20261123"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->

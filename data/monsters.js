@@ -1685,7 +1685,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "zoom": 0.8,
     "maxTime": 16,
     "milkfish": {
-      "focusUp": 170,
+      "focusUp": 150,
       "holdAfter": 0.6
     },
     "gourd": {
