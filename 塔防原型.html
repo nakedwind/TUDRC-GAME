@@ -27,7 +27,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=dynamo-20261122"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=merge-20261120">
+<link rel="stylesheet" href="css/style.css?v=wearerface-20261123">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
@@ -299,7 +299,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=cinemacfg-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=gkleap-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=bosscfg-20261122"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -368,8 +368,8 @@
   <script src="js/pool-boss.js?v=bosscfg-20261122"></script> <!-- 9f7b. 池核 BOSS：巨大比基尼小丑魚（守核心、深水區游泳潛水、抽水時擱淺） -->
   <script src="js/golden-banana-king.js?v=bridgefloor-20261121"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
   <script src="js/gourd-monkey.js?v=gourdfall-20261122"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
-  <script src="js/boss-cinema.js?v=cinemacfg-20261123"></script> <!-- 9f9a. BOSS 出場演出：時間停住、鏡頭移到出場的地方、上下黑邊（虱目魚王、葫蘆猴王、花蓮老鼠王共用） -->
-  <script src="js/gourd-king.js?v=cinemacfg-20261123"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
+  <script src="js/boss-cinema.js?v=gkleap-20261123"></script> <!-- 9f9a. BOSS 出場演出：時間停住、鏡頭移到出場的地方、上下黑邊（虱目魚王、葫蘆猴王、花蓮老鼠王共用） -->
+  <script src="js/gourd-king.js?v=gkleap-20261123"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
   <script src="js/rat-king.js?v=cinemacfg-20261123"></script> <!-- 9f9c. 菁英花蓮版權老鼠「花蓮老鼠王」：O666 上方月台的 BOSS，從鐵軌冒出、手抓人搬核心、核心是護甲、列車撞飛 -->
   <script src="js/human-face-butterfly.js?v=mothdrop-20261123"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/moth-boss.js?v=bossdrops-20261123"></script> <!-- 9f10b. 菁英人面蝶「人面蝶后」：抱著核心在 B56 四個區域之間飛、築巢、大面積撒粉 -->
@@ -441,8 +441,8 @@
   <script src="js/dynamo-sound.js?v=20261116dyn1"></script> <!-- 發電機運轉聲：靠近開著的發電機才聽得到 -->
   <script src="js/sanity.js?v=perf-20261122"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=ammo20-20261121"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=offaudit2-20261122"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
-  <script src="js/gear-v2.js?v=ownednote-20261120"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
+  <script src="js/equipment.js?v=wearerface-20261123"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/gear-v2.js?v=wearerface-20261123"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
   <script src="js/special-guns.js?v=gmstun-20261122"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=ammoshop2-20261120"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=gates-20261122"></script>

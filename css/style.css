@@ -2586,6 +2586,13 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-tile.unowned, .ws-tile.locked { filter: brightness(.35) saturate(.3); }
 /* 製作裝備頁：「持有幾件」放右下角（升級裝備頁的「誰穿著」還是在左上角） */
 .ws-tile u.ws-own { top: auto; left: auto; bottom: 5px; right: 5px; }
+/* 升級裝備頁：左上角放穿著的人的頭像，名字標籤在頭像正下方（裁切跟出任務名單的 .mission-face 一樣） */
+.ws-wearer { position: absolute; top: 5px; left: 5px; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 30%; max-width: 46px; pointer-events: none; }
+.ws-wearer-face { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; border: 1px solid rgba(120,200,255,.55); background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.12), rgba(7,10,14,.6) 70%); }
+.ws-wearer-face img { position: absolute; left: 50%; top: -14%; width: 160%; height: auto; aspect-ratio: 1; max-width: none; transform: translateX(-50%); image-rendering: pixelated; }
+.ws-wearer[data-char="ball"] .ws-wearer-face img { top: 50%; width: 220%; transform: translate(-27%, -56%); }   /* 球球是狗：另外裁 */
+.ws-tile:has(.ws-wearer) .ws-tile-icon { translate: 10% 0; }   /* 有頭像時裝備圖往右挪一點，不要被頭像擋到 */
+.ws-tile .ws-wearer u { position: static; max-width: none; min-width: 100%; text-align: center; box-sizing: border-box; }
 .ws-tile:has(u.ws-own) { padding-bottom: 22px; }   /* 下面留位置給「持有」，名稱才不會被蓋住 */
 /* ===== 裝備等級的顏色（全遊戲共用）：Lv1 原本的、Lv2 綠、Lv3 藍、Lv4 紫、Lv5 金 =====
    JS 用 equipTier(等級)（js/equipment.js）加上 tier-N；這裡決定顏色。新的地方要顯示裝備等級：一樣加 equipTier，再把格子的 selector 加進下面的清單。 */

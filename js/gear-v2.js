@@ -42,6 +42,13 @@ function gearWearer(key) {
   return null;
 }
 const gearWearerName = who => who === 'winter' ? '部隊長' : ((typeof TYPES !== 'undefined' && TYPES[who] && TYPES[who].name) || who);
+// 穿著的人的頭像：{ id: 角色 id（css 個別裁切用，例如球球）, src: 圖片路徑 }；跟背包換裝的頭像列用同一張圖
+const gearWearerFace = who => {
+  if (typeof memberPortraitPath !== 'function') return null;
+  const spec = who === 'winter' ? (typeof CHARACTERS !== 'undefined' && CHARACTERS.winter) : (typeof TYPES !== 'undefined' && TYPES[who]);
+  const src = spec ? memberPortraitPath(spec) : '';
+  return src ? { id: who, src } : null;
+};
 // 把「某一件」包成跟裝備資料一樣的東西（名稱、圖片、數值都跟那種裝備一樣），只有 id 換成這一件的代號；typeId＝它是哪一種
 // （背包、T-Pad 隊員頁原本就是用 id 來穿／卸，這樣它們不用知道「一件一件」的事）
 function gearInstDef(key) {
@@ -278,6 +285,7 @@ if (GEAR_V2) {
         const lv = gearKeyLv(key), who = gearWearer(key), up = lv < d.levels.length;
         out.push({ ...e, key: 'g:' + key, wk: d.id, inst: key, typeOnly: false, lv, extraBtn: null,
           tileNote: who ? gearWearerName(who) : '',
+          tileFace: who ? gearWearerFace(who) : null,   // 格子左上角：穿著的人的頭像（名字標籤放頭像下面）
           upCost: up ? d.cost[lv] : 0, upMoney: up ? wsMoney(d.id, lv, d.cost[lv]) : 0, buy: 'up:' + key,
           extraTags: whoTag + (who ? '<span class="bag-tag worn">' + gearWearerName(who) + '穿著</span>' : '<span class="bag-tag">背包裡</span>') });
       }
