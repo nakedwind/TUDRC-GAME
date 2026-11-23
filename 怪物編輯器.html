@@ -122,7 +122,7 @@
       改動跟上面一起自動儲存，「下載 monsters.js」／「存到專案」也會一起存進去。虱目魚王在上方的怪物列表裡。</p>
     <div class="boss-layout">
       <div id="bossList"></div>
-      <div><div class="actions"><h3 style="flex:1;margin:0" id="bossTitle"></h3><button id="bossReset">這隻恢復檔案的數字</button></div>
+      <div><div class="actions"><h3 style="flex:1;margin:0" id="bossTitle"></h3><span id="bossCinemaBtns" style="display:contents"></span><button id="bossReset">這隻恢復檔案的數字</button></div>
         <details id="bossDescBox"><summary>這隻 BOSS 怎麼打（程式裡的說明）</summary><pre id="bossDesc"></pre></details>
         <input id="bossSearch" type="search" placeholder="搜尋說明或欄位名稱" aria-label="搜尋 BOSS 欄位">
         <div id="bossFields"></div></div>
@@ -149,7 +149,7 @@
   <script src="js/sfx.js?v=mothswoop-20261123"></script>
   <script src="js/burrowing-mouse.js?v=nodeep-20261123"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=bosscfg-20261122"></script>
+  <script src="js/monster-editor.js?v=cinemabtn-20261123"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=bullets-20261121"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

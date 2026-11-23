@@ -92,6 +92,7 @@ function renderBehaviorFields(monster) {
     });
     label.append(input); wrap.append(label);
   }
+  if (monster.behavior === 'milkfishKing') wrap.append(cinemaButton('milkfish', '▶ 播放出場演出（從水池登場）'));   // 改完「登場：」那幾格按這個看效果
 }
 function newMonsterId() {
   let n = 2;
@@ -392,9 +393,24 @@ function renderBossFields() {
   });
   if (!wrap.children.length) wrap.textContent = '沒有符合的欄位';
 }
+// ▶ 播放出場演出：存好暫存後打開 BOSS出場演出預覽.html，用剛剛改的數字（還沒存到專案也行）播那隻 BOSS 的出場（js/boss-cinema.js）
+const CINEMA_BOSSES = { milkfish: '虱目魚王', gourd: '葫蘆猴王', rat: '花蓮老鼠王' };
+function openBossCinemaPreview(boss) {
+  saveMonsters();
+  window.open('BOSS出場演出預覽.html?boss=' + boss, 'boss_cinema_preview');
+  status('已開啟 BOSS 出場演出預覽：用編輯器目前的數字播' + CINEMA_BOSSES[boss] + '出場；不會寫入正式存檔。');
+}
+function cinemaButton(boss, text) {
+  const btn = document.createElement('button'); btn.type = 'button';
+  btn.textContent = text || '▶ 播放' + CINEMA_BOSSES[boss] + '出場演出';
+  btn.addEventListener('click', () => openBossCinemaPreview(boss));
+  return btn;
+}
 function renderBossPanel() {
   const b = BOSS_LIST.find(x => x.key === bossSel);
   document.getElementById('bossTitle').textContent = b.name;
+  const cb = document.getElementById('bossCinemaBtns');   // 有出場演出的 BOSS：標題旁邊放播放鈕；共用那頁放三顆
+  if (cb) cb.replaceChildren(...(b.key === 'BOSS_CINEMA' ? Object.keys(CINEMA_BOSSES).map(k => cinemaButton(k, '▶ ' + CINEMA_BOSSES[k])) : b.key === 'GOURD_KING' ? [cinemaButton('gourd')] : b.key === 'RAT_KING' ? [cinemaButton('rat')] : []));
   document.getElementById('bossDesc').textContent = b.desc.replace(/^=+\s*|\s*=+$/gm, '');
   renderBossList(); renderBossFields();
 }

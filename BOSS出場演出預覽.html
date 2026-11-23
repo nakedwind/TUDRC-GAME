@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS 出場演出預覽</title>
+<style>
+  /* 跟其他編輯器一樣的深色畫面 */
+  :root { --bg: #14181f; --panel: #1d222b; --line: #333c49; --text: #dfe6ef; --dim: #9fb0c3; --accent: #8fc8ff; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, "Noto Sans TC", sans-serif; display: flex; flex-direction: column; }
+  header { padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  h1 { font-size: 16px; margin: 0 8px 0 0; }
+  button { background: #2a3140; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  button.main { background: #2d5a8a; border-color: #4f8fd0; font-weight: 600; }
+  .pick { display: inline-flex; gap: 4px; }
+  .pick button.on { background: #3b4a63; border-color: var(--accent); }
+  label { display: inline-flex; align-items: center; gap: 4px; color: var(--dim); cursor: pointer; }
+  select { background: #2a3140; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; font: inherit; }
+  #status { color: var(--accent); }
+  #values { width: 100%; color: var(--dim); font-size: 12px; }
+  #game { flex: 1; width: 100%; border: 0; background: #000; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 BOSS 出場演出預覽</h1>
+  <span class="pick" id="pick">
+    <button type="button" data-boss="milkfish">虱目魚王</button>
+    <button type="button" data-boss="gourd">葫蘆猴王</button>
+    <button type="button" data-boss="rat">花蓮老鼠王</button>
+  </span>
+  <button id="play" class="main" type="button">▶ 播放出場演出</button>
+  <button id="pause" type="button" disabled>⏸ 暫停</button>
+  <label>速度
+    <select id="speed">
+      <option value="1">正常</option>
+      <option value="0.5">慢動作 ½</option>
+      <option value="0.25">慢動作 ¼</option>
+    </select>
+  </label>
+  <label title="葫蘆猴王前三下撞牆、老鼠王鑽出來前的震動這些等待，直接快轉到演出開始"><input id="skip" type="checkbox" checked> 跳過前面的等待</label>
+  <label><input id="bright" type="checkbox"> 關掉黑暗（看清楚）</label>
+  <label><input id="noBanner" type="checkbox"> 隱藏中間橫幅</label>
+  <label><input id="sound" type="checkbox"> 聲音</label>
+  <span id="status">選一隻 BOSS，按「播放出場演出」（第一次要載入遊戲，約 5～10 秒）</span>
+  <div id="values"></div>
+</header>
+<iframe id="game" title="BOSS 出場演出預覽的遊戲畫面"></iframe>
+<script>
+  /* 做法：把真正的遊戲開在下面的框裡播，用遊戲自己的畫面程式和 BOSS 出場演出（js/boss-cinema.js），不另外做一版。
+     遊戲用唯讀預覽模式開（網址 ?previewMonsters=1&cinemaPreview=1）：
+       ・讀怪物編輯器還沒存到專案的暫存（怪物數值、👑 BOSS 數值），改完數字按播放就看得到效果
+       ・瀏覽器存檔只能讀、不能寫，不會動到正式進度（塔防原型.html 開頭那段）
+     每按一次播放：開那隻 BOSS 的地圖（測試模式）→ 重新開一場 → 照遊戲裡的方式叫醒（溫特開槍打到核心）→ 等演出播完。
+     從怪物編輯器的「▶ 播放出場演出」打開時，網址會帶 ?boss=milkfish｜gourd｜rat。 */
+  const $ = id => document.getElementById(id);
+  const frame = $('game');
+  const NAMES = { milkfish: '虱目魚王', gourd: '葫蘆猴王', rat: '花蓮老鼠王' };
+  let boss = new URLSearchParams(location.search).get('boss');
+  if (!NAMES[boss]) boss = 'milkfish';
+  let win = null, paused = false, watchId = 0;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const run = code => win.eval(code);   // 在遊戲框裡執行（才拿得到遊戲裡的 G、MAP 這些）
+  const status = t => { $('status').textContent = t; };
+  const showPick = () => { for (const b of $('pick').children) b.classList.toggle('on', b.dataset.boss === boss); $('play').textContent = '▶ 播放' + NAMES[boss] + '出場'; };
+  showPick();
+  $('pick').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b || !NAMES[b.dataset.boss]) return; boss = b.dataset.boss; showPick(); history.replaceState(null, '', '?boss=' + boss); });
+
+  async function loadGame() {
+    status('載入遊戲中…');
+    await new Promise(res => { frame.onload = res; frame.src = '塔防原型.html?previewMonsters=1&cinemaPreview=1&t=' + Date.now(); });
+    win = frame.contentWindow;
+    for (let i = 0; i < 160 && !(win.switchMap && win.begin && win.mapIndexById); i++) await wait(250);
+    if (!win.switchMap) throw new Error('遊戲載入失敗');
+    for (let i = 0; i < 120 && run("typeof AssetGate !== 'undefined' && AssetGate.blocking()"); i++) await wait(250);
+    // 每次都重新開一場：不要讀到正式存檔裡暫停中的戰場
+    run(`window.TEST_MODE = true;
+         restoreCombatProgress = () => false; restoreSlotScene = () => false;
+         if (typeof fundCardDue === 'function') fundCardDue = () => false;
+         // 速度：遊戲每一幀的時間乘上倍數（0＝暫停）；演出中遊戲跑的是 bossCinemaTick，也一起乘
+         if (!window.__bcOrigUpdate) { window.__bcOrigUpdate = update; update = function (dt) { return __bcOrigUpdate(dt * (window.__bcSpeed ?? 1)); }; }
+         if (!window.__bcOrigCinema) { window.__bcOrigCinema = bossCinemaTick; bossCinemaTick = function (dt) { return __bcOrigCinema(dt * (window.__bcSpeed ?? 1)); }; }`);
+  }
+  // 那隻 BOSS 在哪張地圖（照遊戲裡的設定，第一張）
+  const mapOf = b => run(b === 'milkfish' ? 'Object.keys(MILKFISH_KING_MAPS)[0]' : b === 'gourd' ? 'Object.keys(GOURD_KING.maps)[0]' : 'Object.keys(RAT_KING.maps)[0]');
+  const readyOf = b => run(b === 'milkfish' ? '!!(G && G.mkIntro)' : b === 'gourd' ? "!!(G && G.gourdKing && G.gourdKing.phase === 'sleep')" : "!!(G && G.ratKing && G.ratKing.phase === 'sleep')");
+
+  async function play() {
+    $('play').disabled = true; const id = ++watchId;
+    try {
+      if (!win) await loadGame();
+      const mapId = mapOf(boss);
+      status('準備' + NAMES[boss] + '的地圖…');
+      applySound(); paused = false; applySpeed();
+      run(`window.TEST_MODE = true; if (typeof resetBossCinema === 'function') resetBossCinema();
+           if (!MAP || MAP.id !== ${JSON.stringify(mapId)}) switchMap(mapIndexById(${JSON.stringify(mapId)}));`);
+      await wait(900);
+      run('begin(false)');
+      for (let i = 0; i < 40 && !readyOf(boss); i++) await wait(150);
+      if (!readyOf(boss)) throw new Error('這張地圖上找不到' + NAMES[boss] + '（或牠已經出場了）');
+      run(`G.player.hp = G.player.maxhp = 1e9;           // 溫特不會死
+           G.cores.forEach(c => { c.timer = 1e9; });     // 核心先不召喚小怪，畫面乾淨
+           G.enemies.length = 0;                         // 地圖上本來就有的小怪先清掉（BOSS 這時還沒出來，不在這裡面）
+           for (const t of G.towers) t.frozenT = 999;     // 隊員站著不動
+           G.coreBanner = null;`);
+      applyBright();
+      showValues();
+      await wait(300);
+      // 跟遊戲裡一樣：溫特開槍打到核心 → 核心醒來 → BOSS 開始出場
+      run(`{ const B = ${JSON.stringify(boss)};
+             const core = B === 'milkfish' ? (G.mkIntro.e.mk.core || G.cores.find(c => !c.dead)) : G.cores.find(c => !c.dead);
+             wakeCore(core); core.lastHp = core.hp;
+             if (B === 'milkfish') milkfishKingCoreShot(core);
+             // 跳過前面的等待：一下子把時間往前推到演出開始（葫蘆猴王前三下撞牆、老鼠王鑽出來前的震動）
+             if (${$('skip').checked}) { let n = 0; while (!bossCinemaActive() && n++ < 60 * 40) __bcOrigUpdate(1 / 60); } }`);
+      paused = false; $('pause').disabled = false; $('pause').textContent = '⏸ 暫停'; applySpeed();
+      status('播放中…（可以再按一次重播）');
+      watchEnd(id);
+    } catch (e) {
+      status('出錯了：' + (e && e.message || e));
+    }
+    $('play').disabled = false;
+  }
+  async function watchEnd(id) {
+    const hideBanner = () => { if ($('noBanner').checked) run('G.coreBanner = null'); };
+    let started = false;
+    for (let i = 0; i < 600 && id === watchId && win; i++) {
+      hideBanner();
+      const on = run("typeof bossCinemaActive === 'function' && bossCinemaActive()");
+      if (on) { started = true; status('演出中…'); }
+      else if (started) break;
+      else status('等' + NAMES[boss] + '出場…（前面的等待沒有跳過）');
+      await wait(100);
+    }
+    if (id === watchId && started) status('演出結束，鏡頭回到溫特、開始戰鬥（再按一次重播）');
+  }
+  function showValues() {
+    const v = run(`(() => { const C = BOSS_CINEMA; return { pan: C.pan, back: C.back, zoom: C.zoom, bars: C.bars,
+      own: ${JSON.stringify(boss)} === 'milkfish' ? '鏡頭往上 ' + C.milkfish.focusUp + ' 像素、吞完核心多停 ' + C.milkfish.holdAfter + ' 秒（登場：震動 ' + mkCfg(G.mkIntro.e).introRumble + ' 秒、空中 ' + mkCfg(G.mkIntro.e).introLeapTime + ' 秒）'
+         : ${JSON.stringify(boss)} === 'gourd' ? '撞破前 ' + C.gourd.lead + ' 秒開始、鏡頭在牆頂往下 ' + C.gourd.focusDown + ' 格、亮相完多停 ' + C.gourd.holdAfter + ' 秒'
+         : '鏡頭在月台邊緣往上 ' + C.rat.focusUp + ' 格、亮相完多停 ' + C.rat.holdAfter + ' 秒' }; })()`);
+    $('values').textContent = '目前數值：鏡頭滑過去 ' + v.pan + ' 秒、滑回 ' + v.back + ' 秒、拉遠 ×' + v.zoom + '、黑邊 ' + v.bars + '；' + v.own
+      + '（在怪物編輯器「👑 BOSS 數值」→「🎬 BOSS 出場演出」改；改完再按播放就會用新的）';
+  }
+  function applySpeed() { if (win) run('window.__bcSpeed = ' + (paused ? 0 : Number($('speed').value))); }
+  function applyBright() { if (win && run('typeof LIGHT !== "undefined"')) run('LIGHT.enabled = ' + !$('bright').checked); }
+  function applySound() { if (win) run('try { Howler.mute(' + !$('sound').checked + '); } catch (_) {}'); }
+
+  $('play').addEventListener('click', play);
+  $('pause').addEventListener('click', () => { paused = !paused; $('pause').textContent = paused ? '▶ 繼續' : '⏸ 暫停'; applySpeed(); });
+  $('speed').addEventListener('change', applySpeed);
+  $('bright').addEventListener('change', applyBright);
+  $('sound').addEventListener('change', applySound);
+  // 從編輯器打開（網址有 ?boss=）：直接開始播
+  if (new URLSearchParams(location.search).get('boss')) play();
+</script>
+</body>
+</html>
