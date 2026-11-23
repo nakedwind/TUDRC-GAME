@@ -616,6 +616,7 @@ function mrtCarryKit(t) { if (t && t.kit && TYPES[t.type] && TYPES[t.type].guide
 function mrtTakeCarriedKit(type) { const k = mrtKitCarry[type]; if (!k) return null; delete mrtKitCarry[type]; return { ...k }; }
 function mrtSendAway(t, why) {
   if (!t || !TYPES[t.type] || t.type === PLAYER_CHARACTER || mrtAway.some(m => m.type === t.type)) return;
+  if (typeof getTeam === 'function' && !getTeam().includes(t.type)) return;   // 住院中、沒編入的人：不會搭下一班車過來（到了也不會出現，隊員欄不要顯示倒數）
   mrtCarryKit(t);   // 晚一班車回來時身上的補給照舊
   if (typeof vitalsMate === 'function') { const m = vitalsMate(t.type); m.hp = t.hp; m.taint = t.taint || 0; m.berserk = !!t.berserk; }   // HP、負荷照現在的帶走（回來時 spawnSentries 會套回去）
   mrtAway.push({ type: t.type, t: Math.max(1, +MRT_TRAIN.nextTrainTime || 120), why });
