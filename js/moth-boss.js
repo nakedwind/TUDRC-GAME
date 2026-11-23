@@ -11,7 +11,9 @@
    - 築巢：飛到那一區後把核心放在地上（這時候核心打得到），在附近繞著目標飛、撒那一區的鱗粉：
            左下＝睡眠、左上＝毒、右上＝混亂、最後回到右下＝三種輪流撒。
    - 大面積撒粉：築巢時有人在這一區，每隔幾秒翅膀發光、地上出現那一區顏色的圓圈預告，接著把整個區域撒滿鱗粉（MOTH_BOSS.burst）。
-   - 平常飛在高空：近戰隊員打不到（meleeLift），只能靠槍；俯衝下來抓人、睡覺時飛得低才打得到。
+   - 平常飛在高空：近戰隊員打不到（meleeLift），只能靠槍；俯衝下來抓人、掠過頭頂撒粉、睡覺時飛得低才打得到。
+   - 飛行手感（MOTH_BOSS.flight）：速度＋加速度（起飛漸快、停下滑行、轉彎畫弧線）、轉彎傾斜、拍翅膀一頓一頓（拍一下往上竄、滑翔下沉）、
+           影子照高度變大變小；築巢時在高空繞大圈盤旋，撒粉那一輪改成俯衝掠過目標頭頂再拉高繞回來。
    - 抓人（畫法跟抱核心一樣：人畫在身體和前方手中間，js/vines.js 那邊只畫地上的影子）：築巢時偶爾盯上溫特或隊員（一半機率抓溫特、一半抓隊員；MOTH_BOSS.grab）：尖叫預告、地上紅圈 → 俯衝，碰到就抓起來飛到空中，
            用手（抱核心的地方）抓著飛到高空繞圈幾秒（grab.circle）再丟下來（落點一定是走得到的地方，不會丟進牆裡；摔下來借用藤蔓丟人那一套：彈兩下、躺著暈、扣血）。
            抓到隊員時改成帶著他飛向鏡頭（往上、變大、淡出消失），grab.mateAway 秒後隊員從空中掉下來（js/vines.js 摔人那一套），蝶后再飛回巢。
@@ -68,7 +70,18 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // fadeFrom＝飛走時飛到幾成開始淡出（0.2＝前 2 成清楚，之後越來越透明，飛出畫面時完全看不到）
   sky: { chance: .5, up: 2.6, away: 1.6, down: 1.5, rise: 700, grow: 1.2, fadeFrom: .2 },
   leash: 8,                      // 築巢時離巢最遠飛幾格（目標跑太遠就回巢）
-  orbit: { min: 1.6, max: 3.2 }, // 繞著目標飛：離目標最近、最遠幾格
+  // 飛行手感：accel＝加速度（像素／秒²，越大起飛停下越快、轉彎越急）、brake＝離目的地幾格開始煞車、
+  // tilt＝轉彎時身體最多傾斜幾度、lean＝往前衝時微微前傾幾度、tiltSpeed＝傾斜跟上的快慢、
+  // flapEvery＝每隔幾秒拍一下翅膀（最短～最長，亂一點像蛾）、flapDown＝拍下去那張圖停幾秒、flapKick＝拍一下往上竄多快（像素／秒）、
+  // sink＝滑翔時往下沉的力道、bobSpring＝拉回原本高度的彈簧力、bobRange＝上下竄最多幾像素、wobble＝每拍一下方向亂偏多少（像素／秒）、
+  // cruiseLift＝平常盤旋的高度（像素）、circleR＝盤旋的半徑（格）、circleSpeed＝盤旋多快（每秒轉幾弧度）、cruiseSpeedMul＝盤旋的速度倍率、
+  // strafeLift＝掠過目標頭頂時飛多低（像素）、strafeRise＝離目標幾格內開始往下俯衝、strafeLen＝掠過頭頂後再衝幾格才拉高繞回來、strafeSpeedMul＝掠過時的速度倍率、
+  // circleRest＝兩輪掠過之間至少在高空盤旋幾秒、liftSpeed＝高度變化跟上的快慢（越大俯衝、拉高越快）、
+  // shadowLow／shadowHigh＝影子最大最深／最小最淡時的飛行高度（像素）、shadowMinW／shadowMaxW＝影子寬是身體寬的幾成、shadowMinA／shadowMaxA＝影子多黑（0～1）
+  flight: { accel: 260, brake: 1.5, tilt: 13, lean: 5, tiltSpeed: 6, flapEvery: [.28, .55], flapDown: .12, flapKick: 90, sink: 140, bobSpring: 6, bobRange: 26, wobble: 22,
+    cruiseLift: 170, circleR: 4, circleSpeed: .45, cruiseSpeedMul: 1.6, strafeLift: 35, strafeRise: 4, strafeLen: 4, strafeSpeedMul: 3, circleRest: 3, liftSpeed: 6,
+    shadowLow: 40, shadowHigh: 260, shadowMinW: .18, shadowMaxW: .5, shadowMinA: .12, shadowMaxA: .42 },
+  orbit: { min: 1.6, max: 3.2 }, // 繞著目標飛：離目標最近、最遠幾格（舊的盤旋方式，現在改用 flight 的 circleR）
   nestOrbit: 2.2,                // 沒有目標時繞著巢飛的半徑（格）
   // 大面積撒粉（築巢時、這一區有目標才會撒）：every＝每隔幾秒一次（最短～最長）、first＝到巢後第一次等幾秒、
   // telegraph＝預告幾秒（翅膀發光、地上圓圈）、time＝幾秒內撒完、puffs＝撒幾團（大團）、cover＝撒滿這一區半徑的幾成
@@ -256,7 +269,8 @@ function mbFollowPath(e, dt, mul) {
   const mb = e.mb;
   if (!mb.path || !mb.path.length) return true;
   const pt = mb.path[0];
-  if (mothFlyToward(e, pt.x, pt.y, dt, mul) || mbDist(e, pt) < 6) mb.path.shift();
+  const last = mb.path.length === 1;   // 中間的路點不煞車（一路順順地轉過去），最後一點才慢下來
+  if (mbFlyToward(e, pt.x, pt.y, dt, mul, !last) || mbDist(e, pt) < (last ? 6 : CELL * .8)) mb.path.shift();
   return !mb.path.length;
 }
 
@@ -270,18 +284,16 @@ function mbNestFor(e, z) {
 function stepMothBoss(e, dt) {
   const P = MOTH_BOSS, m = e.mo, mb = e.mb, f = e.frames || {};
   m.phase += dt; mb.t -= dt;
-  // 拍翅膀（沉睡時拍得慢）
+  // 拍翅膀一頓一頓、上下竄、傾斜（沉睡時拍得慢、不傾斜）
   const slow = mb.state === 'sleep';
-  const wings = f.walkFront && f.walkFront.length ? f.walkFront : [f.front || e.sprite];
-  m.flapT = (m.flapT || 0) + dt * MOTH.flapFps * (slow ? .35 : mb.state === 'fly' ? 1.4 : 1);
-  e.forceFrame = wings[Math.floor(m.flapT) % wings.length];
-  const flapRound = Math.floor(m.flapT / Math.max(wings.length, Math.round(MOTH.flapFps * MOTH.sound.flapEvery)));
-  if (flapRound !== m.flapRound) { m.flapRound = flapRound; if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, P.sound.flap * (slow ? .5 : 1), 'moth-boss-flap'); }
+  mbFlightLook(e, dt, slow);
   e.forceFlip = !!e.faceRight;   // 原圖朝左
   const diving = mb.state === 'swoop' && mb.swoopT >= P.grab.warn;
-  const goalLift = mb.state === 'sleep' ? P.sleepHeight : diving ? P.grab.diveLift : (mb.state === 'carry' || mb.state === 'toDrop') ? P.grab.carryLift : P.height;
-  m.lift += (goalLift - m.lift) * Math.min(1, dt * 3);
-  e.slimeLift = Math.max(4, m.lift + Math.sin(m.phase * MOTH.bobSpeed) * (slow ? 2 : MOTH.bob));
+  const goalLift = mb.state === 'sleep' ? P.sleepHeight : diving ? P.grab.diveLift : (mb.state === 'carry' || mb.state === 'toDrop') ? P.grab.carryLift
+    : mb.state === 'nest' ? (mb.liftGoal ?? P.flight.cruiseLift) : P.height;   // 築巢時：盤旋飛高、掠過時飛低（mbCircle、mbStrafe 設 liftGoal）
+  if (mb.state !== 'nest') mb.liftGoal = goalLift;
+  m.lift += (goalLift - m.lift) * Math.min(1, dt * (mb.state === 'nest' ? P.flight.liftSpeed : 3));   // 築巢時俯衝、拉高比較快
+  e.slimeLift = Math.max(4, m.lift + (mb.bobY || 0));
   if (mb.state === 'skyUp' || mb.state === 'skyDown') mbSkyLook(e);   // 飛向鏡頭：飛得更高、變大
   m.fleeT = 0;   // 一般人面蝶「撒完就逃」不適用：BOSS 自己決定去哪
   const core = e.carryCore;
@@ -317,7 +329,7 @@ function stepMothBoss(e, dt) {
     case 'grab': {   // 飛回巢把核心撿起來
       const c = e.carryCore;
       if (!c) { mbStartMove(e, 'fly'); return; }
-      if (mothFlyToward(e, c.x, c.y, dt, P.flySpeedMul) || mbDist(e, c) < 8) {
+      if (mbFlyToward(e, c.x, c.y, dt, P.flySpeedMul) || mbDist(e, c) < 8) {
         c.carried = true; mbCorePool(c, false);
         G.effects.push({ ring: true, x: c.x, y: c.y, r: 6, r2: 70, life: .35, life0: .35, color: '#b56bff' });
         mbStartMove(e, 'fly');
@@ -344,7 +356,7 @@ function stepMothBoss(e, dt) {
       return;
     }
     case 'land': {   // 降到巢上，把核心放下來
-      if (mothFlyToward(e, mb.nest.x, mb.nest.y, dt, P.flySpeedMul * .6) || mbDist(e, mb.nest) < 6) mbDropCore(e);
+      if (mbFlyToward(e, mb.nest.x, mb.nest.y, dt, P.flySpeedMul * .6) || mbDist(e, mb.nest) < 6) mbDropCore(e);
       return;
     }
     case 'nest': mbNest(e, dt); return;
@@ -505,6 +517,101 @@ function drawMothBossIntro(ctx) {
   }
 }
 
+// ===== 飛行手感（MOTH_BOSS.flight）=====
+// 不再等速直線、到點就停：用速度＋加速度飛（起飛漸快、停下滑一段、轉向畫弧線），身體照轉彎傾斜，
+// 拍翅膀一頓一頓（拍一下往上竄、滑翔慢慢下沉，帶點蛾的歪扭），影子照飛的高度變大變小。
+// 往 (x, y) 飛：用加速度追上「想要的速度」（越靠近越慢，brake 格內開始煞車），所以會畫弧線、會滑行。到了回傳 true
+function mbFlyToward(e, x, y, dt, mul = 1, noBrake = false) {   // noBrake：經過的路點，不用慢下來
+  const F = MOTH_BOSS.flight, mb = e.mb;
+  if (mb.vx == null) { mb.vx = 0; mb.vy = 0; }
+  if (dt <= 0) return Math.hypot(x - e.x, y - e.y) < 6;
+  const dx = x - e.x, dy = y - e.y, d = Math.hypot(dx, dy), max = e.speed * mul;
+  const want = d > .5 ? max * (noBrake ? 1 : Math.min(1, d / (F.brake * CELL))) : 0;   // 想要的速度：快到了就慢下來
+  const tvx = d > .5 ? dx / d * want : 0, tvy = d > .5 ? dy / d * want : 0;
+  let ax = tvx - mb.vx, ay = tvy - mb.vy;
+  const al = Math.hypot(ax, ay), amax = F.accel * Math.max(1, mul) * dt;   // 飛得越快的模式加速度也越大
+  if (al > amax) { ax *= amax / al; ay *= amax / al; }
+  mb.vx += ax; mb.vy += ay; mb.ax = ax / dt; mb.ay = ay / dt;
+  const nx = e.x + mb.vx * dt, ny = e.y + mb.vy * dt;
+  if (mothCanFly(nx, ny) || !mothCanFly(e.x, e.y)) { e.x = nx; e.y = ny; }   // 飛得過牆，只是不能飛出地圖（地圖外的黑色區）
+  else if (mothCanFly(nx, e.y)) { e.x = nx; mb.vy *= .3; }
+  else if (mothCanFly(e.x, ny)) { e.y = ny; mb.vx *= .3; }
+  else { mb.vx *= .3; mb.vy *= .3; }
+  if (Math.abs(mb.vx) > 12) e.faceRight = mb.vx > 0;   // 照真的飛的方向轉身（太慢不轉，免得原地一直翻）
+  return Math.hypot(x - e.x, y - e.y) < 6;
+}
+// 每幀：拍翅膀（一頓一頓）、上下竄動、身體傾斜（stepMothBoss 開頭呼叫）
+function mbFlightLook(e, dt, slow) {
+  const F = MOTH_BOSS.flight, mb = e.mb, m = e.mo, f = e.frames || {};
+  const wings = f.walkFront && f.walkFront.length ? f.walkFront : [f.front || e.sprite];
+  if (mb.bobY == null) { mb.bobY = 0; mb.bobV = 0; mb.flapCd = 0; mb.flapHold = 0; mb.tilt = 0; }
+  const speed = Math.hypot(mb.vx || 0, mb.vy || 0), climbing = (e.mo.lift || 0) < (mb.liftGoal || 0) - 10;
+  mb.flapCd -= dt * (slow ? .35 : 1) * (climbing ? 1.6 : 1) * (1 + Math.min(1, speed / 200) * .5);   // 往上爬、飛得快：拍得比較勤
+  if (mb.flapCd <= 0) {   // 拍一下：往上竄、身體歪一下、播拍翅膀聲
+    mb.flapCd = mothRand(F.flapEvery[0], F.flapEvery[1]);
+    mb.flapHold = F.flapDown;
+    mb.bobV += F.flapKick * (slow ? .35 : 1);
+    if (!slow) { mb.vx = (mb.vx || 0) + mothRand(-1, 1) * F.wobble; mb.vy = (mb.vy || 0) + mothRand(-1, 1) * F.wobble * .5; }   // 蛾的歪扭：每拍一下方向亂偏一點
+    m.flapT = (Math.floor(m.flapT || 0) + 1);   // 拍了第幾下（被抓的人掙扎跟這個換邊）
+    if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, MOTH_BOSS.sound.flap * (slow ? .5 : 1), 'moth-boss-flap');
+  }
+  mb.flapHold -= dt;
+  e.forceFrame = wings[mb.flapHold > 0 && wings.length > 1 ? 1 : 0];   // 拍下去那一下換成第二張圖，其他時間翅膀張開滑翔
+  // 上下：拍一下往上竄，之後像滑翔一樣慢慢往下沉（彈簧拉回原本的高度）
+  mb.bobV -= (F.sink + mb.bobY * F.bobSpring) * dt;
+  mb.bobV *= Math.pow(.35, dt);
+  mb.bobY = Math.max(-F.bobRange, Math.min(F.bobRange, mb.bobY + mb.bobV * dt));
+  // 傾斜：往轉向的那一邊傾（照左右的加速度），往前衝時微微前傾（照左右的速度）
+  const maxS = Math.max(1, e.speed * F.strafeSpeedMul);
+  const turn = Math.max(-1, Math.min(1, (mb.ax || 0) / (F.accel * 1.5)));
+  const lean = Math.max(-1, Math.min(1, (mb.vx || 0) / maxS));
+  const goal = slow ? 0 : (turn * F.tilt + lean * F.lean) * Math.PI / 180;
+  mb.tilt += (goal - mb.tilt) * Math.min(1, dt * F.tiltSpeed);
+  e.mbTilt = mb.tilt;   // js/render.js 畫身體時照這個角度轉（核心、抓著的人在同一個畫面裡，一起轉）
+}
+// 盤旋：在高空繞著目標（沒有目標就繞著巢）轉大圈
+function mbCircle(e, dt, center, home) {
+  const P = MOTH_BOSS, F = P.flight, m = e.mo, mb = e.mb;
+  m.orbit += dt * F.circleSpeed;
+  let cx = center.x, cy = center.y;
+  const dd = Math.hypot(cx - home.x, cy - home.y), max = P.leash * CELL;
+  if (dd > max) { cx = home.x + (cx - home.x) * max / dd; cy = home.y + (cy - home.y) * max / dd; }
+  const R = F.circleR * CELL;
+  mbFlyToward(e, cx + Math.cos(m.orbit) * R, cy + Math.sin(m.orbit) * R * .6, dt, F.cruiseSpeedMul);
+  mb.liftGoal = F.cruiseLift;
+}
+// 掠過攻擊：從目標的一邊俯衝下來、貼著頭頂掠過（這時候撒粉），衝過頭 strafeLen 格後拉高、繞回來再掠過一次
+function mbStrafe(e, dt, target, home) {
+  const P = MOTH_BOSS, F = P.flight, mb = e.mb;
+  let run = mb.run;
+  const newPass = () => {
+    let dx = target.x - e.x, dy = target.y - e.y; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
+    let ex = target.x + dx * F.strafeLen * CELL, ey = target.y + dy * F.strafeLen * CELL * .7;
+    const dd = Math.hypot(ex - home.x, ey - home.y), max = P.leash * CELL;
+    if (dd > max) { ex = home.x + (ex - home.x) * max / dd; ey = home.y + (ey - home.y) * max / dd; }
+    return { target, x: ex, y: ey, passed: false };
+  };
+  if (!run || run.target !== target) run = mb.run = newPass();
+  const dT = mbDist(e, target);
+  if (!run.passed && dT < CELL * .8) run.passed = true;   // 已經從頭頂掠過去了
+  if (mbFlyToward(e, run.x, run.y, dt, F.strafeSpeedMul) || (run.passed && Math.hypot(run.x - e.x, run.y - e.y) < CELL)) run = mb.run = newPass();   // 衝到底：再來一輪
+  // 高度：離目標越近飛得越低（貼著頭頂），越遠越高（拉高繞回來）
+  const k = Math.max(0, Math.min(1, (dT - CELL) / (F.strafeRise * CELL)));
+  mb.liftGoal = F.strafeLift + (F.cruiseLift - F.strafeLift) * k;
+}
+// 影子（js/render.js 的 drawEnemy 畫在腳下）：飛得高小而淡、飛得低大而深，跟本體之間隔著飛的高度
+function drawMothBossShadow(ctx, e) {
+  const F = MOTH_BOSS.flight, lift = e.slimeLift || 0;
+  const k = Math.max(0, Math.min(1, (F.shadowHigh - lift) / (F.shadowHigh - F.shadowLow)));   // 1＝貼地、0＝很高
+  const grow = e.mbH ? e.drawHeight / e.mbH : 1;
+  const w = (e.mbW || e.drawWidth) * grow * (F.shadowMinW + (F.shadowMaxW - F.shadowMinW) * k);
+  ctx.save();
+  ctx.globalAlpha = F.shadowMinA + (F.shadowMaxA - F.shadowMinA) * k;
+  ctx.fillStyle = '#071015';
+  ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, w / 2, w * .13, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
 // 飛往下一區：一路灑下一區顏色的鱗粉
 function mbFly(e, dt) {
   const P = MOTH_BOSS, mb = e.mb, z = mbZone(e, mb.stage);
@@ -556,18 +663,11 @@ function mbNest(e, dt) {
     const had = m.spray;
     mothSpray(e, dt, true);
     if (m.spray && m.spray !== had) { m.spray.kind = mbKind(e, z); mb.mixIdx++; }   // 新的一輪：換成這一區的顏色
+    if (had && !m.spray) m.cd = Math.max(m.cd || 0, P.flight.circleRest);   // 一輪掠過撒完：先回高空盤旋一陣子再來
   }
-  m.orbit += dt * .6;
-  if (target) {
-    const R = (P.orbit.min + (P.orbit.max - P.orbit.min) * (.5 + .5 * Math.sin(m.phase * .7))) * CELL;
-    let gx = target.x + Math.cos(m.orbit) * R, gy = target.y + Math.sin(m.orbit) * R * .6;
-    const dd = Math.hypot(gx - home.x, gy - home.y), max = P.leash * CELL;
-    if (dd > max) { gx = home.x + (gx - home.x) * max / dd; gy = home.y + (gy - home.y) * max / dd; }
-    mothFlyToward(e, gx, gy, dt);
-  } else {
-    const R = P.nestOrbit * CELL;
-    mothFlyToward(e, home.x + Math.cos(m.orbit) * R, home.y + Math.sin(m.orbit) * R * .6, dt, .7);
-  }
+  // 飛行路線：平常在高空繞大圈盤旋；撒粉的那一輪（預告＋撒的時間，撒粉本身照舊）改成俯衝下來貼著目標頭頂掠過、拉高繞回來再掠過
+  if (target && m.spray && !m.spray.burst) mbStrafe(e, dt, target, home);
+  else { mb.run = null; mbCircle(e, dt, target || home, home); }
 }
 // 大面積撒粉：冷卻好了（而且這一區有人）→ 翅膀發光、地上圓圈預告 → 在 time 秒內把整區撒滿大團鱗粉。
 // 正在預告或撒的時候回傳 true（這時候不做一般的一輪一輪撒粉）
@@ -645,13 +745,13 @@ function mbSwoop(e, dt) {
   if (!mbCanGrab(e, a)) { miss(null); return; }   // 目標被藤蔓吊走、倒下、換樓層…：取消
   if (mb.swoopT < C.warn) {   // 預告：在目標上方發抖，腳下紅圈一圈一圈縮
     e.tremble = true;
-    mothFlyToward(e, a.x, a.y - 10, dt, .4);
+    mbFlyToward(e, a.x, a.y - 10, dt, .4);
     if ((mb.ringT -= dt) <= 0) { mb.ringT = .25; G.effects.push({ ring: true, x: a.x, y: a.y + 10, r: 46, r2: 10, life: .3, life0: .3, color: '#ff5b7a' }); }
     return;
   }
   e.tremble = false;
   if (mbDist(e, a) <= C.reach * CELL && e.slimeLift <= C.diveLift + 30) { mbGrabVictim(e, a); return; }
-  mothFlyToward(e, a.x, a.y, dt, C.diveSpeedMul);
+  mbFlyToward(e, a.x, a.y, dt, C.diveSpeedMul);
   if (mb.swoopT >= C.warn + C.dive) miss('撲空了');
 }
 // 抓起來：借用 js/vines.js 的「被吊著」（不能動、怪物打不到；cap.wind＝不畫藤蔓），位置每幀跟著蝶后（mbCarryHold）
@@ -710,7 +810,7 @@ function mbCarry(e, dt) {
   c.t += dt;
   c.ang += C.circleSpeed * dt;
   const R = C.circleR * CELL;
-  mothFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, C.carrySpeedMul);
+  mbFlyToward(e, c.from.x + Math.cos(c.ang) * R, c.from.y + Math.sin(c.ang) * R * .6, dt, C.carrySpeedMul);
   e.faceRight = c.face; e.forceFlip = c.face;   // 抓著的時候不轉身
   mbCarryHold(e, dt);
   if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }
@@ -724,7 +824,7 @@ function mbToDrop(e, dt) {
   if (!c.drop) c.drop = mbSafeDrop(a, c.cap.x0, e.y);   // 飛到最近的安全落點上方
   c.t += dt; c.dropT += dt;
   const hand = mbHandPoint(e), off = hand.x - e.x;   // 手在身體左邊還是右邊（抓著時不轉身，固定）
-  mothFlyToward(e, c.drop.x - off, c.drop.y, dt, C.carrySpeedMul);
+  mbFlyToward(e, c.drop.x - off, c.drop.y, dt, C.carrySpeedMul);
   e.faceRight = c.face; e.forceFlip = c.face;
   mbCarryHold(e, dt);
   if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }

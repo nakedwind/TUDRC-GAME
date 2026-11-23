@@ -431,7 +431,8 @@ function drawEnemy(e) {
   const bottomY = e.y + 13 - lift;
   const shadowScale = Math.max(.55, 1 - lift / 22) * size * (e.behavior === 'gourd' ? (e.drawWidth || 42) / 40 : e.mk ? (e.drawWidth || 220) * .3 / 15 : 1);   // 葫蘆猴身體很寬：影子跟著變大；虱目魚王：影子半徑＝身體寬的 3 成（js/milkfish-king.js）
   ctx.globalAlpha = .28 * Math.min(1, shadowScale); ctx.fillStyle = '#071015';
-  if (e.behavior !== 'burrow') { ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill(); }   // 版權老鼠從土堆裡出來，不畫腳下陰影
+  if (e.mothBoss && typeof drawMothBossShadow === 'function') drawMothBossShadow(ctx, e);   // 人面蝶后：影子照飛的高度變大變小（js/moth-boss.js）
+  else if (e.behavior !== 'burrow') { ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill(); }   // 版權老鼠從土堆裡出來，不畫腳下陰影
   // 撲擊落點警示：蓄力時由外往內縮的紅圈＋逐漸填滿，飛撲時保持顯示
   const pounceGoal = e.playerPounceGoal;
   if (pounceGoal && (e.playerWindupT > 0 || e.playerPounceT > 0)) {
@@ -454,6 +455,8 @@ function drawEnemy(e) {
   const baseSprite = monsterImage(walkFrame ? walkFrame.file : e.art ? shooterFrame(e) : (e.sprite || 'images/monster/Monster_Slime.png'));   // 珍珠小童：眨眼／生氣圖
   const sway = e.behavior === 'charger' && typeof chargerSwayAngle === 'function' ? chargerSwayAngle(e) : 0;   // 鳥頭人暈眩：以腳底為軸左右斜晃（js/bird-head.js）
   if (sway) { ctx.save(); ctx.translate(e.x, bottomY); ctx.rotate(sway); ctx.translate(-e.x, -bottomY); }
+  const tiltOn = !!e.mbTilt;   // 人面蝶后轉彎傾斜（js/moth-boss.js）：以身體中間為軸轉，核心、抓著的人一起轉
+  if (tiltOn) { const cy = bottomY - slimeH / 2; ctx.save(); ctx.translate(e.x, cy); ctx.rotate(e.mbTilt); ctx.translate(-e.x, -cy); }
   if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
   if (e.behavior === 'burrow' && typeof drawBurrowingMouseBody === 'function') {
     drawBurrowingMouseBody(ctx, e);
@@ -486,8 +489,9 @@ function drawEnemy(e) {
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
   }
+  if (tiltOn) ctx.restore();   // 傾斜只套在身體上（連左右翻一起還原）
   if (sway) ctx.restore();   // 斜晃只套在身體上（連左右翻一起還原），血條和文字不跟著晃
-  else if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
+  else if (!tiltOn && walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
   // 血條放在圖的上方（體型大的變體血條也跟著變寬、變高）
   const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' || e.behavior === 'gourd' || e.behavior === 'moth' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
   if (!e.hideBar) {   // 劇情裡的怪物不畫血條（js/story-scene.js）

@@ -1370,6 +1370,39 @@ const BOSS_SETTINGS_DEFAULT = {
       "fadeFrom": 0.2
     },
     "leash": 8,
+    "flight": {
+      "accel": 260,
+      "brake": 1.5,
+      "tilt": 13,
+      "lean": 5,
+      "tiltSpeed": 6,
+      "flapEvery": [
+        0.28,
+        0.55
+      ],
+      "flapDown": 0.12,
+      "flapKick": 90,
+      "sink": 140,
+      "bobSpring": 6,
+      "bobRange": 26,
+      "wobble": 22,
+      "cruiseLift": 170,
+      "circleR": 4,
+      "circleSpeed": 0.45,
+      "cruiseSpeedMul": 1.6,
+      "strafeLift": 35,
+      "strafeRise": 4,
+      "strafeLen": 4,
+      "strafeSpeedMul": 3,
+      "circleRest": 3,
+      "liftSpeed": 6,
+      "shadowLow": 40,
+      "shadowHigh": 260,
+      "shadowMinW": 0.18,
+      "shadowMaxW": 0.5,
+      "shadowMinA": 0.12,
+      "shadowMaxA": 0.42
+    },
     "orbit": {
       "min": 1.6,
       "max": 3.2
