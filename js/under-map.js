@@ -134,10 +134,29 @@ function underVoidData() {
 }
 function underVoidPath() { return underVoidData().path; }
 
+// ===== 飛在空中的東西不能被底圖蓋住 =====
+// 底圖是「樓下」，飛在空中的東西（人面蝶、人面蝶后和她手上的核心、抓著的人，或其他被抬高的怪物）一定在它上面。
+// 做法：底圖畫上去之前先拍快照（underSnap）；底圖畫完後，把飛行的東西畫在空白畫布上當「剪影」（underMask），
+// 剪影的範圍從快照貼回來 → 飛行的東西在空格上方看起來跟沒有底圖時一樣（被照到的地方亮、在暗處的地方照樣被黑幕蓋著）。
+const underFlying = w => !!w && w.x != null && ((w.slimeLift || 0) > 0 || w.behavior === 'moth');
+let underSnap = null, underMask = null, underSnapFresh = false;
+function underLayerFor(c, cvs) {   // 跟遊戲畫布一樣大的空白畫布（大小變了才重做）
+  if (!c) c = document.createElement('canvas');
+  if (c.width !== cvs.width || c.height !== cvs.height) { c.width = cvs.width; c.height = cvs.height; }
+  return c;
+}
+// 把一批東西畫到別張畫布上：js/game.js 的 ctx 是 let，畫的時候暫時換掉、畫完一定換回來（跟 js/water.js 的 drawWaded 同一招）
+function underDrawOnLayer(layerCtx, list) {
+  const main = ctx;
+  ctx = layerCtx;
+  try { for (const it of list) it.draw(); } finally { ctx = main; }
+}
+
 // 每一幀呼叫兩次（js/render.js 的 draw）：
 //   pass＝'below'：塗黑底色之後、畫地板之前（沒有黑幕的地圖用這個，有鋪地板的地方自然會蓋住它）
 //   pass＝'above'：蓋上黑幕之後（有黑幕的地圖用這個，不然黑色的地方會被黑幕整片蓋掉；只畫在完全沒鋪東西的格子裡）
 function drawUnderMap(ctx, pass = 'below') {
+  if (pass === 'above') underSnapFresh = false;   // 上一幀的快照不能拿來用
   const info = underMapConfig();
   if (!info) return;
   const { cfg, under } = info;
@@ -147,6 +166,14 @@ function drawUnderMap(ctx, pass = 'below') {
   const cv = underMapCached(underMapCache, key, () => buildUnderMapCanvas(cfg, under, mapTileById, tileImage, CELL));
   if (!cv) return;
   const { dx, dy, ucols, urows } = underMapOffset(cfg, under, COLS, ROWS);
+  // 有東西飛在空中：底圖蓋上去之前，先把現在的畫面（已經蓋好黑幕）拍一張快照，等一下 redrawOverUnderMap 用它把飛行的東西貼回來
+  if (aboveDark && G.enemies.some(e => !e.dead && underFlying(e))) {
+    underSnap = underLayerFor(underSnap, ctx.canvas);
+    const s = underSnap.getContext('2d');
+    s.setTransform(1, 0, 0, 1, 0, 0); s.globalAlpha = 1; s.filter = 'none';
+    s.globalCompositeOperation = 'copy'; s.drawImage(ctx.canvas, 0, 0); s.globalCompositeOperation = 'source-over';
+    underSnapFresh = true;
+  }
   ctx.save();
   if (aboveDark) ctx.clip(underVoidPath());   // 黑幕上面：只畫在沒鋪東西的格子
   else { ctx.beginPath(); ctx.rect(OX, OY, COLS * CELL, ROWS * CELL); ctx.clip(); }   // 只在這張地圖的範圍裡顯示
@@ -169,14 +196,32 @@ function redrawOverUnderMap(ctx, items) {
   };
   let clipped = false;
   const clip = () => { if (!clipped) { ctx.save(); ctx.clip(path); clipped = true; } };
-  // 補畫的順序跟原本一樣：先地上的怪物、人、建築 → 人面蝶的鱗粉霧 → 人面蝶（飛在最上面）
-  const isMoth = it => it.who && it.who.behavior === 'moth';
-  redrawItems(items.filter(it => !isMoth(it)));
+  // 補畫的順序跟原本一樣：先地上的怪物、人、建築 → 人面蝶的鱗粉霧 → 飛在空中的東西（最上面）
+  const isFlying = it => underFlying(it.who);
+  redrawItems(items.filter(it => !isFlying(it)));
   // 鱗粉霧（js/human-face-butterfly.js 的 drawMothClouds；它本來就只畫亮處的霧，暗處的霧另外畫在黑幕上面，不用補）
   const clouds = (G.mothClouds || []).filter(c => !c.boom && isVisible(c.x, c.y));
   if (typeof drawMothClouds === 'function' && clouds.some(c => touchesVoid(c.x - c.r, c.y - 6 - c.r, c.x + c.r, c.y - 6 + c.r))) { clip(); drawMothClouds(ctx); }
-  redrawItems(items.filter(isMoth));
   if (clipped) ctx.restore();
+  // 飛在空中的東西：不管亮不亮，剪影範圍都從快照貼回來（亮的部分照樣亮、暗的部分照樣被黑幕蓋著，只是不會被底圖蓋掉）。
+  // 體型大、飛向鏡頭時還會放大，所以不先算碰不碰到空格，直接整批做（只有地圖上真的有飛行的東西時才會跑）
+  const flying = items.filter(isFlying);
+  if (underSnapFresh && underSnap && flying.length) {
+    const cvs = ctx.canvas, m = ctx.getTransform();
+    underMask = underLayerFor(underMask, cvs);
+    const g = underMask.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none'; g.globalCompositeOperation = 'source-over';
+    g.clearRect(0, 0, cvs.width, cvs.height);
+    g.setTransform(m); g.imageSmoothingEnabled = ctx.imageSmoothingEnabled;
+    underDrawOnLayer(g, flying);   // ① 飛行的東西畫在空白畫布上＝剪影
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none';
+    g.globalCompositeOperation = 'source-in'; g.drawImage(underSnap, 0, 0); g.globalCompositeOperation = 'source-over';   // ② 剪影裡面換成快照的畫面
+    ctx.save(); ctx.clip(path);   // ③ 只貼在空格範圍（其他地方本來就沒被底圖蓋到）
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(underMask, 0, 0);
+    ctx.restore();
+  }
+  underSnapFresh = false;
 
   function redrawItems(list) {
   for (const it of list) {
