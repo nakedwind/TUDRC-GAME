@@ -249,6 +249,7 @@ function rkStartCinema(K) {
     tick: dt => updateRatKing(dt),                      // 停住的時候只跑：震動、冒土、鑽出來亮相
     done: () => K.phase !== 'sleep' && K.phase !== 'rumble' && K.phase !== 'rise',
     holdAfter: BOSS_CINEMA.rat.holdAfter,
+    zoom: BOSS_CINEMA.rat.zoom, bars: BOSS_CINEMA.rat.bars,   // 不拉遠、不要上下黑邊（怪物編輯器可改）
   });
 }
 // 場上還沒打破的核心有幾顆（躲在地底的也算）

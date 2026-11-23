@@ -200,7 +200,7 @@ function gkStartCinema(K) {
     + (typeof CORE_FRENZY !== 'undefined' ? CORE_FRENZY.banner : 3.2) + E.hold;
   startBossCinema({
     maxTime: Math.max(BOSS_CINEMA.maxTime, total + 3),
-    zoom: BOSS_CINEMA.gourd.zoom,
+    zoom: BOSS_CINEMA.gourd.zoom, bars: BOSS_CINEMA.gourd.bars,   // 不拉遠、不要上下黑邊（怪物編輯器可改）
     focus: { x: box.cx, y: OY + (box.r0 + BOSS_CINEMA.gourd.focusDown) * CELL },   // 牆和牆腳（牠踏出來亮相的地方）都在畫面裡
     tick(dt) {   // 停住的時候只跑：撞牆、煙霧、碎石、粉塵、跳出來壓頂、亮相
       updateGourdKing(dt);
