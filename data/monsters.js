@@ -1742,11 +1742,14 @@ const BOSS_SETTINGS_DEFAULT = {
     "gourd": {
       "lead": 1.2,
       "focusDown": 3.5,
-      "zoom": 0.65,
+      "zoom": 1,
+      "bars": 0,
       "holdAfter": 0.3
     },
     "rat": {
       "focusUp": 2,
+      "zoom": 1,
+      "bars": 0,
       "holdAfter": 0.3
     },
     "moth": {
