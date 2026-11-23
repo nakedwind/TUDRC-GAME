@@ -993,7 +993,7 @@ function renderPreview() {
     '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
     '<div class="workshop-main"><div class="workshop-body">' + tabs +
     (ammoShop ? '<div class="ws-scroll ws-ammo-scroll">' + (bullets.length ? '<div class="supply-shop-list ws-ammo-list">' + ammoShop.list + '</div>' : '<p class="ws-empty">' + empty + '</p>') + '</div>' :
-    '<div class="ws-scroll">' + (list.length ? section('武器・彈匣・背包', weapons.concat(mags, bags)) + section('子彈', bullets) + section('建築', builds) + WORKSHOP_GEAR_GROUPS.map(([g, title]) => section(title, gear.filter(k => gearKind(k) === g))).join('') + section('隊員裝備', sgear) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
+    '<div class="ws-scroll">' + (list.length ? section('武器・彈匣・背包', weapons.concat(mags, bags)) + section('子彈', bullets) + workshopBuildGroups(builds, k => pvOwned(k)).map(([t, ks]) => section(t, ks)).join('') + WORKSHOP_GEAR_GROUPS.map(([g, title]) => section(title, gear.filter(k => gearKind(k) === g))).join('') + section('隊員裝備', sgear) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
     '<div class="ws-info' + (pick ? '' : ' empty') + '">' + (pick ? (isExtra(pick) ? extraPreviewInfo(pick) : isAmmo(pick) ? ammoPreviewInfo(pick) : previewInfo(pick)) : '<div class="bag-detail-empty"><span>🔧</span><p>' + empty + '</p></div>') + '</div>') + '</div>' +
     side + '</div></section></div>';
   const ws = stage.querySelector('#workshop');

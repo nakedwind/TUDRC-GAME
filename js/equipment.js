@@ -1015,7 +1015,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
     '<div class="workshop-main"><div class="workshop-body">' + tabs +
     (ammoShop ? '<div class="ws-scroll ws-ammo-scroll">' + (ammoList.length ? '<div class="supply-shop-list ws-ammo-list">' + ammoShop.list + '</div>' : '<p class="ws-empty">' + empty + '</p>') + '</div>' :
-    '<div class="ws-scroll">' + (list.length ? section('武器・彈匣・背包', [...weaponList, ...magList, ...bagList]) + section('子彈', ammoList) + section('建築', buildEntryList) + WORKSHOP_GEAR_GROUPS.map(([k, title]) => section(title, gearList.filter(e => workshopGearGroup(e.def.kind) === k))).join('') + section('隊員裝備', sgearList) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
+    '<div class="ws-scroll">' + (list.length ? section('武器・彈匣・背包', [...weaponList, ...magList, ...bagList]) + section('子彈', ammoList) + workshopBuildGroups(buildEntryList, x => x.lv > 0).map(([t, xs]) => section(t, xs)).join('') + WORKSHOP_GEAR_GROUPS.map(([k, title]) => section(title, gearList.filter(e => workshopGearGroup(e.def.kind) === k))).join('') + section('隊員裝備', sgearList) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
     '<div class="ws-info' + (e ? '' : ' empty') + '">' + info + '</div>') + '</div>' + side + '</div></section>';
   if (scroll) SCROLLERS.forEach((q, i) => { const el = workshopEl.querySelector(q); if (el) el.scrollTop = scroll[i]; });
   if (typeof fitWorkshopDesc === 'function') fitWorkshopDesc(workshopEl);   // 說明盡量一行（js/workshop-config.js）

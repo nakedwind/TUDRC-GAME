@@ -282,6 +282,9 @@ const WORKSHOP_KINDS = { head: '頭部', body: '上身', legs: '下身', acc: '�
 // 開發工坊裡裝備的分組（照這個順序排）：頭部裝備（頭盔、帽子類）、上身裝備（背心、衣服類）、下身裝備（鞋子類）、隨身物品
 const WORKSHOP_GEAR_GROUPS = [['head', '頭部裝備'], ['body', '上身裝備'], ['legs', '下身裝備'], ['acc', '隨身物品']];
 const workshopGearGroup = kind => WORKSHOP_GEAR_GROUPS.some(g => g[0] === kind) ? kind : 'acc';   // 不認得的部位：放隨身物品
+// 開發建築物頁：上面一區放還沒開發的（壓黑），下面一區放已經開發、可以升級的（一排 8 格，css 的 [data-ws-page="build"] .ws-tiles）
+// owned(x)＝這個建築開發過了沒；遊戲（js/equipment.js）和開發工坊編輯器的預覽都用這一份分法
+const workshopBuildGroups = (list, owned) => [['未開發', list.filter(x => !owned(x))], ['已開發・升級', list.filter(owned)]];
 function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊戲用的裝備資料（跟 data/equipment.js 的格式一樣）
   const texts = Array.isArray(a.levels) ? a.levels : [];
   const cost = Array.isArray(a.cost) ? a.cost.map(n => Math.max(0, Math.round(Number(n) || 0))) : [];

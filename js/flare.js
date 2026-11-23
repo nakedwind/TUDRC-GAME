@@ -41,8 +41,8 @@ function bulletState() {
 function bulletOwned(id) { if (id === 'pistol') return true; const b = BULLETS[id]; return !!b && !b.removed && !!bulletState().owned[id]; }
 function bulletCount(id) { return id === 'pistol' ? Infinity : (bulletState().n[id] || 0); }
 function bulletSave() { if (typeof saveEquipment === 'function') saveEquipment(); if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) updateAmmoHud(); }
-// 彈藥包：每種子彈一組（max 發）佔一格，超過一組再佔下一格；拿到過的子彈就算用光也留一格
-function bulletStacks(id, n = bulletCount(id)) { const b = BULLETS[id]; return !b || id === 'pistol' ? 0 : Math.max(1, Math.ceil(Math.max(0, n) / b.max)); }
+// 彈藥包：每種子彈一組（max 發）佔一格，超過一組再佔下一格；用光（0 發）的不佔格子，背包裡也不顯示
+function bulletStacks(id, n = bulletCount(id)) { const b = BULLETS[id]; return !b || id === 'pistol' ? 0 : Math.ceil(Math.max(0, n) / b.max); }
 // 彈藥包還放得下幾發這種子彈（extraSlots：另外先預留掉的格數，例如商店購物車裡別的子彈）
 function bulletRoom(id, extraSlots = 0) {
   const b = BULLETS[id]; if (!b || b.removed) return 0; if (id === 'pistol') return Infinity;

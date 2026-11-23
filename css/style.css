@@ -2697,6 +2697,11 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .doll-slots .doll-slot em { top: -8px; padding: 0 7.5px; font-size: 15px; line-height: 22.5px; }
 .wss-item em { font-size: 13.5px; }
 @media (max-width: 760px) { .ws-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* 開發建築物頁：格子小一點，一排 8 格（上面一區未開發、下面一區已開發，js/workshop-config.js 的 workshopBuildGroups） */
+.workshop-card[data-ws-page="build"] .ws-tiles { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 7px; }
+.workshop-card[data-ws-page="build"] .ws-tile { gap: 3px; padding: 6px 4px; }
+.workshop-card[data-ws-page="build"] .ws-tile b { font-size: 12.5px; }
+@media (max-width: 760px) { .workshop-card[data-ws-page="build"] .ws-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* 圖示框是正方形：圖片用絕對定位塞滿框再 contain，瘦長的圖（無線電、探測器）才不會照寬度放大、撐破格子 */
 .ws-tile-icon { position: relative; }
 .ws-tile-icon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; scale: var(--ws-img-scale, 1); }
