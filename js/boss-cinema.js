@@ -10,6 +10,7 @@
        tick(dt) { ... },           // 停住的這段時間，BOSS 出場要跑的更新
        done() { return 演完了沒; },  // 回傳 true 就開始收尾（鏡頭滑回溫特）
        holdAfter: .4,              // 演完之後多停幾秒再滑回去
+       zoom: .8, bars: .1,         // 鏡頭拉遠倍率（1＝不拉遠）、上下黑邊（0＝沒有）；沒給就用 BOSS_CINEMA 共用的
        maxTime: 15,                // 保險：最多演幾秒（出錯也不會永遠卡住）
      });
    誰在用：js/milkfish-king.js（虱目魚王從水池竄出）、js/gourd-king.js（葫蘆猴王撞破牆）、js/rat-king.js（花蓮老鼠王從鐵軌鑽出來）、js/moth-boss.js（人面蝶后從鏡頭俯衝下來）。
@@ -29,6 +30,8 @@ const BOSS_CINEMA = applyBossSettings('BOSS_CINEMA', {
   maxTime: 16,    // 保險：一段演出最多幾秒（出了問題也不會永遠停住）
   milkfish: {     // 虱目魚王
     focusUp: 90, // 鏡頭對準核心再往上幾像素（上面留空間給牠跳起來）
+    zoom: 1,      // 這段的鏡頭拉遠倍率（1＝不拉遠；2026-11-23 使用者要拿掉拉遠）
+    bars: 0,      // 這段的上下黑邊（0＝沒有黑邊；2026-11-23 使用者要拿掉黑邊）
     holdAfter: .6,   // 吞完核心後多停幾秒才滑回溫特
   },
   gourd: {        // 葫蘆猴王
@@ -43,7 +46,8 @@ const BOSS_CINEMA = applyBossSettings('BOSS_CINEMA', {
   },
   moth: {         // 人面蝶后（js/moth-boss.js；黑影、俯衝的秒數在牠自己的「出場演出」欄位）
     focusUp: 4,   // 鏡頭對準起點再往上幾格（上面留空間給牠從鏡頭俯衝下來）
-    zoom: .7,     // 這段的鏡頭拉遠倍率
+    zoom: 1,      // 這段的鏡頭拉遠倍率（1＝不拉遠；2026-11-23 使用者要拿掉拉遠）
+    bars: 0,      // 這段的上下黑邊（0＝沒有黑邊；2026-11-23 使用者要拿掉黑邊）
     holdAfter: .4,   // 落地亮相完後多停幾秒才滑回溫特
   },
 });
@@ -51,7 +55,7 @@ let bossCinema = null;
 function startBossCinema(opt) {
   if (bossCinema || window.NO_BOSS_CINEMA || !opt) return false;
   bossCinema = { focus: opt.focus, tick: opt.tick, done: opt.done, holdAfter: opt.holdAfter ?? .4, maxTime: opt.maxTime ?? BOSS_CINEMA.maxTime,
-    zoom: opt.zoom ?? BOSS_CINEMA.zoom, baseScale: VIEW_SCALE, t: 0, phase: 'in', k: 0, doneT: null, outT: 0 };
+    zoom: opt.zoom ?? BOSS_CINEMA.zoom, bars: opt.bars ?? BOSS_CINEMA.bars, baseScale: VIEW_SCALE, t: 0, phase: 'in', k: 0, doneT: null, outT: 0 };
   return true;
 }
 // 重開一場、換地圖時（js/game.js 的 newGame）：還在演的直接收掉、鏡頭縮放還原，不然新的一場會被停住
@@ -94,7 +98,7 @@ function bossCinemaCamera() {
 // 上下的黑邊（js/render.js 最後畫）：螢幕座標
 function drawBossCinemaBars(ctx, cv) {
   const C = bossCinema; if (!C) return;
-  const h = cv.height * BOSS_CINEMA.bars * bcEase(C.k);
+  const h = cv.height * C.bars * bcEase(C.k);   // 各 BOSS 可以自己設 bars（0＝不要黑邊）
   if (h < .5) return;
   ctx.save(); ctx.fillStyle = '#000';   // 跟其他畫面介面一樣照目前的縮放畫（不要重設座標，高解析度螢幕會畫歪）
   ctx.fillRect(0, 0, cv.width, h); ctx.fillRect(0, cv.height - h, cv.width, h);

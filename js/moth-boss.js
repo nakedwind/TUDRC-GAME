@@ -449,7 +449,7 @@ function mbIntroStart(e) {
     tick: dt => mbIntroTick(e, dt),
     done: () => !e.mb.intro,
     holdAfter: BOSS_CINEMA.moth.holdAfter,
-    zoom: BOSS_CINEMA.moth.zoom,
+    zoom: BOSS_CINEMA.moth.zoom, bars: BOSS_CINEMA.moth.bars,   // 不拉遠、不要上下黑邊（怪物編輯器可改）
   });
   if (!ok) { mb.intro = null; e.mbFade = 1; mbIntroLand(e); }   // 沒有演出（自動測試）：直接落地驚醒
 }

@@ -1735,6 +1735,8 @@ const BOSS_SETTINGS_DEFAULT = {
     "maxTime": 16,
     "milkfish": {
       "focusUp": 90,
+      "zoom": 1,
+      "bars": 0,
       "holdAfter": 0.6
     },
     "gourd": {
@@ -1749,7 +1751,8 @@ const BOSS_SETTINGS_DEFAULT = {
     },
     "moth": {
       "focusUp": 4,
-      "zoom": 0.7,
+      "zoom": 1,
+      "bars": 0,
       "holdAfter": 0.4
     }
   }

@@ -1132,6 +1132,7 @@ function milkfishKingCoreShot(core) {
     tick: mkCinemaTick,
     done: () => !G.mkIntro && (king.mk.coreIn || !kc || kc.dead || !G.enemies.includes(king)),
     holdAfter: BOSS_CINEMA.milkfish.holdAfter,
+    zoom: BOSS_CINEMA.milkfish.zoom, bars: BOSS_CINEMA.milkfish.bars,   // 不拉遠、不要上下黑邊（怪物編輯器可改）
   });
 }
 // 出場演出中（戰場停住）每一幀：只跑牠自己的登場、落地後吼叫、走去吞核心
