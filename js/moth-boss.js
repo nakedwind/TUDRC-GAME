@@ -96,12 +96,13 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // reach＝離目標幾格內算抓到、circle＝抓起來後在高空繞幾秒才丟下、carryLift＝抓著人時飛多高（像素）、
   // circleR＝繞圈的半徑（格，繞著抓人的地方）、circleSpeed＝繞圈多快（每秒轉幾弧度，6.28＝一秒一圈）、carrySpeedMul＝抓著人繞圈時的飛行速度倍率、
   // playerCircleMul＝抓到溫特時在空中多繞幾倍時間（2＝溫特繞 circle × 2 秒）、
-  // eightW／eightH＝抓到溫特時飛「∞」字路線：左右多寬、上下多高（像素）、eightTime＝飛一整個 ∞ 要幾秒、eightSpeedMul＝飛 ∞ 的速度倍率、
+  // eightW／eightH＝抓到溫特時飛的固定「∞」字路線（以那一區的巢為中心）：左右多寬、上下多高（像素）、eightLoops＝飛幾圈、eightTime＝飛完全部要幾秒、
+  // eightEase＝開頭、結尾各用多少比例的時間慢慢加速、減速（0～0.5）、eightJoin＝被抓後幾秒內從抓人的地方順順地滑進這條路線、
   // mateAway＝抓到隊員時：蝶后帶著隊員往鏡頭飛走（跟換區的「飛向鏡頭」一樣變大、淡出），消失後隊員幾秒才從空中掉下來、
   // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠（地圖編輯器有放「🦋 BOSS 丟人落點」時不用，B56 有放）、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手、
   // struggleAngle＝溫特被抓在手上時左右掙扎的角度（度，以手抓的地方為支點、腳左右甩；跟著蝶后拍翅膀的圖換格，在左右兩個姿勢之間切換）、struggleShake＝掙扎時身體往左右偏幾像素
-  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, eightW: 720, eightH: 200, eightTime: 6, eightSpeedMul: 6, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
+  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, eightW: 640, eightH: 160, eightLoops: 2, eightTime: 7, eightEase: .12, eightJoin: .8, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
   coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });
@@ -809,12 +810,8 @@ function mbCarry(e, dt) {
   const C = MOTH_BOSS.grab, mb = e.mb, c = mb.carry;
   if (!c || !G.vineCaps || !G.vineCaps.includes(c.cap)) { mb.carry = null; mbSet(e, 'nest'); return; }   // 人已經不在了（換地圖、被別的東西放開）
   c.t += dt;
-  if (c.cap.isPlayer) {   // 抓到溫特：在空中飛「∞」字（以抓人的地方為中心，左右 eightW、上下 eightH），飛的方向會轉身
-    if (c.eight == null) c.eight = 0;
-    c.eight += Math.PI * 2 / C.eightTime * dt;
-    const tx = c.from.x + Math.sin(c.eight) * C.eightW / 2, ty = c.from.y + Math.sin(c.eight * 2) * C.eightH / 2;
-    mbFlyToward(e, tx, ty, dt, C.eightSpeedMul, true);
-    c.face = !!e.faceRight;
+  if (c.cap.isPlayer) {   // 抓到溫特：照固定的「∞」字路線飛（mbEightStep），飛完 eightLoops 圈回到巢的上空
+    mbEightStep(e, c, dt);
   } else {
     c.ang += C.circleSpeed * dt;
     const R = C.circleR * CELL;
@@ -824,14 +821,57 @@ function mbCarry(e, dt) {
   e.forceFlip = !!e.faceRight;
   mbCarryHold(e, dt);
   if (c.hurt >= e.maxhp * C.breakDmg) { flash('鬆手了！', e.x, e.y - e.slimeLift - e.drawHeight * .5, '#fff2b0', .9); mbRelease(e); return; }
-  if (c.t >= C.circle * (c.cap.isPlayer ? C.playerCircleMul : 1)) { mbSet(e, 'toDrop'); c.dropT = 0; c.drop = null; }   // 繞完：找站得住的地方，飛過去再丟
+  if (c.t >= (c.cap.isPlayer ? C.eightTime : C.circle)) { mbSet(e, 'toDrop'); c.dropT = 0; c.drop = null; }   // 繞完：找站得住的地方，飛過去再丟
+}
+// 固定的「∞」字路線：以那一區的巢為中心，左右 eightW、上下 eightH，eightTime 秒飛 eightLoops 圈。
+// 直接照路線擺位置（不是追著目標點飛），所以不會切內圈、忽快忽慢；中間最快、兩端像鐘擺一樣慢下來轉身。
+// 開頭、結尾各 eightEase 的時間慢慢加速、減速；被抓後 eightJoin 秒內從抓人的地方順順地滑進路線。
+// ∞ 的中心：對準固定落點（離巢最近的安全落點；飛完最後一圈往右飛停下時，手剛好在落點正上方，直接鬆手），
+// 整條路線伸進地圖外的黑色區時才左右、上下一格一格挪；同一個巢每次都一樣（固定路線、固定落點）
+function mbEightCenter(e, c) {
+  const C = MOTH_BOSS.grab, mb = e.mb, home = mb.nest || c.from;
+  if (!c.fixedDrop) c.fixedDrop = mbSafeDrop(c.cap.actor, home.x, home.y);
+  const off = Math.abs(mbHandPoint(e).x - e.x) * (e.mbH ? e.mbH / e.drawHeight : 1);   // 手在身體旁邊多遠（最後是往右飛，手在右邊）
+  const base = { x: c.fixedDrop.x - off, y: c.fixedDrop.y };
+  const key = Math.round(base.x) + ',' + Math.round(base.y) + ',' + C.eightW + ',' + C.eightH;   // 落點、大小一樣就沿用算好的中心
+  if (mb.eightCenter && mb.eightCenter.key === key) return mb.eightCenter;
+  const fits = (cx, cy) => { for (let i = 0; i < 48; i++) { const ph = Math.PI * 2 * i / 48; if (!mothCanFly(cx + Math.sin(ph) * C.eightW / 2, cy + Math.sin(ph * 2) * C.eightH / 2)) return false; } return true; };
+  let best = { x: base.x, y: base.y };
+  search: for (let R = 0; R <= 10; R++) for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) !== R) continue;
+    const cx = base.x + dx * CELL, cy = base.y + dy * CELL * .5;
+    if (fits(cx, cy)) { best = { x: cx, y: cy }; break search; }
+  }
+  return (mb.eightCenter = { key, x: best.x, y: best.y });
+}
+function mbEightStep(e, c, dt) {
+  const C = MOTH_BOSS.grab, mb = e.mb, center = mbEightCenter(e, c);
+  const u = Math.min(1, c.t / C.eightTime), r = Math.max(.01, Math.min(.49, C.eightEase)), vm = 1 / (1 - r);
+  const p = u < r ? vm * u * u / (2 * r) : u > 1 - r ? 1 - vm * (1 - u) * (1 - u) / (2 * r) : vm * (u - r / 2);   // 加速 → 等速 → 減速
+  const ph = Math.PI * 2 * C.eightLoops * p;
+  let tx = center.x + Math.sin(ph) * C.eightW / 2, ty = center.y + Math.sin(ph * 2) * C.eightH / 2;
+  if (c.join == null) c.join = { x: e.x - tx, y: e.y - ty };   // 被抓那一刻蝶后跟路線起點差多少：慢慢收掉
+  const j = Math.max(0, 1 - c.t / C.eightJoin), jk = j * j * (3 - 2 * j);
+  tx += c.join.x * jk; ty += c.join.y * jk;
+  const ox = e.x, oy = e.y, k = dt > 0 ? 1 - Math.exp(-dt * 18) : 0;   // 緊緊跟著路線（一點點平滑：路線被擋住時不會瞬間移動）
+  const nx = e.x + (tx - e.x) * k, ny = e.y + (ty - e.y) * k;
+  if (mothCanFly(nx, ny)) { e.x = nx; e.y = ny; }   // 飛得過牆，只是不能飛出地圖（地圖外的黑色區）
+  else if (mothCanFly(nx, e.y)) e.x = nx;
+  else if (mothCanFly(e.x, ny)) e.y = ny;
+  if (dt > 0) {   // 照實際移動算速度、加速度（轉身、傾斜用）
+    const vx = (e.x - ox) / dt, vy = (e.y - oy) / dt;
+    mb.ax = (mb.ax || 0) + (((vx - (mb.vx || 0)) / dt) - (mb.ax || 0)) * Math.min(1, dt * 8);
+    mb.vx = vx; mb.vy = vy;
+    if (Math.abs(vx) > 30) e.faceRight = vx > 0;
+  }
+  c.face = !!e.faceRight;
 }
 // 繞完圈：飛到「人站得住的地方」正上方（手在那一格上面）才鬆手，讓人直直掉下去
 function mbToDrop(e, dt) {
   const C = MOTH_BOSS.grab, mb = e.mb, c = mb.carry;
   if (!c || !G.vineCaps || !G.vineCaps.includes(c.cap)) { mb.carry = null; mbSet(e, 'nest'); return; }
   const a = c.cap.actor;
-  if (!c.drop) c.drop = mbSafeDrop(a, c.cap.x0, e.y);   // 飛到最近的安全落點上方
+  if (!c.drop) c.drop = c.fixedDrop || (c.cap.isPlayer && mb.nest ? mbSafeDrop(a, mb.nest.x, mb.nest.y) : mbSafeDrop(a, c.cap.x0, e.y));   // 溫特：固定丟在離巢最近的安全落點；其他：離現在最近的
   c.t += dt; c.dropT += dt;
   const hand = mbHandPoint(e), off = hand.x - e.x;   // 手在身體左邊還是右邊（抓著時不轉身，固定）
   mbFlyToward(e, c.drop.x - off, c.drop.y, dt, C.carrySpeedMul);
