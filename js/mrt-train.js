@@ -591,6 +591,13 @@ function mrtPickDestination(tr) {
   const list = (MRT_TRAIN.stations || []).filter(st => st && st.map !== MAP.id && mapIndexById(st.map) >= 0 && mrtStationReady(st.map));
   return list.length ? list[Math.floor(Math.random() * list.length)].map : null;
 }
+// 這班車開去哪：進站前就先抽好記在 tr.nextDest，時間牌（js/mrt-time-board.js）才能先顯示「往 ○○」，
+// 溫特搭上車時也照這個開，牌子寫的跟實際到的一定一樣。列車開走時清掉（下一班重新抽）
+function mrtNextDest(tr) {
+  if (!tr) return null;
+  if (tr.nextDest && MAP && tr.nextDest !== MAP.id && mapIndexById(tr.nextDest) >= 0) return tr.nextDest;
+  return (tr.nextDest = mrtPickDestination(tr));
+}
 // 這站的捷運開放條件（data/missions.js 的 metroAfter）達成了沒；不是任務地圖、沒寫條件＝隨時可以到
 function mrtStationReady(mapId) {
   const m = typeof missionOfMap === 'function' ? missionOfMap(mapId) : null;
@@ -1009,7 +1016,8 @@ function updateMrtTrains(dt) {
       if (aboard && mrtRiding) tr.fadeT = (tr.fadeT || 0) + dt;
       if (tr.off >= tr.outDist || (aboard && tr.fadeT > .6)) {   // 載著溫特：畫面黑了就直接算進隧道
         tr.chimed = false;
-        const dest = aboard ? mrtPickDestination(tr) : null;
+        const dest = aboard ? mrtNextDest(tr) : null;   // 照時間牌上寫的那站開
+        tr.nextDest = null;   // 這班開走了：下一班重新抽
         if (dest) { mrtRideToStation(tr, dest); return; }   // 互通的捷運站：開到另一站（換地圖，這一幀後面的列車不用再更新）
         if (aboard) { tr.state = 'tunnel'; tr.t = T.rideTime; tr.fadeT = 0; mrtRideFade(true); }
         else {

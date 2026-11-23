@@ -1036,6 +1036,12 @@ function drawStamp(s) {
   if (!s.blend && alpha === 1) drawStampRaw(s);
   else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
   if (s.still) drawStillBadge(s);
+  if (s.id === 'tile_bg_road_signs' && typeof drawMrtBoardFace === 'function' && !stampHasTransform(s)   // 捷運時間牌：有列車的地圖畫一個範例畫面（跟遊戲同一套畫法，js/mrt-time-board.js）
+    && (curMap().stamps || []).some(o => MRT_TRAIN_CAR_IDS.has(o.id))) {
+    const t = tileById(s.id) || {};
+    drawMrtBoardFace(ctx, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), stampW(s, t) * CELL, stampH(s, t) * CELL,
+      { badge: { text: '線色', color: '#5f5e5a' }, left: '往 ○○區', right: '2:15' });
+  }
   if (s.escTrap && !s.still) {   // 陷阱手扶梯：左上角標「陷阱」（只在編輯器裡看得到）
     const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
     ctx.save(); ctx.fillStyle = 'rgba(150,40,190,.92)'; ctx.fillRect(x, y, 30, 15);
