@@ -309,7 +309,11 @@ function ensureMissionBoard() {
     if (e.target.closest('.mission-team')) { closeMissionBoard(true); openTeamPanel(squadOfMission(missionById(missionSel))); return; }   // 打開選中區域那一隊的出勤配置
     if (e.target.closest('.mission-redeploy')) {
       const m = missionById(missionSel);
-      if (confirm('放棄暫停中的戰場，重新部署？\n門、核心、建築、箱子都會重來（已解封的捷運入口不會），作戰經費不會再給一次。')) { redeployCombat(m.map); sortieTo(m); }
+      const ride = m.metroOnly ? '\n這一區只能搭捷運去：重設後要再' + metroRideHint() + '，到了就是全新的戰場。' : '';
+      if (!confirm('放棄暫停中的戰場，重新部署？\n門、核心、建築、箱子都會重來（已解封的捷運入口不會），作戰經費不會再給一次。' + ride)) return;
+      redeployCombat(m.map);
+      if (m.metroOnly) { sfx('button'); renderMissionBoard(); showBoardToast(m.name + '的戰場已重設，搭捷運過去就會重新開始'); }   // 只能搭捷運去：只重設，不直接出發
+      else sortieTo(m);
       return;
     }
     if (e.target.closest('.mission-go')) sortieTo(missionById(missionSel));
@@ -330,7 +334,9 @@ function renderMissionBoard() {
   const team = getTeam(squad), cleared = MISSIONS.filter(missionCleared).length;
   const teamFaces = team.map(id => { const profile = teamProfile(id); return '<span class="mission-face" data-char="' + id + '" title="' + profile.name + '"><img src="' + memberPortraitPath(profile) + '" alt="' + profile.name + '"></span>'; }).join('');   // 胸像（裁切跟 Y102隊員面板的 .squad-portrait 一樣）
   const canGo = !!sel.map && st !== 'locked' && !sel.metroOnly;   // metroOnly：開放了也只能搭捷運去
-  const paused = canGo && !!readCombatProgress()[sel.map];   // 有暫停中的戰場：出擊＝接續，另外可以重新部署（js/combat-progress.js）
+  // 有暫停中的戰場：出擊＝接續，另外可以重新部署（js/combat-progress.js）。
+  // 只能搭捷運去的區域（B56、G11、O666）也看得到暫停的戰場、也能重新部署；只是部署完不會直接出發，還是要搭捷運過去。
+  const paused = !!sel.map && st !== 'locked' && !!readCombatProgress()[sel.map];
   const side = boardTab === 'side' && typeof renderSideBoard === 'function';
   const ready = typeof readyCount === 'function' ? readyCount() : 0;
   const tabs = '<nav class="board-tabs" role="tablist">' +
@@ -350,7 +356,7 @@ function renderMissionBoard() {
           '<div class="mission-team-row"><span>' + (split ? SQUADS[squad].name + (lead !== 'winter' ? '・隊長 ' + teamProfile(lead).name : '') + '<br>' : '') + '出勤人員 ' + team.length + ' 位</span><div class="mission-faces">' + (teamFaces || '<small>尚未編入</small>') + '</div>' +
             '<button type="button" class="mission-team">🧑‍🤝‍🧑 出勤配置</button></div>' +
           (paused ? '<button type="button" class="mission-redeploy">↺ 重新部署</button>' : '') +
-          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : sel.metroOnly && st !== 'locked' ? '🚇 只能搭捷運前往' : STATUS_TEXT[st]) + '</button>' +
+          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused && canGo ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : sel.metroOnly && st !== 'locked' ? '🚇 只能搭捷運前往' : STATUS_TEXT[st]) + '</button>' +
         '</aside>' +
       '</div>' +
     '</section>'));
