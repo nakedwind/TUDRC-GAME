@@ -1423,12 +1423,24 @@ const BOSS_SETTINGS_DEFAULT = {
     "intro": {
       "range": 12,
       "shadow": 1.6,
-      "shadowScale": 5,
+      "shadowScale": 2.6,
       "shadowAlpha": 0.55,
       "dive": 1.8,
       "diveRise": 80,
       "diveAlpha": 0.35,
       "land": 0.9
+    },
+    "omen": {
+      "every": [
+        25,
+        45
+      ],
+      "first": 12,
+      "time": 2.4,
+      "scale": 1.8,
+      "alpha": 0.5,
+      "flapEvery": 0.4,
+      "volume": 0.7
     },
     "leaveTelegraph": 0.9,
     "grab": {
