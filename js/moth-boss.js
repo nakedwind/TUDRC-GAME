@@ -102,7 +102,7 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // mateDropMin／mateDropMax＝隊員掉在離被抓的地方幾格遠（地圖編輯器有放「🦋 BOSS 丟人落點」時不用，B56 有放）、
   // breakDmg＝抓著人時被打掉多少血（最大血量的幾成）就鬆手、
   // struggleAngle＝溫特被抓在手上時左右掙扎的角度（度，以手抓的地方為支點、腳左右甩；跟著蝶后拍翅膀的圖換格，在左右兩個姿勢之間切換）、struggleShake＝掙扎時身體往左右偏幾像素
-  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, eightW: 640, eightH: 160, eightLoops: 2, eightTime: 7, eightEase: .12, eightJoin: .8, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
+  grab: { every: [10, 14], first: 4, range: 10, warn: .8, dive: 1.6, diveSpeedMul: 4, diveLift: 40, reach: .8, circle: 3, carryLift: 260, circleR: 2.5, circleSpeed: .9, carrySpeedMul: 1.2, playerCircleMul: 2, eightW: 640, eightH: 160, eightLoops: 1, eightTime: 7, eightEase: .12, eightJoin: .8, mateAway: 3, mateDropMin: 2, mateDropMax: 5, breakDmg: .05, struggleAngle: 8, struggleShake: 2 },
   coreShield: .5,                // 人面蝶后活著時，核心少受幾成傷害（0.5＝只受一半）
   sound: { wake: 1.8, flap: .7 },   // 音量：尖叫、拍翅膀
 });

@@ -1451,7 +1451,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "playerCircleMul": 2,
       "eightW": 640,
       "eightH": 160,
-      "eightLoops": 2,
+      "eightLoops": 1,
       "eightTime": 7,
       "eightEase": 0.12,
       "eightJoin": 0.8,
