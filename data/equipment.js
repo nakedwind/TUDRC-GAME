@@ -65,9 +65,11 @@ const EQUIPMENT = [
   { id: 'vest_heavy', name: '重型防護背心', kind: 'body', who: 'all', icon: '🦺', image: 'images/裝備/protective-vest-heavy.png', source: 'develop', cost: [80, 150, 240, 340, 460],
     ownedDesc: '厚重的防彈板，擋下很多傷害；但穿著跑不快。',
     stat: lv => '受到的傷害 −' + Math.round(lv.guard * 100) + '%・移動速度 −' + Math.round(-lv.speed * 100) + '%', levels: [{ guard: .15, speed: -.12 }, { guard: .24, speed: -.11 }, { guard: .3, speed: -.1 }, { guard: .34, speed: -.08 }, { guard: .38, speed: -.06 }] },
-  { id: 'bracelet', name: '共感手環', kind: 'acc', icon: '💠', image: 'images/裝備/empathy-bracelet.png', source: 'develop', cost: [70, 130, 220, 320, 430],
-    ownedDesc: '降低疏導消耗的 SP。',
-    stat: lv => '疏導花的 SP −' + Math.round(lv.save * 100) + '%', levels: [{ save: .15 }, { save: .25 }, { save: .35 }, { save: .45 }, { save: .55 }] },
+  // 共感手環（11-23 改）：不再省 SP，改成疏導時哨兵的負荷降得更多。嚮導（溫特、艾德林…）戴：他疏導別人時降更多；
+  //   哨兵戴：被疏導時降更多；兩邊都戴就相加（例如各 +20% → 降的負荷 ×1.4）。boost＝多降幾成（js/equipment.js 的 equipSootheMul）
+  { id: 'bracelet', name: '共感手環', kind: 'acc', who: 'all', icon: '💠', image: 'images/裝備/empathy-bracelet.png', source: 'develop', cost: [70, 130, 220, 320, 430],
+    ownedDesc: '疏導時哨兵的負荷降得更多。嚮導和哨兵都能戴，兩邊都戴效果會疊加。',
+    stat: lv => '疏導降的負荷 +' + Math.round(lv.boost * 100) + '%', levels: [{ boost: .15 }, { boost: .2 }, { boost: .25 }, { boost: .3 }, { boost: .4 }] },
   { id: 'sneakers', name: '輕量跑鞋', kind: 'legs', who: 'all', icon: '👟', image: 'images/裝備/lightweight-sneakers.png', source: 'develop', cost: [40, 90, 160, 240, 330],
     ownedDesc: '提高移動速度。',
     stat: lv => '移動速度 +' + Math.round(lv.speed * 100) + '%', levels: [{ speed: .08 }, { speed: .12 }, { speed: .16 }, { speed: .2 }, { speed: .24 }] },
@@ -88,17 +90,17 @@ const EQUIPMENT = [
   { id: 'navrecorder', name: '慣性導航記錄器', kind: 'acc', icon: '🧭', image: 'images/裝備/inertial-navigation-recorder-concept-v2.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '不靠訊號，自動記錄走過的路線並畫成地圖。裝備後在戰鬥區域也能打開 T-Pad 的「地圖」；把整張地圖走過一遍，就能得到完整的地圖。',
     stat: lv => '記錄範圍 ' + lv.range + ' 格', levels: [{ range: 3 }, { range: 4 }, { range: 5 }, { range: 6 }, { range: 7 }] },
-  // ---- 下面三件是新版（GEAR_SYSTEM＝2）才有的：原本的隊員裝備（data/squad-gear.js），只有隊員能穿（who: 'squad'）----
+  // ---- 下面三件是新版（GEAR_SYSTEM＝2）才有的：原本的隊員裝備（data/squad-gear.js）；瞄準鏡只有隊員能穿，手套、急救腰包溫特也能穿（11-23）----
   //   舊版的「輕量防護背心」併進上面的輕型防護背心、「機動戰術靴」併進輕量跑鞋（舊存檔會自動換過去，見 GEAR_V1_SQUAD_MAP）
   //   atk：攻擊力加成（0.1＝+10%）、accuracy：命中率加成（0.1＝+10%）、atkRange：射程加幾格、hpRegen：每秒回復 HP
-  { id: 'gloves', name: '強化戰術手套', kind: 'acc', who: 'squad', v2only: true, icon: '🧤', image: 'images/裝備/隊員裝備/gloves.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+  { id: 'gloves', name: '強化戰術手套', kind: 'acc', who: 'all', v2only: true, icon: '🧤', image: 'images/裝備/隊員裝備/gloves.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '加了護甲片的手套，出手更有力。',
     stat: lv => '攻擊力 +' + Math.round(lv.atk * 100) + '%', levels: [{ atk: .1 }, { atk: .13 }, { atk: .16 }, { atk: .2 }, { atk: .25 }] },
   { id: 'scope', name: '戰術瞄準鏡', kind: 'head', who: 'squad', v2only: true, icon: '🔭', image: 'images/裝備/隊員裝備/scope.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '戴在頭上的瞄準鏡，看得更遠、更準。',
     stat: lv => '命中率 +' + Math.round(lv.accuracy * 100) + '%・射程 +' + lv.atkRange + ' 格',
     levels: [{ accuracy: .1, atkRange: .5 }, { accuracy: .12, atkRange: .6 }, { accuracy: .15, atkRange: .75 }, { accuracy: .18, atkRange: .9 }, { accuracy: .2, atkRange: 1 }] },
-  { id: 'pouch', name: '急救腰包', kind: 'acc', who: 'squad', v2only: true, icon: '🩹', image: 'images/裝備/隊員裝備/pouch.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+  { id: 'pouch', name: '急救腰包', kind: 'acc', who: 'all', v2only: true, icon: '🩹', image: 'images/裝備/隊員裝備/pouch.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '隨身的急救用品，受傷時可以自己處理。',
     stat: lv => '每秒回復 HP +' + lv.hpRegen, levels: [{ hpRegen: .2 }, { hpRegen: .3 }, { hpRegen: .4 }, { hpRegen: .5 }, { hpRegen: .6 }] },
 ];

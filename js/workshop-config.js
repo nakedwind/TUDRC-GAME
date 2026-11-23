@@ -260,7 +260,7 @@ const WORKSHOP_VALUE_INFO = {
   light: { label: '照明距離', unit: '格', scale: 1 / 40 }, spread: { label: '光束角度（一半）', unit: '°' }, battery: { label: '一顆電池撐', unit: '秒' },
   fear: { label: '黑暗恐懼減少', unit: '%', scale: 100 }, filter: { label: '腐蝕、酸液減傷', unit: '%', scale: 100 },
   guard: { label: '受到的傷害減少', unit: '%', scale: 100 }, calm: { label: '理智影響減少', unit: '%', scale: 100 },
-  save: { label: '疏導省 SP', unit: '%', scale: 100 }, speed: { label: '移動速度加成', unit: '%', scale: 100 },
+  save: { label: '疏導省 SP', unit: '%', scale: 100 }, boost: { label: '疏導多降的負荷', unit: '%', scale: 100 }, speed: { label: '移動速度加成', unit: '%', scale: 100 },
   fire: { label: '火海燙傷減少', unit: '%', scale: 100 }, corrode: { label: '腐蝕池、酸液減傷', unit: '%', scale: 100 },
   reach: { label: '疏導、急救距離加成', unit: '%', scale: 100 }, rush: { label: '指派時隊員移動加成', unit: '%', scale: 100 },
   mark: { label: '標記黑暗中怪物的範圍', unit: '格' }, range: { label: '暗處偵測範圍（怪物、核心、礦）', unit: '格' },

@@ -121,7 +121,20 @@ const leaderDefense = () => { const s = leaderSpec(); return s ? Math.max(0, Mat
 const equipPlayerDamage = d => { if (leaderSpec()) return d * (1 - leaderDefense()) * (typeof foodGuardMul === 'function' ? foodGuardMul() : 1); const v = equipVest(), h = equipLv('helmet'); return d * (v ? 1 - v.guard : 1) * (h ? 1 - h.guard : 1) * (typeof foodGuardMul === 'function' ? foodGuardMul() : 1); };   // 防護背心、防護頭盔、烤虱目魚肚（js/food.js）：溫特受到的傷害
 const equipFireMul = () => { const v = equipLv('fireboots'); return v ? 1 - v.fire : 1; };   // 防火鞋：火海燙傷（js/oil-barrels.js）
 const equipAcidMul = () => { const v = equipLv('mask'), b = equipLv('acidboots'); return (v ? 1 - v.filter : 1) * (b ? 1 - b.corrode : 1); };   // 防腐鞋：一起減（可疊加）   // 防毒面具：腐蝕池、酸液的傷害
-const equipSootheCost = c => { const v = equipLv('bracelet'); return v ? Math.round(c * (1 - v.save)) : c; };   // 共感手環：疏導花的 SP
+// 共感手環：這個人身上那只手環多降幾成負荷（沒戴＝0）。who＝'winter' 或隊員 id（新版裝備才有隊員穿的）
+function braceletBoost(who) {
+  if (!who) return 0;
+  if (who === 'winter') { const v = equipLv('bracelet'); return (v && v.boost) || 0; }
+  if (typeof GEAR_SYSTEM === 'undefined' || GEAR_SYSTEM !== 2 || typeof squadGearState === 'undefined') return 0;
+  const key = ((squadGearState.equip || {})[who] || []).find(k => k && gearTypeOf(k) === 'bracelet'); if (!key) return 0;
+  const d = equipDef(key), v = d && d.levels[gearKeyLv(key) - 1]; return (v && v.boost) || 0;
+}
+// 疏導降負荷的倍率：嚮導（疏導的人）和哨兵（被疏導的人）身上的共感手環相加（溫特疏導、嚮導光環、嚮導技能都用這個）
+const equipSootheMul = (guide, sentry) => 1 + braceletBoost(guide) + braceletBoost(sentry);
+// 強化戰術手套：溫特的攻擊力（手槍、特殊子彈；艾德林帶隊時不算溫特的裝備）
+const equipAtkMul = () => { if (leaderSpec()) return 1; const v = equipLv('gloves'); return v && v.atk ? 1 + v.atk : 1; };
+// 急救腰包：溫特每秒回復的 HP（js/game.js 的 updatePlayer）
+const equipHpRegen = () => { if (leaderSpec()) return 0; const v = equipLv('pouch'); return (v && v.hpRegen) || 0; };
 const equipSpeedMul = () => { const ls = leaderSpec(); if (ls) { const base = (CHARACTERS[PLAYER_CHARACTER].combat || {}).walkSpeed || ls.walkSpeed || 1; return (ls.walkSpeed || base) / base * adrenalineSpeedMul() * (typeof foodSpeedMul === 'function' ? foodSpeedMul() : 1); } const v = equipLv('sneakers'), b = equipVest(); return (v ? 1 + v.speed : 1) * (b && b.speed ? 1 + b.speed : 1) * adrenalineSpeedMul() * (typeof foodSpeedMul === 'function' ? foodSpeedMul() : 1); };   // 輕量跑鞋、輕型／重型防護背心、腎上腺素（道具）、香蕉／烤香蕉、鬧肚子（js/food.js）
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
 const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && MAP_FIELD ? h.fear : 0)); };   // 照明頭盔也算

@@ -292,7 +292,7 @@ function updateAshSoothe(dt) {
   if (typeof spawnSootheMotes === 'function') spawnSootheMotes([ash, t], VITALS.ashSootheColor, dt, ashJob);
   if (ashJob.t > 0) return;
   const before = t.taint || 0;
-  t.taint = Math.max(0, before - SOOTHE.heal); if (t.berserk && t.taint < 60) t.berserk = false;   // 跟溫特疏導一次一樣的量
+  t.taint = Math.max(0, before - SOOTHE.heal * (typeof equipSootheMul === 'function' ? equipSootheMul(null, t.type) : 1)); if (t.berserk && t.taint < 60) t.berserk = false;   // 跟溫特疏導一次一樣的量
   spawnSootheEffect(t.x, t.y - 8, VITALS.ashSootheColor, t);
   if (typeof sfxAt === 'function') sfxAt('sootheEnd', t.x, t.y, .5, 'ash-soothe-end');
   sentryStatus(t, '負荷 -' + Math.round(before - t.taint), '#7ee0c0');

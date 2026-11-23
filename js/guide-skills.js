@@ -39,7 +39,7 @@ function guideSkillFire(t, s) {
       if (o.hp - before >= 1) flashDmg('HP +' + Math.round(o.hp - before), o.x, o.y - 44, '#7ee08a');
     }
     if (s.soothe && !TYPES[o.type].guide) {
-      const before = o.taint || 0; o.taint = Math.max(0, before - s.soothe);
+      const before = o.taint || 0; o.taint = Math.max(0, before - s.soothe * (typeof equipSootheMul === 'function' ? equipSootheMul(t.type, o.type) : 1));   // 共感手環：嚮導、哨兵戴著都降更多
       if (s.wake && o.berserk) o.berserk = false;
       else if (o.berserk && o.taint < 60) o.berserk = false;
       if (before - o.taint >= 1) flashDmg('負荷 -' + Math.round(before - o.taint), o.x, o.y - 44, color);

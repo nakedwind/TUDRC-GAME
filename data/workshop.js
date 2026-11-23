@@ -232,19 +232,19 @@ const WORKSHOP_CONFIG = {
     "bracelet": {
       "values": [
         {
-          "save": 0.05
+          "boost": 0.15
         },
         {
-          "save": 0.08
+          "boost": 0.2
         },
         {
-          "save": 0.13
+          "boost": 0.25
         },
         {
-          "save": 0.17
+          "boost": 0.3
         },
         {
-          "save": 0.2
+          "boost": 0.4
         }
       ],
       "infoImgY": -12,

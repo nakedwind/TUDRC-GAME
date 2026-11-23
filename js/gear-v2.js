@@ -358,6 +358,7 @@ if (GEAR_V2) {
 function gearSquadNote(d) {
   const w = gearWho(d);
   if (w === 'winter') return '（部隊長專用）';
+  if ((d.levels[0] || {}).boost != null) return '（嚮導、哨兵都能戴，兩邊都戴效果疊加）';   // 共感手環（js/equipment.js 的 equipSootheMul）
   const keys = Object.keys(d.levels[0] || {}).filter(k => GEAR_SQUAD_MODS[k]);
   return keys.length ? (w === 'squad' ? '（隊員專用）' : '（隊員也能穿，效果相同）') : '（隊員穿了沒有效果）';
 }

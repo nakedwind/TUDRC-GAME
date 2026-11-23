@@ -1302,7 +1302,7 @@ window.addEventListener('keydown', e => {
 function soothe(t) {
   if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在做別的事（疏導、急救、包紮）
   if (t.taint <= 0 && !t.berserk) { sfx('error'); sentryStatus(t, '無需疏導', '#9aa4b2'); return; }
-  const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;   // 共感手環：花的 SP 變少（js/equipment.js）
+  const cost = SOOTHE.cost;
   if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
   if (typeof startChannel !== 'function') { finishSoothe(t); return; }
   spawnSootheCast(G.player, SOOTHE_COLORS[PLAYER_CHARACTER] || SOOTHE_COLORS.winter, 0);   // 溫特腳下法陣（跟以前一樣約 1 秒）
@@ -1315,16 +1315,17 @@ function soothe(t) {
 const winterMoteHolder = {};
 function sootheMotes(t, dt) { spawnSootheMotes([G.player, t], SOOTHE_MOTE_COLORS[PLAYER_CHARACTER] || SOOTHE_MOTE_COLORS.winter, dt, winterMoteHolder); }
 function finishSoothe(t) {
-  const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;
+  const cost = SOOTHE.cost;
   if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
   G.guide -= cost;
   const amount = Math.round(SOOTHE.heal * careStyle().amount);   // 溫特：降比較多；艾德林：降比較少但身邊的哨兵一起（data/balance.js 的 CARE_STYLE）
   const list = typeof careTargets === 'function' ? careTargets(t, o => !TYPES[o.type].guide && ((o.taint || 0) > 0 || o.berserk), false) : [t];
   for (const o of list) {
-    o.taint = Math.max(0, o.taint - amount);
+    const amt = Math.round(amount * (typeof equipSootheMul === 'function' ? equipSootheMul(PLAYER_CHARACTER, o.type) : 1));   // 共感手環：疏導的人、被疏導的哨兵戴著都降更多（疊加）
+    o.taint = Math.max(0, o.taint - amt);
     if (o.berserk && o.taint < 60) o.berserk = false;
     spawnSootheEffect(o.x, o.y - 8, SOOTHE_COLORS[PLAYER_CHARACTER] || SOOTHE_COLORS.winter, o);   // 玩家溫特疏導：藍色（操作艾德林時用艾德林的綠色），光環跟隨哨兵
-    sentryStatus(o, '負荷 -' + amount, '#7ee0c0');
+    sentryStatus(o, '負荷 -' + amt, '#7ee0c0');
   }
   if (list.length > 1) spawnSootheCast(G.player, SOOTHE_COLORS[PLAYER_CHARACTER] || SOOTHE_COLORS.winter, careStyle().area * CELL);   // 範圍疏導：腳下的光圈
   sfx('sootheEnd');   // 疏導成功：「疏導2」音效

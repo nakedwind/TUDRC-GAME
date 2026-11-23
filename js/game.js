@@ -1616,6 +1616,7 @@ function updatePlayer(dt) {
   const p = G.player; if (!p) return;
   p.dashPart = dt > 0 ? Math.min(dt, p.dashT || 0) / dt : 0;   // 衝刺剩下的時間、冷卻
   p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
+  if (p.hp > 0 && p.hp < p.maxhp && typeof equipHpRegen === 'function' && equipHpRegen()) p.hp = Math.min(p.maxhp, p.hp + equipHpRegen() * dt);   // 急救腰包：慢慢回血（js/equipment.js）
   if (p.swimRing) { p.dashPart = 0; p.dashT = 0; }   // 衝刺到一半坐上救生圈：衝刺立刻停掉
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
   if (p.mrtRide || p.rkHeld || p.escRush) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）；escRush：陷阱手扶梯往下衝（js/escalators.js）
@@ -1953,7 +1954,8 @@ const LEADER_GUN = { aggro: 0.8 };
 function playerGun() {
   const s = PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER];
   const weak = typeof bananaDebuffAtk === 'function' ? bananaDebuffAtk(G && G.player) : 1;   // 金蕉大王紅色魔法陣：攻擊下降（js/banana-emperor.js）
-  if (!s) return weak === 1 ? PLAYER_ATK : { ...PLAYER_ATK, dmg: PLAYER_ATK.dmg * weak };
+  const glove = typeof equipAtkMul === 'function' ? equipAtkMul() : 1;   // 強化戰術手套：攻擊力加成（js/equipment.js）
+  if (!s) return weak * glove === 1 ? PLAYER_ATK : { ...PLAYER_ATK, dmg: PLAYER_ATK.dmg * weak * glove };
   const p = G && G.player, buff = k => (p && typeof sortieBuff === 'function' ? sortieBuff(p, k) : 0);
   return { ...PLAYER_ATK, dmg: s.dmg * (1 + buff('atk')) * weak, range: s.range, rate: s.rate * (1 + buff('spd')), aggro: LEADER_GUN.aggro, mag: GUIDE_GUN.mag, reloadTime: GUIDE_GUN.reloadTime, double: 0 };
 }
@@ -2487,7 +2489,7 @@ function update(dt) {
           if (!doSoothe && !doHeal) continue;   // 不需要、或身上沒東西可用就跳過
           if (doSoothe) usedSP = true; if (doHeal) usedMedkit = true;
           const taintBefore = o.taint || 0;
-          if (doSoothe) o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD * (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.sootheMul : 1));   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
+          if (doSoothe) o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD * (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.sootheMul : 1) * (typeof equipSootheMul === 'function' ? equipSootheMul(t.type, o.type) : 1));   // 共感手環：嚮導、哨兵戴著都降更多   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
           if (doHeal) o.hp = Math.min(o.maxhp, o.hp + FIRST_AID.heal);   // 用一個急救包：跟溫特用急救包補一樣的量（data/equipment.js）
           if (o.berserk && o.taint < 60) o.berserk = false;
           spawnSootheEffect(o.x, o.y - 8, sc, o);
