@@ -356,7 +356,7 @@ function renderMissionBoard() {
           '<div class="mission-team-row"><span>' + (split ? SQUADS[squad].name + (lead !== 'winter' ? '・隊長 ' + teamProfile(lead).name : '') + '<br>' : '') + '出勤人員 ' + team.length + ' 位</span><div class="mission-faces">' + (teamFaces || '<small>尚未編入</small>') + '</div>' +
             '<button type="button" class="mission-team">🧑‍🤝‍🧑 出勤配置</button></div>' +
           (paused ? '<button type="button" class="mission-redeploy">↺ 重新部署</button>' : '') +
-          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused && canGo ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : sel.metroOnly && st !== 'locked' ? '🚇 只能搭捷運前往' : STATUS_TEXT[st]) + '</button>' +
+          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused && canGo ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : sel.metroOnly && st !== 'locked' ? '🚇 從R89區搭捷運前往' : STATUS_TEXT[st]) + '</button>' +
         '</aside>' +
       '</div>' +
     '</section>'));
