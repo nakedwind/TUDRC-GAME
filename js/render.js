@@ -1296,7 +1296,7 @@ function draw() {
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
   if (typeof drawUnderMap === 'function') drawUnderMap(ctx, 'above');   // 有黑幕的地圖：底下透出的另一張地圖畫在黑幕上面（只畫在沒鋪東西的格子，js/under-map.js）
-  if (typeof redrawOverUnderMap === 'function') redrawOverUnderMap(ctx, sortables.concat(mothItems.filter(it => !it.who.mothBoss)));   // 站在亮處（人面蝶也算）、身體伸進空格的怪物、人、建築：在空格那一塊再畫一次，底圖才會在它們下面
+  if (typeof redrawOverUnderMap === 'function') redrawOverUnderMap(ctx, sortables.concat(mothItems));   // 站在亮處、身體伸進空格的怪物、人、建築：在空格那一塊再畫一次，底圖才會在它們下面；飛在空中的（人面蝶、人面蝶后含手上的核心和抓著的人）不管亮暗都不會被底圖蓋住（js/under-map.js）
   // 人面蝶后體型大、飛得高，身體常常一半在亮處一半在暗處：看牠正下方的影子亮不亮，亮就整隻畫在黑幕上面，暗就整隻留在黑幕裡（js/moth-boss.js）
   for (const it of mothItems) if (it.who.mothBoss && (isVisible(it.who.x, it.who.y) || (it.who.mb && it.who.mb.intro))) it.draw();   // 出場演出中（mb.intro）：不管亮暗都整隻畫在黑幕上面
   if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
