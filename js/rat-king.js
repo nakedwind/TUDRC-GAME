@@ -17,7 +17,7 @@
    - 血量歸零（死亡表演，節奏慢）：老鼠王卡在鐵軌上暈頭轉向 → 響起這個車站的到站音樂、隧道裡的車燈越來越亮、地面越震越大
      → 捷運煞車聲（煞車來不及）→ 紅色列車撞上去（白光、畫面頓住、慢動作、大震動、火花）→ 老鼠王邊轉邊往右飛出去 → 「討伐成功」。
      之後列車照常停靠，可以搭車（開往哪裡寫在 data/mrt-train.js 的 variants）。核心全破的結算畫面會等老鼠王被撞飛之後才跳。
-     整段死亡表演跟出場一樣用 js/boss-cinema.js 的演出：戰場時間停住、溫特不能動，鏡頭固定在老鼠王身上看完才滑回溫特（finale.camera）。
+     死亡表演的最後 finale.camera.last 秒（到「討伐成功」為止）跟出場一樣用 js/boss-cinema.js 的演出：戰場時間停住、溫特不能動，鏡頭固定在老鼠王身上看完才滑回溫特；在那之前戰場照常。
    素材：本體沿用花蓮版權老鼠的圖（放大 scale 倍）；拳頭是 left-fist.png，抓核心張開的手是 left-hand.png（都用 images/monster/rat-king/ 的紫藍版，見 RAT_KING.artDir）。
    數值都在下面的 RAT_KING。必須在 burrowing-mouse.js 之後、game.js 之前載入。
 */
@@ -74,10 +74,10 @@ const RAT_KING = applyBossSettings('RAT_KING', {
   // 死亡表演的節奏：daze＝血量歸零後先暈幾秒才響到站音樂；musicLead＝音樂響了幾秒後列車才從隧道進站；
   //   （現在：暈 2.5 秒＋音樂 17 秒＋列車衝進來約 0.7 秒 ≒ 血量歸零後 20 秒撞上）
   //   brakeLead＝撞上前幾秒響煞車聲（音效「mrtBrake」）；musicGain＝到站音樂的音量；slowMo＝血量歸零那一刻的慢動作
-  //   camera＝死亡表演的鏡頭（戰場時間停住、溫特不能動，鏡頭固定在老鼠王身上）：focusUp＝對準月台邊緣再往上幾格、
+  //   camera＝死亡表演的鏡頭（戰場時間停住、溫特不能動，鏡頭固定在老鼠王身上）：last＝最後幾秒才固定鏡頭（從「討伐成功」往前算；在那之前戰場照常）、focusUp＝對準月台邊緣再往上幾格、
   //     holdAfter＝「討伐成功」之後多停幾秒才滑回溫特、zoom＝鏡頭拉遠倍率（1＝不拉遠）、bars＝上下黑邊（0＝沒有）、maxTime＝保險：最多停幾秒
   finale: { daze: 2.5, musicLead: 17, brakeLead: 1.6, musicGain: .8, slowMo: { time: .5, scale: .5 },
-    camera: { focusUp: 2, holdAfter: 1.5, zoom: 1, bars: 0, maxTime: 40 } },
+    camera: { last: 10, focusUp: 2, holdAfter: 1.5, zoom: 1, bars: 0, maxTime: 40 } },
   // 拳頭（老鼠王專用的紫藍版）；fistFront＝只有前面手指的那一層，握住人／核心時蓋在上面（拳頭 → 人／核心 → 手指）
   art: { fist: 'images/monster/rat-king/left-fist.png', fistFront: 'images/monster/rat-king/left-fist-02.png' },
   // 握在拳頭裡的人／核心放在原圖（110×90）的哪一點：held＝人身體的中心（人橫躺、頭朝外露出拳頭），core＝核心的中心
@@ -194,6 +194,7 @@ function updateRatKing(dt) {
   updateRkFx(K, dt);
   updateRkThrows(dt);
   rkMuteHitFx();
+  if (K.phase === 'finale' || K.phase === 'ram') rkDeathCamCheck(K, dt);   // 死亡表演的最後幾秒：固定鏡頭
   if (K.phase === 'finale') { updateRkFinale(K, dt); return; }
   if (K.phase === 'ram') { updateRkRam(K, dt); return; }
   if (!G.running || G.over || K.phase === 'dead') return;
@@ -762,7 +763,15 @@ function rkStartFinale(e) {
   if (typeof addShake === 'function') addShake(8);
   rkSound('mouseHurt', e.x, e.y, 1.3);
   systemNotice(RAT_KING.name + '卡在鐵軌上動不了了……', true);
-  rkStartDeathCinema(K, e);
+  K.sinceDeath = 0; K.deathCam = false;
+  K.victoryAt = K.enterAt + K.hitIn + RAT_KING.ram.fly;   // 從血量歸零算起，幾秒後「討伐成功」（固定鏡頭從這裡往前算 camera.last 秒）
+}
+// 死亡表演每幀（finale、ram 都會呼叫）：離「討伐成功」剩 camera.last 秒時才開始固定鏡頭
+function rkDeathCamCheck(K, dt) {
+  K.sinceDeath = (K.sinceDeath || 0) + dt;
+  if (K.deathCam || !K.e || K.victoryAt == null) return;
+  const last = (RAT_KING.finale.camera || {}).last ?? 10;
+  if (K.sinceDeath >= K.victoryAt - last) { K.deathCam = true; rkStartDeathCinema(K, K.e); }
 }
 // 死亡表演的鏡頭（js/boss-cinema.js 的共用演出）：戰場時間停住、溫特不能動，鏡頭固定在老鼠王身上，
 //   暈眩 → 到站音樂 → 列車撞飛 → 「討伐成功」都看完才滑回溫特。停住的時候只跑老鼠王的表演和列車（列車要動才撞得到）
