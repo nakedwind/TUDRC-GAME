@@ -141,7 +141,7 @@
   function showValues() {
     const v = run(`(() => { const C = BOSS_CINEMA; return { pan: C.pan, back: C.back, zoom: C.zoom, bars: C.bars,
       own: ${JSON.stringify(boss)} === 'milkfish' ? '鏡頭往上 ' + C.milkfish.focusUp + ' 像素、吞完核心多停 ' + C.milkfish.holdAfter + ' 秒（登場：震動 ' + mkCfg(G.mkIntro.e).introRumble + ' 秒、空中 ' + mkCfg(G.mkIntro.e).introLeapTime + ' 秒）'
-         : ${JSON.stringify(boss)} === 'gourd' ? '撞破前 ' + C.gourd.lead + ' 秒開始、鏡頭在牆頂往下 ' + C.gourd.focusDown + ' 格、亮相完多停 ' + C.gourd.holdAfter + ' 秒'
+         : ${JSON.stringify(boss)} === 'gourd' ? '第 1 下撞牆前 ' + C.gourd.lead + ' 秒開始、鏡頭在牆頂往下 ' + C.gourd.focusDown + ' 格、亮相完多停 ' + C.gourd.holdAfter + ' 秒'
          : '鏡頭在月台邊緣往上 ' + C.rat.focusUp + ' 格、亮相完多停 ' + C.rat.holdAfter + ' 秒' }; })()`);
     $('values').textContent = '目前數值：鏡頭滑過去 ' + v.pan + ' 秒、滑回 ' + v.back + ' 秒、拉遠 ×' + v.zoom + '、黑邊 ' + v.bars + '；' + v.own
       + '（在怪物編輯器「👑 BOSS 數值」→「🎬 BOSS 出場演出」改；改完再按播放就會用新的）';

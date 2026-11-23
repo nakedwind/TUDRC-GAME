@@ -1270,8 +1270,13 @@ const BOSS_SETTINGS_DEFAULT = {
       "bursts": 3
     },
     "emerge": {
-      "wait": 1.8,
-      "growl": 0.9,
+      "start": 70,
+      "rise": 0.5,
+      "height": 210,
+      "hang": 0.35,
+      "drop": 0.15,
+      "land": 6.5,
+      "squash": 0.5,
       "hold": 0.4
     },
     "slam": {
@@ -1686,6 +1691,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "gourd": {
       "lead": 1.2,
       "focusDown": 3.5,
+      "zoom": 0.65,
       "holdAfter": 0.3
     },
     "rat": {
