@@ -4,7 +4,7 @@
      ・剩 10 秒內、進站中：〔紅線〕即將進站（閃）　8秒
      ・門開著：每 3 秒換頁 →「往 R89區　停靠中」⇄「請上車（閃）　12秒關門」；快關門時只顯示第二頁
      ・關門、開走：往 R89區　出發
-     ・發電機沒全開：暫停服務　開啟發電機（紅字）；被花蓮老鼠王卡住：暫停服務　軌道受阻（紅字）
+     ・發電機沒全開：暫停服務　需開啟發電機（紅字）；被花蓮老鼠王卡住：暫停服務　軌道受阻（紅字）
      ・通道列車（停著不動）：不載客　可穿越車廂（灰字）
    往哪站：列車進站前就先抽好（js/mrt-train.js 的 mrtNextDest），溫特搭上去就開到牌子寫的那站。
    站名、線的顏色讀 data/mrt-train.js 的 stations（name「R89區-紅線捷運站」拆成「R89區」「紅線」、color）。
@@ -17,6 +17,7 @@ const MRT_BOARD = {
   soonSec: 10,   // 剩幾秒開始顯示「即將進站」
   pageSec: 3,    // 停靠中幾秒換一頁
   font: 'Consolas, "Microsoft JhengHei", monospace',
+  fontPlus: 2,   // 字再加大幾 px（照看板原圖 40px 高算，看板有縮放時跟著縮放）
 };
 
 // ---- 畫螢幕上的字（遊戲、地圖編輯器共用）----
@@ -24,15 +25,17 @@ const MRT_BOARD = {
 function drawMrtBoardFace(ctx, x, y, w, h, v) {
   if (!v) return;
   const S = MRT_BOARD.screen, sx = x + S[0] * w, sy = y + S[1] * h, sw = S[2] * w, sh = S[3] * h;
-  const big = sh * .56, small = sh * .44, pad = sh * .18, gap = sh * .2, cy = sy + sh / 2;
+  const plus = (MRT_BOARD.fontPlus || 0) * h / 40;
+  const big = sh * .56 + plus, small = sh * .44 + plus, pad = sh * .18, gap = sh * .2, cy = sy + sh / 2;
   const off = (performance.now() % 1000) >= 500;   // 閃爍：每秒暗一下
   ctx.save();
   ctx.beginPath(); ctx.rect(sx, sy, sw, sh); ctx.clip();
   ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
   let cx = sx + pad;
   if (v.badge) {   // 線色標籤（紅線、綠線…）
-    ctx.font = 'bold ' + (sh * .5) + 'px ' + MRT_BOARD.font;
-    const bw = ctx.measureText(v.badge.text).width + sh * .3, bh = sh * .78;
+    const bf = sh * .5 + plus;
+    ctx.font = 'bold ' + bf + 'px ' + MRT_BOARD.font;
+    const bw = ctx.measureText(v.badge.text).width + sh * .3, bh = Math.min(sh * .92, bf + sh * .28);
     ctx.fillStyle = v.badge.color || '#666'; ctx.fillRect(cx, cy - bh / 2, bw, bh);
     ctx.fillStyle = '#fff'; ctx.fillText(v.badge.text, cx + sh * .15, cy + sh * .03);
     cx += bw + gap;
@@ -86,7 +89,7 @@ function mrtBoardView(s) {
   const T = MRT_TRAIN, B = MRT_BOARD;
   if (tr.fixed) return { left: '不載客', right: '可穿越車廂', small: true, color: B.gray };
   if (typeof ratKingBlocksTrain === 'function' && ratKingBlocksTrain(tr)) return { left: '暫停服務', right: '軌道受阻', small: true, color: B.red };
-  if (!mrtPowered()) return { left: '暫停服務', right: '開啟發電機', small: true, color: B.red };
+  if (!mrtPowered()) return { left: '暫停服務', right: '需開啟發電機', small: true, color: B.red };
   const d = mrtBoardDest(mrtNextDest(tr)), badge = d && d.badge, to = d && d.area ? '往 ' + d.area : '列車';
   const sec = n => Math.max(0, Math.ceil(n));
   const soon = n => ({ badge, left: '即將進站', blink: 'left', right: sec(n) + '秒' });
