@@ -46,9 +46,11 @@ const BOSS_BOUNTIES = [
   { id: 'bird', name: '鳥頭大隊長', flag: 'elite', money: 2000 },         // js/elite-bird-head.js
   { id: 'capKing', name: '順順宮主', flag: 'capKingLord', money: 3000 },   // js/elite-cap-king.js（只算跟核心躲在一起的宮主本人，大夯吉寶不算）
   { id: 'pearl', name: '珍珠大童', flag: 'pearlBoss', money: 3000 },       // js/pearl-elder.js
-  { id: 'gourdKing', name: '葫蘆猴王', flag: 'gourdKing', money: 3000 },   // js/gourd-king.js（金額是預設，待確認）
-  { id: 'mothBoss', name: '人面蝶后', flag: 'mothBoss', money: 3000 },     // js/moth-boss.js（金額是預設，待確認）
-  { id: 'ratKing', name: '花蓮老鼠王', flag: 'ratKing', money: 3000 },     // js/rat-king.js（金額是預設，待確認）
+  // 下面 4 隻是捷運站的 BOSS（R89、B56、G11、O666），獎金都是 5000
+  { id: 'gourdKing', name: '葫蘆猴王', flag: 'gourdKing', money: 5000 },   // js/gourd-king.js（R89）
+  { id: 'mothBoss', name: '人面蝶后', flag: 'mothBoss', money: 5000 },     // js/moth-boss.js（B56）
+  { id: 'milkfishKing', name: '虱目魚王', flag: 'milkfishKing', money: 5000 },   // js/milkfish-king.js（G11）
+  { id: 'ratKing', name: '花蓮老鼠王', flag: 'ratKing', money: 5000 },     // js/rat-king.js（O666）
 ];
 
 const MISSIONS = [

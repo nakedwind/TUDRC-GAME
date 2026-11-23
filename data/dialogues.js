@@ -51,6 +51,7 @@ const DIALOGUES = {
       "brief_o666": [],
       "bounty_gourdKing": [],
       "bounty_mothBoss": [],
+      "bounty_milkfishKing": [],
       "bounty_ratKing": []
     },
     "taana": {
@@ -1183,6 +1184,10 @@ const DIALOGUES = {
       ],
       "bounty_mothBoss": [
         "隊長，中心確認人面蝶后已經討伐了。大家都平安回來，真是太好了。",
+        "上面特別撥了一筆獎金{money} 元，已經幫您存進去了喔。"
+      ],
+      "bounty_milkfishKing": [
+        "隊長，中心確認虱目魚王已經討伐了。大家都平安回來，真是太好了。",
         "上面特別撥了一筆獎金{money} 元，已經幫您存進去了喔。"
       ],
       "bounty_ratKing": [

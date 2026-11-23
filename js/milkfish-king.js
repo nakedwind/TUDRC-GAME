@@ -124,6 +124,7 @@ function mkInit(e, core) {
   const spec = ACTIVE_MONSTERS.find(m => m.id === e.type);
   e.mkCfg = typeof validMilkfishKingCfg === 'function' ? validMilkfishKingCfg(spec && spec.mfKing) : {};
   e.eliteName = MILKFISH_KING_FX.name;
+  e.milkfishKing = true;   // 認出「這隻是虱目魚王」的標記：打倒後回應變中心領 BOSS 特別獎金（data/missions.js 的 BOSS_BOUNTIES）
   if (MILKFISH_KING_FX.artDir && !e.mkArtSwapped) {   // 換成魚王專用的圖（另外複製一份，不要改到共用的設定；笑、攻擊圖在 js/milkfish-kid.js 的 mfArt）
     const swap = f => typeof f === 'string' && /\.png$/i.test(f) ? MILKFISH_KING_FX.artDir + f.split('/').pop() : f;
     e.sprite = swap(e.sprite);
