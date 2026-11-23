@@ -5,7 +5,7 @@
    ・locked: true＝路線圖上單獨的點，還沒決定怎麼解鎖，先鎖著（進去過一次就會開放，例如從 R89 搭捷運到 B56）。
    ・metroOnly: true＝只能搭捷運過去：就算開放了、控制了，作戰桌也不能直接出擊（例如 B56、G11、O666 要從 R89 搭捷運）。
    ・metroAfter: [...]＝搭捷運要先控制「全部」這些區域，列車才可能開到這一站（例如 O666 要 R89、B56、G11 都控制）。
-     捷運互通的車站名單在 data/mrt-train.js 的 stations；搭車時從「條件達成的其他站」隨機挑一站（js/mrt-train.js 的 mrtPickDestination）。
+     捷運互通的車站名單在 data/mrt-train.js 的 stations；搭車時從「條件達成的其他站」照順序輪流開（js/mrt-train.js 的 mrtPickDestination）。
    ・hidden: true＝鎖著的時候名字顯示成「？？？」，開放後才露出真名。
    ・off: true＝整個先藏起來：作戰地圖、T-Pad、主線進度、對話編輯器都當作沒有這一區（連線也不畫）。要顯示時拿掉 off 就好。
    ・支線（角色委託）在 data/quests.js。

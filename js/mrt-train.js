@@ -21,7 +21,7 @@
      ③④ 裡外側門口那幾欄另外排、排得比較前面（doorSortDy）：站在門口、腳還在門檻外的人不會被車殼蓋住。
    關門時溫特在車上 → 搭車：車上的人（溫特、隊員、怪物）跟著列車一起開走，快開進隧道時畫面才變黑；
      在隧道裡黑一陣子、搖晃（rideTime），再載著大家開進站、停好開門。搭車時車上的人不能動。
-     互通的捷運站（data/mrt-train.js 的 stations）：從其中一站搭車，會隨機開到「另一個」車站（換地圖，車上的隊員一起過去）；
+     互通的捷運站（data/mrt-train.js 的 stations）：從其中一站搭車，會輪流開到「其他」車站（換地圖，車上的隊員一起過去）；
        到站時一定坐離營地最近的那台車進站（mrtTrainNearCamp）。不在名單裡的地圖照舊開回同一站。每站的到站音樂也在 stations 設（arrive）。
      沒搭上車的隊員：留在原本那站，nextTrainTime 秒（預設 2 分鐘）後搭下一班車到溫特這站（隊員欄顯示「正在搭下班車」倒數）。
      溫特沒上車、隊員不小心留在車上：隊員跟著列車開走，nextTrainTime 秒後搭車回站（隊員欄顯示「不小心搭上車」倒數）。
@@ -581,15 +581,27 @@ function mrtRideFade(on) {
 const mrtStationOf = id => (MRT_TRAIN.stations || []).find(st => st && st.map === id) || null;
 // 這站的到站音樂（stations 沒設就用音效編輯器的「捷運列車：到站音樂」）
 function mrtArriveSound() { const st = MAP && mrtStationOf(MAP.id); return (st && st.arrive) || MRT_TRAIN.sounds.arrive; }
-// 溫特搭車要開去哪：互通車站裡隨機一站（不是現在這站、地圖要存在）；現在這站不在名單裡、或沒有別站 → null（開回同一站）
-//   任務資料寫了 metroAfter 的站（data/missions.js，例如 O666）：那幾區「全部」控制了，才會被抽到
+// 溫特搭車要開去哪：互通車站「輪流」開（不是現在這站、地圖要存在）；現在這站不在名單裡、或沒有別站 → null（開回同一站）
+//   輪流的順序＝data/mrt-train.js 的 stations 排列順序。例如在紅線站：藍 → 綠 → 橘 → 藍 → …
+//   每一站各自記「上一班開去哪」（mrtLastDest），換地圖也記得；第一班從隨機一站開始
+//   任務資料寫了 metroAfter 的站（data/missions.js，例如 O666）：那幾區「全部」控制了，才會輪到（還沒開放就跳過）
+let mrtLastDest = {};   // 出發站地圖 id → 上一班開去的地圖 id
 function mrtPickDestination(tr) {
   if ((typeof PREVIEW !== 'undefined' && PREVIEW) || !MAP) return null;
   const fixed = tr && tr.variant && tr.variant.dest;   // 這班車有指定開去哪（data/mrt-train.js 的 variants）
   if (fixed && fixed !== MAP.id && mapIndexById(fixed) >= 0) return fixed;
   if (!mrtStationOf(MAP.id)) return null;
-  const list = (MRT_TRAIN.stations || []).filter(st => st && st.map !== MAP.id && mapIndexById(st.map) >= 0 && mrtStationReady(st.map));
-  return list.length ? list[Math.floor(Math.random() * list.length)].map : null;
+  const all = (MRT_TRAIN.stations || []).filter(st => st && st.map !== MAP.id);
+  const ok = st => mapIndexById(st.map) >= 0 && mrtStationReady(st.map);
+  if (!all.some(ok)) return null;
+  const last = all.findIndex(st => st.map === mrtLastDest[MAP.id]);
+  // 上一班的下一站開始找第一個能去的站；還沒開過（或上一班那站被拿掉了）就從隨機一站開始
+  const start = last >= 0 ? last + 1 : Math.floor(Math.random() * all.length);
+  for (let i = 0; i < all.length; i++) {
+    const st = all[(start + i) % all.length];
+    if (ok(st)) return (mrtLastDest[MAP.id] = st.map);
+  }
+  return null;
 }
 // 這班車開去哪：進站前就先抽好記在 tr.nextDest，時間牌（js/mrt-time-board.js）才能先顯示「往 ○○」，
 // 溫特搭上車時也照這個開，牌子寫的跟實際到的一定一樣。列車開走時清掉（下一班重新抽）

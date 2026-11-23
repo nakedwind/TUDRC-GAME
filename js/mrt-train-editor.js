@@ -74,7 +74,7 @@ const MrtTrainEditor = (() => {
       ${doorBox('farDoor', '對面車門（mrt-train-door-2，車廂內部那層）')}
       ${NUM_FIELDS.map(([title, list]) => `<fieldset class="mrt-box"><legend>${title}</legend><div class="mrt-grid">` +
         list.map(([k, n, unit, step]) => `<label title="${unit}">${n}<span class="mrt-unit">${unit}</span><input type="number" step="${step}" data-num="${k}"></label>`).join('') + `</div></fieldset>`).join('')}
-      <fieldset class="mrt-box"><legend>互通的捷運站（搭上車會隨機開到另一站）</legend>
+      <fieldset class="mrt-box"><legend>互通的捷運站（搭上車會照順序輪流開到其他站）</legend>
         <p class="help" style="margin-top:0">地圖 id 在地圖編輯器的地圖清單看得到（例如 map_mvxz356e）。到站音樂填音效編輯器裡的名稱（mrtArriveRed＝淡水信義線-紅線、mrtArriveBlue＝板南線-藍線、mrtArriveGreen＝松山新店線-綠線、mrtArriveOrange＝中和新盧線-橘線；空白＝預設的到站音樂）。不在這份名單裡的地圖，搭車照舊開回同一站。</p>
         <div id="mrtStations"></div><div class="row"><button id="mrtStationAdd" class="btn">＋ 新增車站</button></div></fieldset>
       <div class="row"><button id="mrtReset" class="btn">從正式資料重設</button><span id="mrtStatus" class="status"></span></div>`;
@@ -189,7 +189,7 @@ const MrtTrainEditor = (() => {
     return `/* 捷運列車的設定：由物件編輯器「🚇 捷運列車」匯出（js/mrt-train.js 讀）。
    門洞位置是原圖像素（車廂圖 1040×160）：x＝三個門洞的左緣；y、w、h＝門洞的上緣、寬、高；art＝門的圖裡門板的範圍 [x, y, w, h]。
    cells＝車廂的格子圖（一列一串字，由上往下）：# 擋路、. 車內地板、D 外側門口、F 對面通道（兩側車門都開時才走得過）。
-   stations＝互通的捷運站（搭上車會隨機開到「另一個」車站；arrive＝這個車站的到站音樂，音效編輯器裡的名稱；
+   stations＝互通的捷運站（搭上車會照順序輪流開到「其他」車站；arrive＝這個車站的到站音樂，音效編輯器裡的名稱；
      name＝搭車到這站時畫面橫幅顯示的站名；color＝橫幅上那條線的顏色）。
    nextTrainTime＝沒搭上車／不小心搭上車的隊員，幾秒後才搭下一班車到站。
    秒數、速度的意思見 js/mrt-train.js 最上面的 MRT_TRAIN。 */
