@@ -129,15 +129,21 @@ function suspendLeavingBattle() {
   if (MAP_SAFE || !MAP || !G || G.over || isNewbieMap() || !missionOfMap(MAP.id)) return;
   try { suspendCombatProgress(); } catch (_) { systemNotice('無法儲存作戰進度，請確認儲存空間', true); }
 }
+// 存起來的戰場裡，已經不在這次出勤隊伍的隊員拿掉（回傳現在的隊伍名單）。
+// 例如上次在這裡受傷、回應變中心住院的人，或在基地被換下來的人：不管是從應變中心出擊、還是搭捷運／走入口過來，都不能跟著戰場一起回來
+function dropNonTeamTowers() {
+  const team = getTeam();
+  G.towers = G.towers.filter(t => {
+    if (!TYPES[t.type] || team.includes(t.type)) return true;
+    t.hp = 0; return false;   // 怪物還瞄著他的話，當作倒下
+  });
+  return team;
+}
 // 接續時從應變中心回來：在基地準備的東西要算數（換了隊員、帶了補給、休息過）。走出入口直接回來的就不用
 function resumeSquadFromBase(savedSupply) {
   sortieLastSafe = true; onSortieNewGame();   // 吃掉這次帶的補給、彈匣補滿（js/sortie-supply.js）
   sortie.active = { ...savedSupply, ...sortie.active }; saveSortie();
-  const team = getTeam();
-  G.towers = G.towers.filter(t => {
-    if (!TYPES[t.type] || team.includes(t.type)) return true;
-    t.hp = 0; return false;   // 換下來的隊員：怪物還瞄著他的話，當作倒下
-  });
+  const team = dropNonTeamTowers();
   const missing = team.filter(id => !G.towers.some(t => t.type === id));
   if (missing.length) spawnSentries(missing);
   if (typeof regroupSquadAtCamp === 'function') regroupSquadAtCamp();   // 全員回營地重新出現（不留在上次倒下的地方，js/sentry.js）
@@ -173,6 +179,7 @@ function restoreCombatProgress() {
     reclaimAddedWalls();
     if (typeof setMapObstacleFloor === 'function') for (const o of G.obstacles || []) if (o.floor == null) setMapObstacleFloor(o);   // 舊的保留進度沒記樓層：2 樓的礦物、路障補算成 2 樓（js/maploader.js）
     if (lastSafe === true) resumeSquadFromBase(data.activeSupply);
+    else if (!(typeof practiceOn === 'function' && practiceOn())) dropNonTeamTowers();   // 搭捷運、走入口過來：住院中、沒編入的人不會跟著舊戰場一起出現
     if (lastSafe === true && typeof leaderOnSpawn === 'function') { applyOutfits(); leaderOnSpawn(true); }   // 艾德林帶隊：在基地帶的補給加在玩家身上（js/leader-skills.js）
     if (typeof resumeVitals === 'function') resumeVitals();   // 中間回應變中心治療過：換成現在的 HP、負荷（倒下的隊員治好了就站起來，js/vitals.js）
     applyOutfits(); if (typeof syncSanitySP === 'function') syncSanitySP(); else sanitySP = G.guide; rememberGuideSP(); occCache = null; occCacheFor = null;
