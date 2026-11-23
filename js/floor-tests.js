@@ -15,6 +15,7 @@ window.runFloorTests = async function (report) {
   // ---- 準備：測試模式、靜音、開有 2 樓的地圖 ----
   try { Howler.mute(true); } catch (_) {}
   window.TEST_MODE = true;
+  window.NO_BOSS_CINEMA = true;   // 葫蘆猴王的出場演出會把時間停住，測試不要（js/boss-cinema.js）
   const map = mapList().find(m => m && m.id === 'map_mvxz356e') || mapList().find(m => m && (m.deck || []).length);
   if (!map) { report && report({ name: '找有 2 樓的地圖', ok: false, note: '沒有任何地圖有 2 樓地面' }); return results; }
   switchMap(mapIndexById(map.id)); await wait(800); begin(false); await wait(1200);

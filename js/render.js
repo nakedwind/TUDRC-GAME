@@ -1419,6 +1419,7 @@ function draw() {
   drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
   if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
   drawBaseHpTopBar(ctx, cv);   // 戰鬥區域：畫面最上方的基地血條
+  if (typeof drawBossCinemaBars === 'function') drawBossCinemaBars(ctx, cv);   // BOSS 出場演出的上下黑邊（js/boss-cinema.js）；畫在橫幅底下
   if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
   if (typeof drawPoolTideNotice === 'function') drawPoolTideNotice(ctx, cv);   // 池核：「水位即將上升／下降……」（js/pool-tide.js）
   if (typeof drawMrtStationBanner === 'function') drawMrtStationBanner(ctx, cv);   // 搭捷運到別站：「這是哪一站」的橫幅（js/mrt-train.js）

@@ -258,6 +258,7 @@ function visualLights() {
   if (!G) return [];
   return [...(G.lightFlashes || []), ...(typeof coreGlowLights === 'function' ? coreGlowLights() : []),
           ...(typeof oreGlowLights === 'function' ? oreGlowLights() : []),   // 礦物的紫光（js/ore.js）
+          ...(typeof milkfishKingLights === 'function' ? milkfishKingLights() : []),   // 虱目魚王登場時水面的藍光（js/milkfish-king.js）
           ...(typeof coreKeyLights === 'function' ? coreKeyLights() : []),   // 地上異質鑰匙的紫光（js/core-clear.js）
           ...(typeof fogTreeLights === 'function' ? fogTreeLights() : []), ...(typeof leafPileLights === 'function' ? leafPileLights() : [])];   // 霧樹的紫光、著火的橘光（js/fog.js）
 }

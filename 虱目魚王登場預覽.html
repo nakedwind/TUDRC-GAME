@@ -35,7 +35,7 @@
       <option value="0.25">慢動作 ¼</option>
     </select>
   </label>
-  <label><input id="bright" type="checkbox" checked> 關掉黑暗（看清楚）</label>
+  <label><input id="bright" type="checkbox"> 關掉黑暗（看清楚）</label>
   <label><input id="noBanner" type="checkbox" checked> 隱藏中間橫幅</label>
   <label><input id="sound" type="checkbox"> 聲音</label>
   <span id="status">按「播放登場」開始（第一次要載入遊戲，約 5～10 秒）</span>
@@ -44,6 +44,7 @@
 <iframe id="game" title="虱目魚王登場預覽的遊戲畫面"></iframe>
 <script>
   /* 做法：把真正的遊戲（塔防原型.html）開在下面的框裡，用遊戲自己的畫面程式播，不另外做一版。
+     出場時時間停住、鏡頭移到核心、上下黑邊都是遊戲本身的 BOSS 出場演出（js/boss-cinema.js），這頁沒有另外做。
      每按一次「播放登場」：開 G11（測試模式）→ 重新開一場 → 溫特站到水池和原位中間 → 照「溫特開槍打到核心」觸發登場。
      不會動到存檔：遊戲頁在載入前先加一小段程式，所有存檔都只寫在記憶體裡，關掉這頁就消失（用哪個伺服器打開都一樣）。
      登場的秒數、高度、震動大小在怪物編輯器「虱目魚王」的「登場：」那幾格改（這頁只負責播放）。 */
@@ -81,12 +82,10 @@
     run(`restoreCombatProgress = () => false; restoreSlotScene = () => false;
          if (typeof markMissionMapReached === 'function') markMissionMapReached = () => {};
          if (typeof fundCardDue === 'function') fundCardDue = () => false;
-         // 速度：遊戲每一幀的時間乘上倍數（0＝暫停）
-         // 鏡頭：有指定對準的點就對準那裡（只有這個預覽頁會這樣，遊戲本身照舊跟著溫特）
-         if (!window.__mkOrigCam) { window.__mkOrigCam = updateCamera; updateCamera = function () {
-           const f = window.__mkCamFocus; if (!f) return __mkOrigCam();
-           cam.x = Math.max(0, Math.min(COLS * CELL - viewW(), f.x - viewW() / 2)); cam.y = Math.max(0, Math.min(ROWS * CELL - viewH(), f.y - viewH() / 2)); }; }
-         if (!window.__mkOrigUpdate) { window.__mkOrigUpdate = update; update = function (dt) { return __mkOrigUpdate(dt * (window.__mkSpeed ?? 1)); }; }`);
+         // 速度：遊戲每一幀的時間乘上倍數（0＝暫停）；BOSS 出場演出中遊戲跑的是 bossCinemaTick（js/boss-cinema.js），也要一起乘
+         // 鏡頭不用另外管：遊戲自己的出場演出會把鏡頭移到核心
+         if (!window.__mkOrigUpdate) { window.__mkOrigUpdate = update; update = function (dt) { return __mkOrigUpdate(dt * (window.__mkSpeed ?? 1)); }; }
+         if (!window.__mkOrigCinema && typeof bossCinemaTick === 'function') { window.__mkOrigCinema = bossCinemaTick; bossCinemaTick = function (dt) { return __mkOrigCinema(dt * (window.__mkSpeed ?? 1)); }; }`);
   }
 
   async function play() {
@@ -105,9 +104,8 @@
            G.cores.forEach(c => { c.timer = 1e9; });     // 核心先不召喚小怪，畫面乾淨
            G.enemies.length = 0;                         // 地圖上本來就有的小怪也先清掉（虱目魚王這時還躲在水裡，不在這裡面）
            for (const t of G.towers) t.frozenT = 999;     // 隊員站著不動、不搶鏡頭
-           // 鏡頭對準整段動作的中間（水池和原位中間、往上抬到牠跳起來的高度）；溫特站到下面不擋畫面
-           { const I = G.mkIntro, e = I.e, x = (I.from.x + I.to.x) / 2, y = Math.max(I.from.y, I.to.y) + CELL * 2.5;
-             window.__mkCamFocus = { x, y: (I.from.y + I.to.y) / 2 - (mkCfg(e).introLeapHeight + (e.drawHeight || 240)) / 2 + 30 };
+           // 溫特站到水池和落地點中間的下方（開場鏡頭跟著溫特，觸發後遊戲的出場演出會把鏡頭移到核心）
+           { const I = G.mkIntro, x = (I.from.x + I.to.x) / 2, y = Math.max(I.from.y, I.to.y) + CELL * 4;
              const spot = mkFreeCellNear(x, y); if (spot) { const [px, py] = center(spot[0], spot[1]); G.player.x = px; G.player.y = py; }
              G.player.facing = 'right'; }
            G.coreBanner = null;`);
@@ -131,8 +129,10 @@
     const hideBanner = () => { if ($('noBanner').checked) run('G.coreBanner = null'); };   // 「核心甦醒了」「虱目魚王甦醒了」的大橫幅會擋住畫面
     while (id === watchId && win && run('!!(G && G.mkIntro)')) { hideBanner(); await wait(100); }
     if (id !== watchId) return;
-    status('落地了！牠會去吞核心，接著開始戰鬥（再按「重播登場」重來）');
+    status('落地了！牠會去吞核心……');
     for (let i = 0; i < 30 && id === watchId; i++) { hideBanner(); await wait(100); }   // 落地後的吼叫橫幅也收掉
+    while (id === watchId && win && run("typeof bossCinemaActive === 'function' && bossCinemaActive()")) await wait(150);
+    if (id === watchId) status('出場演出結束，鏡頭回到溫特、開始戰鬥（再按「重播登場」重來）');
   }
   function showValues() {
     const v = run(`(() => { const c = mkCfg(G.mkIntro.e); return [c.introRumble, c.introShake, c.introLeapTime, c.introLeapHeight, c.introLandShake]; })()`);

@@ -202,7 +202,7 @@ function updateRatKing(dt) {
     K.t -= dt;
     const x = rkHomeX(), y = rkEdgeY(), Em = RAT_KING.emerge;
     if (K.t <= Em.rumble) {
-      if (!K.noticed) { K.noticed = true; systemNotice('⚠ 鐵軌底下傳來啃咬聲……', true); rkSound('mouseDig', x, y, 1.1); }
+      if (!K.noticed) { K.noticed = true; systemNotice('⚠ 鐵軌底下傳來啃咬聲……', true); rkSound('mouseDig', x, y, 1.1); rkStartCinema(K); }
       // 越接近冒出來震得越大
       if (typeof addShake === 'function') addShake(3 + 4 * (1 - K.t / Em.rumble));
       if (Math.random() < dt * 9) rkDirt(x + rkRand(-3, 3) * CELL, y, .8);
@@ -239,6 +239,17 @@ function updateRatKing(dt) {
   }
   if ((K.coreT -= dt) <= 0) { K.coreT = rkRand(...RAT_KING.core.every); rkGrabCore(K, e); }
   if (e.rkEnraged && (K.miceT -= dt) <= 0) { K.miceT = rkRand(...RAT_KING.mice.every); rkSummonMice(K, e); }
+}
+// ---- BOSS 出場演出（js/boss-cinema.js）：鐵軌底下開始啃咬時，時間停住、鏡頭移到鐵軌，看牠鑽出來亮相完才結束 ----
+function rkStartCinema(K) {
+  if (K.cinema || typeof startBossCinema !== 'function') return;
+  K.cinema = true;
+  startBossCinema({
+    focus: { x: rkHomeX(), y: rkEdgeY() - CELL * 2 },   // 鐵軌和月台邊緣（牠鑽出來的地方）
+    tick: dt => updateRatKing(dt),                      // 停住的時候只跑：震動、冒土、鑽出來亮相
+    done: () => K.phase !== 'sleep' && K.phase !== 'rumble' && K.phase !== 'rise',
+    holdAfter: .3, maxTime: 14,
+  });
 }
 // 場上還沒打破的核心有幾顆（躲在地底的也算）
 const rkCoresAlive = () => (G.cores || []).filter(c => !c.dead).length;

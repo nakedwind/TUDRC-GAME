@@ -87,7 +87,7 @@ const mkAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
 
 // ---- 開場：照 MILKFISH_KING_MAPS 擺在核心旁（game.js 在 seedCores 之後呼叫）----
 function seedMilkfishKing() {
-  G.mkKings = []; G.mkShots = []; G.mkShards = []; G.mkIntro = null;
+  G.mkKings = []; G.mkShots = []; G.mkShards = []; G.mkIntro = null; G.mkGlow = null;
   const cfg = typeof MAP !== 'undefined' && MAP ? MILKFISH_KING_MAPS[MAP.id] : null;
   if (!cfg || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'milkfish_king');
@@ -763,6 +763,7 @@ function mkLaunchMate(e, t, x1, y1) {
 function updateMilkfishKing(dt) {
   if (!G) return;
   mkIntroUpdate(dt);   // 從水池登場的表演
+  mkGlowTick(dt);      // 登場時水面的藍光
   for (const e of [...mkKings()]) {
     const mk = e.mk;
     if (!mkAlive(e)) { mkDown(e); continue; }
@@ -1121,8 +1122,55 @@ function milkfishKingCoreShot(core) {
   const I = G && G.mkIntro;
   if (!I || I.phase !== 'hidden' || (I.e.mk.core && I.e.mk.core !== core)) return;
   I.phase = 'rumble'; I.t = 0;
+  G.mkGlow = { x: I.from.x, y: I.from.y, k: 0, target: .3 };   // 水面的藍光（沒燈照也看得清楚）：越接近竄出越亮
   if (typeof systemNotice === 'function') systemNotice('水池裡好像有什麼東西……！', true);
   if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', I.from.x, I.from.y, 1.2, 'milkfish-king-intro-rumble');   // 水底傳來低沉的吼聲
+  // BOSS 出場演出（js/boss-cinema.js）：整個戰場時間停住、鏡頭移到核心，看牠從水池竄出、落地、把核心吞進肚子才結束
+  const king = I.e, kc = king.mk.core || core;
+  if (typeof startBossCinema === 'function') startBossCinema({
+    focus: { x: kc.x, y: kc.y - 170 },   // 核心偏下、上面留空間給牠跳起來（跳到最高點才不會被切掉）
+    tick: mkCinemaTick,
+    done: () => !G.mkIntro && (king.mk.coreIn || !kc || kc.dead || !G.enemies.includes(king)),
+    holdAfter: .6, maxTime: 16,
+  });
+}
+// 出場演出中（戰場停住）每一幀：只跑牠自己的登場、落地後吼叫、走去吞核心
+function mkCinemaTick(dt) {
+  updateMilkfishKing(dt);
+  for (const e of mkKings()) {
+    if (!G.enemies.includes(e)) continue;
+    if (typeof setFloorCtx === 'function') setFloorCtx(e);
+    stepEnemy(e, dt);
+    if (typeof clearFloorCtx === 'function') clearFloorCtx();
+  }
+}
+// 水面藍光：慢慢變亮／變暗（每一幀 updateMilkfishKing 呼叫）
+function mkGlowTick(dt) {
+  const L = G.mkGlow; if (!L) return;
+  L.k += (L.target - L.k) * Math.min(1, dt * (L.target > L.k ? 3 : 1.2));
+  if (L.target <= 0 && L.k < .02) G.mkGlow = null;
+}
+// 給燈光系統的藍光（js/lighting.js 的 visualLights）：水面一盞；竄出來的時候牠身上再一盞（跟著牠飛）
+function milkfishKingLights() {
+  const L = G && G.mkGlow; if (!L) return [];
+  const now = performance.now() / 1000, I = G.mkIntro, out = [];
+  out.push({ x: L.x, y: L.y - 6, r: 230, life: 1, life0: 1, power: L.k * (.8 + .12 * Math.sin(now * 7)), color: [70, 165, 255] });
+  if (I && I.phase === 'leap') { const e = I.e; out.push({ x: e.x, y: e.y - Math.max(0, e.slimeLift) - (e.drawHeight || 240) * .35, r: 170, life: 1, life0: 1, power: .65 * L.k, color: [120, 200, 255] }); }
+  return out;
+}
+// 水面上一圈發亮的藍色（加亮疊上去，像水底透出光）；畫在牠後面
+function mkDrawGlow(ctx) {
+  const L = G.mkGlow; if (!L || L.k < .02) return;
+  const now = performance.now() / 1000, rx = CELL * 2.4, ry = CELL * 1.1, pulse = 1 + .06 * Math.sin(now * 6);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.translate(L.x, L.y + 6); ctx.scale(1, ry / rx);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx * pulse);
+  g.addColorStop(0, 'rgba(120,210,255,' + (.75 * L.k) + ')'); g.addColorStop(.45, 'rgba(60,150,255,' + (.45 * L.k) + ')'); g.addColorStop(1, 'rgba(30,90,255,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rx * pulse, 0, Math.PI * 2); ctx.fill();
+  // 水面閃爍的亮紋
+  ctx.strokeStyle = 'rgba(190,240,255,' + (.5 * L.k) + ')'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  for (let i = 0; i < 5; i++) { const a = now * (.8 + i * .17) + i * 1.3, rr = rx * (.25 + .14 * i); ctx.beginPath(); ctx.arc(0, 0, rr, a, a + .9); ctx.stroke(); }
+  ctx.restore();
 }
 function mkIntroUpdate(dt) {
   const I = G.mkIntro;
@@ -1132,6 +1180,7 @@ function mkIntroUpdate(dt) {
   I.t += dt;
   if (I.phase === 'rumble') {   // 越震越大、水面冒泡
     const k = Math.min(1, I.t / C.introRumble);
+    if (G.mkGlow) G.mkGlow.target = .35 + .65 * k;   // 水面藍光越來越亮
     mkRumble(C.introShake * (.25 + .75 * k), .25);
     I.bubbleT -= dt;
     while (I.bubbleT <= 0) {
@@ -1148,6 +1197,7 @@ function mkIntroUpdate(dt) {
     const p = Math.min(1, I.t / C.introLeapTime);
     e.x = I.from.x + (I.to.x - I.from.x) * p; e.y = I.from.y + (I.to.y - I.from.y) * p;
     e.slimeLift = mkIntroLift(e, p);
+    if (G.mkGlow) G.mkGlow.target = 1;
     e.faceRight = I.to.x > I.from.x;
     mkFront(e);   // 出場一路都是正面（攻擊圖只在吞核心、咬人、吐東西時用）
     // 身上一路往下滴水
@@ -1184,6 +1234,7 @@ function mkIntroWaveBreak(I) {
 function mkIntroLand(I) {
   const e = I.e, C = mkCfg(e), w = e.drawWidth || 200;
   G.mkIntro = null;
+  if (G.mkGlow) G.mkGlow.target = 0;   // 水面藍光慢慢淡掉
   e.x = I.to.x; e.y = I.to.y; e.slimeLift = 0; e.hitSquashT = .16;   // 落地壓扁一下
   e.mk.home = { x: e.x, y: e.y };
   G.enemies.push(e);
@@ -1204,6 +1255,7 @@ function mkIntroLand(I) {
 }
 // 畫在空中的牠＋跟著衝上來的水浪（js/render.js 收集要排前後的東西時呼叫）
 function milkfishKingSortables(list) {
+  if (G && G.mkGlow) list.push({ floor: 1, band: typeof DRAW_BAND !== 'undefined' ? DRAW_BAND.obj : 2, y: G.mkGlow.y - 40, draw: () => mkDrawGlow(ctx) });   // 水面藍光：畫在牠和水浪後面
   const I = G && G.mkIntro;
   if (!I || I.phase !== 'leap') return;
   list.push({ floor: typeof visualFloor === 'function' ? visualFloor(I.e) : 1, band: typeof DRAW_BAND !== 'undefined' ? DRAW_BAND.obj : 2, y: Math.max(I.e.y, I.from.y) + 13, draw: () => mkIntroDraw(ctx, I) });   // 跟一般怪物一樣排在人物那一層

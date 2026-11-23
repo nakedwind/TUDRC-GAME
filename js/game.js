@@ -1297,12 +1297,14 @@ function updateCamera() {
   cam.y = p ? Math.max(0, Math.min(mapH - vh, p.y - vh / 2)) : 0;
   if (mapW <= vw) cam.x = (mapW - vw) / 2;           // 地圖比畫面小 → 置中
   if (mapH <= vh) cam.y = (mapH - vh) / 2;
+  if (typeof bossCinemaCamera === 'function') bossCinemaCamera();   // BOSS 出場演出：鏡頭滑到出場的地方（js/boss-cinema.js）
 }
 
 // ---- 遊戲狀態 ----
 let G;
 function newGame() {
   if (StoryScene.active()) { StoryScene.prepare(); return; }
+  if (typeof resetBossCinema === 'function') resetBossCinema();   // 上一場還在演 BOSS 出場：收掉（js/boss-cinema.js）
   StoryScene.leave();
   document.getElementById('screenShade').classList.remove('player-dying');   // 溫特陣亡動畫的變暗效果
   applyOutfits();   // 依這張地圖是安全區或戰鬥區，換成 A／B 造型
@@ -2328,15 +2330,19 @@ function frame(ts) {
   // 不然第一幀會照 1 樓的規則判斷：站在只有 2 樓的地板上＝卡在牆裡，被推到最近的 1 樓空格（樓梯旁的洞、柱子裡、黑色的地方），
   // 之後一直找不到路回 2 樓，每次找路都把整張地圖搜一遍，遊戲就會一頓一頓的（B56 出過）
   if (hasFloors) for (const a of [G.player, ...(G.towers || []), ...(G.npcs || [])]) if (a && a.floor == null) updateActorFloor(a);
-  if (!menuOpen && !frozen) { setFloorCtx(G.player); updatePlayer(sdt); updateActorFloor(G.player); clearFloorCtx(); autoStairTravel(); holdPickupTick(dt); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓；按住空白鍵連續拾取
+  const cinema = typeof bossCinemaActive === 'function' && bossCinemaActive();   // BOSS 出場演出中：時間停住、溫特不能動（js/boss-cinema.js）
+  if (!menuOpen && !frozen && !cinema) { setFloorCtx(G.player); updatePlayer(sdt); updateActorFloor(G.player); clearFloorCtx(); autoStairTravel(); holdPickupTick(dt); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓；按住空白鍵連續拾取
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）
   // 衣櫃／推薦穿搭開著也要停（以前只停住溫特，被換衣服的人會自己走掉）
   if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !(typeof clawOpen !== 'undefined' && clawOpen) && !(typeof gachaOpen !== 'undefined' && gachaOpen) && !(typeof wardrobeOpen !== 'undefined' && wardrobeOpen) && !(typeof workshopOpen !== 'undefined' && workshopOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
+    if (cinema) { try { bossCinemaTick(sdt); } catch (err) { reportFrameError(err, 'BOSS 出場演出'); } }   // BOSS 出場演出：只有出場動畫和特效在動，戰場其他東西、作戰計時都停住（js/boss-cinema.js）
+    else {
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
+    }
   }
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   // T-Pad 開著：遊戲本來就暫停，後面的畫面不用一直重畫（不然 T-Pad 背後的模糊每一格都要重算，開關動畫會卡）

@@ -174,6 +174,8 @@ function updateGourdKing(dt) {
   }
   if (K.phase === 'knock') {
     K.t -= dt;
+    // 最後一下（撞破）前 GK_CINEMA_LEAD 秒：開始 BOSS 出場演出（時間停住、鏡頭移到 BOSS 牆），看牠撞破牆、亮相完才結束（js/boss-cinema.js）
+    if (!K.cinema && K.hits === GOURD_KING.wall.stages.length - 1 && K.t <= GK_CINEMA_LEAD) gkStartCinema(K);
     if (K.t > 0) return;
     K.hits++;
     gkWallHit(K, K.hits);
@@ -194,6 +196,23 @@ function updateGourdKing(dt) {
   }
 }
 
+// ---- BOSS 出場演出（js/boss-cinema.js）：前幾下撞牆照常打（聽得到、感覺得到震動），撞破前才把時間停住、鏡頭移過來 ----
+const GK_CINEMA_LEAD = 1.2;   // 最後一下撞破之前幾秒開始演出（鏡頭滑過去要 0.8 秒，剛好趕上撞破那一下）
+function gkStartCinema(K) {
+  K.cinema = true;
+  if (typeof startBossCinema !== 'function') return;
+  const box = gkWallBox(K.stamp);
+  startBossCinema({
+    focus: { x: box.cx, y: OY + (box.r0 + 3.5) * CELL },   // 牆和牆腳（牠踏出來亮相的地方）都在畫面裡
+    tick(dt) {   // 停住的時候只跑：撞牆、煙霧、落石粉塵、踏出來亮相
+      updateGourdKing(dt);
+      const e = K.e;
+      if (e && G.enemies.includes(e)) { if (typeof setFloorCtx === 'function') setFloorCtx(e); stepEnemy(e, dt); if (typeof clearFloorCtx === 'function') clearFloorCtx(); }
+    },
+    done: () => !!(K.e && !(K.e.gkIntroT > 0)) || K.phase === 'dead',   // 亮相完、開始攻擊
+    holdAfter: .3, maxTime: 16,
+  });
+}
 // ---- 撞牆一下：換裂痕圖、畫面搖晃、牆抖、碎石、粉塵 ----
 function gkWallHit(K, n) {
   const C = GOURD_KING.knock, s = K.stamp, box = gkWallBox(s), i = n - 1, last = n >= GOURD_KING.wall.stages.length;
