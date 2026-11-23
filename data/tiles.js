@@ -2955,7 +2955,7 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/background/Road-signs.png",
     "w": 5,
-    "h": 2
+    "h": 1
   },
   {
     "id": "tile_bg_word_y28",

@@ -87254,36 +87254,6 @@ const BATTLE_MAPS = [
         "layer": "floor"
       },
       {
-        "id": "tile_mrt_wall_sign_platform",
-        "c": 28,
-        "r": 96,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 32,
-        "r": 96,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 36,
-        "r": 96,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 40,
-        "r": 96,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 44,
-        "r": 96,
-        "layer": "object"
-      },
-      {
         "id": "tile_mrt_escalator_front_high04",
         "c": 20,
         "r": 95,
@@ -87301,12 +87271,6 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_a02",
         "c": 17,
         "r": 94,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 48,
-        "r": 96,
         "layer": "object"
       },
       {
@@ -88213,24 +88177,6 @@ const BATTLE_MAPS = [
         "c": 56,
         "r": 93,
         "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 52,
-        "r": 96,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 56,
-        "r": 96,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_wall_blue_band",
-        "c": 60,
-        "r": 96,
-        "layer": "object"
       },
       {
         "id": "tile_mrt_glass_railing",
@@ -92038,11 +91984,33 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_road_signs",
-        "c": 33,
-        "r": 97,
+        "c": 28,
+        "r": 98,
         "layer": "overlay",
-        "ox": 20,
-        "oy": 15.333333
+        "oy": 19.333333
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 59,
+        "r": 98,
+        "layer": "overlay",
+        "oy": 19.333332999999584
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 38,
+        "r": 77,
+        "layer": "overlay",
+        "oy": 21.333333,
+        "ox": 18
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 61,
+        "r": 70,
+        "layer": "overlay",
+        "oy": 31.33333300000004,
+        "ox": 28
       },
       {
         "id": "tile_mrt_gate_card_readers",
@@ -92737,7 +92705,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_interactive_electric_light_02",
-        "c": 55,
+        "c": 56,
         "r": 97,
         "layer": "object7",
         "ox": 30,
@@ -92848,15 +92816,16 @@ const BATTLE_MAPS = [
         "layer": "overlay",
         "ox": 20,
         "oy": 30,
-        "fx": true
+        "fx": false
       },
       {
         "id": "tile_mrt_poster_moon_lake",
-        "c": 62,
-        "r": 71,
-        "layer": "object6",
+        "c": 50,
+        "r": 73,
+        "layer": "overlay",
         "fx": false,
-        "level": "span"
+        "level": "span",
+        "ox": 7.333333000000039
       },
       {
         "id": "tile_mrt_floor_tile",
@@ -94511,10 +94480,9 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_dmg_floor_crater",
-        "c": 32,
-        "r": 79,
-        "layer": "ground3",
-        "oy": 30
+        "c": 26,
+        "r": 80,
+        "layer": "ground3"
       },
       {
         "id": "tile_dmg_floor_crater",
@@ -94605,12 +94573,6 @@ const BATTLE_MAPS = [
         "r": 22,
         "layer": "ground3",
         "oy": 10
-      },
-      {
-        "id": "tile_mrt_pillar_large",
-        "c": 40,
-        "r": 74,
-        "layer": "object3"
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -95528,18 +95490,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_planter",
-        "c": 41,
+        "c": 43,
         "r": 79,
         "layer": "ground3",
-        "ox": 30,
         "fx": true
       },
       {
         "id": "tile_mrt_planter",
-        "c": 37,
+        "c": 36,
         "r": 79,
         "layer": "ground3",
-        "ox": 10,
         "fx": true
       },
       {
@@ -95570,10 +95530,9 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_waiting_seats",
-        "c": 44,
+        "c": 48,
         "r": 79,
         "layer": "object3",
-        "ox": 20,
         "fx": true
       },
       {
@@ -95581,24 +95540,21 @@ const BATTLE_MAPS = [
         "c": 46,
         "r": 79,
         "layer": "object3",
-        "ox": 20,
         "fx": true
       },
       {
         "id": "tile_mrt_waiting_seats",
-        "c": 35,
+        "c": 34,
         "r": 79,
         "layer": "object3",
-        "ox": 20,
         "fx": true
       },
       {
         "id": "tile_mrt_waiting_seats",
-        "c": 33,
+        "c": 32,
         "r": 79,
         "layer": "object3",
-        "fx": true,
-        "ox": 20
+        "fx": true
       },
       {
         "id": "tile_mrt_pillar_large",
@@ -95740,20 +95696,21 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwfznsie",
-        "c": 40,
-        "r": 78,
+        "c": 37,
+        "r": 77,
         "layer": "object3",
-        "oy": 10,
+        "oy": 30,
         "fx": true,
         "ox": 10
       },
       {
         "id": "tile_mwfznsie",
-        "c": 41,
-        "r": 78,
+        "c": 44,
+        "r": 77,
         "layer": "object3",
-        "oy": 20,
-        "fx": true
+        "oy": 30,
+        "fx": true,
+        "ox": 10
       },
       {
         "id": "tile_hq_potted_plant",
@@ -95793,10 +95750,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvnn2p1x",
-        "c": 65,
+        "c": 64,
         "r": 72,
         "layer": "object9",
-        "ox": 30,
+        "ox": 20,
         "oy": 20,
         "fx": true,
         "level": 2
@@ -96572,9 +96529,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 40,
+        "c": 35,
         "r": 77,
-        "layer": "object14"
+        "layer": "object14",
+        "ox": 20,
+        "oy": 20
       },
       {
         "id": "tile_bg_electric_light",
@@ -96601,12 +96560,6 @@ const BATTLE_MAPS = [
         "layer": "object9"
       },
       {
-        "id": "tile_bg_electric_light",
-        "c": 66,
-        "r": 71,
-        "layer": "object9"
-      },
-      {
         "id": "tile_interactive_electric_light_02",
         "c": 77,
         "r": 80,
@@ -96617,10 +96570,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_interactive_electric_light_02",
-        "c": 68,
+        "c": 67,
         "r": 71,
         "layer": "object9",
-        "circuit": 2
+        "circuit": 2,
+        "ox": 20
       },
       {
         "id": "tile_interactive_electric_light_02",
@@ -96797,7 +96751,6 @@ const BATTLE_MAPS = [
         "c": 69,
         "r": 72,
         "layer": "object9",
-        "ox": 10,
         "oy": 30
       },
       {
@@ -96819,55 +96772,64 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_wall_sign_platform_red",
         "c": 28,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 32,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 36,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 40,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 44,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 48,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 52,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 56,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_mrt_wall_red_band",
         "c": 60,
         "r": 96,
-        "layer": "object"
+        "layer": "object",
+        "oy": 10
       },
       {
         "id": "tile_decor_foldingchair",
@@ -96991,6 +96953,277 @@ const BATTLE_MAPS = [
         "layer": "object9",
         "ox": 20,
         "oy": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 28,
+        "r": 96,
+        "layer": "overlay",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 33,
+        "r": 97,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 37,
+        "r": 97,
+        "layer": "overlay",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 41,
+        "r": 97,
+        "layer": "overlay",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 45,
+        "r": 97,
+        "layer": "overlay",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 49,
+        "r": 97,
+        "layer": "overlay",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 53,
+        "r": 97,
+        "layer": "overlay",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 28,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 31,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 34,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 37,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 40,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 43,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 46,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 49,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 52,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 55,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 58,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 61,
+        "r": 95,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 38,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 43,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 39,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 40,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 41,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mwayj4gp",
+        "c": 42,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 39,
+        "r": 78,
+        "layer": "object4",
+        "oy": 18.666667
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 50,
+        "r": 71,
+        "layer": "overlay",
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 54,
+        "r": 71,
+        "layer": "overlay",
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 55,
+        "r": 71,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 27,
+        "r": 71,
+        "layer": "object2",
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 24,
+        "r": 71,
+        "layer": "object2",
+        "oy": 10
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 19,
+        "r": 114,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 23,
+        "r": 114,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 27,
+        "r": 114,
+        "layer": "object2",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 59,
+        "r": 21,
+        "layer": "object6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 63,
+        "r": 21,
+        "layer": "object6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mrt_wall_red_band",
+        "c": 67,
+        "r": 21,
+        "layer": "object6",
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 61,
+        "r": 85,
+        "layer": "object9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 58,
+        "r": 72,
+        "layer": "object9",
+        "oy": 30,
+        "circuit": 2
       }
     ],
     "solid": [
@@ -143978,17 +144211,18 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 40,
+        "c": 38,
         "r": 63,
         "layer": "top",
-        "ox": 20
+        "oy": 8
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 46,
+        "c": 47,
         "r": 63,
         "layer": "top",
-        "ox": 30
+        "ox": 10,
+        "oy": 7.333333
       },
       {
         "id": "tile_mwbro91n",
@@ -144048,10 +144282,214 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 45,
+        "c": 43,
         "r": 80,
         "layer": "top",
         "ox": 30
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 54,
+        "r": 25,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 58,
+        "r": 25,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 59,
+        "r": 25,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 26,
+        "r": 25,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 30,
+        "r": 25,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 31,
+        "r": 25,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 26,
+        "r": 32,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 30,
+        "r": 32,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 54,
+        "r": 33,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 58,
+        "r": 33,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 62,
+        "r": 33,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 10,
+        "r": 32,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 14,
+        "r": 32,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 71,
+        "r": 32,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 75,
+        "r": 32,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 26,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 30,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 34,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 38,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 42,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 46,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 50,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 54,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 58,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_blue_band",
+        "c": 60,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 46,
+        "r": 6,
+        "layer": "object7",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 41,
+        "r": 64,
+        "layer": "top",
+        "ox": 10
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 46,
+        "r": 81,
+        "layer": "top",
+        "ox": 10
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 48,
+        "r": 80,
+        "layer": "top",
+        "ox": 10
       }
     ],
     "solid": [
@@ -149511,24 +149949,6 @@ const BATTLE_MAPS = [
     "coreSpots": [
       "75,64"
     ],
-    "bossDrops": [
-      "12,61",
-      "19,61",
-      "12,65",
-      "19,65",
-      "14,24",
-      "20,24",
-      "14,28",
-      "20,28",
-      "68,24",
-      "74,24",
-      "68,28",
-      "74,28",
-      "70,61",
-      "77,61",
-      "70,65",
-      "77,65"
-    ],
     "spawnZone": [
       "74,26",
       "73,26",
@@ -152897,6 +153317,24 @@ const BATTLE_MAPS = [
       "38,61",
       "45,61",
       "46,61"
+    ],
+    "bossDrops": [
+      "12,61",
+      "19,61",
+      "12,65",
+      "19,65",
+      "14,24",
+      "20,24",
+      "14,28",
+      "20,28",
+      "68,24",
+      "74,24",
+      "68,28",
+      "74,28",
+      "70,61",
+      "77,61",
+      "70,65",
+      "77,65"
     ]
   },
   {
@@ -152917,7 +153355,7 @@ const BATTLE_MAPS = [
         "67,13": "tile_obstacle_rock_medium_02"
       },
       "object": {
-        "42,82": "tile_interactive_pickup_battery"
+        "42,78": "tile_interactive_pickup_battery"
       },
       "object2": {},
       "object3": {},
@@ -152944,11 +153382,11 @@ const BATTLE_MAPS = [
         "41,15": "tile_interactive_storage_locker_key"
       },
       "object7": {
-        "9,81": "tile_obstacle_ore_small",
         "33,66": "tile_obstacle_ore_small",
         "71,48": "tile_obstacle_ore_small",
         "48,74": "tile_obstacle_ore_small",
-        "36,50": "tile_obstacle_ore_small"
+        "36,50": "tile_obstacle_ore_small",
+        "14,78": "tile_obstacle_ore_small"
       },
       "object8": {
         "81,13": "tile_poolcore_deep_water",
@@ -154234,11 +154672,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_interactive_storage_locker_key",
-        "c": 47,
-        "r": 83,
+        "c": 39,
+        "r": 78,
         "layer": "object",
         "ox": 30,
-        "oy": 10
+        "oy": 30
       },
       {
         "id": "tile_interactive_storage_locker_key",
@@ -158610,16 +159048,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_field_ammo_crate",
-        "c": 9,
-        "r": 82,
+        "c": 10,
+        "r": 79,
         "layer": "object3",
-        "ox": 10,
+        "ox": 30,
         "oy": 20
       },
       {
         "id": "tile_field_ammo_crate",
-        "c": 46,
-        "r": 83,
+        "c": 47,
+        "r": 74,
         "layer": "object3",
         "ox": 30
       },
@@ -162233,6 +162671,338 @@ const BATTLE_MAPS = [
         "layer": "ground3",
         "ox": 30,
         "oy": 30
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 30,
+        "r": 61,
+        "layer": "ground3",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 26,
+        "r": 61,
+        "layer": "ground3",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 22,
+        "r": 61,
+        "layer": "ground3",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 18,
+        "r": 61,
+        "layer": "ground3",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 16,
+        "r": 61,
+        "layer": "ground3",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 47,
+        "r": 42,
+        "layer": "object",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 51,
+        "r": 42,
+        "layer": "object",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 55,
+        "r": 42,
+        "layer": "object",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 58,
+        "r": 42,
+        "layer": "object",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 42,
+        "r": 24,
+        "layer": "ground",
+        "oy": 17.333333
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 46,
+        "r": 24,
+        "layer": "ground",
+        "oy": 17.333333
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 50,
+        "r": 24,
+        "layer": "ground",
+        "oy": 17.333333
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 54,
+        "r": 24,
+        "layer": "ground",
+        "oy": 17.333333
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 47,
+        "r": 36,
+        "layer": "object",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 51,
+        "r": 36,
+        "layer": "object",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 55,
+        "r": 36,
+        "layer": "object",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 58,
+        "r": 36,
+        "layer": "object",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 10,
+        "r": 82,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 11,
+        "r": 82,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 12,
+        "r": 82,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 13,
+        "r": 82,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_room_pillar",
+        "c": 14,
+        "r": 81,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_platform_edge_line",
+        "c": 7,
+        "r": 85,
+        "layer": "ground",
+        "ox": 29.333333,
+        "oy": 5.333333
+      },
+      {
+        "id": "tile_mrt_floor_tile_strip",
+        "c": 7,
+        "r": 86,
+        "layer": "ground",
+        "ox": 20
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 10,
+        "r": 83,
+        "layer": "object2",
+        "oy": -14
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 9,
+        "r": 83,
+        "layer": "overlay",
+        "oy": -20.666667
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 40,
+        "r": 80,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 40,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvyw7lrk",
+        "c": 40,
+        "r": 85,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mvyw7lrk",
+        "c": 40,
+        "r": 83,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 42,
+        "r": 82,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 43,
+        "r": 82,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 44,
+        "r": 82,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 45,
+        "r": 82,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 46,
+        "r": 82,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 47,
+        "r": 82,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 48,
+        "r": 82,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 42,
+        "r": 83,
+        "layer": "top",
+        "oy": -37.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 45,
+        "r": 83,
+        "layer": "top",
+        "oy": -37.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 42,
+        "r": 85,
+        "layer": "top",
+        "oy": -25.333333,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 36,
+        "r": 67,
+        "layer": "ground3",
+        "oy": 10
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 47,
+        "r": 36,
+        "layer": "top",
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 74,
+        "r": 45,
+        "layer": "top",
+        "oy": 20.666667,
+        "ox": -6.666667
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 52,
+        "r": 17,
+        "layer": "top",
+        "oy": 20
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 61,
+        "r": 3,
+        "layer": "top",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mrt_room_wall",
+        "c": 9,
+        "r": 82,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_wall_green_band",
+        "c": 9,
+        "r": 83,
+        "layer": "object",
+        "oy": -14
       }
     ],
     "solid": [
@@ -170142,7 +170912,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_large",
         "c": 48,
         "r": 68,
-        "layer": "object2"
+        "layer": "object3"
       },
       {
         "id": "tile_mrt_floor_tile_1f",
@@ -170682,7 +171452,7 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_pillar_large",
         "c": 12,
         "r": 46,
-        "layer": "object"
+        "layer": "object3"
       },
       {
         "id": "tile_mvyw7lrk",
@@ -172813,21 +173583,24 @@ const BATTLE_MAPS = [
         "c": 30,
         "r": 87,
         "layer": "object2",
-        "doorMode": "picture"
+        "doorMode": "picture",
+        "sortDepth": 0.25
       },
       {
         "id": "tile_bg_backroom_door_wood",
         "c": 34,
         "r": 87,
         "layer": "object2",
-        "doorMode": "picture"
+        "doorMode": "picture",
+        "sortDepth": 0.25
       },
       {
         "id": "tile_bg_backroom_door_wood",
         "c": 38,
         "r": 87,
         "layer": "object2",
-        "doorMode": "picture"
+        "doorMode": "picture",
+        "sortDepth": 0.25
       },
       {
         "id": "tile_new_decor_plant02",
@@ -173780,6 +174553,131 @@ const BATTLE_MAPS = [
         "layer": "ground3",
         "ox": 30,
         "oy": 20
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 21,
+        "r": 72,
+        "layer": "object2",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 25,
+        "r": 72,
+        "layer": "object2",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 29,
+        "r": 72,
+        "layer": "object2",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 33,
+        "r": 72,
+        "layer": "object2",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 37,
+        "r": 72,
+        "layer": "object2",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 41,
+        "r": 72,
+        "layer": "object2",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 45,
+        "r": 72,
+        "layer": "object2",
+        "oy": 24.66666699999996
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 36,
+        "r": 104,
+        "layer": "top"
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 44,
+        "r": 4,
+        "layer": "top",
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_road_signs",
+        "c": 20,
+        "r": 4,
+        "layer": "top",
+        "ox": 10
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 16,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 20,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 24,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 28,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 32,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 36,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 40,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
+      },
+      {
+        "id": "tile_mrt_wall_orange_band",
+        "c": 12,
+        "r": 50,
+        "layer": "object2",
+        "oy": 28
       }
     ],
     "solid": [
