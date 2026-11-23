@@ -32,6 +32,7 @@
     <button type="button" data-boss="milkfish">虱目魚王</button>
     <button type="button" data-boss="gourd">葫蘆猴王</button>
     <button type="button" data-boss="rat">花蓮老鼠王</button>
+    <button type="button" data-boss="moth">人面蝶后</button>
   </span>
   <button id="play" class="main" type="button">▶ 播放出場演出</button>
   <button id="pause" type="button" disabled>⏸ 暫停</button>
@@ -56,10 +57,11 @@
        ・讀怪物編輯器還沒存到專案的暫存（怪物數值、👑 BOSS 數值），改完數字按播放就看得到效果
        ・瀏覽器存檔只能讀、不能寫，不會動到正式進度（塔防原型.html 開頭那段）
      每按一次播放：開那隻 BOSS 的地圖（測試模式）→ 重新開一場 → 照遊戲裡的方式叫醒（溫特開槍打到核心）→ 等演出播完。
-     從怪物編輯器的「▶ 播放出場演出」打開時，網址會帶 ?boss=milkfish｜gourd｜rat。 */
+     人面蝶后不是打核心叫醒：照遊戲裡的方式，把溫特放到牠起點旁邊（MOTH_BOSS.intro.range 格內）就開演。
+     從怪物編輯器的「▶ 播放出場演出」打開時，網址會帶 ?boss=milkfish｜gourd｜rat｜moth。 */
   const $ = id => document.getElementById(id);
   const frame = $('game');
-  const NAMES = { milkfish: '虱目魚王', gourd: '葫蘆猴王', rat: '花蓮老鼠王' };
+  const NAMES = { milkfish: '虱目魚王', gourd: '葫蘆猴王', rat: '花蓮老鼠王', moth: '人面蝶后' };
   let boss = new URLSearchParams(location.search).get('boss');
   if (!NAMES[boss]) boss = 'milkfish';
   let win = null, paused = false, watchId = 0;
@@ -86,8 +88,9 @@
          if (!window.__bcOrigCinema) { window.__bcOrigCinema = bossCinemaTick; bossCinemaTick = function (dt) { return __bcOrigCinema(dt * (window.__bcSpeed ?? 1)); }; }`);
   }
   // 那隻 BOSS 在哪張地圖（照遊戲裡的設定，第一張）
-  const mapOf = b => run(b === 'milkfish' ? 'Object.keys(MILKFISH_KING_MAPS)[0]' : b === 'gourd' ? 'Object.keys(GOURD_KING.maps)[0]' : 'Object.keys(RAT_KING.maps)[0]');
-  const readyOf = b => run(b === 'milkfish' ? '!!(G && G.mkIntro)' : b === 'gourd' ? "!!(G && G.gourdKing && G.gourdKing.phase === 'sleep')" : "!!(G && G.ratKing && G.ratKing.phase === 'sleep')");
+  const mapOf = b => run(b === 'milkfish' ? 'Object.keys(MILKFISH_KING_MAPS)[0]' : b === 'gourd' ? 'Object.keys(GOURD_KING.maps)[0]' : b === 'moth' ? 'Object.keys(MOTH_BOSS.maps)[0]' : 'Object.keys(RAT_KING.maps)[0]');
+  const readyOf = b => run(b === 'milkfish' ? '!!(G && G.mkIntro)' : b === 'gourd' ? "!!(G && G.gourdKing && G.gourdKing.phase === 'sleep')"
+    : b === 'moth' ? "!!(G && typeof mothBosses === 'function' && mothBosses().some(e => e.mb.state === 'hidden'))" : "!!(G && G.ratKing && G.ratKing.phase === 'sleep')");
 
   async function play() {
     $('play').disabled = true; const id = ++watchId;
@@ -110,8 +113,13 @@
       applyBright();
       showValues();
       await wait(300);
-      // 跟遊戲裡一樣：溫特開槍打到核心 → 核心醒來 → BOSS 開始出場
-      run(`{ const B = ${JSON.stringify(boss)};
+      // 跟遊戲裡一樣：溫特開槍打到核心 → 核心醒來 → BOSS 開始出場（人面蝶后：溫特走到牠起點旁邊就開演）
+      if (boss === 'moth') run(`{ const e = mothBosses().find(o => o.mb.state === 'hidden'), p = G.player;
+             p.floor = e.floor; const [bc, br] = cellAt(e.x, e.y); let spot = null;
+             for (let R = 5; R <= 10 && !spot; R++) for (let dc = -R; dc <= R && !spot; dc++) for (const dr of [R, -R, 0]) { const [x, y] = center(bc + dc, br + dr); if (Math.hypot(x - e.x, y - e.y) < (MOTH_BOSS.intro.range - 1) * CELL && mbDropOk(p, x, y)) { spot = [x, y]; break; } }
+             if (spot) { p.x = spot[0]; p.y = spot[1]; } else { p.x = e.x; p.y = e.y + 3 * CELL; }
+             mbIntroStart(e); }`);
+      else run(`{ const B = ${JSON.stringify(boss)};
              const core = B === 'milkfish' ? (G.mkIntro.e.mk.core || G.cores.find(c => !c.dead)) : G.cores.find(c => !c.dead);
              wakeCore(core); core.lastHp = core.hp;
              if (B === 'milkfish') milkfishKingCoreShot(core);
@@ -139,9 +147,10 @@
     if (id === watchId && started) status('演出結束，鏡頭回到溫特、開始戰鬥（再按一次重播）');
   }
   function showValues() {
-    const v = run(`(() => { const C = BOSS_CINEMA; return { pan: C.pan, back: C.back, zoom: C.zoom, bars: C.bars,
+    const v = run(`(() => { const C = BOSS_CINEMA, own = C[${JSON.stringify(boss)}] || {}; return { pan: C.pan, back: C.back, zoom: own.zoom ?? C.zoom, bars: own.bars ?? C.bars,   /* 各 BOSS 自己的拉遠、黑邊（沒設才用共用的） */
       own: ${JSON.stringify(boss)} === 'milkfish' ? '鏡頭往上 ' + C.milkfish.focusUp + ' 像素、吞完核心多停 ' + C.milkfish.holdAfter + ' 秒（登場：震動 ' + mkCfg(G.mkIntro.e).introRumble + ' 秒、空中 ' + mkCfg(G.mkIntro.e).introLeapTime + ' 秒）'
          : ${JSON.stringify(boss)} === 'gourd' ? '第 1 下撞牆前 ' + C.gourd.lead + ' 秒開始、鏡頭在牆頂往下 ' + C.gourd.focusDown + ' 格、亮相完多停 ' + C.gourd.holdAfter + ' 秒'
+         : ${JSON.stringify(boss)} === 'moth' ? '鏡頭在起點往上 ' + C.moth.focusUp + ' 格、亮相完多停 ' + C.moth.holdAfter + ' 秒（黑影 ' + MOTH_BOSS.intro.shadow + ' 秒、俯衝 ' + MOTH_BOSS.intro.dive + ' 秒、落地 ' + MOTH_BOSS.intro.land + ' 秒）'
          : '鏡頭在月台邊緣往上 ' + C.rat.focusUp + ' 格、亮相完多停 ' + C.rat.holdAfter + ' 秒' }; })()`);
     $('values').textContent = '目前數值：鏡頭滑過去 ' + v.pan + ' 秒、滑回 ' + v.back + ' 秒、拉遠 ×' + v.zoom + '、黑邊 ' + v.bars + '；' + v.own
       + '（在怪物編輯器「👑 BOSS 數值」→「🎬 BOSS 出場演出」改；改完再按播放就會用新的）';
