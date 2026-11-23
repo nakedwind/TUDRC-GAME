@@ -1193,7 +1193,7 @@ function draw() {
   if (typeof drawMothClouds === 'function') drawMothClouds(ctx);
   // 記下來的人面蝶，等一下「底下透出的地圖」蓋上來後要在空格那一塊再畫一次（js/under-map.js 的 redrawOverUnderMap），不然會被底圖切掉
   // 人面蝶后飛向鏡頭時淡出（e.mbFade，js/moth-boss.js）：用 filter 讓整隻（影子、身體、核心、手）一起變透明
-  const mothItems = G.enemies.filter(e => e.behavior === 'moth' && enemyVisible(e) && !(e.mbFade <= 0)).map(e => ({ who: e, draw: () => {
+  const mothItems = G.enemies.filter(e => e.behavior === 'moth' && (enemyVisible(e) || (e.mb && e.mb.intro)) && !(e.mbFade <= 0)).map(e => ({ who: e, draw: () => {
     const fade = e.mbFade != null && e.mbFade < 1, prevFilter = ctx.filter;
     if (fade) ctx.filter = 'opacity(' + Math.round(e.mbFade * 100) + '%)';
     if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e);
@@ -1294,7 +1294,7 @@ function draw() {
   if (typeof drawUnderMap === 'function') drawUnderMap(ctx, 'above');   // 有黑幕的地圖：底下透出的另一張地圖畫在黑幕上面（只畫在沒鋪東西的格子，js/under-map.js）
   if (typeof redrawOverUnderMap === 'function') redrawOverUnderMap(ctx, sortables.concat(mothItems));   // 站在亮處、身體伸進空格的怪物、人、建築：在空格那一塊再畫一次，底圖才會在它們下面；飛在空中的（人面蝶、人面蝶后含手上的核心和抓著的人）不管亮暗都不會被底圖蓋住（js/under-map.js）
   // 人面蝶后體型大、飛得高，身體常常一半在亮處一半在暗處：看牠正下方的影子亮不亮，亮就整隻畫在黑幕上面，暗就整隻留在黑幕裡（js/moth-boss.js）
-  for (const it of mothItems) if (it.who.mothBoss && isVisible(it.who.x, it.who.y)) it.draw();
+  for (const it of mothItems) if (it.who.mothBoss && (isVisible(it.who.x, it.who.y) || (it.who.mb && it.who.mb.intro))) it.draw();   // 出場演出中（mb.intro）：不管亮暗都整隻畫在黑幕上面
   if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
   for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);
@@ -1341,6 +1341,7 @@ function draw() {
   if (typeof drawLoofahHelpHints === 'function') drawLoofahHelpHints(ctx);   // 射隊友身上的絲瓜藤時旁邊的「幫隊友掙脫」（js/loofah-lady.js）
   if (typeof drawBedZzz === 'function') drawBedZzz(ctx);   // 躺床睡覺的頭上飄 ZZZ（js/bed-zzz.js）
   if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉彈打睡的頭上飄 Zzz（js/special-guns.js）
+  if (typeof drawMothBossIntro === 'function') drawMothBossIntro(ctx);   // 人面蝶后出場：巨大黑影掠過畫面（js/moth-boss.js）
   if (typeof drawMothOverlay === 'function') drawMothOverlay(ctx);   // 人面蝶：暗處的鱗粉光、翅膀預告光、吸入量表、中毒／混亂記號、溫特睡著（js/human-face-butterfly.js）
   if (typeof drawPaintMarks === 'function') drawPaintMarks(ctx);   // 漆彈標記的怪物：螢光漆、準心（黑暗中也看得到）
   if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 異質探測器：標記溫特附近黑暗中的怪物（js/equipment.js）

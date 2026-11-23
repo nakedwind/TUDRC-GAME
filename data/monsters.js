@@ -1387,6 +1387,16 @@ const BOSS_SETTINGS_DEFAULT = {
       "cover": 0.95
     },
     "meleeLift": 70,
+    "intro": {
+      "range": 12,
+      "shadow": 1.6,
+      "shadowScale": 5,
+      "shadowAlpha": 0.55,
+      "dive": 1.8,
+      "diveRise": 80,
+      "diveAlpha": 0.35,
+      "land": 0.9
+    },
     "leaveTelegraph": 0.9,
     "grab": {
       "every": [
@@ -1697,6 +1707,11 @@ const BOSS_SETTINGS_DEFAULT = {
     "rat": {
       "focusUp": 2,
       "holdAfter": 0.3
+    },
+    "moth": {
+      "focusUp": 4,
+      "zoom": 0.7,
+      "holdAfter": 0.4
     }
   }
 };
