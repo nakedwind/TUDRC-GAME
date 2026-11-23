@@ -299,7 +299,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=ratlast10-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=omendir-20261123"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=bosscfg-20261122"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -372,7 +372,7 @@
   <script src="js/gourd-king.js?v=nobars2-20261123"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
   <script src="js/rat-king.js?v=ratlast10-20261123"></script> <!-- 9f9c. 菁英花蓮版權老鼠「花蓮老鼠王」：O666 上方月台的 BOSS，從鐵軌冒出、手抓人搬核心、核心是護甲、列車撞飛 -->
   <script src="js/human-face-butterfly.js?v=mothdrop-20261123"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
-  <script src="js/moth-boss.js?v=mothomen3-20261123"></script> <!-- 9f10b. 菁英人面蝶「人面蝶后」：抱著核心在 B56 四個區域之間飛、築巢、大面積撒粉 -->
+  <script src="js/moth-boss.js?v=omendir-20261123"></script> <!-- 9f10b. 菁英人面蝶「人面蝶后」：抱著核心在 B56 四個區域之間飛、築巢、大面積撒粉 -->
   <script src="js/milkfish-kid.js?v=offaudit2-20261122"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
   <script src="js/render.js?v=mothflight3-20261123"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->

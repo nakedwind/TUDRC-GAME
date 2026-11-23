@@ -92,9 +92,10 @@ const MOTH_BOSS = applyBossSettings('MOTH_BOSS', {
   // dive＝從鏡頭俯衝下來幾秒、diveRise＝俯衝一開始比平常飛的高度再高幾像素（太高會在畫面外看不到）、diveAlpha＝俯衝一開始多透明（0～1，越小越透明）、land＝落地亮相停幾秒才開始戰鬥
   intro: { range: 12, shadow: 1.6, shadowScale: 2.6, shadowAlpha: .55, dive: 1.8, diveRise: 80, diveAlpha: .35, land: .9 },
   // 出場前的預兆（還沒甦醒、溫特在這張地圖探索時）：偶爾有巨大的蝶后影子從畫面一邊飛過去、伴隨拍翅聲。
-  // every＝每隔幾秒一次（最短～最長）、first＝進地圖後第一次最快幾秒、time＝影子飛過畫面要幾秒、scale＝影子是本體的幾倍大、
+  // 每次飛的方向都不一樣（任何角度都有可能：橫的、斜的、直的，跟上一次至少差 60 度）。
+  // every＝每隔幾秒一次（最短～最長）、first＝進地圖後第一次最快幾秒、time＝影子飛過畫面要幾秒（2026-11-23 使用者要慢一半：2.4 → 4.8）、scale＝影子是本體的幾倍大、
   // alpha＝影子多黑（0～1）、flapEvery＝拍翅聲每幾秒一下、volume＝拍翅聲音量
-  omen: { every: [25, 45], first: 12, time: 2.4, scale: 1.8, alpha: .5, flapEvery: .4, volume: .7 },
+  omen: { every: [25, 45], first: 12, time: 4.8, scale: 1.8, alpha: .5, flapEvery: .4, volume: .7 },
   leaveTelegraph: .9,            // 飛走前在原地大範圍撒粉：預告幾秒（撒的團數、範圍跟 burst 一樣）
   // 抓人：every＝每隔幾秒抓一次（最短～最長）、first＝到巢後第一次等幾秒、range＝離溫特／隊員幾格內才會去抓（一半機率抓溫特、一半抓隊員）、
   // warn＝俯衝前預告幾秒（尖叫、地上紅圈）、dive＝俯衝最久幾秒（沒碰到就撲空）、diveSpeedMul＝俯衝的速度倍率、diveLift＝俯衝時飛多低（像素）、
@@ -506,22 +507,40 @@ function drawMothBossIntro(ctx) {
   for (const e of mothBosses()) {
     const it = e.mb && e.mb.intro, om = e.mb && e.mb.omen;
     if (it && it.phase === 'shadow') { const I = MOTH_BOSS.intro; drawMothShadowPass(ctx, e, Math.min(1, it.t / I.shadow), it.shadowDir, I.shadowScale, I.shadowAlpha, .45, e.mo.flapT || 0); }
-    else if (om) { const O = MOTH_BOSS.omen; drawMothShadowPass(ctx, e, Math.min(1, om.t / O.time), om.dir, O.scale, O.alpha, om.yFrac, om.t * MOTH.flapFps); }   // 出場前的預兆
+    else if (om) { const O = MOTH_BOSS.omen; drawMothShadowPass(ctx, e, Math.min(1, om.t / O.time), om.dir, O.scale, O.alpha, om.yFrac, om.t * MOTH.flapFps, om); }   // 出場前的預兆（照 om.ang 的方向飛）
   }
 }
+// 斜著飛的影子在畫面上的位置（k：0＝剛進畫面、1＝飛出去）：沿著 om.ang 的方向直直穿過畫面，
+//   中線從畫面中間偏 om.off（-0.5～0.5，往旁邊偏幾成），進出都在畫面外（w、h＝影子的大小）
+function mbOmenPos(om, k, w, h) {
+  const vw = viewW(), vh = viewH(), dx = Math.cos(om.ang), dy = Math.sin(om.ang);
+  const half = (Math.abs(dx) * vw + Math.abs(dy) * vh) / 2 + Math.max(w, h) * .6;   // 從中間走到畫面外要多遠
+  const side = om.off * (Math.abs(dx) * vh + Math.abs(dy) * vw) * .5;   // 往旁邊（跟飛的方向垂直）偏多少
+  const t = -half + half * 2 * k, bob = Math.sin(k * Math.PI) * Math.min(vw, vh) * .06;   // bob：飛的途中微微畫一道弧
+  return { x: cam.x + vw / 2 + dx * t - dy * (side + bob), y: cam.y + vh / 2 + dy * t + dx * (side + bob), dx, dy };
+}
 // 巨大的蝶后黑影從畫面一邊掠過另一邊（k：0＝剛進畫面、1＝飛出去；dir：1 往右、-1 往左；yFrac：在畫面幾成高的地方飛過）
-function drawMothShadowPass(ctx, e, k, dir, scale, alpha, yFrac, flap) {
+//   om（出場前的預兆才有）：照 om.ang 的方向飛（任何角度），不照 dir、yFrac
+function drawMothShadowPass(ctx, e, k, dir, scale, alpha, yFrac, flap, om) {
   const vw = viewW(), vh = viewH();
   const f = e.frames || {}, wings = f.walkFront && f.walkFront.length ? f.walkFront : [f.front || e.sprite];
   const img = monsterImage(wings[Math.floor(flap) % wings.length]);
   const sil = img && img.complete && img.naturalWidth && typeof flashSprite === 'function' ? flashSprite(img, '#08040e') : null;
   if (!sil) return;
   const w = e.mbW * scale, h = e.mbH * scale;
-  const x = dir > 0 ? cam.x - w + (vw + w * 2) * k : cam.x + vw + w - (vw + w * 2) * k;
-  const y = cam.y + vh * yFrac + Math.sin(k * Math.PI) * vh * .08;
+  let x, y, tilt = 0;
+  if (om && om.ang != null) {
+    const p = mbOmenPos(om, k, w, h);
+    x = p.x; y = p.y; dir = p.dx >= 0 ? 1 : -1;
+    tilt = Math.max(-.6, Math.min(.6, Math.atan2(p.dy, Math.abs(p.dx)) * .6)) * dir;   // 斜著飛時身體跟著往那邊歪一點（最多約 35 度）
+  } else {
+    x = dir > 0 ? cam.x - w + (vw + w * 2) * k : cam.x + vw + w - (vw + w * 2) * k;
+    y = cam.y + vh * yFrac + Math.sin(k * Math.PI) * vh * .08;
+  }
   ctx.save();
   ctx.globalAlpha = alpha * Math.sin(k * Math.PI);   // 進來、出去時淡一點
   ctx.translate(x, y);
+  if (tilt) ctx.rotate(tilt);
   if (dir > 0) ctx.scale(-1, 1);   // 原圖朝左：往右飛要翻過來
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(sil, -w / 2, -h / 2, w, h);
@@ -535,8 +554,8 @@ function mbOmenTick(e, dt) {
     om.t += dt;
     if ((om.flapCd -= dt) <= 0 && om.t < O.time) {   // 拍翅聲：跟著影子的位置（畫面中間附近，溫特聽得到）
       om.flapCd = O.flapEvery;
-      const k = om.t / O.time, vw = viewW(), x = om.dir > 0 ? cam.x + vw * k : cam.x + vw * (1 - k);
-      if (typeof sfxAt === 'function') sfxAt('mothFlap', x, cam.y + viewH() * om.yFrac, O.volume, 'moth-boss-omen');
+      const pos = mbOmenPos(om, om.t / O.time, 0, 0);
+      if (typeof sfxAt === 'function') sfxAt('mothFlap', pos.x, pos.y, O.volume, 'moth-boss-omen');
     }
     if (om.t >= O.time) { mb.omen = null; mb.omenCd = mothRand(O.every[0], O.every[1]); }
     return;
@@ -544,7 +563,15 @@ function mbOmenTick(e, dt) {
   if (mb.omenCd == null) mb.omenCd = mothRand(O.first, O.first + (O.every[1] - O.every[0]));   // 進地圖後第一次
   mb.omenCd -= dt;
   if (mb.omenCd > 0 || !p || p.hp <= 0 || (typeof bossCinemaActive === 'function' && bossCinemaActive())) return;
-  mb.omen = { t: 0, dir: Math.random() < .5 ? 1 : -1, yFrac: mothRand(.3, .6), flapCd: 0 };
+  // 方向：隨機任何角度，跟上一次至少差 60 度（才不會連續兩次看起來一樣）
+  let ang = Math.random() * Math.PI * 2;
+  for (let i = 0; i < 20 && mb.omenLastAng != null; i++) {
+    const d = Math.abs(((ang - mb.omenLastAng) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI);
+    if (d >= Math.PI / 3) break;
+    ang = Math.random() * Math.PI * 2;
+  }
+  mb.omenLastAng = ang;
+  mb.omen = { t: 0, ang, off: mothRand(-.35, .35), dir: Math.cos(ang) >= 0 ? 1 : -1, yFrac: .45, flapCd: 0 };
 }
 
 // ===== 飛行手感（MOTH_BOSS.flight）=====

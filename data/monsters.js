@@ -1436,7 +1436,7 @@ const BOSS_SETTINGS_DEFAULT = {
         45
       ],
       "first": 12,
-      "time": 2.4,
+      "time": 4.8,
       "scale": 1.8,
       "alpha": 0.5,
       "flapEvery": 0.4,
