@@ -1176,7 +1176,10 @@ function mkDrawGlow(ctx) {
 }
 function mkIntroUpdate(dt) {
   const I = G.mkIntro;
-  if (G.poolSplash && G.poolSplash.length && typeof updatePoolSplash === 'function' && !(typeof poolTideActive === 'function' && poolTideActive())) updatePoolSplash(dt);   // 水花（池核地圖以外由這裡更新；池核自己會更新）
+  // 水花：游泳池地圖平常由游泳池系統更新（js/pool-tide.js → pool-boss.js 的 updatePoolBoss），其他地圖由這裡更新。
+  // BOSS 出場演出時時間停住、游泳池系統不會跑，這時也要由這裡更新，不然水花會卡在半空不動
+  const tideRuns = typeof poolTideActive === 'function' && poolTideActive() && !(typeof bossCinemaActive === 'function' && bossCinemaActive());
+  if (G.poolSplash && G.poolSplash.length && typeof updatePoolSplash === 'function' && !tideRuns) updatePoolSplash(dt);
   if (!I || I.phase === 'hidden') return;
   const e = I.e, C = mkCfg(e), F = MILKFISH_KING_FX.intro;
   I.t += dt;
