@@ -15,7 +15,7 @@
      ・溫特坐救生圈下水後，每隔 0.6～0.8 秒，讓「離溫特最近、正要走進深水區、有自己游泳圈」的隊員下水
      ・隊員撿到的游泳圈整趟出勤都帶著（換戰鬥地圖也帶著）；回到基地、隊員離隊、重新整理遊戲時，自動還回溫特的背包（不會弄丟）
      ・坐救生圈的隊員一樣不能攻擊（js/game.js 的哨兵攻擊），划回岸上就自動收起救生圈
-     ・划水的時候循環播放划水聲（音效編輯器的 poolPaddle） */
+     ・划水的時候循環播放划水聲（音效編輯器的 poolPaddle）；掉進水裡掙扎時也播（js/pool-fall.js 的 poolStruggleSoundGain） */
 const SWIM_RING = {
   itemId: 'swim-ring',
   hintText: '好像可以用泳圈做點什麼……',   // 身上沒有泳圈、想走進深水區時溫特頭上的泡泡（有泳圈的話改成腳下出現「進入水中」）
@@ -415,9 +415,11 @@ function drawSwimRinged(a, drawFn) {
   setInterval(() => {
     if (!unlocked || typeof SFX === 'undefined') return;
     const p = typeof G !== 'undefined' && G && G.player;
-    const on = !!(p && p.swimRing && p.moving && G.running && !G.over);
+    const live = !!(p && G.running && !G.over);
+    // 多大聲：坐救生圈在動＝1；有人掉進水裡掙扎＝看離多遠（js/pool-fall.js 的 poolStruggleSoundGain），兩個取大的
+    const mul = !live ? 0 : Math.max(p.swimRing && p.moving ? 1 : 0, typeof poolStruggleSoundGain === 'function' ? poolStruggleSoundGain() : 0);
     const file = fileOf(SWIM_RING.paddleSound);
-    const want = on && file && SFX.enabled ? Math.min(1, SFX.volume * (SFX.gainOf(SWIM_RING.paddleSound) ?? 1)) : 0;
+    const want = mul > 0 && file && SFX.enabled ? Math.min(1, SFX.volume * (SFX.gainOf(SWIM_RING.paddleSound) ?? 1) * mul) : 0;
     if (file && want > 0 && (!audio || audioFile !== file)) {
       if (audio) audio.pause();
       audio = new Audio('Sound effects/' + file); audio.loop = true; audio.volume = 0; audioFile = file;

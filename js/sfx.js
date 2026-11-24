@@ -250,7 +250,8 @@ const SFX = (() => {
     whiteNoise: '環境/白噪音.mp3',
     poolDrip: '滴水聲.mp3',
     poolWaterDrop: '環境/水滴聲.mp3',   // 池核的環境背景音（跟滴水聲一起循環，js/map-ambient.js）
-    poolPaddle: '划水聲.mp3',
+    poolPaddle: '划水聲.mp3',   // 坐救生圈划水、掉進水裡掙扎時循環播放（js/swim-ring.js）
+    poolFallSplash: '環境/落水聲.mp3',   // 溫特、隊員掉進深水的那一刻（跟 poolBossSplash 水花聲一起播，js/pool-fall.js）
     wetSlip: '環境/水滴聲.mp3',   // 池核濕地板滑倒（js/wet-floor.js）
     poolBossSplash: '怪物/魚頭君/噴水攻擊.mp3',   // 池核 BOSS 浮上來、潛下去（js/pool-boss.js）
     poolBossDive: '環境/跳到水裡.mp3',   // 池核 BOSS 高高跳起、栽進水裡的那一刻（跟上面的水花聲一起播，js/pool-boss.js）
