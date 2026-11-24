@@ -144516,22 +144516,6 @@ const BATTLE_MAPS = [
         "r": 80,
         "layer": "top",
         "ox": 10
-      },
-      {
-        "id": "tile_mwbro91n",
-        "c": 22,
-        "r": 18,
-        "layer": "object3",
-        "ox": 32.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mwbro91n",
-        "c": 64,
-        "r": 18,
-        "layer": "object3",
-        "ox": 20,
-        "oy": 20
       }
     ],
     "solid": [
