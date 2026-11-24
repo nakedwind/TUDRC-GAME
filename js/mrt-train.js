@@ -47,7 +47,9 @@ const MRT_TRAIN = {
   farDoor:   { file: 'images/捷運車站/mrt-train-door-2.png', x: [113, 449, 785], y: 15, w: 112, h: 84, art: [3, 17, 114, 86] },
   firstWait: 3,         // 開始戰鬥後幾秒來第一班
   monsterChance: .3,    // 地圖編輯器勾了「會載怪物」的列車：每班到站有多少機率載怪物（0～1）
-  monsterMin: 2, monsterMax: 4,   // 載怪物時一班幾隻（隨機；怪物種類照這張地圖的怪物比例）
+  monsterMin: 2, monsterMax: 4,   // 載怪物時一班幾隻（隨機；怪物種類照這張地圖的怪物比例，只挑小型怪物）
+  // 小型怪物（怪物種類 id）：列車只載這些；其他（大型）怪物不會走進停著的車廂、也不會穿過車廂。大體型（巨型史萊姆…）一律算大型
+  smallMonsters: ['slime', 'bird_head', 'pearl_kid', 'fish_head', 'milkfish_kid_small', 'loofah_lady'],
   firstStagger: 15,     // 第一班錯開：每台車再多等 0～這麼多秒（隨機），不會全部同時到站；發電機全開時也照這個一台一台陸續開門
   waitMin: 18, waitMax: 30,   // 離站後隔多久來下一班（秒，隨機）
   arriveDecel: 230,     // 進站減速度（像素／秒²）：越小進站越久
@@ -320,7 +322,7 @@ function updateMrtGates(tr) {
     }
   }
   tr.gateKey = key;
-  if (typeof computeFlow === 'function') computeFlow();
+  mrtFlowDirty = true;   // 怪物的路線圖等這一幀的列車都更新完再重算一次（js/pathfinding.js 的 computeFlow）
   for (const a of [...G.towers, ...G.npcs, ...G.enemies]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
 }
 // 閘門開了幾成（0＝關著、1＝全開）：跟著車門一起動
@@ -384,7 +386,7 @@ function mrtTrainUpdateSolid(tr) {
   tr.solidKey = key;
   for (const k of tr.walls) { mapWalls.delete(k); mrtTrainWalls.delete(k); }
   mrtTrainRestoreCleared(tr);
-  tr.walls = []; tr.edges = []; tr.floor = [];
+  tr.walls = []; tr.edges = []; tr.floor = []; mrtBigCells = null;   // 車廂地板變了：大型怪物不能踩的格子重算
   if (key) {
     const open = key === 'open', far = open && tr.bothDoors, up = mrtTrainFloor(tr) === 2 && typeof floor2Solid !== 'undefined';
     const type = new Map();
@@ -420,7 +422,7 @@ function mrtTrainUpdateSolid(tr) {
     if (!open) mrtTrainClearSill(tr, type);   // 車門關上：站在門檻上的人推進車裡或推回月台
   }
   mrtTrainApplyEdges();
-  if (typeof computeFlow === 'function') computeFlow();
+  mrtFlowDirty = true;   // 怪物的路線圖等這一幀的列車都更新完再重算一次（js/pathfinding.js 的 computeFlow）
   for (const a of [...G.towers, ...G.npcs, ...G.enemies]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
 }
 const mrtTrainActors = () => [G.player, ...G.towers, ...G.npcs, ...G.enemies].filter(a => a && !a.dead);
@@ -895,6 +897,23 @@ function mrtRollMonsters(tr) {
   const lo = Math.max(0, Math.round(T.monsterMin ?? 2)), hi = Math.max(lo, Math.round(T.monsterMax ?? 4));
   return lo + Math.floor(Math.random() * (hi - lo + 1));
 }
+// ---- 小型／大型怪物：列車只載小型；大型怪物不進車廂、不穿過車廂 ----
+const mrtIsBigMonster = e => !!e && !e.dummy && (!!e.wide || !(MRT_TRAIN.smallMonsters || []).includes(e.type));   // 大體型（巨型史萊姆…）一律算大型
+let mrtBigCells = null, mrtBigCellsFor = null;   // 停著的列車車廂裡走得進去的格子（大型怪物當成牆）；車廂地板變了、換地圖就重算
+function mrtBigBlockedCell(e, c, r) {
+  if (!G || !G.mrtTrains || !G.mrtTrains.length || !mrtIsBigMonster(e)) return false;
+  if (!mrtBigCells || mrtBigCellsFor !== G.mrtTrains) { mrtBigCellsFor = G.mrtTrains; mrtBigCells = new Set(); for (const tr of G.mrtTrains) for (const k of tr.floor || []) mrtBigCells.add(k); }
+  return mrtBigCells.has(c + ',' + r);
+}
+// 車上載的怪物：照這張地圖的怪物比例，但只挑小型的（地圖沒有小型怪物＝載史萊姆）；史萊姆不會變成巨型
+function mrtCreateSmallMonster(x, y) {
+  const small = MRT_TRAIN.smallMonsters || [];
+  const mix = ((MAP && MAP.monsterMix) || []).filter(m => small.includes(m.id) && Number(m.weight) > 0);
+  const pool = ACTIVE_MONSTERS.filter(s => small.includes(s.id)); if (!pool.length) return null;
+  const spec = chooseMonster({ monsterMix: mix.length ? mix : [{ id: pool.some(s => s.id === 'slime') ? 'slime' : pool[0].id, weight: 1 }] }, pool);
+  for (let i = 0; i < 6; i++) { const m = createMonster(spec, x, y); if (!mrtIsBigMonster(m)) return m; }
+  return spec.id === 'slime' ? createMonster(spec, x, y, 'normal') : null;
+}
 function mrtSpawnMonsters(tr, n) {
   if (!n || typeof createMonster !== 'function' || typeof chooseMonster !== 'function' || typeof ACTIVE_MONSTERS === 'undefined') return;
   // 出生點：每一扇車門的正中間，怪物才不會卡在門框上。
@@ -925,7 +944,7 @@ function mrtSpawnMonsters(tr, n) {
   for (let i = 0; i < n; i++) {
     const d = pick[Math.floor(Math.random() * pick.length)];   // 隨機挑一扇門
     const y = OY + (d.r + .5) * CELL;
-    const m = createMonster(chooseMonster(MAP, ACTIVE_MONSTERS), d.x, y);
+    const m = mrtCreateSmallMonster(d.x, y); if (!m) return;
     if (hasFloors) m.floor = f === 2 ? 2 : 1;
     m.mrtFrom = tr.soundId;
     // 下車：從車門口直直走到月台上（車外 2 格；先照這扇門朝的方向，走不出去再試另一邊）
@@ -948,7 +967,14 @@ function mrtStepExit(e, dt) {
 }
 // 狀態：away（看不到，等下一班）→ arrive（減速進站）→ opening → dwell（門開著）→ departWarn（離站警示音）→ warn（車門即將關閉）
 //      → closing → closed → depart（加速離站）→ away
+// 怪物的路線圖（流場）要不要重算：列車停好、開關門、開走、閘門開關都會改變哪裡能走。
+// 以前每一次改變都馬上重算（一次十幾毫秒），同一幀好幾台車、閘門一起變就重算好幾次，畫面會突然卡一下 → 改成記下來，這一幀最後只算一次
+let mrtFlowDirty = false;
 function updateMrtTrains(dt) {
+  try { updateMrtTrainsNow(dt); }
+  finally { if (mrtFlowDirty) { mrtFlowDirty = false; if (typeof computeFlow === 'function') computeFlow(); } }
+}
+function updateMrtTrainsNow(dt) {
   mrtArriveMusicTick();   // 到站音樂：越遠越小聲
   updateMrtAway(dt);   // 沒搭上車／不小心搭上車的隊員：倒數
   if (!G.mrtTrains || !G.mrtTrains.length) return;

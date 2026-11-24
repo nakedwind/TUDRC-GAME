@@ -414,7 +414,10 @@ function computeFlowNow() {
   flow2 = hasFloors ? new Array(COLS * ROWS).fill(Infinity) : [];
   const q = [];   // [樓層, c, r]：營地在一樓；二樓的人要先走到樓層出入口、下到一樓才到得了
   const arr = f => f === 2 ? flow2 : flow;
-  const seed = (c, r) => { if (inGrid(c, r) && !enemyWallCell(c, r, 1) && flow[r * COLS + c] > 1) { flow[r * COLS + c] = 1; q.push([1, c, r]); } };
+  // 這次重算裡，每一格每一層「是不是牆」只算一次記起來（同一格會被旁邊四格、兩層問好幾次；捷運站大地圖一次要十幾毫秒）
+  const wallMemo1 = new Uint8Array(COLS * ROWS), wallMemo2 = hasFloors ? new Uint8Array(COLS * ROWS) : null;   // 0＝還沒算、1＝牆、2＝不是牆
+  const wallF = (c, r, f) => { const m = f === 2 ? wallMemo2 : wallMemo1, i = r * COLS + c; if (!m[i]) m[i] = enemyWallCell(c, r, f) ? 1 : 2; return m[i] === 1; };
+  const seed = (c, r) => { if (inGrid(c, r) && !wallF(c, r, 1) && flow[r * COLS + c] > 1) { flow[r * COLS + c] = 1; q.push([1, c, r]); } };
   if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); seed(c, r); });
   else for (let c = 0; c < COLS; c++) seed(c, ROWS - 1);
   // 從 (f, c, r) 走一步到 (nc, nr) 會落在哪一層（出樓層出入口那一步才換層）
@@ -427,7 +430,7 @@ function computeFlowNow() {
       const pc = c + dc, pr = r + dr;
       if (!inGrid(pc, pr)) continue;
       for (const pf of hasFloors ? [1, 2] : [1]) {
-        if (enemyWallCell(pc, pr, pf) || landing(pf, pc, pr, c, r) !== f) continue;   // 吃不可碰撞的像素微調
+        if (wallF(pc, pr, pf) || landing(pf, pc, pr, c, r) !== f) continue;   // 吃不可碰撞的像素微調
         if (pf !== 2 && typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(pc, pr)) continue;   // 深水區：怪物繞過去（js/swim-ring.js）
         if (pf !== 2 && edgeBetween(pc, pr, c, r)) continue;   // 薄牆只擋一樓
         if (pf !== 2 && deckCells.has(pc + ',' + pr) && rampCells.has(c + ',' + r) && !rampCells.has(pc + ',' + pr)) continue;   // 一樓的人不能從 2 樓地面那側走進手扶梯

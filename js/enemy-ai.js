@@ -225,6 +225,7 @@ function enemyBlocked(x, y, actor = null) {
   if (!inGrid(c, r) || enemyWallPoint(x, y) || !!gridBlockAtPoint(x, y, enemyBarrierAt) ||   // 建築：微調過位置的照微調後的範圍（js/build.js）
       (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 牆吃像素微調（js/pathfinding.js）；順順宮帽也擋路（js/hangi-bao.js）
   if (edgeWallBlocksPoint(x, y)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）
+  if (actor && typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(actor, c, r)) return true;   // 大型怪物：停著的捷運車廂當成牆（js/mrt-train.js）
   const br = actor ? enemyBodyR(actor) : 0;   // 只有怪物自己在走路時才看身體；找落點、子彈這類只看一個點
   if (br) for (const [sx, sy] of [[-br, -br], [br, -br], [-br, br], [br, br]]) if (enemyWallPoint(x + sx, y + sy) || edgeWallBlocksPoint(x + sx, y + sy)) return true;
   if (typeof deepWaterBlocksCell === 'function' && !(actor && (actor.behavior === 'moth' || (typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(actor.x, actor.y)))) && deepWaterBlocksCell(c, r)) return true;   // 深水區：地面怪物進不去，會飛的人面蝶照樣飛（js/swim-ring.js）
@@ -247,7 +248,7 @@ function wideEnemyRoute(e, goalC, goalR, canBreakBuildings = true, maxSteps = In
   // 這次找路裡，每一格「是不是空地」「夠不夠寬」都只算一次記起來。
   // 不記的話，同一格會被旁邊的格子重複問幾十次；目標走不到時要把整張地圖搜完，一次要幾十毫秒，好幾隻大體型怪一起找就會卡。
   const openMemo = new Map(), wideMemo = new Map();
-  const isOpen = (c, r) => { const k = c + ',' + r; let v = openMemo.get(k); if (v === undefined) { v = enemyWideOpen(c, r); openMemo.set(k, v); } return v; };
+  const isOpen = (c, r) => { const k = c + ',' + r; let v = openMemo.get(k); if (v === undefined) { v = enemyWideOpen(c, r) && !(typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(e, c, r)); openMemo.set(k, v); } return v; };   // 大型怪物：停著的捷運車廂不能走
   const isWide = (c, r) => {   // 跟 enemyWideAt 一樣的判斷，只是用記起來的結果
     const k = c + ',' + r; let v = wideMemo.get(k);
     if (v !== undefined) return v;
@@ -360,7 +361,7 @@ const ENEMY_NEIGHBORS = [[0, -1], [-1, 0], [1, 0], [0, 1]];
 // 從現在的位置沿著走得到的格子往外找（繞過牆和建築），挑離威脅最遠的一格；路程越遠、死路（只有一個出口）都扣分。
 // 不直接往「威脅的反方向」跑：被逼進牆角時反方向就是牆，會一直貼著牆角原地踏步
 function enemyFleeCell(e, threats, minSteps = 3, maxSteps = 8) {
-  const open = (c, r) => inGrid(c, r) && !enemyWallCell(c, r) && !enemyBarrierAt(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)) && (!e.wide || enemyWideAt(c, r));
+  const open = (c, r) => inGrid(c, r) && !enemyWallCell(c, r) && !enemyBarrierAt(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)) && (!e.wide || enemyWideAt(c, r)) && !(typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(e, c, r));
   const [ec, er] = cellAt(e.x, e.y), seen = new Set([ec + ',' + er]), queue = [[ec, er, 0]];
   let best = null, bestScore = -Infinity;
   for (let qi = 0; qi < queue.length; qi++) {
@@ -421,7 +422,7 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
   if (!inGrid(goalC, goalR) || enemyWallCell(goalC, goalR)) return null;
   const startKey = startC + ',' + startR, goalKey = goalC + ',' + goalR;
   const queue = [[startC, startR]], cameFrom = new Map([[startKey, null]]);
-  const wallMemo = new Map(), wall = (c, r, key) => { let v = wallMemo.get(key); if (v === undefined) { v = enemyWallCell(c, r); wallMemo.set(key, v); } return v; };   // 這次找路裡，每一格是不是牆只算一次（同一格會被旁邊四格問）
+  const wallMemo = new Map(), wall = (c, r, key) => { let v = wallMemo.get(key); if (v === undefined) { v = enemyWallCell(c, r) || (typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(e, c, r)); wallMemo.set(key, v); } return v; };   // 這次找路裡，每一格是不是牆只算一次（同一格會被旁邊四格問）
   for (let qi = 0; qi < queue.length; qi++) {
     const [c, r] = queue[qi];
     if (c === goalC && r === goalR) break;
@@ -544,6 +545,7 @@ function seekBaseNext(e, c, r, here) {
   const banned = k => e.seekBan && e.seekBan.get(k) > now;
   const fits = (cc, rr, k) => {
     if (!inGrid(cc, rr) || !Number.isFinite(flowAt(cc, rr)) || banned(k)) return false;
+    if (typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(e, cc, rr)) return false;   // 大型怪物：不穿過停著的捷運車廂
     const d = seekClosedDoor(k); if (d) return monsterOpensDoor(d);   // 關著的手動門：會推開，算走得過去
     return !!enemyBarrierAt(cc, rr) || !!seekStandPoint(e, cc, rr);   // 建築會打掉；其他要身體站得下
   };
@@ -626,7 +628,7 @@ function chooseDarkWanderCell(e) {
   for (let r = Math.max(0, er - 7); r <= Math.min(ROWS - 1, er + 7); r++) {
     for (let c = Math.max(0, ec - 7); c <= Math.min(COLS - 1, ec + 7); c++) {
       const distance = Math.abs(c - ec) + Math.abs(r - er);
-      if (distance < 2 || distance > 9 || enemyWallCell(c, r) || enemyBarrierAt(c, r) || cellLit(c, r) || (e.wide && !enemyWideAt(c, r))) continue;
+      if (distance < 2 || distance > 9 || enemyWallCell(c, r) || enemyBarrierAt(c, r) || cellLit(c, r) || (e.wide && !enemyWideAt(c, r)) || (typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(e, c, r))) continue;
       choices.push([c, r]);
     }
   }

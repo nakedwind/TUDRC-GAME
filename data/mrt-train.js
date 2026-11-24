@@ -14,6 +14,7 @@ const MRT_TRAIN_SETTINGS = {
   "monsterChance": 0.3,
   "monsterMin": 2,
   "monsterMax": 4,
+  "smallMonsters": ["slime", "bird_head", "pearl_kid", "fish_head", "milkfish_kid_small", "loofah_lady"],
   "waitMin": 18,
   "waitMax": 30,
   "arriveDecel": 230,

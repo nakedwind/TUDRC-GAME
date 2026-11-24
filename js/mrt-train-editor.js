@@ -74,6 +74,9 @@ const MrtTrainEditor = (() => {
       ${doorBox('farDoor', '對面車門（mrt-train-door-2，車廂內部那層）')}
       ${NUM_FIELDS.map(([title, list]) => `<fieldset class="mrt-box"><legend>${title}</legend><div class="mrt-grid">` +
         list.map(([k, n, unit, step]) => `<label title="${unit}">${n}<span class="mrt-unit">${unit}</span><input type="number" step="${step}" data-num="${k}"></label>`).join('') + `</div></fieldset>`).join('')}
+      <fieldset class="mrt-box"><legend>小型怪物（列車只載勾了的怪物；沒勾的＝大型，不會走進停著的車廂、也不會穿過車廂）</legend>
+        <p class="help" style="margin-top:0">大體型的怪物（例如巨型史萊姆）不管有沒有勾都算大型。</p>
+        <div id="mrtSmall" class="mrt-grid"></div></fieldset>
       <fieldset class="mrt-box"><legend>互通的捷運站（搭上車會照順序輪流開到其他站）</legend>
         <p class="help" style="margin-top:0">地圖 id 在地圖編輯器的地圖清單看得到（例如 map_mvxz356e）。到站音樂填音效編輯器裡的名稱（mrtArriveRed＝淡水信義線-紅線、mrtArriveBlue＝板南線-藍線、mrtArriveGreen＝松山新店線-綠線、mrtArriveOrange＝中和新盧線-橘線；空白＝預設的到站音樂）。不在這份名單裡的地圖，搭車照舊開回同一站。</p>
         <div id="mrtStations"></div><div class="row"><button id="mrtStationAdd" class="btn">＋ 新增車站</button></div></fieldset>
@@ -113,6 +116,8 @@ const MrtTrainEditor = (() => {
       if (!confirm('刪掉車站「' + (st.name || st.map || '') + '」？')) return;
       data.stations.splice(+del.dataset.del, 1); save(); refresh();
     };
+    // 小型怪物：勾選＝列車會載、也能穿過車廂（存在 data/mrt-train.js 的 smallMonsters）
+    $('mrtSmall').onchange = () => { data.smallMonsters = [...$('mrtSmall').querySelectorAll('input:checked')].map(i => i.dataset.mon); save(); };
     $('mrtStationAdd').onclick = () => { data.stations.push({ map: '', name: '', arrive: '', color: '#888888' }); save(); refresh(); };
     $('mrtReset').onclick = () => { if (!confirm('確定丟棄瀏覽器裡的捷運列車設定，從正式資料（data/mrt-train.js）重新載入？')) return; data = clone(defaults); localStorage.removeItem(STORE); refresh(); };
     // 左邊清單下面的按鈕
@@ -141,6 +146,12 @@ const MrtTrainEditor = (() => {
     });
     panel.querySelectorAll('[data-num]').forEach(inp => { inp.value = data[inp.dataset.num]; });
     if (!Array.isArray(data.stations)) data.stations = [];
+    if (!Array.isArray(data.smallMonsters)) data.smallMonsters = clone(MRT_TRAIN.smallMonsters || []);
+    {   // 小型怪物的勾選清單：怪物種類照怪物編輯器的資料（data/monsters.js）
+      const mons = typeof MONSTERS_DEFAULT !== 'undefined' ? MONSTERS_DEFAULT.filter(m => m && m.id) : data.smallMonsters.map(id => ({ id, name: id }));
+      const escH = v => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      $('mrtSmall').innerHTML = mons.map(m => `<label><input type="checkbox" data-mon="${escH(m.id)}"${data.smallMonsters.includes(m.id) ? ' checked' : ''}> ${escH(m.name || m.id)}</label>`).join('');
+    }
     const esc = v => String(v || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     $('mrtStations').innerHTML = data.stations.map((st, i) => `<div class="mrt-grid" data-st="${i}" style="margin-bottom:8px;align-items:end">` +
       `<label>名稱<input data-k="name" value="${esc(st.name)}"></label><label>地圖 id<input data-k="map" value="${esc(st.map)}"></label>` +
