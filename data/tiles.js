@@ -7563,7 +7563,7 @@ const SHARED_TILES = [
     "name": "Poolcore-pool_stair_block_Straight02",
     "role": "floor",
     "file": "images/Poolcore/Poolcore-pool_stair_block_Straight02.png",
-    "w": 1,
+    "w": 2,
     "h": 2,
     "flat": true
   },
