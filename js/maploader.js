@@ -727,6 +727,26 @@ function drawMapStampRaw(ctx, s) {
   const t = mapTileById(s.id); if (!t) return;
   withStampTransform(ctx, s, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), mapStampW(s, t) * CELL, mapStampH(s, t) * CELL, () => drawMapStampPlain(ctx, s));
 }
+// 一張物件「這一刻」要畫哪張圖：原本的圖，再依狀態換掉（被破壞的據點、炸開的牆、解封的捷運口、
+// 霧樹、鳥巢、置物箱）。回傳 null＝這一刻不畫（例如置物箱藏起來）。
+// 畫圖（drawMapStampPlain）和重疊補畫檢查「圖載好了沒」（occluderImageReady）都用這一份，兩邊才會一致
+function stampShownTile(s) {
+  let t = mapTileById(s.id); if (!t) return null;
+  t = destroyedBaseDisplayTile(s, t);
+  if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
+  if (typeof mrtDisplayTile === 'function') t = mrtDisplayTile(s, t);   // 解封的捷運入口換圖（js/mrt-locks.js）
+  if (typeof fogTreeDisplayTile === 'function') t = fogTreeDisplayTile(s, t);   // 霧樹的水晶打破了：換成沒有水晶的樹（js/fog.js）
+  if (typeof nestDisplayTile === 'function') t = nestDisplayTile(s, t);   // 鳥巢：有蛋／空巢換圖（js/chickens.js）
+  const display = typeof storagePropDisplayTile === 'function' ? storagePropDisplayTile(s.id, s.c, s.r, s.layer || 'top', s) : null;
+  if (display === false) return null;
+  return display || t;
+}
+// 箱子類的換圖（大小可能跟原圖不同，畫的時候底部對齊）：剛補給過的彈藥箱換成打開的圖、
+// 物資箱照箱子裡剩多少換成滿／剩一些／空的圖。沒有要換就回傳 null
+function stampSwapTile(s) {
+  return (typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s))   // 剛補給過的彈藥箱：換成打開的圖（js/flare.js）
+    || (typeof supplyBoxTile === 'function' && supplyBoxTile(s)) || null;   // 物資箱：照箱子裡的數量換圖（js/camp-supply.js）
+}
 function drawMapStampPlain(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失（挖空門洞的門：門洞、門框在 drawMapGround 最後畫、在角色下面，js/doors.js）
@@ -734,22 +754,13 @@ function drawMapStampPlain(ctx, s) {
   if (typeof ballBedHidden === 'function' && ballBedHidden(s)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
   if (typeof G !== 'undefined' && G && G.flickerGlowStamps && G.flickerGlowStamps.has(s)) return;   // 疊在燈上的光暈圖（池核 LED）：由 js/flicker-light.js 畫在黑幕上面、跟著燈亮暗
   if (typeof poweredGlowHidden === 'function' && poweredGlowHidden(s)) return;   // 跟著電源的池核 LED 光暈圖：通電時才由 js/powered-lights.js 畫在黑幕上面
-  let t = mapTileById(s.id); if (!t) return;
-  t = destroyedBaseDisplayTile(s, t);
-  if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
-  if (typeof mrtDisplayTile === 'function') t = mrtDisplayTile(s, t);   // 解封的捷運入口換圖（js/mrt-locks.js）
-  if (typeof fogTreeDisplayTile === 'function') t = fogTreeDisplayTile(s, t);   // 霧樹的水晶打破了：換成沒有水晶的樹（js/fog.js）
-  if (typeof nestDisplayTile === 'function') t = nestDisplayTile(s, t);   // 鳥巢：有蛋／空巢換圖（js/chickens.js）
-  const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(s.id,s.c,s.r,s.layer||'top',s):null;
-  if(display===false)return;
-  if(display)t=display;
+  let t = stampShownTile(s); if (!t) return;   // 這一刻實際要畫哪張圖（被破壞、換圖、置物箱藏起來…都算進去）
   let w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, rot = mapStampTurn(s);
   // 旋轉後的圖跟編輯器一樣：左上角固定在 (c, r)＋微調，往右下佔「轉向後的寬高」，不再以原本大小的中心為準
   let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
   const jit = typeof gourdKingWallJitter === 'function' ? gourdKingWallJitter(s) : null;   // BOSS 牆被撞的時候抖一下（js/gourd-king.js）
   if (jit) { x += jit[0]; y += jit[1]; }
-  const opened = (typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s))   // 剛補給過的彈藥箱：換成打開的圖
-    || (typeof supplyBoxTile === 'function' && supplyBoxTile(s));   // 物資箱：照箱子裡的數量換圖（js/camp-supply.js）
+  const opened = stampSwapTile(s);
   if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
   const img = isElevatorLightTile(t) && elevatorLightIsOpen(s.c, s.r) && elevatorLightOpenImage.complete && elevatorLightOpenImage.naturalWidth
@@ -1281,7 +1292,7 @@ function occluderStateSigNow(x) {
   const shown = typeof storagePropDisplayTile === 'function' ? storagePropDisplayTile(s.id, s.c, s.r, s.layer || 'top', s) : null;
   return (G.mapDestroyed && G.mapDestroyed.has(s) ? 'x' : '') + ((typeof doorStampOpen === 'function' && doorStampOpen(s)) ? 'o' : '')
     + (shown === false ? 'h' : shown ? (shown.id || 's') : '')   // 置物櫃開啟後，重疊補畫也必須換圖。
-    + ((typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s)) ? 'a' : '')
+    + ((stampSwapTile(s) || {}).id || '')   // 彈藥箱打開、物資箱變成剩一些／空：換了圖，補畫也要重做（以前物資箱換圖不會重做）
     + (destroyedBaseDisplayTile(s, mapTileById(s.id) || {}).id || '')
     + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
     + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '')
@@ -1297,7 +1308,15 @@ function occluderImageReady(x) {
   const shown = typeof storagePropDisplayTile === 'function'
     ? storagePropDisplayTile(id, s ? s.c : x.c, s ? s.r : x.r, s ? (s.layer || 'top') : MAP_LAYER_ORDER[x.li], s) : null;
   if (shown === false) return true;
-  return !!tileImage(shown || mapTileById(id));   // 開啟圖尚未載好時，下一幀繼續重建，避免快取空白。
+  if (!s) return !!tileImage(shown || mapTileById(id));   // 開啟圖尚未載好時，下一幀繼續重建，避免快取空白。
+  // 物件：檢查「實際畫出來的那張圖」有沒有載好，不是原本那張。
+  // 以前只看原本的圖：物資箱換上的「滿／剩一些／空」圖還沒下載完就做了補畫，補畫裡變成一塊深色方塊，
+  // 之後又以為已經好了不再重做，營地就一直黑一塊（W118 營地的醫療箱）
+  const t = stampShownTile(s);
+  if (!t) return true;
+  const swap = stampSwapTile(s);
+  if (!swap && t.color && !t.file) return true;   // 純色方塊：沒有圖要等
+  return !!tileImage(swap || t);
 }
 // 混合圖層補在立體物身上：小畫布畫那幾張水的圖，再用立體物的形狀裁切，最後用圖層的混合模式（例如色彩增值）貼回畫面
 function drawGroupOverPatch(ctx, it, od) {
