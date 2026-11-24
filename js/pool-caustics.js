@@ -13,13 +13,13 @@
 const POOL_CAUSTICS = {
   on: true,              // false＝不要光紋
   image: 'images/Poolcore/Poolcore_caustics.png',   // 水紋圖（要能無縫拼接）
-  scale: 1,              // 水紋圖放大幾倍（1＝原尺寸，120 點一張）
+  scale: 0.8,              // 水紋圖放大幾倍（1＝原尺寸，120 點一張）
   lineFrom: .12,         // 比底色亮多少才算水紋線（0～1：0＝圖裡所有比底色亮的都算、越大只留最亮的線）
-  warp: 2.2,             // 扭曲的幅度：每個點最多往旁邊挪幾點（0＝不扭曲；太大線會糊掉）
-  frames: 36,            // 扭完一輪要算幾張圖（越多越順）
-  loopSecs: 10,          // 扭完一輪要幾秒（越大晃得越慢）
-  drift: [4, 2],         // 整片光紋每秒往哪個方向飄幾點（左右, 上下；[0, 0]＝不飄）
-  alpha: .55,            // 整片光紋多亮（0～1）
+  warp: 1.5,             // 扭曲的幅度：每個點最多往旁邊挪幾點（0＝不扭曲；太大線會糊掉）
+  frames: 45,            // 扭完一輪要算幾張圖（越多越順）
+  loopSecs: 30,          // 扭完一輪要幾秒（越大晃得越慢）
+  drift: [1, 1],         // 整片光紋每秒往哪個方向飄幾點（左右, 上下；[0, 0]＝不飄）
+  alpha: .2,            // 整片光紋多亮（0～1）
   color: [215, 248, 255],   // 光紋的顏色（紅, 綠, 藍）：淡淡的水藍白
   blend: 'screen',       // 疊上去的方式：screen＝濾色（只變亮）、lighter＝相加（更亮更刺眼）
 };
@@ -93,54 +93,96 @@ function poolCausticReady(k) {
 }
 
 // ---- 深水區的形狀（換地圖、改深水區才重算）----
+// 每一幀都要先把畫面裁成深水區的形狀：同一排相連的格子先合成一長條，上下幾排長條一樣的再合成一大塊，
+// 方塊越少裁得越快（W118 五百多格 → 幾十塊）；另外記下整片的範圍，不在畫面裡就整個跳過
 let poolCausticArea = { map: null, deep: null, keep: null, paths: null };
+function poolCausticShape(keys) {
+  const rows = new Map();   // 第幾排 → 這排有哪幾格
+  for (const k of keys) {
+    const [c, r] = String(k).split(',').map(Number);
+    if (!Number.isFinite(c) || !Number.isFinite(r)) continue;
+    if (!rows.has(r)) rows.set(r, []);
+    rows.get(r).push(c);
+  }
+  if (!rows.size) return null;
+  // 每排的長條：[從第幾格, 到第幾格]
+  const runsOf = new Map();
+  for (const [r, cs] of rows) {
+    cs.sort((a, b) => a - b);
+    const runs = []; let a = cs[0], b = cs[0];
+    for (let i = 1; i < cs.length; i++) { if (cs[i] === b + 1) b = cs[i]; else if (cs[i] > b) { runs.push([a, b]); a = b = cs[i]; } }
+    runs.push([a, b]); runsOf.set(r, runs);
+  }
+  // 往下接：下一排有一模一樣的長條就併成同一塊
+  const path = new Path2D(), open = new Map();   // 'a,b' → { r0, r1 }
+  let blocks = 0, x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const close = (key, blk) => {
+    const [a, b] = key.split(',').map(Number);
+    const x = OX + a * CELL, y = OY + blk.r0 * CELL, w = (b - a + 1) * CELL, h = (blk.r1 - blk.r0 + 1) * CELL;
+    path.rect(x, y, w, h); blocks++;
+    x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h);
+  };
+  for (const r of [...runsOf.keys()].sort((a, b) => a - b)) {
+    const here = new Set(runsOf.get(r).map(([a, b]) => a + ',' + b));
+    for (const [key, blk] of [...open]) if (!here.has(key) || blk.r1 !== r - 1) { close(key, blk); open.delete(key); }
+    for (const key of here) { const blk = open.get(key); if (blk) blk.r1 = r; else open.set(key, { r0: r, r1: r }); }
+  }
+  for (const [key, blk] of open) close(key, blk);
+  return { path, blocks, x0, y0, x1, y1 };
+}
 function poolCausticPaths() {
   if (typeof MAP === 'undefined' || !MAP) return null;
   const A = poolCausticArea;
   if (A.map === MAP && A.deep === MAP.deepWater && A.keep === MAP.deepWaterKeep) return A.paths;
   const keepSet = new Set(Array.isArray(MAP.deepWaterKeep) ? MAP.deepWaterKeep : []);
-  const make = keys => {
-    const path = new Path2D(); let any = false;
-    for (const k of keys) { const [c, r] = String(k).split(',').map(Number); if (!Number.isFinite(c) || !Number.isFinite(r)) continue; path.rect(OX + c * CELL, OY + r * CELL, CELL, CELL); any = true; }
-    return any ? path : null;
-  };
-  const normal = make((Array.isArray(MAP.deepWater) ? MAP.deepWater : []).filter(k => !keepSet.has(k)));
-  const keep = make([...keepSet]);
+  const normal = poolCausticShape((Array.isArray(MAP.deepWater) ? MAP.deepWater : []).filter(k => !keepSet.has(k)));
+  const keep = poolCausticShape([...keepSet]);
   poolCausticArea = { map: MAP, deep: MAP.deepWater, keep: MAP.deepWaterKeep, paths: normal || keep ? { normal, keep } : null };
   return poolCausticArea.paths;
 }
 
 // ---- 畫（js/render.js 的 draw：地面圖層之後、人物之前）----
+const poolCausticMatrix = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };   // 圖樣的位置、大小（重複用同一個，不用每幀新建）
 function drawPoolCaustics(ctx) {
   const C = POOL_CAUSTICS;
   if (!C.on || C.alpha <= 0) return;
   const paths = poolCausticPaths(); if (!paths) return;
   const s = typeof poolTideActive === 'function' && poolTideActive() && typeof poolTide === 'function' ? poolTide() : null;
   const deepLevel = s ? Math.max(0, Math.min(1, s.deep)) : 1;   // 抽水抽成淺水：一般深水區的光紋跟著淡掉
+  // 要鋪的範圍：畫面看得到的地方（沒有就整張地圖）
+  const v = typeof mapDrawRect !== 'undefined' && mapDrawRect ? mapDrawRect : { x0: OX, y0: OY, x1: OX + COLS * CELL, y1: OY + ROWS * CELL };
+  const inView = sh => sh && sh.x1 > v.x0 && sh.x0 < v.x1 && sh.y1 > v.y0 && sh.y0 < v.y1;
+  const showNormal = deepLevel > 0 && inView(paths.normal), showKeep = inView(paths.keep);
+  if (!showNormal && !showKeep) return;   // 畫面裡沒有深水：什麼都不用做
   const now = performance.now() / 1000;
   const sc = C.scale || 1;
   const ph = (now / C.loopSecs % 1) * C.frames, f0 = Math.floor(ph) % C.frames, f1 = (f0 + 1) % C.frames, mix = ph - Math.floor(ph);
   const fr0 = poolCausticReady(f0); if (!fr0) return;   // 水紋圖還沒載好
-  const span = fr0.cv.width * sc, ox = (C.drift[0] * now) % span, oy = (C.drift[1] * now) % span;
-  // 要鋪的範圍：畫面看得到的地方（沒有就整張地圖）
-  const v = typeof mapDrawRect !== 'undefined' && mapDrawRect ? mapDrawRect : { x0: OX, y0: OY, x1: OX + COLS * CELL, y1: OY + ROWS * CELL };
-  const layer = (path, a) => {
-    if (!path || a <= 0) return;
+  const span = fr0.cv.width * sc;
+  const M = poolCausticMatrix; M.a = M.d = sc; M.e = OX + (C.drift[0] * now) % span; M.f = OY + (C.drift[1] * now) % span;
+  // 這一幀要用的兩張圖（相鄰兩張交叉淡入淡出，水紋才是慢慢扭動，不是一格一格跳）
+  const pair = [];
+  for (const [k, w] of [[f0, 1 - mix], [f1, mix]]) {
+    if (w <= .002) continue;
+    const fr = poolCausticReady(k); if (!fr) continue;
+    if (!poolCausticFrames[k]) poolCausticWarm();
+    if (!fr.pattern) fr.pattern = ctx.createPattern(fr.cv, 'repeat');   // 每張圖的圖樣只建一次
+    fr.pattern.setTransform(M);
+    pair.push([fr.pattern, w]);
+  }
+  const layer = (sh, a) => {
+    // 只鋪「畫面」和「這片深水」重疊的地方
+    const x0 = Math.max(v.x0, sh.x0), y0 = Math.max(v.y0, sh.y0), x1 = Math.min(v.x1, sh.x1), y1 = Math.min(v.y1, sh.y1);
     ctx.save();
-    ctx.clip(path);
+    ctx.clip(sh.path);
     ctx.globalCompositeOperation = C.blend;
-    for (const [k, w] of [[f0, 1 - mix], [f1, mix]]) {   // 相鄰兩張交叉淡入淡出，水紋才是慢慢扭動，不是一格一格跳
-      if (w <= 0) continue;
-      const fr = poolCausticReady(k); if (!fr) continue;
-      if (!poolCausticFrames[k]) poolCausticWarm();
-      const pat = ctx.createPattern(fr.cv, 'repeat');
-      pat.setTransform(new DOMMatrix().translate(OX + ox, OY + oy).scale(sc));
+    for (const [pat, w] of pair) {
       ctx.globalAlpha = C.alpha * a * w;
       ctx.fillStyle = pat;
-      ctx.fillRect(v.x0, v.y0, v.x1 - v.x0, v.y1 - v.y0);
+      ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
     }
     ctx.restore();
   };
-  layer(paths.normal, deepLevel);
-  layer(paths.keep, 1);
+  if (showNormal) layer(paths.normal, deepLevel);
+  if (showKeep) layer(paths.keep, 1);
 }
