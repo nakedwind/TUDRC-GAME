@@ -65,7 +65,9 @@ const POOL_FALL = {
   // 第 2 版：杯口一開始多寬、最高多高（點）、播幾秒、杯口幾根浪花尖、往外散開多少、杯子塌下去時白沫再往外漂多少
   crownV2: { width: 46, height: 40, life: .8, tips: 11, spread: .9, foamOut: .8 },
   crownColumn: 6,       // 第 2 版：有皇冠水花時，往上衝的水柱數改成這麼多（皇冠已經夠大一團，水柱少一點才不會糊在一起）
-  sound: 'poolBossSplash', soundVol: .45,   // 落水的聲音（音效編輯器；先借池核 BOSS 的水花聲）
+  sound: 'poolBossSplash', soundVol: .45,   // 落水的水花聲（音效編輯器；借池核 BOSS 的水花聲）
+  splashSound: 'poolFallSplash', splashSoundVol: .45,   // 落水聲（音效編輯器的「掉進深水的落水聲」），跟上面的水花聲一起播
+  struggleSoundVol: 1,   // 掙扎時循環播划水聲（音效編輯器的「划水聲」poolPaddle）的音量：1＝跟坐救生圈划水一樣大；隊員離溫特越遠越小聲
   winterSay: '哇、腳滑了——！',   // 溫特失足時說的話（對話編輯器的溫特「掉進水池」有填就用那邊的）
   saySecs: 1.8,
 };
@@ -76,6 +78,25 @@ const poolFallOn = () => typeof deepWaterCells === 'function' && deepWaterCells(
 // 這個人現在在不在掙扎（掉進水裡的、漲潮溺水的都算）
 const poolStruggling = a => !!a && !a.swimRing && a.hp > 0 && (a.drowning || (a.poolFall && a.poolFall.phase === 'struggle'));
 
+// 落水的聲音：水花聲＋落水聲一起播（mul＝音量再乘幾倍）
+function poolFallSounds(a, mul, tag) {
+  if (typeof sfxAt !== 'function') return;
+  const id = tag + (a.id ?? a.type ?? 'p');
+  sfxAt(POOL_FALL.sound, a.x, a.y, POOL_FALL.soundVol * mul, id);
+  sfxAt(POOL_FALL.splashSound, a.x, a.y, POOL_FALL.splashSoundVol * mul, id);
+}
+// 掙扎時的划水聲要多大聲（js/swim-ring.js 的划水聲循環問）：溫特、隊員誰在掙扎就算，離溫特越遠越小聲（跟 sfxAt 一樣：2 格內最大聲、16 格外聽不到）
+function poolStruggleSoundGain() {
+  if (typeof G === 'undefined' || !G || !G.player) return 0;
+  const p = G.player, cell = typeof CELL !== 'undefined' ? CELL : 40;
+  let best = 0;
+  for (const a of [p, ...(G.towers || [])]) {
+    if (!poolStruggling(a)) continue;
+    const d = Math.hypot(a.x - p.x, a.y - p.y) / cell;
+    best = Math.max(best, d <= 2 ? 1 : Math.max(0, (16 - d) / 14));
+  }
+  return best * POOL_FALL.struggleSoundVol;
+}
 // 身體中心離最近的深水有多遠（點）；附近兩格都沒有深水＝Infinity
 function poolFallEdgeDist(a) {
   if (typeof isDeepWaterCell !== 'function') return Infinity;
@@ -257,7 +278,7 @@ function poolFallStep(a, dt) {
       f.phase = 'struggle'; f.t = 0; f.splashAt = poolFallRand(...POOL_FALL.splashGap);
       a.dir = 'front'; a.drownPath = null;
       poolFallSplash(a.x, a.y + 10, true);
-      if (typeof sfxAt === 'function') sfxAt(POOL_FALL.sound, a.x, a.y, POOL_FALL.soundVol, 'pool-fall-' + (a.id ?? a.type ?? 'p'));
+      poolFallSounds(a, 1, 'pool-fall-');
       if (typeof nearbyImpact === 'function') nearbyImpact(a.x, a.y, 2, 0);
     }
     return true;
@@ -305,7 +326,7 @@ function poolFallDropIn(a) {
   if (!a || a.swimRing || !poolFloatsAt(a.x, a.y)) return false;
   if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), a.x, a.y + 10, POOL_FALL.dropSplash);   // 比自己失足掉下去的小一點
   else poolFallSplash(a.x, a.y + 10, false);
-  if (typeof sfxAt === 'function') sfxAt(POOL_FALL.sound, a.x, a.y, POOL_FALL.soundVol, 'pool-drop-' + (a.id ?? a.type ?? ''));
+  poolFallSounds(a, 1, 'pool-drop-');
   if (a.hp <= 0) return true;   // 倒下的：漂在水上（poolFallPose）
   a.poolFall = { phase: 'struggle', t: 0, dir: 'front', dropped: true, splashAt: .3 };
   a.dir = 'front'; a.drownPath = null; a.moving = false;
