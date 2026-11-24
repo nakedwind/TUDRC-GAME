@@ -7557,5 +7557,23 @@ const SHARED_TILES = [
     "w": 4,
     "h": 3,
     "flat": true
+  },
+  {
+    "id": "tile_mwujtpva",
+    "name": "Poolcore-pool_stair_block_Straight02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-pool_stair_block_Straight02.png",
+    "w": 1,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_mwuke4ee",
+    "name": "Poolcore_pool_3 -02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_3 -02.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
   }
 ];
