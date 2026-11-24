@@ -1070,6 +1070,7 @@ function draw() {
   if (typeof drawUnderMap === 'function') drawUnderMap(ctx);   // 黑色的地方透出底下另一張地圖（例如藍線站底下的紅線站，js/under-map.js）
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
+  if (typeof drawPoolCaustics === 'function') drawPoolCaustics(ctx);   // 深水區水底的網狀光紋，慢慢流動（js/pool-caustics.js；在人物下面）
   if (typeof drawPoolBossUnderwater === 'function') drawPoolBossUnderwater(ctx);   // 池核 BOSS 潛在水裡的影子（js/pool-boss.js）
   if (typeof drawPoolSurge === 'function') drawPoolSurge(ctx);   // 大型怪物落水：水面上的浪頭（js/pool-surge.js；在人物下面）
   // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
