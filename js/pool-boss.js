@@ -44,9 +44,9 @@ const POOL_BOSS = applyBossSettings('POOL_BOSS', {
     land: { drops: 36, column: 0,  mist: 6,  up: 200, spread: 200, shake: 4 } },
   // 落水時水滿溢出來（js/pool-surge.js）：水波沿著深水區往外擴散，碰到岸邊就溢到地上，把岸上的人、怪物、地上的道具往遠離水池的方向推開
   surge: { speed: 9, pushTime: .35, linger: 1.4, ringPush: .6,   // 水波擴散多快（格／秒）、被推開滑多久（秒）、溢上岸的水多久退掉（秒）、坐救生圈的人被推的距離倍率
-    up:   { range: 10, spill: 2, push: 60 },   // 躍出水面：水波沿著水面最遠擴散幾格、最多溢上岸幾格、最靠近水邊的人被推開幾像素（越往岸上越小）
-    dive: { range: 14, spill: 3, push: 95 },   // 一頭栽進水裡（最大）：同上
-    land: { range: 7,  spill: 1, push: 35 } },   // 落回水面（最小）：同上
+    up:   { range: 11, spill: 2.2, push: 90 },   // 躍出水面：水波沿著水面最遠擴散幾格、最多溢上岸幾格、最靠近水邊的人被推開幾像素（越往岸上越小）
+    dive: { range: 15.4, spill: 3.3, push: 140 },   // 一頭栽進水裡（最大）：同上
+    land: { range: 7.7, spill: 1.1, push: 55 } },   // 落回水面（最小）：同上
   body: { rx: .3, ry: .14 },  // 身體擋路的範圍：以腳底為中心的橢圓，左右半徑＝畫出來的寬 × rx、前後半徑＝寬 × ry
   touchDamage: 18,            // 被牠撞到扣多少血（再經過防護背心減傷）
   nearSpawn: 14,              // 開戰後，牠幾格內生出來的怪物
@@ -193,9 +193,15 @@ const nearbyImpactSafe = e => { if (typeof bossImpact === 'function') bossImpact
 //   up＝從水裡躍出來：水往四周炸開＋往上噴；dive＝跳進水裡：高高的水柱＋往外噴；land＝落回水面：小一點
 //   每次都有：中間一片白色水沫、往外擴散的好幾圈水波、大大小小的水滴、水霧團、畫面搖晃
 // 音效：音效編輯器的 poolBossSplash（魚頭君的噴水攻擊）
+// BOSS 跳水的水花用哪一種：crown＝新的皇冠水花（跟人落水同一套，js/pool-fall.js 的 poolCrownSplash，放大 scale 倍）；
+// false＝原本的水花（一圈圈水波、白沫、水滴、水柱、水霧）。scale：躍出水面、一頭栽進水裡、落回水面各放大幾倍
+const POOL_BOSS_CROWN = { on: true, scale: { up: 3.4, dive: 3.9, land: 2.6 } };
 function poolBossSplash(e, kind = 'up') {
   const S = POOL_BOSS.splash, K = S[kind] || S.up, w = e.drawWidth || 240, list = G.poolSplash || (G.poolSplash = []);
   const x = e.x, y = e.y + 8, big = kind !== 'land';
+  if (POOL_BOSS_CROWN.on && typeof poolCrownSplash === 'function') {   // 新的皇冠水花（放大版）
+    poolCrownSplash(list, x, y, POOL_BOSS_CROWN.scale[kind] || POOL_BOSS_CROWN.scale.up);
+  } else {   // 原本的水花
   // 水波：一圈一圈往外擴散（後面幾圈晚一點才出現）；[晚幾秒、持續幾秒、擴到身體寬的幾倍]
   const rings = big ? [[0, .9, 1.2], [.12, .75, 1.6], [.3, .6, 2.0]] : [[0, .6, .9]];
   for (const [delay, life, rr] of rings) list.push({ ring: true, x, y, r0: w * .15, r1: w * rr, t: -delay, life });
@@ -219,6 +225,7 @@ function poolBossSplash(e, kind = 'up') {
       vz: 25 + Math.random() * 40, r: 18 + Math.random() * 22, grow: 40 + Math.random() * 40, t: 0, life: 1 + Math.random() * .6 });
   }
   if (list.length > 900) list.splice(0, list.length - 900);   // 太多了就丟掉最舊的，不然會卡
+  }
   if (typeof bossImpact === 'function') bossImpact(x, y, K.shake, big ? .04 : 0);   // 畫面搖一下（離溫特越近越大，6 格外不搖）
   if (typeof sfxAt === 'function') sfxAt('poolBossSplash', x, y, big ? 1 : .6, 'pool-boss-splash-' + kind); else if (typeof sfx === 'function') sfx('poolBossSplash');
   if (typeof poolSurgeStart === 'function') poolSurgeStart(x, y, kind);   // 水滿溢出來、推開岸上的人和東西（js/pool-surge.js）

@@ -1248,8 +1248,12 @@ function collectMapOccluders(ctx, out) {
     if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
     const y = typeof mrtMapItemSortY === 'function' ? mrtMapItemSortY(it, it.y) : it.y;   // 跟捷運列車底邊對齊的物件：整個排在車殼前面（js/mrt-train.js）
     out.push({ floor: it.floor, band: it.band, y, draw: () => withPartClip(ctx, it, () => {
+      // 漂在水池上的小鴨、游泳圈：大型怪物落水的水浪經過時跟著晃（js/pool-surge.js 的 poolSurgeBobFor）
+      const bob = typeof poolSurgeBobFor === 'function' ? poolSurgeBobFor(it) : null;
+      if (bob) { ctx.save(); ctx.translate(bob.px + bob.dx, bob.py + bob.dy); ctx.rotate(bob.rot); ctx.translate(-bob.px, -bob.py); }
       drawOccluderItem(ctx, it);
       for (const od of it.overdraw || []) drawOverdrawPatch(ctx, it, od);   // 上層圖在重疊處補畫回來
+      if (bob) ctx.restore();
     }) });
   }
 }

@@ -104,6 +104,7 @@ function poolSurgeStart(x, y, kind) {
 function poolSurgeTick(dt) {
   if (typeof G === 'undefined' || !G) return;
   poolSurgeItemsStep(dt);
+  poolDecoTick(dt);   // 人物碰到小鴨、游泳圈：推開、晃一下、漂回原位
   const list = G.poolSurges; if (!list || !list.length) return;
   const S = POOL_BOSS.surge, W = POOL_SURGE_LOOK;
   for (const s of list) {
@@ -342,6 +343,86 @@ function poolSurgeSheet(s) {
     hx.fillStyle = rgba(W.lineColor, W.lineAlpha); hx.fill(band, 'evenodd');
   }
   return (s.sheet = { t: s.t, cv: B.cv, x0: B.x0, y0: B.y0, w: B.cv.width, h: B.cv.height, cells });
+}
+// ---- 漂在水池上的裝飾（小鴨、游泳圈）：水浪經過時跟著晃 ----
+// 哪些素材會晃：POOL_SURGE_BOB.tiles（素材 id；要加別的漂浮物就把它的 id 加進來，例如泳道線 tile_mwgchw5x）
+// 怎麼晃：水浪到了那裡 → 上下浮動、左右歪、往外漂一點再漂回來，越晃越小，secs 秒後停住；離 BOSS 越遠晃得越小
+const POOL_SURGE_BOB = {
+  tiles: ['tile_mvqyrysf', 'tile_mw4d9qnu'],   // Poolcore_duck（小鴨）、Poolcore_swimring（游泳圈）
+  lift: 7,        // 上下浮動最多幾點
+  tilt: .25,      // 左右歪最多幾度（弧度；.25 ≈ 14 度）
+  drift: 10,      // 往外漂最多幾點（漂出去再慢慢漂回原位）
+  secs: 2.4,      // 晃多久（秒）
+  speed: 8,       // 晃得多快
+};
+// ---- 人物碰到小鴨、游泳圈：被輕輕推開，晃一下，再慢慢漂回原位 ----
+// 誰會推：溫特、隊員、怪物（含 BOSS）；被推的素材跟上面 POOL_SURGE_BOB.tiles 一樣
+const POOL_DECO_PUSH = {
+  size: .32,      // 小鴨／泳圈的「身體」多大（素材寬度的幾成，當作半徑）
+  kick: 50,       // 被碰到時往外滑的速度（點／秒）
+  damp: 2.6,      // 滑行減速多快（越大越快停）
+  back: 2.4,      // 漂回原位的力道（越大越快回去；0＝推走就不回來）
+  maxOff: 18,     // 最多被推離原位幾點
+  spin: 2.2,      // 被碰到時歪一下的力道
+  maxTilt: .2,    // 最多歪幾度（弧度；.2 ≈ 11 度）
+};
+let poolDecoCache = { map: null, list: [] };
+const poolDecoList = () => {   // 地圖上所有會被推、會晃的小鴨和游泳圈（換地圖才重找）
+  if (poolDecoCache.map !== MAP) poolDecoCache = { map: MAP, list: typeof mapOccluders === 'function' ? mapOccluders().filter(it => it.kind === 'stamp' && POOL_SURGE_BOB.tiles.includes(it.stamp && it.stamp.id)) : [] };
+  return poolDecoCache.list;
+};
+// 每一幀（poolSurgeTick 呼叫）：碰到的推開、滑行減速、漂回原位、歪的角度慢慢回正
+function poolDecoTick(dt) {
+  const list = poolDecoList(); if (!list.length) return;
+  const P = POOL_DECO_PUSH, st = G.floatDeco || (G.floatDeco = new Map());
+  const actors = [];
+  if (G.player && G.player.hp > 0) actors.push([G.player, typeof PLAYER !== 'undefined' ? PLAYER.r : 14]);
+  for (const t of G.towers || []) if (t.hp > 0 && !t.eatenBy && !t.mrtRide) actors.push([t, 14]);
+  for (const e of G.enemies || []) if (!e.dead && e.hp > 0 && !e.airborne && e.behavior !== 'moth') actors.push([e, e.poolBoss ? (e.drawWidth || 240) * .3 : (e.r || 14)]);
+  for (const it of list) {
+    let s = st.get(it.stamp);
+    const w = it.x1 - it.x0, R = w * P.size, hx = OX + (it.x0 + it.x1) / 2, hy = OY + it.y1 - R;   // 原位（身體中心：圖的下半部）
+    for (const [a, ar] of actors) {
+      const x = hx + (s ? s.ox : 0), y = hy + (s ? s.oy : 0), dx = x - a.x, dy = (y - a.y) * 1.6, d = Math.hypot(dx, dy);   // 前後方向距離放大一點（畫面是斜的）
+      if (d >= R + ar || d < .01) continue;
+      if (!s) { s = { ox: 0, oy: 0, vx: 0, vy: 0, rot: 0, vr: 0 }; st.set(it.stamp, s); }
+      const ux = dx / d, uy = dy / d, overlap = R + ar - d;
+      s.ox += ux * overlap * .5; s.oy += uy * overlap * .5 / 1.6;   // 先擠開一點，不會重疊
+      s.vx += ux * P.kick * dt * 8; s.vy += uy * P.kick * dt * 8 / 1.6;
+      const sp = Math.hypot(s.vx, s.vy); if (sp > P.kick) { s.vx *= P.kick / sp; s.vy *= P.kick / sp; }
+      s.vr += (ux >= 0 ? 1 : -1) * P.spin * dt * 6;
+    }
+    if (!s) continue;
+    const k = Math.exp(-P.damp * dt);
+    s.vx = s.vx * k - s.ox * P.back * dt; s.vy = s.vy * k - s.oy * P.back * dt;
+    s.ox += s.vx * dt; s.oy += s.vy * dt;
+    const off = Math.hypot(s.ox, s.oy); if (off > P.maxOff) { s.ox *= P.maxOff / off; s.oy *= P.maxOff / off; }
+    s.vr = Math.max(-1.5, Math.min(1.5, s.vr * Math.exp(-3 * dt) - s.rot * 8 * dt)); s.rot = Math.max(-P.maxTilt, Math.min(P.maxTilt, s.rot + s.vr * dt));   // 歪一下再回正（最多歪 maxTilt）
+    if (off < .3 && Math.abs(s.vx) + Math.abs(s.vy) < .5 && Math.abs(s.rot) < .002 && Math.abs(s.vr) < .01) st.delete(it.stamp);   // 回到原位、停下來了
+  }
+}
+// 地圖畫物件時呼叫（js/maploader.js 的 collectMapOccluders）：回傳這個物件現在要偏移多少 { dx, dy, rot, px, py }，不用晃回傳 null
+// （水浪經過的晃動 ＋ 被人碰到推開的偏移）；it＝地圖物件（x0、y0、x1、y1 是不含 OX/OY 的位置）
+function poolSurgeBobFor(it) {
+  if (!it || it.kind !== 'stamp' || typeof G === 'undefined' || !G) return null;
+  const Bo = POOL_SURGE_BOB; if (!Bo.tiles.includes(it.stamp && it.stamp.id)) return null;
+  const list = G.poolSurges || [], pushed = G.floatDeco && G.floatDeco.get(it.stamp);
+  if (!list.length && !pushed) return null;
+  const px = OX + (it.x0 + it.x1) / 2, py = OY + it.y1, cx = OX + (it.x0 + it.x1) / 2, cy = OY + (it.y0 + it.y1) / 2;
+  const [c, r] = cellAt(cx, cy), key = c + ',' + r;
+  let dx = pushed ? pushed.ox : 0, dy = pushed ? pushed.oy : 0, rot = pushed ? pushed.rot : 0, any = !!pushed;
+  for (const s of list) {
+    if (!s.deepAt) { s.deepAt = new Map(); for (const e of s.deep) s.deepAt.set(e.c + ',' + e.r, e); }
+    const e = s.deepAt.get(key); if (!e) continue;   // 水浪沒經過這裡
+    const age = s.t - e.t; if (age < 0 || age > Bo.secs) continue;
+    const k = (1 - .6 * e.d / (s.K.range + 1)) * Math.exp(-age * 2.2 / Bo.secs * 2), ph = (it.x0 * 7 + it.y0 * 13) % 6.28;   // 越晚越小、越遠越小；每個物件晃的節奏錯開一點
+    const [ox, oy] = center(s.deep[0].c, s.deep[0].r), ux = cx - ox, uy = cy - oy, ul = Math.hypot(ux, uy) || 1;
+    const out = Math.sin(Math.min(Math.PI, age / Bo.secs * Math.PI * 1.4)) * Bo.drift * (1 - .6 * e.d / (s.K.range + 1));   // 往外漂、再漂回來
+    dx += ux / ul * out; dy += uy / ul * out * .5 - Math.abs(Math.sin(age * Bo.speed)) * Bo.lift * k;
+    rot += Math.sin(age * Bo.speed * .8 + ph) * Bo.tilt * k;
+    any = true;
+  }
+  return any ? { dx, dy, rot, px, py } : null;
 }
 // 每一格水要排在哪裡：預設是這一格上緣往下 sortDy 點；
 // 這一格被「標成地板」的地圖圖片蓋到（🧱 牆地板編輯器標 🟫 地板，例如池畔平台的磁磚），而那張圖排得比較後面時，

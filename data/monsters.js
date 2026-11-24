@@ -1745,19 +1745,19 @@ const BOSS_SETTINGS_DEFAULT = {
       "linger": 1.4,
       "ringPush": 0.6,
       "up": {
-        "range": 10,
-        "spill": 2,
-        "push": 60
+        "range": 11,
+        "spill": 2.2,
+        "push": 90
       },
       "dive": {
-        "range": 14,
-        "spill": 3,
-        "push": 95
+        "range": 15.4,
+        "spill": 3.3,
+        "push": 140
       },
       "land": {
-        "range": 7,
-        "spill": 1,
-        "push": 35
+        "range": 7.7,
+        "spill": 1.1,
+        "push": 55
       }
     },
     "body": {
