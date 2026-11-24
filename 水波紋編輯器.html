@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>水波紋編輯器｜Y102 應變中心</title>
+  <link rel="stylesheet" href="css/ui-feedback.css">
+  <style>
+    :root { color-scheme:dark; font-family:system-ui,"Microsoft JhengHei",sans-serif; color:#e8f1fa; background:#0d131b }
+    * { box-sizing:border-box }
+    body { margin:0; padding:28px; max-width:1440px; margin-inline:auto; background:radial-gradient(circle at 85% 0%,#123a4a 0,transparent 40%) }
+    h1,h2,p { margin-top:0 } h1 { font-size:27px; margin-bottom:5px }
+    p,small { color:#9eb0c0; line-height:1.5 }
+    button,input,select { font:inherit }
+    button { cursor:pointer; color:#eaf5ff; background:#263d50; border:1px solid #52718a; border-radius:9px; padding:8px 12px }
+    button.primary { background:#2b6581; border-color:#6abce3; font-weight:700 } button.danger { color:#ffd0c9; border-color:#925d5b; background:#4b3035 }
+    button.small { padding:3px 9px; font-size:12px; border-radius:7px }
+    code { color:#b6ddf5; background:#0e1b29; border-radius:4px; padding:1px 4px; font-size:12px }
+    .notice { border:1px solid #2a5a6b; border-left:4px solid #5ac8f0; border-radius:10px; background:#0f1d24; padding:12px 15px; margin-bottom:18px; font-size:13px; line-height:1.6 }
+    .notice strong { color:#a6e6ff }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,420px); gap:18px; align-items:start }
+    .layout > * { min-width:0 }
+    .panel { background:#18232e; border:1px solid #344d61; border-radius:15px; box-shadow:0 12px 38px #0005; padding:18px 20px }
+    .panel h2 { font-size:17px; margin-bottom:10px; color:#a6e6ff }
+    .preview { position:sticky; top:14px }
+    .stage { position:relative; width:100%; aspect-ratio:16/10; background:#000; border-radius:10px; overflow:hidden; border:1px solid #2b4559 }
+    #cv { width:100%; height:100%; display:block; image-rendering:pixelated }
+    .pv-opts { display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; font-size:13px; color:#cfe0ec; align-items:center }
+    .pv-opts label { display:flex; gap:6px; align-items:center }
+    .pv-opts select, .pv-opts input[type=range] { background:#0e1822; color:#edf7ff; border:1px solid #3d596e; border-radius:7px; padding:3px 6px }
+    #perf { font-size:12px; color:#8fb3c7; margin-top:10px; line-height:1.6 }
+    .field { padding:11px 0; border-bottom:1px solid #263a4b }
+    .field:last-child { border-bottom:0 }
+    .f-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .f-label { font-weight:600; font-size:14px } .f-label code { margin-left:4px; font-weight:400 }
+    .f-top .revert { margin-left:auto }
+    .f-row { display:flex; align-items:center; gap:10px; margin-top:7px }
+    .f-row input[type=range] { flex:1; min-width:0; accent-color:#5ac8f0 }
+    .f-row input[type=number], .f-row input[type=text], .f-row select { color:#edf7ff; background:#0e1822; border:1px solid #3d596e; border-radius:8px; padding:6px 9px; outline:none; font-size:14px }
+    .f-row input[type=number] { width:86px } .f-row input[type=text] { flex:1; min-width:0 }
+    .f-row input:focus, .f-row select:focus { border-color:#5ac8f0; box-shadow:0 0 0 2px #5ac8f033 }
+    .f-row input[type=color] { width:46px; height:32px; padding:0; border:1px solid #3d596e; border-radius:8px; background:none }
+    .field small { display:block; font-size:12px; margin-top:5px }
+    .field.changed .f-label { color:#ffd27a } .was { color:#f0a05a; font-size:12px }
+    .thumb { width:60px; height:60px; image-rendering:pixelated; border:1px solid #3d596e; border-radius:6px; background:#0e1822 }
+    .foot { margin-top:16px; border-top:1px solid #344e62; padding-top:16px }
+    .actions { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:9px }
+    #dirty { font-size:13px; color:#8ce0be; margin-bottom:8px } #dirty.warn { color:#f0a05a }
+    #status { min-height:22px; color:#8ce0be; font-size:13px; margin-top:8px }
+    #exportOut { width:100%; min-height:160px; margin-top:12px; background:#0b151f; color:#a9cbdb; border:1px solid #345065; border-radius:8px; padding:10px; font:11px/1.45 Consolas,monospace }
+    @media(max-width:900px) { body { padding:14px } .layout { grid-template-columns:minmax(0,1fr) } .preview { position:static } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌊 水波紋編輯器</h1>
+    <p>調整深水區水底的網狀光紋（池核、W118區 地下水池）：水紋圖、大小、扭曲、流動速度、亮度、顏色。右邊的預覽跟遊戲用同一支程式畫，改了馬上看得到。</p>
+  </header>
+  <div class="notice"><strong>編輯方式：</strong>修改會先自動保存在這台瀏覽器。按「💾 存到專案」（或下載 <code>pool-caustics.js</code> 取代 <code>data/pool-caustics.js</code>）後，遊戲重新整理就會套用。
+    光紋只鋪在地圖編輯器畫了 🛟 深水區的格子上；要看真正地圖上的樣子，存到專案後到地圖編輯器按「預覽遊戲」。</div>
+  <main class="layout">
+    <section class="panel">
+      <h2>數值</h2>
+      <div id="fields"></div>
+      <div class="foot">
+        <div id="dirty"></div>
+        <div class="actions"><button id="download" class="primary">⬇ 下載 pool-caustics.js</button><button id="showExport">查看匯出內容</button><button id="reset" class="danger">丟掉修改、改回專案檔</button></div>
+        <div id="status" role="status" aria-live="polite"></div>
+        <textarea id="exportOut" readonly hidden aria-label="水波紋數值匯出內容"></textarea>
+      </div>
+    </section>
+    <aside class="panel preview">
+      <h2>預覽</h2>
+      <div class="stage"><canvas id="cv" width="320" height="200" aria-label="水波紋預覽"></canvas></div>
+      <div class="pv-opts">
+        <label>水池底圖 <select id="pvBg"></select></label>
+        <label>放大 <select id="pvZoom"><option value="1">1 倍</option><option value="1.5" selected>1.5 倍（跟遊戲一樣）</option><option value="2">2 倍</option><option value="3">3 倍</option></select></label>
+        <label>環境亮度 <input id="pvDark" type="range" min="0" max="0.85" step="0.05" value="0"></label>
+      </div>
+      <small>放大、底圖、環境亮度只影響預覽，不會存起來。環境亮度往右＝模擬暗的地方（遊戲裡黑暗會把光紋一起壓暗）。</small>
+      <div id="perf"></div>
+    </aside>
+  </main>
+
+  <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
+  <script>document.write('<script src="data/pool-caustics.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 目前存在檔案裡的水波紋數值；每次都讀最新的 -->
+  <script src="js/pool-caustics.js?v=tuning-20261125"></script>   <!-- 遊戲的光紋畫法（預覽跟遊戲用同一支） -->
+  <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
+  <script src="js/pool-caustics-editor.js?v=init-20261125"></script>
+  <script src="js/editor-nav.js?v=caustics-20261125"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+</body>
+</html>

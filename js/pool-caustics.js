@@ -5,31 +5,21 @@
      ・只取圖裡「比底色亮的水紋線」當光，底色不畫：用「濾色」疊在水池圖上面，只會讓水變亮，不會蓋掉原本的顏色和圖案
      ・水紋輕輕扭曲：每個點照波浪往旁邊挪一點（最多 warp 點），算出一輪 frames 張，輪流播（相鄰兩張交叉淡入淡出），看起來像水在晃
      ・整片光紋再朝 drift 的方向慢慢飄
-   換圖：把新的圖放進專案、改 POOL_CAUSTICS.image 就好（圖要能無縫拼接：左邊接右邊、上面接下面看不出接縫）。
+   數值：在「🌊 水波紋編輯器」調，存在 data/pool-caustics.js（遊戲和編輯器讀同一份；編輯器的預覽也是用這支程式畫的）。
+   換圖：把新的圖放進專案、在編輯器改「水紋圖」就好（圖要能無縫拼接：左邊接右邊、上面接下面看不出接縫）。
    水位：抽水抽成淺水時，一般深水區的光紋跟著水位淡掉（js/pool-tide.js 的 poolTide().deep）；永遠深水的照樣有。
    畫的順序：地面圖層畫完之後、人物和牆之前（js/render.js 的 draw 呼叫 drawPoolCaustics），所以人物、柱子會蓋在光紋上面。
    扭曲的圖一張要算幾毫秒：第一次畫的時候只先算第一張，其他的趁瀏覽器有空時在背景一張一張算（poolCausticWarm），
    還沒算好的那張先用已經算好的頂著，所以不會一頓一頓。 */
-const POOL_CAUSTICS = {
-  on: true,              // false＝不要光紋
-  image: 'images/Poolcore/Poolcore_caustics.png',   // 水紋圖（要能無縫拼接）
-  scale: 0.8,              // 水紋圖放大幾倍（1＝原尺寸，120 點一張）
-  lineFrom: .12,         // 比底色亮多少才算水紋線（0～1：0＝圖裡所有比底色亮的都算、越大只留最亮的線）
-  warp: 1.5,             // 扭曲的幅度：每個點最多往旁邊挪幾點（0＝不扭曲；太大線會糊掉）
-  frames: 45,            // 扭完一輪要算幾張圖（越多越順）
-  loopSecs: 30,          // 扭完一輪要幾秒（越大晃得越慢）
-  drift: [1, 1],         // 整片光紋每秒往哪個方向飄幾點（左右, 上下；[0, 0]＝不飄）
-  alpha: .2,            // 整片光紋多亮（0～1）
-  color: [215, 248, 255],   // 光紋的顏色（紅, 綠, 藍）：淡淡的水藍白
-  blend: 'screen',       // 疊上去的方式：screen＝濾色（只變亮）、lighter＝相加（更亮更刺眼）
-};
+// 數值都在 data/pool-caustics.js（水波紋編輯器存的那一份），這裡不另外寫一份；那個檔沒載入就不畫光紋
+const POOL_CAUSTICS = Object.assign({ on: false }, typeof POOL_CAUSTICS_TUNING !== 'undefined' ? JSON.parse(JSON.stringify(POOL_CAUSTICS_TUNING)) : {});
 
 // ---- 水紋圖：讀進來、只留水紋線的亮度（0～1）----
 let poolCausticSrc = null;   // { size, w, h, m：每個點的亮度 }
-let poolCausticImg = null;
+let poolCausticImg = null, poolCausticImgFor = null;   // 讀進來的圖、它是哪個檔
 function poolCausticSource() {
   if (poolCausticSrc) return poolCausticSrc;
-  if (!poolCausticImg) { poolCausticImg = new Image(); poolCausticImg.src = POOL_CAUSTICS.image + '?v=1'; }
+  if (!poolCausticImg) { poolCausticImg = new Image(); poolCausticImg.src = POOL_CAUSTICS.image + '?v=1'; poolCausticImgFor = POOL_CAUSTICS.image; }
   const im = poolCausticImg;
   if (!im.complete || !im.naturalWidth) return null;   // 圖還沒載好：這一幀先不畫
   const w = im.naturalWidth, h = im.naturalHeight;
@@ -39,18 +29,27 @@ function poolCausticSource() {
   let lo = Infinity, hi = -Infinity;
   for (let i = 0; i < w * h; i++) { const v = d[i * 4] * .3 + d[i * 4 + 1] * .59 + d[i * 4 + 2] * .11; lum[i] = v; if (v < lo) lo = v; if (v > hi) hi = v; }
   // 最暗的＝底色、最亮的＝水紋線最亮的地方；換成 0～1，再去掉 lineFrom 以下（底色上的雜點）
-  const m = new Float32Array(w * h), cut = POOL_CAUSTICS.lineFrom, span = Math.max(1, hi - lo);
+  const m = new Float32Array(w * h), cut = Math.max(0, Math.min(.95, POOL_CAUSTICS.lineFrom || 0)), span = Math.max(1, hi - lo);
   for (let i = 0; i < w * h; i++) m[i] = Math.max(0, ((lum[i] - lo) / span - cut) / (1 - cut));
   return (poolCausticSrc = { w, h, m });
 }
+
+// 數值改了要重算（水波紋編輯器用）：圖、取線、扭曲、張數、顏色改了，之前算好的圖都不能用
+function poolCausticReset() {
+  if (poolCausticImgFor !== POOL_CAUSTICS.image) poolCausticImg = null;   // 換了圖：重新讀
+  poolCausticSrc = null; poolCausticFrames.length = 0;
+}
+
+// 扭一輪幾張（整數、至少 1）
+const poolCausticCount = () => Math.max(1, Math.round(POOL_CAUSTICS.frames) || 1);
 
 // ---- 扭曲過的光紋圖（每一張只算一次，存起來重複用）----
 const poolCausticFrames = [];
 function poolCausticFrame(k) {
   if (poolCausticFrames[k]) return poolCausticFrames[k];
   const src = poolCausticSource(); if (!src) return null;
-  const C = POOL_CAUSTICS, { w, h, m } = src, [cr, cg, cb] = C.color;
-  const t = k / C.frames * Math.PI * 2, TAU = Math.PI * 2, A = C.warp;
+  const C = POOL_CAUSTICS, { w, h, m } = src, [cr, cg, cb] = C.color || [255, 255, 255];
+  const t = k / poolCausticCount() * Math.PI * 2, TAU = Math.PI * 2, A = C.warp || 0;
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
   const g = cv.getContext('2d'), img = g.createImageData(w, h), d = img.data;
   // 讀某個位置的亮度：超出圖的範圍就從另一邊接回來（圖是無縫拼接的），位置不是整數就用旁邊四個點混合，線才不會鋸齒
@@ -78,15 +77,16 @@ function poolCausticWarm() {
   poolCausticWarming = true;
   const idle = window.requestIdleCallback || (fn => setTimeout(fn, 30));
   const step = () => {
-    let k = 0; while (k < POOL_CAUSTICS.frames && poolCausticFrames[k]) k++;
-    if (k >= POOL_CAUSTICS.frames) { poolCausticWarming = false; return; }
+    const n = poolCausticCount(); let k = 0; while (k < n && poolCausticFrames[k]) k++;
+    if (k >= n) { poolCausticWarming = false; return; }
     poolCausticFrame(k); idle(step);
   };
   idle(step);
 }
 // 第 k 張可以用的光紋圖：算好了就用它，還沒算好就往前找最近一張算好的；一張都沒有就先算第一張（圖還沒載好＝null，這一幀不畫）
 function poolCausticReady(k) {
-  for (let i = 0; i < POOL_CAUSTICS.frames; i++) { const fr = poolCausticFrames[(k - i + POOL_CAUSTICS.frames) % POOL_CAUSTICS.frames]; if (fr) return fr; }
+  const n = poolCausticCount();
+  for (let i = 0; i < n; i++) { const fr = poolCausticFrames[(k - i + n) % n]; if (fr) return fr; }
   const first = poolCausticFrame(0);
   if (first) poolCausticWarm();
   return first;
@@ -141,25 +141,17 @@ function poolCausticPaths() {
   return poolCausticArea.paths;
 }
 
-// ---- 畫（js/render.js 的 draw：地面圖層之後、人物之前）----
+// ---- 鋪光紋（遊戲和水波紋編輯器的預覽共用這一段）----
+// list：要鋪的幾片 [{ sh：形狀（path、x0、y0、x1、y1）, a：這片多亮（0～1） }]；v：畫面看得到的範圍；ox0、oy0：圖樣從哪裡開始鋪
 const poolCausticMatrix = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };   // 圖樣的位置、大小（重複用同一個，不用每幀新建）
-function drawPoolCaustics(ctx) {
+function paintPoolCaustics(ctx, list, v, ox0, oy0, now) {
   const C = POOL_CAUSTICS;
-  if (!C.on || C.alpha <= 0) return;
-  const paths = poolCausticPaths(); if (!paths) return;
-  const s = typeof poolTideActive === 'function' && poolTideActive() && typeof poolTide === 'function' ? poolTide() : null;
-  const deepLevel = s ? Math.max(0, Math.min(1, s.deep)) : 1;   // 抽水抽成淺水：一般深水區的光紋跟著淡掉
-  // 要鋪的範圍：畫面看得到的地方（沒有就整張地圖）
-  const v = typeof mapDrawRect !== 'undefined' && mapDrawRect ? mapDrawRect : { x0: OX, y0: OY, x1: OX + COLS * CELL, y1: OY + ROWS * CELL };
-  const inView = sh => sh && sh.x1 > v.x0 && sh.x0 < v.x1 && sh.y1 > v.y0 && sh.y0 < v.y1;
-  const showNormal = deepLevel > 0 && inView(paths.normal), showKeep = inView(paths.keep);
-  if (!showNormal && !showKeep) return;   // 畫面裡沒有深水：什麼都不用做
-  const now = performance.now() / 1000;
-  const sc = C.scale || 1;
-  const ph = (now / C.loopSecs % 1) * C.frames, f0 = Math.floor(ph) % C.frames, f1 = (f0 + 1) % C.frames, mix = ph - Math.floor(ph);
+  if (!C.on || !(C.alpha > 0) || !list.length) return;
+  const sc = C.scale || 1, frames = poolCausticCount();
+  const ph = (now / (C.loopSecs || 1) % 1) * frames, f0 = Math.floor(ph) % frames, f1 = (f0 + 1) % frames, mix = ph - Math.floor(ph);
   const fr0 = poolCausticReady(f0); if (!fr0) return;   // 水紋圖還沒載好
-  const span = fr0.cv.width * sc;
-  const M = poolCausticMatrix; M.a = M.d = sc; M.e = OX + (C.drift[0] * now) % span; M.f = OY + (C.drift[1] * now) % span;
+  const span = fr0.cv.width * sc, drift = C.drift || [0, 0];
+  const M = poolCausticMatrix; M.a = M.d = sc; M.e = ox0 + (drift[0] * now) % span; M.f = oy0 + (drift[1] * now) % span;
   // 這一幀要用的兩張圖（相鄰兩張交叉淡入淡出，水紋才是慢慢扭動，不是一格一格跳）
   const pair = [];
   for (const [k, w] of [[f0, 1 - mix], [f1, mix]]) {
@@ -170,19 +162,35 @@ function drawPoolCaustics(ctx) {
     fr.pattern.setTransform(M);
     pair.push([fr.pattern, w]);
   }
-  const layer = (sh, a) => {
+  for (const { sh, a } of list) {
     // 只鋪「畫面」和「這片深水」重疊的地方
     const x0 = Math.max(v.x0, sh.x0), y0 = Math.max(v.y0, sh.y0), x1 = Math.min(v.x1, sh.x1), y1 = Math.min(v.y1, sh.y1);
+    if (x1 <= x0 || y1 <= y0 || a <= 0) continue;
     ctx.save();
-    ctx.clip(sh.path);
-    ctx.globalCompositeOperation = C.blend;
+    if (sh.path) ctx.clip(sh.path);
+    ctx.globalCompositeOperation = C.blend || 'screen';
     for (const [pat, w] of pair) {
       ctx.globalAlpha = C.alpha * a * w;
       ctx.fillStyle = pat;
       ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
     }
     ctx.restore();
-  };
-  if (showNormal) layer(paths.normal, deepLevel);
-  if (showKeep) layer(paths.keep, 1);
+  }
+}
+
+// ---- 畫（js/render.js 的 draw：地面圖層之後、人物之前）----
+function drawPoolCaustics(ctx) {
+  const C = POOL_CAUSTICS;
+  if (!C.on || !(C.alpha > 0)) return;
+  const paths = poolCausticPaths(); if (!paths) return;
+  const s = typeof poolTideActive === 'function' && poolTideActive() && typeof poolTide === 'function' ? poolTide() : null;
+  const deepLevel = s ? Math.max(0, Math.min(1, s.deep)) : 1;   // 抽水抽成淺水：一般深水區的光紋跟著淡掉
+  // 要鋪的範圍：畫面看得到的地方（沒有就整張地圖）
+  const v = typeof mapDrawRect !== 'undefined' && mapDrawRect ? mapDrawRect : { x0: OX, y0: OY, x1: OX + COLS * CELL, y1: OY + ROWS * CELL };
+  const inView = sh => sh && sh.x1 > v.x0 && sh.x0 < v.x1 && sh.y1 > v.y0 && sh.y0 < v.y1;
+  const list = [];
+  if (deepLevel > 0 && inView(paths.normal)) list.push({ sh: paths.normal, a: deepLevel });
+  if (inView(paths.keep)) list.push({ sh: paths.keep, a: 1 });
+  if (!list.length) return;   // 畫面裡沒有深水：什麼都不用做
+  paintPoolCaustics(ctx, list, v, OX, OY, performance.now() / 1000);
 }
