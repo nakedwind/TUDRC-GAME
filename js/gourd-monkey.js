@@ -165,7 +165,7 @@ function gourdThink(e, dt, moveDt) {
     const [gc, gr] = cellAt(core.x, core.y);
     const nav = gourdNavigate(e, gc, gr, moveDt, 'core:' + gc + ',' + gr);
     if (nav.blocker) gourdSmashBlocker(e, nav.blocker);
-    else if (nav.reached && Math.hypot(core.x - e.x, core.y - e.y) > CELL * 2) { e.coreReturning = false; e.coreGiveUpT = 4; }   // 走不到（窄道進不去）：先放棄，過一下再試
+    else if (nav.reached && Math.hypot(core.x - e.x, core.y - e.y) > CELL * 2) { e.coreReturning = false; e.coreGiveUpT = 4 + Math.random() * 2; }   // 走不到（窄道進不去）：先放棄，過一下再試（多等 0～2 秒隨機：大家錯開，不會同一幀一起重找）
     return;
   }
   // 沒事做：發呆、拖到附近走得到的地方

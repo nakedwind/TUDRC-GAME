@@ -98,6 +98,8 @@ let poolDeepWas = true;
 function updatePoolTide(dt) {
   if (!poolTideActive()) { poolWarnShow(false); if (G && G.player) G.player.drowning = false; if (poolFlowOn) { poolFlowOn = false; SFX.fadeOut('poolWaterFlow', POOL_TIDE.flowSoundFade); } return; }   // 離開池核：流水聲也淡掉
   if (typeof updatePoolBoss === 'function') updatePoolBoss(dt);   // 池核 BOSS：游泳、潛水、擱淺（js/pool-boss.js）
+  if (typeof poolFallTick === 'function') poolFallTick(dt);   // 失足掉進深水：隊員搖晃、掉下去、掙扎濺水花、自動戴泳圈（js/pool-fall.js）
+  if (typeof poolSurgeTick === 'function') poolSurgeTick(dt);   // 大型怪物落水、水溢上岸把人推開（js/pool-surge.js）
   const s = poolTide(); s.t += dt;
   if (s.phase === 'drainSoon') {
     if (s.drainFromRise) s.deep = Math.min(1, s.deep + dt / POOL_TIDE.riseSecs);
@@ -126,6 +128,7 @@ function updatePoolTide(dt) {
   }
   // 溺水：深水時，還在深水區、沒坐救生圈的隊友每秒扣血
   const drowning = deepNow && s.drained ? poolMatesInDeep() : [];   // 抽乾過、水又漲回來才會溺水（剛通電還沒開抽水閥＝跟一開始一樣）
+  for (const t of G.towers || []) if (poolFellIn(t) && !drowning.includes(t)) drowning.push(t);   // 失足掉進深水的（js/pool-fall.js）：不管有沒有抽過水都會溺水
   for (const t of G.towers || []) {
     const now = drowning.includes(t);
     if (now && !t.drowning) poolDrownSound('poolDrownMate', t.id ?? t.type);   // 剛開始溺水：冒泡泡的聲音
@@ -133,7 +136,7 @@ function updatePoolTide(dt) {
   }
   for (const t of drowning) {
     t.hp = Math.max(0, t.hp - POOL_TIDE.drownDps * dt);
-    t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#6fb7ff';
+    // 溺水扣血不閃紅（會蓋住掙扎的 >< 表情）
     if ((t.drownTalkT = (t.drownTalkT ?? 0) - dt) <= 0) {
       const [a, b] = POOL_TIDE.drownTalkSecs; t.drownTalkT = a + Math.random() * (b - a);
       const line = typeof pickDialogueLine === 'function' ? pickDialogueLine(t.type, 'drown') : null;
@@ -148,8 +151,8 @@ function updatePoolTide(dt) {
 function updateWinterDrown(dt, deep) {
   const p = G.player; if (!p) return;
   const was = !!p.drowning;
-  p.drowning = deep && p.hp > 0 && !p.swimRing && !p.sitting && poolPointInDeepZone(p.x, p.y)
-    && !(typeof poolPlatformStandingAny === 'function' && poolPlatformStandingAny());
+  p.drowning = (deep && p.hp > 0 && !p.swimRing && !p.sitting && poolPointInDeepZone(p.x, p.y)
+    && !(typeof poolPlatformStandingAny === 'function' && poolPlatformStandingAny())) || poolFellIn(p);   // 失足掉進深水（js/pool-fall.js）也算
   if (!p.drowning) return;
   if (!was) {   // 開始溺水的那一刻：喊一聲（蓋掉「一定有開關可以把這些水抽走。」）
     poolDrownSound('poolDrownSelf', 'winter');   // 冒泡泡的聲音
@@ -158,10 +161,11 @@ function updateWinterDrown(dt, deep) {
   }
   const before = Math.ceil(p.hp);
   p.hp = Math.max(0, p.hp - POOL_TIDE.drownDps * dt);
-  p.hitT = Math.max(p.hitT || 0, .12);
-  if (Math.ceil(p.hp) !== before && typeof updateHUD === 'function') updateHUD();   // 每少 1 點更新一次畫面
+  if (Math.ceil(p.hp) !== before && typeof updateHUD === 'function') updateHUD();   // 每少 1 點更新一次畫面（溺水扣血不閃紅，會蓋住掙扎的 >< 表情）
   if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '溺水'); }
 }
+// 失足掉進深水、正在掙扎（js/pool-fall.js）
+const poolFellIn = a => !!(a && a.poolFall && a.poolFall.phase === 'struggle' && a.hp > 0 && !a.swimRing);
 // ---- 池核的水聲 ----
 // 溺水的泡泡聲：開始溺水時播一次，播 drownSoundSecs 秒後用 drownSoundFade 秒淡出（音檔、音量在音效編輯器：隊友 poolDrownMate、溫特 poolDrownSelf）
 POOL_TIDE.drownSoundSecs = 2; POOL_TIDE.drownSoundFade = 1;

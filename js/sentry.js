@@ -860,8 +860,10 @@ function guideCareTarget(t, spec) {
 function updateSentry(t, dt) {
   if (typeof swimRingWithActor !== 'function') { updateSentryMain(t, dt); return; }
   swimRingAllyTick();
+  const x0 = t.x, y0 = t.y;
   swimRingWithActor(t, () => updateSentryMain(t, dt));
   swimRingAllyAfterMove(t);
+  if (typeof poolFallAllyCheck === 'function') poolFallAllyCheck(t, dt, x0, y0);   // 走在水邊：有機會失足掉進深水（js/pool-fall.js）
 }
 function updateSentryMain(t, dt) {
   t.followDark = false;   // 這一幀要不要穿過黑暗：跟著溫特、照顧人、撿地上的東西時才打開（moveSentryWithPath 看這個）
@@ -873,10 +875,12 @@ function updateSentryMain(t, dt) {
   if (tinoSootheTripStep(t, dt)) return;
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(t, dt)) return;   // 基地：正在跟別人閒聊（js/npc-chats.js）
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
+  if (t.poolFall && t.poolFall.phase !== 'struggle') { t.target = null; t.moving = false; return; }   // 失足：正在搖晃、掉進水裡（js/pool-fall.js）；要在脫困之前，不然掉到一半會被推回岸上
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
   if (t.rootT > 0) { t.moving = false; t.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
   if (stepActorKnock(t, dt, sentryBlocked)) { t.moving = false; return; }   // 被鳥頭人撞飛：滑行中（js/bird-head.js）
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
+  if (t.poolFall && poolFallPanicking(t)) { t.target = null; t.moving = false; return; }   // 剛落水原地慌張（js/pool-fall.js）
   if (t.drowning && typeof poolDrownFlee === 'function' && poolDrownFlee(t, dt)) return;   // 溺水：用 3 成的速度往岸上逃，不攻擊（js/pool-tide.js）
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控

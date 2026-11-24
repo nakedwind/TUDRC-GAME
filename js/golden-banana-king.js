@@ -201,7 +201,7 @@ function stepHealerEnemy(e, dt) {
     bk.flee = null;
     const [gc, gr] = cellAt(guard.x, guard.y);
     const nav = enemyNavigate(e, gc, gr, dt * C.fleeSpeedMul, 'core:' + gc + ',' + gr, 'detour');
-    if (nav.blocker || (nav.reached && Math.hypot(guard.x - e.x, guard.y - e.y) > CELL * 2)) { e.coreReturning = false; e.coreGiveUpT = 4; }   // 走不到（他不會拆建築）：先放棄，過一下再試
+    if (nav.blocker || (nav.reached && Math.hypot(guard.x - e.x, guard.y - e.y) > CELL * 2)) { e.coreReturning = false; e.coreGiveUpT = 4 + Math.random() * 2; }   // 走不到（他不會拆建築）：先放棄，過一下再試（多等 0～2 秒隨機：大家錯開，不會同一幀一起重找）
     return;
   }
   const chasers = (bk.flee && bk.threats || []).filter(t => t.hp > 0);   // 看不到了也要逃到夠遠才停

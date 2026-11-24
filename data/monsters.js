@@ -1739,6 +1739,27 @@ const BOSS_SETTINGS_DEFAULT = {
         "shake": 4
       }
     },
+    "surge": {
+      "speed": 9,
+      "pushTime": 0.35,
+      "linger": 1.4,
+      "ringPush": 0.6,
+      "up": {
+        "range": 10,
+        "spill": 2,
+        "push": 60
+      },
+      "dive": {
+        "range": 14,
+        "spill": 3,
+        "push": 95
+      },
+      "land": {
+        "range": 7,
+        "spill": 1,
+        "push": 35
+      }
+    },
     "body": {
       "rx": 0.3,
       "ry": 0.14

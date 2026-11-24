@@ -18,7 +18,8 @@
      ・划水的時候循環播放划水聲（音效編輯器的 poolPaddle） */
 const SWIM_RING = {
   itemId: 'swim-ring',
-  hintText: '好像可以拿救生圈做點什麼……',   // 想走進深水區時溫特頭上的泡泡
+  hintText: '好像可以用泳圈做點什麼……',   // 身上沒有泳圈、想走進深水區時溫特頭上的泡泡（有泳圈的話改成腳下出現「進入水中」）
+  enterPrompt: '進入水中',   // 身上有泳圈、靠近深水區時的互動提示（按空白鍵坐上泳圈下水）
   noRingText: '身上沒有救生圈。',            // 沒有救生圈還按空白鍵
   hintSecs: 1.6,       // 頭上的泡泡停多久（秒）
   reach: 12,           // 離深水區幾點以內算「在岸邊」（可以按空白鍵下水）
@@ -79,7 +80,7 @@ let swimCurActor = null;
 function swimRingWithActor(t, fn) { const prev = swimCurActor; swimCurActor = t; try { return fn(); } finally { swimCurActor = prev; } }
 const swimMover = () => swimCurActor || (typeof G !== 'undefined' && G ? G.player : null);
 // 隊員的碰撞（js/sentry.js 的 sentryBlocked）：沒坐救生圈的隊員不會下水
-function deepWaterBlocksAlly(x, y) { return !(swimCurActor && (swimCurActor.swimRing || swimCurActor.drowning)) && deepWaterAtPoint(x, y); }   // 溺水中的隊友（js/pool-tide.js）可以自己游出來
+function deepWaterBlocksAlly(x, y) { return !(swimCurActor && (swimCurActor.swimRing || swimCurActor.drowning || swimCurActor.poolFall)) && deepWaterAtPoint(x, y); }   // 溺水中的隊友（js/pool-tide.js）可以自己游出來；失足掉進水裡的（js/pool-fall.js）也不擋，不然會一直被推回岸上、看起來在抽搐
 // 怪物尋路、建築放置用：這格是深水（不管有沒有人坐救生圈，怪物和建築都不能進去）
 function deepWaterBlocksCell(c, r) { return isDeepWaterCell(c, r); }
 // 溫特的碰撞（js/game.js 的 playerBlocked）：沒坐救生圈就不能從岸上踩進深水；
@@ -213,12 +214,14 @@ function useSwimRingShore() {
 // ---- 空白鍵：在岸邊 → 坐上救生圈下水（js/game.js 的互動鍵）----
 function useSwimRingNearPlayer() {
   const p = G && G.player; if (!p || p.sitting) return false;
-  if (p.drowning) {   // 溺水中（js/pool-tide.js）：原地坐上救生圈，位置不變
+  if (p.drowning) {   // 溺水中（js/pool-tide.js；失足掉進水裡也是，js/pool-fall.js）：原地坐上救生圈，位置不變
     if (!hasSwimRing()) { sfx('error'); systemNotice(SWIM_RING.noRingText, true); return true; }
     p.swimRing = true; p.drowning = false; p.swimHintAt = 0;
+    if (typeof poolFallEnd === 'function') poolFallEnd(p);
     swimAllyNextAt = performance.now() + swimAllyDelay();
     return true;
   }
+  if (p.poolFall) return false;   // 正在失足（搖晃、掉下去）
   const spot = deepWaterNearPlayer(); if (!spot) return false;
   if (!hasSwimRing()) { sfx('error'); systemNotice(SWIM_RING.noRingText, true); return true; }
   const keepX = p.x, keepY = p.y;
@@ -368,10 +371,17 @@ function swimRingAllyAfterMove(t) {
 // ---- 畫面 ----
 // 溫特頭上的提示泡泡（js/render.js 的 drawInteractionPrompts 呼叫）
 function drawSwimRingHint() {
-  const p = G && G.player; if (!p || riding() || !p.swimHintAt) return;
+  const p = G && G.player; if (!p || riding() || !p.swimHintAt || p.poolFall) return;
+  if (hasSwimRing()) return;   // 身上有泳圈：腳下改成「進入水中」（swimRingEnterSpot）
   if (performance.now() - p.swimHintAt > SWIM_RING.hintSecs * 1000) return;
   if (!deepWaterNearPlayer()) return;   // 走開了就不顯示
   if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, SWIM_RING.hintText);
+}
+// 身上有泳圈、站在深水區岸邊：「進入水中」的提示畫在哪（js/render.js 的互動提示）；不顯示＝null
+function swimRingEnterSpot() {
+  const p = G && G.player;
+  if (!p || riding() || p.drowning || p.poolFall || p.sitting || p.hp <= 0 || !hasSwimRing()) return null;
+  return deepWaterNearPlayer() ? { x: p.x, y: p.y - 34 } : null;
 }
 // 坐進救生圈（js/water.js 的 drawWaded 呼叫；溫特、隊員都一樣）：
 // 救生圈後半圈 → 角色原本的圖（腳裁掉，划水時用走路圖，手照樣擺）→ 救生圈前半圈。整組一起在水上輕輕晃

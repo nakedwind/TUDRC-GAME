@@ -180271,7 +180271,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
-    "name": "04. 池核（加長）",
+    "name": "W118區 地下水池",
     "desc": "",
     "layers": {
       "object": {},

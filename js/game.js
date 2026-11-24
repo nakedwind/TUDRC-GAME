@@ -66,8 +66,11 @@ function loadSwingSprites(set, folder, files) {
 // 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
 const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png', winter_M: 'fail.png', eldrin_M: 'fail.png' };
 // 痛的表情（正面）：被藤蔓纏住／拉走／摔到地上、被絲瓜小姐的藤綁住時用（js/vines.js、js/loofah-lady.js）；沒有這張圖的角色照舊（藤蔓摔地＝閉眼）
-const OUCH_FILES = { amber_B: 'ouch.png', avaren_B: 'ouch.png', chris_B: 'ouch.png', colyn_B: 'ouch.png', eldrin_B: 'ouch.png', red_B: 'ouch.png', taana_B: 'ouch.png', theonie_B: 'OUCH.png', winter_B: 'ouch.png' };
-const OUCH_GROUND_ONLY = new Set(['avaren_B']);   // 只有摔在地上暈的時候才用 ouch（被纏住、拉走、倒吊、掉下來、絲瓜藤綁住照舊）
+const OUCH_FILES = { amber_B: 'ouch.png', avaren_B: 'ouch.png', chris_B: 'ouch.png', colyn_B: 'ouch.png', eldrin_B: 'ouch.png', red_B: 'ouch.png', taana_B: 'ouch.png', theonie_B: 'OUCH.png', winter_B: 'ouch.png', winter_M: '0000_ouch.png', eldrin_M: '0000_ouch.png' };   // 寫 4 位數字開頭的＝完整檔名（前面不再加 0012_）
+const OUCH_GROUND_ONLY = new Set(['avaren_B']);
+// 溺水掙扎的 >< 表情（正面走路圖換成 >< 的頭：<前綴>_0001_Front-Walking01_drown.png、0002_Front-Walking02_drown.png）
+// 圖是手畫的（放在各角色資料夾裡）；新的角色畫好這兩張圖後，把資料夾名稱加進這個清單（沒列的角色掙扎時照用原本的圖）
+const DROWN_FACE_FOLDERS = new Set(['amber_B', 'ash_B', 'avaren_B', 'cael_C', 'chris_B', 'colyn_B', 'eden_B', 'eldrin_B', 'eldrin_M', 'kakuma_C', 'luther_B', 'mob_B', 'noah_B', 'red_B', 'rowan_C', 'saku_B', 'salem_B', 'taana_B', 'theonie_B', 'tino_B', 'tino_C', 'winter_B', 'winter_M']);   // 只有摔在地上暈的時候才用 ouch（被纏住、拉走、倒吊、掉下來、絲瓜藤綁住照舊）
 // 側面坐下圖（tools/make-sit-sprites.py 用柯林的腿做的）：腿是出勤制服的褲子，所以只有 B 款有；球球有自己的坐下圖（js/ball-poses.js）
 const hasSitPose = folder => /_B$/.test(folder) && !/^ball_/.test(folder);
 const SIT_POSE_DROP = 4;   // 坐下圖的上半身比站著低幾像素：衣櫃配件跟著往下
@@ -92,7 +95,8 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
     }
   }
   if (SWING_FILES[folder]) loadSwingSprites(set, folder, SWING_FILES[folder]);   // 近戰揮擊圖
-  if (OUCH_FILES[folder]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}0012_${OUCH_FILES[folder]}`; set.ouch = img; set.ouchGroundOnly = OUCH_GROUND_ONLY.has(folder); }   // 痛的表情
+  if (OUCH_FILES[folder]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}${/^\d{4}_/.test(OUCH_FILES[folder]) ? '' : '0012_'}${OUCH_FILES[folder]}`; set.ouch = img; set.ouchGroundOnly = OUCH_GROUND_ONLY.has(folder); }   // 痛的表情
+  if (DROWN_FACE_FOLDERS.has(folder)) set.drown = ['0001_Front-Walking01_drown.png', '0002_Front-Walking02_drown.png'].map(f => { const img = new Image(); img.src = `images/character/${folder}/${prefix}${f}`; return img; });   // 溺水掙扎（js/pool-fall.js）
   if (hasSitPose(folder)) {
     set.sit = {};
     for (const [dir, file] of [['left', '0003_Leftside'], ['right', '0006_right-side']]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}_sit.png`; set.sit[dir] = img; }
@@ -461,6 +465,8 @@ const TWO_FRAME_WALK = new Set(['ball']);   // 走路只輪流用 Walking01、02
 function pickCharacterFrame(set, who) {
   if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
   if (who.poolDownT > 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 從抽水機平台跳下來摔在地上（js/pool-platform.js）
+  const drownFrame = typeof poolFallFrame === 'function' ? poolFallFrame(set, who) : null;   // 掉進深水、溺水掙扎：>< 表情（js/pool-fall.js）
+  if (drownFrame) return drownFrame;
   const mothFrame = (who.mothSleep || who.mothWakeT > 0) && typeof mothSleepFrame === 'function' ? mothSleepFrame(set, who) : null;   // 吸了人面蝶的睡眠鱗粉：半閉眼 → 閉眼（js/human-face-butterfly.js）
   if (mothFrame) return mothFrame;
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
@@ -1631,7 +1637,8 @@ function updatePlayer(dt) {
     if (!anyMoveKey()) { p.moving = false; p.anim = 0; updateBlink(p, dt); return; }
     standUp();
   }
-  if (typeof poolJumpUpdate === 'function' && poolJumpUpdate(p, dt)) { p.moving = false; p.anim = 0; return; }   // 從抽水機平台跳下去、摔在地上頭暈（js/pool-platform.js）
+  if (typeof poolJumpUpdate === 'function' && poolJumpUpdate(p, dt)) { p.moving = false; p.anim = 0; return; }
+  if (p.poolFall && typeof poolFallStep === 'function' && poolFallStep(p, dt)) { p.dashT = 0; p.dashPart = 0; return; }   // 失足掉進深水：搖晃、掉下去、掙扎往岸邊游（js/pool-fall.js）   // 從抽水機平台跳下去、摔在地上頭暈（js/pool-platform.js）
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
   // 被撞飛、滑倒的滑行：碰撞優先——跟走路一樣，除了「這個位置有沒有被擋」，也檢查有沒有穿過邊緣碰撞（薄牆）
@@ -1670,6 +1677,7 @@ function updatePlayer(dt) {
     else if (yBlocked && (!dx || xBlocked)) slideIntoGap(p, 'y', ny2 - p.y, step);
   }
   if (typeof swimRingAfterMove === 'function') swimRingAfterMove(p, dx, dy);   // 撞到深水跳提示、划上岸收起救生圈（js/swim-ring.js）
+  if (typeof poolFallAfterMove === 'function') poolFallAfterMove(p, dx, dy, dt, px0, py0);   // 太靠近水邊、硬往深水走：失足掉下去（js/pool-fall.js）
   if (typeof poolPlatformAfterMove === 'function') poolPlatformAfterMove(p, dx, dy, px0, py0);   // 抽乾的平台上往邊上走被擋住：出現「跳下去」（js/pool-platform.js）
   if (p.dashPart > 0) {   // 衝刺中：身後留殘影（js/render.js 的 drawDashTrail）
     const now = performance.now() / 1000, tr = p.dashTrail || (p.dashTrail = []);
@@ -2041,7 +2049,7 @@ function updatePlayerAttack(dt) {
   }
   updateAmmoHud();
   const queued = performance.now() - shotQueuedAt < SHOT_QUEUE * 1000;   // 剛點了一下（已經放開也算）
-  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.mothWakeT > 0 || p.slipDizzyT > 0 || p.poolJump || p.poolDownT > 0 || p.vineCap || p.vineDazeT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中、被藤蔓吊走不開槍
+  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.mothWakeT > 0 || p.slipDizzyT > 0 || p.poolJump || p.poolDownT > 0 || p.poolFall || p.vineCap || p.vineDazeT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中、被藤蔓吊走不開槍
   if (canFire) shotQueuedAt = -Infinity;   // 這一下開了：用掉
   if (wid === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈（js/flare.js）
   if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
@@ -2221,6 +2229,7 @@ let last = 0;
 //     walk＝平常走路、water＝走在淺水裡（坐救生圈划水也算）
 const MAP_FOOTSTEPS = {
   map_mv1bzur4: { walk: 'FootstepEcho', water: 'WalkOnWater' },   // 04. 池核：腳步回音、走在水中
+  'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { walk: 'FootstepEcho', water: 'WalkOnWater' },   // W118區 地下水池：跟池核一樣
 };
 const FOOT = { audio: null, file: '', gain: 'footsteps' };
 // 音效編輯器裡某個音效的音檔路徑（只用第一個音檔；沒有就回傳空字串）

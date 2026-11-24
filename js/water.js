@@ -75,7 +75,13 @@ function wadeInfo(a, kind) {
 // 畫一個角色：在水裡的話，水面上照常畫、水面下半透明，再加一圈波紋
 let waterLayer = null;   // 旁邊的空白畫布（跟遊戲畫面一樣大）
 function drawWaded(a, kind, drawFn) {
-  const info = a && a.swimRing ? null : wadeInfo(a, kind);   // 坐在救生圈上：整個人照常畫，不會被水遮住
+  // 失足搖晃、掉進水裡、溺水掙扎（js/pool-fall.js）：整個人轉一點、上下浮沉，掙扎時泡到脖子
+  const fall = kind === 'char' && typeof poolFallPose === 'function' ? poolFallPose(a) : null;
+  if (fall) {
+    const inner = drawFn, py = a.y + fall.pivot;
+    drawFn = () => { ctx.save(); ctx.translate(a.x, py); ctx.rotate(fall.rot); ctx.translate(-a.x, -py + fall.dy); try { inner(); } finally { ctx.restore(); } };
+  }
+  const info = a && a.swimRing ? null : (fall && fall.wade) || wadeInfo(a, kind);   // 坐在救生圈上：整個人照常畫，不會被水遮住
   if (a && a.swimRing && typeof drawSwimRinged === 'function') {   // 坐進救生圈：腳藏起來（js/swim-ring.js），救生圈外面一圈水波紋
     const ri = typeof swimRingRippleInfo === 'function' ? swimRingRippleInfo(a) : null;
     if (ri) drawWaterRipple(a, ri, 'back');

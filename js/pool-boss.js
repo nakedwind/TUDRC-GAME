@@ -42,6 +42,11 @@ const POOL_BOSS = applyBossSettings('POOL_BOSS', {
     up:   { drops: 80, column: 30, mist: 12, up: 380, spread: 260, shake: 8 },
     dive: { drops: 70, column: 55, mist: 14, up: 560, spread: 200, shake: 10 },
     land: { drops: 36, column: 0,  mist: 6,  up: 200, spread: 200, shake: 4 } },
+  // 落水時水滿溢出來（js/pool-surge.js）：水波沿著深水區往外擴散，碰到岸邊就溢到地上，把岸上的人、怪物、地上的道具往遠離水池的方向推開
+  surge: { speed: 9, pushTime: .35, linger: 1.4, ringPush: .6,   // 水波擴散多快（格／秒）、被推開滑多久（秒）、溢上岸的水多久退掉（秒）、坐救生圈的人被推的距離倍率
+    up:   { range: 10, spill: 2, push: 60 },   // 躍出水面：水波沿著水面最遠擴散幾格、最多溢上岸幾格、最靠近水邊的人被推開幾像素（越往岸上越小）
+    dive: { range: 14, spill: 3, push: 95 },   // 一頭栽進水裡（最大）：同上
+    land: { range: 7,  spill: 1, push: 35 } },   // 落回水面（最小）：同上
   body: { rx: .3, ry: .14 },  // 身體擋路的範圍：以腳底為中心的橢圓，左右半徑＝畫出來的寬 × rx、前後半徑＝寬 × ry
   touchDamage: 18,            // 被牠撞到扣多少血（再經過防護背心減傷）
   nearSpawn: 14,              // 開戰後，牠幾格內生出來的怪物
@@ -216,6 +221,7 @@ function poolBossSplash(e, kind = 'up') {
   if (list.length > 900) list.splice(0, list.length - 900);   // 太多了就丟掉最舊的，不然會卡
   if (typeof bossImpact === 'function') bossImpact(x, y, K.shake, big ? .04 : 0);   // 畫面搖一下（離溫特越近越大，6 格外不搖）
   if (typeof sfxAt === 'function') sfxAt('poolBossSplash', x, y, big ? 1 : .6, 'pool-boss-splash-' + kind); else if (typeof sfx === 'function') sfx('poolBossSplash');
+  if (typeof poolSurgeStart === 'function') poolSurgeStart(x, y, kind);   // 水滿溢出來、推開岸上的人和東西（js/pool-surge.js）
 }
 function updatePoolSplash(dt) {
   const list = G.poolSplash; if (!list || !list.length) return;

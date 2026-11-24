@@ -417,6 +417,12 @@ function closestObstacleCell(e, o) {
   return best;
 }
 const ENEMY_ROUTE_FAIL_WAIT = 2;   // 找不到路之後，隔幾秒才再找一次（同一個目標）
+const ENEMY_ROUTE_FAIL_JITTER = 1.5;   // 再加 0～這麼多秒的隨機：很多隻同時找不到路時（例如核心醒來，全地圖的怪物一起衝回核心），
+                                       // 不要每次都擠在同一幀一起重找，畫面會頓一下（F307 出過）
+// 每一幀「怪物找路」最多花幾毫秒：超過了，還沒輪到的怪物下一幀再找（原本有路的先照舊路走）。
+// 核心醒來、開關門、蓋建築時，全部怪物會在同一幀一起重新找路，一次算完會頓一下；分到接下來幾幀就不會。
+const ENEMY_ROUTE_BUDGET_MS = 6;
+let enemyRouteBudget = { frame: null, spent: 0 };
 function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
   const [startC, startR] = cellAt(e.x, e.y);
   if (!inGrid(goalC, goalR) || enemyWallCell(goalC, goalR)) return null;
@@ -449,7 +455,15 @@ function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   // 剛剛才找過、同一個目標走不到：等 aiRouteTimer 到了再找，不要每一幀都重找
   // （大體型走不到時會先走到離目標最近的地方，走完那段路後一樣要等，不然會停在門口每一幀都重找）
   const failedHere = (!e.aiPath || !e.aiPath.length) && e.aiRouteFailed && e.aiRouteKey === routeKey && e.aiGoal === goal;
-  if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || (!failedHere && (!e.aiPath || !e.aiPath.length))) {
+  const needRoute = e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || (!failedHere && (!e.aiPath || !e.aiPath.length));
+  // 這一幀找路的時間用完了：先不找。手上還有路就照舊路走，沒有就原地等一幀（下一幀一定輪得到）
+  // 這一幀的記號：last＝畫面這一幀的時間（js/game.js 的 frame 每幀更新）、G.navClock＝遊戲時間（每次 update 都會加）。
+  // 兩個一起看：BOSS 出場演出時 update 不跑但畫面照跑；自動測試一直呼叫 update 時畫面不跑——兩種情況都會換新的一幀
+  const frameId = (typeof last !== 'undefined' ? last : 0) + ':' + ((G && G.navClock) || 0);
+  if (enemyRouteBudget.frame !== frameId) enemyRouteBudget = { frame: frameId, spent: 0 };
+  if (needRoute && enemyRouteBudget.spent >= ENEMY_ROUTE_BUDGET_MS && !(e.aiPath && e.aiPath.length)) return {};
+  if (needRoute && enemyRouteBudget.spent < ENEMY_ROUTE_BUDGET_MS) {
+    const routeT0 = performance.now();
     let reached = true;
     if (e.wide) {   // 大體型：只走寬的路，過不去就停在離目標最近的地方
       const around = canBreakBuildings === 'detour' ? wideEnemyRoute(e, goalC, goalR, false) : null;
@@ -459,7 +473,8 @@ function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
     e.aiRouteKey = routeKey; e.aiGoal = goal; e.aiRouteTimer = .65 + Math.random() * .35;
     // 走不到（例如目標在深水區裡、大體型被窄門擋住）：找一次要把整張地圖搜完，很花時間，晚一點再找（ENEMY_ROUTE_FAIL_WAIT 秒）
     e.aiRouteFailed = !e.aiPath || !reached;
-    if (e.aiRouteFailed) e.aiRouteTimer = ENEMY_ROUTE_FAIL_WAIT;
+    if (e.aiRouteFailed) e.aiRouteTimer = ENEMY_ROUTE_FAIL_WAIT + Math.random() * ENEMY_ROUTE_FAIL_JITTER;
+    enemyRouteBudget.spent += performance.now() - routeT0;
   }
   if (!e.aiPath || !e.aiPath.length) return { reached: true };
   const [nc, nr] = e.aiPath[0], blocker = enemyBarrierAt(nc, nr);
@@ -767,7 +782,7 @@ function stepEnemy(e, dt) {
     const moveDt = e.behavior === 'clownfish' && typeof updateClownfishHop === 'function' ? updateClownfishHop(e, dt) : e.frames ? dt : updateSlimeJump(e, dt);
     const nav = enemyNavigate(e, gc, gr, moveDt, 'core:' + gc + ',' + gr, e.behavior === 'charger' ? 'detour' : true);   // 鳥頭人回核心：繞得過去就繞，不先拆建築
     if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
-    else if (nav.reached && Math.hypot(guardCore.x - e.x, guardCore.y - e.y) > CELL * 2) { e.coreReturning = false; e.coreGiveUpT = 4; }   // 走不到核心：先放棄，過一下再試
+    else if (nav.reached && Math.hypot(guardCore.x - e.x, guardCore.y - e.y) > CELL * 2) { e.coreReturning = false; e.coreGiveUpT = 4 + Math.random() * 2; }   // 走不到核心：先放棄，過一下再試（多等 0～2 秒隨機：大家錯開，不會同一幀一起重找）
     return;
   }
   if (e.behavior === 'charger') { stepChargerEnemy(e, dt); return; }   // 鳥頭人：發呆、散步、看到人就衝撞（js/bird-head.js）

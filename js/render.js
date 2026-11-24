@@ -1071,11 +1071,13 @@ function draw() {
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
   if (typeof drawPoolBossUnderwater === 'function') drawPoolBossUnderwater(ctx);   // 池核 BOSS 潛在水裡的影子（js/pool-boss.js）
+  if (typeof drawPoolSurge === 'function') drawPoolSurge(ctx);   // 大型怪物落水：水面上的浪頭（js/pool-surge.js；在人物下面）
   // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
   if (typeof wetFloorSortables === 'function') wetFloorSortables(sortables);   // 泳池旁的濕地板：水漬、反光（js/wet-floor.js；跟地板素材一起排前後，在人物下面）
+  if (typeof poolSurgeSortables === 'function') poolSurgeSortables(sortables);   // 大型怪物落水：溢上岸的水（js/pool-surge.js；跟地板物件一起排前後，在人物下面）
   // 角色泡在水裡：下半身半透明＋水面波紋（js/water.js 的 drawWaded；沒載入就照常畫）
   const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色
@@ -1229,7 +1231,8 @@ function draw() {
     else if (typeof poolPlatformNearPlayer === 'function' && poolPlatformNearPlayer()) { const q = poolPlatformNearPlayer(); drawInteractPrompt(q.x, q.y - 6, POOL_PLATFORM.prompt); }   // 坐救生圈到抽水機平台旁邊：「上岸」（js/pool-platform.js）
     else if (typeof poolPlatformJumpSpot === 'function' && poolPlatformJumpSpot()) { const q = poolPlatformJumpSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.jump.prompt); }   // 站在抽乾的平台邊上：跳下去（js/pool-platform.js）
     else if (typeof swimRingShoreSpot === 'function' && swimRingShoreSpot()) { const q = swimRingShoreSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, SWIM_RING.shorePrompt); }   // 坐救生圈划到深水區邊上：收起泳圈（js/swim-ring.js）
-    else if (typeof poolPlatformLeaveSpot === 'function' && poolPlatformLeaveSpot()) { const q = poolPlatformLeaveSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.leavePrompt); }   // 站在救生台上靠近深水：「下水」（按空白鍵坐救生圈離開；js/pool-platform.js）
+    else if (typeof poolPlatformLeaveSpot === 'function' && poolPlatformLeaveSpot()) { const q = poolPlatformLeaveSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.leavePrompt); }
+    else if (typeof swimRingEnterSpot === 'function' && !near && swimRingEnterSpot()) { const q = swimRingEnterSpot(); drawInteractPrompt(q.x, q.y, SWIM_RING.enterPrompt); }   // 身上有泳圈、站在深水區岸邊：「進入水中」（js/swim-ring.js）   // 站在救生台上靠近深水：「下水」（按空白鍵坐救生圈離開；js/pool-platform.js）
     else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, near.portal.locked ? '鎖住了' : near.portal.at ? '進入' : '進入 ' + portalTargetName(near.portal));   // at＝同地圖傳送點：不顯示地圖名稱
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
