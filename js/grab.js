@@ -7,6 +7,8 @@
        戰鬥區的隊友＝在落地的地方巡邏（等於「在原地巡邏」）；掉在黑暗裡會自己走到最近的亮處，再在那裡巡邏
        基地裡的人＝在附近閒晃 GRAB.wanderTime 秒，再走回自己原本的區域
    ・倒下的隊友也抓得起來（可以拖到安全的地方再急救）
+   ・水池（有 🛟 深水區的地圖）：把隊友拖到深水上放開＝噗通掉進水裡掙扎（有自己的泳圈會自動戴上；倒下的就漂在水上）；
+     抓起在水裡掙扎／漂著的隊友＝掙扎停下來，放到岸上＝救起來（頭上跳 GRAB.rescueText）。被抓在空中不算泡在水裡、不扣溺水的血（js/pool-fall.js 的 poolFallDropIn、poolFallGrabbed）
    ・溫特自己蓋的建築（地雷除外）也抓得起來：拖到新位置放開；太遠、太黑、放不下就回到原位（檔案下面「抓建築」那段）
    必須在 js/render.js（drawTower、drawWanderer）、js/game.js、js/channel-actions.js 之後載入。
 */
@@ -25,6 +27,7 @@ const GRAB = {
   squashTime: .5,    // 壓扁→拉長→恢復要幾秒
   bodyR: 6,          // 拖動時撞牆判定的身體大小（像素，從腳底中心往外）：越小越不容易撞到；走路用的是 12
   menuCooldown: 1,   // 放下（或撞到東西掉下來）後，放開右鍵再過幾秒才會開命令選單
+  rescueText: '救上岸了！',   // 把在水裡的隊友拖上岸放下時，頭上跳的字
 };
 let grab = null;           // 抓著的：{ actor, dx, dy, lift, sway, swayV, vx }
 let grabPress = null;      // 右鍵按下、還沒變成抓取：{ actor, cx, cy, t }
@@ -49,7 +52,8 @@ function startGrab(actor, press) {
   if (typeof npcStandUp === 'function') npcStandUp(actor);
   actor.seatGoal = null; actor.npcPosed = false;
   if (typeof playerChannel !== 'undefined' && playerChannel && playerChannel.target === actor) cancelChannel();   // 正在疏導／急救他：中斷
-  Object.assign(actor, { grabbed: true, target: null, navPath: null, navGoal: null, knockT: 0, waitT: 0, meleeSwing: null, gunSwing: null });
+  const fromWater = typeof poolFallGrabbed === 'function' && poolFallGrabbed(actor);   // 從水裡抓起來：掙扎停下來（js/pool-fall.js）
+  Object.assign(actor, { grabbed: true, grabFromWater: fromWater, target: null, navPath: null, navGoal: null, knockT: 0, waitT: 0, meleeSwing: null, gunSwing: null });
   if (typeof assigning !== 'undefined' && assigning === actor) assigning = null;
   closeSentryMenu(); closeGroundMenu();
   grab = { actor, dx: actor.x - p.x, dy: actor.y - p.y, lift: 0, sway: 0, swayV: 0, vx: 0 };
@@ -74,6 +78,9 @@ function landGrab(a) {
   a.target = null; a.navPath = null; a.navGoal = null; a.waitT = .5; a.moving = false;
   if (MAP_SAFE) { a.grabWanderT = GRAB.wanderTime; return; }   // 基地：在附近閒晃一下再回去
   if (!G.towers.includes(a)) return;
+  const fromWater = a.grabFromWater; a.grabFromWater = false;
+  if (typeof poolFallDropIn === 'function' && poolFallDropIn(a)) return;   // 放在深水上：掉進水裡（js/pool-fall.js）；游上岸後在岸邊巡邏
+  if (fromWater && a.hp > 0) flash(GRAB.rescueText, a.x, a.y - 52, '#9ff0c0', 1.1);   // 從水裡救上岸
   Object.assign(a, { mode: 'hold', anchor: { x: a.x, y: a.y }, guardSummoned: false, guardBase: null, summonDark: false, darkResumeTarget: null });
   a.grabDark = typeof personnelInLight === 'function' && !personnelInLight(a.x, a.y);   // 掉在黑暗裡：走到亮處後改在那裡巡邏
   if (a.hp > 0 && !a.berserk) sentryStatus(a, '在原地巡邏');

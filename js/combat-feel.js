@@ -226,10 +226,14 @@ function enemyHitReact(e, fromX, fromY, heavy) {
 // 每隻怪物每幀先跑這裡；回傳 true 代表這幀不再執行 AI（硬直、引信中）
 function updateEnemyFeel(e, dt) {
   e.hitSquashT = Math.max(0, (e.hitSquashT || 0) - dt);
+  if (e.poolMFall && typeof poolMonsterFallStep === 'function' && poolMonsterFallStep(e, dt)) return true;   // 被推下深水：掉下去、掙扎、往岸邊游（js/pool-monster-fall.js）
   if (e.playerPounceT > 0) return false;
   if (e.knockT > 0) {
     const step = Math.min(dt, e.knockT); e.knockT -= step;
-    displaceEnemy(e, e.knockVX, e.knockVY, Math.hypot(e.knockVX, e.knockVY) * step, false);
+    const want = Math.hypot(e.knockVX, e.knockVY) * step, x0 = e.x, y0 = e.y;
+    displaceEnemy(e, e.knockVX, e.knockVY, want, false);
+    // 滑到一半被擋住、擋住的是深水：掉下去（js/pool-monster-fall.js）
+    if (Math.hypot(e.x - x0, e.y - y0) < want * .9 && typeof poolMonsterKnockIn === 'function' && poolMonsterKnockIn(e, e.knockVX, e.knockVY)) return true;
   }
   if (e.variant === 'bomber') {
     if (e.fuseT > 0) {

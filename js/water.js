@@ -76,7 +76,9 @@ function wadeInfo(a, kind) {
 let waterLayer = null;   // 旁邊的空白畫布（跟遊戲畫面一樣大）
 function drawWaded(a, kind, drawFn) {
   // 失足搖晃、掉進水裡、溺水掙扎（js/pool-fall.js）：整個人轉一點、上下浮沉，掙扎時泡到脖子
-  const fall = kind === 'char' && typeof poolFallPose === 'function' ? poolFallPose(a) : null;
+  const fall = kind === 'char' && typeof poolFallPose === 'function' ? poolFallPose(a)
+    : kind === 'enemy' && a && a.poolMFall && typeof poolMonsterFallPose === 'function' ? poolMonsterFallPose(a)   // 怪物被推下深水（js/pool-monster-fall.js）
+    : kind === 'float' ? a.floatPose || null : null;   // 漂在水上的東西（丟進深水的道具，js/ground-items.js；姿勢由 js/pool-fall.js 的 poolFloatPose 算）
   if (fall) {
     const inner = drawFn, py = a.y + fall.pivot;
     drawFn = () => { ctx.save(); ctx.translate(a.x, py); ctx.rotate(fall.rot); ctx.translate(-a.x, -py + fall.dy); try { inner(); } finally { ctx.restore(); } };
@@ -121,13 +123,17 @@ function drawWaterRipple(a, info, part) {
   const t = performance.now() / 1000;
   ctx.save();
   ctx.lineWidth = 1.2;
-  ctx.strokeStyle = WATER.rippleColor + '.55)';
-  ctx.beginPath(); ctx.ellipse(a.x, y, rx, ry, 0, a0, a1); ctx.stroke();
-  if (a.moving || (a.walkUntil && a.walkUntil > t)) {   // 走動中：一圈一圈往外擴散、慢慢變淡
-    for (let i = 0; i < 2; i++) {
-      const k = ((t * 1.6) + i * .5) % 1;
-      ctx.strokeStyle = WATER.rippleColor + (.45 * (1 - k)).toFixed(3) + ')';
-      ctx.beginPath(); ctx.ellipse(a.x, y, rx * (1 + k * .9), ry * (1 + k * .9), 0, a0, a1); ctx.stroke();
+  if (!(info.ripple && info.ripple.noBase)) {   // 貼著身體、一直在的那一圈（info.ripple.noBase＝不要這圈，只有往外擴散的）
+    ctx.strokeStyle = WATER.rippleColor + '.55)';
+    ctx.beginPath(); ctx.ellipse(a.x, y, rx, ry, 0, a0, a1); ctx.stroke();
+  }
+  // 一圈一圈往外擴散、慢慢變淡：走動中照下面的預設；info.ripple 有給的話（例如陣亡漂在水上，js/pool-fall.js）就一直擴散、照它的速度和大小
+  const R = info.ripple || ((a.moving || (a.walkUntil && a.walkUntil > t)) ? { speed: 1.6, rings: 2, grow: .9, alpha: .45 } : null);
+  if (R) {
+    for (let i = 0; i < R.rings; i++) {
+      const k = ((t * R.speed) + i / R.rings + (R.phase || 0)) % 1;
+      ctx.strokeStyle = WATER.rippleColor + (R.alpha * (1 - k)).toFixed(3) + ')';
+      ctx.beginPath(); ctx.ellipse(a.x, y, rx * (1 + k * R.grow), ry * (1 + k * R.grow), 0, a0, a1); ctx.stroke();
     }
   }
   ctx.restore();

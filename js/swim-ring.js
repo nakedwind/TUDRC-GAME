@@ -306,7 +306,7 @@ const swimRingCanPick = t => !t.ownRing && !t.swimRing && t.hp > 0 && !t.berserk
 let swimPickPlan = { at: -1, who: new Map() };   // 這一幀誰去撿哪一堆（同一幀只算一次）
 function swimRingPickPlan() {
   const now = performance.now(); if (swimPickPlan.at === now) return swimPickPlan.who;
-  const who = new Map(), rings = (G.groundItems || []).filter(g => g.id === SWIM_RING.itemId && g.qty > 0);
+  const who = new Map(), rings = (G.groundItems || []).filter(g => g.id === SWIM_RING.itemId && g.qty > 0 && !(typeof poolItemFloating === 'function' && poolItemFloating(g)));   // 漂在深水裡的游泳圈：隊員走不過去，不去撿
   const free = (G.towers || []).filter(swimRingCanPick);
   for (const g of rings) {   // 一堆有幾個，就分給離它最近的幾個人
     const near = free.filter(t => !who.has(t)).sort((a, b) => Math.hypot(a.x - g.x, a.y - g.y) - Math.hypot(b.x - g.x, b.y - g.y));

@@ -7548,5 +7548,14 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_mrt-exit-2-sealed.png",
     "w": 5,
     "h": 6
+  },
+  {
+    "id": "tile_mwuj8w8i",
+    "name": "Poolcore_pool_4",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_4.png",
+    "w": 4,
+    "h": 3,
+    "flat": true
   }
 ];

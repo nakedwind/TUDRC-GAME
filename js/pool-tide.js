@@ -214,7 +214,7 @@ function drawPoolTideNotice(ctx, cv) {
 // 在深水區裡、沒坐救生圈、還站得起來的隊友
 function poolMatesInDeep() {
   if (typeof deepWaterAtPoint !== 'function') return [];
-  return (G.towers || []).filter(t => t.hp > 0 && !t.swimRing && !t.eatenBy && !t.mrtRide && poolPointInDeepZone(t.x, t.y));
+  return (G.towers || []).filter(t => t.hp > 0 && !t.swimRing && !t.eatenBy && !t.mrtRide && !t.grabbed && !t.grabFall && poolPointInDeepZone(t.x, t.y));   // 被溫特抓在空中（js/grab.js）不算
 }
 // 不管現在水位，這個點在不在畫好的深水區範圍裡
 function poolPointInDeepZone(x, y) {

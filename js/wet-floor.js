@@ -4,6 +4,7 @@
    ・泡在水裡（看得到水的地方）、坐救生圈的人不會滑
    ・滑多遠：WET_FLOOR.dist 隨機，越濕越遠。不到 bigFrom 格＝「小滑」：往前滑一小段、身體晃一下，不會頭暈；
      bigFrom 格以上＝跟踩到香蕉皮一樣大滑（往後仰、撞到東西會頭暈，js/golden-banana-king.js 那一套）
+   ・滑多快：跟踩到香蕉皮一樣快（BANANA_KING 的 slipDist 格 ÷ slipTime 秒），滑得越遠就滑越久，不會一下子噴出去
    ・溫特和隊員都會滑；滑過一次 cooldown 秒內不會再滑
    ・哪張地圖有濕地板、濕幾格：地圖編輯器 →「地圖設定」→「💦 泳池旁的地板是濕的」（存在地圖資料的 wetFloor：true／false、wetRange：格數）
      地圖資料還沒設定過時照 WET_FLOOR.maps（池核預設有）
@@ -14,9 +15,8 @@ const WET_FLOOR = {
   slipRate: .08,            // 最濕的地方，一直走的話每秒滑倒的機率（越乾越小；.08 ≈ 貼著泳池走每分鐘滑 3 次左右）
   slipPow: 1.6,             // 機率跟濕度的關係（越大＝離泳池遠一點就很少滑）
   cooldown: 5,              // 滑過一次，幾秒內不會再滑
-  dist: [1, 6],             // 滑多遠（格）：最乾時最多 dist[0]＋一點點、最濕時最多 dist[1]
-  bigFrom: 4,               // 滑 4 格以上才是大滑（往後仰、會頭暈）；不到 4 格是小滑
-  smallTime: [.3, .7],      // 小滑花幾秒（滑越遠越久）
+  dist: [1, 3.5],           // 滑多遠（格）：最乾時最多 dist[0]＋一點點、最濕時最多 dist[1]（香蕉皮是 2.5 格）
+  bigFrom: 2.5,             // 滑 2.5 格以上才是大滑（往後仰、會頭暈）；不到 2.5 格是小滑
   smallWobble: .14,         // 小滑時身體晃多大（弧度）
   puddle: { chance: .85, minR: 6, maxR: 18, alpha: .42, color: '#2c6fa3', shine: '#ffffff' },   // 地上的水漬：每格出現的機會（再乘濕度）、大小、最濃多濃
   sheen: .16,               // 濕地板整片變深一點（最濕的地方；地板是淺色的，變深才看得出濕）
@@ -100,14 +100,14 @@ function wetSlip(a, vx, vy, wet) {
   const W = WET_FLOOR, d = Math.hypot(vx, vy) || 1;
   const cells = W.dist[0] + Math.random() * (W.dist[0] * .5 + (W.dist[1] - W.dist[0]) * wet);
   a.wfCd = W.cooldown;
+  // 滑行時間：跟香蕉皮一樣的速度（香蕉皮 slipTime 秒滑 slipDist 格），滑越遠越久；速度一開始最快、慢慢停下（距離＝v × T ÷ 2）
+  const B = typeof BANANA_KING !== 'undefined' ? BANANA_KING : { slipTime: .9, slipDist: 2.5 }, T = cells * B.slipTime / B.slipDist, v = cells * CELL * 2 / T;
   if (cells >= W.bigFrom && typeof BANANA_KING !== 'undefined') {   // 大滑：跟香蕉皮一樣（往後仰、撞到東西頭暈）
-    const T = BANANA_KING.slipTime, v = cells * CELL * 2 / T;
     a.knockT = a.knockT0 = T; a.knockVX = vx / d * v; a.knockVY = vy / d * v;
-    a.slipT = T;
+    a.slipT = a.slipT0 = T;
     a.slipPose = { dir: ['front', 'back', 'left', 'right'][Math.floor(Math.random() * 4)], frame: 1 + Math.floor(Math.random() * 2) };
     flash('滑倒！', a.x, a.y - 50, '#9fdcff');
   } else {   // 小滑：往前滑一小段、身體晃一下（不定格、撞到東西也不會頭暈）
-    const T = W.smallTime[0] + (W.smallTime[1] - W.smallTime[0]) * Math.min(1, cells / W.bigFrom), v = cells * CELL * 2 / T;
     a.knockT = a.knockT0 = T; a.knockVX = vx / d * v; a.knockVY = vy / d * v;
     a.wetSlipT = a.wetSlipT0 = T; a.wetSlipSide = (vx >= 0 ? 1 : -1);
     flash('滑了一下', a.x, a.y - 50, '#bfe8ff');

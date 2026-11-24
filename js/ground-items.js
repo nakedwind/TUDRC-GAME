@@ -11,7 +11,9 @@ const GROUND_ITEMS = { size: 26, sortDy: 10, guideReach: 30, throwReach: 120, ki
 // 背包「放在地上」呼叫：從背包拿掉 qty 個，放在溫特面前一點點的地上（同一個位置已經有同樣的東西就疊在一起）
 // aim＝{x, y}：丟到這個位置（快捷欄拖到地圖上，js/quick-slots.js）；太遠就丟到 throwReach 那麼遠。那裡有障礙物＝不能放（回傳 0）
 // 這個點能不能放東西：照放下去那一層的牆、建築判斷（js/pathfinding.js 的 placeFloorAt）
-const groundBlocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y, hasFloors ? { x, y, floor: placeFloorAt(x, y, G.player) } : null) : solidBlocksPoint(x, y);
+// 深水也可以丟（東西會漂在水上，js/pool-fall.js 的 poolFloatPose）：只看牆
+const groundBlocked = (x, y) => typeof poolFloatsAt === 'function' && poolFloatsAt(x, y) ? solidBlocksPoint(x, y)
+  : typeof playerBlocked === 'function' ? playerBlocked(x, y, hasFloors ? { x, y, floor: placeFloorAt(x, y, G.player) } : null) : solidBlocksPoint(x, y);
 function groundDropSpot(aim) {   // 拖到 aim 會落在哪裡；有障礙物＝null
   const p = G && G.player; if (!p) return null;
   const dx = aim.x - p.x, dy = aim.y - p.y, d = Math.hypot(dx, dy), k = d > GROUND_ITEMS.throwReach ? GROUND_ITEMS.throwReach / d : 1;
@@ -30,6 +32,10 @@ function dropItemOnGround(id, qty = 1, aim = null) {
   const floor = hasFloors ? placeFloorAt(x, y, p) : 1, pile = G.groundItems.find(g => g.id === id && (g.floor || 1) === floor && Math.hypot(g.x - x, g.y - y) < 10);   // floor：放在幾樓（同一層的才疊成一堆）
   const at = performance.now() / 1000;   // 什麼時候放的：從上面掉下來的動畫（drawGroundItem）
   if (pile) Object.assign(pile, { qty: pile.qty + n, at }); else G.groundItems.push({ id, qty: n, x, y, at, floor });
+  if (typeof poolFloatsAt === 'function' && poolFloatsAt(x, y)) {   // 丟進深水：噗通一聲、濺一點小水花
+    if (typeof poolFallSplash === 'function') poolFallSplash(x, y + 2, false);
+    if (typeof sfxAt === 'function') sfxAt('poolBossSplash', x, y, .2, 'item-splash');
+  }
   return n;
 }
 function removeGroundItem(g, n) {
@@ -49,6 +55,7 @@ const groundItemName = g => (itemById(g.id) || {}).name || '物品';
 
 // ---- 球球叼給嚮導：這個東西現在給誰（身上帶最少的那位；一樣少就給最近的）。沒人需要＝null ----
 function groundItemGuide(id, from) {
+  if (typeof poolItemFloating === 'function' && poolItemFloating(from)) return null;   // 漂在深水裡的：球球不去撿
   if (MAP_SAFE || !GROUND_ITEMS.kitItems.includes(id) || typeof guideKit !== 'function') return null;
   let best = null, bn = Infinity, bd = Infinity;
   for (const t of G.towers) {
@@ -71,7 +78,8 @@ const groundOnScreen = g => g.x >= cam.x && g.x <= cam.x + viewW() && g.y >= cam
 // care：現在能照顧的隊友（js/sentry.js 的 guideCareTarget；急救包用完、SP 不夠等幫不上忙的不算）：有的話補血、疏導優先，不走開
 function guideGroundStep(t, dt, care) {
   const list = G.groundItems || [], kit = guideKit(t);
-  const want = g => GROUND_ITEMS.kitItems.includes(g.id) && (kit[g.id] || 0) < CAMP_SUPPLY.carry && personnelInLight(g.x, g.y);
+  const want = g => GROUND_ITEMS.kitItems.includes(g.id) && (kit[g.id] || 0) < CAMP_SUPPLY.carry && personnelInLight(g.x, g.y)
+    && !(typeof poolItemFloating === 'function' && poolItemFloating(g));   // 漂在深水裡的：嚮導走不過去，不去撿
   for (const g of list) if (want(g) && Math.hypot(g.x - t.x, g.y - t.y) < GROUND_ITEMS.guideReach) { guideTakeGround(t, g); t.groundTrip = null; return false; }
   if (care) { t.groundTrip = null; return false; }   // 走到一半有人要照顧：先去照顧（路徑不用清，換目標時 moveSentryWithPath 會重找）
   let trip = t.groundTrip;
@@ -110,17 +118,28 @@ function groundItemImg(id) {
 }
 function drawGroundItem(ctx, g) {
   const now = performance.now() / 1000, S = (typeof itemById === 'function' && (itemById(g.id) || {}).groundSize) || GROUND_ITEMS.size, x = g.x, y = g.y;   // groundSize：個別道具在地上畫多大（雞蛋比較小，data/supplies.js）
+  if (typeof poolItemFloating === 'function' && typeof drawWaded === 'function' && poolItemFloating(g)) {   // 漂在深水裡：載浮載沉、下面泡在水裡、四周水波紋（跟陣亡隊員同一套，js/pool-fall.js 的 poolFloatPose）
+    const F = POOL_FALL.float;
+    g.floatPose = poolFloatPose(g, { bottom: y + 2, height: S, width: S * 1.3, sink: F.itemSink, bob: F.itemBob, pivot: 0 });
+    drawWaded(g, 'float', () => drawGroundItemImage(g, S, x, y, 0));
+    return;
+  }
   const a = typeof dropAnim === 'function' ? dropAnim(now - (g.at || 0)) : null;   // 從上面掉下來 → 壓扁 → 回彈（跟放建築一樣，js/build.js）
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y + 2, S * .36, S * .13, 0, 0, Math.PI * 2); ctx.fill();   // 影子
-  const img = groundItemImg(g.id), bob = a ? 0 : Math.sin(now * 2.5 + g.x * .05) * 1;
-  ctx.imageSmoothingEnabled = false;
+  const bob = a ? 0 : Math.sin(now * 2.5 + g.x * .05) * 1;
   if (a) { ctx.translate(x, y + 2 + a.dy); ctx.scale(a.sx, a.sy); ctx.translate(-x, -(y + 2)); }   // 以底部中央為錨點縮放
+  drawGroundItemImage(g, S, x, y, bob);
+  ctx.restore();
+}
+// 畫道具的圖（用遊戲目前的 ctx：漂在水上時 js/water.js 的 drawWaded 會先換成旁邊的畫布、畫完再貼回來）
+function drawGroundItemImage(g, S, x, y, bob) {
+  const img = groundItemImg(g.id);
+  ctx.imageSmoothingEnabled = false;
   if (img) {
     const sc = S / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * sc, h = img.naturalHeight * sc;
     ctx.drawImage(img, x - w / 2, y - h + 2 + bob, w, h);
   } else { ctx.fillStyle = '#ffd479'; ctx.beginPath(); ctx.arc(x, y - 6, 5, 0, Math.PI * 2); ctx.fill(); }
-  ctx.restore();
 }
 // 球球叼著的東西：畫在嘴巴的位置（render.js 放進 sortables，緊接在球球後面畫，被東西擋住時一起被擋）
 const DOG_MOUTH = { right: [27, -2], left: [-27, -2], front: [-27, -2], back: [-27, -2], size: GROUND_ITEMS.size };   // front、back：球球的正面、背面圖跟朝左是同一張，所以位置一樣；size：跟地上的一樣大，不縮小

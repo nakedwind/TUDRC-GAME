@@ -41,6 +41,11 @@ const POOL_FALL = {
   swaySpeed: 3.4,       // 左右搖擺的快慢
   flailSecs: .16,       // 掙扎的兩張圖（手揮來揮去）多久換一張
   splashGap: [.22, .45],   // 掙扎時隔幾秒濺一次小水花
+  dropSplash: .275,        // 溫特右鍵抓起隊友丟進水裡時，落水水花的大小（1＝跟自己失足掉下去一樣大）
+  // 漂在水上載浮載沉（共用：陣亡在深水裡的隊員用倒地圖漂著、丟進深水的道具；水被抽乾就照常躺在地上）（poolFloatPose）
+  float: { sink: .3, see: .35, bobAmp: 2.5, bobSpeed: 1.8, swayAmp: .05, swaySpeed: 1.1,   // 水面在身體的哪裡、水面下看得多清楚、上下浮沉幾像素、浮沉多快、左右晃幾度（弧度）、晃多快
+    itemSink: .35, itemBob: .6,   // 道具：水面在道具圖的哪裡（從底部算）、浮沉幅度是上面的幾倍（道具比較小）
+    ripple: { speed: .45, rings: 3, grow: 1.4, alpha: .55, noBase: true } },   // 身體四周的水波紋：一秒擴散幾輪（.45＝約 2.2 秒一輪）、同時幾圈、擴到原本的幾倍大、最濃多濃、noBase＝不畫固定的那一圈（只有往外擴散的）
   bigSplash: { drops: 22, column: 14, up: 230, spread: 120, width: 46 },   // 落水的大水花：水滴數、水柱數、往上衝的速度、往旁邊噴的速度、範圍寬度
   smallSplash: { drops: 5, up: 120, spread: 55, width: 26 },               // 掙扎時的小水花
   // 落水那一下的皇冠水花用第幾版：
@@ -284,8 +289,30 @@ function poolFallPlayerSwim(a, dt) {
   if (dy && ok(a.x, ny)) a.y = ny;
   a.moving = true;   // 臉一樣維持正面（掙扎的 >< 圖只有正面）
 }
+// ---- 溫特右鍵抓隊友（js/grab.js）----
+// 抓起來的那一刻：在水裡（掙扎、漂著）就讓掙扎停下來；回傳 true＝是從水裡抓起來的（放到岸上會跳「救上岸了！」）
+function poolFallGrabbed(a) {
+  if (!a) return false;
+  const inWater = !!(a.poolFall || a.drowning || (poolFallOn() && deepWaterAtPoint(a.x, a.y) && !a.swimRing));
+  if (a.poolFall) { a.poolFall = null; a.drownPath = null; }
+  a.drowning = false; a.poolPushT = 0;
+  return inWater;
+}
+// 放下的那一刻：放在深水上（沒坐泳圈）就掉進水裡，噴水花、開始掙扎往岸邊游；回傳 true＝掉進水裡了
+function poolFallDropIn(a) {
+  if (!a || a.swimRing || !poolFloatsAt(a.x, a.y)) return false;
+  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), a.x, a.y + 10, POOL_FALL.dropSplash);   // 比自己失足掉下去的小一點
+  else poolFallSplash(a.x, a.y + 10, false);
+  if (typeof sfxAt === 'function') sfxAt(POOL_FALL.sound, a.x, a.y, POOL_FALL.soundVol, 'pool-drop-' + (a.id ?? a.type ?? ''));
+  if (a.hp <= 0) return true;   // 倒下的：漂在水上（poolFallPose）
+  a.poolFall = { phase: 'struggle', t: 0, dir: 'front', dropped: true, splashAt: .3 };
+  a.dir = 'front'; a.drownPath = null; a.moving = false;
+  a.mode = 'hold'; a.anchor = null;   // 游上岸之後在岸邊巡邏（poolFallEnd 補上 anchor）
+  return true;
+}
 function poolFallEnd(a) {
   if (!a || !a.poolFall) return;
+  if (a.poolFall.dropped && typeof G !== 'undefined' && G && (G.towers || []).includes(a) && a.mode === 'hold') a.anchor = { x: a.x, y: a.y };   // 被丟下水的：游上岸後就在岸邊巡邏
   a.poolFall = null; a.drownPath = null;
   a.poolFallCdUntil = performance.now() + POOL_FALL.cooldown * 1000;
 }
@@ -375,6 +402,10 @@ function poolFallPose(a) {
   const f = a.poolFall, now = performance.now() / 1000;
   if (a.poolSeed == null) a.poolSeed = Math.random() * 10;   // 每個人固定錯開節奏（不能用位置算：游動時位置一直變，節奏會每一幀亂跳、看起來像抽搐）
   const seed = a.poolSeed;
+  if (a.hp <= 0 && typeof G !== 'undefined' && G && a !== G.player && !a.grabbed && !a.grabFall && poolFloatsAt(a.x, a.y)) {   // 隊員陣亡在深水裡：用倒地圖漂在水上載浮載沉（被抓起來時不算）
+    const size = (typeof PLAYER !== 'undefined' && PLAYER.drawSize) || 64;
+    return poolFloatPose(a, { bottom: a.y + 18, height: size, width: size * .8 });
+  }
   if (f && f.phase === 'wobble') {
     const ramp = .45 + .55 * Math.min(1, f.t / POOL_FALL.wobbleSecs);   // 越晃越大
     return { rot: Math.sin(f.t * POOL_FALL.wobbleSpeed) * POOL_FALL.wobbleAmp * ramp, pivot: 16, dy: 0 };
@@ -392,6 +423,22 @@ function poolFallPose(a) {
     pivot: 6,
     dy: Math.sin(t * POOL_FALL.bobSpeed) * POOL_FALL.bobAmp + (1 - settle) * 14,
     wade: { w: { depth: POOL_FALL.sink, see: POOL_FALL.see }, bottom: a.y + 18, height: size, width: size * .62 },
+  };
+}
+// ---- 漂在水上載浮載沉（共用：陣亡的隊員、丟進深水的道具）----
+// 這個點會不會漂起來：現在是深水的地方（水被抽乾就不會）
+const poolFloatsAt = (x, y) => poolFallOn() && deepWaterAtPoint(x, y);
+// 地上的道具是不是漂在水裡（隊員、球球就不會走去撿，js/ground-items.js、js/swim-ring.js）
+const poolItemFloating = g => !!g && poolFloatsAt(g.x, g.y);
+// 姿勢：box＝{ bottom：圖的底部 y、height：圖多高、width：水波紋多寬、sink：水面在圖的哪裡（沒給＝POOL_FALL.float.sink）、bob：浮沉幅度倍率 }
+// 回傳給 js/water.js 的 drawWaded 用（kind 'float' 讀 a.floatPose；隊員由 poolFallPose 回傳）
+function poolFloatPose(o, box) {
+  if (o.poolSeed == null) o.poolSeed = Math.random() * 10;   // 每個錯開節奏
+  const D = POOL_FALL.float, t = performance.now() / 1000 + o.poolSeed, bob = box.bob ?? 1;
+  return {
+    rot: Math.sin(t * D.swaySpeed) * D.swayAmp, pivot: box.pivot ?? 6,
+    dy: Math.sin(t * D.bobSpeed) * D.bobAmp * bob,
+    wade: { w: { depth: box.sink ?? D.sink, see: D.see }, bottom: box.bottom, height: box.height, width: box.width, ripple: { ...D.ripple, phase: o.poolSeed % 1 } },   // phase：波紋錯開
   };
 }
 // 掙扎時用哪張圖：>< 表情的正面走路圖輪流換（手揮來揮去）；沒有這組圖就回傳 null（照原本的圖）

@@ -80,6 +80,14 @@ const BOSS_LIST = [
   "base": "milkfish_king",
   "artDir": "",
   "desc": "BOSS 出場時整個戰場停住、溫特不能動，鏡頭滑到出場的地方並稍微拉遠，畫面上下出現黑邊，演完才滑回溫特、遊戲繼續（不能跳過）。\n   目前有演出的：虱目魚王（溫特打到核心就開始，吞完核心結束）、葫蘆猴王（第 1 下撞牆前開始，撞破牆跳出來泰山壓頂、亮相完結束）、花蓮老鼠王（鐵軌下開始啃咬就開始，鑽出來開始戰鬥時結束）。\n   虱目魚王登場本身的秒數、跳多高在牠自己的「登場：」欄位。"
+ },
+ {
+  "key": "POOL_MONSTER_FALL",
+  "name": "🌊 怪物掉進深水（共用）",
+  "file": "js/pool-monster-fall.js",
+  "base": "bird_head",
+  "artDir": "",
+  "desc": "===== 地面怪物被推下深水：掉進水裡 → 掙扎、扣血、往岸邊游，爬上岸就活下來 =====\n   有畫 🛟 深水區、而且現在是深水的地圖才有（池核、W118區 地下水池）。\n   什麼時候會掉：怪物被擊退滑行（溫特、隊員打的擊退、小丑魚 BOSS 的水浪…，設 e.knockT 的都算），\n               滑到深水邊被擋住的那一刻（js/combat-feel.js 的 updateEnemyFeel 呼叫 poolMonsterKnockIn）\n   不會掉的：BOSS（池核 BOSS、虱目魚王）、會飛的人面蝶、推不動的、已經在水裡的（POOL_MONSTER_FALL_IMMUNE）\n   會游泳的（POOL_MONSTER_SWIMMERS：史萊姆、魚頭君、虱目魚小子、小虱目魚小子、比基尼小丑魚、小丑魚幼體）：\n             一樣會被推下水、噴水花，但不慌張、不扣血、不掙扎，直接用 swimmerMul 的速度游回岸上\n   其他地面怪物（例如鳥頭人、金蕉王）掉下去之後：\n     ① 往被推的方向掉進水裡一小段，落水的那一刻噴皇冠水花（js/pool-fall.js 的 poolCrownSplash，照怪物體型放大）\n     ② 先原地慌張 panicSecs 秒，再往最近的岸邊游（速度＝自己走路速度 × swimMul）；掙扎時上下浮沉、左右搖擺、一直濺小水花\n     ③ 在水裡每秒扣「最大血量的 dpsPct %」；血扣光就照一般擊殺算（獎勵、掉落物照舊）\n     ④ 整個身體爬上岸、站得住，就結束，照常行動\n   數值：怪物編輯器「👑 BOSS 數值」→「🌊 怪物掉進深水（共用）」（存在 data/monsters.js 的 BOSS_SETTINGS_DEFAULT.POOL_MONSTER_FALL；\n         改了下面的欄位或註解要跑 tools/build-boss-fields.py，跑完把只有行尾變動的其他 BOSS 檔案還原）\n   畫法：js/water.js 的 drawWaded 問 poolMonsterFallPose（轉身體、浮沉、水面以下半透明）"
  }
 ];
 const BOSS_FIELD_ROWS = {"ELITE_BIRD":[{"d":0,"t":"以原型鳥頭人（data/monsters.js）的數值為基準；hpMul 12 → 血量 1800","k":[["hpMul","hpMul"],["dmgMul","dmgMul"],["rewardMul","rewardMul"],["crystalMul","crystalMul"]]},
@@ -499,4 +507,19 @@ const BOSS_FIELD_ROWS = {"ELITE_BIRD":[{"d":0,"t":"以原型鳥頭人（data/mon
 {"d":1,"t":"鏡頭對準起點再往上幾格（上面留空間給牠從鏡頭俯衝下來）","k":[["moth.focusUp","focusUp"]]},
 {"d":1,"t":"這段的鏡頭拉遠倍率（1＝不拉遠；2026-11-23 使用者要拿掉拉遠）","k":[["moth.zoom","zoom"]]},
 {"d":1,"t":"這段的上下黑邊（0＝沒有黑邊；2026-11-23 使用者要拿掉黑邊）","k":[["moth.bars","bars"]]},
-{"d":1,"t":"落地亮相完後多停幾秒才滑回溫特","k":[["moth.holdAfter","holdAfter"]]}]};
+{"d":1,"t":"落地亮相完後多停幾秒才滑回溫特","k":[["moth.holdAfter","holdAfter"]]}],
+"POOL_MONSTER_FALL":[{"d":0,"t":"從岸邊掉進水裡要幾秒","k":[["fallSecs","fallSecs"]]},
+{"d":0,"t":"掉下去時往上彈多高（像素）","k":[["fallLift","fallLift"]]},
+{"d":0,"t":"掉進水裡多遠（像素，順著被推的方向；那裡不是深水就縮短）","k":[["fallIn","fallIn"]]},
+{"d":0,"t":"剛落水先原地慌張幾秒，才開始往岸邊游","k":[["panicSecs","panicSecs"]]},
+{"d":0,"t":"往岸邊游的速度＝自己走路速度的幾倍","k":[["swimMul","swimMul"]]},
+{"d":0,"t":"在水裡每秒扣最大血量的幾 %（8＝游 3 秒大約扣掉四分之一）","k":[["dpsPct","dpsPct"]]},
+{"d":0,"t":"水面在身體的哪裡（0＝腳底、1＝頭頂）","k":[["sink","sink"]]},
+{"d":0,"t":"水面下的身體看得多清楚（0～1）","k":[["see","see"]]},
+{"d":0,"t":"上下浮沉幾像素","k":[["bobAmp","bobAmp"]]},
+{"d":0,"t":"浮沉多快","k":[["bobSpeed","bobSpeed"]]},
+{"d":0,"t":"左右搖擺的角度（弧度）","k":[["swayAmp","swayAmp"]]},
+{"d":0,"t":"搖擺多快","k":[["swaySpeed","swaySpeed"]]},
+{"d":0,"t":"落水水花的大小（再乘怪物體型：寬 42 的怪物＝1 倍）","k":[["splashScale","splashScale"]]},
+{"d":0,"t":"掙扎時平均隔幾秒濺一次小水花","k":[["splashGap","splashGap"]]},
+{"d":0,"t":"會游泳的怪物（不會溺水）游回岸上的速度＝自己走路速度的幾倍","k":[["swimmerMul","swimmerMul"]]}]};

@@ -272,7 +272,7 @@ function bkSlip(a, peel) {
   if (Math.hypot(vx, vy) < .2) { vx = a.x - peel.x; vy = a.y - peel.y; }
   const d = Math.hypot(vx, vy) || 1, v = C.slipDist * CELL * 2 / C.slipTime;   // 速度線性遞減：滑行距離 = v × T ÷ 2
   a.knockT = a.knockT0 = C.slipTime; a.knockVX = vx / d * v; a.knockVY = vy / d * v;
-  a.slipT = C.slipTime;
+  a.slipT = a.slipT0 = C.slipTime;
   // 滑倒的姿勢：隨機挑一張走路圖（任一方向、Walking01 或 02），整段滑行定格在這張（js/game.js 的 pickCharacterFrame）
   a.slipPose = { dir: ['front', 'back', 'left', 'right'][Math.floor(Math.random() * 4)], frame: 1 + Math.floor(Math.random() * 2) };
   flash('滑倒！', a.x, a.y - 50, '#ffe066');
@@ -327,7 +327,7 @@ function applySlipTransform(ctx, a) {
     return;
   }
   if (!(a && a.slipT > 0)) return;
-  const C = BANANA_KING, k = a.slipT / C.slipTime, side = (a.knockVX || 0) >= 0 ? 1 : -1;
+  const C = BANANA_KING, k = Math.min(1, a.slipT / (a.slipT0 || C.slipTime)), side = (a.knockVX || 0) >= 0 ? 1 : -1;   // slipT0＝這次滑多久（水邊濕地板滑得遠就滑比較久，js/wet-floor.js）
   const lean = Math.sin(Math.min(1, (1 - k) * 4) * Math.PI / 2) * k * .55;   // 一踩到就往後仰，慢慢站穩
   const ang = -side * lean + Math.sin(performance.now() / 1000 * 30) * .06 * k;
   const fx = a.x, fy = a.y + 16;

@@ -1799,5 +1799,22 @@ const BOSS_SETTINGS_DEFAULT = {
       "bars": 0,
       "holdAfter": 0.4
     }
+  },
+  "POOL_MONSTER_FALL": {
+    "fallSecs": 0.4,
+    "fallLift": 14,
+    "fallIn": 44,
+    "panicSecs": 1,
+    "swimMul": 0.35,
+    "dpsPct": 8,
+    "sink": 0.38,
+    "see": 0.35,
+    "bobAmp": 3,
+    "bobSpeed": 5,
+    "swayAmp": 0.14,
+    "swaySpeed": 3.2,
+    "splashScale": 1.2,
+    "splashGap": 0.35,
+    "swimmerMul": 0.7
   }
 };

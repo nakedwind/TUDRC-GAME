@@ -26,6 +26,7 @@ BOSSES = [
     ('RAT_KING', 'js/rat-king.js', '花蓮老鼠王', 'burrowing_mouse'),
     ('POOL_BOSS', 'js/pool-boss.js', '巨大比基尼小丑魚', 'clownfish'),
     ('BOSS_CINEMA', 'js/boss-cinema.js', '🎬 BOSS 出場演出（共用）', 'milkfish_king'),   # 不是一隻 BOSS：出場時停住時間、移鏡頭的共用數字
+    ('POOL_MONSTER_FALL', 'js/pool-monster-fall.js', '🌊 怪物掉進深水（共用）', 'bird_head'),   # 不是一隻 BOSS：地面怪物被推下深水後掙扎、扣血、爬回岸的共用數字
 ]
 SKIP_KEYS = {'maps', 'color', 'eyeFlash'}   # 地圖位置在地圖相關的地方改；顏色不放進編輯器
 
