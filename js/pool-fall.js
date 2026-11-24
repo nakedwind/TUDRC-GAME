@@ -3,7 +3,8 @@
    怎麼會掉下去：
      ① 太靠近水邊走路：溫特身體中心離深水 edgeNear 點以內在走動，每秒有 edgeRate 的機率失足；
         隊員走在緊貼深水的那一格（allyEdgeNear）時，每秒 allyRate 的機率失足
-     ② 硬要往深水走：溫特一直往深水的方向走、被擋住超過 pushSecs 秒（頭上的「好像可以用泳圈做點什麼……」不理它）
+     ② 硬要往深水走：溫特在水邊一直往深水的方向走、被擋住超過 pushSecs 秒，就一定會掉（頭上的「好像可以用泳圈做點什麼……」不理它）
+        斜著走、貼著水邊被往旁邊挪也算（只要朝水的那個方向走不過去）；剛爬上岸的冷卻（cooldown）不算，硬要走進去就是會掉
    掉下去的過程：
      搖晃（wobble）：原地左右晃、頭上說一句（對話編輯器的「掉進水池」poolFall；溫特沒填就用 POOL_FALL.winterSay）
      → 掉下去（fall）：往深水裡跳一小段弧線，落水的那一刻噴起水柱＋水花＋水波
@@ -88,10 +89,11 @@ function poolFallEdgeDist(a) {
   return best;
 }
 // 可不可以開始失足：在地上走、沒在做別的事
-function poolFallCanStart(a) {
+// ignoreCd＝不管剛爬上岸的冷卻（硬往水裡走用：冷卻只擋「不小心腳滑」）
+function poolFallCanStart(a, ignoreCd) {
   if (!a || a.hp <= 0 || a.poolFall || a.swimRing || a.drowning || a.sitting || !poolFallOn()) return false;
   if (a.eatenBy || a.mrtRide || a.grabbed || a.vineCap || a.vineDazeT > 0 || a.poolJump || a.poolDownT > 0 || a.slipT > 0) return false;
-  if (performance.now() < (a.poolFallCdUntil || 0)) return false;
+  if (!ignoreCd && performance.now() < (a.poolFallCdUntil || 0)) return false;
   if (typeof poolPlatformAt === 'function' && poolPlatformAt(a.x, a.y)) return false;   // 站在救生台上
   if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) return false;
   return true;
@@ -379,13 +381,18 @@ function poolFallClimbOut(a, dt) {
 
 // ---- 溫特走動之後（js/game.js 的 updatePlayer 呼叫）：太靠近水邊、硬往深水走 → 失足 ----
 function poolFallAfterMove(p, dx, dy, dt, px0, py0) {
-  if (!poolFallCanStart(p)) { if (p) p.poolPushT = 0; return; }
+  if (!poolFallCanStart(p, true)) { if (p) p.poolPushT = 0; return; }
   if (!(dx || dy)) { p.poolPushT = 0; return; }
-  const len = Math.hypot(dx, dy), ahead = PLAYER.r + 6;
-  const towardDeep = deepWaterAtPoint(p.x + dx / len * ahead, p.y + dy / len * ahead);
-  const stuck = Math.hypot(p.x - px0, p.y - py0) < .5;
-  p.poolPushT = towardDeep && stuck ? (p.poolPushT || 0) + dt : 0;
-  if (p.poolPushT >= POOL_FALL.pushSecs) { p.poolPushT = 0; poolFallStart(p); return; }   // 硬要往水裡走
+  const len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len, ahead = PLAYER.r + 6;
+  // 有沒有在「站在水邊、一直往水裡走」：人在水邊（離深水 ahead 點以內），而且按的方向前面就是深水
+  //   左右、上下分開看：斜著走、貼著水邊滑動、卡在牆和水的轉角抖來抖去，只要其中一個方向一直朝著水都算
+  const atEdge = poolFallEdgeDist(p) <= ahead;
+  const pushX = !!dx && deepWaterAtPoint(p.x + Math.sign(dx) * ahead, p.y);
+  const pushY = !!dy && deepWaterAtPoint(p.x, p.y + Math.sign(dy) * ahead);
+  const pushD = deepWaterAtPoint(p.x + ux * ahead, p.y + uy * ahead);
+  p.poolPushT = atEdge && (pushX || pushY || pushD) ? (p.poolPushT || 0) + dt : 0;
+  if (p.poolPushT >= POOL_FALL.pushSecs) { p.poolPushT = 0; poolFallStart(p); return; }   // 硬要往水裡走：一定會掉
+  if (!poolFallCanStart(p)) return;   // 剛爬上岸：冷卻中不會不小心腳滑
   if (poolFallEdgeDist(p) <= POOL_FALL.edgeNear && Math.random() < POOL_FALL.edgeRate * dt) poolFallStart(p);   // 太靠近水邊：不小心失足
 }
 // ---- 隊員走動之後（js/sentry.js 的 updateSentry 呼叫）----
