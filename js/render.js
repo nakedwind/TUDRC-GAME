@@ -1077,7 +1077,7 @@ function draw() {
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
   if (typeof wetFloorSortables === 'function') wetFloorSortables(sortables);   // 泳池旁的濕地板：水漬、反光（js/wet-floor.js；跟地板素材一起排前後，在人物下面）
-  if (typeof poolSurgeSortables === 'function') poolSurgeSortables(sortables);   // 大型怪物落水：溢上岸的水（js/pool-surge.js；跟地板物件一起排前後，在人物下面）
+  if (typeof poolSurgeSortables === 'function') poolSurgeSortables(sortables);   // 大型怪物落水：溢上岸的水（js/pool-surge.js；蓋在地板、水池上面，在人物、牆下面）
   // 角色泡在水裡：下半身半透明＋水面波紋（js/water.js 的 drawWaded；沒載入就照常畫）
   const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色

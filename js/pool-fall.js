@@ -9,7 +9,8 @@
      → 掉下去（fall）：往深水裡跳一小段弧線，落水的那一刻噴起水柱＋水花＋水波
      → 掙扎（struggle）：泡在水裡載浮載沉、左右搖擺、不斷濺起小水花，臉換成 >< 的表情
         （圖是各角色資料夾裡手畫的 *_drown.png，有哪些角色寫在 js/game.js 的 DROWN_FACE_FOLDERS），
-        一邊掙扎一邊往最近的岸邊游（js/pool-tide.js 的 poolDrownFlee），跟漲潮溺水一樣每秒扣血、會喊溺水的台詞
+        溫特：慌張一下之後，玩家自己用方向鍵控制往哪游（POOL_FALL.playerSwim、swimMul）；隊員：自動往最近的岸邊游（js/pool-tide.js 的 poolDrownFlee）；
+        跟漲潮溺水一樣每秒扣血、會喊溺水的台詞
    泳圈：
      ・隊員有自己的游泳圈（t.ownRing）：掙扎 ringDelay 秒後自動戴上
      ・溫特：要按互動鍵（空白鍵／Enter）才會戴上（js/swim-ring.js 的 useSwimRingNearPlayer，腳下有「空白鍵／使用救生圈」）
@@ -28,7 +29,9 @@ const POOL_FALL = {
   fallSecs: .38,        // 從岸邊掉進水裡要幾秒
   fallLift: 16,         // 掉下去時往上彈多高（點）
   fallIn: 52,           // 落水點離原本站的地方多遠（點）：往深水裡面掉；那裡不是深水就慢慢縮短
-  panicSecs: 1.2,       // 剛落水先原地慌張掙扎幾秒，才開始往岸邊游
+  panicSecs: 1.2,       // 剛落水先原地慌張掙扎幾秒，才開始往岸邊游（溫特：這段時間按方向鍵也不會動）
+  playerSwim: true,     // 溫特掉進水裡：true＝玩家自己用方向鍵控制往哪游；false＝自動游到最近的岸邊
+  swimMul: .2,          // 溫特自己游的速度＝走路速度的幾倍（.2 ≈ 每秒 46 點，大約一秒一格）
   ringDelay: 1,         // 隊員有游泳圈：掙扎幾秒後自動戴上
   sink: .3,             // 掙扎時水面在身體的哪裡（0＝腳底、1＝頭頂；角色是大頭比例，.3 ≈ 到胸口，眼睛在 .44 左右要露出來）
   see: .35,             // 水面下的身體看得多清楚（0～1）
@@ -40,6 +43,22 @@ const POOL_FALL = {
   splashGap: [.22, .45],   // 掙扎時隔幾秒濺一次小水花
   bigSplash: { drops: 22, column: 14, up: 230, spread: 120, width: 46 },   // 落水的大水花：水滴數、水柱數、往上衝的速度、往旁邊噴的速度、範圍寬度
   smallSplash: { drops: 5, up: 120, spread: 55, width: 26 },               // 掙扎時的小水花
+  // 落水那一下的皇冠水花用第幾版：
+  //   4＝第 4 版（第 2 版的杯子＋尖尖浪花、浪花散開時不往回縮；第 3 版的水滴散落和細水圈；第 1 版中間往上噴的水柱）
+  //   3＝第 3 版（照 12 格示意圖：厚厚往外捲的浪頭、會破成水絲、最後剩細細的水圈）
+  //   2＝第 2 版（一圈尖尖的浪花）、0＝不要皇冠水花（第 1 版）
+  crownStyle: 4,
+  // 第 4 版另外的數值（杯子大小用下面 crownV2 那一組）：破掉時甩出幾顆水滴、中間往上噴幾根水柱、細水圈第幾秒開始出現、要幾圈
+  // 第 4 版另外的數值（杯子大小用下面 crownV2 那一組）：破掉時甩出幾顆水滴、中間往上噴幾根水柱、細水圈第幾秒開始出現、要幾圈、
+  // 水滴的重力是平常的幾倍（越大掉得越乾脆，不會在最高點停一下；噴的高度會自動補回來，差不多一樣高）
+  // headSize＝杯口浪花尾端那一小團的大小是原本的幾倍；rimWave＝杯口波浪狀凹凸的程度（0＝正正的扁圓、1＝現在、越大越歪）
+  // band＝杯底水面上那圈白色水沫帶（第 3 版那種，一團團白沫加幾根小水柱），跟杯子水花一起出現、一起往外散、一起消失（false＝不要）
+  crown4: { drops: 16, column: 14, rippleAt: .4, ripples: 2, gravity: 2.2, headSize: 2, rimWave: 1, band: true },
+  // 第 3 版：杯口一開始多寬、最高多高（點）、播幾秒、整朵往外散開多少（.5＝最後寬出五成）、杯口左右高中間低的程度（0＝一樣高、.4＝中間矮四成）、破成幾條水絲、破掉時噴幾顆水滴
+  crown: { width: 40, height: 42, life: 1.25, spread: .5, saddle: .5, tendrils: 5, drops: 16 },
+  // 第 2 版：杯口一開始多寬、最高多高（點）、播幾秒、杯口幾根浪花尖、往外散開多少、杯子塌下去時白沫再往外漂多少
+  crownV2: { width: 46, height: 40, life: .8, tips: 11, spread: .9, foamOut: .8 },
+  crownColumn: 6,       // 第 2 版：有皇冠水花時，往上衝的水柱數改成這麼多（皇冠已經夠大一團，水柱少一點才不會糊在一起）
   sound: 'poolBossSplash', soundVol: .45,   // 落水的聲音（音效編輯器；先借池核 BOSS 的水花聲）
   winterSay: '哇、腳滑了——！',   // 溫特失足時說的話（對話編輯器的溫特「掉進水池」有填就用那邊的）
   saySecs: 1.8,
@@ -109,15 +128,62 @@ function poolFallTarget(a) {
 function poolFallSplash(x, y, big) {
   if (typeof G === 'undefined' || !G) return;
   const K = big ? POOL_FALL.bigSplash : POOL_FALL.smallSplash, w = K.width, list = G.poolSplash || (G.poolSplash = []);
+  const style = big ? POOL_FALL.crownStyle : 0;
+  if (style === 3) {   // 第 3 版：水圈、水沫、水滴都由皇冠水花自己安排（畫法在 js/pool-boss.js 的 drawPoolCrown3）
+    const C3 = POOL_FALL.crown;
+    list.push({ crown: true, style: 3, x, y, w: C3.width, h: C3.height, spread: C3.spread, saddle: C3.saddle, nTend: C3.tendrils, t: 0, life: C3.life });
+    for (let i = 0; i < 4; i++) {   // 剛落水：幾顆小水滴先蹦出來
+      const ang = Math.random() * Math.PI * 2, sp = poolFallRand(20, 50);
+      list.push({ x, y, z: 2, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .4, vz: poolFallRand(90, 140), r: poolFallRand(1, 1.8), t: 0, life: 1 });
+    }
+    for (let i = 0; i < C3.drops; i++) {   // 杯口破掉的時候：從杯口邊上甩出水滴（wait＝等幾秒才出現）
+      const ang = Math.random() * Math.PI * 2, rx = C3.width * .5 * (1 + C3.spread * .6), sp = poolFallRand(10, 45);
+      list.push({ x: x + Math.cos(ang) * rx, y: y + Math.sin(ang) * rx * .3, z: C3.height * poolFallRand(.4, .8), vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .35,
+        vz: poolFallRand(40, 150), r: poolFallRand(1.1, 2.4), t: 0, life: 1.4, wait: C3.life * poolFallRand(.48, .6) });
+    }
+    if (list.length > 900) list.splice(0, list.length - 900);
+    return;
+  }
+  if (style === 4) {   // 第 4 版：三版各取最好的部分
+    const V2 = POOL_FALL.crownV2, C4 = POOL_FALL.crown4;
+    const g4 = C4.gravity || 1, gk = Math.sqrt(g4);   // 水滴重力加重幾倍；往上噴的速度乘 gk，噴的高度才會差不多一樣
+    list.push({ foam: true, x, y, r: w * .45, t: 0, life: .55 });   // 中間的白色水沫（第 1 版）
+    const crownAt = list.length;   // 杯子在清單裡的位置（水沫帶要插在它前面，才會畫在杯子後面）
+    list.push({ crown: true, x, y, w: V2.width, h: V2.height, n: V2.tips, spread: V2.spread, foamOut: V2.foamOut, keepTips: true, headK: C4.headSize, waveK: C4.rimWave, t: 0, life: V2.life });   // 杯子（第 2 版，浪花不往回縮）
+    const rEnd = V2.width * .5 * (1 + V2.spread);   // 杯口散到最開大約多寬
+    if (C4.band)   // 水面上的白色水沫帶（第 3 版）：跟杯子同時出現、同時消失（syncCrown＝淡出的時間跟杯子一樣），跟著杯子一起往外擴
+      list.splice(crownAt, 0, { band: true, syncCrown: true, x, y, w: V2.width, r0: V2.width * .35, r1: rEnd * 1.05, t: 0, life: V2.life });
+    for (let i = 0; i < C4.ripples; i++)   // 細細的白色水圈（第 3 版）：從杯口最開的地方再往外擴散
+      list.push({ ripple: true, x, y, r0: rEnd * (.8 - i * .15), r1: rEnd * (1.9 - i * .3), t: -(C4.rippleAt + i * .12), life: .9 - i * .1 });
+    for (let i = 0; i < 4; i++) {   // 剛落水：幾顆小水滴先蹦出來（第 3 版）
+      const ang = Math.random() * Math.PI * 2, sp = poolFallRand(20, 50);
+      list.push({ x, y, z: 2, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .4, vz: poolFallRand(90, 140) * gk, gMul: g4, r: poolFallRand(1, 1.8), t: 0, life: 1 });
+    }
+    for (let i = 0; i < C4.drops; i++) {   // 杯口散開、塌下去時：從杯口邊上甩出水滴（第 3 版；wait＝等幾秒才出現）
+      const ang = Math.random() * Math.PI * 2, rx = rEnd * poolFallRand(.6, .85), sp = poolFallRand(30, 80);
+      list.push({ x: x + Math.cos(ang) * rx, y: y + Math.sin(ang) * rx * .3, z: V2.height * poolFallRand(.5, .9), vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .35,
+        vz: poolFallRand(60, 160) * gk, gMul: g4, r: poolFallRand(1.1, 2.4), t: 0, life: 1.4, wait: V2.life * poolFallRand(.4, .55) });
+    }
+    for (let i = 0; i < C4.column; i++) {   // 中間往上噴的水柱（第 1 版）
+      const ang = Math.random() * Math.PI * 2, sp = poolFallRand(8, 30);
+      list.push({ x: x + (Math.random() - .5) * w * .3, y, z: Math.random() * 12, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .45,
+        vz: K.up * poolFallRand(1, 1.6) * gk, gMul: g4, r: poolFallRand(2.4, 4.2), t: 0, life: 1.8 });
+    }
+    if (list.length > 900) list.splice(0, list.length - 900);
+    return;
+  }
   list.push({ ring: true, x, y, r0: w * .2, r1: w * (big ? 1.4 : .9), t: 0, life: big ? .8 : .5 });   // 水波
   if (big) list.push({ ring: true, x, y, r0: w * .2, r1: w * 2, t: -.15, life: .7 });
   list.push({ foam: true, x, y, r: w * (big ? .45 : .3), t: 0, life: big ? .55 : .3 });   // 白色水沫
+  const CR = style === 2 && POOL_FALL.crownV2;
+  if (CR) list.push({ crown: true, x, y, w: CR.width, h: CR.height, n: CR.tips, spread: CR.spread, foamOut: CR.foamOut, t: 0, life: CR.life });   // 第 2 版皇冠水花（畫法在 js/pool-boss.js 的 drawPoolCrown）
   for (let i = 0; i < K.drops; i++) {   // 往四周噴的水滴
     const ang = Math.random() * Math.PI * 2, sp = K.spread * poolFallRand(.35, 1), rr = w * poolFallRand(.05, .3);
     list.push({ x: x + Math.cos(ang) * rr, y: y + Math.sin(ang) * rr * .45, z: poolFallRand(2, 10), vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .45,
       vz: K.up * poolFallRand(.35, 1), r: big ? poolFallRand(1.8, 3.6) : poolFallRand(1.2, 2.4), t: 0, life: 1.4 });
   }
-  for (let i = 0; i < (K.column || 0); i++) {   // 往上衝的水柱（窄、高）
+  const columns = CR ? POOL_FALL.crownColumn : (K.column || 0);
+  for (let i = 0; i < columns; i++) {   // 往上衝的水柱（窄、高）
     const ang = Math.random() * Math.PI * 2, sp = poolFallRand(8, 30);
     list.push({ x: x + (Math.random() - .5) * w * .3, y, z: Math.random() * 12, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .45,
       vz: K.up * poolFallRand(1, 1.6), r: poolFallRand(2.4, 4.2), t: 0, life: 1.8 });
@@ -153,9 +219,34 @@ function poolFallStep(a, dt) {
     }
     return true;
   }
-  // 掙扎：剛落水先原地慌張一下，之後溫特往岸上游（隊員在 js/sentry.js 游）；漲潮溺水那套（js/pool-tide.js）會把 drowning 打開、每秒扣血
-  if (f.t >= POOL_FALL.panicSecs && typeof G !== 'undefined' && G && a === G.player && a.drowning && typeof poolDrownFlee === 'function') poolDrownFlee(a, dt);
+  // 掙扎：剛落水先原地慌張一下，之後：
+  //   溫特：玩家自己用方向鍵（WASD／方向鍵）控制往哪游（POOL_FALL.playerSwim 關掉的話，改回自動游到最近的岸邊）
+  //   隊員：自動往岸上游（js/sentry.js）
+  //   漲潮溺水那套（js/pool-tide.js）會把 drowning 打開、每秒扣血
+  if (f.t >= POOL_FALL.panicSecs && typeof G !== 'undefined' && G && a === G.player && a.drowning) {
+    if (POOL_FALL.playerSwim) poolFallPlayerSwim(a, dt);
+    else if (typeof poolDrownFlee === 'function') poolDrownFlee(a, dt);
+  }
   return true;
+}
+// 溫特掉進水裡：玩家按方向鍵自己游（速度＝走路速度 × POOL_FALL.swimMul）
+// 水裡、岸上都能游過去，只有牆擋得住；游到岸邊之後，poolFallTick 會接手讓她爬上岸、結束掙扎
+function poolFallPlayerSwim(a, dt) {
+  if (typeof keys === 'undefined') return;
+  const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
+  const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
+  if (!dx && !dy) return;   // 沒按方向鍵：原地載浮載沉
+  const len = Math.hypot(dx, dy), step = (typeof PLAYER !== 'undefined' ? PLAYER.speed : 230) * POOL_FALL.swimMul * dt;
+  const ok = (x, y) => {
+    const [c, r] = cellAt(x, y);
+    if (!inGrid(c, r) || isWall(c, r)) return false;                                                         // 牆、地圖外面
+    if (typeof edgeWallCrossed === 'function' && edgeWallCrossed(a.x, a.y, x, y, PLAYER.r)) return false;   // 薄牆
+    return true;
+  };
+  const nx = a.x + dx / len * step, ny = a.y + dy / len * step;
+  if (dx && ok(nx, a.y)) a.x = nx;   // 左右、上下分開試，貼著牆也能沿著牆游
+  if (dy && ok(a.x, ny)) a.y = ny;
+  a.moving = true;   // 臉一樣維持正面（掙扎的 >< 圖只有正面）
 }
 function poolFallEnd(a) {
   if (!a || !a.poolFall) return;

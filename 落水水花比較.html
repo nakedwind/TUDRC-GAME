@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>落水水花比較</title>
+<style>
+  body { margin: 0; background: #0f1a24; color: #e8f4fa; font-family: "Microsoft JhengHei", sans-serif; }
+  h1 { font-size: 18px; margin: 12px 16px 4px; }
+  h2 { font-size: 15px; margin: 14px 16px 6px; }
+  p { margin: 0 16px 10px; font-size: 13px; color: #9fc0d0; }
+  .row { display: flex; gap: 10px; padding: 0 16px 12px; flex-wrap: wrap; }
+  .box { text-align: center; }
+  .box b { display: block; margin-bottom: 4px; font-size: 14px; }
+  canvas { border-radius: 8px; display: block; }
+  button { margin: 0 16px 12px; padding: 6px 14px; font-size: 14px; }
+</style></head>
+<body>
+<h1>落水水花：舊版 ↔ 第 2 版 ↔ 第 3 版 ↔ 第 4 版</h1>
+<p>會一直重播。上排放大 2 倍，下排是遊戲裡的實際大小（淡淡的小人代表角色大小）。遊戲現在用的是 POOL_FALL.crownStyle 設的那一版。</p>
+<button id="slow">切換慢動作（目前：正常速度）</button>
+<div class="row" id="big"></div>
+<div class="row" id="small"></div>
+<h2>第 4 版：12 格分解（放大 1.5 倍，由左到右、由上到下）</h2>
+<div class="row"><canvas id="strip4" width="900" height="640"></canvas></div>
+<h2>第 3 版：12 格分解（放大 2 倍）</h2>
+<div class="row"><canvas id="strip3" width="900" height="640"></canvas></div>
+<h2>第 2 版：12 格分解（放大 1.5 倍）</h2>
+<div class="row"><canvas id="strip2" width="900" height="640"></canvas></div>
+<script>var G = { poolSplash: [] }; function applyBossSettings(k, v) { return v; }</script>
+<script src="js/pool-boss.js?v=crown22-20261124"></script>
+<script src="js/pool-fall.js?v=swim1-20261124"></script>
+<script>
+const VERS = [{ label: '舊版', style: 0, loop: 1.6 }, { label: '第 2 版', style: 2, loop: 1.6 }, { label: '第 3 版', style: 3, loop: 2 }, { label: '第 4 版', style: 4, loop: 1.8 }];
+const sides = [];
+function make(rowId, v, zoom) {
+  const box = document.createElement('div'); box.className = 'box';
+  box.innerHTML = '<b>' + v.label + (zoom > 1 ? '（放大 2 倍）' : '（實際大小）') + '</b>';
+  const c = document.createElement('canvas'); c.width = zoom > 1 ? 250 : 125; c.height = zoom > 1 ? 190 : 95;
+  box.appendChild(c); document.getElementById(rowId).appendChild(box);
+  sides.push({ ctx: c.getContext('2d'), c, v, zoom, list: [], timer: 0 });
+}
+VERS.forEach(v => make('big', v, 2)); VERS.forEach(v => make('small', v, 1));
+const savedStyle = POOL_FALL.crownStyle;
+function spawnOne(style) { G.poolSplash = []; POOL_FALL.crownStyle = style; poolFallSplash(0, 0, true); POOL_FALL.crownStyle = savedStyle; return G.poolSplash; }
+function water(ctx, x, y, w, h) { const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#163447'); g.addColorStop(1, '#0f2533'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); }
+// 分解圖：同一朵水花停在 12 個時間點
+const realRandom = Math.random;
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function strip(id, style) {
+  const zoom = style === 3 ? 2 : 1.5;   // 第 2、4 版的杯子比較寬，放大 1.5 倍才裝得下
+  const c = document.getElementById(id), ctx = c.getContext('2d'), cols = 3, rows = 4, cw = c.width / cols, ch = c.height / rows;
+  const life = style === 3 ? POOL_FALL.crown.life : style === 4 ? 1.35 : POOL_FALL.crownV2.life;
+  ctx.fillStyle = '#0f1a24'; ctx.fillRect(0, 0, c.width, c.height);
+  for (let i = 0; i < 12; i++) {
+    const tt = life * (.02 + i / 11 * .96), cx = (i % cols) * cw, cy = Math.floor(i / cols) * ch;
+    Math.random = mulberry(11);
+    let list = spawnOne(style);
+    for (let s = 0; s < Math.round(tt * 60); s++) { G.poolSplash = list; updatePoolSplash(1 / 60); list = G.poolSplash; }
+    Math.random = realRandom;
+    ctx.save(); ctx.beginPath(); ctx.rect(cx + 2, cy + 2, cw - 4, ch - 4); ctx.clip();
+    water(ctx, cx + 2, cy + 2, cw - 4, ch - 4);
+    ctx.strokeStyle = '#4d6b7d'; ctx.lineWidth = 1; ctx.strokeRect(cx + 2.5, cy + 2.5, cw - 5, ch - 5);
+    ctx.setTransform(zoom, 0, 0, zoom, cx + cw / 2, cy + ch * .78); G.poolSplash = list; drawPoolSplash(ctx); ctx.restore();
+    ctx.fillStyle = '#7fa3b6'; ctx.font = '11px sans-serif'; ctx.fillText((i + 1) + '　' + tt.toFixed(2) + ' 秒', cx + 8, cy + 16);
+  }
+}
+strip('strip4', 4); strip('strip3', 3); strip('strip2', 2);
+let speed = 1, last = performance.now();
+document.getElementById('slow').onclick = e => { speed = speed === 1 ? .3 : 1; e.target.textContent = '切換慢動作（目前：' + (speed === 1 ? '正常速度' : '慢動作 0.3 倍') + '）'; };
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000) * speed; last = now;
+  for (const s of sides) {
+    s.timer -= dt; if (s.timer <= 0) { s.timer = s.v.loop; s.list = spawnOne(s.v.style); }
+    const { ctx, c, zoom } = s;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); water(ctx, 0, 0, c.width, c.height);
+    ctx.setTransform(zoom, 0, 0, zoom, c.width / 2, c.height * .72);
+    ctx.fillStyle = 'rgba(255,255,255,.15)';   // 代表角色大小的小人
+    ctx.beginPath(); ctx.arc(-52, -30, 9, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(-58, -21, 12, 18);
+    G.poolSplash = s.list; updatePoolSplash(dt); s.list = G.poolSplash;
+    drawPoolSplash(ctx);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body></html>

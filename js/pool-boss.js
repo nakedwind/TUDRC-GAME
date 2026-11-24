@@ -226,11 +226,12 @@ function poolBossSplash(e, kind = 'up') {
 function updatePoolSplash(dt) {
   const list = G.poolSplash; if (!list || !list.length) return;
   for (const d of list) {
+    if (d.wait > 0) { d.wait -= dt; continue; }   // 還沒輪到它出現（例如皇冠水花破掉時才甩出來的水滴）
     d.t += dt;
-    if (d.ring || d.foam) continue;   // 水波、水沫不會動，只會變大變淡
+    if (d.ring || d.foam || d.crown || d.ripple || d.band) continue;   // 水波、水沫、皇冠水花不會移動，只會變大變淡
     d.x += d.vx * dt; d.y += d.vy * dt;
     if (d.mist) { d.z += d.vz * dt; d.r += d.grow * dt; d.vx *= .96; d.vy *= .96; continue; }   // 水霧：往上飄、變大
-    d.vz -= POOL_BOSS.splash.gravity * dt; d.z += d.vz * dt;
+    d.vz -= POOL_BOSS.splash.gravity * (d.gMul || 1) * dt; d.z += d.vz * dt;   // gMul＝這顆水滴的重力是平常的幾倍（落水第 4 版用）
     if (d.z < 0 && d.vz < 0) { d.z = 0; d.t = d.life; }   // 水滴落回水面
   }
   G.poolSplash = list.filter(d => d.t < d.life);
@@ -248,12 +249,327 @@ function splashBlobPath(ctx, x, y, rx, ry, shape, rot = 0) {
   for (let i = 0; i < n; i++) { const m = mid(i); ctx.quadraticCurveTo(pts[i][0], pts[i][1], m[0], m[1]); }
   ctx.closePath();
 }
+// ---- 皇冠水花：卡通風格的「一整圈」水花（像杯子一樣從水面冒出來，杯口一圈白色浪花尖往外翻）----
+// d.x、d.y＝水面上的中心；d.w＝杯口最寬時的寬度；d.h＝最高時的高度；p＝播到哪裡（0～1）
+// 過程：小小冒出來 → 長高、杯口張開、浪花尖翹起來 → 塌下去、攤開、淡掉
+// 顏色寫在 POOL_CROWN_COLORS（想換水的顏色改這裡）
+const POOL_CROWN_COLORS = {
+  top: '#8fe0ee',      // 杯子上半部（比較亮）
+  bottom: '#3a9cc0',   // 杯子下半部、碰到水面的地方（比較深）
+  inside: '#2a7898',   // 杯口裡面看進去（最深）
+  streak: '#c4f1f8',   // 杯子上直直的亮線
+  foam: '#ffffff',     // 白色浪花
+  shade: '#bfe9f5',    // 白色浪花底下淡淡的藍色陰影
+  // 第 3 版用的（比較淺、比較透的水色，像 12 格示意圖）
+  top3: '#b4eef6',     // 水牆上半部
+  bottom3: '#62bfd6',  // 水牆下半部
+  inside3: '#86d6e6',  // 杯口裡面
+};
+
+// ---- 皇冠水花第 3 版（照 12 格示意圖）----
+// 過程（p＝播到哪裡，0～1）：
+//   ① 0～.12   水面先蹦出一小撮細細尖尖的白色碎片
+//   ② .03～.22 杯子很快長出來，杯口是一圈厚厚往外捲的白色浪頭，左右兩邊高、中間低
+//   ③ .22～.5  幾乎停住，只輕輕晃
+//   ④ .5～.66  杯口破開，幾條水絲往上捲，杯子變矮
+//   ⑤ .6～.74  整個塌下去，變成水面上一條白色水沫帶
+//   ⑥ .68～1   水沫帶變成細細的白色水圈往外擴散、淡掉
+function drawPoolCrown3(ctx, d, p) {
+  const C = POOL_CROWN_COLORS, PI2 = Math.PI * 2;
+  const clamp = v => Math.max(0, Math.min(1, v)), easeOut = v => 1 - Math.pow(1 - v, 3);
+  const R = Math.random;
+  // 第一次畫時決定這朵水花的細節（之後一直用同一組，形狀才不會每一幀亂跳）
+  if (!d.k3) {
+    const lip = [], n = 30;
+    for (let i = 0; i < n; i++) lip.push({ a: (i + R() * .5) / n * PI2, s: .75 + R() * .5, breaks: R() < .55 });
+    const tend = [], nt = d.nTend ?? 5;
+    for (let i = 0; i < nt; i++) {   // 水絲多半長在左右兩邊（杯口最高的地方）
+      const side = i % 2 ? 0 : Math.PI, a = side + (R() - .5) * 1.4 + (R() < .3 ? -Math.PI / 2 : 0);
+      tend.push({ a, L: .6 + R() * .6, dir: Math.cos(a) >= 0 ? 1 : -1, bend: .5 + R() * .6 });
+    }
+    const shards = []; for (let i = 0; i < 7; i++) shards.push({ ang: (i / 6 - .5) * 1.5 + (R() - .5) * .25, L: .5 + R() * .6, off: (R() - .5) * 8 });
+    const foam = []; for (let i = 0; i < 26; i++) foam.push({ a: i / 26 * PI2 + R() * .2, s: .6 + R() * .8, up: R() < .35 ? .8 + R() * 1.4 : 0 });
+    const dash = []; for (let i = 0; i < 6; i++) dash.push(.3 + R() * 1.2, .08 + R() * .35);
+    d.k3 = { lip, tend, shards, foam, dash, streaks: [-.55, -.2, .2, .5].map(v => v + (R() - .5) * .1), seed: R() * 10 };
+  }
+  const K = d.k3, x = d.x, y = d.y, T = d.t;
+  const sp = 1 + (d.spread ?? .5) * easeOut(clamp(p));          // 整朵一路往外散開
+  const grow = easeOut(clamp((p - .03) / .19));
+  const brk = clamp((p - .5) / .16), coll = clamp((p - .6) / .14);
+  const hold = p > .2 && p < .62 ? 1 : 0;
+  const wob = hold * Math.sin(T * 13 + K.seed) * .03;             // 停住時輕輕晃
+  const H = d.h * grow * (1 - .35 * brk) * (1 - coll);
+  const rxT = d.w * .5 * (.5 + .5 * grow) * sp * (1 + wob), ryT = rxT * .3;
+  const rxB = d.w * .3 * sp * (.85 + .15 * grow), ryB = rxB * .3;
+  const sad = d.saddle ?? .4;
+  // 杯口上 θ 方向那一點的位置（左右 θ＝0、π 最高；前後最矮）；out＝再往外推、up＝再往上推
+  const rim = (a, out = 0, up = 0) => {
+    const s = Math.sin(a), hk = 1 - sad * s * s + hold * .05 * Math.sin(a * 3 + T * 9 + K.seed);
+    return [x + Math.cos(a) * (rxT + out), y - H * hk + s * ryT - up];
+  };
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  // ⑥ 細細的白色水圈（畫在最底下，貼著水面）
+  for (let k = 0; k < 2; k++) {
+    const rp = clamp((p - .66 - k * .09) / (.34 - k * .05)); if (rp <= 0 || rp >= 1) continue;
+    const r = d.w * .55 * sp * (1 + .9 * rp) * (1 - .2 * k);
+    ctx.globalAlpha = .85 * (1 - rp); ctx.strokeStyle = C.foam; ctx.lineWidth = Math.max(.8, 1.6 * (1 - rp * .5));
+    ctx.setLineDash(K.dash.map(v => v * r * .5)); ctx.lineDashOffset = k * r;
+    ctx.beginPath(); ctx.ellipse(x, y, r, r * .26, 0, 0, PI2); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // ⑤ 水面上的白色水沫帶（一團一團、有的往上凸一點）
+  const fb = clamp((p - .58) / .08) * (1 - clamp((p - .78) / .14));
+  if (fb > 0) {
+    const rfx = d.w * .55 * sp * (1 + .25 * clamp((p - .6) / .3)), rfy = rfx * .26;
+    ctx.globalAlpha = .3 * fb; ctx.fillStyle = C.top3;
+    ctx.beginPath(); ctx.ellipse(x, y, rfx * .42, rfy * .42, 0, 0, PI2); ctx.fill();
+    ctx.globalAlpha = fb; ctx.fillStyle = C.foam;
+    for (const f of K.foam) {
+      const fx = x + Math.cos(f.a) * rfx, fy = y + Math.sin(f.a) * rfy, r = d.w * .045 * f.s;
+      ctx.beginPath(); ctx.ellipse(fx, fy, r * 1.6, r, 0, 0, PI2); ctx.fill();
+      if (f.up) { ctx.beginPath(); ctx.ellipse(fx, fy - r * f.up, r * .6, r * (f.up + .6), 0, 0, PI2); ctx.fill(); }   // 往上凸的小水柱
+    }
+    ctx.strokeStyle = C.foam; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.ellipse(x, y, rfx, rfy, 0, 0, PI2); ctx.stroke();
+  }
+
+  // ④ 杯口破開時往上捲的水絲（which：'back'＝杯子後半圈長出來的、'front'＝前半圈、'all'＝全部）
+  const tendrils = which => {
+    if (!(brk > 0 && coll < 1)) return;
+    ctx.globalAlpha = 1 - coll; ctx.strokeStyle = C.foam; ctx.fillStyle = C.foam;
+    const lw = Math.max(1.4, d.w * .065);
+    for (const t of K.tend) {
+      const isBack = Math.sin(t.a) < 0;
+      if ((which === 'back' && !isBack) || (which === 'front' && isBack)) continue;
+      const L = d.h * .6 * t.L * easeOut(brk);
+      const [bx, by] = rim(t.a); const dx = t.dir * L;
+      const ex = bx + dx * .35, ey = by - L * .8;
+      ctx.lineWidth = lw * (1 - .4 * coll);
+      ctx.beginPath(); ctx.moveTo(bx, by);
+      ctx.bezierCurveTo(bx + dx * .1, by - L * .55, bx + dx * t.bend, by - L * 1.05, ex, ey);   // 往上、再往回勾
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(ex, ey, lw * .75, 0, PI2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // ②～④ 杯子
+  if (H > .6) {
+    ctx.globalAlpha = 1;
+    const N = 36;
+    // 杯口裡面
+    ctx.fillStyle = C.inside3; ctx.beginPath();
+    for (let i = 0; i <= N; i++) { const [px, py] = rim(i / N * PI2); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.fill();
+    // 杯口的白色浪頭：一團團白沫沿著杯口排一圈，左右兩邊比較大、往外捲得比較多
+    const lip = wantFront => {
+      ctx.lineWidth = Math.max(1.5, rxT * .22 * (1 - brk)); ctx.strokeStyle = C.foam; ctx.beginPath();
+      const a0 = wantFront ? 0 : Math.PI;
+      for (let i = 0; i <= 18; i++) { const [px, py] = rim(a0 + i / 18 * Math.PI); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+      if (brk < 1) ctx.stroke();
+      for (const u of K.lip) {
+        if ((Math.sin(u.a) >= 0) !== wantFront) continue;
+        const flare = Math.pow(Math.cos(u.a), 2);
+        const r = rxT * .15 * u.s * (.65 + .6 * flare) * grow * (u.breaks ? 1 - brk : 1 - brk * .5);
+        if (r < .4) continue;
+        const [px, py] = rim(u.a, r * (.2 + .8 * flare), r * (.25 + .4 * flare));
+        ctx.fillStyle = C.shade; ctx.beginPath(); ctx.arc(px, py + r * .35, r, 0, PI2); ctx.fill();
+        ctx.fillStyle = C.foam; ctx.beginPath(); ctx.arc(px, py, r, 0, PI2); ctx.fill();
+        if (flare > .5) {   // 左右兩邊：浪頭再往外、往上捲出一團（像示意圖杯口兩端捲起來的浪）
+          const [qx, qy] = rim(u.a, r * 2.2, r * .5);
+          ctx.fillStyle = C.shade; ctx.beginPath(); ctx.arc(qx, qy + r * .3, r * .7, 0, PI2); ctx.fill();
+          ctx.fillStyle = C.foam; ctx.beginPath(); ctx.arc(qx, qy, r * .7, 0, PI2); ctx.fill();
+        }
+      }
+    };
+    lip(false);
+    tendrils('back');
+    // 前面那片水牆：上寬下窄，杯口那條邊跟著浪頭高高低低
+    const wall = () => {
+      const [lx, ly] = rim(Math.PI), [rx, ry] = rim(0);
+      ctx.beginPath(); ctx.moveTo(lx, ly);
+      ctx.quadraticCurveTo(x - rxB * .95, y - H * .4, x - rxB, y);
+      ctx.ellipse(x, y, rxB, ryB, 0, Math.PI, 0, true);
+      ctx.quadraticCurveTo(x + rxB * .95, y - H * .4, rx, ry);
+      for (let i = 1; i <= 18; i++) { const [px, py] = rim(i / 18 * Math.PI); ctx.lineTo(px, py); }
+      ctx.closePath();
+    };
+    const g = ctx.createLinearGradient(0, y - H, 0, y + ryB);
+    g.addColorStop(0, C.top3); g.addColorStop(1, C.bottom3);
+    ctx.fillStyle = g; wall(); ctx.fill();
+    // 水牆上淡淡的直線（像示意圖杯子上的亮紋）
+    ctx.save(); wall(); ctx.clip();
+    ctx.globalAlpha = .5; ctx.strokeStyle = C.foam; ctx.lineWidth = Math.max(.8, d.w * .03);
+    for (const s of K.streaks) { ctx.beginPath(); ctx.moveTo(x + s * rxT * .9, y - H * .85); ctx.quadraticCurveTo(x + s * rxB * 1.1, y - H * .4, x + s * rxB, y); ctx.stroke(); }
+    ctx.restore();
+    lip(true);
+  }
+  tendrils(H > .6 ? 'front' : 'all');   // 杯子還在：只畫前面那幾條（後面的已經在水牆後面畫過了）
+  // ① 一開始蹦出來的白色碎片
+  if (p < .14) {
+    const shK = easeOut(clamp(p / .05)), shA = 1 - clamp((p - .05) / .09);
+    ctx.globalAlpha = shA;
+    for (const s of K.shards) {
+      const L = d.h * .45 * s.L * shK, bx = x + s.off, w2 = 2.2;
+      const tx = bx + Math.sin(s.ang) * L, ty = y - Math.cos(s.ang) * L;
+      ctx.fillStyle = C.shade; ctx.beginPath(); ctx.moveTo(bx - w2, y + 1); ctx.lineTo(bx + w2, y + 1); ctx.lineTo(tx, ty + 1.5); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = C.foam; ctx.beginPath(); ctx.moveTo(bx - w2, y); ctx.lineTo(bx + w2, y); ctx.lineTo(tx, ty); ctx.closePath(); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+function drawPoolCrown(ctx, d, p) {
+  const C = POOL_CROWN_COLORS;
+  const easeOut = v => 1 - Math.pow(1 - v, 3);
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const easeQ = v => 1 - (1 - v) * (1 - v);                 // 慢慢減速（比 easeOut 收得柔，不會「啪」一下停住）
+  const easeIn = v => v * v;                                  // 慢慢加速
+  let grow, fall, sp, foamOut, tipK, lean, alpha;
+  if (d.keepTips) {
+    // 第 4 版：長高、散開、塌下去「重疊」在一起，是一個連續的動作，中間不會有停住的空檔
+    //   長高 0～.34（越長越慢）；塌下去從 .2 就慢慢開始（一開始很慢、越來越快），兩段疊在一起，最高點一過就自然往下
+    //   往外散開、白沫往外漂、浪花往外飛，也都是從頭到尾一直在動，沒有突然加速
+    grow = easeQ(clamp(p / .34));
+    fall = clamp((p - .2) / .8);
+    sp = (d.spread ?? .9) * easeQ(clamp(p));
+    foamOut = 1 + (d.foamOut ?? .8) * easeIn(fall);
+    tipK = easeQ(clamp((p - .04) / .32));
+    lean = easeIn(fall) * 1.2 > 1 ? 1 : easeIn(fall) * 1.2;
+    alpha = fall > .6 ? 1 - (fall - .6) / .4 : 1;
+  } else {
+    // 第 2 版（保留原樣，給比較頁對照）
+    grow = easeOut(clamp(p / .3));                 // 前 3 成時間：長出來
+    fall = clamp((p - .5) / .5);                   // 後 5 成時間：塌下去
+    sp = (d.spread ?? .9) * (.6 * easeOut(clamp(p)) + .4 * clamp(p));   // 一路往外散開到消失為止（d.spread＝最後多寬出幾成）
+    foamOut = 1 + (d.foamOut ?? .8) * easeOut(fall);   // 杯子塌下去時，杯口那圈白沫再額外往外漂多遠（d.foamOut＝多漂出幾成）
+    tipK = clamp((p - .06) / .28) * (1 - fall);    // 浪花尖翹多高；塌下去時跟著縮短
+    lean = 0;
+    alpha = fall > .55 ? 1 - (fall - .55) / .45 : 1;
+  }
+  const H = d.h * grow * (1 - (d.keepTips ? easeIn(fall) : fall * fall));   // 現在多高
+  const open = .45 + .55 * grow + sp;              // 杯口張多開
+  if (alpha <= 0) return;
+  // 第一次畫時決定這朵水花的浪花尖（位置、長短、粗細）和亮線，之後都用同一組，形狀才不會亂跳
+  if (!d.tips) {
+    const n = d.n || 11; d.tips = [];
+    for (let i = 0; i < n; i++) d.tips.push({ a: (i + Math.random() * .6) / n * Math.PI * 2, L: .5 + Math.random() * .7, w: .75 + Math.random() * .5, curl: (Math.random() - .5) * .5 });
+    d.streaks = [-.5, -.15, .25, .55].map(v => v + (Math.random() - .5) * .12);
+    d.lumps = []; for (let i = 0; i < 18; i++) d.lumps.push({ a: (i + Math.random() * .5) / 18 * Math.PI * 2, s: .75 + Math.random() * .55 });   // 杯口一圈一團一團的白沫
+  }
+  const x = d.x, y = d.y, top = y - H;
+  const rxT = d.w * .5 * open, ryT = rxT * .34;   // 杯口（扁圓）
+  const rxB = d.w * .3 * (.8 + sp * .9), ryB = rxB * .34;   // 杯底（碰到水面）：跟著往外散
+  // 杯口的形狀：第 2 版是正正的扁圓；第 4 版是波浪狀、凹凸不平的不規則形（幾個大小不同的波疊在一起，還會慢慢蠕動）
+  if (d.keepTips && !d.wave) {
+    d.wave = [3, 4, 5].map(k => ({ k, amp: (.06 + Math.random() * .07) * (d.waveK ?? 1), ph: Math.random() * Math.PI * 2, drift: (Math.random() - .5) * 3 }));
+  }
+  const rimR = a => {   // 杯口在 a 這個方向，要比扁圓大（>1）還是小（<1）
+    if (!d.wave) return 1;
+    let r = 1; for (const w of d.wave) r += w.amp * Math.sin(w.k * a + w.ph + w.drift * p); return r;
+  };
+  const rimX = (a, k = 1) => x + Math.cos(a) * rxT * rimR(a) * k;
+  const rimY = (a, k = 1) => top + Math.sin(a) * ryT * rimR(a) * k;
+  // 沿著杯口從 a0 畫到 a1（first＝true 時先移到起點）
+  const rimPath = (a0, a1, first) => {
+    const n = 36;
+    for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; (first && !i) ? ctx.moveTo(rimX(a), rimY(a)) : ctx.lineTo(rimX(a), rimY(a)); }
+  };
+  ctx.save(); ctx.globalAlpha = alpha;
+  // 一片浪花：從杯口邊上往外、往上翹的胖胖一片，尾端圓圓的往外捲（像卡通水花的白色浪頭）
+  const tip = (t, fill, dy) => {
+    // 第 4 版塌下去時（lean 從 0 到 1）：浪花整片往外飛出去（底部離開杯口）、變細、淡掉，不會往回縮
+    const fly = 1 + .45 * lean;
+    const bx = rimX(t.a, fly), by = rimY(t.a, fly) + dy;   // 浪花長在杯口邊上（第 4 版的杯口是波浪狀，浪花跟著站在波浪上）
+    const L = d.h * .62 * t.L * tipK * (1 - .45 * lean); if (L < 1) return;   // 飛出去時變短一點、不要拉成細長條
+    const hw = rxT * .24 * t.w * (1 - .25 * lean), out = Math.cos(t.a) * (.9 + sp) + t.curl;   // 越散開，浪花越往外甩
+    const up = 1 - .3 * lean, side = 1 + .4 * lean;   // 往上的少一點、往外的多一點
+    if (lean > 0) ctx.globalAlpha = alpha * (1 - lean);
+    const tx = bx + out * L * .7 * side, ty = by - L * (.75 + .25 * Math.abs(Math.sin(t.a))) * up;
+    const tr = hw * .38;   // 尾端那顆圓頭的大小
+    ctx.fillStyle = fill; ctx.beginPath();
+    ctx.moveTo(bx - hw, by + hw * .25);
+    ctx.quadraticCurveTo(bx - hw * .5 + out * L * .05 * side, by - L * .75 * up, tx - tr * .6, ty);
+    ctx.quadraticCurveTo(bx + hw * .8 + out * L * .5 * side, by - L * .2 * up, bx + hw, by + hw * .25);
+    ctx.closePath(); ctx.fill();
+    if (d.keepTips) {   // 第 4 版：尾端不是正圓，是歪歪的一小團（飛出去時越來越小、拉長）；d.headK＝這團放大幾倍
+      if (!t.head) { t.head = splashShape(7, .35); t.headRot = Math.random() * 6; }
+      const hr = tr * (d.headK ?? 1) * (1 - .3 * lean);
+      splashBlobPath(ctx, tx, ty + tr * .2, hr * (1 + .15 * lean), hr * (1 - .05 * lean), t.head, t.headRot); ctx.fill();
+    } else { ctx.beginPath(); ctx.arc(tx, ty + tr * .2, tr, 0, Math.PI * 2); ctx.fill(); }
+    ctx.globalAlpha = alpha;
+  };
+  // 杯口邊上一團一團的白沫（front＝畫前面那半圈，不然畫後面那半圈）
+  const lumps = (fill, dy, wantFront) => {
+    ctx.fillStyle = fill;
+    for (const u of d.lumps) {
+      if ((Math.sin(u.a) >= 0) !== wantFront) continue;
+      const r = Math.max(1, rxT * .1 * u.s * (.4 + .6 * grow));
+      const lx = rimX(u.a, foamOut), ly = rimY(u.a, foamOut) + dy;
+      if (!d.keepTips) { ctx.beginPath(); ctx.arc(lx, ly, r, 0, Math.PI * 2); ctx.fill(); continue; }
+      // 第 4 版：白沫不是一顆顆圓點，而是歪歪扭扭、大小不一的碎水花：
+      //   每團形狀不規則、順著往外漂的方向拉長（漂越遠拉越長），旁邊還黏著一兩小塊
+      if (!u.shape) {
+        u.shape = splashShape(7, .4); u.rot = Math.random() * 6; u.k = .45 + Math.random() * 1.1;
+        u.bits = []; const nb = Math.floor(Math.random() * 3);
+        for (let i = 0; i < nb; i++) u.bits.push({ dx: (Math.random() - .5) * 2.4, dy: (Math.random() - .5) * 1.2, s: .3 + Math.random() * .35, shape: splashShape(6, .35), rot: Math.random() * 6 });
+      }
+      const rr = r * u.k, drift = foamOut - 1;
+      const ang = Math.atan2(Math.sin(u.a) * .34, Math.cos(u.a));   // 往外漂的方向（畫面上）
+      ctx.save(); ctx.translate(lx, ly); ctx.rotate(ang);
+      splashBlobPath(ctx, 0, 0, rr * (1.15 + .35 * drift), rr * (.85 - .05 * drift), u.shape, u.rot); ctx.fill();   // 漂出去時只稍微拉長一點，不要變細長條
+      for (const b of u.bits) splashBlobPath(ctx, b.dx * rr * (1 + .5 * drift), b.dy * rr, rr * b.s * 1.15, rr * b.s, b.shape, b.rot), ctx.fill();
+      ctx.restore();
+    }
+  };
+  const back = d.tips.filter(t => Math.sin(t.a) < 0), front = d.tips.filter(t => Math.sin(t.a) >= 0);
+  // ① 後面那排浪花尖
+  for (const t of back) { tip(t, C.shade, 1.5); tip(t, C.foam, 0); }
+  // ② 杯口裡面
+  ctx.fillStyle = C.inside; ctx.beginPath(); rimPath(0, Math.PI * 2, true); ctx.closePath(); ctx.fill();
+  // ③ 後面那半圈白色浪花邊
+  // （杯子塌下去時，白色浪花邊跟著淡掉，只剩一團團白沫繼續往外漂）
+  ctx.strokeStyle = C.foam; ctx.lineWidth = Math.max(1.2, rxT * .1); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.globalAlpha = alpha * (1 - fall);
+  ctx.beginPath(); rimPath(Math.PI, Math.PI * 2, true); ctx.stroke();
+  ctx.globalAlpha = alpha;
+  lumps(C.foam, 0, false);
+  // ④ 杯子前面那片水牆：上寬下窄、兩邊往內彎
+  const wall = () => {
+    ctx.beginPath(); ctx.moveTo(rimX(Math.PI), rimY(Math.PI));
+    ctx.quadraticCurveTo(x - rxB * .9, top + H * .55, x - rxB, y);
+    ctx.ellipse(x, y, rxB, ryB, 0, Math.PI, 0, true);
+    ctx.quadraticCurveTo(x + rxB * .9, top + H * .55, rimX(0), rimY(0));
+    rimPath(0, Math.PI, false);   // 水牆的上緣＝杯口前面那半圈（第 4 版是波浪狀）
+    ctx.closePath();
+  };
+  const g = ctx.createLinearGradient(0, top, 0, y + ryB);
+  g.addColorStop(0, C.top); g.addColorStop(1, C.bottom);
+  ctx.fillStyle = g; wall(); ctx.fill();
+  // ⑤ 水牆上直直的亮線
+  ctx.save(); wall(); ctx.clip();
+  ctx.strokeStyle = C.streak; ctx.globalAlpha = alpha * .55; ctx.lineWidth = Math.max(1, d.w * .035);
+  for (const s of d.streaks) {
+    const sxT = x + s * rxT, sxB = x + s * rxB;
+    ctx.beginPath(); ctx.moveTo(sxT, top + ryT * .6); ctx.lineTo(sxB, y - H * .15); ctx.stroke();
+  }
+  ctx.restore();
+  // ⑥ 前面那半圈白色浪花邊、前面那排浪花尖
+  ctx.strokeStyle = C.foam; ctx.lineWidth = Math.max(1.2, rxT * .13);
+  ctx.globalAlpha = alpha * (1 - fall);
+  ctx.beginPath(); rimPath(0, Math.PI, true); ctx.stroke();
+  ctx.globalAlpha = alpha;
+  lumps(C.shade, 1.5, true); lumps(C.foam, 0, true);
+  for (const t of front) { tip(t, C.shade, 1.5); tip(t, C.foam, 0); }
+  ctx.restore();
+}
 // js/render.js 畫完角色後呼叫：水波、水沫、水霧、水滴（形狀都不規則：水滴順著飛的方向拉長、水波斷斷續續又歪歪的、水沫是好幾團疊在一起）
 function drawPoolSplash(ctx) {
   const list = typeof G !== 'undefined' && G && G.poolSplash; if (!list || !list.length) return;
   ctx.save();
   for (const d of list) {
-    if (d.t < 0) continue;   // 還沒輪到的水波
+    if (d.t < 0 || d.wait > 0) continue;   // 還沒輪到的水波、水滴
     const p = d.t / d.life, k = 1 - p;
     if (d.ring) {   // 水波：歪歪的扁圈、斷成好幾段，越擴越淡
       const r = d.r0 + (d.r1 - d.r0) * (1 - Math.pow(1 - p, 2));
@@ -276,6 +592,36 @@ function drawPoolSplash(ctx) {
       }
       continue;
     }
+    if (d.ripple) {   // 細細的白色水圈（第 4 版落水用，跟皇冠水花第 3 版收尾的水圈同一種）：斷斷續續的細線，往外擴散、淡掉
+      const r = d.r0 + (d.r1 - d.r0) * (1 - Math.pow(1 - p, 3));
+      if (!d.dash) { d.dash = []; for (let i = 0; i < 6; i++) d.dash.push(.3 + Math.random() * 1.2, .08 + Math.random() * .35); d.dashOff = Math.random() * 3; }
+      ctx.globalAlpha = .85 * k; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = Math.max(.8, 1.6 * (1 - p * .5));
+      ctx.setLineDash(d.dash.map(v => v * r * .5)); ctx.lineDashOffset = d.dashOff * r;
+      ctx.beginPath(); ctx.ellipse(d.x, d.y, r, r * .26, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      continue;
+    }
+    if (d.band) {   // 水面上的白色水沫帶（第 4 版落水用，跟皇冠水花第 3 版塌下去時那一圈同一種）：一團團白沫排成一圈，有幾團往上凸成小水柱
+      const R = Math.random, PI2 = Math.PI * 2;
+      if (!d.foamBits) { d.foamBits = []; for (let i = 0; i < 26; i++) d.foamBits.push({ a: i / 26 * PI2 + R() * .2, s: .6 + R() * .8, up: R() < .35 ? .8 + R() * 1.4 : 0 }); }
+      // 淡入淡出：syncCrown＝跟皇冠水花第 4 版完全同步（一開始就冒出來；杯子在 .68 之後淡掉，它也在同一段時間淡掉）
+      const fb = d.syncCrown
+        ? Math.min(1, p / .08) * (p > .68 ? 1 - (p - .68) / .32 : 1)
+        : Math.min(1, p / .15) * (1 - Math.max(0, (p - .6) / .4));
+      const rfx = d.r0 + (d.r1 - d.r0) * (1 - Math.pow(1 - p, 2)), rfy = rfx * .26;   // 一邊淡掉一邊往外擴
+      ctx.globalAlpha = .3 * fb; ctx.fillStyle = POOL_CROWN_COLORS.top3;   // 中間淡淡的一片水色
+      ctx.beginPath(); ctx.ellipse(d.x, d.y, rfx * .42, rfy * .42, 0, 0, PI2); ctx.fill();
+      ctx.globalAlpha = fb; ctx.fillStyle = '#ffffff';
+      for (const f of d.foamBits) {
+        const fx = d.x + Math.cos(f.a) * rfx, fy = d.y + Math.sin(f.a) * rfy, r = d.w * .045 * f.s;
+        ctx.beginPath(); ctx.ellipse(fx, fy, r * 1.6, r, 0, 0, PI2); ctx.fill();
+        if (f.up) { ctx.beginPath(); ctx.ellipse(fx, fy - r * f.up, r * .6, r * (f.up + .6), 0, 0, PI2); ctx.fill(); }   // 往上凸的小水柱
+      }
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(d.x, d.y, rfx, rfy, 0, 0, PI2); ctx.stroke();
+      continue;
+    }
+    if (d.crown) { if (d.style === 3) drawPoolCrown3(ctx, d, p); else drawPoolCrown(ctx, d, p); continue; }   // 皇冠水花（落水那一下，js/pool-fall.js）
     if (d.mist) {   // 水霧：兩三團柔柔的白霧疊成一朵
       const cy = d.y - d.z;
       if (!d.puffs) { d.puffs = []; const n = 2 + Math.floor(Math.random() * 2); for (let i = 0; i < n; i++) d.puffs.push({ dx: (Math.random() - .5) * .9, dy: (Math.random() - .5) * .5, s: .5 + Math.random() * .5 }); }
