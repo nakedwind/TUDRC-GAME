@@ -119,14 +119,15 @@ function mrtTrainApplyEdges() {
 // ---- 只是圖片的列車（地圖編輯器勾「只是圖片（不當列車）」，stamp.mrtStatic）----
 // 不放進 G.mrtTrains，所以所有列車的功能（進出站、擋路、上下車、時刻牌、怪物跳軌…）都不會碰到它；
 // 只是照原本的樣子畫出來：車廂內部＋車門＋外殼。車門預設開著（跟停著開門時一樣），
-// 地圖編輯器的「關門的車廂」寫了第幾節，那幾節的門就畫成關著的（stamp.staticClosed，1＝車頭那節）。
+// 地圖編輯器的「關門的車廂」寫了第幾節，那幾節兩側的門都畫成關著的（stamp.staticClosed，1＝車頭那節）；
+// 「只關後方門的車廂」寫了第幾節，那幾節只有後方（對面那側）的門關著，前方（靠月台這側）照樣開著（stamp.staticFarClosed）。
 let mrtStaticTrains = [];
 function mrtMakeStaticTrain(cars, head, variant, top, bottom) {
   // 車廂照離車頭的遠近排好：第 1 節＝車頭，往後依序 2、3…
   const order = [...cars].sort((a, b) => Math.abs(a.x - head.x) - Math.abs(b.x - head.x));
-  const closed = new Set();
-  for (const c of cars) for (const n of c.stamp.staticClosed || []) closed.add(+n);
-  order.forEach((car, i) => { car.closed = closed.has(i + 1); });
+  const closed = new Set(), farClosed = new Set();
+  for (const c of cars) { for (const n of c.stamp.staticClosed || []) closed.add(+n); for (const n of c.stamp.staticFarClosed || []) farClosed.add(+n); }
+  order.forEach((car, i) => { car.closed = closed.has(i + 1); car.farClosed = car.closed || farClosed.has(i + 1); });
   return { cars: order, variant, bothDoors: cars.some(c => c.stamp.bothDoors), top, bottom, stamp: head.stamp };
 }
 function drawMrtStaticTrain(ctx, st) {
@@ -138,7 +139,7 @@ function drawMrtStaticTrain(ctx, st) {
     if (car.stamp.fx) { ctx.translate(car.w, 0); ctx.scale(-1, 1); }
     ctx.scale(car.w / shell.naturalWidth, car.h / shell.naturalHeight);
     const open = car.closed ? 0 : 1;
-    if (far) drawMrtDoors(ctx, far, T.farDoor, st.bothDoors ? open : 0);   // 對面的門
+    if (far) drawMrtDoors(ctx, far, T.farDoor, st.bothDoors && !car.farClosed ? 1 : 0);   // 對面（後方）的門
     if (inside) ctx.drawImage(inside, 0, 0);                                 // 車廂內部
     if (outer) drawMrtDoors(ctx, outer, T.outerDoor, open);                  // 靠月台這側的門
     ctx.drawImage(shell, 0, 0);                                              // 外殼

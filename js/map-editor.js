@@ -1079,7 +1079,7 @@ function drawDeck2Badge(s) {
 // 車廂左上角的小標籤：兩側開門（藍）、會載怪物（紅）、停著不動＝通道（綠）、只是圖片（灰）
 function drawMrtDoorsBadge(s) {
   let x = OX + s.c * CELL + (s.ox || 0); const y = OY + s.r * CELL + (s.oy || 0);
-  const tags = [[s.bothDoors, '兩側開門', 'rgba(40,110,200,.9)'], [s.mrtMonsters, '載怪物', 'rgba(190,50,50,.9)'], [s.mrtFixed, '通道', 'rgba(40,150,90,.9)'], [s.mrtStatic, '只是圖片' + (s.staticClosed && s.staticClosed.length ? '（第' + s.staticClosed.join('、') + '節關門）' : ''), 'rgba(120,120,130,.92)']];
+  const tags = [[s.bothDoors, '兩側開門', 'rgba(40,110,200,.9)'], [s.mrtMonsters, '載怪物', 'rgba(190,50,50,.9)'], [s.mrtFixed, '通道', 'rgba(40,150,90,.9)'], [s.mrtStatic, '只是圖片' + (s.staticClosed && s.staticClosed.length ? '（第' + s.staticClosed.join('、') + '節關門）' : '') + (s.staticFarClosed && s.staticFarClosed.length ? '（第' + s.staticFarClosed.join('、') + '節關後門）' : ''), 'rgba(120,120,130,.92)']];
   ctx.save(); ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   for (const [on, text, color] of tags) {
     if (!on) continue;
@@ -3548,7 +3548,8 @@ function refreshMrtDoorsControl() {
       '<label title="勾了：這班車一直停在月台不會開走，發電機全部打開後門一直開著，變成可以穿過去的通道"><input type="checkbox" id="mrtFixedToggle" data-flag="mrtFixed"> 停著不動（通道）</label>' +
       '<label id="mrtCarsBox" title="遊戲裡自動在車頭後面接上中段車廂（地圖放不下也沒關係，軌道外的部分不會畫）">車頭後面接 <input type="number" id="mrtCarsInput" min="0" max="9" step="1" style="width:46px"> 節車廂</label>' +
       '<label title="勾了：遊戲裡完全不當列車（不會動、不擋路、不能上車、不算軌道上的車），只照原樣畫成一張圖。車門預設開著，下面可以指定哪幾節關門"><input type="checkbox" id="mrtStaticToggle" data-flag="mrtStatic"> 只是圖片（不當列車）</label>' +
-      '<label id="mrtClosedBox" title="只是圖片的列車：哪幾節車廂的門畫成關著的。1＝車頭那節，往後 2、3…；好幾節用逗號分開，例如 2,3；空白＝全部開著">關門的車廂：第 <input type="text" id="mrtClosedInput" style="width:54px" placeholder="例如 2"> 節</label>';
+      '<label id="mrtClosedBox" title="只是圖片的列車：哪幾節車廂兩側的門都畫成關著的。1＝車頭那節，往後 2、3…；好幾節用逗號分開，例如 2,3；空白＝全部開著">兩側關門的車廂：第 <input type="text" id="mrtClosedInput" data-field="staticClosed" style="width:54px" placeholder="例如 2"> 節</label>' +
+      '<label id="mrtFarClosedBox" title="只是圖片的列車：哪幾節車廂只關後方（對面那側）的門，前方（靠月台這側）照樣開著。1＝車頭那節；好幾節用逗號分開">只關後方門的車廂：第 <input type="text" id="mrtFarClosedInput" data-field="staticFarClosed" style="width:54px" placeholder="例如 2"> 節</label>';
     document.getElementById('selControls').appendChild(box);
     document.getElementById('mrtCarsInput').addEventListener('change', e => {
       if (dropLockedSelections('改車廂節數')) return;
@@ -3570,15 +3571,16 @@ function refreshMrtDoorsControl() {
       saveMaps(); draw(); refreshSelPanel();
       setStatus(list.length + ' 節車廂' + (e.target.checked ? '設為' : '取消') + '「' + label + '」', '#7ee0c0');
     });
-    // 關門的車廂（只是圖片的列車）：stamp.staticClosed＝[第幾節…]，1＝車頭那節
-    document.getElementById('mrtClosedInput').addEventListener('change', e => {
+    // 關門的車廂（只是圖片的列車）：stamp.staticClosed＝兩側都關、stamp.staticFarClosed＝只關後方門，[第幾節…]，1＝車頭那節
+    for (const id of ['mrtClosedInput', 'mrtFarClosedInput']) document.getElementById(id).addEventListener('change', e => {
       if (dropLockedSelections('改關門的車廂')) return;
       const list = selectedMrtCars(); if (!list.length) return;
+      const field = e.target.dataset.field, what = field === 'staticClosed' ? '兩側的門' : '後方的門';
       const nums = [...new Set(String(e.target.value).split(/[^0-9]+/).map(Number).filter(n => n >= 1 && n <= 10))].sort((a, b) => a - b);
       pushUndo();
-      for (const s of list) { if (nums.length) s.staticClosed = nums; else delete s.staticClosed; }
+      for (const s of list) { if (nums.length) s[field] = nums; else delete s[field]; }
       saveMaps(); draw(); refreshSelPanel();
-      setStatus(nums.length ? '第 ' + nums.join('、') + ' 節車廂的門畫成關著的' : '車門全部開著', '#7ee0c0');
+      setStatus(nums.length ? '第 ' + nums.join('、') + ' 節車廂' + what + '畫成關著的' : '沒有車廂' + what + '關著', '#7ee0c0');
     });
     document.getElementById('mrtDoorsToggle').addEventListener('change', e => {
       if (dropLockedSelections('切換車門')) return;
@@ -3598,8 +3600,11 @@ function refreshMrtDoorsControl() {
     el.checked = n === list.length; el.indeterminate = n > 0 && n < list.length;
   }
   const statics = list.filter(s => s.mrtStatic);
-  document.getElementById('mrtClosedBox').classList.toggle('hidden', !statics.length);
-  if (statics.length && document.activeElement !== document.getElementById('mrtClosedInput')) document.getElementById('mrtClosedInput').value = (statics[0].staticClosed || []).join(',');
+  for (const id of ['mrtClosedInput', 'mrtFarClosedInput']) {
+    const el = document.getElementById(id);
+    el.parentElement.classList.toggle('hidden', !statics.length);
+    if (statics.length && document.activeElement !== el) el.value = (statics[0][el.dataset.field] || []).join(',');
+  }
   const heads = list.filter(s => MRT_HEAD_MIDDLE[s.id]);
   document.getElementById('mrtCarsBox').classList.toggle('hidden', !heads.length);
   if (heads.length) document.getElementById('mrtCarsInput').value = heads[0].cars || 0;

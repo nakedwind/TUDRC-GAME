@@ -155485,7 +155485,7 @@ const BATTLE_MAPS = [
         "ox": 10,
         "oy": 30,
         "mrtStatic": true,
-        "staticClosed": [2],
+        "staticFarClosed": [2],
         "bothDoors": true
       },
       {
