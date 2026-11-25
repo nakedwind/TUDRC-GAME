@@ -19,7 +19,9 @@ const WATER = {
     ampMin: 1.5,     // 最少浮幾像素（太小的怪物也看得出來）
     speed: 2.1,      // 停著時浮沉多快（越大越快）
     moveSpeed: 2.8,  // 游動時浮沉多快
-    tilt: .05,       // 前後晃多少（弧度）
+    tilt: .08,       // 左右搖晃多少（身體以水面為軸左右歪，弧度）
+    sway: .025,      // 左右飄移多少＝身體寬的幾倍
+    swaySpeed: .9,   // 左右搖晃多快（跟上下浮沉錯開，看起來比較像被水推著）
   },
 };
 // 在水裡游的怪物：每張圖的眼睛在圖裡的高度（像素，從圖片最上面往下數）。
@@ -130,14 +132,16 @@ function drawWaded(a, kind, drawFn) {
     drawFn = () => { ctx.save(); ctx.translate(0, sdy); try { inner(); } finally { ctx.restore(); } };
   }
   // 在水裡游的怪物：身體載浮載沉（只有身體動，水面那條線和波紋留在原地，看起來就像在水裡一浮一沉）
-  if (kind === 'enemy' && !fall && (a.aqua || a.waterSwim)) {
+  if (kind === 'enemy' && !fall && (a.aqua || a.waterSwim || a.fishKing) && (a.slimeLift || 0) <= 4) {   // 魚頭王也一樣（跳出水面時不晃）
     const B = WATER.bob, t = performance.now() / 1000, seed = a.bobSeed || (a.bobSeed = Math.random() * 20);
     a.bobPhase = (a.bobPhase == null ? seed : a.bobPhase) + (a.moving ? B.moveSpeed : B.speed) * (t - (a.bobT || t));   // 用累加的相位：游／停切換時不會突然跳一下
     a.bobT = t;
     const ph = a.bobPhase, amp = Math.max(B.ampMin, info.height * B.amp);
-    const dy = Math.sin(ph) * amp, rot = Math.sin(ph * .5 + seed) * B.tilt * (a.faceRight ? -1 : 1);
+    // 上下浮沉＋左右搖晃（歪一邊、再往另一邊飄一點），兩種節奏錯開，才不會像機器一樣規律
+    const sp = ph * B.swaySpeed + seed, dy = Math.sin(ph) * amp;
+    const rot = Math.sin(sp) * B.tilt, dx = Math.sin(sp - .6) * info.width * B.sway;
     const inner = drawFn, py = info.bottom - info.height * info.w.depth;
-    drawFn = () => { ctx.save(); ctx.translate(a.x, py + dy); ctx.rotate(rot); ctx.translate(-a.x, -py); try { inner(); } finally { ctx.restore(); } };
+    drawFn = () => { ctx.save(); ctx.translate(a.x + dx, py + dy); ctx.rotate(rot); ctx.translate(-a.x, -py); try { inner(); } finally { ctx.restore(); } };
   }
   const main = ctx, cvs = main.canvas, m = main.getTransform();
   if (!waterLayer) waterLayer = document.createElement('canvas');

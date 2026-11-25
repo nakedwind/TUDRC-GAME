@@ -526,7 +526,7 @@ const BOSS_FIELD_ROWS = {"ELITE_BIRD":[{"d":0,"t":"以原型鳥頭人（data/mon
 {"d":0,"t":"浮上來幾秒（隨機）","k":[["surface","surface"]]},
 {"d":0,"t":"潛水時間到之後，最多花幾秒游到岸邊才浮上來","k":[["approachMax","approachMax"]]},
 {"d":0,"t":"潛下去之前轉身露出背面幾秒（打得到、背面比較痛；這段時間身體慢慢沉下去）","k":[["diveTurn","diveTurn"]]},
-{"d":0,"t":"浮上來時水面在身體的哪裡（.45＝露出一半多一點）","k":[["surfaceDepth","surfaceDepth"]]},
+{"d":0,"t":"浮上來時水面在身體的哪裡（0＝腳底、1＝頭頂；.57＝水面在眼睛下面一點，只露出頭和背）","k":[["surfaceDepth","surfaceDepth"]]},
 {"d":0,"t":"潛水時的影子多濃（再乘水的能見度）","k":[["silhouette","silhouette"]]},
 {"d":0,"t":"水的能見度（沒有水素材時用）","k":[["defaultSee","defaultSee"]]},
 {"d":0,"t":"浮上來、潛下去的水花大小（皇冠水花放大幾倍）","k":[["splashSize","splashSize"]]},
