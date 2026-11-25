@@ -29,6 +29,7 @@ const GOURD_KING = applyBossSettings('GOURD_KING', {
   atk: 1.6,                      // 攻擊力：一般葫蘆猴的幾倍（壓到溫特、隊友、建築）
   speedMul: 1.1,                 // 拖行速度：一般葫蘆猴的幾倍
   rewardMul: 8, crystalMul: 8,   // 打倒給的經費、結晶：一般葫蘆猴的幾倍
+  blastMul: .6,                  // 被爆炸炸到（油桶、油箱、瓦斯爐、地雷、人面蝶粉塵爆炸）的傷害倍率：.6＝只受 6 成（2026-11-26）
   // ---- BOSS 牆：每撞一下換下一張圖，最後一張是撞破 ----
   wall: {
     stages: ['tile_mrt_room_highwallx6_crack_small', 'tile_mrt_room_highwallx6_crack_large',
@@ -85,7 +86,7 @@ const GOURD_KING = applyBossSettings('GOURD_KING', {
   },
   // ---- 天花板落石：每次大壓頂後掉下來 ----
   rocks: {
-    count: 6, aimed: 2,          // 一次掉幾顆、其中幾顆瞄準我方站的地方（其他落在葫蘆猴王身邊）
+    count: 12, aimed: 4,         // 一次掉幾顆、其中幾顆瞄準我方站的地方（其他落在葫蘆猴王身邊）
     near: 2.5, far: 8,           // 沒瞄準的落在離葫蘆猴王幾～幾格
     delay: [.15, .7],            // 震完之後幾秒才開始掉（每顆不一樣）
     fall: 1.1,                   // 影子出現到砸下來幾秒（影子越來越深）
@@ -94,7 +95,7 @@ const GOURD_KING = applyBossSettings('GOURD_KING', {
     playerDamage: 14, sentryDamage: 18,
     monsterDamage: 60,           // 不分敵我：砸到怪物也會扣血（葫蘆猴王自己不會被砸）
     hitKing: false,              // true＝葫蘆猴王自己也會被落石砸到
-    quick: 1,                    // 暴怒連跳的小壓頂：每下掉幾顆
+    quick: 2,                    // 暴怒連跳的小壓頂：每下掉幾顆
     big: {                       // 大顆落石（2026-11-21）：只有沒瞄準人的那幾顆會是大顆；落地後變成擋路的大石頭
       chance: .5,                // 沒瞄準的落石有幾成是大顆
       radius: 46,                // 大顆砸到的範圍（像素）
@@ -316,6 +317,7 @@ function gkEmerge(K) {
   e.speed = base.speed * B.speedMul;
   for (const k of ['playerDamage', 'sentryDamage', 'buildingDamage']) if (e[k] != null) e[k] = Math.round(e[k] * B.atk);
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true; e.noStun = true;
+  e.blastMul = B.blastMul ?? 1;   // 比較耐炸（data/balance.js 的 elementHitMul 看這個）
   e.alertT = typeof ENEMY_ALERT_TIME !== 'undefined' ? ENEMY_ALERT_TIME : 1;
   e.faceRight = !!(G.player && G.player.x > sx);
   e.gm = { cd: 0, wait: 0, pulse: 0, laughCd: 0 };

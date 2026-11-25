@@ -325,7 +325,7 @@ function mothBlastNow(c) {
     if (e.dead || e.hp <= 0 || !blastHits(e)) continue;
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R) continue;
-    const hurt = B.enemy * k * (1 - .4 * d / R) * (e.behavior === 'moth' ? B.mothMul : 1);   // 人面蝶自己的粉塵炸到自己：只受 3 成傷害
+    const hurt = B.enemy * k * (1 - .4 * d / R) * (e.behavior === 'moth' ? B.mothMul : 1) * (e.blastMul ?? 1);   // 人面蝶自己的粉塵炸到自己：只受 3 成傷害
     e.hp -= hurt; e.hitT = .2; e.hitColor = '#ff9a3c';
     e.fireHitAt = performance.now() / 1000;   // 爆焰可以燒死生命體（js/lifeform.js）
     flashDmg('-' + Math.round(hurt), e.x, e.y - 26 - (e.slimeLift || 0), '#ff9a3c');
