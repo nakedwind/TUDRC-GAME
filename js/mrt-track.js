@@ -425,11 +425,16 @@ function trackTrainHits(tr) {
     trainFling(e, tr, a => { if (a.hp > 0) { a.hp = 0; a.hitT = .2; a.hitColor = '#ff9a3c'; } });   // 落地才死
   }
   // 蓋在軌道上的建築：撞破（車廂裡跟著列車走的不算）
+  // 只看會擋路的格子（跟放建築時的規則一樣，js/build.js 的 placeCheckCells）：
+  // 探照燈這種上半部只是圖片的，燈頭疊在軌道上、燈腳在月台上就不算擋在軌道上；完全不擋路的（露營燈）才看整個佔地
   for (const o of [...(G.obstacles || [])]) {
     if (o.isBase || o.mapSource || o.mrtCargo || o.hp <= 0) continue;
     const w = o.w || 1, h = o.h || 1;
+    let cells = typeof obstacleSolidCells === 'function' ? obstacleSolidCells(o) : [];
+    if (!cells.length) { cells = []; for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) cells.push([dc, dr]); }
     let hit = false;
-    for (let dc = 0; dc < w && !hit; dc++) for (let dr = 0; dr < h && !hit; dr++) {
+    for (const [dc, dr] of cells) {
+      if (hit) break;
       const c = o.c + dc, r = o.r + dr;
       if (!trackCells.has(c + ',' + r)) continue;
       const cx = OX + (c + .5) * CELL, cy = OY + (r + .5) * CELL;
