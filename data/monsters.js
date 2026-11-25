@@ -1190,6 +1190,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "speedMul": 1.1,
     "rewardMul": 8,
     "crystalMul": 8,
+    "blastMul": 0.6,
     "knock": {
       "delay": 2.2,
       "gaps": [
@@ -1305,8 +1306,8 @@ const BOSS_SETTINGS_DEFAULT = {
       "markEvery": 14
     },
     "rocks": {
-      "count": 6,
-      "aimed": 2,
+      "count": 12,
+      "aimed": 4,
       "near": 2.5,
       "far": 8,
       "delay": [
@@ -1319,7 +1320,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "playerDamage": 14,
       "sentryDamage": 18,
       "monsterDamage": 60,
-      "quick": 1,
+      "quick": 2,
       "big": {
         "chance": 0.5,
         "radius": 46,

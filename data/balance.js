@@ -295,6 +295,10 @@ const monsterElement = e => { const m = e && typeof ACTIVE_MONSTERS !== 'undefin
 const elementDamageMul = (spec, e) => !spec ? 1 : spec.ability === '火焰' ? elementHitMul(e, 'fire') : spec.ability === '雷電' ? elementHitMul(e, 'shock') : 1;
 // 這隻怪物吃這種傷害要乘多少（kind：'fire' 火焰、'blast' 爆炸、'shock' 雷電）；沒有相剋＝1
 function elementHitMul(e, kind) {
+  if (kind === 'blast' && e && e.blastMul != null) return e.blastMul * elementHitMulBase(e, kind);   // 比較耐炸的怪物（例如葫蘆猴王 GOURD_KING.blastMul）：爆炸傷害再乘上自己的倍率
+  return elementHitMulBase(e, kind);
+}
+function elementHitMulBase(e, kind) {
   const el = e && monsterElement(e);
   if (el === 'grass') return kind === 'fire' ? ELEMENT_RULES.fireVsGrass : 1;   // 草系：怕火
   if (el !== 'water' || e.behavior === 'fishhead') return 1;   // 魚頭君：照 js/fish-head.js 自己的倍率
