@@ -82,7 +82,7 @@ function seedFishKing() {
   const deep = deepWaterCells(), start = spot.home[0] + ',' + spot.home[1];
   if (!deep.has(start)) return;
   const P = FISH_KING, [hx, hy] = center(...spot.home), e = createMonster(base, hx, hy);
-  const R = fkRegionFrom(start);
+  const R = fkRegionFrom(start, Math.round(base.width * P.scale));
   e.fishKing = true; e.eliteName = P.name;
   e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是魚頭君血量 × 難度：換成 BOSS 的血量，難度照樣乘
   e.reward = Math.round(e.reward * P.rewardMul); e.crystals = Math.round((e.crystals ?? 3) * P.crystalMul);
@@ -99,7 +99,7 @@ function seedFishKing() {
   e.faceRight = false;   // 開戰前不放進怪物清單：打不到、隊員不會瞄
 }
 // 從某一格深水往四周連在一起的那一池：region＝格子集合、list＝格子清單、shore＝岸邊的深水格（旁邊就是能走的地）
-function fkRegionFrom(start) {
+function fkRegionFrom(start, width) {
   const deep = deepWaterCells(), region = new Set([start]), queue = [start];
   while (queue.length) {
     const [c, r] = queue.shift().split(',').map(Number);
@@ -109,8 +109,34 @@ function fkRegionFrom(start) {
     }
   }
   const shore = [...region].filter(k => { const [c, r] = k.split(',').map(Number); return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dc, dr]) => !deep.has((c + dc) + ',' + (r + dr)) && inGrid(c + dc, r + dr) && !isWall(c + dc, r + dr)); });
-  return { region, list: [...region], shore };
+  // 牠游得到的地方：離岸邊夠遠（身體邊緣到岸邊至少 shoreGap 格，跟其他水中怪物同一套，js/water-monsters.js 的 aquaMarginOf）
+  //   swim＝游得到的格子、swimShore＝游得到的格子裡最靠岸的那一圈（浮上來打人時待的地方）
+  //   水池不夠寬（牠太大隻）：退一步，盡量離岸越遠越好，但游得到的地方要連成一片（不然會被困在水池的一角）
+  const dist = k => fkShoreDist(k), all = [...region];
+  let m = Math.min(fkMargin(width), Math.max(...all.map(dist)));
+  let swim = all;
+  for (; m > 1; m--) {
+    const s = all.filter(k => dist(k) >= m);
+    if (s.length && fkConnected(s)) { swim = s; break; }
+  }
+  const near = Math.min(...swim.map(dist));
+  const swimShore = swim.filter(k => dist(k) <= near);
+  return { region, list: [...region], shore, swim, swimSet: new Set(swim), swimShore };
 }
+// 這些格子是不是上下左右連成一片
+function fkConnected(list) {
+  const set = new Set(list), seen = new Set([list[0]]), q = [list[0]];
+  while (q.length) {
+    const [c, r] = q.pop().split(',').map(Number);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (c + dc) + ',' + (r + dr); if (set.has(k) && !seen.has(k)) { seen.add(k); q.push(k); } }
+  }
+  return seen.size === set.size;
+}
+// 這一格深水離岸邊幾格（緊貼岸邊＝1；js/water-monsters.js 的 aquaLabels 算好的）
+const fkShoreDist = k => (typeof aquaLabels === 'function' && aquaLabels().shore.get(k)) || 99;
+// 身體多寬 → 中心至少離岸邊幾格
+const fkMargin = width => typeof aquaMarginOf === 'function' && width ? aquaMarginOf(width) : 0;
+const fkRoomyAt = (K, x, y) => !K.swimSet || K.swimSet.has(fkCellKey(x, y));
 
 // ---- 每一幀（js/pool-tide.js 的 updatePoolTide 呼叫；潛水時牠不在 G.enemies 裡，所以由這裡自己動）----
 function updateFishKing(dt) {
@@ -176,6 +202,7 @@ function fkPeekStart(K) {
     const [x, y] = center(c, r), d = Math.hypot(x - p.x, y - p.y) / CELL;
     if (d < P.distMin || d > P.distMax || !hasLineOfSight(x, y, p.x, p.y)) continue;
     if (![[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dc, dr]) => deepWaterAtPoint(x + dc * CELL * .6, y + dr * CELL * .6))) continue;   // 四周也是水（身體不會凸到岸上）
+    if (fkShoreDist(k) < fkMargin(K.e.drawWidth)) continue;   // 離岸邊不夠遠：身體會穿到岸上
     (typeof isLit === 'function' && isLit(x, y - 40) ? lit : dark).push([x, y]);
   }
   const pool = lit.length ? lit : dark; if (!pool.length) return;   // 溫特附近沒有右邊的深水：這次不冒頭
@@ -200,14 +227,19 @@ function fkPeekStep(K, dt) {
 function fkIntroStart(K, core) {
   const e = K.e;
   let best = null, bd = Infinity;
-  for (const k of deepWaterCells()) {
-    const [c, r] = k.split(',').map(Number); if (!fkInArea(K, c, r)) continue;
-    const [x, y] = center(c, r);
-    if (![[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dc, dr]) => deepWaterAtPoint(x + dc * CELL * .6, y + dr * CELL * .6))) continue;
-    const d = Math.hypot(x - core.x, y - core.y); if (d < bd) { bd = d; best = k; }
+  const m = fkMargin(e.drawWidth);
+  for (const pass of [m, 0]) {   // 先找離岸夠遠的深水；都沒有才退而求其次
+    for (const k of deepWaterCells()) {
+      const [c, r] = k.split(',').map(Number); if (!fkInArea(K, c, r)) continue;
+      const [x, y] = center(c, r);
+      if (![[1, 0], [-1, 0], [0, 1], [0, -1]].every(([dc, dr]) => deepWaterAtPoint(x + dc * CELL * .6, y + dr * CELL * .6))) continue;
+      if (fkShoreDist(k) < pass) continue;
+      const d = Math.hypot(x - core.x, y - core.y); if (d < bd) { bd = d; best = k; }
+    }
+    if (best) break;
   }
   if (!best) best = fkCellKey(K.home.x, K.home.y);   // 右邊找不到深水：用原位
-  Object.assign(K, fkRegionFrom(best));   // 之後只在這一池裡游
+  Object.assign(K, fkRegionFrom(best, e.drawWidth));   // 之後只在這一池裡游
   const [x, y] = center(...best.split(',').map(Number));
   e.x = x; e.y = y; e.fkRise = null; e.eliteAwake = true; e.hideBar = false;
   K.phase = 'intro'; K.intro = { t: 0 }; K.peek = null; K.sub = false;
@@ -295,7 +327,12 @@ function fkSwim(K, dt, mul) {
   const want0 = P.swimSpeed * (K.sub ? 1 : P.surfacedSpeedMul) * mul * (1 - .5 * Math.min(1, Math.abs(turn) / (P.turnRate * dt || 1)));
   K.spd = (K.spd ?? 0) + (want0 - (K.spd ?? 0)) * Math.min(1, (P.accel || 99) * dt);
   const step = K.spd * dt, nx = e.x + Math.cos(a) * step, ny = e.y + Math.sin(a) * step;
-  if (K.region.has(fkCellKey(nx, ny)) && deepWaterAtPoint(nx, ny)) { e.x = nx; e.y = ny; }
+  // 離岸夠遠的地方不再游回岸邊；現在太靠岸（被推過來）就讓牠游出來
+  const canGo = (x, y) => K.region.has(fkCellKey(x, y)) && deepWaterAtPoint(x, y) && (fkRoomyAt(K, x, y) || !fkRoomyAt(K, e.x, e.y));
+  const slid = () => { if ((K.slideT = (K.slideT || 0) + dt) > 1.5) { K.slideT = 0; K.goal = null; } };   // 沿著邊滑太久（目標在轉角後面）：下次換個目標
+  if (canGo(nx, ny)) { e.x = nx; e.y = ny; K.slideT = 0; }
+  else if (canGo(nx, e.y) && Math.abs(nx - e.x) > step * .3) { e.x = nx; slid(); }   // 斜斜撞到邊：沿著邊滑過去（才游得進窄的水道）
+  else if (canGo(e.x, ny) && Math.abs(ny - e.y) > step * .3) { e.y = ny; slid(); }
   else { K.spd = (K.spd || 0) * .4; K.goal = nearShore ? fkShoreGoal(K) : fkPickGoal(K); if (K.goal) K.ang = Math.atan2(K.goal.y - e.y, K.goal.x - e.x); }
   if (Math.abs(Math.cos(a)) > .15) e.faceRight = Math.cos(a) > 0;
   e.moving = true;
@@ -306,7 +343,7 @@ function fkPickGoal(K, far) {
   const e = K.e, p = G.player;
   let best = null, bestD = -1;
   for (let n = 0; n < (far ? 40 : 14); n++) {
-    const k = K.list[Math.floor(Math.random() * K.list.length)]; if (!k) return null;
+    const L = K.swim || K.list, k = L[Math.floor(Math.random() * L.length)]; if (!k) return null;   // 只挑離岸夠遠的地方
     const [x, y] = center(...k.split(',').map(Number));
     if (!far) { if (Math.hypot(x - e.x, y - e.y) < 3 * CELL) continue; return { x, y }; }
     const d = p ? Math.hypot(x - p.x, y - p.y) : 0;   // far：離溫特最遠的地方（躲起來用）
@@ -314,11 +351,11 @@ function fkPickGoal(K, far) {
   }
   return best || fkPickGoal(K, false);
 }
-// 岸邊的深水格：離最近的「岸上的人」最近的那一格（沒人就隨便一格）
+// 靠岸那一圈（離岸邊剛好夠遠、身體不會穿到岸上）：離最近的「岸上的人」最近的那一格（沒人就隨便一格）
 function fkShoreGoal(K) {
-  const who = fkTargets(K, false);
-  if (!K.shore.length) return fkPickGoal(K);
-  const pool = K.shore.map(k => center(...k.split(',').map(Number)));
+  const who = fkTargets(K, false), S = K.swimShore || K.shore;
+  if (!S.length) return fkPickGoal(K);
+  const pool = S.map(k => center(...k.split(',').map(Number)));
   if (!who.length) { const [x, y] = pool[Math.floor(Math.random() * pool.length)]; return { x, y }; }
   const t = who[Math.floor(Math.random() * who.length)];
   let best = null, bd = Infinity;
@@ -489,7 +526,7 @@ function fkStrandStep(K, dt) {
   if (K.t > 0) return;
   // 跳回最近的深水
   let best = null, bd = Infinity;
-  for (const k of K.list) { const [x, y] = center(...k.split(',').map(Number)); const d = Math.hypot(x - e.x, y - e.y); if (d < bd && deepWaterAtPoint(x, y)) { bd = d; best = { x, y }; } }
+  for (const k of K.swim || K.list) { const [x, y] = center(...k.split(',').map(Number)); const d = Math.hypot(x - e.x, y - e.y); if (d < bd && deepWaterAtPoint(x, y)) { bd = d; best = { x, y }; } }   // 跳回離岸夠遠的深水
   if (!best) best = { ...K.home };
   K.phase = 'hop'; K.hop = { t: 0, from: { x: e.x, y: e.y }, to: best }; e.airborne = true; e.slimeLift = 0;
 }
