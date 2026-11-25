@@ -3680,7 +3680,8 @@ function refreshLockerControl() {
 // 電源開關、電源控制的電燈：設定電路編號（1～5），同編號的開關只控制同編號的燈（js/powered-lights.js）
 function isCircuitTile(t) { return !!t && (/power-switch-(on|off)\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || /^tile_interactive_power_switch/.test(t.id)
   || /electric-light-02\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || t.id === 'tile_interactive_electric_light_02'
-  || /\/Poolcore_LED\.png$/i.test(String(t.file || '').replace(/\\/g, '/'))); }   // 池核的 LED 燈條
+  || /\/Poolcore_LED\.png$/i.test(String(t.file || '').replace(/\\/g, '/'))   // 池核的 LED 燈條
+  || t.poweredLight === true); }   // data/tiles.js 標了 "poweredLight": true 的素材（例如藍光的電源控制燈）也算
 function selectedCircuitThing() {
   if (selections.length !== 1) return null;
   const sel = selections[0], m = curMap();

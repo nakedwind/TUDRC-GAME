@@ -6,8 +6,12 @@ const circuitOf = s => Math.max(1, Math.min(5, Math.floor(Number(s && s.circuit)
 const isPoweredLightTile = tile => {
   const file=String(tile?.file||'').replaceAll('\\','/');
   return file.endsWith('/electric-light-02.png') || /^electric-light-02(?:\.png)?$/i.test(String(tile?.name||'')) || tile?.id==='tile_interactive_electric_light_02'
+    || tile?.poweredLight===true   // data/tiles.js 裡標了 "poweredLight": true 的素材（例如藍光的電源控制燈 electric-light-02-blue）
     || isPoolcoreLed(tile);   // 池核的 LED 燈條（Poolcore_LED）
 };
+// 燈光的顏色：data/tiles.js 裡素材的 "lightColor": "R,G,B"（例如 "200,228,255"＝藍白光）；沒寫＝原本的暖白光（255,248,212）
+// 只改燈管本身光暈、亮線的顏色；照亮的範圍、亮度跟原本的燈一樣
+const poweredLightColor = tile => { const v=String(tile?.lightColor||'').split(',').map(Number); return v.length===3&&v.every(n=>Number.isFinite(n))?v:null; };
 // 池核的 LED 燈條：燈本身一律照原圖畫（關著時調暗）。
 // 地圖上疊在燈上的光暈圖（Poolcore_LED_glow）：不在一般地圖那一輪畫；燈亮著時才畫，而且畫在黑幕上面，
 // 照編輯器裡設的混合模式（例如「實光」）、不透明度畫，跟著燈閃爍；燈熄掉（閃爍、跳電、關電）就不畫。
@@ -50,7 +54,8 @@ function poweredLightFixtures(){
     const w=mapTileW(tile)*CELL,h=mapTileH(tile)*CELL;
     const dx=w*.5,dy=h*.9;
     lamps.push({x:OX+c*CELL+(s?.ox||0)+(s?.fx?w-dx:dx),y:OY+r*CELL+(s?.oy||0)+(s?.fy?h-dy:dy),circuit:circuitOf(s),top:OY+r*CELL+(s?.oy||0),floor:(s?stampOn2F(s):MAP_FLOOR2_LAYERS.has(lid))?2:1,
-      flicker:isPoolcoreLed(tile)});   // 池核 LED：亮光、閃爍由 js/flicker-light.js 處理，這裡不畫光、不算光源
+      flicker:isPoolcoreLed(tile),   // 池核 LED：亮光、閃爍由 js/flicker-light.js 處理，這裡不畫光、不算光源
+      color:poweredLightColor(tile)});   // 燈光的顏色（沒設＝暖白光）
   };
   for(const [lid,layer] of Object.entries(MAP.layers||{}))for(const [key,id] of Object.entries(layer)){const [c,r]=key.split(',').map(Number);add(id,c,r,null,lid);}
   for(const s of MAP.stamps||[])add(s.id,s.c,s.r,s);
@@ -62,14 +67,16 @@ function poweredLightSources(){
 const SHOW_CIRCUIT_NUMBERS = false;   // 遊戲裡要不要在開關、電燈上顯示電路編號（地圖編輯器一律顯示）
 function drawPoweredLights(ctx){
   if(SHOW_CIRCUIT_NUMBERS)drawCircuitNumbers(ctx);
+  const lit=l=>!l.flicker&&mapPowerIsOn(l.circuit)&&!(typeof inHiddenArea==='function'&&inHiddenArea(l.x,l.y));   // 還沒炸開的隱藏區：燈不亮（js/breakable-walls.js）
+  // 燈管本身的光暈和亮線（有設燈光顏色的燈用它的顏色，例如藍白光；沒有就是原本的暖白光）
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const l of poweredLightFixtures()){
-    if(l.flicker||!mapPowerIsOn(l.circuit))continue;
-    if(typeof inHiddenArea==='function'&&inHiddenArea(l.x,l.y))continue;   // 還沒炸開的隱藏區：燈不亮（js/breakable-walls.js）
+    if(!lit(l))continue;
+    const [gr,gg,gb]=l.color||[255,248,212],[br,bg,bb]=l.color?l.color.map(v=>Math.min(255,Math.round(v*.6+102))):[255,253,225];   // 亮線比燈光色再白一點
     const glow=ctx.createRadialGradient(l.x,l.y,0,l.x,l.y,28);
-    glow.addColorStop(0,'rgba(255,248,212,.3)');glow.addColorStop(1,'rgba(255,248,212,0)');
+    glow.addColorStop(0,`rgba(${gr},${gg},${gb},.3)`);glow.addColorStop(1,`rgba(${gr},${gg},${gb},0)`);
     ctx.fillStyle=glow;ctx.fillRect(l.x-28,l.y-28,56,56);
-    ctx.fillStyle='rgba(255,253,225,.65)';ctx.fillRect(l.x-14,l.y-1,28,2);
+    ctx.fillStyle=`rgba(${br},${bg},${bb},.65)`;ctx.fillRect(l.x-14,l.y-1,28,2);
   }
   ctx.restore();
   // 亮著的池核 LED：疊上光暈圖，跟著燈閃（混合模式、不透明度照編輯器設的，js/maploader.js 的 drawMapStampImg）

@@ -1702,7 +1702,7 @@ const SHARED_TILES = [
     "id": "color_mufvoh5q",
     "name": "色塊",
     "role": "floor",
-    "color": "#4f8fbf",
+    "color": "#86cafe",
     "w": 1,
     "h": 1,
     "systemColor": true,
@@ -3562,7 +3562,7 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/poolcore-deep-water-gradient.png",
     "w": 1,
-    "h": 5,
+    "h": 7,
     "flat": true
   },
   {
@@ -3945,6 +3945,16 @@ const SHARED_TILES = [
     "file": "images/background/electric-light-02.png",
     "w": 2,
     "h": 1
+  },
+  {
+    "id": "tile_interactive_electric_light_02_blue",
+    "name": "electric-light-02（電源控制燈・藍光）",
+    "role": "floor",
+    "file": "images/background/electric-light-02-blue.png",
+    "w": 2,
+    "h": 1,
+    "poweredLight": true,
+    "lightColor": "200,228,255"
   },
   {
     "id": "tile_interactive_pickup_battery",
@@ -5182,7 +5192,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore-pool_stair_block_02.png",
     "w": 1,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_mvr2g292",
@@ -5190,7 +5201,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore-pool_stair_block.png",
     "w": 2,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_mvr32pqo",
@@ -5198,7 +5210,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore-pool_stair_block_01.png",
     "w": 2,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_mvr3kqob",
@@ -5206,7 +5219,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore-stair_full.png",
     "w": 4,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_mvr3la0q",
@@ -5214,7 +5228,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore-stair_middle.png",
     "w": 4,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_mvr3nuyx",
@@ -5222,7 +5237,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore-stair_full_02.png",
     "w": 4,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_mvr40sp8",
@@ -5230,7 +5246,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore-pool_stair_block_Straight.png",
     "w": 1,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_halloween_pumpkin_large",
@@ -7461,7 +7478,7 @@ const SHARED_TILES = [
     "id": "tile_mwggq9a4",
     "name": "Poolcore_water",
     "role": "floor",
-    "file": "images/Poolcore/Poolcore_water.png",
+    "file": "images/Poolcore/Poolcore_water_solid.png",
     "w": 2,
     "h": 2,
     "flat": true,
@@ -7489,7 +7506,7 @@ const SHARED_TILES = [
     "id": "tile_poolwater_dark",
     "name": "Poolcore_water_dark",
     "role": "floor",
-    "file": "images/Poolcore/Poolcore_water_dark.png",
+    "file": "images/Poolcore/Poolcore_water_dark_solid.png",
     "w": 2,
     "h": 2,
     "flat": true,
@@ -7503,7 +7520,7 @@ const SHARED_TILES = [
     "id": "tile_poolwater_deep_dark",
     "name": "Poolcore_water_deep_dark",
     "role": "floor",
-    "file": "images/Poolcore/Poolcore_water_deep_dark.png",
+    "file": "images/Poolcore/Poolcore_water_deep_dark_solid.png",
     "w": 2,
     "h": 2,
     "flat": true,
@@ -7517,7 +7534,7 @@ const SHARED_TILES = [
     "id": "tile_mwgn2tt1",
     "name": "Poolcore_water_S",
     "role": "floor",
-    "file": "images/Poolcore/Poolcore_water_S.png",
+    "file": "images/Poolcore/Poolcore_water_S_solid.png",
     "w": 1,
     "h": 1,
     "water": {
@@ -7531,7 +7548,7 @@ const SHARED_TILES = [
     "id": "tile_poolwater_s_dark",
     "name": "Poolcore_water_S_dark",
     "role": "floor",
-    "file": "images/Poolcore/Poolcore_water_S _dark.png",
+    "file": "images/Poolcore/Poolcore_water_S_dark_solid.png",
     "w": 1,
     "h": 1,
     "water": {

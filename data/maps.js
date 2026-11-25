@@ -105974,7 +105974,6 @@ const BATTLE_MAPS = [
       "10,59",
       "11,59",
       "12,59",
-      "14,59",
       "6,60",
       "7,60",
       "8,60",
@@ -106378,9 +106377,6 @@ const BATTLE_MAPS = [
       "15,79",
       "16,79",
       "17,79",
-      "62,79",
-      "63,79",
-      "64,79",
       "66,79",
       "67,79",
       "68,79",
@@ -106394,17 +106390,6 @@ const BATTLE_MAPS = [
       "76,79",
       "77,79",
       "78,79",
-      "6,80",
-      "7,80",
-      "8,80",
-      "9,80",
-      "10,80",
-      "11,80",
-      "12,80",
-      "13,80",
-      "14,80",
-      "15,80",
-      "16,80",
       "66,80",
       "67,80",
       "68,80",
@@ -106594,24 +106579,7 @@ const BATTLE_MAPS = [
       "75,92",
       "76,92",
       "77,92",
-      "78,92",
-      "62,93",
-      "63,93",
-      "64,93",
-      "65,93",
-      "66,93",
-      "67,93",
-      "68,93",
-      "69,93",
-      "70,93",
-      "71,93",
-      "72,93",
-      "73,93",
-      "74,93",
-      "75,93",
-      "76,93",
-      "77,93",
-      "78,93"
+      "78,92"
     ],
     "ramps": [
       "41,52",
@@ -150598,54 +150566,6 @@ const BATTLE_MAPS = [
       "32,4",
       "33,4",
       "34,4",
-      "37,4",
-      "38,4",
-      "39,4",
-      "40,4",
-      "41,4",
-      "42,4",
-      "43,4",
-      "44,4",
-      "45,4",
-      "46,4",
-      "47,4",
-      "48,4",
-      "49,4",
-      "50,4",
-      "51,4",
-      "54,4",
-      "55,4",
-      "56,4",
-      "57,4",
-      "58,4",
-      "59,4",
-      "29,7",
-      "30,7",
-      "31,7",
-      "32,7",
-      "33,7",
-      "34,7",
-      "37,7",
-      "38,7",
-      "39,7",
-      "40,7",
-      "41,7",
-      "42,7",
-      "43,7",
-      "44,7",
-      "45,7",
-      "46,7",
-      "47,7",
-      "48,7",
-      "49,7",
-      "50,7",
-      "51,7",
-      "54,7",
-      "55,7",
-      "56,7",
-      "57,7",
-      "58,7",
-      "59,7",
       "29,8",
       "30,8",
       "31,8",
@@ -150832,9 +150752,6 @@ const BATTLE_MAPS = [
       "49,17",
       "50,17",
       "51,17",
-      "72,17",
-      "76,17",
-      "77,17",
       "37,18",
       "38,18",
       "39,18",
@@ -151503,27 +151420,12 @@ const BATTLE_MAPS = [
       "76,32",
       "77,32",
       "78,32",
-      "10,33",
-      "11,33",
-      "12,33",
-      "13,33",
-      "14,33",
-      "15,33",
-      "16,33",
-      "17,33",
       "19,33",
       "20,33",
       "21,33",
       "22,33",
       "23,33",
       "24,33",
-      "26,33",
-      "27,33",
-      "28,33",
-      "29,33",
-      "30,33",
-      "31,33",
-      "32,33",
       "33,33",
       "34,33",
       "35,33",
@@ -151560,14 +151462,6 @@ const BATTLE_MAPS = [
       "67,33",
       "68,33",
       "69,33",
-      "71,33",
-      "72,33",
-      "73,33",
-      "74,33",
-      "75,33",
-      "76,33",
-      "77,33",
-      "78,33",
       "19,34",
       "20,34",
       "21,34",
@@ -151593,15 +151487,6 @@ const BATTLE_MAPS = [
       "51,34",
       "52,34",
       "53,34",
-      "54,34",
-      "55,34",
-      "56,34",
-      "57,34",
-      "58,34",
-      "59,34",
-      "60,34",
-      "61,34",
-      "62,34",
       "64,34",
       "65,34",
       "66,34",
@@ -152190,16 +152075,6 @@ const BATTLE_MAPS = [
       "22,61",
       "23,61",
       "24,61",
-      "25,61",
-      "26,61",
-      "27,61",
-      "28,61",
-      "29,61",
-      "30,61",
-      "31,61",
-      "32,61",
-      "33,61",
-      "34,61",
       "35,61",
       "36,61",
       "37,61",
@@ -152218,16 +152093,6 @@ const BATTLE_MAPS = [
       "50,61",
       "51,61",
       "52,61",
-      "53,61",
-      "54,61",
-      "55,61",
-      "56,61",
-      "57,61",
-      "58,61",
-      "59,61",
-      "60,61",
-      "61,61",
-      "62,61",
       "64,61",
       "65,61",
       "66,61",
@@ -169610,7 +169475,6 @@ const BATTLE_MAPS = [
       "ground2": {},
       "ground3": {
         "21,21": "tile_obstacle_ore_small",
-        "27,15": "tile_obstacle_ore_small",
         "21,10": "tile_obstacle_ore_small",
         "37,9": "tile_obstacle_ore_small",
         "48,11": "tile_obstacle_ore_small",
@@ -169626,7 +169490,8 @@ const BATTLE_MAPS = [
         "19,59": "tile_interactive_pickup_battery",
         "41,83": "tile_interactive_pickup_battery",
         "55,48": "tile_obstacle_ore_small",
-        "20,47": "tile_obstacle_ore_small"
+        "20,47": "tile_obstacle_ore_small",
+        "27,21": "tile_obstacle_ore_small"
       },
       "object": {},
       "object2": {},
@@ -174552,11 +174417,9 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_dmg_floor_stain_smudge",
-        "c": 25,
+        "c": 21,
         "r": 14,
-        "layer": "ground3",
-        "ox": 30,
-        "oy": 10
+        "layer": "ground3"
       },
       {
         "id": "tile_dmg_rubble_brick_chunks",
@@ -174582,11 +174445,9 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_dmg_crack05",
-        "c": 37,
+        "c": 39,
         "r": 13,
-        "layer": "ground3",
-        "ox": 30,
-        "oy": 20
+        "layer": "ground3"
       },
       {
         "id": "tile_dmg_crack05",
@@ -174606,41 +174467,32 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_ore_limestone",
         "c": 27,
-        "r": 8,
-        "layer": "ground3",
-        "ox": 20,
-        "oy": 20
+        "r": 9,
+        "layer": "ground3"
       },
       {
         "id": "tile_obstacle_ore_manganese",
-        "c": 38,
-        "r": 14,
-        "layer": "ground3",
-        "ox": 10,
-        "oy": 30
+        "c": 41,
+        "r": 18,
+        "layer": "ground3"
       },
       {
         "id": "tile_obstacle_ore_limestone",
-        "c": 28,
-        "r": 10,
-        "layer": "ground3",
-        "ox": 20
+        "c": 30,
+        "r": 16,
+        "layer": "ground3"
       },
       {
         "id": "tile_obstacle_ore_manganese",
         "c": 39,
-        "r": 14,
-        "layer": "ground3",
-        "ox": 30,
-        "oy": 10
+        "r": 15,
+        "layer": "ground3"
       },
       {
         "id": "tile_obstacle_ore_coal",
-        "c": 23,
-        "r": 17,
-        "layer": "ground3",
-        "ox": 20,
-        "oy": 30
+        "c": 24,
+        "r": 16,
+        "layer": "ground3"
       },
       {
         "id": "tile_obstacle_ore_rare",
@@ -174709,9 +174561,8 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvmo77lx",
         "c": 40,
-        "r": 9,
-        "layer": "ground3",
-        "oy": 30
+        "r": 10,
+        "layer": "ground3"
       },
       {
         "id": "tile_mvmo77lx",
@@ -174723,26 +174574,21 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvmo77lx",
-        "c": 33,
-        "r": 11,
-        "layer": "ground3",
-        "ox": 30,
-        "oy": 10
+        "c": 34,
+        "r": 10,
+        "layer": "ground3"
       },
       {
         "id": "tile_mvmo77lx",
         "c": 43,
-        "r": 13,
-        "layer": "ground3",
-        "oy": 10
+        "r": 14,
+        "layer": "ground3"
       },
       {
         "id": "tile_mvmo77lx",
-        "c": 27,
-        "r": 13,
-        "layer": "ground3",
-        "ox": 30,
-        "oy": 20
+        "c": 24,
+        "r": 14,
+        "layer": "ground3"
       },
       {
         "id": "tile_mrt_wall_orange_band",
@@ -174868,6 +174714,24 @@ const BATTLE_MAPS = [
         "r": 50,
         "layer": "object2",
         "oy": 28
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 31,
+        "r": 14,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 23,
+        "r": 19,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mvmo77lx",
+        "c": 37,
+        "r": 14,
+        "layer": "ground3"
       }
     ],
     "solid": [
@@ -181168,12 +181032,6 @@ const BATTLE_MAPS = [
         "71,37": "tile_poolcore_deep_water",
         "71,38": "tile_poolcore_deep_water",
         "72,39": "tile_poolcore_deep_water",
-        "72,40": "tile_poolcore_deep_water",
-        "72,41": "tile_poolcore_deep_water",
-        "72,42": "tile_poolcore_deep_water",
-        "73,42": "tile_poolcore_deep_water",
-        "73,41": "tile_poolcore_deep_water",
-        "73,40": "tile_poolcore_deep_water",
         "73,38": "tile_poolcore_deep_water",
         "73,37": "tile_poolcore_deep_water",
         "72,37": "tile_poolcore_deep_water",
@@ -181196,15 +181054,9 @@ const BATTLE_MAPS = [
         "74,38": "tile_poolcore_deep_water",
         "74,39": "tile_poolcore_deep_water",
         "75,39": "tile_poolcore_deep_water",
-        "75,40": "tile_poolcore_deep_water",
-        "75,41": "tile_poolcore_deep_water",
-        "75,42": "tile_poolcore_deep_water",
         "75,43": "tile_poolcore_deep_water",
         "74,43": "tile_poolcore_deep_water",
         "74,44": "tile_poolcore_deep_water",
-        "74,42": "tile_poolcore_deep_water",
-        "74,41": "tile_poolcore_deep_water",
-        "74,40": "tile_poolcore_deep_water",
         "72,38": "tile_poolcore_deep_water",
         "73,39": "tile_poolcore_deep_water",
         "75,38": "tile_poolcore_deep_water",
@@ -181217,8 +181069,6 @@ const BATTLE_MAPS = [
         "73,35": "tile_poolcore_deep_water",
         "73,36": "tile_poolcore_deep_water",
         "71,39": "tile_poolcore_deep_water",
-        "71,40": "tile_poolcore_deep_water",
-        "71,42": "tile_poolcore_deep_water",
         "71,43": "tile_poolcore_deep_water",
         "71,44": "tile_poolcore_deep_water",
         "71,45": "tile_poolcore_deep_water",
@@ -181239,7 +181089,6 @@ const BATTLE_MAPS = [
         "73,46": "tile_poolcore_deep_water",
         "73,44": "tile_poolcore_deep_water",
         "73,43": "tile_poolcore_deep_water",
-        "71,41": "tile_poolcore_deep_water",
         "72,43": "tile_poolcore_deep_water",
         "72,44": "tile_poolcore_deep_water",
         "72,45": "tile_poolcore_deep_water",
@@ -181806,7 +181655,9 @@ const BATTLE_MAPS = [
         "106,12": "tile_poolcore_deep_water",
         "105,12": "tile_poolcore_deep_water"
       },
-      "ground8": {}
+      "ground8": {},
+      "object35": {},
+      "ground9": {}
     },
     "stamps": [
       {
@@ -190492,22 +190343,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwdqrv1c",
-        "c": 64,
-        "r": 74,
-        "layer": "object12",
-        "oy": 10,
-        "scale": 150,
-        "ox": 10
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 61,
-        "r": 74,
-        "layer": "object12",
-        "oy": 10
-      },
-      {
-        "id": "tile_mwdqrv1c",
         "c": 32,
         "r": 80,
         "layer": "object12",
@@ -190676,13 +190511,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwdqrv1c",
-        "c": 60,
-        "r": 74,
-        "layer": "object12",
-        "oy": 10
-      },
-      {
-        "id": "tile_mwdqrv1c",
         "c": 31,
         "r": 80,
         "layer": "object12",
@@ -190735,27 +190563,6 @@ const BATTLE_MAPS = [
         "layer": "object12",
         "ox": 10,
         "oy": 30
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 58,
-        "r": 74,
-        "layer": "object12",
-        "oy": 10
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 62,
-        "r": 74,
-        "layer": "object12",
-        "oy": 10
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 63,
-        "r": 74,
-        "layer": "object12",
-        "oy": 20
       },
       {
         "id": "tile_mwdqrv1c",
@@ -191254,13 +191061,6 @@ const BATTLE_MAPS = [
         "layer": "object12",
         "ox": 10,
         "oy": 30
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 59,
-        "r": 74,
-        "layer": "object12",
-        "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
@@ -196596,8 +196396,8 @@ const BATTLE_MAPS = [
         "c": 49,
         "r": 67,
         "layer": "object32",
-        "ox": 25.333333,
-        "oy": 29.333333
+        "ox": 25.33333300000004,
+        "oy": 29.33333300000004
       },
       {
         "id": "tile_poolwater_dark",
@@ -196918,24 +196718,24 @@ const BATTLE_MAPS = [
         "c": 47,
         "r": 66,
         "layer": "object32",
-        "ox": 25.333333,
-        "oy": 10.666667
+        "ox": 25.33333300000004,
+        "oy": 10.666666999999961
       },
       {
         "id": "tile_poolwater_deep_dark",
         "c": 47,
         "r": 64,
         "layer": "object32",
-        "ox": 25.333333,
-        "oy": 10.666667
+        "ox": 25.33333300000004,
+        "oy": 10.666666999999961
       },
       {
         "id": "tile_poolwater_deep_dark",
         "c": 47,
         "r": 62,
         "layer": "object32",
-        "ox": 25.333333,
-        "oy": 10.666667
+        "ox": 25.33333300000004,
+        "oy": 10.666666999999961
       },
       {
         "id": "tile_mvzbmx47",
@@ -198399,34 +198199,6 @@ const BATTLE_MAPS = [
         "oy": 30
       },
       {
-        "id": "tile_mwdqrv1c",
-        "c": 67,
-        "r": 74,
-        "layer": "object23",
-        "scale": 500
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 72,
-        "r": 74,
-        "layer": "object23",
-        "scale": 500
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 77,
-        "r": 74,
-        "layer": "object23",
-        "scale": 500
-      },
-      {
-        "id": "tile_mwdqrv1c",
-        "c": 82,
-        "r": 74,
-        "layer": "object23",
-        "scale": 500
-      },
-      {
         "id": "tile_mvoa0cqd",
         "c": 65,
         "r": 55,
@@ -198541,7 +198313,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 65,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198549,7 +198321,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 67,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198557,7 +198329,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 69,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198565,7 +198337,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 71,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198573,7 +198345,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 73,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198581,7 +198353,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 75,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198589,7 +198361,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 77,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198597,7 +198369,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 79,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -198605,7 +198377,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3kqob",
         "c": 81,
         "r": 74,
-        "layer": "object25",
+        "layer": "object6",
         "oy": 30,
         "fx": true
       },
@@ -200659,21 +200431,21 @@ const BATTLE_MAPS = [
         "c": 71,
         "r": 56,
         "layer": "ground6",
-        "oy": 30
+        "oy": 32.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 73,
         "r": 56,
         "layer": "ground6",
-        "oy": 30
+        "oy": 32.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 74,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 32.666667,
         "ox": 20
       },
       {
@@ -200681,7 +200453,7 @@ const BATTLE_MAPS = [
         "c": 79,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -200689,7 +200461,7 @@ const BATTLE_MAPS = [
         "c": 81,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -200697,7 +200469,7 @@ const BATTLE_MAPS = [
         "c": 83,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -200705,7 +200477,7 @@ const BATTLE_MAPS = [
         "c": 85,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -200713,7 +200485,7 @@ const BATTLE_MAPS = [
         "c": 87,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -200721,7 +200493,7 @@ const BATTLE_MAPS = [
         "c": 89,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -200729,7 +200501,7 @@ const BATTLE_MAPS = [
         "c": 91,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -200737,42 +200509,42 @@ const BATTLE_MAPS = [
         "c": 97,
         "r": 56,
         "layer": "ground6",
-        "oy": 30
+        "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 99,
         "r": 56,
         "layer": "ground6",
-        "oy": 30
+        "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 101,
         "r": 56,
         "layer": "ground6",
-        "oy": 30
+        "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 103,
         "r": 56,
         "layer": "ground6",
-        "oy": 30
+        "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 105,
         "r": 56,
         "layer": "ground6",
-        "oy": 30
+        "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 93,
         "r": 56,
         "layer": "ground6",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": -13.333333
       },
       {
@@ -201520,7 +201292,7 @@ const BATTLE_MAPS = [
         "c": 94,
         "r": 45,
         "layer": "ground6",
-        "oy": -4.666667,
+        "oy": -4,
         "ox": -5.333333
       },
       {
@@ -201536,7 +201308,7 @@ const BATTLE_MAPS = [
         "c": 93,
         "r": 32,
         "layer": "ground6",
-        "oy": 39.333333,
+        "oy": 40,
         "ox": 34.666667
       },
       {
@@ -201560,7 +201332,7 @@ const BATTLE_MAPS = [
         "c": 94,
         "r": 47,
         "layer": "ground6",
-        "oy": -4.666667,
+        "oy": -4,
         "ox": -5.333333
       },
       {
@@ -201576,7 +201348,7 @@ const BATTLE_MAPS = [
         "c": 93,
         "r": 34,
         "layer": "ground6",
-        "oy": 38.666667,
+        "oy": 39.333333,
         "ox": 34.666667
       },
       {
@@ -201600,7 +201372,7 @@ const BATTLE_MAPS = [
         "c": 94,
         "r": 49,
         "layer": "ground6",
-        "oy": -4.666667,
+        "oy": -4,
         "ox": -5.333333
       },
       {
@@ -201616,7 +201388,7 @@ const BATTLE_MAPS = [
         "c": 93,
         "r": 36,
         "layer": "ground6",
-        "oy": 38,
+        "oy": 38.666667,
         "ox": 34.666667
       },
       {
@@ -201640,7 +201412,7 @@ const BATTLE_MAPS = [
         "c": 94,
         "r": 51,
         "layer": "ground6",
-        "oy": -4.666667,
+        "oy": -4,
         "ox": -5.333333
       },
       {
@@ -201656,7 +201428,7 @@ const BATTLE_MAPS = [
         "c": 93,
         "r": 38,
         "layer": "ground6",
-        "oy": 37.333333,
+        "oy": 38,
         "ox": 34.666667
       },
       {
@@ -201680,7 +201452,7 @@ const BATTLE_MAPS = [
         "c": 94,
         "r": 53,
         "layer": "ground6",
-        "oy": -4.666667,
+        "oy": -4,
         "ox": -5.333333
       },
       {
@@ -201696,7 +201468,7 @@ const BATTLE_MAPS = [
         "c": 93,
         "r": 40,
         "layer": "ground6",
-        "oy": 36.666667,
+        "oy": 37.333333,
         "ox": 34.666667
       },
       {
@@ -201720,7 +201492,7 @@ const BATTLE_MAPS = [
         "c": 94,
         "r": 55,
         "layer": "ground6",
-        "oy": -4.666667,
+        "oy": -4,
         "ox": -5.333333
       },
       {
@@ -201736,7 +201508,7 @@ const BATTLE_MAPS = [
         "c": 93,
         "r": 42,
         "layer": "ground6",
-        "oy": 36,
+        "oy": 36.666667,
         "ox": 34.666667
       },
       {
@@ -201920,7 +201692,7 @@ const BATTLE_MAPS = [
         "c": 76,
         "r": 56,
         "layer": "object23",
-        "oy": 29.333333,
+        "oy": 32,
         "ox": -2
       },
       {
@@ -201991,7 +201763,7 @@ const BATTLE_MAPS = [
         "c": 96,
         "r": 56,
         "layer": "object23",
-        "oy": 29.333333,
+        "oy": 33.333333,
         "ox": 14
       },
       {
@@ -201999,7 +201771,7 @@ const BATTLE_MAPS = [
         "c": 93,
         "r": 56,
         "layer": "object23",
-        "oy": 30,
+        "oy": 33.333333,
         "ox": 38.666667
       },
       {
@@ -202007,7 +201779,7 @@ const BATTLE_MAPS = [
         "c": 78,
         "r": 56,
         "layer": "object23",
-        "oy": 29.333333,
+        "oy": 32.666667,
         "ox": 10.666667
       },
       {
@@ -202253,6 +202025,491 @@ const BATTLE_MAPS = [
         "layer": "ground8",
         "oy": 30,
         "ox": -6
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 57,
+        "r": 72,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 61,
+        "r": 72,
+        "layer": "object9",
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 85,
+        "r": 49,
+        "layer": "top",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 67,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 68,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 69,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 70,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 71,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 72,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 73,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 74,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 75,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 77,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 78,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 76,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 80,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 81,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 82,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 83,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 84,
+        "r": 72,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 88,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 93,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 95,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 97,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 96,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 94,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 81,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 82,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 80,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 71,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 73,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 72,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 74,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 75,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 84,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 86,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 88,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 93,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 83,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 85,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 87,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 97,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 98,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 99,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 101,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 102,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 103,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 105,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 106,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 104,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 100,
+        "r": 54,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 98,
+        "r": 60,
+        "layer": "ground9"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 104,
+        "r": 60,
+        "layer": "ground9",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 79,
+        "r": 33,
+        "layer": "ground9",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 91,
+        "r": 33,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 85,
+        "r": 33,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 71,
+        "r": 43,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 72,
+        "r": 43,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 73,
+        "r": 43,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 74,
+        "r": 43,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 75,
+        "r": 43,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 71,
+        "r": 40,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 74,
+        "r": 40,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 74,
+        "r": 69,
+        "layer": "ground9",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 68,
+        "r": 61,
+        "layer": "ground9",
+        "ox": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 72,
+        "r": 61,
+        "layer": "ground9",
+        "ox": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 76,
+        "r": 61,
+        "layer": "ground9",
+        "ox": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 81,
+        "r": 61,
+        "layer": "ground9",
+        "ox": 30
       }
     ],
     "solid": [
@@ -202459,8 +202716,6 @@ const BATTLE_MAPS = [
       "37,75",
       "37,74",
       "38,74",
-      "39,74",
-      "40,74",
       "41,74",
       "42,74",
       "43,74",
@@ -203407,8 +203662,6 @@ const BATTLE_MAPS = [
       "64,56",
       "65,56",
       "62,54",
-      "39,73",
-      "40,73",
       "41,73",
       "42,73",
       "43,73",
@@ -209730,6 +209983,24 @@ const BATTLE_MAPS = [
         "r": 4,
         "to": "map_mvxz356e",
         "oy": -6
+      },
+      {
+        "c": 15,
+        "r": 67,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          55,
+          74
+        ]
+      },
+      {
+        "c": 55,
+        "r": 74,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          15,
+          67
+        ]
       }
     ],
     "cols": 116,
@@ -209974,6 +210245,10 @@ const BATTLE_MAPS = [
         "name": "超深水區"
       },
       {
+        "id": "ground9",
+        "name": "水池燈"
+      },
+      {
         "id": "ground8",
         "name": "新圖層"
       },
@@ -210012,6 +210287,11 @@ const BATTLE_MAPS = [
         "id": "object8",
         "name": "抽水機_深水池（深水時顯現）",
         "blend": "multiply"
+      },
+      {
+        "id": "object35",
+        "name": "水池光",
+        "blend": "soft-light"
       },
       {
         "id": "object22",

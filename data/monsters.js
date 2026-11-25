@@ -1530,6 +1530,8 @@ const BOSS_SETTINGS_DEFAULT = {
       "scale": 2.5,
       "riseSpeed": 0.5,
       "coreHoleGap": 2.5,
+      "holeReach": 3,
+      "holeChance": 0.7,
       "holdSway": {
         "angle": 0.1,
         "speed": 2.4
@@ -1552,7 +1554,8 @@ const BOSS_SETTINGS_DEFAULT = {
         ],
         "up": 230
       },
-      "monsterDamage": 40
+      "monsterDamage": 40,
+      "maxHits": 0
     },
     "grab": {
       "windup": 1.15,

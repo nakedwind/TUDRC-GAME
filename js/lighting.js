@@ -13,6 +13,7 @@ const LIT_MIN = 0.1;                                   // 亮度低於這個值�
 const LIGHT_FILL_SOLID = 4;                            // 大物件（置物櫃等）裡面最多補亮幾格深，避免中間黑一塊
 let lightField = new Float32Array(COLS * ROWS);        // 每格亮度 0～1
 let warmField = new Float32Array(COLS * ROWS);         // 探照燈暖色量（沿用同一份遮牆結果）
+let coolField = new Float32Array(COLS * ROWS);         // 其中來自「藍白光」燈的量（LIGHT_COOL；畫的時候照比例把暖光換成藍白光）
 let lightDist = new Float32Array(COLS * ROWS).fill(Infinity);   // BFS 暫存：平常全是 Infinity，spreadLight 用完只把碰過的格子改回來
 let flashField = new Float32Array(COLS * ROWS);        // 攻擊閃光的亮度（只影響畫面，不算進遊戲的「亮處」判定）
 let visField = new Float32Array(COLS * ROWS);          // 畫黑幕用的亮度：不含溫特身上的燈（頭燈、手電筒另外用平滑的形狀挖開，見 drawDarkness）
@@ -27,6 +28,24 @@ warmCv.width = COLS; warmCv.height = ROWS;
 const warmCtx = warmCv.getContext('2d');
 let warmImg = warmCtx.createImageData(COLS, ROWS);
 
+// ---- 藍白光：指定地圖上的指定發光建築，燈光從暖黃色改成藍白色（照亮範圍、亮度都不變，只換顏色）----
+const LIGHT_COOL = {
+  maps: ['map_89aacb92-4b89-47ec-a76b-0908972d3fdf'],   // 哪些地圖：W118區 地下水池
+  buildings: ['searchlight'],                             // 哪些發光建築（data/balance.js 的 LIGHT.buildings 裡的 id）：探照燈
+  ambient: [140, 195, 255],   // 照到的範圍那層淡淡的光色（原本的暖光是 255,174,82）
+  beam: [[228, 240, 255], [190, 220, 255], [150, 195, 255]],                  // 往上的光束：燈頭 → 中間 → 尾端（原本 255,239,184 → 255,216,132 → 255,190,92）
+  halo: [[232, 242, 255], [200, 224, 255], [160, 200, 255], [130, 180, 255]], // 燈頭附近的柔光（原本 255,239,185 → 255,211,118 → 255,177,72 → 255,154,45）
+  core: [[248, 252, 255], [215, 234, 255], [150, 195, 255]],                  // 燈頭的亮芯（原本 255,255,238 → 255,235,160 → 255,187,78）
+};
+const LIGHT_WARM = {   // 原本的暖黃光（沒在上面清單裡的燈都用這組）
+  ambient: [255, 174, 82],
+  beam: [[255, 239, 184], [255, 216, 132], [255, 190, 92]],
+  halo: [[255, 239, 185], [255, 211, 118], [255, 177, 72], [255, 154, 45]],
+  core: [[255, 255, 238], [255, 235, 160], [255, 187, 78]],
+};
+const lightCoolBuilding = type => !!type && typeof MAP !== 'undefined' && !!MAP && LIGHT_COOL.maps.includes(MAP.id) && LIGHT_COOL.buildings.includes(type);
+const lightRgba = ([r, g, b], a) => 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+
 // 切換地圖後尺寸會變，這些暫存要跟著重新配置，否則亮度會算進錯的格子→全黑。
 let lightBufCols = COLS, lightBufRows = ROWS;
 function ensureLightBuffers() {
@@ -34,6 +53,7 @@ function ensureLightBuffers() {
   lightBufCols = COLS; lightBufRows = ROWS;
   lightField = new Float32Array(COLS * ROWS);
   warmField = new Float32Array(COLS * ROWS);
+  coolField = new Float32Array(COLS * ROWS);
   lightDist = new Float32Array(COLS * ROWS).fill(Infinity);
   flashField = new Float32Array(COLS * ROWS);
   visField = new Float32Array(COLS * ROWS);
@@ -99,6 +119,7 @@ function lightFloor2WallFaces() {
       if (lightField[j] > lightField[i]) lightField[i] = lightField[j];
       if (visField[j] > visField[i]) visField[i] = visField[j];
       if (warmField[j] > warmField[i]) warmField[i] = warmField[j];
+      if (coolField[j] > coolField[i]) coolField[i] = coolField[j];
       if (beamMask[j] > beamMask[i]) beamMask[i] = beamMask[j];
       break;
     }
@@ -112,6 +133,7 @@ function computeLightField() {
   ensureLightBuffers();   // 地圖尺寸變了就先重建暫存
   lightField.fill(0);
   warmField.fill(0);
+  coolField.fill(0);
   visField.fill(0);
   beamMask.fill(0);
   if (!LIGHT.enabled) return;
@@ -133,13 +155,14 @@ function computeLightField() {
       if (b > lightField[i]) lightField[i] = b;          // 遊戲判定（亮處）：手電筒照常用格子扇形
       if (!l.smooth && b > visField[i]) visField[i] = b;   // 畫面：頭燈、手電筒另外畫
       if (l.warm && b > warmField[i]) warmField[i] = b;
+      if (l.cool && b > coolField[i]) coolField[i] = b;   // 藍白光的燈（LIGHT_COOL）
     });
     if (l.smooth) markBeamMask(l);   // 頭燈、手電筒畫面上照得到的格子（牆後面不會亮）
   }
   beamNoLos = false;
   if (twoFloors) lightFloor2WallFaces();
   lightWalls = walls1; lightSkipSurf = -1; losNoFloors = false; floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; floorScoped = keepScoped;
-  if (typeof lightBreakableWallFaces === 'function') lightBreakableWallFaces([lightField, visField, warmField]);   // 可炸開的牆：牆面跟著牆腳一起亮（js/breakable-walls.js）
+  if (typeof lightBreakableWallFaces === 'function') lightBreakableWallFaces([lightField, visField, warmField, coolField]);   // 可炸開的牆：牆面跟著牆腳一起亮（js/breakable-walls.js）
 }
 // 頭燈、手電筒畫面上照得到的格子：格子擴散（不限扇形，讓柔邊也有地方亮；範圍多一點給柔邊）＋從燈到格子要「直線看得到」。
 // 只靠格子擴散的話，光會從門口繞過牆角、或穿過比一格薄的牆，跑到牆的另一邊。
@@ -379,7 +402,7 @@ function getLights() {
       const y = OY + (o.r + (o.h || 1) / 2) * CELL + dy;
       // 燈頭在 1×2 圖片的上方；visualY 只影響光暈位置，不改遊戲照明判定。
       const visualY = OY + (o.r + Math.min(0.38, (o.h || 1) * 0.3)) * CELL + 10 + dy;
-      L.push({ x, y, visualX: x, visualY, r: lr, warm: true,
+      L.push({ x, y, visualX: x, visualY, r: lr, warm: true, cool: lightCoolBuilding(o.type),   // cool＝這張地圖的這種燈改成藍白光（LIGHT_COOL）
         single: o.type === 'camping_lights', phase: o.c * 7 + o.r * 13 });
     }
     for (let k = nObs; k < L.length; k++) if (L[k].floor == null) L[k].floor = o.floor === 2 ? 2 : 1;   // 建築的燈：蓋在哪一層就照哪一層（js/build.js 的 o.floor）
@@ -461,13 +484,14 @@ function drawDarkness() {
   const pairs = MAP ? wallFacePairs() : [], saved = [];
   for (let k = 0; k < pairs.length; k += 2) {
     const i = pairs[k], b = pairs[k + 1];
-    saved.push(i, visField[i], warmField[i], beamMask[i]);
+    saved.push(i, visField[i], warmField[i], beamMask[i], coolField[i]);
     if (visField[b] > visField[i]) visField[i] = visField[b];
     if (warmField[b] > warmField[i]) warmField[i] = warmField[b];
+    if (coolField[b] > coolField[i]) coolField[i] = coolField[b];
     if (beamMask[b] > beamMask[i]) beamMask[i] = beamMask[b];   // 溫特身上的燈（頭燈、手電筒）照到牆腳：牆面也照得到
   }
   try { drawDarknessLayers(); }
-  finally { for (let k = saved.length - 4; k >= 0; k -= 4) { const i = saved[k]; visField[i] = saved[k + 1]; warmField[i] = saved[k + 2]; beamMask[i] = saved[k + 3]; } }
+  finally { for (let k = saved.length - 5; k >= 0; k -= 5) { const i = saved[k]; visField[i] = saved[k + 1]; warmField[i] = saved[k + 2]; beamMask[i] = saved[k + 3]; coolField[i] = saved[k + 4]; } }
 }
 function drawDarknessLayers() {
   const now = performance.now() / 1000;
@@ -475,13 +499,13 @@ function drawDarknessLayers() {
   // 雙燈向上投射的柔和光束。先畫光束、再蓋黑幕，牆後區域會被照明遮罩自然壓暗。
   ctx.save();
   ctx.globalCompositeOperation = 'screen';
-  function drawBeam(x0, y0, x1, y1, nearHalf, farHalf, alpha) {
+  function drawBeam(x0, y0, x1, y1, nearHalf, farHalf, alpha, pal = LIGHT_WARM) {
     const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1;
     const px = -dy / len, py = dx / len;
     const beam = ctx.createLinearGradient(x0, y0, x1, y1);
-    beam.addColorStop(0, 'rgba(255,239,184,' + alpha + ')');
-    beam.addColorStop(0.35, 'rgba(255,216,132,' + (alpha * 0.7).toFixed(3) + ')');
-    beam.addColorStop(1, 'rgba(255,190,92,0)');
+    beam.addColorStop(0, lightRgba(pal.beam[0], alpha));
+    beam.addColorStop(0.35, lightRgba(pal.beam[1], (alpha * 0.7).toFixed(3)));
+    beam.addColorStop(1, lightRgba(pal.beam[2], 0));
     ctx.fillStyle = beam;
     ctx.beginPath();
     ctx.moveTo(x0 + px * nearHalf, y0 + py * nearHalf);
@@ -494,16 +518,16 @@ function drawDarknessLayers() {
     if (!l.warm || l.lantern) continue;   // 吊燈：不畫往上的光束
     const sx = (l.visualX ?? l.x), sy = (l.visualY ?? l.y);   // 世界座標（黑幕跟著畫面縮放一起畫）
     const beamLen = Math.min(l.r * 0.78, 220);
-    const pulse = 0.95 + 0.05 * Math.sin(now * 1.8 + l.phase);
+    const pulse = 0.95 + 0.05 * Math.sin(now * 1.8 + l.phase), pal = l.cool ? LIGHT_COOL : LIGHT_WARM;   // 藍白光的燈用藍白色
     // 外層低透明度負責柔邊，內層窄光束提供方向感。
     if (l.single) {
-      drawBeam(sx, sy - 2, sx, sy - beamLen, 5, 52, 0.08 * pulse);
-      drawBeam(sx, sy - 2, sx, sy - beamLen * 0.9, 3, 29, 0.11 * pulse);
+      drawBeam(sx, sy - 2, sx, sy - beamLen, 5, 52, 0.08 * pulse, pal);
+      drawBeam(sx, sy - 2, sx, sy - beamLen * 0.9, 3, 29, 0.11 * pulse, pal);
     } else {
-      drawBeam(sx - 9, sy - 2, sx - 38, sy - beamLen, 5, 55, 0.075 * pulse);
-      drawBeam(sx + 9, sy - 2, sx + 38, sy - beamLen, 5, 55, 0.075 * pulse);
-      drawBeam(sx - 9, sy - 2, sx - 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse);
-      drawBeam(sx + 9, sy - 2, sx + 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse);
+      drawBeam(sx - 9, sy - 2, sx - 38, sy - beamLen, 5, 55, 0.075 * pulse, pal);
+      drawBeam(sx + 9, sy - 2, sx + 38, sy - beamLen, 5, 55, 0.075 * pulse, pal);
+      drawBeam(sx - 9, sy - 2, sx - 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse, pal);
+      drawBeam(sx + 9, sy - 2, sx + 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse, pal);
     }
   }
   ctx.restore();
@@ -543,7 +567,8 @@ function drawDarknessLayers() {
   const wp = warmImg.data;
   for (let i = 0; i < warmField.length; i++) {
     const w = Math.pow(Math.min(1, warmField[i]), 0.72), o = i * 4;
-    wp[o] = 255; wp[o + 1] = 174; wp[o + 2] = 82;
+    const ck = warmField[i] > 0 ? Math.min(1, coolField[i] / warmField[i]) : 0, A = LIGHT_WARM.ambient, B = LIGHT_COOL.ambient;   // ck＝這格的光有幾成來自藍白光的燈
+    wp[o] = A[0] + (B[0] - A[0]) * ck; wp[o + 1] = A[1] + (B[1] - A[1]) * ck; wp[o + 2] = A[2] + (B[2] - A[2]) * ck;
     wp[o + 3] = Math.round(58 * w);
   }
   warmCtx.putImageData(warmImg, 0, 0);
@@ -560,13 +585,13 @@ function drawDarknessLayers() {
     if (!l.warm) continue;
     const sx = (l.visualX ?? l.x), sy = (l.visualY ?? l.y);
     if (sx < cam.x - 80 || sy < cam.y - 80 || sx > cam.x + viewW() + 80 || sy > cam.y + viewH() + 80) continue;
-    const pulse = 1 + 0.045 * Math.sin(now * 1.8 + l.phase);
+    const pulse = 1 + 0.045 * Math.sin(now * 1.8 + l.phase), pal = l.cool ? LIGHT_COOL : LIGHT_WARM;   // 藍白光的燈用藍白色
     const haloR = 42 * pulse;
     const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, haloR);
-    halo.addColorStop(0, 'rgba(255,239,185,.25)');
-    halo.addColorStop(0.2, 'rgba(255,211,118,.19)');
-    halo.addColorStop(0.58, 'rgba(255,177,72,.08)');
-    halo.addColorStop(1, 'rgba(255,154,45,0)');
+    halo.addColorStop(0, lightRgba(pal.halo[0], .25));
+    halo.addColorStop(0.2, lightRgba(pal.halo[1], .19));
+    halo.addColorStop(0.58, lightRgba(pal.halo[2], .08));
+    halo.addColorStop(1, lightRgba(pal.halo[3], 0));
     ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(sx, sy, haloR, 0, Math.PI * 2); ctx.fill();
     if (l.lantern) {   // 吊燈：周圍再染一圈淡淡的橘黃色，讓照到的地方看起來是暖色的燈光
       const warmR = l.r * .85 * pulse, wg = ctx.createRadialGradient(sx, sy, 0, sx, sy, warmR);
@@ -577,9 +602,9 @@ function drawDarknessLayers() {
     for (const lampX of (l.single ? [sx] : [sx - 9, sx + 9])) {
       const coreR = 5.5 * pulse;
       const core = ctx.createRadialGradient(lampX, sy, 0, lampX, sy, coreR);
-      core.addColorStop(0, 'rgba(255,255,238,.82)');
-      core.addColorStop(0.32, 'rgba(255,235,160,.58)');
-      core.addColorStop(1, 'rgba(255,187,78,0)');
+      core.addColorStop(0, lightRgba(pal.core[0], .82));
+      core.addColorStop(0.32, lightRgba(pal.core[1], .58));
+      core.addColorStop(1, lightRgba(pal.core[2], 0));
       ctx.fillStyle = core; ctx.beginPath(); ctx.arc(lampX, sy, coreR, 0, Math.PI * 2); ctx.fill();
     }
   }

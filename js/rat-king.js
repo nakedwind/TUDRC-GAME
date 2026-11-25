@@ -6,8 +6,8 @@
    - 核心洞（打地鼠）：地圖上鋪的洞素材（RAT_KING.holeTile）專門放核心。核心一開始就隨機放在其中一個洞口。
        核心被打到 → 先震動 → 洞裡冒出手把核心抓住 → 拖進洞裡 → 從另一個洞冒出來放下。
        每次核心露出來，最多只會被打掉 core.exposeCap 成血量（打到上限就打不動了，等手來搬），所以要多打幾輪才打得破。
-   - 一般的手（只在核心洞以外的地方冒出來，冒出來的地方會先裂開一個洞）：
-       1. 拳頭：在溫特或隊員腳下冒出握拳的手往上打，一隻手只打一個（範圍裡離洞口最近的；怪物自己人也會被打到），打中會被揍飛（飛出去、彈兩下、躺著暈，跟藤蔓丟人同一套）。
+   - 一般的手（在目標腳下裂地冒出來；目標站在空的核心洞旁邊時，也可能直接從核心洞伸出來，見 hands.holeReach／holeChance）：
+       1. 拳頭：在溫特或隊員腳下冒出握拳的手往上打，範圍裡的人全部打（怪物自己人也會被打到；punch.maxHits 可以限制最多打幾個），打中會被揍飛（飛出去、彈兩下、躺著暈，跟藤蔓丟人同一套）。
        2. 抓人：紫色預警圈。被抓到的人握在拳頭裡（頭露在外面），過 grab.hold 秒：
           溫特 → 被往外丟出去；隊員 → 有 grab.dragChance 的機會被拖進地底（過一陣子別的地方的地面裂開，從洞口被往上拋飛、落地暈眩），不然也是被丟出去。
           被揍飛、丟出去、躺在地上暈的時候不會受擊閃紅、發抖。
@@ -40,17 +40,20 @@ const RAT_KING = applyBossSettings('RAT_KING', {
   emerge: { delay: 2.2, rumble: 2.4, rise: 2.4, hold: 1.2 },   // 核心醒了幾秒後開始震、震幾秒才冒出來、冒出來花幾秒、亮相多停幾秒
   // 手：every＝隔幾秒冒一波（最短～最長），count＝一波幾隻；frenzy＝暴怒時的版本
   //   scale＝手的大小（原圖 110×90 的幾倍）；riseSpeed＝往上舉、縮回去的速度（1＝原本的速度，.5＝一半的速度）
-  //   coreHoleGap＝一般的手離核心洞至少幾格（核心洞只給搬核心的手用）
+  //   coreHoleGap＝一般的手自己裂地冒出來時，離核心洞至少幾格（不會在核心洞旁邊另外裂一個洞）
+  //   holeReach＝目標離空的核心洞幾格以內，打人／抓人的手就可能直接從那個核心洞伸出來；holeChance＝這時從洞裡伸出來的機會（0＝都不會）
+  //     （洞裡有核心、或已經有別的手的洞不算空的）
   //   frenzyTargets＝暴怒時一波同時打幾個不同的人（場上人不夠就打全部）；frenzyGrabs＝暴怒時這一波決定抓人的話，一次抓幾個人
   //   grabChance＝一波裡第一隻手用「抓」的機會（其他是拳頭）；holdSway＝抓住人時手左右搖晃：幅度（弧度，.1 約 6 度）、速度
-  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [2.8, 4.2], frenzyCount: [2, 3], frenzyTargets: 2, frenzyGrabs: 2, frenzySpeed: .75, grabChance: .6, scale: 2.5, riseSpeed: .5, coreHoleGap: 2.5, holdSway: { angle: .1, speed: 2.4 } },
+  hands: { every: [2.8, 4.2], count: [1, 1], frenzyEvery: [2.8, 4.2], frenzyCount: [2, 3], frenzyTargets: 2, frenzyGrabs: 2, frenzySpeed: .75, grabChance: .6, scale: 2.5, riseSpeed: .5, coreHoleGap: 2.5, holeReach: 3, holeChance: .7, holdSway: { angle: .1, speed: 2.4 } },
   // 核心洞：地圖上鋪的這種洞素材就是核心會出現的地方（在地圖編輯器加減、搬動，核心出現的位置就跟著變）
   holeTile: 'tile_mvmo77lx',     // 地圖素材「hole02」
   // 一般的手冒出來時地上裂開的洞（用同一張 hole02 圖）：size＝大小倍率、linger＝手縮回去後洞還留幾秒才淡掉
   dig: { art: 'images/破損建築/hole02.png', size: 1, linger: 1.2 },
   // 拳頭：預警幾秒、冒出、停住、縮回；打中範圍（格）；launch＝揍飛：飛多遠（格，最短～最長）、往上拋的速度
   //   monsterDamage＝拳頭打到怪物（自己人也會被打）扣多少血
-  punch: { windup: .95, rise: .18, hold: .35, sink: .3, radius: 2.2, launch: { dist: [2.5, 3.8], up: 230 }, monsterDamage: 40 },
+  //   maxHits＝一拳最多打幾個（從離洞口最近的開始算；0＝範圍裡全部都打）
+  punch: { windup: .95, rise: .18, hold: .35, sink: .3, radius: 2.2, launch: { dist: [2.5, 3.8], up: 230 }, monsterDamage: 40, maxHits: 0 },
   // 抓人：預警幾秒、冒出、打中範圍（格）、握住幾秒才丟出去／拖下去（這段時間打掉手就救出來）、手的血量、
   //   在地底幾秒、吐出來的傷害倍率、吐出來暈幾秒、兩次抓人至少隔幾秒；
   //   dragChance＝抓到隊員時被拖進地底的機會（其他就丟出去；溫特一律丟出去）；
@@ -427,7 +430,18 @@ function rkHandSpotNear(K, a, lead) {
   }
   return null;
 }
-// 一波手：每隻挑一個目標（溫特、隊員；要在範圍裡），有機會變成抓人；一律在核心洞以外的地方冒出來
+// 目標附近（hands.holeReach 格以內）最近的空核心洞（洞裡沒有核心、也沒有別的手）；沒有就回傳 null
+function rkFreeHoleNear(K, a) {
+  let best = null, bd = (RAT_KING.hands.holeReach || 0) * CELL;
+  for (const o of rkHoles()) {
+    if (rkHoleBusy(K, o) || (G.cores || []).some(c => !c.dead && !c.hidden && c.rkHole === o)) continue;
+    const d = Math.hypot(o.cx - a.x, o.cy - a.y);
+    if (d <= bd) { bd = d; best = o; }
+  }
+  return best;
+}
+// 一波手：每隻挑一個目標（溫特、隊員；要在範圍裡），有機會變成抓人；
+//   目標站在空的核心洞旁邊時，有 hands.holeChance 的機會直接從那個洞伸出來，不然就在目標腳下裂地冒出來
 function rkHandWave(K, e, n) {
   const pool = [G.player, ...(G.towers || [])].filter(a => a && a.hp > 0 && !a.eatenBy && !a.rkHeld && !a.vineCap && !a.mrtRide && rkInArea(a.x, a.y) && sameFloor(e, a));
   if (!pool.length) return;
@@ -439,11 +453,14 @@ function rkHandWave(K, e, n) {
   for (let i = 0; i < n; i++) {
     const direct = e.rkEnraged ? i < picks.length : i === 0;   // 這隻手直接打在某個人腳下
     const a = e.rkEnraged && direct ? picks[i] : picks[Math.floor(Math.random() * picks.length)];
-    const s = rkHandSpotNear(K, a, direct ? 0 : rkRand(.6, 1.6) * CELL); if (!s) continue;
+    const hole = Math.random() < (RAT_KING.hands.holeChance || 0) ? rkFreeHoleNear(K, a) : null;
+    const s = hole ? { x: hole.cx, y: hole.cy } : rkHandSpotNear(K, a, direct ? 0 : rkRand(.6, 1.6) * CELL); if (!s) continue;
     // 抓人：平常只有第一隻手有機會；暴怒時這一波擲中的話，直接對準人的前 frenzyGrabs 隻手都改成抓（同時最多抓這麼多個）
     const grab = grabWave && direct && i < maxGrabs && K.hands.filter(h => h.kind === 'grab').length < maxGrabs;
-    if (grab) { rkDigHand(K, 'grab', s.x, s.y, { target: a }); K.grabCd = RAT_KING.grab.cooldown; }
-    else rkDigHand(K, 'punch', s.x, s.y);
+    const kind = grab ? 'grab' : 'punch', extra = grab ? { target: a } : {};
+    if (hole) rkNewHand(K, kind, hole.x, hole.y, { ...extra, hole });   // 從核心洞伸出來（洞本來就在，不用再裂地）
+    else rkDigHand(K, kind, s.x, s.y, extra);
+    if (grab) K.grabCd = RAT_KING.grab.cooldown;
     rkSound('mouseDig', s.x, s.y, .5);
   }
 }
@@ -477,17 +494,20 @@ function updateRkHands(K, dt) {
 // 手完全冒出來的那一刻
 function rkHandUp(K, e, h) {
   const P = RAT_KING.punch;
-  if (h.kind === 'punch') {   // 揍飛：一隻手只打一個（範圍裡離洞口最近的那個，怪物自己人也算），打中的人飛出去、彈兩下、躺著暈
+  if (h.kind === 'punch') {   // 揍飛：範圍裡的人全部打（怪物自己人也算；punch.maxHits 可以限制最多打幾個，從離洞口最近的開始），打中的人飛出去、彈兩下、躺著暈
     const o = rkHandSpot(h), near = a => Math.hypot(a.x - o.x, a.y - o.y) <= P.radius * CELL;
     const people = [G.player, ...G.towers].filter(a => a && a.hp > 0 && !a.rkHeld && !a.eatenBy && !a.vineCap && near(a));
     const monsters = G.enemies.filter(m => !m.dead && m.hp > 0 && !m.ratKing && !m.ratKingHand && (!e || sameFloor(e, m)) && near(m));
-    const a = [...people, ...monsters].sort((p, q) => Math.hypot(p.x - o.x, p.y - o.y) - Math.hypot(q.x - o.x, q.y - o.y))[0];
-    if (a === G.player) { const hp0 = a.hp; e.playerTouchCd = 0; enemyAttackPlayer(e, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
-    else if (a && G.towers.includes(a)) { const hp0 = a.hp; e.atkCd = 0; enemyAttackSentry(e, a, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
-    else if (a) {   // 打到怪物：扣血、重重往外彈開（打死了照一般怪物死掉，會掉碎片）
-      a.hp -= P.monsterDamage; a.hitT = Math.max(a.hitT || 0, .2); a.hitColor = '#f0a3c8';
-      if (typeof flashDmg === 'function') flashDmg('-' + P.monsterDamage, a.x, a.y - 26, '#f0a3c8');
-      if (typeof enemyHitReact === 'function') enemyHitReact(a, o.x, o.y, true);
+    let hits = [...people, ...monsters].sort((p, q) => Math.hypot(p.x - o.x, p.y - o.y) - Math.hypot(q.x - o.x, q.y - o.y));
+    if (P.maxHits > 0) hits = hits.slice(0, P.maxHits);
+    for (const a of hits) {
+      if (a === G.player) { const hp0 = a.hp; e.playerTouchCd = 0; enemyAttackPlayer(e, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
+      else if (G.towers.includes(a)) { const hp0 = a.hp; e.atkCd = 0; enemyAttackSentry(e, a, 0); if (a.hp < hp0 && a.hp > 0) rkLaunch(a, o, P.launch); }
+      else {   // 打到怪物：扣血、重重往外彈開（打死了照一般怪物死掉，會掉碎片）
+        a.hp -= P.monsterDamage; a.hitT = Math.max(a.hitT || 0, .2); a.hitColor = '#f0a3c8';
+        if (typeof flashDmg === 'function') flashDmg('-' + P.monsterDamage, a.x, a.y - 26, '#f0a3c8');
+        if (typeof enemyHitReact === 'function') enemyHitReact(a, o.x, o.y, true);
+      }
     }
     if (typeof addShake === 'function') addShake(4);
   } else if (h.kind === 'grab') {

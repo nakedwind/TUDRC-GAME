@@ -612,6 +612,7 @@ const NPC_LABEL_DY = { ball: 22 };
 // 對話泡泡：參考《苦艾與甘露》——深色半透明底＋角色專屬色邊框/文字＋圓角＋向下小尾巴＋淡光暈
 // 淺底色＋深色字，每個角色一種顏色（bg 淺底／bd 邊框＋尾巴／tx 深色文字）
 const BUBBLE_COLORS = {
+  winter:  { bg: '#d9e8fd', bd: '#2f6fd6', tx: '#0f2f66' },   // 藍色（溫特自己講話；比莎蓮、阿瓦倫的淺藍更鮮明）
   taana:   { bg: '#e0e0fb', bd: '#5a5fc4', tx: '#262a6e' },   // 偏紫的藍
   eden:    { bg: '#fde0ef', bd: '#d0609a', tx: '#5e1f42' },   // 粉色
   salem:   { bg: '#ddf0fb', bd: '#4f9cc9', tx: '#173f58' },   // 淺藍
@@ -685,7 +686,11 @@ function wrapBubbleText(text) {
 // → 泡泡永遠在最上層，不會被角色前面的牆、建築擋住。
 // 這位隊員頭上有選項時，泡泡排到選項的上面——選項固定在頭上不會被泡泡推走。
 let pendingTowerBubbles = new Map();   // 隊員 → 這一幀要畫的泡泡（同一位隊員一幀可能畫兩次身體，只留最後一次）
-function queueTowerBubble(t, cx, bottomY, text, col) { pendingTowerBubbles.set(t, { cx, bottomY, text, col, alpha: ctx.globalAlpha }); }
+// 沒指定顏色、說話的是玩家自己（溫特頭上的泡泡：抽水閥、救生圈、吃飯、派對…）→ 用玩家角色的顏色（平常是溫特的藍色；艾德林帶隊時是艾德林的顏色）
+function queueTowerBubble(t, cx, bottomY, text, col) {
+  if (!col && typeof G !== 'undefined' && G && t === G.player) col = BUBBLE_COLORS[typeof PLAYER_CHARACTER !== 'undefined' ? PLAYER_CHARACTER : 'winter'] || BUBBLE_COLORS.winter;
+  pendingTowerBubbles.set(t, { cx, bottomY, text, col, alpha: ctx.globalAlpha });
+}
 function flushTowerBubbles() {
   for (const [t, b] of pendingTowerBubbles) {
     const mine = towerPrompts.filter(p => p.actor === t);
