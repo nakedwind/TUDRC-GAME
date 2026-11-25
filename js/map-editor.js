@@ -1055,7 +1055,7 @@ function drawStamp(s) {
   }
   if (s.level === 2 || s.level === 'span') drawDeck2Badge(s);   // 2 樓的圖、跨樓層的圖：左上角標一下
   if (s.cars > 0 && MRT_HEAD_MIDDLE[s.id]) drawMrtExtraCars(s);
-  if ((s.bothDoors || s.mrtMonsters || s.mrtFixed) && MRT_TRAIN_CAR_IDS.has(s.id)) drawMrtDoorsBadge(s);
+  if ((s.bothDoors || s.mrtMonsters || s.mrtFixed || s.mrtStatic) && MRT_TRAIN_CAR_IDS.has(s.id)) drawMrtDoorsBadge(s);
   if (s.glow) {   // 發光：畫一圈淡淡的虛線，標出照亮的範圍（只在編輯器裡看得到）
     const t = tileById(s.id) || {}, cx = OX + s.c * CELL + (s.ox || 0) + stampW(s, t) * CELL / 2, cy = OY + s.r * CELL + (s.oy || 0) + stampH(s, t) * CELL / 2;
     ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = 'rgba(255,214,102,.55)'; ctx.lineWidth = 1.5;
@@ -1076,10 +1076,10 @@ function drawDeck2Badge(s) {
   ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(span ? '↕跨樓層' : '🌉2樓', x + 3, y + 8); ctx.restore();
 }
 // 捷運車廂設成「兩側車門都開」：左上角標一下（js/mrt-train.js）
-// 車廂左上角的小標籤：兩側開門（藍）、會載怪物（紅）、停著不動＝通道（綠）
+// 車廂左上角的小標籤：兩側開門（藍）、會載怪物（紅）、停著不動＝通道（綠）、只是圖片（灰）
 function drawMrtDoorsBadge(s) {
   let x = OX + s.c * CELL + (s.ox || 0); const y = OY + s.r * CELL + (s.oy || 0);
-  const tags = [[s.bothDoors, '兩側開門', 'rgba(40,110,200,.9)'], [s.mrtMonsters, '載怪物', 'rgba(190,50,50,.9)'], [s.mrtFixed, '通道', 'rgba(40,150,90,.9)']];
+  const tags = [[s.bothDoors, '兩側開門', 'rgba(40,110,200,.9)'], [s.mrtMonsters, '載怪物', 'rgba(190,50,50,.9)'], [s.mrtFixed, '通道', 'rgba(40,150,90,.9)'], [s.mrtStatic, '只是圖片' + (s.staticClosed && s.staticClosed.length ? '（第' + s.staticClosed.join('、') + '節關門）' : ''), 'rgba(120,120,130,.92)']];
   ctx.save(); ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   for (const [on, text, color] of tags) {
     if (!on) continue;
@@ -3546,7 +3546,9 @@ function refreshMrtDoorsControl() {
     box.innerHTML = '<label title="沒勾：只開靠月台這側（外側）的車門；勾了：對面的車門也一起開。同一排的車廂算同一班車"><input type="checkbox" id="mrtDoorsToggle"> 兩側車門都開</label>' +
       '<label title="勾了：這班車每次到站有機率載怪物，門開好怪物就下車（機率、幾隻在物件編輯器「🚇 捷運列車」調；怪物種類照這張地圖的怪物比例）"><input type="checkbox" id="mrtMonstersToggle" data-flag="mrtMonsters"> 會載怪物</label>' +
       '<label title="勾了：這班車一直停在月台不會開走，發電機全部打開後門一直開著，變成可以穿過去的通道"><input type="checkbox" id="mrtFixedToggle" data-flag="mrtFixed"> 停著不動（通道）</label>' +
-      '<label id="mrtCarsBox" title="遊戲裡自動在車頭後面接上中段車廂（地圖放不下也沒關係，軌道外的部分不會畫）">車頭後面接 <input type="number" id="mrtCarsInput" min="0" max="9" step="1" style="width:46px"> 節車廂</label>';
+      '<label id="mrtCarsBox" title="遊戲裡自動在車頭後面接上中段車廂（地圖放不下也沒關係，軌道外的部分不會畫）">車頭後面接 <input type="number" id="mrtCarsInput" min="0" max="9" step="1" style="width:46px"> 節車廂</label>' +
+      '<label title="勾了：遊戲裡完全不當列車（不會動、不擋路、不能上車、不算軌道上的車），只照原樣畫成一張圖。車門預設開著，下面可以指定哪幾節關門"><input type="checkbox" id="mrtStaticToggle" data-flag="mrtStatic"> 只是圖片（不當列車）</label>' +
+      '<label id="mrtClosedBox" title="只是圖片的列車：哪幾節車廂的門畫成關著的。1＝車頭那節，往後 2、3…；好幾節用逗號分開，例如 2,3；空白＝全部開著">關門的車廂：第 <input type="text" id="mrtClosedInput" style="width:54px" placeholder="例如 2"> 節</label>';
     document.getElementById('selControls').appendChild(box);
     document.getElementById('mrtCarsInput').addEventListener('change', e => {
       if (dropLockedSelections('改車廂節數')) return;
@@ -3558,14 +3560,25 @@ function refreshMrtDoorsControl() {
       setStatus('車頭後面接 ' + n + ' 節車廂', '#7ee0c0');
     });
     // 會載怪物、停著不動（通道）：勾在車廂上（stamp.mrtMonsters／stamp.mrtFixed），同一排的車廂算同一班車
-    for (const id of ['mrtMonstersToggle', 'mrtFixedToggle']) document.getElementById(id).addEventListener('change', e => {
+    // 只是圖片（不當列車）：stamp.mrtStatic（js/mrt-train.js 的 mrtMakeStaticTrain）
+    for (const id of ['mrtMonstersToggle', 'mrtFixedToggle', 'mrtStaticToggle']) document.getElementById(id).addEventListener('change', e => {
       if (dropLockedSelections('切換列車設定')) return;
       const list = selectedMrtCars(); if (!list.length) return;
-      const flag = e.target.dataset.flag, label = flag === 'mrtMonsters' ? '會載怪物' : '停著不動（通道）';
+      const flag = e.target.dataset.flag, label = { mrtMonsters: '會載怪物', mrtFixed: '停著不動（通道）', mrtStatic: '只是圖片（不當列車）' }[flag];
       pushUndo();
       for (const s of list) { if (e.target.checked) s[flag] = true; else delete s[flag]; }
       saveMaps(); draw(); refreshSelPanel();
       setStatus(list.length + ' 節車廂' + (e.target.checked ? '設為' : '取消') + '「' + label + '」', '#7ee0c0');
+    });
+    // 關門的車廂（只是圖片的列車）：stamp.staticClosed＝[第幾節…]，1＝車頭那節
+    document.getElementById('mrtClosedInput').addEventListener('change', e => {
+      if (dropLockedSelections('改關門的車廂')) return;
+      const list = selectedMrtCars(); if (!list.length) return;
+      const nums = [...new Set(String(e.target.value).split(/[^0-9]+/).map(Number).filter(n => n >= 1 && n <= 10))].sort((a, b) => a - b);
+      pushUndo();
+      for (const s of list) { if (nums.length) s.staticClosed = nums; else delete s.staticClosed; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus(nums.length ? '第 ' + nums.join('、') + ' 節車廂的門畫成關著的' : '車門全部開著', '#7ee0c0');
     });
     document.getElementById('mrtDoorsToggle').addEventListener('change', e => {
       if (dropLockedSelections('切換車門')) return;
@@ -3580,10 +3593,13 @@ function refreshMrtDoorsControl() {
   if (!list.length) return;
   const toggle = document.getElementById('mrtDoorsToggle'), on = list.filter(s => s.bothDoors).length;
   toggle.checked = on === list.length; toggle.indeterminate = on > 0 && on < list.length;
-  for (const id of ['mrtMonstersToggle', 'mrtFixedToggle']) {
+  for (const id of ['mrtMonstersToggle', 'mrtFixedToggle', 'mrtStaticToggle']) {
     const el = document.getElementById(id), n = list.filter(s => s[el.dataset.flag]).length;
     el.checked = n === list.length; el.indeterminate = n > 0 && n < list.length;
   }
+  const statics = list.filter(s => s.mrtStatic);
+  document.getElementById('mrtClosedBox').classList.toggle('hidden', !statics.length);
+  if (statics.length && document.activeElement !== document.getElementById('mrtClosedInput')) document.getElementById('mrtClosedInput').value = (statics[0].staticClosed || []).join(',');
   const heads = list.filter(s => MRT_HEAD_MIDDLE[s.id]);
   document.getElementById('mrtCarsBox').classList.toggle('hidden', !heads.length);
   if (heads.length) document.getElementById('mrtCarsInput').value = heads[0].cars || 0;

@@ -116,12 +116,75 @@ function mrtTrainApplyEdges() {
   if (typeof setExtraEdges === 'function') setExtraEdges(all, up);
 }
 
+// ---- 只是圖片的列車（地圖編輯器勾「只是圖片（不當列車）」，stamp.mrtStatic）----
+// 不放進 G.mrtTrains，所以所有列車的功能（進出站、擋路、上下車、時刻牌、怪物跳軌…）都不會碰到它；
+// 只是照原本的樣子畫出來：車廂內部＋車門＋外殼。車門預設開著（跟停著開門時一樣），
+// 地圖編輯器的「關門的車廂」寫了第幾節，那幾節的門就畫成關著的（stamp.staticClosed，1＝車頭那節）。
+let mrtStaticTrains = [];
+function mrtMakeStaticTrain(cars, head, variant, top, bottom) {
+  // 車廂照離車頭的遠近排好：第 1 節＝車頭，往後依序 2、3…
+  const order = [...cars].sort((a, b) => Math.abs(a.x - head.x) - Math.abs(b.x - head.x));
+  const closed = new Set();
+  for (const c of cars) for (const n of c.stamp.staticClosed || []) closed.add(+n);
+  order.forEach((car, i) => { car.closed = closed.has(i + 1); });
+  return { cars: order, variant, bothDoors: cars.some(c => c.stamp.bothDoors), top, bottom, stamp: head.stamp };
+}
+function drawMrtStaticTrain(ctx, st) {
+  const T = MRT_TRAIN, V = st.variant || {}, inside = mrtTrainImg(T.inside), outer = mrtTrainImg(V.outerDoor || T.outerDoor.file), far = mrtTrainImg(V.farDoor || T.farDoor.file);
+  for (const car of st.cars) {
+    const shell = tileImage(car.tile); if (!shell) continue;
+    ctx.save();
+    ctx.translate(car.x, car.y);
+    if (car.stamp.fx) { ctx.translate(car.w, 0); ctx.scale(-1, 1); }
+    ctx.scale(car.w / shell.naturalWidth, car.h / shell.naturalHeight);
+    const open = car.closed ? 0 : 1;
+    if (far) drawMrtDoors(ctx, far, T.farDoor, st.bothDoors ? open : 0);   // 對面的門
+    if (inside) ctx.drawImage(inside, 0, 0);                                 // 車廂內部
+    if (outer) drawMrtDoors(ctx, outer, T.outerDoor, open);                  // 靠月台這側的門
+    ctx.drawImage(shell, 0, 0);                                              // 外殼
+    ctx.restore();
+  }
+}
+// 接續戰場時：存檔裡的列車如果現在被勾成「只是圖片」，把它從列車名單拿掉（它加的牆、拿掉的格子都還原），改成圖片
+function mrtStaticFromSave() {
+  mrtStaticTrains = [];
+  if (!G || !G.mrtTrains || !MAP) return;
+  const keep = [];
+  for (const tr of G.mrtTrains) {
+    if (!(tr.cars || []).some(c => c.stamp && c.stamp.mrtStatic)) { keep.push(tr); continue; }
+    for (const k of tr.walls || []) mapWalls.delete(k);
+    mrtTrainRestoreCleared(tr);
+  }
+  G.mrtTrains = keep;
+  // 照地圖重新找一次只是圖片的車廂（跟 setupMrtTrains 一樣的分組）
+  const rows = new Map();
+  for (const s of MAP.stamps || []) {
+    const kind = MRT_TRAIN.cars[s.id], tile = kind && mapTileById(s.id);
+    if (!tile) continue;
+    const key = s.r + ':' + (s.oy || 0);
+    if (!rows.has(key)) rows.set(key, []);
+    rows.get(key).push({ stamp: s, tile, kind, x: OX + s.c * CELL + (s.ox || 0), y: OY + s.r * CELL + (s.oy || 0), w: mapTileW(tile) * CELL, h: mapTileH(tile) * CELL });
+  }
+  for (const cars of rows.values()) {
+    if (!cars.some(c => c.stamp.mrtStatic)) continue;
+    for (const car of cars) G.mapDestroyed.add(car.stamp);
+    const head = cars.find(c => c.kind === 'head') || cars[0], variant = (MRT_TRAIN.variants || {})[head.stamp.id] || null;
+    const midTile = mapTileById((variant && variant.middle) || MRT_TRAIN.middleTile), extra = Math.min(MRT_TRAIN.maxCars, Math.max(0, Math.floor(+head.stamp.cars || 0)));
+    if (head.kind === 'head' && midTile) for (let i = 1; i <= extra; i++) {
+      const w = mapTileW(midTile) * CELL, back = head.stamp.fx ? head.x + head.w + (i - 1) * w : head.x - i * w;
+      cars.push({ stamp: { fx: head.stamp.fx }, tile: midTile, kind: 'middle', x: back, y: head.y, w, h: mapTileH(midTile) * CELL });
+    }
+    mrtStaticTrains.push(mrtMakeStaticTrain(cars, head, variant, Math.min(...cars.map(c => c.y)), Math.max(...cars.map(c => c.y + c.h))));
+  }
+}
+
 // 每局開始（js/game.js 的 newGame）：找出地圖上的車廂，同一排的組成一班列車
 function setupMrtTrains() {
   for (const tr of (G && G.mrtTrains) || []) mrtTrainRestoreCleared(tr);   // 同一張地圖重開：上一局拿掉的軌道碰撞格放回去
   for (const k of mrtTrainWalls) mapWalls.delete(k);
   mrtTrainWalls = new Set();
   G.mrtTrains = [];
+  mrtStaticTrains = [];
   mrtTrainApplyEdges();
   if (mrtRiding) mrtRideFade(false);   // 搭車搭到一半換地圖、重開
   if (!MAP) return;
@@ -148,6 +211,8 @@ function setupMrtTrains() {
     }
     const left = Math.min(...cars.map(c => c.x)), right = Math.max(...cars.map(c => c.x + c.w));
     const top = Math.min(...cars.map(c => c.y)), bottom = Math.max(...cars.map(c => c.y + c.h));
+    // 地圖編輯器勾了「只是圖片（不當列車）」：完全不當列車（不會動、不擋路、不載人、不算軌道上的車），只照原樣畫成一張圖
+    if (cars.some(c => c.stamp.mrtStatic)) { mrtStaticTrains.push(mrtMakeStaticTrain(cars, head, variant, top, bottom)); continue; }
     // 軌道範圍：跟列車上下重疊的軌道，最左到最右（沒擺軌道就用整張地圖）
     // 軌道圖不只一種（一般軌道、有雜物的軌道、mrt-rail-track25…）都要算，跟 mrtTrackCells 一樣。
     // 以前只認一般軌道那張圖：鋪別張軌道圖的列車（G11 綠線大多是）找不到軌道，就變成整張地圖寬都畫得出來，看起來像穿牆
@@ -224,6 +289,7 @@ function mrtPowerOnFx() {
 function restoreMrtTrains() {
   // 地圖編輯器的勾勾以地圖為準：存進度之後才勾（或取消）「停著不動（通道）」「會載怪物」，接續戰場也要照新的設定。
   // 以前直接用存檔裡記的舊值：G11 綠線那台通道列車在勾勾不見時存了進度，之後補勾回去，接續戰場時還是會開走
+  mrtStaticFromSave();   // 存進度之後才勾「只是圖片」的列車：拿出列車名單、改成圖片
   for (const tr of (G && G.mrtTrains) || []) {
     tr.fixed = (tr.cars || []).some(c => c.stamp && c.stamp.mrtFixed);
     tr.monsterCar = (tr.cars || []).some(c => c.stamp && c.stamp.mrtMonsters);
@@ -1087,6 +1153,11 @@ function updateMrtTrainsNow(dt) {
 // 車內走道上的人（腳底最多到車廂下緣）會畫在兩層中間，月台上的人畫在最前面
 function mrtTrainSortables(list) {
   const v = typeof mapDrawFull !== 'undefined' && !mapDrawFull && typeof mapDrawRect !== 'undefined' ? mapDrawRect : null;   // 這一幀畫面看得到的範圍（js/maploader.js）
+  // 只是圖片的列車：整張圖跟一般物件一樣，照底邊排前後
+  for (const st of mrtStaticTrains) {
+    if (v && (st.bottom < v.y0 || st.top > v.y1)) continue;
+    list.push({ floor: typeof stampDrawFloor === 'function' ? stampDrawFloor(st.stamp) : 1, y: st.bottom, draw: () => drawMrtStaticTrain(ctx, st) });
+  }
   for (const tr of G.mrtTrains || []) {
     if (tr.state === 'away') continue;
     if (v && (tr.bottom + 3 * CELL < v.y0 || tr.top - 3 * CELL > v.y1 || !mrtTrainCars(tr, v).length)) continue;   // 整班車都在畫面外：不畫（以前 8 班車不管在哪都畫三遍，會讓 G11 這種大捷運站掉幀）
