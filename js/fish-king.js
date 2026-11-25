@@ -1,7 +1,7 @@
 /* ===== 魚頭王（魚頭君放大 2.4 倍的菁英 BOSS，住在 W118區 地下水池右上角那一池永遠不會抽乾的深水裡）=====
    ・開戰前：躲在水裡看不到。每隔 peek.every 秒會在地圖右邊的深水（maps 的 area）隨機冒出頭來，盯著溫特看 peek.stay 秒，
      不攻擊、打不到，看完就潛下去消失（冒頭的地方盡量挑照得到的；在暗處的話，黑暗中只看得到兩顆紅眼睛）
-   ・正式登場：地圖上任何一顆異質核心被打到（扣血）→ 從離那顆核心最近的右邊深水躍出來（大水花、畫面震動）→ 開戰（畫面上方出現 BOSS 血條）；
+   ・正式登場：牠守的那顆異質核心被打到（扣血）→ 從離那顆核心最近的右邊深水躍出來（大水花、畫面震動）→ 開戰（畫面上方出現 BOSS 血條）；
      之後在登場的那一池水裡游（偶爾海豚跳換到別的水池）
    ・潛水／浮上來：大部分時間潛在水裡（只看得到淡淡的影子、打不到），游到靠近岸邊的地方才浮上來（打得到）；
      要潛下去之前會先轉身、露出背面的魚肉 diveTurn 秒（打背面比較痛，魚頭君本來的特性：js/fish-head.js 的 FISH_HEAD.backMul）
@@ -29,7 +29,9 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   name: '魚頭王',
   // W118區 地下水池：home＝原位（格子座標）、area＝冒頭偷看、登場的範圍 [左邊第幾欄, 上面第幾列, 右邊第幾欄, 下面第幾列]（地圖右邊那些深水）
   //   deep＝右邊的超深水區（最右邊那一長條水池），冒頭偷看比較常挑這裡（機率 peek.deepChance）
-  maps: { 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { home: [95, 16], area: [64, 0, 115, 89], deep: [97, 26, 106, 61] } },
+//   core＝牠守哪一顆核心（離這格最近的那顆）：只有這顆被打到才會登場；沒寫＝任何一顆被打到都登場
+//     （W118 中間深水區那顆 57,19 給池核 BOSS 巨大比基尼小丑魚守，js/pool-boss.js；魚頭王守右邊那顆 86,21）
+  maps: { 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { home: [95, 16], area: [64, 0, 115, 89], deep: [97, 26, 106, 61], core: [86, 21] } },
   of: 'fish_head',            // 以哪隻怪物為基準（怪物編輯器的魚頭君）
   artDir: 'images/monster/fish-king/',
   scale: 2.64,                // 放大幾倍
@@ -116,7 +118,7 @@ function seedFishKing() {
   e.sprite = swap(e.sprite || base.sprite);
   G.fishKing = { e, ...R, area: spot.area || [0, 0, COLS - 1, ROWS - 1], deep: spot.deep || null, leapT: fkRand(P.leap.every), phase: 'hidden', sub: true, t: 0, goal: null, ang: Math.PI, age: 0,
     cannon: null, cannonT: fkRand(P.cannon.every), geysers: [], geyserT: fkRand(P.geyser.every) * .6, sparks: [], shockCd: 0,
-    minionsDone: 0, hideT: 0, home: { x: hx, y: hy }, peekT: fkRand(P.peek.every) * .5 };
+    minionsDone: 0, hideT: 0, home: { x: hx, y: hy }, peekT: fkRand(P.peek.every) * .5, core: fkGuardCore(spot) };
   e.faceRight = false;   // 開戰前不放進怪物清單：打不到、隊員不會瞄
 }
 // 從某一格深水往四周連在一起的那一池：region＝格子集合、list＝格子清單、shore＝岸邊的深水格（旁邊就是能走的地）
@@ -176,7 +178,7 @@ function updateFishKing(dt) {
   // 開戰前：躲在水裡，偶爾冒頭偷看；核心被打到就正式登場
   if (K.phase === 'hidden' || K.phase === 'peek') {
     if (K.phase === 'peek') e.hp = e.maxhp;   // 還沒開戰：打不死、不扣血
-    const hit = fkHitCore();
+    const hit = fkHitCore(K);
     if (hit) { fkIntroStart(K, hit); return; }
     if (K.phase === 'peek') { if (playerHit) fkPeekFlinch(K); fkPeekStep(K, dt); return; }
     if ((K.peekT -= dt) <= 0) { K.peekT = fkRand(P.peek.every); fkPeekStart(K); }
@@ -234,7 +236,16 @@ function updateFishKing(dt) {
 // ---- 開戰前：冒頭偷看 ----
 // 地圖上有沒有核心被打到（扣了血）：回傳那顆核心
 // （泡在深水裡、沉睡中的核心被打不會扣血，所以看 js/anomalous-core.js 記下的 struck＝被打過，或血量少了）
-const fkHitCore = () => (G.cores || []).find(c => !c.dead && (c.struck || (c.maxhp && c.hp < c.maxhp - .01))) || null;
+// K.core＝牠守的那顆（地圖設定有寫 core 時）：只看那一顆；沒寫就看全部
+const fkHitCore = K => (K && K.core ? [K.core] : (G.cores || [])).find(c => !c.dead && (c.struck || (c.maxhp && c.hp < c.maxhp - .01))) || null;
+// 牠守哪一顆核心：地圖設定的 core 那一格最近的核心（沒寫 core＝不指定）
+function fkGuardCore(spot) {
+  if (!spot.core) return null;
+  const [x, y] = center(...spot.core);
+  let best = null, bd = Infinity;
+  for (const c of G.cores || []) { const d = Math.hypot(c.x - x, c.y - y); if (d < bd) { bd = d; best = c; } }
+  return best;
+}
 // 這格深水在不在地圖右邊的範圍（maps 的 area）
 const fkInArea = (K, c, r) => c >= K.area[0] && c <= K.area[2] && r >= K.area[1] && r <= K.area[3];
 // 這格在不在右邊的超深水區（maps 的 deep）
