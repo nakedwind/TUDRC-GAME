@@ -122,6 +122,7 @@ function suspendDefeatedBattle() {
     G.destroyedBases.delete(s);
   }
   const [x, y] = playerSpawnPos(); G.player.x = x; G.player.y = y; G.player.moving = false;
+  if (typeof vitals !== 'undefined') { vitals.fromDefeat = true; saveVitals(); }   // 回應變中心時倒下的隊員不自動住院：再次出擊全隊一起在營地重生（js/vitals.js 的 arriveVitals）
   try { suspendCombatProgress(); } catch (_) { systemNotice('無法儲存作戰進度，請確認儲存空間', true); }
 }
 // 走出入口離開戰鬥地圖（js/game.js 的 enterPortal）：這張地圖一樣暫停，走回來接著打
