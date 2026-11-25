@@ -527,6 +527,7 @@ function fixMap(m) {
   if (typeof MapLevels !== 'undefined' && typeof tileById === 'function') MapLevels.syncDeck(m, tileById);   // 2 樓地面自動從圖層算的地圖：照現在的圖層、牆地板標記重算（js/map-levels.js）
   if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;
   if (Array.isArray(m.solid2) && m.solid2.length) m.solid2 = [...new Set(m.solid2)]; else delete m.solid2;
+  if (Array.isArray(m.track) && m.track.length) m.track = [...new Set(m.track)]; else delete m.track;   // 🛤️ 軌道（js/mrt-track.js）
   if (typeof MapLevels !== 'undefined') MapLevels.normalize(m);   // 🏢 樓層資料：陸橋（bridge）一定在 2 樓地面上、不是出入口；舊的 only2 換成 bridge（js/map-levels.js）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
@@ -1520,7 +1521,8 @@ function draw() {
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
   const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
   const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []), solid2Set = new Set(m.solid2 || []);   // 陸橋：2樓地面、樓層出入口
-  const deepSet = new Set([...(m.deepWater || []), ...(m.deepWaterKeep || [])]), keepSet = new Set(m.deepWaterKeep || []);   // 🛟 深水區、🔒 永遠深水（js/swim-ring.js）
+  const deepSet = new Set([...(m.deepWater || []), ...(m.deepWaterKeep || [])]), keepSet = new Set(m.deepWaterKeep || []);
+  const trackSet = new Set(m.track || []);   // 🛤️ 軌道（js/mrt-track.js）   // 🛟 深水區、🔒 永遠深水（js/swim-ring.js）
 
   const baseOk = editorBaseReuse && editorBaseCv && editorBaseFor === curId && editorBaseCv.width === cv.width && editorBaseCv.height === cv.height;
   if (baseOk) {   // 懸停：貼上次存的底圖就好
@@ -1595,6 +1597,11 @@ function draw() {
       ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6); ctx.setLineDash([]);
     }
+    if ((showSolid || brush.mode === 'track') && trackSet.has(key)) {   // 🛤️ 軌道（咖啡色斜線框）：月台邊按空白鍵跳下去、靠近月台邊跳上來；列車經過會撞人
+      ctx.fillStyle = 'rgba(160,100,40,.28)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = 'rgba(230,170,90,.9)'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
+      ctx.beginPath(); ctx.moveTo(x + 4, y + CELL / 2); ctx.lineTo(x + CELL - 4, y + CELL / 2); ctx.stroke();
+    }
     if ((showSolid || brush.mode === 'deepwater' || brush.mode === 'deepkeep') && deepSet.has(key)) {   // 🛟 深水區（深藍色斜線框）：沒坐救生圈走不進去；有微調就畫在微調後的位置
       const off = deepOffsetOf(m, key), dx2 = x + off[0], dy2 = y + off[1];
       ctx.fillStyle = 'rgba(30,110,230,.30)'; ctx.fillRect(dx2, dy2, CELL, CELL);
@@ -1666,6 +1673,10 @@ function draw() {
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
+  }
+  if (brush.mode === 'track' || (showSolid && (m.track || []).length)) {
+    ctx.fillStyle = '#e6aa5a'; ctx.textAlign = 'left';
+    ctx.fillText('🛤️ 軌道 ' + (m.track || []).length + ' 格（月台邊會出現【跳下】、軌道裡靠近月台邊會出現【跳上】；列車經過會撞倒軌道裡的人、怪物、建築，BOSS 除外）', OX + 6, OY + 52);
   }
   if (brush.mode === 'deepwater' || brush.mode === 'deepkeep' || (showSolid && ((m.deepWater || []).length || (m.deepWaterKeep || []).length))) {
     ctx.fillStyle = '#8fd0ff'; ctx.textAlign = 'left';
@@ -2019,6 +2030,11 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (isDown) deckPaintAdd = !list.includes(key);
     if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else { removeFrom(list, key); if (!(m.deepWater || []).includes(key)) { setDeepOffset(m, key, [0, 0]); solidNudgeDeep.delete(key); } }
     if (!list.length) delete m.deepWaterKeep;
+  } else if (brush.mode === 'track') {   // 🛤️ 軌道：拖曳畫一片、再畫一次＝擦掉（js/mrt-track.js）
+    const list = m.track || (m.track = []);
+    if (isDown) deckPaintAdd = !list.includes(key);
+    if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
+    if (!list.length) delete m.track;
   } else if (brush.mode === 'deepwater') {   // 🛟 深水區：拖曳畫一片、再畫一次＝擦掉
     const list = m.deepWater || (m.deepWater = []);
     if (isDown) deckPaintAdd = !list.includes(key);
@@ -4317,6 +4333,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.only2) m.only2 = m.only2.map(shiftKey);   // 舊資料
   if (m.bridge) m.bridge = m.bridge.map(shiftKey);   // 🌉 陸橋（筆刷刷的）
   if (m.deepWater) m.deepWater = m.deepWater.map(shiftKey);
+  if (m.track) m.track = m.track.map(shiftKey);
   if (m.deepWaterKeep) m.deepWaterKeep = m.deepWaterKeep.map(shiftKey);
   if (m.deepWaterOffsets) { const o = {}; for (const k in m.deepWaterOffsets) o[shiftKey(k)] = m.deepWaterOffsets[k]; m.deepWaterOffsets = o; }
   if (solidNudgeDeep.size) { const moved = [...solidNudgeDeep].map(shiftKey); solidNudgeDeep.clear(); moved.forEach(k => solidNudgeDeep.add(k)); }
@@ -4359,6 +4376,7 @@ function dropOutsideContent(m) {
   if (m.only2) m.only2 = m.only2.filter(insideKey);   // 舊資料
   if (m.bridge) { m.bridge = m.bridge.filter(insideKey); if (!m.bridge.length) delete m.bridge; }
   if (m.deepWater) { m.deepWater = m.deepWater.filter(insideKey); if (!m.deepWater.length) delete m.deepWater; }
+  if (m.track) { m.track = m.track.filter(insideKey); if (!m.track.length) delete m.track; }
   if (m.deepWaterKeep) { m.deepWaterKeep = m.deepWaterKeep.filter(insideKey); if (!m.deepWaterKeep.length) delete m.deepWaterKeep; }
   if (m.deepWaterOffsets) { for (const k in m.deepWaterOffsets) if (!insideKey(k)) delete m.deepWaterOffsets[k]; if (!Object.keys(m.deepWaterOffsets).length) delete m.deepWaterOffsets; }
   for (const k of [...solidNudgeDeep]) if (!insideKey(k)) solidNudgeDeep.delete(k);

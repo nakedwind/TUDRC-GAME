@@ -25,6 +25,9 @@ BOSSES = [
     ('MOTH_BOSS', 'js/moth-boss.js', '人面蝶后', 'human_face_butterfly'),
     ('RAT_KING', 'js/rat-king.js', '花蓮老鼠王', 'burrowing_mouse'),
     ('POOL_BOSS', 'js/pool-boss.js', '巨大比基尼小丑魚', 'clownfish'),
+    ('FISH_KING', 'js/fish-king.js', '魚頭王', 'fish_head'),
+    ('WATER_MONSTERS', 'js/water-monsters.js', '🐟 水中怪物（共用）', 'fish_head'),   # 不是一隻 BOSS：生在深水裡的魚頭君、虱目魚小子、小虱目魚小子、小丑魚
+    ('WATER_COMBAT', 'js/water-monsters.js', '🛟 泳圈上戰鬥（共用）', 'fish_head'),   # 不是一隻 BOSS：坐泳圈攻擊的攻速、命中率、後座力
     ('BOSS_CINEMA', 'js/boss-cinema.js', '🎬 BOSS 出場演出（共用）', 'milkfish_king'),   # 不是一隻 BOSS：出場時停住時間、移鏡頭的共用數字
     ('POOL_MONSTER_FALL', 'js/pool-monster-fall.js', '🌊 怪物掉進深水（共用）', 'bird_head'),   # 不是一隻 BOSS：地面怪物被推下深水後掙扎、扣血、爬回岸的共用數字
 ]

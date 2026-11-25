@@ -200,7 +200,7 @@ const mrtTrackCell = (c, r) => mrtTrackCells().has(c + ',' + r);
 // 視線、子彈能不能穿過這格：軌道上的碰撞格只擋走路（人不能跳下軌道），不擋射擊，隔著軌道可以打到對面月台的怪物。
 // 列車停在站上（車廂擋路格加好了）時，車廂蓋住的格子照樣擋（js/maploader.js 的 lineOfSightRaw 呼叫）
 function mrtSeeThroughCell(c, r) {
-  if (!mrtTrackCell(c, r)) return false;
+  if (!mrtTrackCell(c, r) && !(typeof trackCells !== 'undefined' && trackCells.has(c + ',' + r))) return false;   // 🛤️ 軌道筆刷畫的格子也一樣
   const k = c + ',' + r;
   return !((G && G.mrtTrains) || []).some(tr => tr.solidKey && tr.cover && tr.cover.has(k));
 }
@@ -422,6 +422,7 @@ function mrtTrainUpdateSolid(tr) {
     if (!open) mrtTrainClearSill(tr, type);   // 車門關上：站在門檻上的人推進車裡或推回月台
   }
   mrtTrainApplyEdges();
+  mrtBigCells = null;   // 車廂地板整理完：重算一次（整理途中算到的只有一半）
   mrtFlowDirty = true;   // 怪物的路線圖等這一幀的列車都更新完再重算一次（js/pathfinding.js 的 computeFlow）
   for (const a of [...G.towers, ...G.npcs, ...G.enemies]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
 }
@@ -900,10 +901,16 @@ function mrtRollMonsters(tr) {
 // ---- 小型／大型怪物：列車只載小型；大型怪物不進車廂、不穿過車廂 ----
 const mrtIsBigMonster = e => !!e && !e.dummy && (!!e.wide || !(MRT_TRAIN.smallMonsters || []).includes(e.type));   // 大體型（巨型史萊姆…）一律算大型
 let mrtBigCells = null, mrtBigCellsFor = null;   // 停著的列車車廂裡走得進去的格子（大型怪物當成牆）；車廂地板變了、換地圖就重算
+// 停著的列車車廂裡走得進去的格子（大型怪物當成牆、捷運軌道裡的人當成牆，js/pathfinding.js 的 trackBlocksIn）
+const MRT_EMPTY_SET = new Set();
+function mrtStoppedFloorSet() {
+  if (typeof G === 'undefined' || !G || !G.mrtTrains || !G.mrtTrains.length) return MRT_EMPTY_SET;
+  if (!mrtBigCells || mrtBigCellsFor !== G.mrtTrains) { mrtBigCellsFor = G.mrtTrains; mrtBigCells = new Set(); for (const tr of G.mrtTrains) for (const k of tr.floor || []) mrtBigCells.add(k); }
+  return mrtBigCells;
+}
 function mrtBigBlockedCell(e, c, r) {
   if (!G || !G.mrtTrains || !G.mrtTrains.length || !mrtIsBigMonster(e)) return false;
-  if (!mrtBigCells || mrtBigCellsFor !== G.mrtTrains) { mrtBigCellsFor = G.mrtTrains; mrtBigCells = new Set(); for (const tr of G.mrtTrains) for (const k of tr.floor || []) mrtBigCells.add(k); }
-  return mrtBigCells.has(c + ',' + r);
+  return mrtStoppedFloorSet().has(c + ',' + r);
 }
 // 車上載的怪物：照這張地圖的怪物比例，但只挑小型的（地圖沒有小型怪物＝載史萊姆）；史萊姆不會變成巨型
 function mrtCreateSmallMonster(x, y) {
@@ -1067,6 +1074,7 @@ function updateMrtTrainsNow(dt) {
     }
     if (mrtPlayerAboard(tr) && typeof addShake === 'function' && (tr.state === 'depart' || tr.state === 'arrive')) addShake(T.rideShake * .35);   // 坐在車上：輕輕晃
     if (tr.cargo) mrtTrainMoveCargo(tr);
+    if ((tr.state === 'arrive' || tr.state === 'depart') && typeof trackTrainHits === 'function') trackTrainHits(tr);   // 進站、開走：撞倒軌道裡的人、怪物、建築（js/mrt-track.js）
     updateMrtGates(tr);   // 月台閘門：列車剛停好時先讓位
     mrtTrainUpdateSolid(tr);
     if (tr.monsterOut && tr.solidKey === 'open') { tr.monsterOut = false; mrtSpawnMonsters(tr, tr.monsterLoad); tr.monsterLoad = 0; }   // 門開好了：車上的怪物下車

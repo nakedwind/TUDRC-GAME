@@ -322,6 +322,7 @@ function fishEggSortables(out) {
   for (const egg of G.fishEggs || []) out.push({ floor: looseFloor(egg), y: egg.y + 3, draw: () => drawFishEgg(ctx, egg) });
 }
 function drawFishEgg(ctx, egg) {
+  if (egg.water && !egg.floatBusy && typeof drawFloatingFishEgg === 'function' && drawFloatingFishEgg(egg)) return;   // 水中的小丑魚生的魚卵：浮在水上載浮載沉（js/water-monsters.js）
   const C = CLOWNFISH, now = performance.now() / 1000;
   const img = typeof monsterImage === 'function' ? monsterImage(CF_ART.egg) : null;
   {
@@ -331,8 +332,10 @@ function drawFishEgg(ctx, egg) {
     const fade = !egg.hatch && egg.life < 3 ? Math.max(.25, egg.life / 3) : 1;   // 不會孵化的：最後 3 秒慢慢乾掉
     const s = C.eggSize * (armed ? 1 + .12 * Math.sin(now * 38) : soon ? 1 + .06 * Math.sin(now * 9 + egg.seed) : 1);
     ctx.save();
-    ctx.globalAlpha = .25 * fade; ctx.fillStyle = '#071015';
-    ctx.beginPath(); ctx.ellipse(egg.x, egg.y + 3, s * .42, s * .2, 0, 0, Math.PI * 2); ctx.fill();
+    if (!egg.water) {   // 地上的影子（浮在水上的不畫）
+      ctx.globalAlpha = .25 * fade; ctx.fillStyle = '#071015';
+      ctx.beginPath(); ctx.ellipse(egg.x, egg.y + 3, s * .42, s * .2, 0, 0, Math.PI * 2); ctx.fill();
+    }
     ctx.globalAlpha = fade;
     if (img && img.complete && img.naturalWidth) {
       ctx.imageSmoothingEnabled = false;

@@ -876,6 +876,7 @@ function guideCareTarget(t, spec) {
 }
 // 坐救生圈的隊員：更新時讓深水不擋、划水變慢；更新完划上岸就收起救生圈（js/swim-ring.js）
 function updateSentry(t, dt) {
+  if (typeof trackSentryStep === 'function' && trackSentryStep(t, dt)) return;   // 跟著溫特跳進、跳出捷運軌道（js/mrt-track.js）
   if (typeof swimRingWithActor !== 'function') { updateSentryMain(t, dt); return; }
   swimRingAllyTick();
   const x0 = t.x, y0 = t.y;

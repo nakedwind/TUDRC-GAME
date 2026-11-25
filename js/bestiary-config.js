@@ -106,6 +106,7 @@ const BESTIARY_ELITES = [
   { of: 'hangi_bao', def: () => typeof CAP_KING !== 'undefined' ? CAP_KING.big : { name: '大夯吉寶', artDir: 'images/monster/hangi-bao-big/' } },   // 順順宮主帽子裡的大夯吉寶（js/elite-cap-king.js）
   { of: 'loofah_lady', def: () => typeof LOOFAH_QUEEN !== 'undefined' ? LOOFAH_QUEEN : { name: '絲瓜女王', artDir: 'images/monster/loofah-queen/' } },   // js/loofah-queen.js
   { of: 'golden_banana_king', def: () => typeof BANANA_EMPEROR !== 'undefined' ? BANANA_EMPEROR : { name: '金蕉大王', artDir: 'images/monster/banana-emperor/' } },   // js/banana-emperor.js
+  { of: 'fish_head', def: () => typeof FISH_KING !== 'undefined' ? FISH_KING : { name: '魚頭王', artDir: 'images/monster/fish-king/' } },   // js/fish-king.js（W118 地下水池）
 ];
 // 本身就是一種怪物、但遊戲裡換了專用圖的 BOSS：圖鑑也用那組圖（檔名一樣、換資料夾）
 const BESTIARY_ART_DIR = { milkfish_king: 'images/monster/milkfish-king/' };   // 虱目魚王（js/milkfish-king.js 的 MILKFISH_KING_FX.artDir）

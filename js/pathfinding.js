@@ -43,7 +43,15 @@ function setMapFloor1Auto(cells) { floor1Auto = new Set(cells || []); }
 // 找路（隊友、怪物、出生點、蓋建築…所有問「這格是不是牆」isWall 的地方）不另外存一份，而是照同樣的牆算出來：
 //   這一格的正中間（角色站的地方）有沒有被微調後的紅格或橘框蓋住。紅格被微調到隔壁格，找路就當隔壁那格是牆、原本那格空出來。
 //   這樣不管紅格怎麼微調，走路和找路看到的牆都一樣，不會出現「找路以為走得過、走過去卻撞牆卡住」。
-const wall1FRaw = k => mapWalls.has(k) || floor1Auto.has(k);
+// ---- 捷運軌道（地圖編輯器 🛤️ 軌道 筆刷，MAP.track；跳下跳上、列車撞人在 js/mrt-track.js）----
+// trackCtx＝現在處理的人在不在軌道裡（setFloorCtx 照 a.inTrack 設）。在軌道裡：只有軌道格能走，月台、停著的列車都是牆；
+// 不在軌道裡：軌道格是牆（停著的列車車廂地板例外，照樣可以上車）——進出軌道只能用跳的
+let trackCells = new Set(), trackCtx = false;
+function setTrackCells(list) { trackCells = new Set(list || []); }
+const trackStopped = k => typeof mrtStoppedFloorSet === 'function' && mrtStoppedFloorSet().has(k);
+function trackBlocksIn(k) { return !trackCells.has(k) || trackStopped(k) || (typeof mrtTrainWalls !== 'undefined' && mrtTrainWalls.has(k)); }
+const trackBlocksOut = k => trackCells.has(k) && !trackStopped(k);
+const wall1FRaw = k => (trackCells.size && (trackCtx ? trackBlocksIn(k) : trackBlocksOut(k))) || (!(trackCtx && trackCells.size) && (mapWalls.has(k) || floor1Auto.has(k)));
 // 有微調過的紅格附近（本身和周圍 8 格）才需要細算；其他格子照原本的紅格判斷就好（找路一次問上萬格，要快）
 // mapSolidOffsets 被換掉（換地圖、讀進度）會自動重算；在原地加、刪微調的程式要呼叫 solidOffsetsChanged()
 let solidOffsetsVer = 0, nudgeNear = { src: null, ver: -1, set: new Set() };
@@ -58,6 +66,7 @@ function nudgeNearSet() {
 }
 // 找路用的一樓牆：k＝'c,r'
 function wall1F(k, c, r) {
+  if (trackCells.size) { if (trackCtx) return trackBlocksIn(k); if (trackBlocksOut(k)) return true; }   // 捷運軌道（上面的 trackCtx）
   if (floor1Auto.has(k)) return true;
   if (c === undefined) [c, r] = k.split(',').map(Number);
   if (typeof tileBoxCoversCellFast === 'function' && tileBoxCoversCellFast(c, r)) return true;   // 橘框蓋住這格中間
@@ -82,6 +91,7 @@ const wallAt = (f, c, r) => hasFloors ? wallOnFloor(f, c, r) : wall1F(c + ',' + 
 // raw＝true：撞牆用，照原始的紅格（微調後的方塊由呼叫的程式自己算）；沒給＝找路用
 function wallOnFloor(f, c, r, raw = false) {
   const k = c + ',' + r;
+  if (trackCtx && trackCells.size) return trackBlocksIn(k);   // 在軌道裡：只看軌道格
   if (rampCells.has(k)) return mapWalls.has(k);
   if (f !== 2) return raw ? wall1FRaw(k) : wall1F(k, c, r);
   return !deckCells.has(k) || deckBlocked(k);
@@ -105,13 +115,14 @@ function floorUnscoped() {
 }
 // 在某一層的規則下做事（who＝角色：連他是不是站在樓層出入口上一起算；或直接給 1、2）；做完自動還原成原本的狀態
 function onFloorDo(who, fn) {
-  const keep = [floorCtx, floorOnRamp, floorOnDeck, floorScoped];
-  if (typeof who === 'number') setFloorCtxTo(who); else setFloorCtx(who);
-  try { return fn(); } finally { [floorCtx, floorOnRamp, floorOnDeck, floorScoped] = keep; }
+  const keep = [floorCtx, floorOnRamp, floorOnDeck, floorScoped, trackCtx];
+  if (typeof who === 'number') setFloorCtxTo(who); else setFloorCtx(who);   // 給樓層數字：在不在軌道裡照原本的
+  try { return fn(); } finally { [floorCtx, floorOnRamp, floorOnDeck, floorScoped, trackCtx] = keep; }
 }
 function wallNow(c, r, raw = false) {
   if (!floorScoped) floorUnscoped();
   const k = c + ',' + r, w1 = () => raw ? wall1FRaw(k) : wall1F(k, c, r);
+  if (trackCtx && trackCells.size) return trackBlocksIn(k);   // 在軌道裡：只看軌道格
   if (rampCells.has(k)) return mapWalls.has(k) || (floorCtx !== 2 && !floorOnRamp && floorOnDeck);   // 一樓的人站在 2 樓地面的格子上：不能從這邊走進手扶梯（只能從一樓那頭上去）
   if (floorOnRamp) return deckCells.has(k) ? deckBlocked(k) : w1();
   return floorCtx === 2 ? !deckCells.has(k) || deckBlocked(k) : w1();
@@ -124,11 +135,12 @@ const isWallRaw = (c, r) => hasFloors ? wallNow(c, r, true) : mapWalls.has(c + '
 function setFloorCtx(a) {
   floorScoped = true;
   floorCtx = actorFloor(a);
+  trackCtx = !!(a && a.inTrack && a.inTrackMap === MAP);   // 在捷運軌道裡（js/mrt-track.js）
   const k = hasFloors && a ? cellAt(a.x, a.y).join(',') : '';
   floorOnRamp = !!(k && rampCells.has(k));
   floorOnDeck = !!(k && deckCells.has(k) && !floorOnRamp);
 }
-function clearFloorCtx() { floorCtx = 1; floorOnRamp = false; floorOnDeck = false; floorScoped = false; }
+function clearFloorCtx() { floorCtx = 1; floorOnRamp = false; floorOnDeck = false; floorScoped = false; trackCtx = false; }
 // 角色走出「樓層出入口」時換樓層（每幀、每個角色呼叫一次；a._fk＝上一幀站的格子）
 function updateActorFloor(a) {
   if (!hasFloors || !a) return;
@@ -303,6 +315,7 @@ function edgeBetween(c, r, nc, nr) {
 // 這個點有沒有碰到薄牆（線的兩側各 EDGE_WALL.half 像素；兩端也多延伸一點，轉角接得起來）
 // 一張地圖的薄牆通常只有幾十條，直接每條檢查
 function edgeWallBlocksPoint(x, y) {
+  if (trackCtx && trackCells.size) return false;   // 在軌道裡：薄牆不算（只看軌道格）
   const [E, segs] = edgesNow(); if (!E.size) return false; if (!floorScoped) floorUnscoped();
   const lx = x - OX, ly = y - OY, H = EDGE_WALL.half;
   for (const s of segs) {
@@ -333,6 +346,7 @@ function edgeWallCrossed(x0, y0, x1, y1, r) {
 // wall(c, r)＝那一格是不是牆；牆格用方向鍵微調過（js/maploader.js 的 solidOffsetAt）：擋的是移過去之後的那一格大小的範圍，原本那格空出來的地方可以走
 // off：照哪一份像素微調（沒給＝一樓的 solidOffsetAt；2 樓用 solid2OffsetAt）
 function nudgedWallAt(x, y, wall, offFn = null) {
+  if (trackCtx && trackCells.size) return trackBlocksIn(cellAt(x, y).join(','));   // 在軌道裡：只看軌道格（不看微調、方框）
   if (typeof tileBoxBlocksPoint === 'function' && tileBoxBlocksPoint(x, y)) return true;   // 素材碰撞方框（js/tile-collisions.js）
   if (typeof poolPlatformBlocksPoint === 'function' && poolPlatformBlocksPoint(x, y)) return true;   // 抽水機平台：怪物上不去（js/pool-platform.js）
   const [c, r] = cellAt(x, y), off = offFn || (typeof solidOffsetAt === 'function' ? solidOffsetAt : () => null);
@@ -409,7 +423,8 @@ function computeFlow() {
   try { computeFlowNow(); } finally { for (const k of doorPass) mapWalls.add(k); }
 }
 function computeFlowNow() {
-  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck, keepScoped = floorScoped; floorCtx = 1; floorOnRamp = false; floorOnDeck = false; floorScoped = true;   // 算一樓的薄牆要用一樓的規則
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck, keepScoped = floorScoped, keepTrack = trackCtx; floorCtx = 1; floorOnRamp = false; floorOnDeck = false; floorScoped = true; trackCtx = false;   // 怪物路線圖照月台上的規則算（軌道裡另外由 js/mrt-track.js 處理）
+  // 算一樓的薄牆要用一樓的規則
   flow = new Array(COLS * ROWS).fill(Infinity);
   flow2 = hasFloors ? new Array(COLS * ROWS).fill(Infinity) : [];
   const q = [];   // [樓層, c, r]：營地在一樓；二樓的人要先走到樓層出入口、下到一樓才到得了
@@ -439,6 +454,6 @@ function computeFlowNow() {
       }
     }
   }
-  floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; floorScoped = keepScoped;
+  floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; floorScoped = keepScoped; trackCtx = keepTrack;
 }
 const flowAt = (c, r) => { if (!floorScoped) floorUnscoped(); return inGrid(c, r) ? (floorCtx === 2 ? flow2 : flow)[r * COLS + c] : Infinity; };

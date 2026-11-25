@@ -648,6 +648,7 @@ window.addEventListener('keydown', e => {
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else if (typeof useLadderNearPlayer === 'function' && useLadderNearPlayer()) {}   // 坐救生圈到梯子底下：收起救生圈爬上去（js/swim-ring.js）
+    else if (typeof useTrackJump === 'function' && useTrackJump()) {}   // 站在捷運軌道邊：跳下去／跳上來（js/mrt-track.js）
     else if (typeof usePoolPlatformJump === 'function' && usePoolPlatformJump()) {}   // 站在抽乾的平台邊上：跳下去（js/pool-platform.js）
     else if (typeof usePoolPlatformNearPlayer === 'function' && usePoolPlatformNearPlayer()) {}   // 坐救生圈到抽水機平台旁邊（深水時）：上岸（js/pool-platform.js）
     else if (typeof useSwimRingShore === 'function' && useSwimRingShore()) {}   // 坐救生圈划到深水區邊上：收起泳圈、站到岸上（js/swim-ring.js）
@@ -1378,6 +1379,7 @@ function newGame() {
   if (typeof seedMilkfishKing === 'function') seedMilkfishKing();   // 守在核心旁的虱目魚王（js/milkfish-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
   if (typeof seedPoolBoss === 'function') seedPoolBoss();   // 池核：守在深水區核心旁的巨大比基尼小丑魚（js/pool-boss.js）
+  if (typeof seedFishKing === 'function') seedFishKing();   // W118區 地下水池右上角的魚頭王（js/fish-king.js）
   if (typeof seedLoofahQueen === 'function') seedLoofahQueen();
   if (typeof seedRatKing === 'function') seedRatKing();   // 花蓮老鼠王：躲在鐵軌底下，核心醒了就冒出來（js/rat-king.js）
   if (typeof seedGourdKing === 'function') seedGourdKing();   // 葫蘆猴王：躲在 BOSS 牆後面，核心醒了就撞牆出來（js/gourd-king.js）
@@ -1638,6 +1640,7 @@ function updatePlayer(dt) {
     standUp();
   }
   if (typeof poolJumpUpdate === 'function' && poolJumpUpdate(p, dt)) { p.moving = false; p.anim = 0; return; }
+  if (typeof trackJumpUpdate === 'function' && trackJumpUpdate(p, dt)) { p.moving = false; p.anim = 0; return; }   // 跳下、跳上捷運軌道中（js/mrt-track.js）
   if (p.poolFall && typeof poolFallStep === 'function' && poolFallStep(p, dt)) { p.dashT = 0; p.dashPart = 0; return; }   // 失足掉進深水：搖晃、掉下去、掙扎往岸邊游（js/pool-fall.js）   // 從抽水機平台跳下去、摔在地上頭暈（js/pool-platform.js）
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
@@ -2038,7 +2041,7 @@ function updatePlayerAttack(dt) {
   if (p.gunT > 0) p.gunT -= dt;
   if (p.recoilT > 0) p.recoilT -= dt;
   p.atkCd = (p.atkCd || 0) - dt;
-  if (p.swimRing) { shotQueuedAt = -Infinity; p.gunT = 0; updateAmmoHud(); return; }   // 坐在救生圈上：只能划水，不能開槍（js/swim-ring.js）
+  // 坐在泳圈上也能開槍：射速變慢、命中率下降、每一槍往後飄（js/water-monsters.js 的 WATER_COMBAT）
   if (aimHeld && p.hp > 0) p.gunT = Math.max(p.gunT, 0.3);   // 按住時持續舉槍，不會射完一發就跳回
   if (G.over || dialogueState || elevatorMenuOpen) shotQueuedAt = -Infinity;   // 選單、對話開著：剛才那一下不要留到之後才開
   const wid = playerWeapon(p).id, paint = wid === 'paint';   // 裝的子彈（滾輪換，js/flare.js）
@@ -2059,9 +2062,10 @@ function updatePlayerAttack(dt) {
   else if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const adx = aim.x - p.x, ady = aim.y - p.y, aimAng = Math.atan2(ady, adx);
   if (paint) { p.atkCd = BULLETS.paint.gap; useBullet('paint'); }   // 漆彈：跟一般子彈一樣瞄準，打中的怪物被標記（不扣血）
-  else { p.atkCd = 1 / playerGun().rate / (typeof foodRateMul === 'function' ? foodRateMul() : 1); p.ammo--; }   // 烤魚片：射速變快（js/food.js）
+  else { p.atkCd = 1 / playerGun().rate / (typeof foodRateMul === 'function' ? foodRateMul() : 1) / (typeof ringRateMul === 'function' ? ringRateMul(p) : 1); p.ammo--; }   // ringRateMul：坐泳圈射速變慢   // 烤魚片：射速變快（js/food.js）
   p.dir = Math.abs(adx) >= Math.abs(ady) ? (adx < 0 ? 'left' : 'right') : (ady < 0 ? 'back' : 'front');
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
+  if (typeof ringRecoil === 'function') ringRecoil(p, aimAng);   // 坐泳圈：開一槍往後飄一點（js/water-monsters.js）
   const vineMate = !paint && typeof vineShotTarget === 'function' ? vineShotTarget(aim) : null;   // 游標點在被絲瓜藤纏住的隊友身上：子彈射斷藤蔓（js/loofah-lady.js）
   if (vineMate) { shootVine(p, vineMate, aim, aimAng); return; }
   const hungMate = !paint && typeof vineHangShotTarget === 'function' ? vineHangShotTarget(aim) : null;   // 游標點在被森林倒吊藤蔓吊著的隊友身上：子彈打藤蔓（js/vines.js）
@@ -2119,6 +2123,11 @@ function updatePlayerAttack(dt) {
   }
   const wild = typeof mothWildShot === 'function' ? mothWildShot(p, aimAng) : null;   // 吸了人面蝶的混亂鱗粉：八成打偏（js/human-face-butterfly.js）
   if (wild) { best = null; endX = wild.x; endY = wild.y; }
+  if (best && typeof ringShotMiss === 'function' && ringShotMiss(p)) {   // 坐泳圈開槍：命中率下降，這一槍打偏（js/water-monsters.js）
+    const off = (Math.random() < .5 ? -1 : 1) * (.12 + Math.random() * .15), L = Math.hypot(endX - p.x, endY - p.y);
+    best = null; endX = p.x + Math.cos(aimAng + off) * L; endY = p.y + Math.sin(aimAng + off) * L;
+    flash('偏了', endX, endY - 20, '#c6d1dd', .5);
+  }
   let eggShot = null;
   if (!best && typeof shootFishEggOnLine === 'function') {   // 沒打到怪物：打中魚卵就引爆（js/clownfish.js）
     eggShot = shootFishEggOnLine(p.x, p.y, endX, endY);
@@ -2455,8 +2464,8 @@ function update(dt) {
   for (const t of G.towers) {
     const spec = TYPES[t.type];
     if (typeof tickSkillBuffs === 'function') tickSkillBuffs(t, dt);   // 嚮導技能給的增益倒數（js/guide-skills.js）
-    if (t.gsCast && (t.hp <= 0 || t.swimRing || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0 || t.eatenBy || t.sleepT > 0 || t.dazeT > 0 || t.frozenT > 0)) cancelGuideCast(t);   // 嚮導詠唱中被打斷：技能取消
-    if (t.hp <= 0 || t.swimRing || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // swimRing：坐救生圈划水，不能攻擊（js/swim-ring.js）   // 倒下、被抓著（js/grab.js）、被藤蔓吊走（js/vines.js）：不攻擊
+    if (t.gsCast && (t.hp <= 0 || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0 || t.eatenBy || t.sleepT > 0 || t.dazeT > 0 || t.frozenT > 0)) cancelGuideCast(t);   // 嚮導詠唱中被打斷：技能取消
+    if (t.hp <= 0 || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 坐泳圈也能攻擊（攻速、命中率變差，js/water-monsters.js）   // 倒下、被抓著（js/grab.js）、被藤蔓吊走（js/vines.js）：不攻擊
     if (t.gunT > 0) t.gunT -= dt;   // 持槍攻擊圖計時
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0) {
       t.gunReloadT = Math.max(0, t.gunReloadT - dt);
@@ -2552,6 +2561,7 @@ function update(dt) {
         sw.fired = true;
         if (GUIDE_GUN_TYPES.has(t.type)) spawnGuideGunshot(t, sw);
         else { playSentryAttackSound(t); spawnSentryShotVisual(t, sw, spec); }
+        if (typeof ringRecoil === 'function') ringRecoil(t, sw.angle);   // 坐泳圈開槍：往後飄一點（js/water-monsters.js）
         const foe = sw.target;
         if (foe && !foe.dead && foe.hp > 0 && (!G.enemies.includes(foe) || sameFloor(foe, t)) && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) swingTarget = foe;   // 開槍時怪物已經換樓層：打空
       }
@@ -2568,7 +2578,7 @@ function update(dt) {
     if (target && G.enemies.includes(target) && !sameFloor(target, t)) target = null;   // 保險：不同樓層（陸橋上／下）的怪物打不到（不管是怎麼選到的）
     if (!target) target = pickSentryTarget(t, R);
     if (target) {
-      if (!swingTarget) t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')) * (t.taint > 85 && !t.berserk ? 0.5 : 1));   // 瀕臨暴走：攻速減半
+      if (!swingTarget) t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')) * (t.taint > 85 && !t.berserk ? 0.5 : 1) * (typeof ringRateMul === 'function' ? ringRateMul(t) : 1));   // 瀕臨暴走：攻速減半；坐泳圈：攻速變慢（js/water-monsters.js）
       if ((t.type === 'red' || t.type === 'luther' || t.type === 'avaren' || t.type === 'colyn') && !swingTarget) {
         const heavy = t.type === 'luther', dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
@@ -2611,7 +2621,7 @@ function update(dt) {
         if (hitEnemy) sfxMonsterHit(hitEnemy, 0.48, t.type + '-ult');
       } else if (typeof mothDodgesMelee === 'function' && mothDodgesMelee(t, target)) {   // 近戰打飛在空中的人面蝶：有一半打不到（js/human-face-butterfly.js）
         flashDmg('打不到', target.x, target.y - 26 - (target.slimeLift || 0), '#c6d1dd');
-      } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy * (typeof fogHitMul === 'function' ? fogHitMul(t) : 1)) {   // 霧裡命中率下降（js/fog.js）
+      } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy * (typeof fogHitMul === 'function' ? fogHitMul(t) : 1) * (t.swimRing && typeof WATER_COMBAT !== 'undefined' ? WATER_COMBAT.hitMul : 1)) {   // 霧裡命中率下降（js/fog.js）；坐泳圈命中率下降（js/water-monsters.js）
         const impactPoint = { x: target.x, y: target.y };
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
@@ -2897,7 +2907,7 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text, typeof missionLoseButton === 'function' ? missionLoseButton() : '重新部署');   // 有應變中心可回時，大按鈕＝撤退回應變中心（js/missions.js）
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { if (e && (e.ratKing || e.capKing || e.pearlBoss || e.poolBoss || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.mothBoss) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && (e.ratKing || e.capKing || e.pearlBoss || e.poolBoss || e.fishKing || e.loofahQueen || e.bananaEmperor || e.gourdKing || e.mothBoss) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;

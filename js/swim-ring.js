@@ -216,6 +216,7 @@ function useSwimRingNearPlayer() {
   const p = G && G.player; if (!p || p.sitting) return false;
   if (p.drowning) {   // 溺水中（js/pool-tide.js；失足掉進水裡也是，js/pool-fall.js）：原地坐上救生圈，位置不變
     if (!hasSwimRing()) { sfx('error'); systemNotice(SWIM_RING.noRingText, true); return true; }
+    if (typeof poolFallRingLocked === 'function' && poolFallRingLocked(p)) { sfx('error'); systemNotice('太慌張了，戴不上泳圈！', true); return true; }   // 被魚頭王的水柱噴飛落水：慌張完才能戴（js/pool-fall.js）
     p.swimRing = true; p.drowning = false; p.swimHintAt = 0;
     if (typeof poolFallEnd === 'function') poolFallEnd(p);
     swimAllyNextAt = performance.now() + swimAllyDelay();

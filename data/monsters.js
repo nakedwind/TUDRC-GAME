@@ -1771,6 +1771,145 @@ const BOSS_SETTINGS_DEFAULT = {
     "nearSpawn": 14,
     "hatchlingChance": 0.8
   },
+  "FISH_KING": {
+    "scale": 2.4,
+    "hp": 4200,
+    "rewardMul": 6,
+    "crystalMul": 6,
+    "peek": {
+      "every": [
+        14,
+        26
+      ],
+      "stay": 3.2,
+      "rise": 0.6,
+      "distMin": 4,
+      "distMax": 10
+    },
+    "introSecs": 1.1,
+    "introHeight": 150,
+    "introSplash": 3.2,
+    "knockMul": 0.6,
+    "swimSpeed": 150,
+    "surfacedSpeedMul": 0.35,
+    "turnRate": 3.5,
+    "dive": [
+      3,
+      5
+    ],
+    "surface": [
+      4,
+      6
+    ],
+    "approachMax": 4,
+    "diveTurn": 0.9,
+    "surfaceDepth": 0.45,
+    "silhouette": 0.4,
+    "defaultSee": 0.45,
+    "splashSize": 2.2,
+    "cannon": {
+      "every": [
+        2.5,
+        4
+      ],
+      "windup": 1.1,
+      "sweep": 1.4,
+      "arc": 1.1,
+      "range": 11,
+      "width": 30,
+      "damage": 14,
+      "push": 2.4
+    },
+    "geyser": {
+      "every": [
+        4,
+        6.5
+      ],
+      "warn": 1.2,
+      "column": 0.7,
+      "radius": 0.9,
+      "count": 2,
+      "range": 16,
+      "up": 620,
+      "distMin": 2,
+      "distMax": 4.5,
+      "landDamage": 14,
+      "panic": 3
+    },
+    "strandSecs": 6,
+    "strandMul": 2,
+    "hopSecs": 0.75,
+    "hopHeight": 90,
+    "flop": [
+      0.9,
+      1.8
+    ],
+    "flopLift": 16,
+    "shock": {
+      "boss": 60,
+      "mate": 12,
+      "minion": 40,
+      "daze": 0.8,
+      "cd": 0.6
+    },
+    "minions": {
+      "at": [
+        0.7,
+        0.4
+      ],
+      "count": 3,
+      "hideSecs": 4,
+      "fleeMul": 1.8
+    }
+  },
+  "WATER_MONSTERS": {
+    "spawnChance": 0.4,
+    "spawnMin": 5,
+    "spawnMax": 16,
+    "minPool": 8,
+    "swimMul": 1,
+    "noticeRange": 10,
+    "sink": 0.45,
+    "see": 0.35,
+    "milkfish": {
+      "lunge": 2.5,
+      "leapSecs": 0.55,
+      "leapHeight": 50
+    },
+    "small": {
+      "every": [
+        4,
+        7
+      ],
+      "range": 9,
+      "swimMul": 1.8,
+      "diveMax": 4,
+      "warn": 0.7,
+      "radius": 1,
+      "leap": 70,
+      "up": 520,
+      "distMin": 1.5,
+      "distMax": 3,
+      "landDamage": 10,
+      "panic": 2
+    },
+    "clown": {
+      "every": [
+        2.5,
+        4
+      ],
+      "near": 6,
+      "keep": 2.5,
+      "eggLife": 30,
+      "maxEggs": 10
+    }
+  },
+  "WATER_COMBAT": {
+    "rateMul": 0.5,
+    "hitMul": 0.7,
+    "recoil": 18,
+    "recoilSecs": 0.35
+  },
   "BOSS_CINEMA": {
     "pan": 0.8,
     "back": 0.7,

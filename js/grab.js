@@ -75,6 +75,7 @@ function dropGrab(reason) {
 // 落地：決定之後要做什麼
 function landGrab(a) {
   a.grabFall = null;
+  if (typeof setInTrack === 'function' && typeof trackCells !== 'undefined' && trackCells.size) setInTrack(a, trackCells.has(cellAt(a.x, a.y).join(',')));   // 放在軌道裡＝在軌道裡；放在月台上＝拉出來了（js/mrt-track.js）
   a.target = null; a.navPath = null; a.navGoal = null; a.waitT = .5; a.moving = false;
   if (MAP_SAFE) { a.grabWanderT = GRAB.wanderTime; return; }   // 基地：在附近閒晃一下再回去
   if (!G.towers.includes(a)) return;
@@ -96,7 +97,9 @@ function grabBlocked(x, y) {
   const r = GRAB.bodyR;
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy, [c, rr] = cellAt(px, py);
-    if (!inGrid(c, rr) || G.grid[c + ',' + rr] || solidBlocksPoint(px, py)) return true;
+    if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
+    if (typeof trackCells !== 'undefined' && trackCells.has(c + ',' + rr)) continue;   // 捷運軌道是低下去的坑：抓在空中可以拉過去（js/mrt-track.js）
+    if (solidBlocksPoint(px, py)) return true;
   }
   return false;
 }

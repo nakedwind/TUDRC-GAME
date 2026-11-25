@@ -103,6 +103,8 @@ function drawCoreBossUI(ctx, cv) {
   if (mothBars.length) rows.push(mothBars);
   const poolBars = typeof poolBossBars === 'function' ? poolBossBars() : [];   // 池核的巨大比基尼小丑魚（js/pool-boss.js）
   if (poolBars.length) rows.push(poolBars);
+  const fishKingBarList = typeof fishKingBars === 'function' ? fishKingBars() : [];   // W118 的魚頭王（js/fish-king.js）
+  if (fishKingBarList.length) rows.push(fishKingBarList);
   const queenBars = typeof loofahQueenBars === 'function' ? loofahQueenBars() : [];   // 絲瓜女王和吊著的核心（js/loofah-queen.js）
   if (queenBars.length) rows.push(queenBars);
   const emperorBars = typeof bananaEmperorBars === 'function' ? bananaEmperorBars() : [];   // 金蕉大王（js/banana-emperor.js）

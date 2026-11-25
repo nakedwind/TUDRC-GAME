@@ -39,7 +39,7 @@ const POOL_MONSTER_SWIMMERS = new Set(['slime', 'fish_head', 'milkfish_kid', 'mi
 const pmfSwimmer = e => POOL_MONSTER_SWIMMERS.has(e.type);
 
 const pmfOn = () => typeof deepWaterCells === 'function' && deepWaterCells().size > 0 && !(typeof poolDeepIsDeep === 'function' && !poolDeepIsDeep());
-const pmfCanFall = e => !!e && !e.dead && e.hp > 0 && !e.poolBoss && !e.unpushable && !e.airborne && !e.poolMFall
+const pmfCanFall = e => !!e && !e.dead && e.hp > 0 && !e.poolBoss && !e.fishKing && !e.unpushable && !e.airborne && !e.poolMFall
   && !POOL_MONSTER_FALL_IMMUNE.has(e.behavior) && !(typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(e.x, e.y));
 
 // ---- 擊退滑行被擋住時（js/combat-feel.js 的 updateEnemyFeel 呼叫）：擋住的是深水就掉下去；回傳 true＝掉下去了 ----

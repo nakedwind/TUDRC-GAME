@@ -665,6 +665,7 @@ function updateEnemyEffects(e, dt) {
   e.playerTouchCd = Math.max(0, (e.playerTouchCd || 0) - dt);
   e.playerPounceCd = Math.max(0, (e.playerPounceCd || 0) - dt);
   e.playerPounceT = Math.max(0, (e.playerPounceT || 0) - dt);
+  if (e.burnT > 0 && typeof monsterElement === 'function' && monsterElement(e) === 'water') e.burnT = 0;   // 水系怪物（魚頭君、虱目魚小子、小丑魚…）不會燒傷（data/monsters.js 的 element）
   if (e.burnT > 0) {
     e.burnT -= dt; e.burnTick = (e.burnTick || 0) - dt;
     if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; e.fireDmg = (e.fireDmg || 0) + (e.burnDmg || 5); flashDmg('-' + (e.burnDmg || 5), e.x + 12, e.y - 18, '#ff8a42', { small: true }); }   // 燒傷：小字、不搶眼
@@ -751,7 +752,10 @@ function stepEnemy(e, dt) {
   if (e.ratKing) { stepRatKing(e, dt); return; }   // 花蓮老鼠王：卡在鐵軌上、手由 updateRatKing 出（js/rat-king.js）
   if (e.ratKingHand) { e.moving = false; e.target = null; e.knockT = 0; return; }   // 老鼠王抓人的手：不動，打掉就放人
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信
-  if (e.mrtExit && typeof mrtStepExit === 'function' && mrtStepExit(e, dt)) return;   // 剛從捷運下車：先直直走到月台上（js/mrt-train.js）
+  if (e.aqua && typeof stepAquaMonster === 'function' && stepAquaMonster(e, dt)) return;   // 生在深水裡的怪物：在水裡游泳、攻擊（js/water-monsters.js；被推上岸就照陸地的行為）
+  if (e.mrtExit && typeof mrtStepExit === 'function' && mrtStepExit(e, dt)) return;
+  if (typeof trackEnemyStep === 'function' && trackEnemyStep(e, dt)) return;   // 跳進、跳出捷運軌道追人（js/mrt-track.js）   // 剛從捷運下車：先直直走到月台上（js/mrt-train.js）
+  if (e.fishKing) { stepFishKing(e, dt); return; }   // 魚頭王：游泳、潛水、擱淺都由 js/fish-king.js 自己管（擊退照樣會推動牠，被推上岸就擱淺）
   if (e.poolBoss) { stepPoolBoss(e, dt); return; }   // 池核的巨大比基尼小丑魚：游泳、潛水、擱淺都由 js/pool-boss.js 自己管
   if ((e.confuseT > 0 || e.brawlT > 0) && stepConfusedEnemy(e, dt)) return;   // 混亂（混亂彈、會混亂的隊員）：改打其他怪物；被混亂的怪物打到：回手打牠
   if (e.mothBoss) { stepMothBoss(e, dt); return; }   // 人面蝶后：抱著核心在幾個區域之間飛、築巢（js/moth-boss.js）

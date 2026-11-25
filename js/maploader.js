@@ -281,7 +281,8 @@ function initMap() {
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
-  setMapFloors(MAP.deck, MAP.ramps, MAP.solid2);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
+  setMapFloors(MAP.deck, MAP.ramps, MAP.solid2);
+  if (typeof setTrackCells === 'function') setTrackCells(MAP.track);   // 🛤️ 捷運軌道（地圖編輯器的軌道筆刷；js/pathfinding.js、js/mrt-track.js）                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
   setMapWallFaces(MapLevels.wallFaceCells(MAP, mapTileById));                         // 平台邊緣的牆面：2 樓的人不能走上去（js/map-levels.js）
   setMapFloor1Auto(MapLevels.auto1FWalls(MAP, mapTileById));                         // 只有 2 樓的格子：1 樓的人走不進去（js/map-levels.js）
   // 牆格整組重建了：上一張地圖的門、捷運閘門、可炸牆、置物箱「加進去的格子」不能再拿來刪
@@ -443,6 +444,8 @@ function hasLineOfSight(x0, y0, x1, y1) {
   return lineOfSightRaw(x0, y0, x1, y1);
 }
 function lineOfSightRaw(x0, y0, x1, y1) {
+  // 視線一律照月台上的規則算（軌道是低下去的坑，看得過去）：在軌道裡的人也看得到、打得到月台上的怪物
+  if (typeof trackCtx !== 'undefined' && trackCtx) { trackCtx = false; try { return lineOfSightRaw(x0, y0, x1, y1); } finally { trackCtx = true; } }
   if (typeof bigPearlBlocksLine === 'function' && bigPearlBlocksLine(x0, y0, x1, y1)) return false;   // 珍珠大童的大珍珠：擋住雙方的子彈和射線（js/pearl-elder.js）
   const clear = (ox, oy) => {
     const ax = x0 + ox, ay = y0 + oy, bx = x1 + ox, by = y1 + oy;
@@ -460,6 +463,7 @@ function lineOfSightRaw(x0, y0, x1, y1) {
   return clear(px, py) || clear(-px, -py);
 }
 function solidBlocksPoint(x, y) {
+  if (typeof trackCtx !== 'undefined' && trackCtx && trackCells.size) return trackBlocksIn(cellAt(x, y).join(','));   // 在捷運軌道裡：只看軌道格（js/pathfinding.js）
   const elevator = elevatorBlocksPoint(x, y);
   if (elevator !== null) return elevator;
   if (typeof tileBoxBlocksPoint === 'function' && tileBoxBlocksPoint(x, y)) return true;   // 素材碰撞方框（物件編輯器設定，js/tile-collisions.js）

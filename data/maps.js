@@ -107257,6 +107257,162 @@ const BATTLE_MAPS = [
       "46,51",
       "47,51",
       "33,49"
+    ],
+    "track": [
+      "19,85",
+      "20,85",
+      "21,85",
+      "22,85",
+      "23,85",
+      "24,85",
+      "24,86",
+      "23,86",
+      "22,86",
+      "21,86",
+      "20,86",
+      "19,86",
+      "25,85",
+      "26,85",
+      "27,85",
+      "28,85",
+      "29,85",
+      "30,85",
+      "31,85",
+      "32,85",
+      "33,85",
+      "34,85",
+      "35,85",
+      "36,85",
+      "37,85",
+      "38,85",
+      "39,85",
+      "40,85",
+      "41,85",
+      "41,86",
+      "42,86",
+      "43,86",
+      "44,86",
+      "42,85",
+      "43,85",
+      "44,85",
+      "45,85",
+      "25,86",
+      "26,86",
+      "32,86",
+      "33,86",
+      "34,86",
+      "35,86",
+      "36,86",
+      "37,86",
+      "38,86",
+      "39,86",
+      "40,86",
+      "27,86",
+      "28,86",
+      "29,86",
+      "30,86",
+      "31,86",
+      "45,86",
+      "46,86",
+      "47,86",
+      "48,86",
+      "49,86",
+      "50,86",
+      "51,86",
+      "52,86",
+      "53,86",
+      "54,86",
+      "55,86",
+      "56,86",
+      "57,86",
+      "58,86",
+      "59,86",
+      "60,86",
+      "60,85",
+      "59,85",
+      "58,85",
+      "57,85",
+      "56,85",
+      "55,85",
+      "54,85",
+      "53,85",
+      "52,85",
+      "51,85",
+      "50,85",
+      "49,85",
+      "48,85",
+      "47,85",
+      "46,85",
+      "63,102",
+      "62,102",
+      "61,102",
+      "60,102",
+      "59,102",
+      "58,102",
+      "57,102",
+      "56,102",
+      "55,102",
+      "54,102",
+      "53,102",
+      "52,102",
+      "51,102",
+      "50,102",
+      "49,102",
+      "48,102",
+      "47,102",
+      "46,102",
+      "45,102",
+      "44,102",
+      "43,102",
+      "42,102",
+      "41,102",
+      "40,102",
+      "39,102",
+      "38,102",
+      "37,102",
+      "36,102",
+      "35,102",
+      "34,102",
+      "33,102",
+      "33,101",
+      "34,101",
+      "35,101",
+      "36,101",
+      "37,101",
+      "38,101",
+      "39,101",
+      "40,101",
+      "41,101",
+      "42,101",
+      "43,101",
+      "44,101",
+      "45,101",
+      "46,101",
+      "47,101",
+      "48,101",
+      "49,101",
+      "50,101",
+      "51,101",
+      "52,101",
+      "53,101",
+      "54,101",
+      "55,101",
+      "56,101",
+      "57,101",
+      "58,101",
+      "59,101",
+      "60,101",
+      "61,101",
+      "62,101",
+      "63,101",
+      "32,101",
+      "32,102",
+      "31,102",
+      "31,101",
+      "30,101",
+      "30,102",
+      "29,102",
+      "29,101"
     ]
   },
   {
@@ -153226,6 +153382,120 @@ const BATTLE_MAPS = [
       "77,61",
       "70,65",
       "77,65"
+    ],
+    "track": [
+      "27,84",
+      "28,84",
+      "29,84",
+      "31,84",
+      "32,84",
+      "33,84",
+      "34,84",
+      "35,84",
+      "36,84",
+      "37,84",
+      "30,84",
+      "25,84",
+      "24,84",
+      "26,84",
+      "38,84",
+      "39,84",
+      "40,84",
+      "41,84",
+      "42,84",
+      "43,84",
+      "44,84",
+      "45,84",
+      "46,84",
+      "47,84",
+      "48,84",
+      "49,84",
+      "50,84",
+      "51,84",
+      "52,84",
+      "53,84",
+      "54,84",
+      "55,84",
+      "56,84",
+      "57,84",
+      "58,84",
+      "59,84",
+      "60,84",
+      "61,84",
+      "62,84",
+      "62,85",
+      "61,85",
+      "60,85",
+      "59,85",
+      "58,85",
+      "57,85",
+      "56,85",
+      "55,85",
+      "54,85",
+      "53,85",
+      "52,85",
+      "51,85",
+      "50,85",
+      "44,85",
+      "43,85",
+      "42,85",
+      "41,85",
+      "40,85",
+      "39,85",
+      "38,85",
+      "37,85",
+      "36,85",
+      "35,85",
+      "34,85",
+      "33,85",
+      "32,85",
+      "31,85",
+      "30,85",
+      "29,85",
+      "25,85",
+      "24,85",
+      "26,85",
+      "27,85",
+      "28,85",
+      "45,85",
+      "46,85",
+      "47,85",
+      "48,85",
+      "49,85",
+      "37,9",
+      "38,9",
+      "39,9",
+      "40,9",
+      "41,9",
+      "42,9",
+      "43,9",
+      "44,9",
+      "45,9",
+      "46,9",
+      "47,9",
+      "48,9",
+      "49,9",
+      "50,9",
+      "51,9",
+      "52,9",
+      "52,10",
+      "51,10",
+      "50,10",
+      "48,10",
+      "47,10",
+      "46,10",
+      "45,10",
+      "44,10",
+      "43,10",
+      "42,10",
+      "41,10",
+      "40,10",
+      "39,10",
+      "38,10",
+      "37,10",
+      "36,10",
+      "36,9",
+      "49,10"
     ]
   },
   {
@@ -169377,6 +169647,723 @@ const BATTLE_MAPS = [
       "90,15",
       "91,15",
       "92,15"
+    ],
+    "track": [
+      "48,87",
+      "47,87",
+      "46,87",
+      "45,87",
+      "44,87",
+      "43,87",
+      "42,87",
+      "41,87",
+      "40,87",
+      "39,87",
+      "38,87",
+      "37,87",
+      "36,87",
+      "34,87",
+      "34,88",
+      "35,88",
+      "36,88",
+      "37,88",
+      "38,88",
+      "40,88",
+      "41,88",
+      "42,88",
+      "43,88",
+      "44,88",
+      "45,88",
+      "46,88",
+      "47,88",
+      "48,88",
+      "39,88",
+      "35,87",
+      "9,87",
+      "10,87",
+      "11,87",
+      "12,87",
+      "13,87",
+      "14,87",
+      "15,87",
+      "16,87",
+      "17,87",
+      "18,87",
+      "19,87",
+      "20,87",
+      "21,87",
+      "22,87",
+      "23,87",
+      "24,87",
+      "25,87",
+      "26,87",
+      "27,87",
+      "28,87",
+      "29,87",
+      "30,87",
+      "31,87",
+      "32,87",
+      "33,87",
+      "33,88",
+      "32,88",
+      "31,88",
+      "30,88",
+      "29,88",
+      "28,88",
+      "27,88",
+      "26,88",
+      "25,88",
+      "24,88",
+      "23,88",
+      "22,88",
+      "21,88",
+      "20,88",
+      "19,88",
+      "18,88",
+      "17,88",
+      "16,88",
+      "15,88",
+      "10,88",
+      "9,88",
+      "11,88",
+      "12,88",
+      "13,88",
+      "14,88",
+      "9,70",
+      "10,70",
+      "11,70",
+      "13,70",
+      "15,70",
+      "16,70",
+      "17,70",
+      "17,71",
+      "18,71",
+      "16,71",
+      "15,71",
+      "14,71",
+      "13,71",
+      "12,71",
+      "11,71",
+      "10,71",
+      "9,71",
+      "12,70",
+      "14,70",
+      "18,70",
+      "19,70",
+      "21,70",
+      "22,70",
+      "23,70",
+      "24,70",
+      "25,70",
+      "26,70",
+      "27,70",
+      "28,70",
+      "28,71",
+      "27,71",
+      "26,71",
+      "25,71",
+      "24,71",
+      "23,71",
+      "22,71",
+      "21,71",
+      "20,71",
+      "19,71",
+      "20,70",
+      "48,70",
+      "48,71",
+      "47,71",
+      "46,71",
+      "45,71",
+      "44,71",
+      "43,71",
+      "42,71",
+      "41,71",
+      "40,71",
+      "39,71",
+      "38,71",
+      "37,71",
+      "36,71",
+      "35,71",
+      "34,71",
+      "33,71",
+      "32,71",
+      "31,71",
+      "30,71",
+      "29,71",
+      "29,70",
+      "30,70",
+      "31,70",
+      "32,70",
+      "33,70",
+      "34,70",
+      "35,70",
+      "36,70",
+      "37,70",
+      "38,70",
+      "39,70",
+      "40,70",
+      "41,70",
+      "42,70",
+      "43,70",
+      "44,70",
+      "45,70",
+      "46,70",
+      "47,70",
+      "12,54",
+      "13,54",
+      "14,54",
+      "15,54",
+      "9,54",
+      "10,54",
+      "11,54",
+      "16,54",
+      "17,54",
+      "18,54",
+      "19,54",
+      "20,54",
+      "21,54",
+      "22,54",
+      "23,54",
+      "24,54",
+      "25,54",
+      "26,54",
+      "27,54",
+      "28,54",
+      "29,54",
+      "30,54",
+      "31,54",
+      "32,54",
+      "33,54",
+      "34,54",
+      "34,55",
+      "33,55",
+      "32,55",
+      "31,55",
+      "30,55",
+      "29,55",
+      "28,55",
+      "27,55",
+      "26,55",
+      "25,55",
+      "24,55",
+      "23,55",
+      "22,55",
+      "21,55",
+      "20,55",
+      "19,55",
+      "18,55",
+      "17,55",
+      "16,55",
+      "15,55",
+      "14,55",
+      "13,55",
+      "12,55",
+      "11,55",
+      "10,55",
+      "9,55",
+      "35,54",
+      "36,54",
+      "37,54",
+      "39,54",
+      "40,54",
+      "41,54",
+      "42,54",
+      "43,54",
+      "44,54",
+      "45,54",
+      "46,54",
+      "38,54",
+      "38,55",
+      "37,55",
+      "36,55",
+      "35,55",
+      "39,55",
+      "40,55",
+      "41,55",
+      "42,55",
+      "43,55",
+      "44,55",
+      "45,55",
+      "46,55",
+      "47,55",
+      "48,55",
+      "49,55",
+      "50,55",
+      "51,55",
+      "52,55",
+      "53,55",
+      "54,55",
+      "55,55",
+      "56,55",
+      "57,55",
+      "59,55",
+      "60,55",
+      "61,55",
+      "62,55",
+      "63,55",
+      "64,55",
+      "65,55",
+      "66,55",
+      "66,54",
+      "65,54",
+      "64,54",
+      "63,54",
+      "62,54",
+      "61,54",
+      "60,54",
+      "59,54",
+      "58,54",
+      "57,54",
+      "56,54",
+      "55,54",
+      "54,54",
+      "53,54",
+      "52,54",
+      "51,54",
+      "50,54",
+      "49,54",
+      "48,54",
+      "47,54",
+      "58,55",
+      "35,45",
+      "36,45",
+      "38,45",
+      "39,45",
+      "40,45",
+      "41,45",
+      "42,45",
+      "43,45",
+      "44,45",
+      "44,46",
+      "43,46",
+      "42,46",
+      "40,46",
+      "39,46",
+      "38,46",
+      "37,46",
+      "36,46",
+      "35,46",
+      "37,45",
+      "41,46",
+      "45,46",
+      "46,46",
+      "47,46",
+      "48,46",
+      "49,46",
+      "50,46",
+      "51,46",
+      "52,46",
+      "53,46",
+      "54,46",
+      "55,46",
+      "56,46",
+      "57,46",
+      "58,46",
+      "59,46",
+      "60,46",
+      "61,46",
+      "62,46",
+      "63,46",
+      "64,46",
+      "65,46",
+      "65,45",
+      "64,45",
+      "63,45",
+      "62,45",
+      "61,45",
+      "60,45",
+      "59,45",
+      "58,45",
+      "57,45",
+      "56,45",
+      "55,45",
+      "54,45",
+      "53,45",
+      "52,45",
+      "51,45",
+      "50,45",
+      "49,45",
+      "48,45",
+      "47,45",
+      "46,45",
+      "45,45",
+      "66,45",
+      "67,45",
+      "68,45",
+      "69,45",
+      "70,45",
+      "71,45",
+      "71,46",
+      "70,46",
+      "69,46",
+      "68,46",
+      "67,46",
+      "66,46",
+      "71,37",
+      "71,38",
+      "70,38",
+      "69,38",
+      "68,38",
+      "67,38",
+      "66,38",
+      "65,38",
+      "64,38",
+      "63,38",
+      "62,38",
+      "61,38",
+      "60,38",
+      "59,38",
+      "58,38",
+      "57,38",
+      "56,38",
+      "55,38",
+      "54,38",
+      "53,38",
+      "52,38",
+      "51,38",
+      "50,38",
+      "49,38",
+      "48,38",
+      "47,38",
+      "46,38",
+      "45,38",
+      "44,38",
+      "43,38",
+      "42,38",
+      "41,38",
+      "40,38",
+      "39,38",
+      "38,38",
+      "37,38",
+      "36,38",
+      "35,38",
+      "35,37",
+      "36,37",
+      "37,37",
+      "38,37",
+      "39,37",
+      "40,37",
+      "41,37",
+      "42,37",
+      "43,37",
+      "44,37",
+      "45,37",
+      "46,37",
+      "47,37",
+      "48,37",
+      "49,37",
+      "50,37",
+      "51,37",
+      "52,37",
+      "53,37",
+      "54,37",
+      "55,37",
+      "56,37",
+      "57,37",
+      "58,37",
+      "59,37",
+      "60,37",
+      "61,37",
+      "62,37",
+      "63,37",
+      "64,37",
+      "65,37",
+      "66,37",
+      "67,37",
+      "68,37",
+      "69,37",
+      "70,37",
+      "79,29",
+      "80,29",
+      "80,30",
+      "79,30",
+      "78,30",
+      "77,30",
+      "76,30",
+      "75,30",
+      "74,30",
+      "73,30",
+      "72,30",
+      "71,30",
+      "70,30",
+      "69,30",
+      "68,30",
+      "67,30",
+      "66,30",
+      "65,30",
+      "64,30",
+      "63,30",
+      "62,30",
+      "61,30",
+      "60,30",
+      "59,30",
+      "58,30",
+      "57,30",
+      "56,30",
+      "55,30",
+      "54,30",
+      "53,30",
+      "52,30",
+      "51,30",
+      "51,29",
+      "52,29",
+      "53,29",
+      "54,29",
+      "55,29",
+      "56,29",
+      "57,29",
+      "58,29",
+      "59,29",
+      "60,29",
+      "61,29",
+      "62,29",
+      "63,29",
+      "64,29",
+      "65,29",
+      "66,29",
+      "67,29",
+      "68,29",
+      "69,29",
+      "70,29",
+      "71,29",
+      "72,29",
+      "73,29",
+      "74,29",
+      "75,29",
+      "76,29",
+      "78,29",
+      "77,29",
+      "50,29",
+      "50,30",
+      "49,30",
+      "48,30",
+      "47,30",
+      "46,30",
+      "45,30",
+      "44,30",
+      "43,30",
+      "42,30",
+      "41,30",
+      "40,30",
+      "40,29",
+      "39,29",
+      "41,29",
+      "42,29",
+      "43,29",
+      "44,29",
+      "45,29",
+      "46,29",
+      "47,29",
+      "48,29",
+      "49,29",
+      "18,29",
+      "18,30",
+      "19,30",
+      "20,30",
+      "21,30",
+      "22,30",
+      "23,30",
+      "24,30",
+      "25,30",
+      "26,30",
+      "27,30",
+      "28,30",
+      "29,30",
+      "30,30",
+      "31,30",
+      "32,30",
+      "33,30",
+      "34,30",
+      "35,30",
+      "36,30",
+      "37,30",
+      "38,30",
+      "39,30",
+      "38,29",
+      "37,29",
+      "36,29",
+      "35,29",
+      "34,29",
+      "33,29",
+      "32,29",
+      "31,29",
+      "30,29",
+      "29,29",
+      "28,29",
+      "27,29",
+      "26,29",
+      "25,29",
+      "24,29",
+      "23,29",
+      "22,29",
+      "21,29",
+      "20,29",
+      "19,29",
+      "18,18",
+      "19,18",
+      "22,18",
+      "24,18",
+      "25,18",
+      "26,18",
+      "27,18",
+      "28,18",
+      "29,18",
+      "30,18",
+      "31,18",
+      "32,18",
+      "33,18",
+      "34,18",
+      "35,18",
+      "36,18",
+      "37,18",
+      "38,18",
+      "39,18",
+      "40,18",
+      "41,18",
+      "41,19",
+      "40,19",
+      "39,19",
+      "38,19",
+      "37,19",
+      "36,19",
+      "35,19",
+      "34,19",
+      "33,19",
+      "32,19",
+      "31,19",
+      "30,19",
+      "29,19",
+      "28,19",
+      "27,19",
+      "26,19",
+      "25,19",
+      "24,19",
+      "23,19",
+      "22,19",
+      "21,19",
+      "20,19",
+      "19,19",
+      "21,18",
+      "20,18",
+      "18,19",
+      "23,18",
+      "42,18",
+      "43,18",
+      "44,18",
+      "45,18",
+      "46,18",
+      "47,18",
+      "48,18",
+      "49,18",
+      "50,18",
+      "51,18",
+      "52,18",
+      "53,18",
+      "54,18",
+      "55,18",
+      "56,18",
+      "57,18",
+      "58,18",
+      "58,19",
+      "57,19",
+      "56,19",
+      "55,19",
+      "54,19",
+      "53,19",
+      "52,19",
+      "51,19",
+      "50,19",
+      "49,19",
+      "48,19",
+      "47,19",
+      "46,19",
+      "45,19",
+      "44,19",
+      "43,19",
+      "42,19",
+      "59,18",
+      "60,18",
+      "61,18",
+      "64,18",
+      "65,18",
+      "67,18",
+      "68,18",
+      "69,18",
+      "70,18",
+      "71,18",
+      "72,18",
+      "73,18",
+      "74,18",
+      "75,18",
+      "76,18",
+      "77,18",
+      "78,18",
+      "79,18",
+      "80,18",
+      "80,19",
+      "79,19",
+      "78,19",
+      "77,19",
+      "76,19",
+      "75,19",
+      "74,19",
+      "73,19",
+      "72,19",
+      "71,19",
+      "70,19",
+      "69,19",
+      "68,19",
+      "67,19",
+      "66,19",
+      "65,19",
+      "64,19",
+      "62,19",
+      "61,19",
+      "60,19",
+      "59,19",
+      "62,18",
+      "63,18",
+      "66,18",
+      "66,7",
+      "65,7",
+      "64,7",
+      "63,7",
+      "62,7",
+      "60,7",
+      "59,7",
+      "58,7",
+      "57,7",
+      "56,7",
+      "55,7",
+      "54,7",
+      "53,7",
+      "52,7",
+      "61,7",
+      "58,6",
+      "53,6",
+      "52,6",
+      "51,6",
+      "50,6",
+      "49,6",
+      "50,7",
+      "51,7",
+      "66,6",
+      "65,6",
+      "64,6",
+      "63,6",
+      "62,6",
+      "61,6",
+      "60,6",
+      "59,6",
+      "57,6",
+      "56,6",
+      "55,6",
+      "54,6",
+      "48,6",
+      "47,6",
+      "47,7",
+      "48,7",
+      "49,7"
     ]
   },
   {
@@ -180150,6 +181137,122 @@ const BATTLE_MAPS = [
         "id": "top",
         "name": "☁️ 上層"
       }
+    ],
+    "track": [
+      "49,6",
+      "48,6",
+      "47,6",
+      "46,6",
+      "45,6",
+      "44,6",
+      "43,6",
+      "42,6",
+      "41,6",
+      "40,6",
+      "39,6",
+      "38,6",
+      "37,6",
+      "36,6",
+      "35,6",
+      "34,6",
+      "33,6",
+      "32,6",
+      "31,6",
+      "30,6",
+      "29,6",
+      "28,7",
+      "29,7",
+      "30,7",
+      "31,7",
+      "32,7",
+      "33,7",
+      "34,7",
+      "35,7",
+      "36,7",
+      "37,7",
+      "38,7",
+      "39,7",
+      "40,7",
+      "41,7",
+      "42,7",
+      "43,7",
+      "44,7",
+      "45,7",
+      "46,7",
+      "47,7",
+      "48,7",
+      "49,7",
+      "28,6",
+      "27,6",
+      "26,6",
+      "25,6",
+      "24,6",
+      "23,6",
+      "22,6",
+      "21,6",
+      "20,6",
+      "20,7",
+      "21,7",
+      "22,7",
+      "23,7",
+      "24,7",
+      "25,7",
+      "21,107",
+      "21,108",
+      "22,108",
+      "24,108",
+      "24,107",
+      "25,107",
+      "26,107",
+      "27,107",
+      "28,107",
+      "29,107",
+      "30,107",
+      "31,107",
+      "32,107",
+      "33,107",
+      "34,107",
+      "35,107",
+      "36,107",
+      "37,107",
+      "38,107",
+      "39,107",
+      "40,107",
+      "41,107",
+      "42,107",
+      "43,107",
+      "44,107",
+      "45,107",
+      "46,107",
+      "48,107",
+      "48,108",
+      "47,108",
+      "46,108",
+      "45,108",
+      "43,108",
+      "42,108",
+      "41,108",
+      "40,108",
+      "39,108",
+      "38,108",
+      "37,108",
+      "36,108",
+      "35,108",
+      "34,108",
+      "33,108",
+      "32,108",
+      "31,108",
+      "30,108",
+      "29,108",
+      "28,108",
+      "27,108",
+      "26,108",
+      "25,108",
+      "22,107",
+      "23,107",
+      "23,108",
+      "44,108",
+      "47,107"
     ]
   },
   {
@@ -180162,7 +181265,10 @@ const BATTLE_MAPS = [
       "ground4": {},
       "object6": {},
       "object5": {},
-      "object9": {},
+      "object9": {
+        "73,22": "tile_interactive_pickup_battery",
+        "86,26": "tile_interactive_pickup_almond_water"
+      },
       "object11": {},
       "object12": {},
       "object13": {},
@@ -180180,187 +181286,182 @@ const BATTLE_MAPS = [
       "object23": {},
       "object24": {},
       "object25": {
-        "89,65": "tile_poolcore_deep_water",
-        "90,65": "tile_poolcore_deep_water",
-        "91,65": "tile_poolcore_deep_water",
-        "93,65": "tile_poolcore_deep_water",
-        "94,65": "tile_poolcore_deep_water",
-        "95,65": "tile_poolcore_deep_water",
-        "96,65": "tile_poolcore_deep_water",
-        "96,66": "tile_poolcore_deep_water",
-        "95,66": "tile_poolcore_deep_water",
-        "94,66": "tile_poolcore_deep_water",
-        "93,66": "tile_poolcore_deep_water",
-        "92,65": "tile_poolcore_deep_water",
-        "88,65": "tile_poolcore_deep_water",
-        "88,66": "tile_poolcore_deep_water",
-        "88,67": "tile_poolcore_deep_water",
-        "88,68": "tile_poolcore_deep_water",
-        "88,69": "tile_poolcore_deep_water",
+        "89,70": "tile_poolcore_deep_water",
+        "90,70": "tile_poolcore_deep_water",
+        "91,70": "tile_poolcore_deep_water",
+        "93,70": "tile_poolcore_deep_water",
+        "94,70": "tile_poolcore_deep_water",
+        "95,70": "tile_poolcore_deep_water",
+        "96,70": "tile_poolcore_deep_water",
+        "96,71": "tile_poolcore_deep_water",
+        "95,71": "tile_poolcore_deep_water",
+        "94,71": "tile_poolcore_deep_water",
+        "93,71": "tile_poolcore_deep_water",
+        "92,70": "tile_poolcore_deep_water",
         "88,70": "tile_poolcore_deep_water",
         "88,71": "tile_poolcore_deep_water",
         "88,72": "tile_poolcore_deep_water",
-        "89,72": "tile_poolcore_deep_water",
-        "89,73": "tile_poolcore_deep_water",
-        "89,74": "tile_poolcore_deep_water",
-        "89,75": "tile_poolcore_deep_water",
-        "88,75": "tile_poolcore_deep_water",
-        "88,74": "tile_poolcore_deep_water",
         "88,73": "tile_poolcore_deep_water",
-        "89,68": "tile_poolcore_deep_water",
-        "89,67": "tile_poolcore_deep_water",
-        "90,66": "tile_poolcore_deep_water",
-        "90,67": "tile_poolcore_deep_water",
-        "90,69": "tile_poolcore_deep_water",
-        "90,70": "tile_poolcore_deep_water",
-        "90,71": "tile_poolcore_deep_water",
-        "90,72": "tile_poolcore_deep_water",
-        "90,73": "tile_poolcore_deep_water",
-        "90,74": "tile_poolcore_deep_water",
-        "90,68": "tile_poolcore_deep_water",
-        "89,66": "tile_poolcore_deep_water",
-        "91,66": "tile_poolcore_deep_water",
-        "92,66": "tile_poolcore_deep_water",
-        "93,67": "tile_poolcore_deep_water",
-        "92,68": "tile_poolcore_deep_water",
-        "91,68": "tile_poolcore_deep_water",
-        "89,69": "tile_poolcore_deep_water",
-        "89,70": "tile_poolcore_deep_water",
-        "89,71": "tile_poolcore_deep_water",
-        "91,74": "tile_poolcore_deep_water",
-        "92,74": "tile_poolcore_deep_water",
-        "92,73": "tile_poolcore_deep_water",
-        "92,72": "tile_poolcore_deep_water",
-        "92,71": "tile_poolcore_deep_water",
-        "92,70": "tile_poolcore_deep_water",
-        "92,69": "tile_poolcore_deep_water",
-        "91,69": "tile_poolcore_deep_water",
-        "91,67": "tile_poolcore_deep_water",
-        "92,67": "tile_poolcore_deep_water",
-        "94,67": "tile_poolcore_deep_water",
-        "95,67": "tile_poolcore_deep_water",
-        "96,67": "tile_poolcore_deep_water",
-        "97,68": "tile_poolcore_deep_water",
-        "97,69": "tile_poolcore_deep_water",
-        "96,70": "tile_poolcore_deep_water",
-        "96,71": "tile_poolcore_deep_water",
-        "96,72": "tile_poolcore_deep_water",
-        "96,73": "tile_poolcore_deep_water",
-        "96,74": "tile_poolcore_deep_water",
-        "96,75": "tile_poolcore_deep_water",
-        "96,76": "tile_poolcore_deep_water",
+        "88,74": "tile_poolcore_deep_water",
+        "88,75": "tile_poolcore_deep_water",
         "88,76": "tile_poolcore_deep_water",
         "88,77": "tile_poolcore_deep_water",
-        "88,78": "tile_poolcore_deep_water",
-        "88,79": "tile_poolcore_deep_water",
-        "88,80": "tile_poolcore_deep_water",
+        "89,77": "tile_poolcore_deep_water",
+        "89,78": "tile_poolcore_deep_water",
+        "89,79": "tile_poolcore_deep_water",
         "89,80": "tile_poolcore_deep_water",
+        "88,80": "tile_poolcore_deep_water",
+        "88,79": "tile_poolcore_deep_water",
+        "88,78": "tile_poolcore_deep_water",
+        "89,73": "tile_poolcore_deep_water",
+        "89,72": "tile_poolcore_deep_water",
+        "90,71": "tile_poolcore_deep_water",
+        "90,72": "tile_poolcore_deep_water",
+        "90,74": "tile_poolcore_deep_water",
+        "90,75": "tile_poolcore_deep_water",
+        "90,76": "tile_poolcore_deep_water",
+        "90,77": "tile_poolcore_deep_water",
+        "90,78": "tile_poolcore_deep_water",
+        "90,79": "tile_poolcore_deep_water",
+        "90,73": "tile_poolcore_deep_water",
+        "89,71": "tile_poolcore_deep_water",
+        "91,71": "tile_poolcore_deep_water",
+        "92,71": "tile_poolcore_deep_water",
+        "93,72": "tile_poolcore_deep_water",
+        "92,73": "tile_poolcore_deep_water",
+        "91,73": "tile_poolcore_deep_water",
+        "89,74": "tile_poolcore_deep_water",
+        "89,75": "tile_poolcore_deep_water",
+        "89,76": "tile_poolcore_deep_water",
+        "91,79": "tile_poolcore_deep_water",
+        "92,79": "tile_poolcore_deep_water",
+        "92,78": "tile_poolcore_deep_water",
+        "92,77": "tile_poolcore_deep_water",
+        "92,76": "tile_poolcore_deep_water",
+        "92,75": "tile_poolcore_deep_water",
+        "92,74": "tile_poolcore_deep_water",
+        "91,74": "tile_poolcore_deep_water",
+        "91,72": "tile_poolcore_deep_water",
+        "92,72": "tile_poolcore_deep_water",
+        "94,72": "tile_poolcore_deep_water",
+        "95,72": "tile_poolcore_deep_water",
+        "96,72": "tile_poolcore_deep_water",
+        "97,73": "tile_poolcore_deep_water",
+        "97,74": "tile_poolcore_deep_water",
+        "96,75": "tile_poolcore_deep_water",
+        "96,76": "tile_poolcore_deep_water",
+        "96,77": "tile_poolcore_deep_water",
+        "96,78": "tile_poolcore_deep_water",
+        "96,79": "tile_poolcore_deep_water",
+        "96,80": "tile_poolcore_deep_water",
+        "96,81": "tile_poolcore_deep_water",
+        "88,81": "tile_poolcore_deep_water",
+        "88,82": "tile_poolcore_deep_water",
+        "88,83": "tile_poolcore_deep_water",
+        "88,84": "tile_poolcore_deep_water",
+        "88,85": "tile_poolcore_deep_water",
+        "89,85": "tile_poolcore_deep_water",
+        "90,85": "tile_poolcore_deep_water",
+        "91,85": "tile_poolcore_deep_water",
+        "92,85": "tile_poolcore_deep_water",
+        "93,85": "tile_poolcore_deep_water",
+        "94,85": "tile_poolcore_deep_water",
+        "95,85": "tile_poolcore_deep_water",
+        "96,85": "tile_poolcore_deep_water",
+        "96,84": "tile_poolcore_deep_water",
+        "97,84": "tile_poolcore_deep_water",
+        "97,83": "tile_poolcore_deep_water",
+        "97,82": "tile_poolcore_deep_water",
+        "97,81": "tile_poolcore_deep_water",
+        "97,80": "tile_poolcore_deep_water",
+        "97,79": "tile_poolcore_deep_water",
+        "97,78": "tile_poolcore_deep_water",
+        "97,77": "tile_poolcore_deep_water",
+        "96,74": "tile_poolcore_deep_water",
+        "96,73": "tile_poolcore_deep_water",
+        "95,73": "tile_poolcore_deep_water",
+        "94,73": "tile_poolcore_deep_water",
+        "93,74": "tile_poolcore_deep_water",
+        "93,75": "tile_poolcore_deep_water",
+        "93,76": "tile_poolcore_deep_water",
+        "93,77": "tile_poolcore_deep_water",
+        "93,78": "tile_poolcore_deep_water",
+        "93,79": "tile_poolcore_deep_water",
+        "93,81": "tile_poolcore_deep_water",
+        "93,83": "tile_poolcore_deep_water",
+        "92,84": "tile_poolcore_deep_water",
+        "90,84": "tile_poolcore_deep_water",
+        "89,83": "tile_poolcore_deep_water",
+        "89,82": "tile_poolcore_deep_water",
+        "89,81": "tile_poolcore_deep_water",
+        "89,84": "tile_poolcore_deep_water",
+        "91,83": "tile_poolcore_deep_water",
+        "90,82": "tile_poolcore_deep_water",
+        "90,81": "tile_poolcore_deep_water",
         "90,80": "tile_poolcore_deep_water",
+        "91,75": "tile_poolcore_deep_water",
+        "91,76": "tile_poolcore_deep_water",
+        "91,77": "tile_poolcore_deep_water",
+        "91,78": "tile_poolcore_deep_water",
         "91,80": "tile_poolcore_deep_water",
+        "91,81": "tile_poolcore_deep_water",
+        "92,81": "tile_poolcore_deep_water",
+        "91,82": "tile_poolcore_deep_water",
+        "91,84": "tile_poolcore_deep_water",
+        "90,83": "tile_poolcore_deep_water",
+        "92,83": "tile_poolcore_deep_water",
+        "92,82": "tile_poolcore_deep_water",
+        "93,82": "tile_poolcore_deep_water",
         "92,80": "tile_poolcore_deep_water",
         "93,80": "tile_poolcore_deep_water",
         "94,80": "tile_poolcore_deep_water",
         "95,80": "tile_poolcore_deep_water",
-        "96,80": "tile_poolcore_deep_water",
-        "96,79": "tile_poolcore_deep_water",
-        "97,79": "tile_poolcore_deep_water",
-        "97,78": "tile_poolcore_deep_water",
-        "97,77": "tile_poolcore_deep_water",
-        "97,76": "tile_poolcore_deep_water",
-        "97,75": "tile_poolcore_deep_water",
-        "97,74": "tile_poolcore_deep_water",
-        "97,73": "tile_poolcore_deep_water",
-        "97,72": "tile_poolcore_deep_water",
-        "96,69": "tile_poolcore_deep_water",
-        "96,68": "tile_poolcore_deep_water",
-        "95,68": "tile_poolcore_deep_water",
-        "94,68": "tile_poolcore_deep_water",
-        "93,69": "tile_poolcore_deep_water",
-        "93,70": "tile_poolcore_deep_water",
-        "93,71": "tile_poolcore_deep_water",
-        "93,72": "tile_poolcore_deep_water",
-        "93,73": "tile_poolcore_deep_water",
-        "93,74": "tile_poolcore_deep_water",
-        "93,76": "tile_poolcore_deep_water",
-        "93,78": "tile_poolcore_deep_water",
-        "92,79": "tile_poolcore_deep_water",
-        "90,79": "tile_poolcore_deep_water",
-        "89,78": "tile_poolcore_deep_water",
-        "89,77": "tile_poolcore_deep_water",
-        "89,76": "tile_poolcore_deep_water",
-        "89,79": "tile_poolcore_deep_water",
-        "91,78": "tile_poolcore_deep_water",
-        "90,77": "tile_poolcore_deep_water",
-        "90,76": "tile_poolcore_deep_water",
-        "90,75": "tile_poolcore_deep_water",
-        "91,70": "tile_poolcore_deep_water",
-        "91,71": "tile_poolcore_deep_water",
-        "91,72": "tile_poolcore_deep_water",
-        "91,73": "tile_poolcore_deep_water",
-        "91,75": "tile_poolcore_deep_water",
-        "91,76": "tile_poolcore_deep_water",
-        "92,76": "tile_poolcore_deep_water",
-        "91,77": "tile_poolcore_deep_water",
-        "91,79": "tile_poolcore_deep_water",
-        "90,78": "tile_poolcore_deep_water",
-        "92,78": "tile_poolcore_deep_water",
-        "92,77": "tile_poolcore_deep_water",
-        "93,77": "tile_poolcore_deep_water",
-        "92,75": "tile_poolcore_deep_water",
-        "93,75": "tile_poolcore_deep_water",
+        "95,81": "tile_poolcore_deep_water",
+        "95,82": "tile_poolcore_deep_water",
+        "95,83": "tile_poolcore_deep_water",
+        "94,83": "tile_poolcore_deep_water",
+        "94,84": "tile_poolcore_deep_water",
+        "93,84": "tile_poolcore_deep_water",
+        "94,81": "tile_poolcore_deep_water",
+        "94,82": "tile_poolcore_deep_water",
+        "95,84": "tile_poolcore_deep_water",
+        "96,83": "tile_poolcore_deep_water",
+        "96,82": "tile_poolcore_deep_water",
+        "97,85": "tile_poolcore_deep_water",
+        "95,79": "tile_poolcore_deep_water",
+        "94,78": "tile_poolcore_deep_water",
+        "94,77": "tile_poolcore_deep_water",
+        "94,76": "tile_poolcore_deep_water",
         "94,75": "tile_poolcore_deep_water",
-        "95,75": "tile_poolcore_deep_water",
+        "94,74": "tile_poolcore_deep_water",
+        "95,74": "tile_poolcore_deep_water",
         "95,76": "tile_poolcore_deep_water",
         "95,77": "tile_poolcore_deep_water",
         "95,78": "tile_poolcore_deep_water",
-        "94,78": "tile_poolcore_deep_water",
         "94,79": "tile_poolcore_deep_water",
-        "93,79": "tile_poolcore_deep_water",
-        "94,76": "tile_poolcore_deep_water",
-        "94,77": "tile_poolcore_deep_water",
-        "95,79": "tile_poolcore_deep_water",
-        "96,78": "tile_poolcore_deep_water",
-        "96,77": "tile_poolcore_deep_water",
-        "97,80": "tile_poolcore_deep_water",
-        "95,74": "tile_poolcore_deep_water",
-        "94,73": "tile_poolcore_deep_water",
-        "94,72": "tile_poolcore_deep_water",
-        "94,71": "tile_poolcore_deep_water",
-        "94,70": "tile_poolcore_deep_water",
-        "94,69": "tile_poolcore_deep_water",
-        "95,69": "tile_poolcore_deep_water",
-        "95,71": "tile_poolcore_deep_water",
-        "95,72": "tile_poolcore_deep_water",
-        "95,73": "tile_poolcore_deep_water",
-        "94,74": "tile_poolcore_deep_water",
-        "93,68": "tile_poolcore_deep_water",
-        "95,70": "tile_poolcore_deep_water",
+        "93,73": "tile_poolcore_deep_water",
+        "95,75": "tile_poolcore_deep_water",
+        "97,76": "tile_poolcore_deep_water",
+        "97,72": "tile_poolcore_deep_water",
         "97,71": "tile_poolcore_deep_water",
-        "97,67": "tile_poolcore_deep_water",
-        "97,66": "tile_poolcore_deep_water",
-        "97,65": "tile_poolcore_deep_water",
-        "97,64": "tile_poolcore_deep_water",
-        "97,63": "tile_poolcore_deep_water",
-        "93,56": "tile_poolcore_deep_water",
-        "92,56": "tile_poolcore_deep_water",
-        "91,56": "tile_poolcore_deep_water",
-        "90,56": "tile_poolcore_deep_water",
-        "89,56": "tile_poolcore_deep_water",
-        "88,56": "tile_poolcore_deep_water",
-        "87,56": "tile_poolcore_deep_water",
-        "86,56": "tile_poolcore_deep_water",
-        "84,56": "tile_poolcore_deep_water",
-        "83,56": "tile_poolcore_deep_water",
-        "82,56": "tile_poolcore_deep_water",
-        "81,56": "tile_poolcore_deep_water",
-        "80,56": "tile_poolcore_deep_water",
-        "79,56": "tile_poolcore_deep_water",
-        "85,56": "tile_poolcore_deep_water",
-        "79,38": "tile_poolcore_deep_water",
-        "79,39": "tile_poolcore_deep_water",
-        "79,40": "tile_poolcore_deep_water",
-        "79,41": "tile_poolcore_deep_water",
-        "79,42": "tile_poolcore_deep_water",
+        "97,70": "tile_poolcore_deep_water",
+        "97,69": "tile_poolcore_deep_water",
+        "97,68": "tile_poolcore_deep_water",
+        "93,61": "tile_poolcore_deep_water",
+        "92,61": "tile_poolcore_deep_water",
+        "91,61": "tile_poolcore_deep_water",
+        "90,61": "tile_poolcore_deep_water",
+        "89,61": "tile_poolcore_deep_water",
+        "88,61": "tile_poolcore_deep_water",
+        "87,61": "tile_poolcore_deep_water",
+        "86,61": "tile_poolcore_deep_water",
+        "84,61": "tile_poolcore_deep_water",
+        "83,61": "tile_poolcore_deep_water",
+        "82,61": "tile_poolcore_deep_water",
+        "81,61": "tile_poolcore_deep_water",
+        "80,61": "tile_poolcore_deep_water",
+        "79,61": "tile_poolcore_deep_water",
+        "85,61": "tile_poolcore_deep_water",
         "79,43": "tile_poolcore_deep_water",
         "79,44": "tile_poolcore_deep_water",
         "79,45": "tile_poolcore_deep_water",
@@ -180370,406 +181471,411 @@ const BATTLE_MAPS = [
         "79,49": "tile_poolcore_deep_water",
         "79,50": "tile_poolcore_deep_water",
         "79,51": "tile_poolcore_deep_water",
-        "80,51": "tile_poolcore_deep_water",
-        "80,52": "tile_poolcore_deep_water",
-        "80,53": "tile_poolcore_deep_water",
-        "81,53": "tile_poolcore_deep_water",
-        "82,54": "tile_poolcore_deep_water",
-        "83,54": "tile_poolcore_deep_water",
-        "84,54": "tile_poolcore_deep_water",
-        "85,54": "tile_poolcore_deep_water",
-        "86,53": "tile_poolcore_deep_water",
-        "87,53": "tile_poolcore_deep_water",
-        "88,52": "tile_poolcore_deep_water",
-        "89,51": "tile_poolcore_deep_water",
-        "89,50": "tile_poolcore_deep_water",
-        "90,49": "tile_poolcore_deep_water",
-        "90,48": "tile_poolcore_deep_water",
-        "90,46": "tile_poolcore_deep_water",
-        "90,45": "tile_poolcore_deep_water",
-        "89,44": "tile_poolcore_deep_water",
-        "89,43": "tile_poolcore_deep_water",
-        "89,42": "tile_poolcore_deep_water",
-        "89,41": "tile_poolcore_deep_water",
-        "88,41": "tile_poolcore_deep_water",
-        "80,38": "tile_poolcore_deep_water",
-        "81,38": "tile_poolcore_deep_water",
-        "82,38": "tile_poolcore_deep_water",
-        "84,38": "tile_poolcore_deep_water",
-        "85,38": "tile_poolcore_deep_water",
-        "86,38": "tile_poolcore_deep_water",
-        "87,38": "tile_poolcore_deep_water",
-        "88,38": "tile_poolcore_deep_water",
-        "89,38": "tile_poolcore_deep_water",
-        "90,38": "tile_poolcore_deep_water",
-        "91,38": "tile_poolcore_deep_water",
-        "92,38": "tile_poolcore_deep_water",
-        "93,38": "tile_poolcore_deep_water",
-        "93,39": "tile_poolcore_deep_water",
-        "92,39": "tile_poolcore_deep_water",
-        "91,39": "tile_poolcore_deep_water",
-        "89,39": "tile_poolcore_deep_water",
-        "83,38": "tile_poolcore_deep_water",
-        "83,39": "tile_poolcore_deep_water",
-        "82,39": "tile_poolcore_deep_water",
-        "81,40": "tile_poolcore_deep_water",
-        "81,39": "tile_poolcore_deep_water",
-        "80,39": "tile_poolcore_deep_water",
-        "80,40": "tile_poolcore_deep_water",
-        "80,41": "tile_poolcore_deep_water",
-        "81,43": "tile_poolcore_deep_water",
+        "79,52": "tile_poolcore_deep_water",
+        "79,53": "tile_poolcore_deep_water",
+        "79,54": "tile_poolcore_deep_water",
+        "79,55": "tile_poolcore_deep_water",
+        "79,56": "tile_poolcore_deep_water",
+        "80,56": "tile_poolcore_deep_water",
+        "80,57": "tile_poolcore_deep_water",
+        "80,58": "tile_poolcore_deep_water",
+        "81,58": "tile_poolcore_deep_water",
+        "82,59": "tile_poolcore_deep_water",
+        "83,59": "tile_poolcore_deep_water",
+        "84,59": "tile_poolcore_deep_water",
+        "85,59": "tile_poolcore_deep_water",
+        "86,58": "tile_poolcore_deep_water",
+        "87,58": "tile_poolcore_deep_water",
+        "88,57": "tile_poolcore_deep_water",
+        "89,56": "tile_poolcore_deep_water",
+        "89,55": "tile_poolcore_deep_water",
+        "90,54": "tile_poolcore_deep_water",
+        "90,53": "tile_poolcore_deep_water",
+        "90,51": "tile_poolcore_deep_water",
+        "90,50": "tile_poolcore_deep_water",
+        "89,49": "tile_poolcore_deep_water",
+        "89,48": "tile_poolcore_deep_water",
+        "89,47": "tile_poolcore_deep_water",
+        "89,46": "tile_poolcore_deep_water",
+        "88,46": "tile_poolcore_deep_water",
         "80,43": "tile_poolcore_deep_water",
+        "81,43": "tile_poolcore_deep_water",
+        "82,43": "tile_poolcore_deep_water",
+        "84,43": "tile_poolcore_deep_water",
+        "85,43": "tile_poolcore_deep_water",
+        "86,43": "tile_poolcore_deep_water",
+        "87,43": "tile_poolcore_deep_water",
+        "88,43": "tile_poolcore_deep_water",
+        "89,43": "tile_poolcore_deep_water",
+        "90,43": "tile_poolcore_deep_water",
+        "91,43": "tile_poolcore_deep_water",
+        "92,43": "tile_poolcore_deep_water",
+        "93,43": "tile_poolcore_deep_water",
+        "93,44": "tile_poolcore_deep_water",
+        "92,44": "tile_poolcore_deep_water",
+        "91,44": "tile_poolcore_deep_water",
+        "89,44": "tile_poolcore_deep_water",
+        "83,43": "tile_poolcore_deep_water",
+        "83,44": "tile_poolcore_deep_water",
+        "82,44": "tile_poolcore_deep_water",
+        "81,45": "tile_poolcore_deep_water",
+        "81,44": "tile_poolcore_deep_water",
         "80,44": "tile_poolcore_deep_water",
         "80,45": "tile_poolcore_deep_water",
         "80,46": "tile_poolcore_deep_water",
-        "80,47": "tile_poolcore_deep_water",
+        "81,48": "tile_poolcore_deep_water",
         "80,48": "tile_poolcore_deep_water",
         "80,49": "tile_poolcore_deep_water",
         "80,50": "tile_poolcore_deep_water",
+        "80,51": "tile_poolcore_deep_water",
+        "80,52": "tile_poolcore_deep_water",
+        "80,53": "tile_poolcore_deep_water",
         "80,54": "tile_poolcore_deep_water",
         "80,55": "tile_poolcore_deep_water",
-        "79,55": "tile_poolcore_deep_water",
-        "79,54": "tile_poolcore_deep_water",
-        "79,53": "tile_poolcore_deep_water",
-        "79,52": "tile_poolcore_deep_water",
-        "81,55": "tile_poolcore_deep_water",
-        "82,55": "tile_poolcore_deep_water",
-        "83,55": "tile_poolcore_deep_water",
-        "84,55": "tile_poolcore_deep_water",
-        "86,55": "tile_poolcore_deep_water",
-        "87,55": "tile_poolcore_deep_water",
-        "88,55": "tile_poolcore_deep_water",
-        "89,55": "tile_poolcore_deep_water",
-        "90,55": "tile_poolcore_deep_water",
-        "91,55": "tile_poolcore_deep_water",
-        "92,55": "tile_poolcore_deep_water",
+        "80,59": "tile_poolcore_deep_water",
+        "80,60": "tile_poolcore_deep_water",
+        "79,60": "tile_poolcore_deep_water",
+        "79,59": "tile_poolcore_deep_water",
+        "79,58": "tile_poolcore_deep_water",
+        "79,57": "tile_poolcore_deep_water",
+        "81,60": "tile_poolcore_deep_water",
+        "82,60": "tile_poolcore_deep_water",
+        "83,60": "tile_poolcore_deep_water",
+        "84,60": "tile_poolcore_deep_water",
+        "86,60": "tile_poolcore_deep_water",
+        "87,60": "tile_poolcore_deep_water",
+        "88,60": "tile_poolcore_deep_water",
+        "89,60": "tile_poolcore_deep_water",
+        "90,60": "tile_poolcore_deep_water",
+        "91,60": "tile_poolcore_deep_water",
+        "92,60": "tile_poolcore_deep_water",
+        "93,60": "tile_poolcore_deep_water",
+        "93,59": "tile_poolcore_deep_water",
+        "93,58": "tile_poolcore_deep_water",
+        "93,57": "tile_poolcore_deep_water",
+        "93,56": "tile_poolcore_deep_water",
         "93,55": "tile_poolcore_deep_water",
         "93,54": "tile_poolcore_deep_water",
         "93,53": "tile_poolcore_deep_water",
-        "93,52": "tile_poolcore_deep_water",
-        "93,51": "tile_poolcore_deep_water",
-        "93,50": "tile_poolcore_deep_water",
-        "93,49": "tile_poolcore_deep_water",
-        "93,48": "tile_poolcore_deep_water",
+        "92,53": "tile_poolcore_deep_water",
+        "92,52": "tile_poolcore_deep_water",
+        "92,51": "tile_poolcore_deep_water",
+        "92,50": "tile_poolcore_deep_water",
+        "92,49": "tile_poolcore_deep_water",
         "92,48": "tile_poolcore_deep_water",
         "92,47": "tile_poolcore_deep_water",
         "92,46": "tile_poolcore_deep_water",
         "92,45": "tile_poolcore_deep_water",
-        "92,44": "tile_poolcore_deep_water",
-        "92,43": "tile_poolcore_deep_water",
-        "92,42": "tile_poolcore_deep_water",
-        "92,41": "tile_poolcore_deep_water",
-        "92,40": "tile_poolcore_deep_water",
-        "93,40": "tile_poolcore_deep_water",
-        "93,41": "tile_poolcore_deep_water",
-        "93,42": "tile_poolcore_deep_water",
-        "93,43": "tile_poolcore_deep_water",
-        "93,44": "tile_poolcore_deep_water",
         "93,45": "tile_poolcore_deep_water",
         "93,46": "tile_poolcore_deep_water",
         "93,47": "tile_poolcore_deep_water",
-        "92,50": "tile_poolcore_deep_water",
-        "92,51": "tile_poolcore_deep_water",
-        "92,52": "tile_poolcore_deep_water",
-        "92,53": "tile_poolcore_deep_water",
-        "92,54": "tile_poolcore_deep_water",
-        "91,54": "tile_poolcore_deep_water",
-        "85,55": "tile_poolcore_deep_water",
-        "81,54": "tile_poolcore_deep_water",
-        "81,52": "tile_poolcore_deep_water",
-        "81,50": "tile_poolcore_deep_water",
-        "81,48": "tile_poolcore_deep_water",
+        "93,48": "tile_poolcore_deep_water",
+        "93,49": "tile_poolcore_deep_water",
+        "93,50": "tile_poolcore_deep_water",
+        "93,51": "tile_poolcore_deep_water",
+        "93,52": "tile_poolcore_deep_water",
+        "92,55": "tile_poolcore_deep_water",
+        "92,56": "tile_poolcore_deep_water",
+        "92,57": "tile_poolcore_deep_water",
+        "92,58": "tile_poolcore_deep_water",
+        "92,59": "tile_poolcore_deep_water",
+        "91,59": "tile_poolcore_deep_water",
+        "85,60": "tile_poolcore_deep_water",
+        "81,59": "tile_poolcore_deep_water",
+        "81,57": "tile_poolcore_deep_water",
+        "81,55": "tile_poolcore_deep_water",
+        "81,53": "tile_poolcore_deep_water",
+        "81,51": "tile_poolcore_deep_water",
+        "80,47": "tile_poolcore_deep_water",
         "81,46": "tile_poolcore_deep_water",
-        "80,42": "tile_poolcore_deep_water",
-        "81,41": "tile_poolcore_deep_water",
-        "82,40": "tile_poolcore_deep_water",
-        "84,39": "tile_poolcore_deep_water",
-        "85,39": "tile_poolcore_deep_water",
-        "86,39": "tile_poolcore_deep_water",
-        "87,39": "tile_poolcore_deep_water",
-        "88,39": "tile_poolcore_deep_water",
-        "90,39": "tile_poolcore_deep_water",
-        "91,40": "tile_poolcore_deep_water",
-        "91,41": "tile_poolcore_deep_water",
-        "91,42": "tile_poolcore_deep_water",
-        "91,43": "tile_poolcore_deep_water",
-        "91,44": "tile_poolcore_deep_water",
-        "91,45": "tile_poolcore_deep_water",
-        "92,49": "tile_poolcore_deep_water",
-        "91,51": "tile_poolcore_deep_water",
-        "91,52": "tile_poolcore_deep_water",
-        "91,53": "tile_poolcore_deep_water",
-        "90,54": "tile_poolcore_deep_water",
-        "89,54": "tile_poolcore_deep_water",
-        "88,54": "tile_poolcore_deep_water",
-        "87,54": "tile_poolcore_deep_water",
-        "86,54": "tile_poolcore_deep_water",
-        "88,53": "tile_poolcore_deep_water",
-        "89,53": "tile_poolcore_deep_water",
-        "90,53": "tile_poolcore_deep_water",
-        "90,52": "tile_poolcore_deep_water",
-        "91,50": "tile_poolcore_deep_water",
-        "91,49": "tile_poolcore_deep_water",
-        "91,48": "tile_poolcore_deep_water",
-        "91,47": "tile_poolcore_deep_water",
-        "91,46": "tile_poolcore_deep_water",
-        "90,47": "tile_poolcore_deep_water",
-        "90,50": "tile_poolcore_deep_water",
-        "90,51": "tile_poolcore_deep_water",
-        "89,52": "tile_poolcore_deep_water",
-        "85,53": "tile_poolcore_deep_water",
-        "84,53": "tile_poolcore_deep_water",
-        "83,53": "tile_poolcore_deep_water",
-        "82,53": "tile_poolcore_deep_water",
-        "82,52": "tile_poolcore_deep_water",
-        "82,51": "tile_poolcore_deep_water",
-        "81,49": "tile_poolcore_deep_water",
-        "81,42": "tile_poolcore_deep_water",
-        "82,42": "tile_poolcore_deep_water",
-        "83,41": "tile_poolcore_deep_water",
-        "83,40": "tile_poolcore_deep_water",
-        "84,40": "tile_poolcore_deep_water",
-        "85,40": "tile_poolcore_deep_water",
-        "87,40": "tile_poolcore_deep_water",
-        "89,40": "tile_poolcore_deep_water",
-        "90,40": "tile_poolcore_deep_water",
-        "90,43": "tile_poolcore_deep_water",
-        "90,44": "tile_poolcore_deep_water",
-        "90,42": "tile_poolcore_deep_water",
-        "90,41": "tile_poolcore_deep_water",
-        "88,40": "tile_poolcore_deep_water",
-        "86,40": "tile_poolcore_deep_water",
-        "82,41": "tile_poolcore_deep_water",
-        "82,43": "tile_poolcore_deep_water",
-        "82,44": "tile_poolcore_deep_water",
         "82,45": "tile_poolcore_deep_water",
-        "82,46": "tile_poolcore_deep_water",
+        "84,44": "tile_poolcore_deep_water",
+        "85,44": "tile_poolcore_deep_water",
+        "86,44": "tile_poolcore_deep_water",
+        "87,44": "tile_poolcore_deep_water",
+        "88,44": "tile_poolcore_deep_water",
+        "90,44": "tile_poolcore_deep_water",
+        "91,45": "tile_poolcore_deep_water",
+        "91,46": "tile_poolcore_deep_water",
+        "91,47": "tile_poolcore_deep_water",
+        "91,48": "tile_poolcore_deep_water",
+        "91,49": "tile_poolcore_deep_water",
+        "91,50": "tile_poolcore_deep_water",
+        "92,54": "tile_poolcore_deep_water",
+        "91,56": "tile_poolcore_deep_water",
+        "91,57": "tile_poolcore_deep_water",
+        "91,58": "tile_poolcore_deep_water",
+        "90,59": "tile_poolcore_deep_water",
+        "89,59": "tile_poolcore_deep_water",
+        "88,59": "tile_poolcore_deep_water",
+        "87,59": "tile_poolcore_deep_water",
+        "86,59": "tile_poolcore_deep_water",
+        "88,58": "tile_poolcore_deep_water",
+        "89,58": "tile_poolcore_deep_water",
+        "90,58": "tile_poolcore_deep_water",
+        "90,57": "tile_poolcore_deep_water",
+        "91,55": "tile_poolcore_deep_water",
+        "91,54": "tile_poolcore_deep_water",
+        "91,53": "tile_poolcore_deep_water",
+        "91,52": "tile_poolcore_deep_water",
+        "91,51": "tile_poolcore_deep_water",
+        "90,52": "tile_poolcore_deep_water",
+        "90,55": "tile_poolcore_deep_water",
+        "90,56": "tile_poolcore_deep_water",
+        "89,57": "tile_poolcore_deep_water",
+        "85,58": "tile_poolcore_deep_water",
+        "84,58": "tile_poolcore_deep_water",
+        "83,58": "tile_poolcore_deep_water",
+        "82,58": "tile_poolcore_deep_water",
+        "82,57": "tile_poolcore_deep_water",
+        "82,56": "tile_poolcore_deep_water",
+        "81,54": "tile_poolcore_deep_water",
+        "81,47": "tile_poolcore_deep_water",
         "82,47": "tile_poolcore_deep_water",
+        "83,46": "tile_poolcore_deep_water",
+        "83,45": "tile_poolcore_deep_water",
+        "84,45": "tile_poolcore_deep_water",
+        "85,45": "tile_poolcore_deep_water",
+        "87,45": "tile_poolcore_deep_water",
+        "89,45": "tile_poolcore_deep_water",
+        "90,45": "tile_poolcore_deep_water",
+        "90,48": "tile_poolcore_deep_water",
+        "90,49": "tile_poolcore_deep_water",
+        "90,47": "tile_poolcore_deep_water",
+        "90,46": "tile_poolcore_deep_water",
+        "88,45": "tile_poolcore_deep_water",
+        "86,45": "tile_poolcore_deep_water",
+        "82,46": "tile_poolcore_deep_water",
         "82,48": "tile_poolcore_deep_water",
         "82,49": "tile_poolcore_deep_water",
-        "81,51": "tile_poolcore_deep_water",
-        "81,47": "tile_poolcore_deep_water",
-        "81,45": "tile_poolcore_deep_water",
-        "81,44": "tile_poolcore_deep_water",
         "82,50": "tile_poolcore_deep_water",
+        "82,51": "tile_poolcore_deep_water",
+        "82,52": "tile_poolcore_deep_water",
+        "82,53": "tile_poolcore_deep_water",
+        "82,54": "tile_poolcore_deep_water",
+        "81,56": "tile_poolcore_deep_water",
+        "81,52": "tile_poolcore_deep_water",
+        "81,50": "tile_poolcore_deep_water",
+        "81,49": "tile_poolcore_deep_water",
+        "82,55": "tile_poolcore_deep_water",
+        "83,56": "tile_poolcore_deep_water",
+        "83,57": "tile_poolcore_deep_water",
+        "83,55": "tile_poolcore_deep_water",
+        "84,53": "tile_poolcore_deep_water",
+        "84,51": "tile_poolcore_deep_water",
+        "84,50": "tile_poolcore_deep_water",
+        "84,49": "tile_poolcore_deep_water",
+        "83,48": "tile_poolcore_deep_water",
+        "83,47": "tile_poolcore_deep_water",
+        "86,46": "tile_poolcore_deep_water",
+        "87,46": "tile_poolcore_deep_water",
+        "85,46": "tile_poolcore_deep_water",
+        "84,46": "tile_poolcore_deep_water",
+        "83,49": "tile_poolcore_deep_water",
+        "83,50": "tile_poolcore_deep_water",
         "83,51": "tile_poolcore_deep_water",
         "83,52": "tile_poolcore_deep_water",
-        "83,50": "tile_poolcore_deep_water",
-        "84,48": "tile_poolcore_deep_water",
-        "84,46": "tile_poolcore_deep_water",
-        "84,45": "tile_poolcore_deep_water",
-        "84,44": "tile_poolcore_deep_water",
-        "83,43": "tile_poolcore_deep_water",
-        "83,42": "tile_poolcore_deep_water",
-        "86,41": "tile_poolcore_deep_water",
-        "87,41": "tile_poolcore_deep_water",
-        "85,41": "tile_poolcore_deep_water",
-        "84,41": "tile_poolcore_deep_water",
-        "83,44": "tile_poolcore_deep_water",
-        "83,45": "tile_poolcore_deep_water",
-        "83,46": "tile_poolcore_deep_water",
-        "83,47": "tile_poolcore_deep_water",
-        "83,48": "tile_poolcore_deep_water",
-        "83,49": "tile_poolcore_deep_water",
-        "84,50": "tile_poolcore_deep_water",
-        "84,51": "tile_poolcore_deep_water",
-        "84,52": "tile_poolcore_deep_water",
+        "83,53": "tile_poolcore_deep_water",
+        "83,54": "tile_poolcore_deep_water",
+        "84,55": "tile_poolcore_deep_water",
+        "84,56": "tile_poolcore_deep_water",
+        "84,57": "tile_poolcore_deep_water",
+        "85,57": "tile_poolcore_deep_water",
+        "86,57": "tile_poolcore_deep_water",
+        "87,56": "tile_poolcore_deep_water",
+        "87,55": "tile_poolcore_deep_water",
+        "86,53": "tile_poolcore_deep_water",
         "85,52": "tile_poolcore_deep_water",
-        "86,52": "tile_poolcore_deep_water",
-        "87,51": "tile_poolcore_deep_water",
-        "87,50": "tile_poolcore_deep_water",
-        "86,48": "tile_poolcore_deep_water",
+        "85,51": "tile_poolcore_deep_water",
+        "84,48": "tile_poolcore_deep_water",
+        "84,47": "tile_poolcore_deep_water",
         "85,47": "tile_poolcore_deep_water",
-        "85,46": "tile_poolcore_deep_water",
-        "84,43": "tile_poolcore_deep_water",
-        "84,42": "tile_poolcore_deep_water",
-        "85,42": "tile_poolcore_deep_water",
-        "86,42": "tile_poolcore_deep_water",
-        "87,42": "tile_poolcore_deep_water",
-        "88,42": "tile_poolcore_deep_water",
-        "88,43": "tile_poolcore_deep_water",
-        "88,44": "tile_poolcore_deep_water",
-        "87,44": "tile_poolcore_deep_water",
-        "86,43": "tile_poolcore_deep_water",
-        "85,43": "tile_poolcore_deep_water",
-        "85,44": "tile_poolcore_deep_water",
-        "85,45": "tile_poolcore_deep_water",
-        "86,44": "tile_poolcore_deep_water",
-        "87,43": "tile_poolcore_deep_water",
-        "87,45": "tile_poolcore_deep_water",
-        "86,46": "tile_poolcore_deep_water",
         "86,47": "tile_poolcore_deep_water",
-        "86,45": "tile_poolcore_deep_water",
-        "87,46": "tile_poolcore_deep_water",
         "87,47": "tile_poolcore_deep_water",
-        "87,48": "tile_poolcore_deep_water",
+        "88,47": "tile_poolcore_deep_water",
+        "88,48": "tile_poolcore_deep_water",
+        "88,49": "tile_poolcore_deep_water",
         "87,49": "tile_poolcore_deep_water",
+        "86,48": "tile_poolcore_deep_water",
+        "85,48": "tile_poolcore_deep_water",
+        "85,49": "tile_poolcore_deep_water",
+        "85,50": "tile_poolcore_deep_water",
+        "86,49": "tile_poolcore_deep_water",
+        "87,48": "tile_poolcore_deep_water",
+        "87,50": "tile_poolcore_deep_water",
+        "86,51": "tile_poolcore_deep_water",
+        "86,52": "tile_poolcore_deep_water",
+        "86,50": "tile_poolcore_deep_water",
+        "87,51": "tile_poolcore_deep_water",
+        "87,52": "tile_poolcore_deep_water",
+        "87,53": "tile_poolcore_deep_water",
+        "87,54": "tile_poolcore_deep_water",
+        "88,56": "tile_poolcore_deep_water",
+        "88,55": "tile_poolcore_deep_water",
+        "88,54": "tile_poolcore_deep_water",
+        "88,53": "tile_poolcore_deep_water",
+        "88,52": "tile_poolcore_deep_water",
         "88,51": "tile_poolcore_deep_water",
         "88,50": "tile_poolcore_deep_water",
-        "88,49": "tile_poolcore_deep_water",
-        "88,48": "tile_poolcore_deep_water",
-        "88,47": "tile_poolcore_deep_water",
-        "88,46": "tile_poolcore_deep_water",
-        "88,45": "tile_poolcore_deep_water",
-        "89,45": "tile_poolcore_deep_water",
-        "89,46": "tile_poolcore_deep_water",
-        "89,47": "tile_poolcore_deep_water",
-        "89,48": "tile_poolcore_deep_water",
-        "89,49": "tile_poolcore_deep_water",
-        "87,52": "tile_poolcore_deep_water",
-        "86,51": "tile_poolcore_deep_water",
-        "86,50": "tile_poolcore_deep_water",
-        "85,49": "tile_poolcore_deep_water",
-        "84,49": "tile_poolcore_deep_water",
-        "84,47": "tile_poolcore_deep_water",
-        "85,48": "tile_poolcore_deep_water",
-        "86,49": "tile_poolcore_deep_water",
-        "85,51": "tile_poolcore_deep_water",
-        "85,50": "tile_poolcore_deep_water",
-        "97,70": "tile_poolcore_deep_water",
-        "98,71": "tile_poolcore_deep_water",
-        "98,72": "tile_poolcore_deep_water",
-        "98,74": "tile_poolcore_deep_water",
-        "98,75": "tile_poolcore_deep_water",
+        "89,50": "tile_poolcore_deep_water",
+        "89,51": "tile_poolcore_deep_water",
+        "89,52": "tile_poolcore_deep_water",
+        "89,53": "tile_poolcore_deep_water",
+        "89,54": "tile_poolcore_deep_water",
+        "87,57": "tile_poolcore_deep_water",
+        "86,56": "tile_poolcore_deep_water",
+        "86,55": "tile_poolcore_deep_water",
+        "85,54": "tile_poolcore_deep_water",
+        "84,54": "tile_poolcore_deep_water",
+        "84,52": "tile_poolcore_deep_water",
+        "85,53": "tile_poolcore_deep_water",
+        "86,54": "tile_poolcore_deep_water",
+        "85,56": "tile_poolcore_deep_water",
+        "85,55": "tile_poolcore_deep_water",
+        "97,75": "tile_poolcore_deep_water",
         "98,76": "tile_poolcore_deep_water",
         "98,77": "tile_poolcore_deep_water",
-        "98,78": "tile_poolcore_deep_water",
         "98,79": "tile_poolcore_deep_water",
-        "98,73": "tile_poolcore_deep_water",
-        "98,65": "tile_poolcore_deep_water",
-        "98,66": "tile_poolcore_deep_water",
-        "98,67": "tile_poolcore_deep_water",
-        "98,68": "tile_poolcore_deep_water",
-        "98,69": "tile_poolcore_deep_water",
+        "98,80": "tile_poolcore_deep_water",
+        "98,81": "tile_poolcore_deep_water",
+        "98,82": "tile_poolcore_deep_water",
+        "98,83": "tile_poolcore_deep_water",
+        "98,84": "tile_poolcore_deep_water",
+        "98,78": "tile_poolcore_deep_water",
         "98,70": "tile_poolcore_deep_water",
-        "99,65": "tile_poolcore_deep_water",
-        "99,66": "tile_poolcore_deep_water",
-        "99,67": "tile_poolcore_deep_water",
-        "99,68": "tile_poolcore_deep_water",
-        "99,69": "tile_poolcore_deep_water",
+        "98,71": "tile_poolcore_deep_water",
+        "98,72": "tile_poolcore_deep_water",
+        "98,73": "tile_poolcore_deep_water",
+        "98,74": "tile_poolcore_deep_water",
+        "98,75": "tile_poolcore_deep_water",
         "99,70": "tile_poolcore_deep_water",
         "99,71": "tile_poolcore_deep_water",
         "99,72": "tile_poolcore_deep_water",
         "99,73": "tile_poolcore_deep_water",
+        "99,74": "tile_poolcore_deep_water",
         "99,75": "tile_poolcore_deep_water",
         "99,76": "tile_poolcore_deep_water",
         "99,77": "tile_poolcore_deep_water",
-        "99,74": "tile_poolcore_deep_water",
-        "100,65": "tile_poolcore_deep_water",
-        "101,65": "tile_poolcore_deep_water",
-        "103,65": "tile_poolcore_deep_water",
-        "105,65": "tile_poolcore_deep_water",
-        "106,65": "tile_poolcore_deep_water",
-        "104,65": "tile_poolcore_deep_water",
-        "102,65": "tile_poolcore_deep_water",
-        "101,66": "tile_poolcore_deep_water",
-        "100,67": "tile_poolcore_deep_water",
-        "101,67": "tile_poolcore_deep_water",
-        "101,68": "tile_poolcore_deep_water",
-        "100,69": "tile_poolcore_deep_water",
+        "99,78": "tile_poolcore_deep_water",
+        "99,80": "tile_poolcore_deep_water",
+        "99,81": "tile_poolcore_deep_water",
+        "99,82": "tile_poolcore_deep_water",
+        "99,79": "tile_poolcore_deep_water",
         "100,70": "tile_poolcore_deep_water",
+        "101,70": "tile_poolcore_deep_water",
+        "103,70": "tile_poolcore_deep_water",
+        "105,70": "tile_poolcore_deep_water",
+        "106,70": "tile_poolcore_deep_water",
+        "104,70": "tile_poolcore_deep_water",
+        "102,70": "tile_poolcore_deep_water",
+        "101,71": "tile_poolcore_deep_water",
         "100,72": "tile_poolcore_deep_water",
+        "101,72": "tile_poolcore_deep_water",
+        "101,73": "tile_poolcore_deep_water",
         "100,74": "tile_poolcore_deep_water",
         "100,75": "tile_poolcore_deep_water",
-        "100,76": "tile_poolcore_deep_water",
         "100,77": "tile_poolcore_deep_water",
-        "101,77": "tile_poolcore_deep_water",
-        "102,77": "tile_poolcore_deep_water",
-        "103,77": "tile_poolcore_deep_water",
-        "104,77": "tile_poolcore_deep_water",
-        "105,77": "tile_poolcore_deep_water",
+        "100,79": "tile_poolcore_deep_water",
+        "100,80": "tile_poolcore_deep_water",
+        "100,81": "tile_poolcore_deep_water",
+        "100,82": "tile_poolcore_deep_water",
+        "101,82": "tile_poolcore_deep_water",
+        "102,82": "tile_poolcore_deep_water",
+        "103,82": "tile_poolcore_deep_water",
+        "104,82": "tile_poolcore_deep_water",
+        "105,82": "tile_poolcore_deep_water",
+        "106,82": "tile_poolcore_deep_water",
+        "106,81": "tile_poolcore_deep_water",
         "106,77": "tile_poolcore_deep_water",
         "106,76": "tile_poolcore_deep_water",
-        "106,72": "tile_poolcore_deep_water",
-        "106,71": "tile_poolcore_deep_water",
-        "106,70": "tile_poolcore_deep_water",
-        "106,69": "tile_poolcore_deep_water",
-        "106,68": "tile_poolcore_deep_water",
-        "106,67": "tile_poolcore_deep_water",
-        "106,66": "tile_poolcore_deep_water",
-        "105,66": "tile_poolcore_deep_water",
-        "103,66": "tile_poolcore_deep_water",
-        "102,66": "tile_poolcore_deep_water",
-        "100,66": "tile_poolcore_deep_water",
-        "101,69": "tile_poolcore_deep_water",
-        "101,72": "tile_poolcore_deep_water",
-        "101,74": "tile_poolcore_deep_water",
-        "101,75": "tile_poolcore_deep_water",
-        "101,76": "tile_poolcore_deep_water",
-        "101,73": "tile_poolcore_deep_water",
-        "100,68": "tile_poolcore_deep_water",
-        "100,71": "tile_poolcore_deep_water",
-        "100,73": "tile_poolcore_deep_water",
-        "101,71": "tile_poolcore_deep_water",
-        "102,67": "tile_poolcore_deep_water",
-        "102,68": "tile_poolcore_deep_water",
-        "102,72": "tile_poolcore_deep_water",
-        "102,74": "tile_poolcore_deep_water",
-        "102,75": "tile_poolcore_deep_water",
-        "102,76": "tile_poolcore_deep_water",
-        "103,76": "tile_poolcore_deep_water",
-        "105,74": "tile_poolcore_deep_water",
-        "104,72": "tile_poolcore_deep_water",
-        "104,71": "tile_poolcore_deep_water",
-        "103,70": "tile_poolcore_deep_water",
-        "103,69": "tile_poolcore_deep_water",
-        "103,68": "tile_poolcore_deep_water",
-        "103,67": "tile_poolcore_deep_water",
-        "102,69": "tile_poolcore_deep_water",
-        "102,71": "tile_poolcore_deep_water",
-        "102,73": "tile_poolcore_deep_water",
-        "103,74": "tile_poolcore_deep_water",
-        "103,75": "tile_poolcore_deep_water",
-        "104,76": "tile_poolcore_deep_water",
-        "104,75": "tile_poolcore_deep_water",
-        "105,73": "tile_poolcore_deep_water",
-        "104,73": "tile_poolcore_deep_water",
-        "104,74": "tile_poolcore_deep_water",
-        "105,75": "tile_poolcore_deep_water",
-        "105,76": "tile_poolcore_deep_water",
         "106,75": "tile_poolcore_deep_water",
         "106,74": "tile_poolcore_deep_water",
         "106,73": "tile_poolcore_deep_water",
-        "105,68": "tile_poolcore_deep_water",
-        "105,67": "tile_poolcore_deep_water",
-        "105,69": "tile_poolcore_deep_water",
-        "105,70": "tile_poolcore_deep_water",
+        "106,72": "tile_poolcore_deep_water",
+        "106,71": "tile_poolcore_deep_water",
         "105,71": "tile_poolcore_deep_water",
-        "105,72": "tile_poolcore_deep_water",
-        "104,66": "tile_poolcore_deep_water",
-        "104,67": "tile_poolcore_deep_water",
-        "104,68": "tile_poolcore_deep_water",
-        "104,69": "tile_poolcore_deep_water",
-        "104,70": "tile_poolcore_deep_water",
-        "103,72": "tile_poolcore_deep_water",
-        "103,73": "tile_poolcore_deep_water",
         "103,71": "tile_poolcore_deep_water",
-        "102,70": "tile_poolcore_deep_water",
-        "101,70": "tile_poolcore_deep_water",
+        "102,71": "tile_poolcore_deep_water",
+        "100,71": "tile_poolcore_deep_water",
+        "101,74": "tile_poolcore_deep_water",
+        "101,77": "tile_poolcore_deep_water",
+        "101,79": "tile_poolcore_deep_water",
+        "101,80": "tile_poolcore_deep_water",
+        "101,81": "tile_poolcore_deep_water",
+        "101,78": "tile_poolcore_deep_water",
+        "100,73": "tile_poolcore_deep_water",
+        "100,76": "tile_poolcore_deep_water",
+        "100,78": "tile_poolcore_deep_water",
+        "101,76": "tile_poolcore_deep_water",
+        "102,72": "tile_poolcore_deep_water",
+        "102,73": "tile_poolcore_deep_water",
+        "102,77": "tile_poolcore_deep_water",
+        "102,79": "tile_poolcore_deep_water",
+        "102,80": "tile_poolcore_deep_water",
+        "102,81": "tile_poolcore_deep_water",
+        "103,81": "tile_poolcore_deep_water",
+        "105,79": "tile_poolcore_deep_water",
+        "104,77": "tile_poolcore_deep_water",
+        "104,76": "tile_poolcore_deep_water",
+        "103,75": "tile_poolcore_deep_water",
+        "103,74": "tile_poolcore_deep_water",
+        "103,73": "tile_poolcore_deep_water",
+        "103,72": "tile_poolcore_deep_water",
+        "102,74": "tile_poolcore_deep_water",
+        "102,76": "tile_poolcore_deep_water",
+        "102,78": "tile_poolcore_deep_water",
+        "103,79": "tile_poolcore_deep_water",
+        "103,80": "tile_poolcore_deep_water",
+        "104,81": "tile_poolcore_deep_water",
+        "104,80": "tile_poolcore_deep_water",
         "105,78": "tile_poolcore_deep_water",
         "104,78": "tile_poolcore_deep_water",
-        "102,78": "tile_poolcore_deep_water",
-        "101,78": "tile_poolcore_deep_water",
-        "100,78": "tile_poolcore_deep_water",
-        "99,78": "tile_poolcore_deep_water",
-        "103,78": "tile_poolcore_deep_water",
-        "99,79": "tile_poolcore_deep_water",
-        "100,79": "tile_poolcore_deep_water",
-        "102,79": "tile_poolcore_deep_water",
-        "103,79": "tile_poolcore_deep_water",
         "104,79": "tile_poolcore_deep_water",
-        "105,79": "tile_poolcore_deep_water",
-        "101,79": "tile_poolcore_deep_water",
-        "99,80": "tile_poolcore_deep_water",
-        "100,80": "tile_poolcore_deep_water",
-        "101,80": "tile_poolcore_deep_water",
-        "102,80": "tile_poolcore_deep_water",
-        "103,80": "tile_poolcore_deep_water",
-        "104,80": "tile_poolcore_deep_water",
         "105,80": "tile_poolcore_deep_water",
-        "106,78": "tile_poolcore_deep_water",
+        "105,81": "tile_poolcore_deep_water",
+        "106,80": "tile_poolcore_deep_water",
         "106,79": "tile_poolcore_deep_water",
-        "106,80": "tile_poolcore_deep_water"
+        "106,78": "tile_poolcore_deep_water",
+        "105,73": "tile_poolcore_deep_water",
+        "105,72": "tile_poolcore_deep_water",
+        "105,74": "tile_poolcore_deep_water",
+        "105,75": "tile_poolcore_deep_water",
+        "105,76": "tile_poolcore_deep_water",
+        "105,77": "tile_poolcore_deep_water",
+        "104,71": "tile_poolcore_deep_water",
+        "104,72": "tile_poolcore_deep_water",
+        "104,73": "tile_poolcore_deep_water",
+        "104,74": "tile_poolcore_deep_water",
+        "104,75": "tile_poolcore_deep_water",
+        "103,77": "tile_poolcore_deep_water",
+        "103,78": "tile_poolcore_deep_water",
+        "103,76": "tile_poolcore_deep_water",
+        "102,75": "tile_poolcore_deep_water",
+        "101,75": "tile_poolcore_deep_water",
+        "105,83": "tile_poolcore_deep_water",
+        "104,83": "tile_poolcore_deep_water",
+        "102,83": "tile_poolcore_deep_water",
+        "101,83": "tile_poolcore_deep_water",
+        "100,83": "tile_poolcore_deep_water",
+        "99,83": "tile_poolcore_deep_water",
+        "103,83": "tile_poolcore_deep_water",
+        "99,84": "tile_poolcore_deep_water",
+        "100,84": "tile_poolcore_deep_water",
+        "102,84": "tile_poolcore_deep_water",
+        "103,84": "tile_poolcore_deep_water",
+        "104,84": "tile_poolcore_deep_water",
+        "105,84": "tile_poolcore_deep_water",
+        "101,84": "tile_poolcore_deep_water",
+        "99,85": "tile_poolcore_deep_water",
+        "100,85": "tile_poolcore_deep_water",
+        "101,85": "tile_poolcore_deep_water",
+        "102,85": "tile_poolcore_deep_water",
+        "103,85": "tile_poolcore_deep_water",
+        "104,85": "tile_poolcore_deep_water",
+        "105,85": "tile_poolcore_deep_water",
+        "106,83": "tile_poolcore_deep_water",
+        "106,84": "tile_poolcore_deep_water",
+        "106,85": "tile_poolcore_deep_water"
       },
       "object26": {},
       "object27": {},
@@ -180780,300 +181886,295 @@ const BATTLE_MAPS = [
       "object32": {},
       "object33": {},
       "object34": {
-        "62,27": "tile_mwdka8vr"
+        "62,32": "tile_mwdka8vr"
       },
       "ground5": {},
       "object29": {},
       "ground6": {
-        "85,59": "tile_mvr2fi62"
+        "85,64": "tile_mvr2fi62"
       },
       "ground7": {
-        "68,65": "tile_poolcore_deep_water",
-        "69,65": "tile_poolcore_deep_water",
-        "70,65": "tile_poolcore_deep_water",
-        "71,65": "tile_poolcore_deep_water",
-        "72,65": "tile_poolcore_deep_water",
-        "73,65": "tile_poolcore_deep_water",
-        "74,65": "tile_poolcore_deep_water",
-        "75,65": "tile_poolcore_deep_water",
-        "77,65": "tile_poolcore_deep_water",
-        "78,65": "tile_poolcore_deep_water",
-        "79,65": "tile_poolcore_deep_water",
-        "80,65": "tile_poolcore_deep_water",
-        "81,65": "tile_poolcore_deep_water",
-        "82,65": "tile_poolcore_deep_water",
-        "83,65": "tile_poolcore_deep_water",
-        "84,65": "tile_poolcore_deep_water",
-        "84,66": "tile_poolcore_deep_water",
-        "83,66": "tile_poolcore_deep_water",
-        "83,67": "tile_poolcore_deep_water",
-        "84,67": "tile_poolcore_deep_water",
-        "84,68": "tile_poolcore_deep_water",
-        "84,69": "tile_poolcore_deep_water",
+        "68,70": "tile_poolcore_deep_water",
+        "69,70": "tile_poolcore_deep_water",
+        "70,70": "tile_poolcore_deep_water",
+        "71,70": "tile_poolcore_deep_water",
+        "72,70": "tile_poolcore_deep_water",
+        "73,70": "tile_poolcore_deep_water",
+        "74,70": "tile_poolcore_deep_water",
+        "75,70": "tile_poolcore_deep_water",
+        "77,70": "tile_poolcore_deep_water",
+        "78,70": "tile_poolcore_deep_water",
+        "79,70": "tile_poolcore_deep_water",
+        "80,70": "tile_poolcore_deep_water",
+        "81,70": "tile_poolcore_deep_water",
+        "82,70": "tile_poolcore_deep_water",
+        "83,70": "tile_poolcore_deep_water",
         "84,70": "tile_poolcore_deep_water",
         "84,71": "tile_poolcore_deep_water",
+        "83,71": "tile_poolcore_deep_water",
+        "83,72": "tile_poolcore_deep_water",
         "84,72": "tile_poolcore_deep_water",
         "84,73": "tile_poolcore_deep_water",
         "84,74": "tile_poolcore_deep_water",
-        "83,74": "tile_poolcore_deep_water",
-        "82,74": "tile_poolcore_deep_water",
-        "79,74": "tile_poolcore_deep_water",
-        "78,74": "tile_poolcore_deep_water",
-        "77,74": "tile_poolcore_deep_water",
-        "76,74": "tile_poolcore_deep_water",
-        "75,74": "tile_poolcore_deep_water",
-        "74,74": "tile_poolcore_deep_water",
-        "73,74": "tile_poolcore_deep_water",
-        "72,74": "tile_poolcore_deep_water",
-        "71,74": "tile_poolcore_deep_water",
-        "70,74": "tile_poolcore_deep_water",
-        "69,74": "tile_poolcore_deep_water",
-        "68,74": "tile_poolcore_deep_water",
-        "67,74": "tile_poolcore_deep_water",
-        "67,66": "tile_poolcore_deep_water",
-        "67,65": "tile_poolcore_deep_water",
-        "68,66": "tile_poolcore_deep_water",
-        "67,67": "tile_poolcore_deep_water",
-        "67,68": "tile_poolcore_deep_water",
-        "68,67": "tile_poolcore_deep_water",
-        "69,67": "tile_poolcore_deep_water",
-        "70,67": "tile_poolcore_deep_water",
-        "71,67": "tile_poolcore_deep_water",
-        "72,67": "tile_poolcore_deep_water",
-        "73,67": "tile_poolcore_deep_water",
-        "73,66": "tile_poolcore_deep_water",
-        "74,66": "tile_poolcore_deep_water",
-        "72,66": "tile_poolcore_deep_water",
-        "71,66": "tile_poolcore_deep_water",
-        "70,66": "tile_poolcore_deep_water",
-        "69,66": "tile_poolcore_deep_water",
-        "76,65": "tile_poolcore_deep_water",
-        "76,66": "tile_poolcore_deep_water",
-        "76,67": "tile_poolcore_deep_water",
-        "75,67": "tile_poolcore_deep_water",
-        "74,67": "tile_poolcore_deep_water",
-        "75,66": "tile_poolcore_deep_water",
-        "77,66": "tile_poolcore_deep_water",
-        "79,66": "tile_poolcore_deep_water",
-        "80,66": "tile_poolcore_deep_water",
-        "81,66": "tile_poolcore_deep_water",
-        "82,66": "tile_poolcore_deep_water",
-        "82,67": "tile_poolcore_deep_water",
-        "81,67": "tile_poolcore_deep_water",
-        "80,67": "tile_poolcore_deep_water",
-        "79,67": "tile_poolcore_deep_water",
-        "78,67": "tile_poolcore_deep_water",
-        "77,67": "tile_poolcore_deep_water",
-        "82,68": "tile_poolcore_deep_water",
-        "83,68": "tile_poolcore_deep_water",
-        "83,69": "tile_poolcore_deep_water",
-        "83,70": "tile_poolcore_deep_water",
-        "83,71": "tile_poolcore_deep_water",
-        "83,72": "tile_poolcore_deep_water",
-        "83,73": "tile_poolcore_deep_water",
-        "82,73": "tile_poolcore_deep_water",
-        "81,74": "tile_poolcore_deep_water",
-        "80,74": "tile_poolcore_deep_water",
-        "79,73": "tile_poolcore_deep_water",
-        "79,72": "tile_poolcore_deep_water",
-        "78,72": "tile_poolcore_deep_water",
-        "76,72": "tile_poolcore_deep_water",
-        "74,72": "tile_poolcore_deep_water",
-        "72,72": "tile_poolcore_deep_water",
-        "71,72": "tile_poolcore_deep_water",
-        "70,72": "tile_poolcore_deep_water",
-        "69,72": "tile_poolcore_deep_water",
-        "68,72": "tile_poolcore_deep_water",
-        "67,73": "tile_poolcore_deep_water",
-        "67,72": "tile_poolcore_deep_water",
+        "84,75": "tile_poolcore_deep_water",
+        "84,76": "tile_poolcore_deep_water",
+        "84,77": "tile_poolcore_deep_water",
+        "84,78": "tile_poolcore_deep_water",
+        "84,79": "tile_poolcore_deep_water",
+        "83,79": "tile_poolcore_deep_water",
+        "82,79": "tile_poolcore_deep_water",
+        "79,79": "tile_poolcore_deep_water",
+        "78,79": "tile_poolcore_deep_water",
+        "77,79": "tile_poolcore_deep_water",
+        "76,79": "tile_poolcore_deep_water",
+        "75,79": "tile_poolcore_deep_water",
+        "74,79": "tile_poolcore_deep_water",
+        "73,79": "tile_poolcore_deep_water",
+        "72,79": "tile_poolcore_deep_water",
+        "71,79": "tile_poolcore_deep_water",
+        "70,79": "tile_poolcore_deep_water",
+        "69,79": "tile_poolcore_deep_water",
+        "68,79": "tile_poolcore_deep_water",
+        "67,79": "tile_poolcore_deep_water",
         "67,71": "tile_poolcore_deep_water",
-        "69,71": "tile_poolcore_deep_water",
-        "70,71": "tile_poolcore_deep_water",
-        "71,71": "tile_poolcore_deep_water",
-        "72,71": "tile_poolcore_deep_water",
+        "67,70": "tile_poolcore_deep_water",
+        "68,71": "tile_poolcore_deep_water",
+        "67,72": "tile_poolcore_deep_water",
+        "67,73": "tile_poolcore_deep_water",
+        "68,72": "tile_poolcore_deep_water",
+        "69,72": "tile_poolcore_deep_water",
+        "70,72": "tile_poolcore_deep_water",
+        "71,72": "tile_poolcore_deep_water",
+        "72,72": "tile_poolcore_deep_water",
+        "73,72": "tile_poolcore_deep_water",
+        "73,71": "tile_poolcore_deep_water",
         "74,71": "tile_poolcore_deep_water",
-        "75,71": "tile_poolcore_deep_water",
+        "72,71": "tile_poolcore_deep_water",
+        "71,71": "tile_poolcore_deep_water",
+        "70,71": "tile_poolcore_deep_water",
+        "69,71": "tile_poolcore_deep_water",
+        "76,70": "tile_poolcore_deep_water",
         "76,71": "tile_poolcore_deep_water",
+        "76,72": "tile_poolcore_deep_water",
+        "75,72": "tile_poolcore_deep_water",
+        "74,72": "tile_poolcore_deep_water",
+        "75,71": "tile_poolcore_deep_water",
         "77,71": "tile_poolcore_deep_water",
-        "78,71": "tile_poolcore_deep_water",
         "79,71": "tile_poolcore_deep_water",
         "80,71": "tile_poolcore_deep_water",
         "81,71": "tile_poolcore_deep_water",
         "82,71": "tile_poolcore_deep_water",
         "82,72": "tile_poolcore_deep_water",
-        "81,73": "tile_poolcore_deep_water",
-        "80,73": "tile_poolcore_deep_water",
-        "80,72": "tile_poolcore_deep_water",
         "81,72": "tile_poolcore_deep_water",
-        "78,73": "tile_poolcore_deep_water",
-        "75,73": "tile_poolcore_deep_water",
-        "73,72": "tile_poolcore_deep_water",
-        "70,73": "tile_poolcore_deep_water",
-        "68,73": "tile_poolcore_deep_water",
+        "80,72": "tile_poolcore_deep_water",
+        "79,72": "tile_poolcore_deep_water",
+        "78,72": "tile_poolcore_deep_water",
+        "77,72": "tile_poolcore_deep_water",
+        "82,73": "tile_poolcore_deep_water",
+        "83,73": "tile_poolcore_deep_water",
+        "83,74": "tile_poolcore_deep_water",
+        "83,75": "tile_poolcore_deep_water",
+        "83,76": "tile_poolcore_deep_water",
+        "83,77": "tile_poolcore_deep_water",
+        "83,78": "tile_poolcore_deep_water",
+        "82,78": "tile_poolcore_deep_water",
+        "81,79": "tile_poolcore_deep_water",
+        "80,79": "tile_poolcore_deep_water",
+        "79,78": "tile_poolcore_deep_water",
+        "79,77": "tile_poolcore_deep_water",
+        "78,77": "tile_poolcore_deep_water",
+        "76,77": "tile_poolcore_deep_water",
+        "74,77": "tile_poolcore_deep_water",
+        "72,77": "tile_poolcore_deep_water",
+        "71,77": "tile_poolcore_deep_water",
+        "70,77": "tile_poolcore_deep_water",
+        "69,77": "tile_poolcore_deep_water",
+        "68,77": "tile_poolcore_deep_water",
+        "67,78": "tile_poolcore_deep_water",
+        "67,77": "tile_poolcore_deep_water",
+        "67,76": "tile_poolcore_deep_water",
+        "69,76": "tile_poolcore_deep_water",
+        "70,76": "tile_poolcore_deep_water",
+        "71,76": "tile_poolcore_deep_water",
+        "72,76": "tile_poolcore_deep_water",
+        "74,76": "tile_poolcore_deep_water",
+        "75,76": "tile_poolcore_deep_water",
+        "76,76": "tile_poolcore_deep_water",
+        "77,76": "tile_poolcore_deep_water",
+        "78,76": "tile_poolcore_deep_water",
+        "79,76": "tile_poolcore_deep_water",
+        "80,76": "tile_poolcore_deep_water",
+        "81,76": "tile_poolcore_deep_water",
+        "82,76": "tile_poolcore_deep_water",
+        "82,77": "tile_poolcore_deep_water",
+        "81,78": "tile_poolcore_deep_water",
+        "80,78": "tile_poolcore_deep_water",
+        "80,77": "tile_poolcore_deep_water",
+        "81,77": "tile_poolcore_deep_water",
+        "78,78": "tile_poolcore_deep_water",
+        "75,78": "tile_poolcore_deep_water",
+        "73,77": "tile_poolcore_deep_water",
+        "70,78": "tile_poolcore_deep_water",
+        "68,78": "tile_poolcore_deep_water",
+        "69,78": "tile_poolcore_deep_water",
+        "71,78": "tile_poolcore_deep_water",
+        "73,78": "tile_poolcore_deep_water",
+        "74,78": "tile_poolcore_deep_water",
+        "76,78": "tile_poolcore_deep_water",
+        "77,78": "tile_poolcore_deep_water",
+        "77,77": "tile_poolcore_deep_water",
+        "72,78": "tile_poolcore_deep_water",
+        "75,77": "tile_poolcore_deep_water",
+        "73,76": "tile_poolcore_deep_water",
+        "72,75": "tile_poolcore_deep_water",
+        "73,75": "tile_poolcore_deep_water",
+        "69,75": "tile_poolcore_deep_water",
+        "68,75": "tile_poolcore_deep_water",
+        "68,76": "tile_poolcore_deep_water",
+        "68,74": "tile_poolcore_deep_water",
+        "67,74": "tile_poolcore_deep_water",
+        "67,75": "tile_poolcore_deep_water",
+        "69,74": "tile_poolcore_deep_water",
         "69,73": "tile_poolcore_deep_water",
+        "70,74": "tile_poolcore_deep_water",
+        "70,75": "tile_poolcore_deep_water",
+        "68,73": "tile_poolcore_deep_water",
+        "70,73": "tile_poolcore_deep_water",
         "71,73": "tile_poolcore_deep_water",
+        "72,73": "tile_poolcore_deep_water",
         "73,73": "tile_poolcore_deep_water",
         "74,73": "tile_poolcore_deep_water",
         "76,73": "tile_poolcore_deep_water",
         "77,73": "tile_poolcore_deep_water",
-        "77,72": "tile_poolcore_deep_water",
-        "72,73": "tile_poolcore_deep_water",
-        "75,72": "tile_poolcore_deep_water",
-        "73,71": "tile_poolcore_deep_water",
-        "72,70": "tile_poolcore_deep_water",
-        "73,70": "tile_poolcore_deep_water",
-        "69,70": "tile_poolcore_deep_water",
-        "68,70": "tile_poolcore_deep_water",
-        "68,71": "tile_poolcore_deep_water",
-        "68,69": "tile_poolcore_deep_water",
-        "67,69": "tile_poolcore_deep_water",
-        "67,70": "tile_poolcore_deep_water",
-        "69,69": "tile_poolcore_deep_water",
-        "69,68": "tile_poolcore_deep_water",
-        "70,69": "tile_poolcore_deep_water",
-        "70,70": "tile_poolcore_deep_water",
-        "68,68": "tile_poolcore_deep_water",
-        "70,68": "tile_poolcore_deep_water",
-        "71,68": "tile_poolcore_deep_water",
-        "72,68": "tile_poolcore_deep_water",
-        "73,68": "tile_poolcore_deep_water",
-        "74,68": "tile_poolcore_deep_water",
-        "76,68": "tile_poolcore_deep_water",
-        "77,68": "tile_poolcore_deep_water",
-        "79,68": "tile_poolcore_deep_water",
-        "80,68": "tile_poolcore_deep_water",
-        "81,68": "tile_poolcore_deep_water",
-        "82,69": "tile_poolcore_deep_water",
-        "82,70": "tile_poolcore_deep_water",
-        "81,70": "tile_poolcore_deep_water",
-        "79,70": "tile_poolcore_deep_water",
-        "78,70": "tile_poolcore_deep_water",
-        "77,70": "tile_poolcore_deep_water",
-        "76,70": "tile_poolcore_deep_water",
-        "75,70": "tile_poolcore_deep_water",
-        "74,70": "tile_poolcore_deep_water",
-        "72,69": "tile_poolcore_deep_water",
-        "71,69": "tile_poolcore_deep_water",
-        "71,70": "tile_poolcore_deep_water",
-        "73,69": "tile_poolcore_deep_water",
-        "74,69": "tile_poolcore_deep_water",
-        "75,69": "tile_poolcore_deep_water",
-        "76,69": "tile_poolcore_deep_water",
-        "77,69": "tile_poolcore_deep_water",
-        "78,69": "tile_poolcore_deep_water",
-        "79,69": "tile_poolcore_deep_water",
-        "80,69": "tile_poolcore_deep_water",
-        "81,69": "tile_poolcore_deep_water",
-        "80,70": "tile_poolcore_deep_water",
-        "78,68": "tile_poolcore_deep_water",
-        "75,68": "tile_poolcore_deep_water",
-        "78,66": "tile_poolcore_deep_water",
-        "71,26": "tile_poolcore_deep_water",
-        "72,26": "tile_poolcore_deep_water",
-        "74,26": "tile_poolcore_deep_water",
-        "75,26": "tile_poolcore_deep_water",
-        "76,26": "tile_poolcore_deep_water",
-        "77,26": "tile_poolcore_deep_water",
-        "78,26": "tile_poolcore_deep_water",
-        "79,26": "tile_poolcore_deep_water",
-        "80,26": "tile_poolcore_deep_water",
-        "81,26": "tile_poolcore_deep_water",
-        "82,26": "tile_poolcore_deep_water",
-        "73,26": "tile_poolcore_deep_water",
-        "71,27": "tile_poolcore_deep_water",
-        "72,27": "tile_poolcore_deep_water",
-        "73,27": "tile_poolcore_deep_water",
-        "74,27": "tile_poolcore_deep_water",
-        "76,27": "tile_poolcore_deep_water",
-        "77,27": "tile_poolcore_deep_water",
-        "78,27": "tile_poolcore_deep_water",
-        "79,27": "tile_poolcore_deep_water",
-        "80,27": "tile_poolcore_deep_water",
-        "81,27": "tile_poolcore_deep_water",
-        "82,27": "tile_poolcore_deep_water",
-        "82,28": "tile_poolcore_deep_water",
-        "82,29": "tile_poolcore_deep_water",
-        "81,29": "tile_poolcore_deep_water",
-        "80,29": "tile_poolcore_deep_water",
-        "79,29": "tile_poolcore_deep_water",
-        "78,29": "tile_poolcore_deep_water",
-        "77,29": "tile_poolcore_deep_water",
-        "76,29": "tile_poolcore_deep_water",
-        "75,29": "tile_poolcore_deep_water",
-        "74,29": "tile_poolcore_deep_water",
-        "73,29": "tile_poolcore_deep_water",
-        "72,29": "tile_poolcore_deep_water",
-        "71,29": "tile_poolcore_deep_water",
-        "71,28": "tile_poolcore_deep_water",
-        "72,28": "tile_poolcore_deep_water",
-        "74,28": "tile_poolcore_deep_water",
-        "75,28": "tile_poolcore_deep_water",
-        "77,28": "tile_poolcore_deep_water",
-        "78,28": "tile_poolcore_deep_water",
-        "79,28": "tile_poolcore_deep_water",
-        "80,28": "tile_poolcore_deep_water",
-        "75,27": "tile_poolcore_deep_water",
-        "76,28": "tile_poolcore_deep_water",
-        "73,28": "tile_poolcore_deep_water",
-        "81,28": "tile_poolcore_deep_water",
-        "71,30": "tile_poolcore_deep_water",
-        "72,30": "tile_poolcore_deep_water",
-        "73,30": "tile_poolcore_deep_water",
-        "74,30": "tile_poolcore_deep_water",
-        "75,30": "tile_poolcore_deep_water",
+        "79,73": "tile_poolcore_deep_water",
+        "80,73": "tile_poolcore_deep_water",
+        "81,73": "tile_poolcore_deep_water",
+        "82,74": "tile_poolcore_deep_water",
+        "82,75": "tile_poolcore_deep_water",
+        "81,75": "tile_poolcore_deep_water",
+        "79,75": "tile_poolcore_deep_water",
+        "78,75": "tile_poolcore_deep_water",
+        "77,75": "tile_poolcore_deep_water",
+        "76,75": "tile_poolcore_deep_water",
+        "75,75": "tile_poolcore_deep_water",
+        "74,75": "tile_poolcore_deep_water",
+        "72,74": "tile_poolcore_deep_water",
+        "71,74": "tile_poolcore_deep_water",
+        "71,75": "tile_poolcore_deep_water",
+        "73,74": "tile_poolcore_deep_water",
+        "74,74": "tile_poolcore_deep_water",
+        "75,74": "tile_poolcore_deep_water",
+        "76,74": "tile_poolcore_deep_water",
+        "77,74": "tile_poolcore_deep_water",
+        "78,74": "tile_poolcore_deep_water",
+        "79,74": "tile_poolcore_deep_water",
+        "80,74": "tile_poolcore_deep_water",
+        "81,74": "tile_poolcore_deep_water",
+        "80,75": "tile_poolcore_deep_water",
+        "78,73": "tile_poolcore_deep_water",
+        "75,73": "tile_poolcore_deep_water",
+        "78,71": "tile_poolcore_deep_water",
+        "71,31": "tile_poolcore_deep_water",
+        "72,31": "tile_poolcore_deep_water",
+        "74,31": "tile_poolcore_deep_water",
         "75,31": "tile_poolcore_deep_water",
-        "74,32": "tile_poolcore_deep_water",
+        "76,31": "tile_poolcore_deep_water",
+        "77,31": "tile_poolcore_deep_water",
+        "78,31": "tile_poolcore_deep_water",
+        "79,31": "tile_poolcore_deep_water",
+        "80,31": "tile_poolcore_deep_water",
+        "81,31": "tile_poolcore_deep_water",
+        "82,31": "tile_poolcore_deep_water",
+        "73,31": "tile_poolcore_deep_water",
+        "71,32": "tile_poolcore_deep_water",
+        "72,32": "tile_poolcore_deep_water",
         "73,32": "tile_poolcore_deep_water",
-        "72,33": "tile_poolcore_deep_water",
+        "74,32": "tile_poolcore_deep_water",
+        "76,32": "tile_poolcore_deep_water",
+        "77,32": "tile_poolcore_deep_water",
+        "78,32": "tile_poolcore_deep_water",
+        "79,32": "tile_poolcore_deep_water",
+        "80,32": "tile_poolcore_deep_water",
+        "81,32": "tile_poolcore_deep_water",
+        "82,32": "tile_poolcore_deep_water",
+        "82,33": "tile_poolcore_deep_water",
+        "82,34": "tile_poolcore_deep_water",
+        "81,34": "tile_poolcore_deep_water",
+        "80,34": "tile_poolcore_deep_water",
+        "79,34": "tile_poolcore_deep_water",
+        "78,34": "tile_poolcore_deep_water",
+        "77,34": "tile_poolcore_deep_water",
+        "76,34": "tile_poolcore_deep_water",
+        "75,34": "tile_poolcore_deep_water",
+        "74,34": "tile_poolcore_deep_water",
+        "73,34": "tile_poolcore_deep_water",
         "72,34": "tile_poolcore_deep_water",
         "71,34": "tile_poolcore_deep_water",
+        "71,33": "tile_poolcore_deep_water",
+        "72,33": "tile_poolcore_deep_water",
+        "74,33": "tile_poolcore_deep_water",
+        "75,33": "tile_poolcore_deep_water",
+        "77,33": "tile_poolcore_deep_water",
+        "78,33": "tile_poolcore_deep_water",
+        "79,33": "tile_poolcore_deep_water",
+        "80,33": "tile_poolcore_deep_water",
+        "75,32": "tile_poolcore_deep_water",
+        "76,33": "tile_poolcore_deep_water",
+        "73,33": "tile_poolcore_deep_water",
+        "81,33": "tile_poolcore_deep_water",
         "71,35": "tile_poolcore_deep_water",
+        "72,35": "tile_poolcore_deep_water",
+        "73,35": "tile_poolcore_deep_water",
+        "74,35": "tile_poolcore_deep_water",
+        "75,35": "tile_poolcore_deep_water",
+        "75,36": "tile_poolcore_deep_water",
+        "74,37": "tile_poolcore_deep_water",
+        "73,37": "tile_poolcore_deep_water",
+        "72,38": "tile_poolcore_deep_water",
+        "72,39": "tile_poolcore_deep_water",
+        "71,39": "tile_poolcore_deep_water",
+        "71,40": "tile_poolcore_deep_water",
+        "71,41": "tile_poolcore_deep_water",
+        "71,42": "tile_poolcore_deep_water",
+        "71,43": "tile_poolcore_deep_water",
+        "72,44": "tile_poolcore_deep_water",
+        "73,43": "tile_poolcore_deep_water",
+        "73,42": "tile_poolcore_deep_water",
+        "72,42": "tile_poolcore_deep_water",
+        "72,41": "tile_poolcore_deep_water",
+        "72,40": "tile_poolcore_deep_water",
         "71,36": "tile_poolcore_deep_water",
         "71,37": "tile_poolcore_deep_water",
         "71,38": "tile_poolcore_deep_water",
-        "72,39": "tile_poolcore_deep_water",
-        "73,38": "tile_poolcore_deep_water",
-        "73,37": "tile_poolcore_deep_water",
-        "72,37": "tile_poolcore_deep_water",
         "72,36": "tile_poolcore_deep_water",
-        "72,35": "tile_poolcore_deep_water",
-        "71,31": "tile_poolcore_deep_water",
-        "71,32": "tile_poolcore_deep_water",
-        "71,33": "tile_poolcore_deep_water",
-        "72,31": "tile_poolcore_deep_water",
-        "72,32": "tile_poolcore_deep_water",
-        "73,31": "tile_poolcore_deep_water",
-        "74,31": "tile_poolcore_deep_water",
-        "75,32": "tile_poolcore_deep_water",
-        "75,33": "tile_poolcore_deep_water",
-        "75,34": "tile_poolcore_deep_water",
-        "75,35": "tile_poolcore_deep_water",
-        "75,36": "tile_poolcore_deep_water",
+        "72,37": "tile_poolcore_deep_water",
+        "73,36": "tile_poolcore_deep_water",
+        "74,36": "tile_poolcore_deep_water",
         "75,37": "tile_poolcore_deep_water",
-        "74,37": "tile_poolcore_deep_water",
-        "74,38": "tile_poolcore_deep_water",
-        "74,39": "tile_poolcore_deep_water",
+        "75,38": "tile_poolcore_deep_water",
         "75,39": "tile_poolcore_deep_water",
-        "75,43": "tile_poolcore_deep_water",
+        "75,40": "tile_poolcore_deep_water",
+        "75,41": "tile_poolcore_deep_water",
+        "75,42": "tile_poolcore_deep_water",
+        "74,42": "tile_poolcore_deep_water",
         "74,43": "tile_poolcore_deep_water",
         "74,44": "tile_poolcore_deep_water",
-        "72,38": "tile_poolcore_deep_water",
+        "75,44": "tile_poolcore_deep_water",
+        "75,48": "tile_poolcore_deep_water",
+        "74,48": "tile_poolcore_deep_water",
+        "74,49": "tile_poolcore_deep_water",
+        "72,43": "tile_poolcore_deep_water",
+        "73,44": "tile_poolcore_deep_water",
+        "75,43": "tile_poolcore_deep_water",
+        "74,41": "tile_poolcore_deep_water",
+        "74,40": "tile_poolcore_deep_water",
+        "74,39": "tile_poolcore_deep_water",
+        "74,38": "tile_poolcore_deep_water",
+        "73,38": "tile_poolcore_deep_water",
         "73,39": "tile_poolcore_deep_water",
-        "75,38": "tile_poolcore_deep_water",
-        "74,36": "tile_poolcore_deep_water",
-        "74,35": "tile_poolcore_deep_water",
-        "74,34": "tile_poolcore_deep_water",
-        "74,33": "tile_poolcore_deep_water",
-        "73,33": "tile_poolcore_deep_water",
-        "73,34": "tile_poolcore_deep_water",
-        "73,35": "tile_poolcore_deep_water",
-        "73,36": "tile_poolcore_deep_water",
-        "71,39": "tile_poolcore_deep_water",
-        "71,43": "tile_poolcore_deep_water",
+        "73,40": "tile_poolcore_deep_water",
+        "73,41": "tile_poolcore_deep_water",
         "71,44": "tile_poolcore_deep_water",
-        "71,45": "tile_poolcore_deep_water",
-        "71,46": "tile_poolcore_deep_water",
-        "71,47": "tile_poolcore_deep_water",
         "71,48": "tile_poolcore_deep_water",
         "71,49": "tile_poolcore_deep_water",
         "71,50": "tile_poolcore_deep_water",
@@ -181081,126 +182182,126 @@ const BATTLE_MAPS = [
         "71,52": "tile_poolcore_deep_water",
         "71,53": "tile_poolcore_deep_water",
         "71,54": "tile_poolcore_deep_water",
-        "72,54": "tile_poolcore_deep_water",
+        "71,55": "tile_poolcore_deep_water",
+        "71,56": "tile_poolcore_deep_water",
+        "71,57": "tile_poolcore_deep_water",
+        "71,58": "tile_poolcore_deep_water",
+        "71,59": "tile_poolcore_deep_water",
+        "72,59": "tile_poolcore_deep_water",
+        "73,57": "tile_poolcore_deep_water",
+        "74,55": "tile_poolcore_deep_water",
+        "74,53": "tile_poolcore_deep_water",
         "73,52": "tile_poolcore_deep_water",
-        "74,50": "tile_poolcore_deep_water",
-        "74,48": "tile_poolcore_deep_water",
-        "73,47": "tile_poolcore_deep_water",
-        "73,46": "tile_poolcore_deep_water",
-        "73,44": "tile_poolcore_deep_water",
-        "73,43": "tile_poolcore_deep_water",
-        "72,43": "tile_poolcore_deep_water",
-        "72,44": "tile_poolcore_deep_water",
-        "72,45": "tile_poolcore_deep_water",
-        "72,46": "tile_poolcore_deep_water",
-        "72,47": "tile_poolcore_deep_water",
+        "73,51": "tile_poolcore_deep_water",
+        "73,49": "tile_poolcore_deep_water",
+        "73,48": "tile_poolcore_deep_water",
         "72,48": "tile_poolcore_deep_water",
         "72,49": "tile_poolcore_deep_water",
         "72,50": "tile_poolcore_deep_water",
         "72,51": "tile_poolcore_deep_water",
         "72,52": "tile_poolcore_deep_water",
         "72,53": "tile_poolcore_deep_water",
+        "72,54": "tile_poolcore_deep_water",
         "72,55": "tile_poolcore_deep_water",
         "72,56": "tile_poolcore_deep_water",
-        "71,56": "tile_poolcore_deep_water",
-        "71,55": "tile_poolcore_deep_water",
-        "73,56": "tile_poolcore_deep_water",
+        "72,57": "tile_poolcore_deep_water",
+        "72,58": "tile_poolcore_deep_water",
+        "72,60": "tile_poolcore_deep_water",
+        "72,61": "tile_poolcore_deep_water",
+        "71,61": "tile_poolcore_deep_water",
+        "71,60": "tile_poolcore_deep_water",
+        "73,61": "tile_poolcore_deep_water",
+        "74,61": "tile_poolcore_deep_water",
+        "75,61": "tile_poolcore_deep_water",
+        "75,60": "tile_poolcore_deep_water",
+        "75,59": "tile_poolcore_deep_water",
+        "75,58": "tile_poolcore_deep_water",
+        "75,57": "tile_poolcore_deep_water",
         "74,56": "tile_poolcore_deep_water",
-        "75,56": "tile_poolcore_deep_water",
-        "75,55": "tile_poolcore_deep_water",
-        "75,54": "tile_poolcore_deep_water",
-        "75,53": "tile_poolcore_deep_water",
-        "75,52": "tile_poolcore_deep_water",
+        "74,54": "tile_poolcore_deep_water",
+        "74,52": "tile_poolcore_deep_water",
         "74,51": "tile_poolcore_deep_water",
-        "74,49": "tile_poolcore_deep_water",
-        "74,47": "tile_poolcore_deep_water",
-        "74,46": "tile_poolcore_deep_water",
-        "74,45": "tile_poolcore_deep_water",
-        "73,45": "tile_poolcore_deep_water",
-        "73,48": "tile_poolcore_deep_water",
-        "73,49": "tile_poolcore_deep_water",
+        "74,50": "tile_poolcore_deep_water",
         "73,50": "tile_poolcore_deep_water",
-        "73,51": "tile_poolcore_deep_water",
         "73,53": "tile_poolcore_deep_water",
         "73,54": "tile_poolcore_deep_water",
         "73,55": "tile_poolcore_deep_water",
-        "74,55": "tile_poolcore_deep_water",
-        "74,54": "tile_poolcore_deep_water",
-        "74,53": "tile_poolcore_deep_water",
-        "74,52": "tile_poolcore_deep_water",
-        "75,44": "tile_poolcore_deep_water",
-        "75,45": "tile_poolcore_deep_water",
-        "75,46": "tile_poolcore_deep_water",
-        "75,47": "tile_poolcore_deep_water",
-        "75,48": "tile_poolcore_deep_water",
+        "73,56": "tile_poolcore_deep_water",
+        "73,58": "tile_poolcore_deep_water",
+        "73,59": "tile_poolcore_deep_water",
+        "73,60": "tile_poolcore_deep_water",
+        "74,60": "tile_poolcore_deep_water",
+        "74,59": "tile_poolcore_deep_water",
+        "74,58": "tile_poolcore_deep_water",
+        "74,57": "tile_poolcore_deep_water",
         "75,49": "tile_poolcore_deep_water",
         "75,50": "tile_poolcore_deep_water",
         "75,51": "tile_poolcore_deep_water",
-        "89,26": "tile_poolcore_deep_water",
-        "90,26": "tile_poolcore_deep_water",
-        "91,26": "tile_poolcore_deep_water",
-        "93,26": "tile_poolcore_deep_water",
-        "94,26": "tile_poolcore_deep_water",
-        "95,26": "tile_poolcore_deep_water",
-        "96,26": "tile_poolcore_deep_water",
-        "97,26": "tile_poolcore_deep_water",
-        "98,26": "tile_poolcore_deep_water",
-        "99,26": "tile_poolcore_deep_water",
-        "100,26": "tile_poolcore_deep_water",
-        "101,26": "tile_poolcore_deep_water",
-        "102,26": "tile_poolcore_deep_water",
-        "103,26": "tile_poolcore_deep_water",
-        "92,26": "tile_poolcore_deep_water",
-        "89,27": "tile_poolcore_deep_water",
-        "90,27": "tile_poolcore_deep_water",
-        "92,27": "tile_poolcore_deep_water",
-        "94,27": "tile_poolcore_deep_water",
-        "95,27": "tile_poolcore_deep_water",
-        "96,27": "tile_poolcore_deep_water",
-        "97,27": "tile_poolcore_deep_water",
-        "98,27": "tile_poolcore_deep_water",
-        "99,27": "tile_poolcore_deep_water",
-        "100,27": "tile_poolcore_deep_water",
-        "101,27": "tile_poolcore_deep_water",
-        "102,27": "tile_poolcore_deep_water",
-        "103,27": "tile_poolcore_deep_water",
-        "103,28": "tile_poolcore_deep_water",
-        "102,28": "tile_poolcore_deep_water",
-        "100,28": "tile_poolcore_deep_water",
-        "99,28": "tile_poolcore_deep_water",
-        "98,28": "tile_poolcore_deep_water",
-        "97,28": "tile_poolcore_deep_water",
-        "96,28": "tile_poolcore_deep_water",
-        "95,28": "tile_poolcore_deep_water",
-        "94,28": "tile_poolcore_deep_water",
-        "93,28": "tile_poolcore_deep_water",
-        "92,28": "tile_poolcore_deep_water",
-        "91,28": "tile_poolcore_deep_water",
-        "90,28": "tile_poolcore_deep_water",
-        "89,28": "tile_poolcore_deep_water",
-        "89,29": "tile_poolcore_deep_water",
-        "90,29": "tile_poolcore_deep_water",
-        "91,29": "tile_poolcore_deep_water",
-        "92,29": "tile_poolcore_deep_water",
-        "93,29": "tile_poolcore_deep_water",
-        "94,29": "tile_poolcore_deep_water",
-        "95,29": "tile_poolcore_deep_water",
-        "96,29": "tile_poolcore_deep_water",
-        "97,29": "tile_poolcore_deep_water",
-        "98,29": "tile_poolcore_deep_water",
-        "99,29": "tile_poolcore_deep_water",
-        "100,29": "tile_poolcore_deep_water",
-        "101,29": "tile_poolcore_deep_water",
-        "103,29": "tile_poolcore_deep_water",
-        "101,28": "tile_poolcore_deep_water",
-        "91,27": "tile_poolcore_deep_water",
-        "93,27": "tile_poolcore_deep_water",
-        "102,29": "tile_poolcore_deep_water",
-        "97,30": "tile_poolcore_deep_water",
+        "75,52": "tile_poolcore_deep_water",
+        "75,53": "tile_poolcore_deep_water",
+        "75,54": "tile_poolcore_deep_water",
+        "75,55": "tile_poolcore_deep_water",
+        "75,56": "tile_poolcore_deep_water",
+        "89,31": "tile_poolcore_deep_water",
+        "90,31": "tile_poolcore_deep_water",
+        "91,31": "tile_poolcore_deep_water",
+        "93,31": "tile_poolcore_deep_water",
+        "94,31": "tile_poolcore_deep_water",
+        "95,31": "tile_poolcore_deep_water",
+        "96,31": "tile_poolcore_deep_water",
         "97,31": "tile_poolcore_deep_water",
+        "98,31": "tile_poolcore_deep_water",
+        "99,31": "tile_poolcore_deep_water",
+        "100,31": "tile_poolcore_deep_water",
+        "101,31": "tile_poolcore_deep_water",
+        "102,31": "tile_poolcore_deep_water",
+        "103,31": "tile_poolcore_deep_water",
+        "92,31": "tile_poolcore_deep_water",
+        "89,32": "tile_poolcore_deep_water",
+        "90,32": "tile_poolcore_deep_water",
+        "92,32": "tile_poolcore_deep_water",
+        "94,32": "tile_poolcore_deep_water",
+        "95,32": "tile_poolcore_deep_water",
+        "96,32": "tile_poolcore_deep_water",
         "97,32": "tile_poolcore_deep_water",
+        "98,32": "tile_poolcore_deep_water",
+        "99,32": "tile_poolcore_deep_water",
+        "100,32": "tile_poolcore_deep_water",
+        "101,32": "tile_poolcore_deep_water",
+        "102,32": "tile_poolcore_deep_water",
+        "103,32": "tile_poolcore_deep_water",
+        "103,33": "tile_poolcore_deep_water",
+        "102,33": "tile_poolcore_deep_water",
+        "100,33": "tile_poolcore_deep_water",
+        "99,33": "tile_poolcore_deep_water",
+        "98,33": "tile_poolcore_deep_water",
         "97,33": "tile_poolcore_deep_water",
+        "96,33": "tile_poolcore_deep_water",
+        "95,33": "tile_poolcore_deep_water",
+        "94,33": "tile_poolcore_deep_water",
+        "93,33": "tile_poolcore_deep_water",
+        "92,33": "tile_poolcore_deep_water",
+        "91,33": "tile_poolcore_deep_water",
+        "90,33": "tile_poolcore_deep_water",
+        "89,33": "tile_poolcore_deep_water",
+        "89,34": "tile_poolcore_deep_water",
+        "90,34": "tile_poolcore_deep_water",
+        "91,34": "tile_poolcore_deep_water",
+        "92,34": "tile_poolcore_deep_water",
+        "93,34": "tile_poolcore_deep_water",
+        "94,34": "tile_poolcore_deep_water",
+        "95,34": "tile_poolcore_deep_water",
+        "96,34": "tile_poolcore_deep_water",
         "97,34": "tile_poolcore_deep_water",
+        "98,34": "tile_poolcore_deep_water",
+        "99,34": "tile_poolcore_deep_water",
+        "100,34": "tile_poolcore_deep_water",
+        "101,34": "tile_poolcore_deep_water",
+        "103,34": "tile_poolcore_deep_water",
+        "101,33": "tile_poolcore_deep_water",
+        "91,32": "tile_poolcore_deep_water",
+        "93,32": "tile_poolcore_deep_water",
+        "102,34": "tile_poolcore_deep_water",
         "97,35": "tile_poolcore_deep_water",
         "97,36": "tile_poolcore_deep_water",
         "97,37": "tile_poolcore_deep_water",
@@ -181209,397 +182310,407 @@ const BATTLE_MAPS = [
         "97,40": "tile_poolcore_deep_water",
         "97,41": "tile_poolcore_deep_water",
         "97,42": "tile_poolcore_deep_water",
-        "98,42": "tile_poolcore_deep_water",
-        "98,43": "tile_poolcore_deep_water",
+        "97,43": "tile_poolcore_deep_water",
+        "97,44": "tile_poolcore_deep_water",
+        "97,45": "tile_poolcore_deep_water",
+        "97,46": "tile_poolcore_deep_water",
+        "97,47": "tile_poolcore_deep_water",
+        "98,47": "tile_poolcore_deep_water",
+        "98,48": "tile_poolcore_deep_water",
+        "98,49": "tile_poolcore_deep_water",
+        "99,49": "tile_poolcore_deep_water",
+        "99,48": "tile_poolcore_deep_water",
+        "98,46": "tile_poolcore_deep_water",
+        "98,45": "tile_poolcore_deep_water",
         "98,44": "tile_poolcore_deep_water",
-        "99,44": "tile_poolcore_deep_water",
-        "99,43": "tile_poolcore_deep_water",
+        "98,43": "tile_poolcore_deep_water",
+        "98,42": "tile_poolcore_deep_water",
         "98,41": "tile_poolcore_deep_water",
-        "98,40": "tile_poolcore_deep_water",
         "98,39": "tile_poolcore_deep_water",
         "98,38": "tile_poolcore_deep_water",
         "98,37": "tile_poolcore_deep_water",
         "98,36": "tile_poolcore_deep_water",
-        "98,34": "tile_poolcore_deep_water",
-        "98,33": "tile_poolcore_deep_water",
-        "98,32": "tile_poolcore_deep_water",
-        "98,31": "tile_poolcore_deep_water",
-        "98,30": "tile_poolcore_deep_water",
-        "99,30": "tile_poolcore_deep_water",
-        "100,30": "tile_poolcore_deep_water",
-        "101,30": "tile_poolcore_deep_water",
-        "102,30": "tile_poolcore_deep_water",
-        "103,30": "tile_poolcore_deep_water",
-        "104,31": "tile_poolcore_deep_water",
-        "103,31": "tile_poolcore_deep_water",
-        "102,31": "tile_poolcore_deep_water",
-        "101,31": "tile_poolcore_deep_water",
-        "100,31": "tile_poolcore_deep_water",
-        "100,32": "tile_poolcore_deep_water",
-        "99,32": "tile_poolcore_deep_water",
-        "99,33": "tile_poolcore_deep_water",
         "98,35": "tile_poolcore_deep_water",
-        "98,45": "tile_poolcore_deep_water",
-        "98,46": "tile_poolcore_deep_water",
-        "97,46": "tile_poolcore_deep_water",
-        "97,45": "tile_poolcore_deep_water",
-        "97,44": "tile_poolcore_deep_water",
-        "97,43": "tile_poolcore_deep_water",
-        "97,47": "tile_poolcore_deep_water",
-        "97,48": "tile_poolcore_deep_water",
-        "97,49": "tile_poolcore_deep_water",
-        "97,50": "tile_poolcore_deep_water",
+        "99,35": "tile_poolcore_deep_water",
+        "100,35": "tile_poolcore_deep_water",
+        "101,35": "tile_poolcore_deep_water",
+        "102,35": "tile_poolcore_deep_water",
+        "103,35": "tile_poolcore_deep_water",
+        "104,36": "tile_poolcore_deep_water",
+        "103,36": "tile_poolcore_deep_water",
+        "102,36": "tile_poolcore_deep_water",
+        "101,36": "tile_poolcore_deep_water",
+        "100,36": "tile_poolcore_deep_water",
+        "100,37": "tile_poolcore_deep_water",
+        "99,37": "tile_poolcore_deep_water",
+        "99,38": "tile_poolcore_deep_water",
+        "98,40": "tile_poolcore_deep_water",
+        "98,50": "tile_poolcore_deep_water",
+        "98,51": "tile_poolcore_deep_water",
         "97,51": "tile_poolcore_deep_water",
+        "97,50": "tile_poolcore_deep_water",
+        "97,49": "tile_poolcore_deep_water",
+        "97,48": "tile_poolcore_deep_water",
         "97,52": "tile_poolcore_deep_water",
         "97,53": "tile_poolcore_deep_water",
         "97,54": "tile_poolcore_deep_water",
         "97,55": "tile_poolcore_deep_water",
-        "98,55": "tile_poolcore_deep_water",
-        "98,56": "tile_poolcore_deep_water",
         "97,56": "tile_poolcore_deep_water",
-        "100,56": "tile_poolcore_deep_water",
-        "99,56": "tile_poolcore_deep_water",
-        "101,56": "tile_poolcore_deep_water",
-        "103,56": "tile_poolcore_deep_water",
-        "104,56": "tile_poolcore_deep_water",
-        "105,56": "tile_poolcore_deep_water",
-        "106,56": "tile_poolcore_deep_water",
-        "102,56": "tile_poolcore_deep_water",
-        "103,55": "tile_poolcore_deep_water",
-        "105,55": "tile_poolcore_deep_water",
-        "105,54": "tile_poolcore_deep_water",
-        "106,54": "tile_poolcore_deep_water",
-        "106,55": "tile_poolcore_deep_water",
-        "107,55": "tile_poolcore_deep_water",
-        "104,55": "tile_poolcore_deep_water",
-        "102,55": "tile_poolcore_deep_water",
-        "101,55": "tile_poolcore_deep_water",
-        "100,55": "tile_poolcore_deep_water",
-        "99,55": "tile_poolcore_deep_water",
-        "99,54": "tile_poolcore_deep_water",
+        "97,57": "tile_poolcore_deep_water",
+        "97,58": "tile_poolcore_deep_water",
+        "97,59": "tile_poolcore_deep_water",
+        "97,60": "tile_poolcore_deep_water",
+        "98,60": "tile_poolcore_deep_water",
+        "98,61": "tile_poolcore_deep_water",
+        "97,61": "tile_poolcore_deep_water",
+        "100,61": "tile_poolcore_deep_water",
+        "99,61": "tile_poolcore_deep_water",
+        "101,61": "tile_poolcore_deep_water",
+        "103,61": "tile_poolcore_deep_water",
+        "104,61": "tile_poolcore_deep_water",
+        "105,61": "tile_poolcore_deep_water",
+        "106,61": "tile_poolcore_deep_water",
+        "102,61": "tile_poolcore_deep_water",
+        "103,60": "tile_poolcore_deep_water",
+        "105,60": "tile_poolcore_deep_water",
+        "105,59": "tile_poolcore_deep_water",
+        "106,59": "tile_poolcore_deep_water",
+        "106,60": "tile_poolcore_deep_water",
+        "107,60": "tile_poolcore_deep_water",
+        "104,60": "tile_poolcore_deep_water",
+        "102,60": "tile_poolcore_deep_water",
+        "101,60": "tile_poolcore_deep_water",
+        "100,60": "tile_poolcore_deep_water",
+        "99,60": "tile_poolcore_deep_water",
+        "99,59": "tile_poolcore_deep_water",
+        "98,59": "tile_poolcore_deep_water",
+        "98,58": "tile_poolcore_deep_water",
+        "98,57": "tile_poolcore_deep_water",
+        "98,56": "tile_poolcore_deep_water",
+        "98,55": "tile_poolcore_deep_water",
         "98,54": "tile_poolcore_deep_water",
         "98,53": "tile_poolcore_deep_water",
         "98,52": "tile_poolcore_deep_water",
-        "98,51": "tile_poolcore_deep_water",
-        "98,50": "tile_poolcore_deep_water",
-        "98,49": "tile_poolcore_deep_water",
-        "98,48": "tile_poolcore_deep_water",
-        "98,47": "tile_poolcore_deep_water",
-        "99,48": "tile_poolcore_deep_water",
-        "99,49": "tile_poolcore_deep_water",
-        "99,50": "tile_poolcore_deep_water",
-        "99,51": "tile_poolcore_deep_water",
-        "99,52": "tile_poolcore_deep_water",
-        "100,52": "tile_poolcore_deep_water",
-        "100,53": "tile_poolcore_deep_water",
-        "100,54": "tile_poolcore_deep_water",
-        "101,54": "tile_poolcore_deep_water",
-        "100,50": "tile_poolcore_deep_water",
-        "100,51": "tile_poolcore_deep_water",
         "99,53": "tile_poolcore_deep_water",
-        "101,53": "tile_poolcore_deep_water",
-        "103,54": "tile_poolcore_deep_water",
-        "104,54": "tile_poolcore_deep_water",
+        "99,54": "tile_poolcore_deep_water",
+        "99,55": "tile_poolcore_deep_water",
+        "99,56": "tile_poolcore_deep_water",
+        "99,57": "tile_poolcore_deep_water",
+        "100,57": "tile_poolcore_deep_water",
+        "100,58": "tile_poolcore_deep_water",
+        "100,59": "tile_poolcore_deep_water",
+        "101,59": "tile_poolcore_deep_water",
+        "100,55": "tile_poolcore_deep_water",
+        "100,56": "tile_poolcore_deep_water",
+        "99,58": "tile_poolcore_deep_water",
+        "101,58": "tile_poolcore_deep_water",
+        "103,59": "tile_poolcore_deep_water",
+        "104,59": "tile_poolcore_deep_water",
+        "102,59": "tile_poolcore_deep_water",
+        "102,58": "tile_poolcore_deep_water",
+        "102,57": "tile_poolcore_deep_water",
+        "102,56": "tile_poolcore_deep_water",
+        "102,55": "tile_poolcore_deep_water",
         "102,54": "tile_poolcore_deep_water",
-        "102,53": "tile_poolcore_deep_water",
-        "102,52": "tile_poolcore_deep_water",
-        "102,51": "tile_poolcore_deep_water",
-        "102,50": "tile_poolcore_deep_water",
-        "102,49": "tile_poolcore_deep_water",
-        "101,47": "tile_poolcore_deep_water",
-        "101,45": "tile_poolcore_deep_water",
-        "101,43": "tile_poolcore_deep_water",
-        "100,42": "tile_poolcore_deep_water",
-        "100,41": "tile_poolcore_deep_water",
-        "100,40": "tile_poolcore_deep_water",
-        "100,43": "tile_poolcore_deep_water",
-        "100,44": "tile_poolcore_deep_water",
-        "100,46": "tile_poolcore_deep_water",
-        "100,47": "tile_poolcore_deep_water",
-        "100,49": "tile_poolcore_deep_water",
-        "101,51": "tile_poolcore_deep_water",
         "101,52": "tile_poolcore_deep_water",
         "101,50": "tile_poolcore_deep_water",
-        "101,49": "tile_poolcore_deep_water",
         "101,48": "tile_poolcore_deep_water",
-        "100,48": "tile_poolcore_deep_water",
-        "99,46": "tile_poolcore_deep_water",
-        "99,47": "tile_poolcore_deep_water",
-        "99,45": "tile_poolcore_deep_water",
+        "100,47": "tile_poolcore_deep_water",
+        "100,46": "tile_poolcore_deep_water",
         "100,45": "tile_poolcore_deep_water",
-        "102,46": "tile_poolcore_deep_water",
-        "102,47": "tile_poolcore_deep_water",
-        "102,48": "tile_poolcore_deep_water",
-        "103,50": "tile_poolcore_deep_water",
-        "103,51": "tile_poolcore_deep_water",
-        "103,52": "tile_poolcore_deep_water",
-        "103,53": "tile_poolcore_deep_water",
-        "105,53": "tile_poolcore_deep_water",
-        "107,54": "tile_poolcore_deep_water",
+        "100,48": "tile_poolcore_deep_water",
+        "100,49": "tile_poolcore_deep_water",
+        "100,51": "tile_poolcore_deep_water",
+        "100,52": "tile_poolcore_deep_water",
+        "100,54": "tile_poolcore_deep_water",
+        "101,56": "tile_poolcore_deep_water",
+        "101,57": "tile_poolcore_deep_water",
+        "101,55": "tile_poolcore_deep_water",
+        "101,54": "tile_poolcore_deep_water",
+        "101,53": "tile_poolcore_deep_water",
+        "100,53": "tile_poolcore_deep_water",
+        "99,51": "tile_poolcore_deep_water",
+        "99,52": "tile_poolcore_deep_water",
+        "99,50": "tile_poolcore_deep_water",
+        "100,50": "tile_poolcore_deep_water",
+        "102,51": "tile_poolcore_deep_water",
+        "102,52": "tile_poolcore_deep_water",
+        "102,53": "tile_poolcore_deep_water",
+        "103,55": "tile_poolcore_deep_water",
+        "103,56": "tile_poolcore_deep_water",
+        "103,57": "tile_poolcore_deep_water",
+        "103,58": "tile_poolcore_deep_water",
+        "105,58": "tile_poolcore_deep_water",
+        "107,59": "tile_poolcore_deep_water",
+        "107,58": "tile_poolcore_deep_water",
+        "106,58": "tile_poolcore_deep_water",
+        "104,58": "tile_poolcore_deep_water",
+        "104,57": "tile_poolcore_deep_water",
+        "104,55": "tile_poolcore_deep_water",
+        "105,55": "tile_poolcore_deep_water",
+        "106,55": "tile_poolcore_deep_water",
+        "107,55": "tile_poolcore_deep_water",
+        "107,56": "tile_poolcore_deep_water",
+        "107,57": "tile_poolcore_deep_water",
+        "106,57": "tile_poolcore_deep_water",
+        "105,57": "tile_poolcore_deep_water",
+        "104,56": "tile_poolcore_deep_water",
+        "106,56": "tile_poolcore_deep_water",
+        "105,56": "tile_poolcore_deep_water",
         "107,53": "tile_poolcore_deep_water",
-        "106,53": "tile_poolcore_deep_water",
-        "104,53": "tile_poolcore_deep_water",
+        "107,54": "tile_poolcore_deep_water",
+        "107,52": "tile_poolcore_deep_water",
+        "107,50": "tile_poolcore_deep_water",
+        "106,47": "tile_poolcore_deep_water",
+        "105,44": "tile_poolcore_deep_water",
+        "104,42": "tile_poolcore_deep_water",
+        "104,40": "tile_poolcore_deep_water",
+        "103,38": "tile_poolcore_deep_water",
+        "99,36": "tile_poolcore_deep_water",
+        "99,39": "tile_poolcore_deep_water",
+        "99,41": "tile_poolcore_deep_water",
+        "99,43": "tile_poolcore_deep_water",
+        "99,44": "tile_poolcore_deep_water",
+        "99,45": "tile_poolcore_deep_water",
+        "99,47": "tile_poolcore_deep_water",
+        "99,40": "tile_poolcore_deep_water",
+        "99,46": "tile_poolcore_deep_water",
+        "99,42": "tile_poolcore_deep_water",
+        "100,41": "tile_poolcore_deep_water",
+        "101,46": "tile_poolcore_deep_water",
+        "101,41": "tile_poolcore_deep_water",
+        "101,38": "tile_poolcore_deep_water",
+        "101,37": "tile_poolcore_deep_water",
+        "101,40": "tile_poolcore_deep_water",
+        "101,45": "tile_poolcore_deep_water",
+        "102,49": "tile_poolcore_deep_water",
+        "103,54": "tile_poolcore_deep_water",
+        "103,53": "tile_poolcore_deep_water",
+        "103,52": "tile_poolcore_deep_water",
+        "103,50": "tile_poolcore_deep_water",
+        "102,50": "tile_poolcore_deep_water",
+        "103,51": "tile_poolcore_deep_water",
+        "104,54": "tile_poolcore_deep_water",
         "104,52": "tile_poolcore_deep_water",
         "104,50": "tile_poolcore_deep_water",
-        "105,50": "tile_poolcore_deep_water",
-        "106,50": "tile_poolcore_deep_water",
-        "107,50": "tile_poolcore_deep_water",
-        "107,51": "tile_poolcore_deep_water",
-        "107,52": "tile_poolcore_deep_water",
-        "106,52": "tile_poolcore_deep_water",
-        "105,52": "tile_poolcore_deep_water",
         "104,51": "tile_poolcore_deep_water",
-        "106,51": "tile_poolcore_deep_water",
+        "104,53": "tile_poolcore_deep_water",
+        "105,54": "tile_poolcore_deep_water",
+        "105,52": "tile_poolcore_deep_water",
+        "105,50": "tile_poolcore_deep_water",
         "105,51": "tile_poolcore_deep_water",
-        "107,48": "tile_poolcore_deep_water",
+        "105,53": "tile_poolcore_deep_water",
+        "106,54": "tile_poolcore_deep_water",
+        "106,53": "tile_poolcore_deep_water",
+        "106,50": "tile_poolcore_deep_water",
+        "106,49": "tile_poolcore_deep_water",
+        "106,51": "tile_poolcore_deep_water",
+        "107,51": "tile_poolcore_deep_water",
         "107,49": "tile_poolcore_deep_water",
         "107,47": "tile_poolcore_deep_water",
-        "107,45": "tile_poolcore_deep_water",
-        "106,42": "tile_poolcore_deep_water",
-        "105,39": "tile_poolcore_deep_water",
-        "104,37": "tile_poolcore_deep_water",
-        "104,35": "tile_poolcore_deep_water",
-        "103,33": "tile_poolcore_deep_water",
-        "99,31": "tile_poolcore_deep_water",
-        "99,34": "tile_poolcore_deep_water",
-        "99,36": "tile_poolcore_deep_water",
-        "99,38": "tile_poolcore_deep_water",
-        "99,39": "tile_poolcore_deep_water",
-        "99,40": "tile_poolcore_deep_water",
-        "99,42": "tile_poolcore_deep_water",
-        "99,35": "tile_poolcore_deep_water",
-        "99,41": "tile_poolcore_deep_water",
-        "99,37": "tile_poolcore_deep_water",
-        "100,36": "tile_poolcore_deep_water",
-        "101,41": "tile_poolcore_deep_water",
-        "101,36": "tile_poolcore_deep_water",
-        "101,33": "tile_poolcore_deep_water",
-        "101,32": "tile_poolcore_deep_water",
-        "101,35": "tile_poolcore_deep_water",
-        "101,40": "tile_poolcore_deep_water",
-        "102,44": "tile_poolcore_deep_water",
-        "103,49": "tile_poolcore_deep_water",
-        "103,48": "tile_poolcore_deep_water",
-        "103,47": "tile_poolcore_deep_water",
-        "103,45": "tile_poolcore_deep_water",
-        "102,45": "tile_poolcore_deep_water",
-        "103,46": "tile_poolcore_deep_water",
-        "104,49": "tile_poolcore_deep_water",
-        "104,47": "tile_poolcore_deep_water",
-        "104,45": "tile_poolcore_deep_water",
-        "104,46": "tile_poolcore_deep_water",
-        "104,48": "tile_poolcore_deep_water",
-        "105,49": "tile_poolcore_deep_water",
-        "105,47": "tile_poolcore_deep_water",
-        "105,45": "tile_poolcore_deep_water",
-        "105,46": "tile_poolcore_deep_water",
-        "105,48": "tile_poolcore_deep_water",
-        "106,49": "tile_poolcore_deep_water",
-        "106,48": "tile_poolcore_deep_water",
-        "106,45": "tile_poolcore_deep_water",
-        "106,44": "tile_poolcore_deep_water",
-        "106,46": "tile_poolcore_deep_water",
-        "107,46": "tile_poolcore_deep_water",
-        "107,44": "tile_poolcore_deep_water",
-        "107,42": "tile_poolcore_deep_water",
-        "107,43": "tile_poolcore_deep_water",
-        "106,47": "tile_poolcore_deep_water",
-        "104,12": "tile_poolcore_deep_water",
-        "103,12": "tile_poolcore_deep_water",
-        "101,12": "tile_poolcore_deep_water",
-        "100,12": "tile_poolcore_deep_water",
-        "99,12": "tile_poolcore_deep_water",
-        "98,12": "tile_poolcore_deep_water",
-        "97,12": "tile_poolcore_deep_water",
-        "96,12": "tile_poolcore_deep_water",
-        "95,12": "tile_poolcore_deep_water",
-        "94,12": "tile_poolcore_deep_water",
-        "93,12": "tile_poolcore_deep_water",
-        "92,12": "tile_poolcore_deep_water",
-        "91,12": "tile_poolcore_deep_water",
-        "90,12": "tile_poolcore_deep_water",
-        "89,12": "tile_poolcore_deep_water",
-        "88,12": "tile_poolcore_deep_water",
-        "87,12": "tile_poolcore_deep_water",
-        "86,12": "tile_poolcore_deep_water",
-        "85,12": "tile_poolcore_deep_water",
-        "84,12": "tile_poolcore_deep_water",
-        "83,11": "tile_poolcore_deep_water",
-        "82,11": "tile_poolcore_deep_water",
-        "81,11": "tile_poolcore_deep_water",
-        "80,11": "tile_poolcore_deep_water",
-        "79,11": "tile_poolcore_deep_water",
-        "78,11": "tile_poolcore_deep_water",
-        "77,11": "tile_poolcore_deep_water",
-        "76,11": "tile_poolcore_deep_water",
-        "75,11": "tile_poolcore_deep_water",
-        "75,12": "tile_poolcore_deep_water",
-        "74,12": "tile_poolcore_deep_water",
-        "73,12": "tile_poolcore_deep_water",
-        "72,12": "tile_poolcore_deep_water",
-        "71,12": "tile_poolcore_deep_water",
-        "71,13": "tile_poolcore_deep_water",
-        "71,14": "tile_poolcore_deep_water",
-        "72,14": "tile_poolcore_deep_water",
-        "73,14": "tile_poolcore_deep_water",
-        "74,14": "tile_poolcore_deep_water",
-        "73,13": "tile_poolcore_deep_water",
-        "72,13": "tile_poolcore_deep_water",
-        "74,13": "tile_poolcore_deep_water",
-        "75,13": "tile_poolcore_deep_water",
-        "76,13": "tile_poolcore_deep_water",
-        "77,13": "tile_poolcore_deep_water",
-        "77,12": "tile_poolcore_deep_water",
-        "76,12": "tile_poolcore_deep_water",
-        "78,12": "tile_poolcore_deep_water",
-        "81,12": "tile_poolcore_deep_water",
-        "82,12": "tile_poolcore_deep_water",
-        "83,12": "tile_poolcore_deep_water",
-        "83,13": "tile_poolcore_deep_water",
-        "83,14": "tile_poolcore_deep_water",
-        "82,14": "tile_poolcore_deep_water",
-        "81,14": "tile_poolcore_deep_water",
-        "80,14": "tile_poolcore_deep_water",
-        "79,14": "tile_poolcore_deep_water",
-        "78,14": "tile_poolcore_deep_water",
-        "77,14": "tile_poolcore_deep_water",
-        "76,14": "tile_poolcore_deep_water",
-        "75,14": "tile_poolcore_deep_water",
-        "79,13": "tile_poolcore_deep_water",
-        "80,13": "tile_poolcore_deep_water",
-        "78,13": "tile_poolcore_deep_water",
-        "79,12": "tile_poolcore_deep_water",
-        "80,12": "tile_poolcore_deep_water",
-        "81,13": "tile_poolcore_deep_water",
-        "82,13": "tile_poolcore_deep_water",
-        "84,13": "tile_poolcore_deep_water",
-        "85,13": "tile_poolcore_deep_water",
-        "86,13": "tile_poolcore_deep_water",
-        "87,13": "tile_poolcore_deep_water",
-        "88,13": "tile_poolcore_deep_water",
-        "89,13": "tile_poolcore_deep_water",
-        "90,13": "tile_poolcore_deep_water",
-        "91,13": "tile_poolcore_deep_water",
-        "92,13": "tile_poolcore_deep_water",
-        "94,13": "tile_poolcore_deep_water",
-        "96,13": "tile_poolcore_deep_water",
-        "97,13": "tile_poolcore_deep_water",
-        "98,13": "tile_poolcore_deep_water",
-        "99,13": "tile_poolcore_deep_water",
-        "100,13": "tile_poolcore_deep_water",
-        "101,13": "tile_poolcore_deep_water",
-        "102,13": "tile_poolcore_deep_water",
-        "103,13": "tile_poolcore_deep_water",
-        "104,13": "tile_poolcore_deep_water",
-        "104,14": "tile_poolcore_deep_water",
-        "103,14": "tile_poolcore_deep_water",
-        "102,14": "tile_poolcore_deep_water",
-        "101,14": "tile_poolcore_deep_water",
-        "100,14": "tile_poolcore_deep_water",
-        "99,14": "tile_poolcore_deep_water",
-        "98,14": "tile_poolcore_deep_water",
-        "97,14": "tile_poolcore_deep_water",
-        "96,14": "tile_poolcore_deep_water",
-        "95,14": "tile_poolcore_deep_water",
-        "94,14": "tile_poolcore_deep_water",
-        "93,14": "tile_poolcore_deep_water",
-        "92,14": "tile_poolcore_deep_water",
-        "91,14": "tile_poolcore_deep_water",
-        "90,14": "tile_poolcore_deep_water",
-        "89,14": "tile_poolcore_deep_water",
-        "88,14": "tile_poolcore_deep_water",
-        "87,14": "tile_poolcore_deep_water",
-        "86,14": "tile_poolcore_deep_water",
-        "84,14": "tile_poolcore_deep_water",
-        "93,13": "tile_poolcore_deep_water",
-        "95,13": "tile_poolcore_deep_water",
-        "102,12": "tile_poolcore_deep_water",
-        "85,14": "tile_poolcore_deep_water",
-        "104,21": "tile_poolcore_deep_water",
-        "104,22": "tile_poolcore_deep_water",
-        "104,23": "tile_poolcore_deep_water",
-        "104,24": "tile_poolcore_deep_water",
-        "104,25": "tile_poolcore_deep_water",
+        "107,48": "tile_poolcore_deep_water",
+        "106,52": "tile_poolcore_deep_water",
+        "104,17": "tile_poolcore_deep_water",
+        "103,17": "tile_poolcore_deep_water",
+        "101,17": "tile_poolcore_deep_water",
+        "100,17": "tile_poolcore_deep_water",
+        "99,17": "tile_poolcore_deep_water",
+        "98,17": "tile_poolcore_deep_water",
+        "97,17": "tile_poolcore_deep_water",
+        "96,17": "tile_poolcore_deep_water",
+        "95,17": "tile_poolcore_deep_water",
+        "94,17": "tile_poolcore_deep_water",
+        "93,17": "tile_poolcore_deep_water",
+        "92,17": "tile_poolcore_deep_water",
+        "91,17": "tile_poolcore_deep_water",
+        "90,17": "tile_poolcore_deep_water",
+        "89,17": "tile_poolcore_deep_water",
+        "88,17": "tile_poolcore_deep_water",
+        "87,17": "tile_poolcore_deep_water",
+        "86,17": "tile_poolcore_deep_water",
+        "85,17": "tile_poolcore_deep_water",
+        "84,17": "tile_poolcore_deep_water",
+        "83,16": "tile_poolcore_deep_water",
+        "82,16": "tile_poolcore_deep_water",
+        "81,16": "tile_poolcore_deep_water",
+        "80,16": "tile_poolcore_deep_water",
+        "79,16": "tile_poolcore_deep_water",
+        "78,16": "tile_poolcore_deep_water",
+        "77,16": "tile_poolcore_deep_water",
+        "76,16": "tile_poolcore_deep_water",
+        "75,16": "tile_poolcore_deep_water",
+        "75,17": "tile_poolcore_deep_water",
+        "74,17": "tile_poolcore_deep_water",
+        "73,17": "tile_poolcore_deep_water",
+        "72,17": "tile_poolcore_deep_water",
+        "71,17": "tile_poolcore_deep_water",
+        "71,18": "tile_poolcore_deep_water",
+        "71,19": "tile_poolcore_deep_water",
+        "72,19": "tile_poolcore_deep_water",
+        "73,19": "tile_poolcore_deep_water",
+        "74,19": "tile_poolcore_deep_water",
+        "73,18": "tile_poolcore_deep_water",
+        "72,18": "tile_poolcore_deep_water",
+        "74,18": "tile_poolcore_deep_water",
+        "75,18": "tile_poolcore_deep_water",
+        "76,18": "tile_poolcore_deep_water",
+        "77,18": "tile_poolcore_deep_water",
+        "77,17": "tile_poolcore_deep_water",
+        "76,17": "tile_poolcore_deep_water",
+        "78,17": "tile_poolcore_deep_water",
+        "81,17": "tile_poolcore_deep_water",
+        "82,17": "tile_poolcore_deep_water",
+        "83,17": "tile_poolcore_deep_water",
+        "83,18": "tile_poolcore_deep_water",
+        "83,19": "tile_poolcore_deep_water",
+        "82,19": "tile_poolcore_deep_water",
+        "81,19": "tile_poolcore_deep_water",
+        "80,19": "tile_poolcore_deep_water",
+        "79,19": "tile_poolcore_deep_water",
+        "78,19": "tile_poolcore_deep_water",
+        "77,19": "tile_poolcore_deep_water",
+        "76,19": "tile_poolcore_deep_water",
+        "75,19": "tile_poolcore_deep_water",
+        "79,18": "tile_poolcore_deep_water",
+        "80,18": "tile_poolcore_deep_water",
+        "78,18": "tile_poolcore_deep_water",
+        "79,17": "tile_poolcore_deep_water",
+        "80,17": "tile_poolcore_deep_water",
+        "81,18": "tile_poolcore_deep_water",
+        "82,18": "tile_poolcore_deep_water",
+        "84,18": "tile_poolcore_deep_water",
+        "85,18": "tile_poolcore_deep_water",
+        "86,18": "tile_poolcore_deep_water",
+        "87,18": "tile_poolcore_deep_water",
+        "88,18": "tile_poolcore_deep_water",
+        "89,18": "tile_poolcore_deep_water",
+        "90,18": "tile_poolcore_deep_water",
+        "91,18": "tile_poolcore_deep_water",
+        "92,18": "tile_poolcore_deep_water",
+        "94,18": "tile_poolcore_deep_water",
+        "96,18": "tile_poolcore_deep_water",
+        "97,18": "tile_poolcore_deep_water",
+        "98,18": "tile_poolcore_deep_water",
+        "99,18": "tile_poolcore_deep_water",
+        "100,18": "tile_poolcore_deep_water",
+        "101,18": "tile_poolcore_deep_water",
+        "102,18": "tile_poolcore_deep_water",
+        "103,18": "tile_poolcore_deep_water",
+        "104,18": "tile_poolcore_deep_water",
+        "104,19": "tile_poolcore_deep_water",
+        "103,19": "tile_poolcore_deep_water",
+        "102,19": "tile_poolcore_deep_water",
+        "101,19": "tile_poolcore_deep_water",
+        "100,19": "tile_poolcore_deep_water",
+        "99,19": "tile_poolcore_deep_water",
+        "98,19": "tile_poolcore_deep_water",
+        "97,19": "tile_poolcore_deep_water",
+        "96,19": "tile_poolcore_deep_water",
+        "95,19": "tile_poolcore_deep_water",
+        "94,19": "tile_poolcore_deep_water",
+        "93,19": "tile_poolcore_deep_water",
+        "92,19": "tile_poolcore_deep_water",
+        "91,19": "tile_poolcore_deep_water",
+        "90,19": "tile_poolcore_deep_water",
+        "89,19": "tile_poolcore_deep_water",
+        "88,19": "tile_poolcore_deep_water",
+        "87,19": "tile_poolcore_deep_water",
+        "86,19": "tile_poolcore_deep_water",
+        "84,19": "tile_poolcore_deep_water",
+        "93,18": "tile_poolcore_deep_water",
+        "95,18": "tile_poolcore_deep_water",
+        "102,17": "tile_poolcore_deep_water",
+        "85,19": "tile_poolcore_deep_water",
         "104,26": "tile_poolcore_deep_water",
         "104,27": "tile_poolcore_deep_water",
         "104,28": "tile_poolcore_deep_water",
         "104,29": "tile_poolcore_deep_water",
         "104,30": "tile_poolcore_deep_water",
+        "104,31": "tile_poolcore_deep_water",
         "104,32": "tile_poolcore_deep_water",
         "104,33": "tile_poolcore_deep_water",
-        "100,33": "tile_poolcore_deep_water",
-        "100,34": "tile_poolcore_deep_water",
-        "100,35": "tile_poolcore_deep_water",
-        "100,37": "tile_poolcore_deep_water",
-        "101,46": "tile_poolcore_deep_water",
-        "101,44": "tile_poolcore_deep_water",
-        "101,42": "tile_poolcore_deep_water",
-        "101,39": "tile_poolcore_deep_water",
-        "100,39": "tile_poolcore_deep_water",
+        "104,34": "tile_poolcore_deep_water",
+        "104,35": "tile_poolcore_deep_water",
+        "104,37": "tile_poolcore_deep_water",
+        "104,38": "tile_poolcore_deep_water",
         "100,38": "tile_poolcore_deep_water",
-        "101,37": "tile_poolcore_deep_water",
-        "101,38": "tile_poolcore_deep_water",
-        "102,39": "tile_poolcore_deep_water",
-        "102,40": "tile_poolcore_deep_water",
-        "102,41": "tile_poolcore_deep_water",
-        "102,42": "tile_poolcore_deep_water",
-        "102,43": "tile_poolcore_deep_water",
-        "103,43": "tile_poolcore_deep_water",
-        "103,44": "tile_poolcore_deep_water",
-        "104,44": "tile_poolcore_deep_water",
-        "105,44": "tile_poolcore_deep_water",
-        "106,43": "tile_poolcore_deep_water",
+        "100,39": "tile_poolcore_deep_water",
+        "100,40": "tile_poolcore_deep_water",
+        "100,42": "tile_poolcore_deep_water",
+        "101,51": "tile_poolcore_deep_water",
+        "101,49": "tile_poolcore_deep_water",
+        "101,47": "tile_poolcore_deep_water",
+        "101,44": "tile_poolcore_deep_water",
+        "100,44": "tile_poolcore_deep_water",
+        "100,43": "tile_poolcore_deep_water",
+        "101,42": "tile_poolcore_deep_water",
+        "101,43": "tile_poolcore_deep_water",
+        "102,44": "tile_poolcore_deep_water",
+        "102,45": "tile_poolcore_deep_water",
+        "102,46": "tile_poolcore_deep_water",
+        "102,47": "tile_poolcore_deep_water",
+        "102,48": "tile_poolcore_deep_water",
+        "103,48": "tile_poolcore_deep_water",
+        "103,49": "tile_poolcore_deep_water",
+        "104,49": "tile_poolcore_deep_water",
+        "105,49": "tile_poolcore_deep_water",
+        "106,48": "tile_poolcore_deep_water",
+        "105,47": "tile_poolcore_deep_water",
+        "105,46": "tile_poolcore_deep_water",
+        "105,45": "tile_poolcore_deep_water",
+        "105,43": "tile_poolcore_deep_water",
         "105,42": "tile_poolcore_deep_water",
         "105,41": "tile_poolcore_deep_water",
-        "105,40": "tile_poolcore_deep_water",
-        "105,38": "tile_poolcore_deep_water",
-        "105,37": "tile_poolcore_deep_water",
-        "105,36": "tile_poolcore_deep_water",
-        "104,34": "tile_poolcore_deep_water",
-        "103,32": "tile_poolcore_deep_water",
-        "102,33": "tile_poolcore_deep_water",
-        "101,34": "tile_poolcore_deep_water",
-        "103,40": "tile_poolcore_deep_water",
-        "103,39": "tile_poolcore_deep_water",
-        "102,37": "tile_poolcore_deep_water",
-        "102,36": "tile_poolcore_deep_water",
-        "102,35": "tile_poolcore_deep_water",
-        "102,34": "tile_poolcore_deep_water",
-        "102,32": "tile_poolcore_deep_water",
-        "103,36": "tile_poolcore_deep_water",
-        "102,38": "tile_poolcore_deep_water",
-        "103,34": "tile_poolcore_deep_water",
-        "103,35": "tile_poolcore_deep_water",
-        "104,36": "tile_poolcore_deep_water",
-        "104,38": "tile_poolcore_deep_water",
         "104,39": "tile_poolcore_deep_water",
-        "104,40": "tile_poolcore_deep_water",
-        "104,41": "tile_poolcore_deep_water",
-        "104,42": "tile_poolcore_deep_water",
-        "104,43": "tile_poolcore_deep_water",
-        "103,42": "tile_poolcore_deep_water",
-        "103,38": "tile_poolcore_deep_water",
         "103,37": "tile_poolcore_deep_water",
+        "102,38": "tile_poolcore_deep_water",
+        "101,39": "tile_poolcore_deep_water",
+        "103,45": "tile_poolcore_deep_water",
+        "103,44": "tile_poolcore_deep_water",
+        "102,42": "tile_poolcore_deep_water",
+        "102,41": "tile_poolcore_deep_water",
+        "102,40": "tile_poolcore_deep_water",
+        "102,39": "tile_poolcore_deep_water",
+        "102,37": "tile_poolcore_deep_water",
         "103,41": "tile_poolcore_deep_water",
-        "105,43": "tile_poolcore_deep_water",
+        "102,43": "tile_poolcore_deep_water",
+        "103,39": "tile_poolcore_deep_water",
+        "103,40": "tile_poolcore_deep_water",
+        "104,41": "tile_poolcore_deep_water",
+        "104,43": "tile_poolcore_deep_water",
+        "104,44": "tile_poolcore_deep_water",
+        "104,45": "tile_poolcore_deep_water",
+        "104,46": "tile_poolcore_deep_water",
+        "104,47": "tile_poolcore_deep_water",
+        "104,48": "tile_poolcore_deep_water",
+        "103,47": "tile_poolcore_deep_water",
+        "103,43": "tile_poolcore_deep_water",
+        "103,42": "tile_poolcore_deep_water",
+        "103,46": "tile_poolcore_deep_water",
+        "105,48": "tile_poolcore_deep_water",
+        "107,46": "tile_poolcore_deep_water",
+        "107,45": "tile_poolcore_deep_water",
+        "107,44": "tile_poolcore_deep_water",
+        "107,43": "tile_poolcore_deep_water",
+        "107,42": "tile_poolcore_deep_water",
         "107,41": "tile_poolcore_deep_water",
         "107,40": "tile_poolcore_deep_water",
         "107,39": "tile_poolcore_deep_water",
         "107,38": "tile_poolcore_deep_water",
-        "107,37": "tile_poolcore_deep_water",
-        "107,36": "tile_poolcore_deep_water",
-        "107,35": "tile_poolcore_deep_water",
-        "107,34": "tile_poolcore_deep_water",
-        "107,33": "tile_poolcore_deep_water",
-        "106,33": "tile_poolcore_deep_water",
-        "106,34": "tile_poolcore_deep_water",
-        "106,35": "tile_poolcore_deep_water",
-        "106,36": "tile_poolcore_deep_water",
-        "106,37": "tile_poolcore_deep_water",
         "106,38": "tile_poolcore_deep_water",
         "106,39": "tile_poolcore_deep_water",
         "106,40": "tile_poolcore_deep_water",
         "106,41": "tile_poolcore_deep_water",
+        "106,42": "tile_poolcore_deep_water",
+        "106,43": "tile_poolcore_deep_water",
+        "106,44": "tile_poolcore_deep_water",
+        "106,45": "tile_poolcore_deep_water",
+        "106,46": "tile_poolcore_deep_water",
+        "105,40": "tile_poolcore_deep_water",
+        "105,39": "tile_poolcore_deep_water",
+        "105,38": "tile_poolcore_deep_water",
+        "105,37": "tile_poolcore_deep_water",
+        "105,36": "tile_poolcore_deep_water",
         "105,35": "tile_poolcore_deep_water",
         "105,34": "tile_poolcore_deep_water",
         "105,33": "tile_poolcore_deep_water",
@@ -181607,17 +182718,7 @@ const BATTLE_MAPS = [
         "105,31": "tile_poolcore_deep_water",
         "105,30": "tile_poolcore_deep_water",
         "105,29": "tile_poolcore_deep_water",
-        "105,28": "tile_poolcore_deep_water",
-        "105,27": "tile_poolcore_deep_water",
         "105,26": "tile_poolcore_deep_water",
-        "105,25": "tile_poolcore_deep_water",
-        "105,24": "tile_poolcore_deep_water",
-        "105,21": "tile_poolcore_deep_water",
-        "106,21": "tile_poolcore_deep_water",
-        "106,22": "tile_poolcore_deep_water",
-        "106,23": "tile_poolcore_deep_water",
-        "106,24": "tile_poolcore_deep_water",
-        "106,25": "tile_poolcore_deep_water",
         "106,26": "tile_poolcore_deep_water",
         "106,27": "tile_poolcore_deep_water",
         "106,28": "tile_poolcore_deep_water",
@@ -181625,6 +182726,16 @@ const BATTLE_MAPS = [
         "106,30": "tile_poolcore_deep_water",
         "106,31": "tile_poolcore_deep_water",
         "106,32": "tile_poolcore_deep_water",
+        "106,33": "tile_poolcore_deep_water",
+        "106,34": "tile_poolcore_deep_water",
+        "106,35": "tile_poolcore_deep_water",
+        "106,36": "tile_poolcore_deep_water",
+        "106,37": "tile_poolcore_deep_water",
+        "107,37": "tile_poolcore_deep_water",
+        "107,36": "tile_poolcore_deep_water",
+        "107,35": "tile_poolcore_deep_water",
+        "107,34": "tile_poolcore_deep_water",
+        "107,33": "tile_poolcore_deep_water",
         "107,32": "tile_poolcore_deep_water",
         "107,31": "tile_poolcore_deep_water",
         "107,30": "tile_poolcore_deep_water",
@@ -181634,26 +182745,21 @@ const BATTLE_MAPS = [
         "107,26": "tile_poolcore_deep_water",
         "107,25": "tile_poolcore_deep_water",
         "107,24": "tile_poolcore_deep_water",
+        "105,28": "tile_poolcore_deep_water",
+        "105,27": "tile_poolcore_deep_water",
         "107,23": "tile_poolcore_deep_water",
         "107,22": "tile_poolcore_deep_water",
-        "107,21": "tile_poolcore_deep_water",
         "107,20": "tile_poolcore_deep_water",
+        "107,21": "tile_poolcore_deep_water",
+        "105,18": "tile_poolcore_deep_water",
+        "105,19": "tile_poolcore_deep_water",
+        "106,19": "tile_poolcore_deep_water",
         "107,19": "tile_poolcore_deep_water",
-        "105,23": "tile_poolcore_deep_water",
-        "105,22": "tile_poolcore_deep_water",
+        "106,18": "tile_poolcore_deep_water",
         "107,18": "tile_poolcore_deep_water",
         "107,17": "tile_poolcore_deep_water",
-        "107,15": "tile_poolcore_deep_water",
-        "107,16": "tile_poolcore_deep_water",
-        "105,13": "tile_poolcore_deep_water",
-        "105,14": "tile_poolcore_deep_water",
-        "106,14": "tile_poolcore_deep_water",
-        "107,14": "tile_poolcore_deep_water",
-        "106,13": "tile_poolcore_deep_water",
-        "107,13": "tile_poolcore_deep_water",
-        "107,12": "tile_poolcore_deep_water",
-        "106,12": "tile_poolcore_deep_water",
-        "105,12": "tile_poolcore_deep_water"
+        "106,17": "tile_poolcore_deep_water",
+        "105,17": "tile_poolcore_deep_water"
       },
       "ground8": {},
       "object35": {},
@@ -181663,251 +182769,251 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvofs5nu",
         "c": 3,
-        "r": 68,
+        "r": 73,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 46,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 4,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 7,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 10,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 13,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 16,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 19,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 22,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 25,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 28,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 31,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 34,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 37,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 1,
-        "r": 49,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 4,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 7,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 10,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 13,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 16,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 19,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 22,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 25,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 28,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 31,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 34,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 37,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 40,
         "r": 51,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 54,
+        "c": 7,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 57,
+        "c": 10,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 60,
+        "c": 13,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 63,
+        "c": 16,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 66,
+        "c": 19,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 69,
+        "c": 22,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 72,
+        "c": 25,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 75,
+        "c": 28,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 75,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 58,
+        "r": 54,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 63,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_mvp8n5zs",
         "c": 3,
-        "r": 32,
+        "r": 37,
         "layer": "top",
         "ox": 20,
         "angle": -10
@@ -181915,7 +183021,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 3,
-        "r": 32,
+        "r": 37,
         "layer": "object19",
         "blend": "hard-light",
         "ox": 20,
@@ -181924,14 +183030,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 61,
+        "r": 66,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_mvph1jix",
         "c": 2,
-        "r": 57,
+        "r": 62,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -181939,7 +183045,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 3,
-        "r": 57,
+        "r": 62,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -181947,7 +183053,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph143o",
         "c": 2,
-        "r": 58,
+        "r": 63,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -181955,7 +183061,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 3,
-        "r": 58,
+        "r": 63,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -181963,7 +183069,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 3,
-        "r": 58,
+        "r": 63,
         "layer": "top",
         "ox": 20,
         "oy": 10
@@ -181971,7 +183077,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 3,
-        "r": 58,
+        "r": 63,
         "layer": "object19",
         "ox": 20,
         "oy": 10,
@@ -181980,1157 +183086,1157 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 64,
+        "r": 69,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 52,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 1,
-        "r": 55,
-        "layer": "ground4",
-        "ox": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 19,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 22,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 25,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 28,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 31,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 34,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 37,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 45,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 40,
-        "r": 48,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 25,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 28,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 31,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 34,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 37,
-        "r": 51,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 4,
-        "r": 54,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 4,
         "r": 57,
-        "layer": "ground4"
+        "layer": "ground4",
+        "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
-        "c": 4,
+        "c": 1,
         "r": 60,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 7,
-        "r": 54,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 10,
-        "r": 54,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 13,
-        "r": 54,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 16,
-        "r": 54,
-        "layer": "ground4"
+        "layer": "ground4",
+        "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 54,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 54,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 54,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 54,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 54,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 54,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 54,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 57,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 57,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 17,
-        "r": 60,
+        "r": 65,
         "layer": "ground4",
         "ox": 32
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 17,
-        "r": 63,
+        "r": 68,
         "layer": "ground4",
         "ox": 32
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 66,
+        "r": 71,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 69,
+        "r": 74,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 72,
+        "r": 77,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 75,
+        "r": 80,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 33,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 32,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 48,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 45,
-        "r": 48,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 45,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 48,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 48,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 48,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 42,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 5,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 7,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoddiqi",
         "c": 9,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoddiqi",
         "c": 1,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoddiqi",
         "c": -1,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 13,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 11,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoe808h",
         "c": 2,
-        "r": 66,
+        "r": 71,
         "layer": "object6",
         "baseSolid": [
           [
@@ -183264,7 +184370,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_camp_bed",
         "c": 10,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 10,
         "ox": 10
@@ -183272,7 +184378,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_camp_bed",
         "c": 8,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 10,
         "ox": 10
@@ -183280,7 +184386,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvot2yuu",
         "c": 7,
-        "r": 68,
+        "r": 73,
         "layer": "object6",
         "ox": 30,
         "oy": 30
@@ -183288,14 +184394,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvotgy7w",
         "c": 9,
-        "r": 68,
+        "r": 73,
         "layer": "object6",
         "oy": 30
       },
       {
         "id": "tile_mvotwe6t",
         "c": 10,
-        "r": 68,
+        "r": 73,
         "layer": "object6",
         "ox": 22,
         "oy": 30
@@ -183303,49 +184409,49 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 23,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 17,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvoddiqi",
         "c": 19,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 21,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 15,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
       {
         "id": "tile_mvobex5o",
         "c": 22,
-        "r": 65,
+        "r": 70,
         "layer": "object10",
         "sortDepth": 1.5
       },
       {
         "id": "tile_mvobex5o",
         "c": 8,
-        "r": 41,
+        "r": 46,
         "layer": "object10",
         "sortDepth": 1.5,
         "ox": 24.666667,
@@ -183354,7 +184460,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobex5o",
         "c": 5,
-        "r": 32,
+        "r": 37,
         "layer": "object10",
         "sortDepth": 0,
         "ox": 40,
@@ -183363,7 +184469,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobex5o",
         "c": 15,
-        "r": 32,
+        "r": 37,
         "layer": "object10",
         "sortDepth": 1.5,
         "oy": 28
@@ -183372,7 +184478,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 14,
-        "r": 62,
+        "r": 67,
         "layer": "object6",
         "ox": 30,
         "oy": 30
@@ -183380,7 +184486,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 3,
-        "r": 63,
+        "r": 68,
         "layer": "object6",
         "oy": 10
       },
@@ -183388,7 +184494,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 2,
-        "r": 62,
+        "r": 67,
         "layer": "object6",
         "ox": 20,
         "oy": 30
@@ -183396,7 +184502,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvxf5so7",
         "c": 16,
-        "r": 35,
+        "r": 40,
         "layer": "object11",
         "ox": 20,
         "oy": 30,
@@ -183405,7 +184511,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvxgf9gt",
         "c": 15,
-        "r": 35,
+        "r": 40,
         "layer": "object11",
         "ox": 20,
         "oy": 10,
@@ -183414,7 +184520,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 15,
-        "r": 37,
+        "r": 42,
         "layer": "object11",
         "ox": 20,
         "oy": 8.666667
@@ -183422,7 +184528,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 15,
-        "r": 39,
+        "r": 44,
         "layer": "object11",
         "oy": 4,
         "ox": 20
@@ -183430,7 +184536,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 15,
-        "r": 43,
+        "r": 48,
         "layer": "object14",
         "oy": 14,
         "ox": 20
@@ -183438,7 +184544,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 15,
-        "r": 45,
+        "r": 50,
         "layer": "object11",
         "oy": 14,
         "ox": 19.33333300000004,
@@ -183447,7 +184553,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 15,
-        "r": 41,
+        "r": 46,
         "layer": "object11",
         "oy": 4,
         "ox": 20
@@ -183455,7 +184561,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 15,
-        "r": 43,
+        "r": 48,
         "layer": "object11",
         "oy": 4,
         "ox": 20
@@ -183463,7 +184569,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 30,
-        "r": 38,
+        "r": 43,
         "layer": "object11",
         "oy": 14,
         "ox": -1.333333
@@ -183471,7 +184577,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 36,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -183479,7 +184585,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -183487,7 +184593,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvxf5so7",
         "c": 52,
-        "r": 50,
+        "r": 55,
         "layer": "object13",
         "sortDepth": 7.25,
         "oy": 30,
@@ -183496,7 +184602,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvxf5so7",
         "c": 38,
-        "r": 50,
+        "r": 55,
         "layer": "object13",
         "sortDepth": 7.25,
         "oy": 30,
@@ -183505,7 +184611,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvxf5so7",
         "c": 2,
-        "r": 38,
+        "r": 43,
         "layer": "object5",
         "sortDepth": 7.25,
         "oy": 10,
@@ -183514,7 +184620,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 18,
-        "r": 55,
+        "r": 60,
         "layer": "object",
         "oy": 20,
         "sortDepth": 2.75,
@@ -183523,7 +184629,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 20,
-        "r": 55,
+        "r": 60,
         "layer": "object",
         "oy": 20,
         "sortDepth": 2.75,
@@ -183532,7 +184638,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 24,
-        "r": 55,
+        "r": 60,
         "layer": "object",
         "oy": 20,
         "ox": 10
@@ -183540,7 +184646,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 22,
-        "r": 55,
+        "r": 60,
         "layer": "object",
         "oy": 20,
         "ox": 10
@@ -183548,7 +184654,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 28,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -183556,7 +184662,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 66,
+        "r": 71,
         "layer": "object",
         "oy": 30,
         "ox": 30
@@ -183565,7 +184671,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 17,
-        "r": 54,
+        "r": 59,
         "layer": "object",
         "oy": 30
       },
@@ -183573,7 +184679,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 25,
-        "r": 54,
+        "r": 59,
         "layer": "object",
         "ox": 30,
         "oy": 30
@@ -183581,35 +184687,35 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 17,
-        "r": 62,
+        "r": 67,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 17,
-        "r": 60,
+        "r": 65,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 17,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 17,
-        "r": 56,
+        "r": 61,
         "layer": "object",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 25,
-        "r": 56,
+        "r": 61,
         "layer": "object",
         "ox": 30,
         "oy": 30
@@ -183617,7 +184723,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 19,
-        "r": 60,
+        "r": 65,
         "layer": "object",
         "oy": 6.666667,
         "ox": 7.333333
@@ -183625,7 +184731,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 20,
-        "r": 60,
+        "r": 65,
         "layer": "object",
         "oy": 6.666667,
         "ox": 8,
@@ -183634,7 +184740,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 21,
-        "r": 62,
+        "r": 67,
         "layer": "object",
         "ox": 32,
         "oy": 8
@@ -183642,7 +184748,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 18,
-        "r": 62,
+        "r": 67,
         "layer": "object",
         "ox": 32,
         "oy": 8
@@ -183650,7 +184756,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 10,
-        "r": 64,
+        "r": 69,
         "layer": "top",
         "oy": 20,
         "ox": 10
@@ -183658,7 +184764,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 10,
-        "r": 64,
+        "r": 69,
         "layer": "object19",
         "oy": 20,
         "blend": "hard-light",
@@ -183667,7 +184773,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvpj1fdy",
         "c": 20,
-        "r": 7,
+        "r": 12,
         "layer": "object24",
         "oy": 7.333333,
         "angle": 10,
@@ -183676,7 +184782,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvpj53ld",
         "c": 19,
-        "r": 8,
+        "r": 13,
         "layer": "object24",
         "ox": 20,
         "oy": -3.333333
@@ -183684,7 +184790,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_life_ring_blue",
         "c": 51,
-        "r": 55,
+        "r": 60,
         "layer": "object15",
         "ox": 20,
         "oy": 10
@@ -183692,7 +184798,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_life_ring_red",
         "c": 52,
-        "r": 54,
+        "r": 59,
         "layer": "object15",
         "oy": 30,
         "ox": 20
@@ -183700,22 +184806,23 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvqv5agz",
         "c": 32,
-        "r": 59,
+        "r": 64,
         "layer": "object16",
         "oy": 20
       },
       {
         "id": "tile_mvqyrysf",
         "c": 55,
-        "r": 62,
+        "r": 67,
         "layer": "object15",
         "ox": 20,
-        "oy": 20
+        "oy": 20,
+        "fx": false
       },
       {
         "id": "tile_mvr11zmd",
         "c": 39,
-        "r": 54,
+        "r": 59,
         "layer": "object15",
         "ox": 10,
         "oy": 22.666667
@@ -183723,7 +184830,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 18,
-        "r": 59,
+        "r": 64,
         "layer": "object",
         "oy": 10,
         "ox": 30,
@@ -183732,7 +184839,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 19,
-        "r": 59,
+        "r": 64,
         "layer": "object",
         "oy": 10,
         "ox": 6,
@@ -183741,7 +184848,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 18,
-        "r": 60,
+        "r": 65,
         "layer": "object",
         "ox": 16,
         "sortDepth": 0
@@ -183749,7 +184856,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 23,
-        "r": 60,
+        "r": 65,
         "layer": "object",
         "ox": 2,
         "oy": 6,
@@ -183758,7 +184865,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 21,
-        "r": 59,
+        "r": 64,
         "layer": "object",
         "oy": 10,
         "ox": 10,
@@ -183767,7 +184874,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 21,
-        "r": 61,
+        "r": 66,
         "layer": "object",
         "oy": 30,
         "ox": 30,
@@ -183776,7 +184883,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 23,
-        "r": 59,
+        "r": 64,
         "layer": "object",
         "oy": 10,
         "sortDepth": 0,
@@ -183785,7 +184892,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 19,
-        "r": 61,
+        "r": 66,
         "layer": "object",
         "oy": 30,
         "sortDepth": 0
@@ -183793,7 +184900,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 18,
-        "r": 61,
+        "r": 66,
         "layer": "object",
         "ox": 20,
         "oy": 30,
@@ -183802,7 +184909,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 21,
-        "r": 61,
+        "r": 66,
         "layer": "object",
         "oy": 30,
         "sortDepth": 0
@@ -183810,7 +184917,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 19,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "ox": 20,
         "sortDepth": 0,
@@ -183819,7 +184926,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 23,
-        "r": 61,
+        "r": 66,
         "layer": "object",
         "oy": 30,
         "sortDepth": 0,
@@ -183828,7 +184935,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 18,
-        "r": 59,
+        "r": 64,
         "layer": "object",
         "ox": 20,
         "oy": 10,
@@ -183837,21 +184944,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_life_ring_blue",
         "c": 23,
-        "r": 57,
+        "r": 62,
         "layer": "object16",
         "oy": 30
       },
       {
         "id": "tile_poolcore_life_ring_red",
         "c": 21,
-        "r": 57,
+        "r": 62,
         "layer": "object16",
         "ox": 30
       },
       {
         "id": "tile_mvph1jix",
         "c": 21,
-        "r": 70,
+        "r": 75,
         "layer": "object6",
         "oy": 30,
         "ox": 6,
@@ -183860,7 +184967,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1jix",
         "c": 56,
-        "r": 65,
+        "r": 70,
         "layer": "object7",
         "ox": 6,
         "sortDepth": 0,
@@ -183869,7 +184976,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 58,
-        "r": 64,
+        "r": 69,
         "layer": "object7",
         "ox": 3.3333330000000387,
         "sortDepth": 0,
@@ -183879,7 +184986,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 23,
-        "r": 70,
+        "r": 75,
         "layer": "object6",
         "oy": 30,
         "ox": 6,
@@ -183888,7 +184995,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 58,
-        "r": 64,
+        "r": 69,
         "layer": "object7",
         "ox": 6,
         "sortDepth": 0,
@@ -183897,7 +185004,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph143o",
         "c": 21,
-        "r": 72,
+        "r": 77,
         "layer": "object6",
         "oy": 30,
         "ox": 6,
@@ -183906,7 +185013,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 58,
-        "r": 66,
+        "r": 71,
         "layer": "object7",
         "ox": 3.3333330000000387,
         "sortDepth": 0,
@@ -183915,7 +185022,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph143o",
         "c": 56,
-        "r": 67,
+        "r": 72,
         "layer": "object7",
         "ox": 6,
         "sortDepth": 0,
@@ -183924,7 +185031,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 23,
-        "r": 72,
+        "r": 77,
         "layer": "object6",
         "oy": 30,
         "ox": 6,
@@ -183933,7 +185040,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 58,
-        "r": 66,
+        "r": 71,
         "layer": "object7",
         "ox": 6,
         "sortDepth": 0
@@ -183941,7 +185048,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 58,
-        "r": 67,
+        "r": 72,
         "layer": "object7",
         "ox": 6,
         "sortDepth": 0,
@@ -183951,7 +185058,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 24,
-        "r": 62,
+        "r": 67,
         "layer": "object6",
         "ox": 20,
         "oy": 30
@@ -183960,7 +185067,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 37,
-        "r": 57,
+        "r": 62,
         "layer": "object",
         "ox": 20,
         "oy": 30
@@ -183968,7 +185075,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 44,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20
@@ -183976,7 +185083,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 52,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20
@@ -183984,7 +185091,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 46,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20
@@ -183992,7 +185099,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 50,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20
@@ -184000,14 +185107,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 60,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16
       },
       {
         "id": "tile_mvocpp0c",
         "c": 58,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20
@@ -184015,7 +185122,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 56,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20
@@ -184023,7 +185130,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 48,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20
@@ -184031,7 +185138,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 54,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 16,
         "ox": 20,
@@ -184040,7 +185147,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 44,
+        "r": 49,
         "layer": "object31",
         "oy": 14,
         "ox": 20
@@ -184048,7 +185155,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 14,
         "ox": 20
@@ -184056,7 +185163,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 41,
+        "r": 46,
         "layer": "object31",
         "oy": 24,
         "ox": 20
@@ -184065,7 +185172,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 37,
-        "r": 45,
+        "r": 50,
         "layer": "object31",
         "ox": 20,
         "oy": 16.66666699999996
@@ -184074,7 +185181,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 37,
-        "r": 62,
+        "r": 67,
         "layer": "object",
         "ox": 19.333333,
         "oy": 30
@@ -184082,7 +185189,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 24,
-        "r": 64,
+        "r": 69,
         "layer": "object6",
         "oy": 30,
         "ox": 20
@@ -184090,7 +185197,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 24,
-        "r": 66,
+        "r": 71,
         "layer": "object6",
         "oy": 30,
         "ox": 20
@@ -184098,7 +185205,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 24,
-        "r": 68,
+        "r": 73,
         "layer": "object6",
         "oy": 30,
         "ox": 20
@@ -184106,7 +185213,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 24,
-        "r": 70,
+        "r": 75,
         "layer": "object6",
         "oy": 30,
         "ox": 20
@@ -184115,7 +185222,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 36,
-        "r": 72,
+        "r": 77,
         "layer": "object6",
         "ox": 8,
         "oy": 16
@@ -184123,19 +185230,19 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 28,
-        "r": 72,
+        "r": 77,
         "layer": "object6"
       },
       {
         "id": "tile_mvodgug9",
         "c": 26,
-        "r": 72,
+        "r": 77,
         "layer": "object6"
       },
       {
         "id": "tile_poolcore_pillar",
         "c": 24,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "ox": 20,
         "oy": 20,
@@ -184144,7 +185251,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 21,
-        "r": 73,
+        "r": 78,
         "layer": "object6",
         "oy": 10,
         "ox": 30,
@@ -184153,14 +185260,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 40,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvocpp0c",
         "c": 47,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
@@ -184168,7 +185275,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 31,
-        "r": 66,
+        "r": 71,
         "layer": "object6",
         "ox": 20,
         "boxes": [
@@ -184184,35 +185291,35 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 42,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvoddiqi",
         "c": 49,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvocpp0c",
         "c": 38,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvocpp0c",
         "c": 45,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 31,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20,
         "ox": 20,
@@ -184221,7 +185328,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 31,
-        "r": 69,
+        "r": 74,
         "layer": "object6",
         "oy": 20,
         "ox": 20,
@@ -184230,7 +185337,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 31,
-        "r": 68,
+        "r": 73,
         "layer": "object6",
         "oy": 10,
         "ox": 20,
@@ -184240,7 +185347,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr2fi62",
         "sortDepth": 0,
         "c": 36,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20,
         "ox": 12
@@ -184248,21 +185355,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 30,
-        "r": 72,
+        "r": 77,
         "layer": "object6",
         "sortDepth": 2.55
       },
       {
         "id": "tile_mvobzfro",
         "c": 30,
-        "r": 73,
+        "r": 78,
         "layer": "object10",
         "oy": 30
       },
       {
         "id": "tile_mvobzfro",
         "c": 53,
-        "r": 56,
+        "r": 61,
         "layer": "object10",
         "oy": 8,
         "doorMode": "picture"
@@ -184270,7 +185377,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 31,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "ox": 20,
         "oy": 20,
@@ -184280,14 +185387,14 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 62,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "ox": 20
       },
       {
         "id": "tile_mvquvyy8",
         "c": 12,
-        "r": 64,
+        "r": 69,
         "layer": "object17",
         "oy": 20,
         "sortDepth": 0
@@ -184295,7 +185402,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3nuyx",
         "c": 33,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 10,
         "sortDepth": 0
@@ -184303,665 +185410,665 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 40,
+        "r": 45,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 43,
+        "r": 48,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 8,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 18,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 38,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 2,
-        "r": 34,
+        "r": 39,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 2,
-        "r": 37,
+        "r": 42,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 2,
-        "r": 30,
+        "r": 35,
         "layer": "ground4",
         "oy": 32
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 3,
-        "r": 28,
+        "r": 33,
         "layer": "ground4",
         "ox": 8
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 3,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -184969,7 +186076,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 3,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -184977,33 +186084,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 6,
-        "r": 12,
-        "layer": "ground4",
-        "ox": 28,
-        "oy": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 6,
-        "r": 9,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185011,7 +186110,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 6,
-        "r": 6,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 11,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185019,33 +186126,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 9,
-        "r": 12,
-        "layer": "ground4",
-        "ox": 28,
-        "oy": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 9,
-        "r": 9,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185053,7 +186152,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 9,
-        "r": 6,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 11,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185061,33 +186168,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 12,
-        "r": 12,
-        "layer": "ground4",
-        "ox": 28,
-        "oy": 10
-      },
-      {
-        "id": "tile_poolcore_floor_l",
-        "c": 12,
-        "r": 9,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185095,7 +186194,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 12,
-        "r": 6,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 11,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185103,25 +186210,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 15,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185129,7 +186236,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 15,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185137,7 +186244,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 15,
-        "r": 6,
+        "r": 11,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185145,25 +186252,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 18,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185171,7 +186278,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 18,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185179,25 +186286,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 21,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185205,7 +186312,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 21,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185213,26 +186320,26 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 24,
+        "r": 29,
         "layer": "ground4",
         "oy": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 24,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185240,7 +186347,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 24,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185248,25 +186355,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 27,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185274,7 +186381,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 27,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185282,25 +186389,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 30,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185308,7 +186415,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 30,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185316,25 +186423,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 33,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185342,7 +186449,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 33,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 28,
         "oy": 10
@@ -185350,560 +186457,560 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 43,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 45,
-        "r": 10,
+        "r": 15,
         "layer": "ground4",
         "ox": 20
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 46,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 49,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 12,
+        "r": 17,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 3,
+        "r": 8,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 6,
+        "r": 11,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 9,
+        "r": 14,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 62,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_mvqv5agz",
         "c": 4,
-        "r": 42,
+        "r": 47,
         "layer": "object5",
         "ox": 10,
         "oy": 20
@@ -185911,14 +187018,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr11rba",
         "c": 17,
-        "r": 39,
+        "r": 44,
         "layer": "object11",
         "oy": 20
       },
       {
         "id": "tile_mvr3kqob",
         "c": 18,
-        "r": 42,
+        "r": 47,
         "layer": "object11",
         "ox": 20,
         "sortDepth": 0
@@ -185926,14 +187033,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 13,
-        "r": 41,
+        "r": 46,
         "layer": "top",
         "oy": 20
       },
       {
         "id": "tile_mvp8n5zs",
         "c": 32,
-        "r": 22,
+        "r": 27,
         "layer": "top",
         "oy": 10,
         "ox": 20,
@@ -185942,7 +187049,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 23,
-        "r": 22,
+        "r": 27,
         "layer": "top",
         "oy": 10,
         "ox": 20
@@ -185950,7 +187057,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 14,
-        "r": 22,
+        "r": 27,
         "layer": "top",
         "oy": 10,
         "ox": 20,
@@ -185959,7 +187066,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 5,
-        "r": 22,
+        "r": 27,
         "layer": "top",
         "oy": 10,
         "ox": 20
@@ -185967,14 +187074,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 8,
-        "r": 8,
+        "r": 13,
         "layer": "top",
         "ox": 20
       },
       {
         "id": "tile_mvp8nxz4",
         "c": 13,
-        "r": 41,
+        "r": 46,
         "layer": "object19",
         "blend": "hard-light",
         "oy": 20
@@ -185982,14 +187089,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 22,
-        "r": 37,
+        "r": 42,
         "layer": "top",
         "ox": 20
       },
       {
         "id": "tile_mvp8n5zs",
         "c": 28,
-        "r": 7,
+        "r": 12,
         "layer": "top",
         "oy": 10,
         "circuit": 3
@@ -185997,7 +187104,16 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 50,
-        "r": 2,
+        "r": 7,
+        "layer": "top",
+        "oy": 10,
+        "circuit": 3,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 60,
+        "r": 7,
         "layer": "top",
         "oy": 10,
         "circuit": 3,
@@ -186006,7 +187122,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 14,
-        "r": 4,
+        "r": 9,
         "layer": "top",
         "oy": 30,
         "circuit": 3,
@@ -186015,14 +187131,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 15,
-        "r": 13,
+        "r": 18,
         "layer": "top",
         "circuit": 3
       },
       {
         "id": "tile_mvp8nxz4",
         "c": 22,
-        "r": 37,
+        "r": 42,
         "layer": "object19",
         "blend": "hard-light",
         "ox": 20
@@ -186030,7 +187146,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 19,
-        "r": 40,
+        "r": 45,
         "layer": "object10",
         "oy": 10,
         "doorMode": "picture"
@@ -186038,16 +187154,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 28,
-        "r": 41,
+        "r": 46,
         "layer": "object10",
         "oy": 7.333333000000039
       },
       {
         "id": "tile_mvobzfro",
         "c": 33,
-        "r": 42,
+        "r": 47,
         "layer": "object10",
         "doorMode": "key"
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 63,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 34
       },
       {
         "id": "tile_mvr40sp8",
@@ -186061,17 +187186,8 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
-        "c": 13,
-        "r": 53,
-        "layer": "object5",
-        "ox": 6,
-        "oy": 34
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "sortDepth": 0,
         "c": 2,
-        "r": 53,
+        "r": 58,
         "layer": "object5",
         "ox": 16,
         "oy": 34
@@ -186079,14 +187195,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 20,
-        "r": 56,
+        "r": 61,
         "layer": "top",
         "oy": 30
       },
       {
         "id": "tile_mvp8n5zs",
         "c": 18,
-        "r": 52,
+        "r": 57,
         "layer": "top",
         "oy": 10,
         "ox": 10
@@ -186094,7 +187210,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 29,
-        "r": 52,
+        "r": 57,
         "layer": "top",
         "oy": 10,
         "ox": 30
@@ -186102,7 +187218,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 20,
-        "r": 56,
+        "r": 61,
         "layer": "object19",
         "blend": "hard-light",
         "oy": 30
@@ -186111,7 +187227,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 10,
-        "r": 55,
+        "r": 60,
         "layer": "object5",
         "ox": 10,
         "oy": 20
@@ -186120,7 +187236,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 11,
-        "r": 55,
+        "r": 60,
         "layer": "object5",
         "ox": 20,
         "oy": 20
@@ -186129,7 +187245,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 2,
-        "r": 55,
+        "r": 60,
         "layer": "object5",
         "ox": 20,
         "oy": 20
@@ -186138,7 +187254,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 8,
-        "r": 55,
+        "r": 60,
         "layer": "object5",
         "ox": 10,
         "oy": 20
@@ -186147,10 +187263,37 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3nuyx",
         "sortDepth": 0,
         "c": 4,
-        "r": 55,
+        "r": 60,
         "layer": "object5",
         "ox": 10,
         "oy": 10
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 58,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 13,
+        "r": 60,
+        "layer": "object5",
+        "ox": 10,
+        "sortDepth": 0,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 56,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 34
       },
       {
         "id": "tile_mvr40sp8",
@@ -186162,37 +187305,10 @@ const BATTLE_MAPS = [
         "oy": 24
       },
       {
-        "id": "tile_mvr2fi62",
-        "c": 13,
-        "r": 55,
-        "layer": "object5",
-        "ox": 10,
-        "sortDepth": 0,
-        "oy": 20
-      },
-      {
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 13,
-        "r": 51,
-        "layer": "object5",
-        "ox": 6,
-        "oy": 34
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "sortDepth": 0,
-        "c": 13,
-        "r": 48,
-        "layer": "object5",
-        "ox": 6,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "sortDepth": 0,
-        "c": 13,
-        "r": 49,
+        "r": 54,
         "layer": "object5",
         "ox": 6,
         "oy": 34
@@ -186200,7 +187316,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 2,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 16,
         "oy": 24,
@@ -186209,7 +187325,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 2,
-        "r": 50,
+        "r": 55,
         "layer": "object5",
         "ox": 16,
         "oy": 14,
@@ -186219,7 +187335,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 2,
-        "r": 54,
+        "r": 59,
         "layer": "object5",
         "ox": 16,
         "oy": 14
@@ -186227,7 +187343,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 2,
-        "r": 55,
+        "r": 60,
         "layer": "object5",
         "ox": 20,
         "sortDepth": 0,
@@ -186237,7 +187353,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 3,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "oy": 10
       },
@@ -186245,7 +187361,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 4,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 10,
         "oy": 10
@@ -186254,7 +187370,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 11,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 20,
         "oy": 10
@@ -186263,7 +187379,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 10,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 10,
         "oy": 10
@@ -186272,7 +187388,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 6,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 10,
         "oy": 10
@@ -186281,7 +187397,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr32pqo",
         "sortDepth": 0,
         "c": 8,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 10,
         "oy": 10
@@ -186289,7 +187405,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 13,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 10,
         "sortDepth": 0,
@@ -186298,7 +187414,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 2,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "ox": 20,
         "sortDepth": 0,
@@ -186306,28 +187422,17 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_cvs_sign_twelve",
-        "c": 1,
-        "r": 48,
+        "c": 2,
+        "r": 53,
         "layer": "object5",
         "ox": 4,
         "sortDepth": 1,
-        "angle": -15,
-        "oy": 10
-      },
-      {
-        "id": "tile_cvs_sign_twelve",
-        "c": 1,
-        "r": 48,
-        "layer": "object5",
-        "ox": 4,
-        "sortDepth": 0,
-        "angle": -15,
-        "oy": 10
+        "angle": -15
       },
       {
         "id": "tile_cvs_back_counter",
         "c": 5,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "fx": true,
         "sortDepth": 2.5,
@@ -186337,7 +187442,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_cvs_drink_cooler",
         "c": 3,
-        "r": 48,
+        "r": 53,
         "layer": "object5",
         "sortDepth": 2.5,
         "ox": 10,
@@ -186346,7 +187451,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_cvs_checkout_counter_backroom",
         "c": 5,
-        "r": 50,
+        "r": 55,
         "layer": "object5",
         "oy": 20,
         "sortDepth": 2.5,
@@ -186355,7 +187460,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_cvs_counter_extension",
         "c": 3,
-        "r": 51,
+        "r": 56,
         "layer": "object5",
         "oy": 20,
         "sortDepth": 1.5,
@@ -186364,7 +187469,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 27,
-        "r": 73,
+        "r": 78,
         "layer": "top",
         "ox": 10,
         "circuit": 2
@@ -186372,7 +187477,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 27,
-        "r": 73,
+        "r": 78,
         "layer": "object19",
         "blend": "hard-light",
         "ox": 10
@@ -186380,7 +187485,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 57,
-        "r": 67,
+        "r": 72,
         "layer": "top",
         "ox": 10,
         "circuit": 2
@@ -186388,7 +187493,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 57,
-        "r": 67,
+        "r": 72,
         "layer": "object19",
         "blend": "hard-light",
         "ox": 10
@@ -186396,7 +187501,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 26,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -186404,7 +187509,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 32,
-        "r": 66,
+        "r": 71,
         "layer": "object",
         "oy": 30,
         "ox": 30
@@ -186412,7 +187517,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobex5o",
         "c": 24,
-        "r": 57,
+        "r": 62,
         "layer": "object10",
         "ox": 20,
         "oy": 10,
@@ -186421,7 +187526,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 23,
-        "r": 70,
+        "r": 75,
         "layer": "object9",
         "ox": 10,
         "lockerLoot": {
@@ -186435,7 +187540,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 8,
-        "r": 81,
+        "r": 86,
         "layer": "object9",
         "ox": 20,
         "lockerLoot": {
@@ -186448,7 +187553,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 21,
-        "r": 23,
+        "r": 28,
         "layer": "object9",
         "ox": 20,
         "lockerLoot": {
@@ -186461,7 +187566,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 10,
-        "r": 5,
+        "r": 10,
         "layer": "object9",
         "ox": 22,
         "lockerLoot": {
@@ -186475,7 +187580,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 56,
-        "r": 64,
+        "r": 69,
         "layer": "object9",
         "lockerLoot": {
           "kind": "item",
@@ -186486,7 +187591,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvyo15bc",
         "c": 23,
-        "r": 64,
+        "r": 69,
         "layer": "object9",
         "ox": 20,
         "oy": 30
@@ -186494,7 +187599,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvyo15bc",
         "c": 59,
-        "r": 66,
+        "r": 71,
         "layer": "object9",
         "oy": 30.66666699999996,
         "circuit": 2
@@ -186502,7 +187607,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvyo15bc",
         "c": 35,
-        "r": 7,
+        "r": 12,
         "layer": "object33",
         "oy": 0.6666669999999613,
         "ox": 20
@@ -186510,7 +187615,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvyo15bc",
         "c": 46,
-        "r": 43,
+        "r": 48,
         "layer": "object33",
         "oy": 30.66666699999996,
         "ox": 30
@@ -186518,7 +187623,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 64,
+        "r": 69,
         "layer": "object6",
         "oy": 30,
         "ox": 30
@@ -186526,7 +187631,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 66,
+        "r": 71,
         "layer": "object6",
         "oy": 30,
         "ox": 30
@@ -186534,7 +187639,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 68,
+        "r": 73,
         "layer": "object6",
         "oy": 30,
         "ox": 30
@@ -186542,34 +187647,129 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
+        "r": 75,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 77,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 81,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 55,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 57,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 59,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 65,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 63,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 67,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 5,
         "r": 70,
-        "layer": "object6",
-        "oy": 30,
+        "layer": "object10",
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 51,
+        "layer": "object5",
+        "oy": 20,
         "ox": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 72,
-        "layer": "object6",
-        "oy": 30,
+        "r": 53,
+        "layer": "object5",
+        "oy": 20,
         "ox": 30
       },
       {
-        "id": "tile_mvoa0cqd",
+        "id": "tile_mvxgf9gt",
         "c": 0,
-        "r": 74,
-        "layer": "object6",
-        "oy": 30,
-        "ox": 30
+        "r": 48,
+        "layer": "object5",
+        "ox": 30,
+        "oy": 20
       },
       {
-        "id": "tile_mvoa0cqd",
+        "id": "tile_mvxgf9gt",
         "c": 0,
-        "r": 76,
-        "layer": "object6",
-        "oy": 30,
-        "ox": 30
+        "r": 42,
+        "layer": "object5",
+        "ox": 30,
+        "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
@@ -186580,118 +187780,23 @@ const BATTLE_MAPS = [
         "ox": 30
       },
       {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 52,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 56,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 54,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 60,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 58,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 62,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvobex5o",
-        "c": 5,
-        "r": 65,
-        "layer": "object10",
-        "sortDepth": 1.5
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 46,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 48,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvxgf9gt",
-        "c": 0,
-        "r": 43,
-        "layer": "object5",
-        "ox": 30,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvxgf9gt",
-        "c": 0,
-        "r": 37,
-        "layer": "object5",
-        "ox": 30,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 0,
-        "r": 45,
-        "layer": "object5",
-        "oy": 20,
-        "ox": 30
-      },
-      {
         "id": "color_mu8nxukw",
         "c": 2,
-        "r": 27,
+        "r": 32,
         "layer": "object22",
         "oy": 10
       },
       {
         "id": "color_mu8nxukw",
         "c": 2,
-        "r": 23,
+        "r": 28,
         "layer": "object22",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 35,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": 6.666666999999961
@@ -186699,7 +187804,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 33,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": 36.66666699999996
@@ -186707,7 +187812,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 35,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "ox": 37.333333,
         "sortDepth": 4
@@ -186715,7 +187820,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 35,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "ox": 37.333333,
         "sortDepth": 4
@@ -186723,7 +187828,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 10,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333332999999982
@@ -186731,7 +187836,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 7,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -186739,7 +187844,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 8,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333332999999982
@@ -186747,7 +187852,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": -1,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333332999999982
@@ -186755,7 +187860,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 5,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20,
@@ -186764,7 +187869,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 6,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.33333300000001
@@ -186772,7 +187877,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 4,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.33333300000001
@@ -186780,7 +187885,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 18,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "ox": 9.333333000000039,
         "oy": 16
@@ -186788,7 +187893,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 30,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "ox": 9.333333000000039,
         "oy": 16
@@ -186796,7 +187901,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 20,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "ox": 9.333333000000039,
         "oy": 16
@@ -186804,7 +187909,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 34,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "ox": 9.333333000000039,
         "oy": 16
@@ -186812,7 +187917,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 12,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "ox": 9.333332999999982,
         "oy": 16
@@ -186820,7 +187925,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 6,
-        "r": 3,
+        "r": 8,
         "layer": "object23",
         "ox": 29.333333,
         "oy": 20
@@ -186829,7 +187934,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 5,
-        "r": 2,
+        "r": 7,
         "layer": "object23",
         "ox": 10,
         "oy": 37.33333300000001
@@ -186838,7 +187943,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 18,
-        "r": 2,
+        "r": 7,
         "layer": "object23",
         "ox": 6,
         "oy": 37.333333
@@ -186847,7 +187952,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 36,
-        "r": 0,
+        "r": 5,
         "layer": "object23",
         "ox": 6.666667,
         "oy": 7.333333
@@ -186855,7 +187960,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 3,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -186863,7 +187968,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 14,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186871,7 +187976,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 26,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186879,7 +187984,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 16,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186887,7 +187992,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 28,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186895,7 +188000,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 35,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186903,7 +188008,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 32,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186911,7 +188016,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 22,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186919,7 +188024,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 24,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186927,7 +188032,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 2,
-        "r": 16,
+        "r": 21,
         "layer": "object22",
         "oy": 16,
         "ox": 9.333333000000039
@@ -186935,7 +188040,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 1,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "ox": 36.66666699999996,
         "oy": 30
@@ -186943,7 +188048,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": -1,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "ox": 36.66666699999996,
         "oy": 30
@@ -186951,14 +188056,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 36,
-        "r": 13,
+        "r": 18,
         "layer": "object22",
         "ox": -2
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 36,
-        "r": 2,
+        "r": 7,
         "layer": "object23",
         "ox": 6.666667,
         "oy": 6.666667
@@ -186966,14 +188071,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 36,
-        "r": 15,
+        "r": 20,
         "layer": "object22",
         "ox": -2
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 36,
-        "r": 4,
+        "r": 9,
         "layer": "object23",
         "ox": 6.666667,
         "oy": 6.666667
@@ -186982,7 +188087,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 0,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "ox": 30
       },
@@ -186990,7 +188095,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 35,
-        "r": 15,
+        "r": 20,
         "layer": "object22",
         "oy": 25.33333300000001,
         "ox": 38
@@ -186998,7 +188103,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 35,
-        "r": 15,
+        "r": 20,
         "layer": "object22",
         "oy": 25.33333300000001,
         "ox": 38,
@@ -187007,14 +188112,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 13,
+        "r": 18,
         "layer": "object22",
         "ox": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 5,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "ox": 10,
         "oy": -2.666667
@@ -187022,7 +188127,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 18,
-        "r": 4,
+        "r": 9,
         "layer": "object23",
         "oy": 37.333333,
         "ox": 6
@@ -187030,7 +188135,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 18,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "ox": 6,
         "oy": 30
@@ -187038,14 +188143,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 15,
+        "r": 20,
         "layer": "object22",
         "ox": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 5,
-        "r": 6,
+        "r": 11,
         "layer": "object23",
         "ox": 10
       },
@@ -187053,7 +188158,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 0,
-        "r": 15,
+        "r": 20,
         "layer": "object22",
         "oy": 35.33333300000004,
         "ox": 29.33333300000004
@@ -187061,7 +188166,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 40,
-        "r": 66,
+        "r": 71,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
@@ -187070,7 +188175,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 15,
+        "r": 20,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187078,7 +188183,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 35,
+        "r": 40,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187086,7 +188191,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 37,
+        "r": 42,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187094,7 +188199,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 25,
+        "r": 30,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187102,7 +188207,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 40,
-        "r": 64,
+        "r": 69,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
@@ -187111,7 +188216,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187119,7 +188224,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187127,7 +188232,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187136,7 +188241,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 37,
-        "r": 50,
+        "r": 55,
         "layer": "object13",
         "ox": 19.33333300000004,
         "oy": 20
@@ -187144,7 +188249,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 40,
-        "r": 62,
+        "r": 67,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
@@ -187153,7 +188258,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187161,7 +188266,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187169,7 +188274,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187177,7 +188282,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 40,
-        "r": 58,
+        "r": 63,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
@@ -187186,7 +188291,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 40,
-        "r": 60,
+        "r": 65,
         "layer": "object13",
         "sortDepth": 0,
         "rot": 3,
@@ -187195,7 +188300,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 9,
+        "r": 14,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187203,7 +188308,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 29,
+        "r": 34,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187211,7 +188316,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 19,
+        "r": 24,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187219,7 +188324,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 7,
+        "r": 12,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3,
@@ -187228,7 +188333,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 27,
+        "r": 32,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187236,7 +188341,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 41,
-        "r": 17,
+        "r": 22,
         "layer": "object25",
         "sortDepth": 0,
         "rot": 3
@@ -187244,7 +188349,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 30,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -187252,7 +188357,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 36,
-        "r": 66,
+        "r": 71,
         "layer": "object",
         "oy": 30,
         "ox": 30
@@ -187260,41 +188365,41 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 26,
-        "r": 63,
+        "r": 68,
         "layer": "object",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 28,
-        "r": 63,
+        "r": 68,
         "layer": "object",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 36,
-        "r": 63,
+        "r": 68,
         "layer": "object",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 30,
-        "r": 63,
+        "r": 68,
         "layer": "object",
         "oy": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 26,
-        "r": 68,
+        "r": 73,
         "layer": "object"
       },
       {
         "id": "tile_mvodgug9",
         "c": 32,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -187302,14 +188407,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 32,
-        "r": 63,
+        "r": 68,
         "layer": "object",
         "oy": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 35,
-        "r": 63,
+        "r": 68,
         "layer": "object",
         "oy": 10,
         "fx": true
@@ -187317,19 +188422,19 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 28,
-        "r": 68,
+        "r": 73,
         "layer": "object"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 30,
-        "r": 68,
+        "r": 73,
         "layer": "object"
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 43,
+        "r": 48,
         "layer": "object5",
         "oy": 20,
         "ox": 30
@@ -187337,7 +188442,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 41,
+        "r": 46,
         "layer": "object5",
         "oy": 20,
         "ox": 30
@@ -187345,7 +188450,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 11,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 20
@@ -187353,7 +188458,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 13,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 20
@@ -187361,7 +188466,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 15,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 20
@@ -187369,7 +188474,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 10,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 6.666667000000018
@@ -187377,7 +188482,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 8,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -187385,7 +188490,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 7,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 10,
         "ox": 10
@@ -187393,7 +188498,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 6,
-        "r": 61,
+        "r": 66,
         "layer": "object",
         "oy": 30,
         "ox": 20
@@ -187401,7 +188506,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 23,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 10
@@ -187409,7 +188514,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 30,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "oy": 30.666667000000018,
         "ox": 26.66666699999996
@@ -187417,7 +188522,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 10,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.333332999999982
@@ -187425,7 +188530,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 8,
-        "r": 39,
+        "r": 44,
         "layer": "object18",
         "oy": 40.666667,
         "ox": 39.333333
@@ -187433,7 +188538,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 28,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 36
@@ -187441,7 +188546,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 32,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 35.333333
@@ -187449,7 +188554,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 35.33333300000004
@@ -187457,7 +188562,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 11,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": -10.666667
@@ -187465,7 +188570,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 5,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18.66666699999996,
         "ox": 10.66666699999999
@@ -187473,7 +188578,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 40,
+        "r": 45,
         "layer": "object11",
         "oy": 6,
         "ox": 20
@@ -187481,7 +188586,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 21,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 10
@@ -187489,23 +188594,31 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 28,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "oy": 30.666667000000018,
         "ox": 26.66666699999996
       },
       {
         "id": "tile_mvodgug9",
-        "c": 53,
-        "r": 0,
+        "c": 51,
+        "r": 5,
         "layer": "object23",
         "oy": 30.666667,
-        "ox": 36
+        "ox": 26
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 61,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26
       },
       {
         "id": "tile_mvodgug9",
         "c": 8,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.333332999999982
@@ -187513,7 +188626,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 6,
-        "r": 39,
+        "r": 44,
         "layer": "object18",
         "oy": 40.666667,
         "ox": 39.333333
@@ -187521,7 +188634,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 26,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 36
@@ -187529,7 +188642,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 3,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18.66666699999996,
         "ox": 10.66666699999999
@@ -187537,7 +188650,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": -1,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.333332999999982
@@ -187545,7 +188658,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 32,
-        "r": 40,
+        "r": 45,
         "layer": "object11",
         "oy": 6,
         "ox": 20,
@@ -187554,7 +188667,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 19,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 10
@@ -187562,23 +188675,31 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 26,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "oy": 30.666667000000018,
         "ox": 26.66666699999996
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 51,
-        "r": 0,
+        "c": 49,
+        "r": 5,
         "layer": "object23",
         "oy": 30.666667,
-        "ox": 36
+        "ox": 26
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 59,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26
       },
       {
         "id": "tile_mvocpp0c",
         "c": 6,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.33333300000001,
@@ -187587,7 +188708,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 24,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 36
@@ -187595,7 +188716,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 1,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18.66666699999996,
         "ox": 10.666667000000004
@@ -187603,7 +188724,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 13,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "oy": 0.6666669999999613,
         "ox": 10
@@ -187611,7 +188732,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 14,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "oy": 0.6666669999999613,
         "ox": 20
@@ -187619,7 +188740,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 30,
-        "r": 40,
+        "r": 45,
         "layer": "object11",
         "oy": 6,
         "ox": 20
@@ -187627,7 +188748,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 17,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 10
@@ -187635,7 +188756,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 24,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "oy": 30.666667000000018,
         "ox": 26.66666699999996
@@ -187643,7 +188764,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 16,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": 29.33333300000004
@@ -187651,7 +188772,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 18,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": 29.33333300000004
@@ -187659,7 +188780,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 18,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "oy": 28.666667,
         "ox": 10.666667
@@ -187667,7 +188788,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 17,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "oy": 28.66666699999996,
         "ox": 10.666666999999961
@@ -187675,7 +188796,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 16,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "oy": 28.666667,
         "ox": 10.666667
@@ -187683,7 +188804,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 25,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": 29.33333300000004
@@ -187691,7 +188812,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 14,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "ox": 38.666667,
         "oy": 0.666667
@@ -187699,7 +188820,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 31,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": 29.33333300000004
@@ -187707,7 +188828,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 20,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": 9.333333000000039
@@ -187715,7 +188836,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 4,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.33333300000001,
@@ -187724,7 +188845,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 11,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "oy": 0.6666669999999613,
         "ox": 10
@@ -187732,14 +188853,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 17,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 4,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -187747,7 +188868,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 25,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": 36.66666699999996
@@ -187755,14 +188876,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 19,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 6,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -187770,14 +188891,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 21,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvoddiqi",
         "c": 8,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -187785,7 +188906,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 0,
-        "r": 7,
+        "r": 12,
         "layer": "object23",
         "oy": 20,
         "ox": 31.333333
@@ -187793,7 +188914,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 14,
-        "r": 3,
+        "r": 8,
         "layer": "object23",
         "oy": 20,
         "ox": 26.66666699999996,
@@ -187802,7 +188923,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 22,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "oy": 30.666667000000018,
         "ox": 26.66666699999996
@@ -187810,14 +188931,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 33,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvoddiqi",
         "c": 20,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -187825,7 +188946,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 32,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333,
@@ -187834,7 +188955,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 31,
-        "r": 46,
+        "r": 51,
         "layer": "object14",
         "ox": 10,
         "oy": -4
@@ -187842,7 +188963,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 18,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 9.333333000000039,
         "oy": 36
@@ -187850,7 +188971,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 30,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 35.333333,
         "oy": 36
@@ -187858,7 +188979,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 36,
-        "r": 40,
+        "r": 45,
         "layer": "object11",
         "ox": 15.333333000000039,
         "oy": 6
@@ -187866,7 +188987,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 27,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 29.333333,
         "oy": 18
@@ -187874,7 +188995,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 25,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "ox": 18.666667,
         "oy": 30.666667
@@ -187882,7 +189003,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 47,
-        "r": 52,
+        "r": 57,
         "layer": "object31",
         "ox": 28.66666699999996,
         "oy": 20.66666699999996
@@ -187890,7 +189011,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 61,
-        "r": 52,
+        "r": 57,
         "layer": "object31",
         "ox": 28.66666699999996,
         "oy": 20.66666699999996
@@ -187898,7 +189019,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 33,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 29.33333300000004,
         "oy": 18
@@ -187906,14 +189027,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 23,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 10,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -187921,7 +189042,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 2,
-        "r": 7,
+        "r": 12,
         "layer": "object23",
         "oy": 20,
         "ox": 31.333333
@@ -187929,7 +189050,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 16,
-        "r": 3,
+        "r": 8,
         "layer": "object23",
         "oy": 20,
         "ox": 26.66666699999996
@@ -187937,14 +189058,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 31,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 18,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -187952,7 +189073,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 12,
-        "r": 3,
+        "r": 8,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 20
@@ -187960,7 +189081,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 20,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 30.666667000000018
@@ -187968,7 +189089,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 20,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 9.333333000000039,
         "oy": 36
@@ -187976,7 +189097,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 29,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 29.333333,
         "oy": 18
@@ -187984,7 +189105,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 35,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 29.33333300000004,
         "oy": 18
@@ -187992,7 +189113,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 36,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 29.33333300000004,
         "oy": 18
@@ -188000,14 +189121,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 25,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 12,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -188015,7 +189136,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 4,
-        "r": 7,
+        "r": 12,
         "layer": "object23",
         "oy": 20,
         "ox": 31.333333
@@ -188023,7 +189144,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": -1,
-        "r": 7,
+        "r": 12,
         "layer": "object23",
         "ox": 30,
         "oy": 20
@@ -188031,7 +189152,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 27,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": 36.66666699999996
@@ -188039,7 +189160,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 21,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": 36.66666699999996
@@ -188047,14 +189168,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 27,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 14,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -188062,7 +189183,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 8,
-        "r": 3,
+        "r": 8,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 20,
@@ -188071,7 +189192,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 29,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": 36.66666699999996
@@ -188079,7 +189200,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 23,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": 36.66666699999996,
@@ -188088,14 +189209,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 29,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 16,
-        "r": 11,
+        "r": 16,
         "layer": "object22",
         "oy": 30,
         "ox": -3.333333
@@ -188103,7 +189224,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 10,
-        "r": 3,
+        "r": 8,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 20,
@@ -188112,7 +189233,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 18,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 30.666667000000018
@@ -188121,7 +189242,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 8,
-        "r": 2,
+        "r": 7,
         "layer": "object23",
         "ox": 20,
         "oy": 37.33333300000001
@@ -188130,7 +189251,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 9,
-        "r": 2,
+        "r": 7,
         "layer": "object23",
         "ox": 20,
         "oy": 37.33333300000001
@@ -188139,7 +189260,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 0,
-        "r": 7,
+        "r": 12,
         "layer": "object23",
         "ox": 29.333332999999996,
         "oy": 7.333332999999982
@@ -188147,7 +189268,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 15,
-        "r": 51,
+        "r": 56,
         "layer": "object14",
         "ox": 36.66666699999996
       },
@@ -188155,7 +189276,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 14,
-        "r": 50,
+        "r": 55,
         "layer": "object14",
         "ox": 30,
         "oy": 10
@@ -188163,7 +189284,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 14,
-        "r": 52,
+        "r": 57,
         "layer": "object14",
         "oy": 10,
         "ox": 30
@@ -188171,7 +189292,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 52,
+        "r": 57,
         "layer": "object13",
         "oy": 34,
         "ox": 19.33333300000004
@@ -188179,7 +189300,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 52,
+        "r": 57,
         "layer": "object13",
         "oy": 20.666667,
         "ox": 19.333333
@@ -188187,7 +189308,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 64,
+        "r": 69,
         "layer": "object",
         "oy": 24,
         "ox": 19.33333300000004
@@ -188195,7 +189316,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 14,
-        "r": 55,
+        "r": 60,
         "layer": "object14",
         "oy": 4,
         "ox": 30
@@ -188203,7 +189324,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 14,
-        "r": 56,
+        "r": 61,
         "layer": "object14",
         "oy": 24,
         "ox": 30
@@ -188211,7 +189332,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 25,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "ox": 10,
         "oy": 36
@@ -188219,7 +189340,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 32,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 30.666667000000018
@@ -188227,23 +189348,39 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 37,
-        "r": 0,
+        "r": 5,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 30.666667000000018
       },
       {
         "id": "tile_mvoddiqi",
-        "c": 47,
-        "r": 0,
+        "c": 41,
+        "r": 5,
         "layer": "object23",
-        "ox": 36.66666699999996,
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 45,
+        "r": 5,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 55,
+        "r": 5,
+        "layer": "object23",
+        "ox": 26.66666699999996,
         "oy": 30.666667000000018
       },
       {
         "id": "tile_mvoddiqi",
         "c": 62,
-        "r": 0,
+        "r": 5,
         "layer": "object23",
         "ox": 6.666666999999961,
         "oy": 30.666667000000018
@@ -188251,7 +189388,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 19,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "ox": 10.666667,
         "oy": 28.666667
@@ -188259,7 +189396,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 41,
-        "r": 52,
+        "r": 57,
         "layer": "object31",
         "ox": 20.66666699999996,
         "oy": 18.66666699999996
@@ -188267,7 +189404,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 55,
-        "r": 52,
+        "r": 57,
         "layer": "object31",
         "ox": 20.66666699999996,
         "oy": 18.66666699999996
@@ -188275,7 +189412,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 12,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 9.333332999999982,
         "oy": 36
@@ -188283,7 +189420,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 13,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": -10.666667
@@ -188291,7 +189428,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 27,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 10
@@ -188299,7 +189436,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 32,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 10
@@ -188307,7 +189444,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "oy": 30.666667000000018,
         "ox": 26.66666699999996
@@ -188315,23 +189452,47 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 39,
-        "r": 0,
+        "r": 5,
         "layer": "object23",
         "oy": 30.666667000000018,
         "ox": 26.66666699999996
       },
       {
         "id": "tile_mvocpp0c",
-        "c": 49,
-        "r": 0,
+        "c": 43,
+        "r": 5,
         "layer": "object23",
         "oy": 30.666667000000018,
-        "ox": 36.66666699999996
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 53,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 47,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 57,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
       },
       {
         "id": "tile_mvocpp0c",
         "c": 14,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.333333000000039
@@ -188339,7 +189500,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 15,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "oy": 18,
         "ox": -10.666667
@@ -188347,7 +189508,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 29,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 10
@@ -188355,7 +189516,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 16,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.333333000000039
@@ -188363,7 +189524,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 22,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.333333000000039,
@@ -188372,7 +189533,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 22,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 36,
@@ -188381,7 +189542,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 6,
-        "r": 59,
+        "r": 64,
         "layer": "object",
         "oy": 30,
         "ox": 20
@@ -188389,7 +189550,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbgmzf",
         "c": 6,
-        "r": 58,
+        "r": 63,
         "layer": "object",
         "oy": 24,
         "ox": 20
@@ -188397,7 +189558,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbolt4",
         "c": 25,
-        "r": 57,
+        "r": 62,
         "layer": "object",
         "ox": 30,
         "oy": 21.333333
@@ -188405,7 +189566,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 2,
-        "r": 52,
+        "r": 57,
         "layer": "object5",
         "ox": 16,
         "oy": 14,
@@ -188414,7 +189575,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbvnsy",
         "c": 16,
-        "r": 57,
+        "r": 62,
         "layer": "object11",
         "rot": 0,
         "ox": 21.33333300000004,
@@ -188423,7 +189584,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 14,
-        "r": 57,
+        "r": 62,
         "layer": "object",
         "ox": 10,
         "oy": 21.333333
@@ -188431,7 +189592,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 16,
-        "r": 62,
+        "r": 67,
         "layer": "object6",
         "ox": 20,
         "oy": 21.33333300000004
@@ -188439,14 +189600,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 6,
-        "r": 62,
+        "r": 67,
         "layer": "object6",
         "oy": 21.333333
       },
       {
         "id": "tile_mw4d9qnu",
         "c": 49,
-        "r": 65,
+        "r": 70,
         "layer": "object15",
         "oy": 10,
         "ox": 30
@@ -188454,14 +189615,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mw4d9qnu",
         "c": 51,
-        "r": 65,
+        "r": 70,
         "layer": "object15",
         "ox": 20
       },
       {
         "id": "tile_mwdlevxi",
         "c": 52,
-        "r": 62,
+        "r": 67,
         "layer": "object13",
         "ox": 32.666667,
         "oy": 39.333333
@@ -188469,7 +189630,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdlevxi",
         "c": 50,
-        "r": 62,
+        "r": 67,
         "layer": "object13",
         "oy": 39.333333,
         "ox": 1.333333
@@ -188477,7 +189638,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdlevxi",
         "c": 55,
-        "r": 62,
+        "r": 67,
         "layer": "object13",
         "ox": 24,
         "oy": 39.333333
@@ -188485,7 +189646,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdlevxi",
         "c": 56,
-        "r": 65,
+        "r": 70,
         "layer": "object13",
         "ox": 12,
         "oy": 32.666667
@@ -188493,7 +189654,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdlevxi",
         "c": 53,
-        "r": 65,
+        "r": 70,
         "layer": "object13",
         "ox": 8.666667,
         "oy": 18
@@ -188501,7 +189662,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdlevxi",
         "c": 50,
-        "r": 65,
+        "r": 70,
         "layer": "object13",
         "oy": 18,
         "ox": 1.333333
@@ -188509,7 +189670,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 47,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "oy": 39.33333300000004,
         "ox": 16.66666699999996
@@ -188517,7 +189678,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 49,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "oy": 39.333333,
         "ox": 40.666667
@@ -188525,7 +189686,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 53,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "ox": 8,
         "oy": 39.333333
@@ -188533,7 +189694,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "oy": 39.333333,
         "ox": 22.666667
@@ -188541,7 +189702,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "ox": 26.666667,
         "oy": 39.333333
@@ -188549,7 +189710,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 53,
-        "r": 67,
+        "r": 72,
         "layer": "object13",
         "ox": 8.666667,
         "oy": 8.666667
@@ -188557,7 +189718,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 50,
-        "r": 67,
+        "r": 72,
         "layer": "object13",
         "oy": 8.666667,
         "ox": 1.333333
@@ -188565,7 +189726,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 58,
-        "r": 62,
+        "r": 67,
         "layer": "object13",
         "fx": true,
         "oy": 39.333333,
@@ -188574,7 +189735,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 58,
-        "r": 64,
+        "r": 69,
         "layer": "object13",
         "fx": true,
         "oy": 44,
@@ -188583,7 +189744,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 56,
-        "r": 67,
+        "r": 72,
         "layer": "object13",
         "ox": 16.666667,
         "oy": 8.666667
@@ -188591,7 +189752,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 58,
-        "r": 67,
+        "r": 72,
         "layer": "object13",
         "fx": true,
         "oy": 8.666667,
@@ -188600,7 +189761,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 39,
+        "r": 44,
         "layer": "object5",
         "oy": 30,
         "ox": 30
@@ -188608,7 +189769,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 2,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 36,
         "ox": 9.333332999999996
@@ -188616,7 +189777,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 1,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 20,
         "oy": 7.333333
@@ -188625,7 +189786,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 0,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 15.333333000000039,
         "ox": 30
@@ -188633,7 +189794,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 14,
-        "r": 54,
+        "r": 59,
         "layer": "object14",
         "oy": 4,
         "ox": 30
@@ -188641,7 +189802,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 54,
+        "r": 59,
         "layer": "object13",
         "oy": 34,
         "ox": 19.333333
@@ -188649,7 +189810,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 47,
+        "r": 52,
         "layer": "object31",
         "oy": 14,
         "ox": 19.33333300000004
@@ -188657,7 +189818,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 46,
-        "r": 48,
+        "r": 53,
         "layer": "object31",
         "oy": 15.333333000000039,
         "ox": 20
@@ -188665,7 +189826,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 60,
-        "r": 48,
+        "r": 53,
         "layer": "object31",
         "oy": 15.333333000000039,
         "ox": 20
@@ -188673,7 +189834,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 60,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 15.333333000000039,
         "ox": 20
@@ -188681,7 +189842,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 60,
-        "r": 44,
+        "r": 49,
         "layer": "object31",
         "oy": 25.33333300000004,
         "ox": 20
@@ -188689,14 +189850,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 48,
+        "r": 53,
         "layer": "object31",
         "oy": 15.333333000000039
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 15.333333000000039,
         "sortDepth": 0.4
@@ -188704,14 +189865,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 44,
+        "r": 49,
         "layer": "object31",
         "oy": 25.33333300000004
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 67,
+        "r": 72,
         "layer": "object",
         "oy": 14,
         "ox": 19.33333300000004
@@ -188719,7 +189880,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 56,
+        "r": 61,
         "layer": "object13",
         "oy": 34,
         "ox": 19.33333300000004
@@ -188727,7 +189888,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 49,
+        "r": 54,
         "layer": "object31",
         "oy": 4,
         "ox": 19.33333300000004,
@@ -188736,7 +189897,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 46,
-        "r": 50,
+        "r": 55,
         "layer": "object31",
         "oy": 15.333333000000039,
         "ox": 20
@@ -188744,7 +189905,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 60,
-        "r": 50,
+        "r": 55,
         "layer": "object31",
         "oy": 15.333333000000039,
         "ox": 20
@@ -188752,21 +189913,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 50,
+        "r": 55,
         "layer": "object31",
         "oy": 15.333333000000039
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 57,
-        "r": 50,
+        "r": 55,
         "layer": "object31",
         "oy": 15.333333000000039
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 69,
+        "r": 74,
         "layer": "object",
         "oy": 14,
         "ox": 19.33333300000004,
@@ -188775,7 +189936,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 70,
+        "r": 75,
         "layer": "object",
         "oy": 24,
         "ox": 19.33333300000004,
@@ -188784,7 +189945,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 15,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 36,
         "ox": 49.333333
@@ -188793,7 +189954,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 33,
-        "r": 50,
+        "r": 55,
         "layer": "object14",
         "ox": 29.33333300000004,
         "oy": 20
@@ -188802,7 +189963,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 35,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "oy": 15.333333000000039,
         "ox": 38
@@ -188811,7 +189972,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 37,
-        "r": 35,
+        "r": 40,
         "layer": "object18",
         "oy": 35.33333300000004,
         "ox": 18
@@ -188820,7 +189981,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 37,
-        "r": 39,
+        "r": 44,
         "layer": "object11",
         "oy": 25.333333,
         "ox": 18.666667
@@ -188828,7 +189989,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 49,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -188837,7 +189998,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 49,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -188846,7 +190007,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 41,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -188855,7 +190016,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 41,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -188864,7 +190025,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 49,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -188873,7 +190034,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 49,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -188882,7 +190043,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 41,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -188891,7 +190052,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 41,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -188900,7 +190061,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 51,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -188909,7 +190070,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 51,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -188918,7 +190079,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 43,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -188927,7 +190088,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 43,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -188936,7 +190097,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 51,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -188945,7 +190106,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 51,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -188954,7 +190115,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 43,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -188963,7 +190124,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 43,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -188972,7 +190133,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 40,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 30,
@@ -188981,7 +190142,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 41,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "oy": -4.666667
@@ -188989,7 +190150,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 40,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 30,
@@ -188998,7 +190159,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 41,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "oy": 2
@@ -189006,7 +190167,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 53,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189015,7 +190176,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 53,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189024,7 +190185,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 45,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -189033,7 +190194,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 45,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -189042,7 +190203,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 53,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189051,7 +190212,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 53,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189060,7 +190221,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 45,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -189069,7 +190230,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 45,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -189078,7 +190239,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 59,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189087,7 +190248,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 59,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189096,7 +190257,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 59,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189105,7 +190266,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 59,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189114,7 +190275,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 57,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189123,7 +190284,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 57,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189132,7 +190293,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 57,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189141,7 +190302,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 57,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189150,7 +190311,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 55,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189159,7 +190320,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 55,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189168,7 +190329,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 47,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -189177,7 +190338,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 47,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -189186,7 +190347,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 55,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189195,7 +190356,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 55,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189204,7 +190365,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 47,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 20,
@@ -189213,7 +190374,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 47,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 30,
@@ -189222,7 +190383,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 47,
-        "r": 62,
+        "r": 67,
         "layer": "object13",
         "oy": 39.33333300000004,
         "ox": 16.66666699999996
@@ -189230,7 +190391,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 47,
-        "r": 65,
+        "r": 70,
         "layer": "object13",
         "oy": 17.33333300000004,
         "ox": 16.66666699999996
@@ -189238,7 +190399,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 47,
-        "r": 67,
+        "r": 72,
         "layer": "object13",
         "oy": 8.666666999999961,
         "ox": 16.66666699999996
@@ -189246,21 +190407,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 57,
+        "r": 62,
         "layer": "object13",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 55,
+        "r": 60,
         "layer": "object13",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 53,
+        "r": 58,
         "layer": "object13",
         "ox": 20,
         "sortDepth": 1.75
@@ -189269,7 +190430,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 62,
-        "r": 58,
+        "r": 63,
         "layer": "object13",
         "ox": 20,
         "oy": 20
@@ -189277,7 +190438,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 70,
+        "r": 75,
         "layer": "object13",
         "oy": 10,
         "ox": 20
@@ -189285,7 +190446,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 68,
+        "r": 73,
         "layer": "object13",
         "oy": 20,
         "ox": 20
@@ -189293,7 +190454,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 60,
+        "r": 65,
         "layer": "object13",
         "oy": 20,
         "ox": 20
@@ -189301,7 +190462,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 62,
+        "r": 67,
         "layer": "object13",
         "oy": 20,
         "ox": 20
@@ -189309,7 +190470,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 64,
+        "r": 69,
         "layer": "object13",
         "oy": 20,
         "ox": 20
@@ -189317,7 +190478,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 62,
-        "r": 66,
+        "r": 71,
         "layer": "object13",
         "oy": 20,
         "ox": 20
@@ -189325,76 +190486,76 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 28,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 30,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvodgug9",
         "c": 2,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 4,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 22,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 25,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 28,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 31,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 34,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 37,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 3,
-        "r": 27,
+        "r": 32,
         "layer": "ground4",
         "ox": 8
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 0,
-        "r": 12,
+        "r": 17,
         "layer": "ground4",
         "ox": 38,
         "oy": 10
@@ -189402,7 +190563,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 9,
+        "r": 14,
         "layer": "ground4",
         "ox": 18.666667,
         "oy": 10
@@ -189410,215 +190571,215 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 15,
+        "r": 20,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 3,
-        "r": 24,
+        "r": 29,
         "layer": "ground4",
         "ox": 8
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 1,
-        "r": 78,
+        "r": 83,
         "layer": "ground4",
         "ox": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 4,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 6,
-        "r": 81,
+        "r": 86,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 6,
-        "r": 84,
+        "r": 89,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 7,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 8,
-        "r": 81,
+        "r": 86,
         "layer": "ground4",
         "ox": 8
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 8,
-        "r": 84,
+        "r": 89,
         "layer": "ground4",
         "ox": 8
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 10,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 13,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 16,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 19,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 40,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 42,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 10,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 12,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvoddiqi",
         "c": 14,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 18,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 16,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 20,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvodgug9",
         "c": 26,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 22,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 24,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 10
       },
       {
         "id": "tile_mvocpp0c",
         "c": 34,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 32,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 36,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvodgug9",
         "c": 38,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 40,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 42,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 43,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 73,
+        "r": 78,
         "layer": "object6",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "ox": 20,
         "oy": 20
@@ -189626,7 +190787,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 75,
+        "r": 80,
         "layer": "object6",
         "ox": 20,
         "oy": 20
@@ -189634,7 +190795,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 43,
-        "r": 77,
+        "r": 82,
         "layer": "object6",
         "ox": 20,
         "oy": 20
@@ -189642,28 +190803,28 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 51,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvoddiqi",
         "c": 57,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvocpp0c",
         "c": 59,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
       {
         "id": "tile_mvocpp0c",
         "c": 61,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20
       },
@@ -189671,7 +190832,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 24,
-        "r": 77,
+        "r": 82,
         "layer": "object6",
         "ox": 30,
         "oy": 20
@@ -189680,7 +190841,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 0,
-        "r": 77,
+        "r": 82,
         "layer": "object6",
         "ox": 30,
         "oy": 20
@@ -189689,7 +190850,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 67,
+        "r": 72,
         "layer": "object13",
         "ox": 6,
         "oy": 32.666667
@@ -189698,7 +190859,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189707,7 +190868,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189716,7 +190877,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 39,
+        "r": 44,
         "layer": "object25",
         "ox": 16,
         "oy": 12.666666999999961
@@ -189725,7 +190886,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189734,7 +190895,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189743,7 +190904,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 63,
+        "r": 68,
         "layer": "object13",
         "ox": 6,
         "oy": 32.66666699999996
@@ -189752,7 +190913,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 12,
+        "r": 17,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189761,7 +190922,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 32,
+        "r": 37,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189770,7 +190931,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 22,
+        "r": 27,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189779,43 +190940,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 65,
-        "layer": "object13",
-        "ox": 6,
-        "oy": 32.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "sortDepth": 0,
-        "c": 61,
-        "r": 14,
-        "layer": "object25",
-        "ox": 16,
-        "oy": 32.66666699999996
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "sortDepth": 0,
-        "c": 61,
-        "r": 34,
-        "layer": "object25",
-        "ox": 16,
-        "oy": 32.66666699999996
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "sortDepth": 0,
-        "c": 61,
-        "r": 24,
-        "layer": "object25",
-        "ox": 16,
-        "oy": 32.66666699999996
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "sortDepth": 0,
-        "c": 61,
-        "r": 61,
+        "r": 70,
         "layer": "object13",
         "ox": 6,
         "oy": 32.666667
@@ -189824,7 +190949,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 10,
+        "r": 19,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189833,7 +190958,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 30,
+        "r": 39,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189842,7 +190967,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 20,
+        "r": 29,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189851,7 +190976,43 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 59,
+        "r": 66,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 15,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 35,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 25,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 64,
         "layer": "object13",
         "ox": 6,
         "oy": 32.66666699999996
@@ -189860,7 +191021,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189869,7 +191030,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189878,7 +191039,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "sortDepth": 0,
         "c": 61,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "ox": 16,
         "oy": 32.66666699999996
@@ -189886,7 +191047,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvnn2p1x",
         "c": 42,
-        "r": 73,
+        "r": 78,
         "layer": "object17",
         "oy": 30,
         "ox": 30,
@@ -189895,7 +191056,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 61,
-        "r": 69,
+        "r": 74,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189904,7 +191065,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 61,
-        "r": 41,
+        "r": 46,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189913,7 +191074,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 61,
-        "r": 59,
+        "r": 64,
         "layer": "object13",
         "sortDepth": 0,
         "ox": 10,
@@ -189922,7 +191083,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 61,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189931,7 +191092,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 49,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "oy": 2,
@@ -189940,7 +191101,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 49,
-        "r": 40,
+        "r": 45,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 10,
@@ -189949,7 +191110,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 48,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "sortDepth": 0,
         "ox": 20,
@@ -189958,56 +191119,56 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 37.333333
       },
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 21.333333
       },
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 29.333333
       },
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 42.666667
       },
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 4
       },
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 16.666667
       },
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "ox": 37.333333
       },
       {
         "id": "tile_mwdka8vr",
         "c": 37,
-        "r": 75,
+        "r": 80,
         "layer": "object17",
         "ox": 10,
         "oy": 10,
@@ -190016,7 +191177,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mw49f97t",
         "c": 28,
-        "r": 74,
+        "r": 79,
         "layer": "object17",
         "ox": 30,
         "oy": 10
@@ -190024,7 +191185,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvqyrysf",
         "c": 38,
-        "r": 74,
+        "r": 79,
         "layer": "object17",
         "oy": 10,
         "sortDepth": 0
@@ -190032,7 +191193,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbna04",
         "c": 30,
-        "r": 36,
+        "r": 41,
         "layer": "object11",
         "oy": 18
       },
@@ -190040,7 +191201,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 29,
-        "r": 39,
+        "r": 44,
         "layer": "object11",
         "oy": 25.33333300000004,
         "ox": 38.66666699999996
@@ -190048,7 +191209,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbolt4",
         "c": 15,
-        "r": 45,
+        "r": 50,
         "layer": "object11",
         "ox": 20,
         "oy": 7.333333
@@ -190057,7 +191218,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 15,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "oy": 15.333333,
         "ox": 19.333333
@@ -190065,7 +191226,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_storage_locker",
         "c": 26,
-        "r": 64,
+        "r": 69,
         "layer": "object16",
         "oy": 30,
         "ox": 1.333333,
@@ -190078,7 +191239,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 38,
-        "r": 61,
+        "r": 66,
         "layer": "object16",
         "ox": 30,
         "oy": 30
@@ -190086,7 +191247,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 39,
-        "r": 62,
+        "r": 67,
         "layer": "object16",
         "ox": 10,
         "oy": 10
@@ -190094,7 +191255,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 39,
-        "r": 64,
+        "r": 69,
         "layer": "object16",
         "oy": 30,
         "ox": 14.666667
@@ -190102,7 +191263,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 39,
-        "r": 63,
+        "r": 68,
         "layer": "object16",
         "oy": 10,
         "ox": 30
@@ -190110,14 +191271,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 39,
-        "r": 64,
+        "r": 69,
         "layer": "object16",
         "oy": -1.333333
       },
       {
         "id": "tile_mvzbvnsy",
         "c": 37,
-        "r": 66,
+        "r": 71,
         "layer": "object",
         "oy": 2.666667,
         "ox": 0.666667
@@ -190125,7 +191286,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 37,
-        "r": 70,
+        "r": 75,
         "layer": "object6",
         "oy": 31.333333,
         "ox": -0.666667
@@ -190134,14 +191295,14 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 36,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "ox": 20
       },
       {
         "id": "tile_mvybeuxg",
         "c": 25,
-        "r": 57,
+        "r": 62,
         "layer": "object",
         "oy": 10,
         "fx": true,
@@ -190150,7 +191311,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_storage_locker_key",
         "c": 16,
-        "r": 57,
+        "r": 62,
         "layer": "object9",
         "ox": 20,
         "oy": 20
@@ -190158,7 +191319,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvortyiv",
         "c": 28,
-        "r": 67,
+        "r": 72,
         "layer": "object16",
         "oy": -3.333333,
         "ox": -4
@@ -190166,7 +191327,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mw5zi7xa",
         "c": 26,
-        "r": 64,
+        "r": 69,
         "layer": "object16",
         "ox": 10,
         "oy": 20
@@ -190174,7 +191335,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbvnsy",
         "c": 25,
-        "r": 67,
+        "r": 72,
         "layer": "object6",
         "oy": 12.666667,
         "fx": true
@@ -190182,49 +191343,49 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 28,
-        "r": 70,
+        "r": 75,
         "layer": "object12",
         "oy": 30
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 30,
-        "r": 70,
+        "r": 75,
         "layer": "object12",
         "oy": 30
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 26,
-        "r": 70,
+        "r": 75,
         "layer": "object12",
         "oy": 30
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 27,
-        "r": 70,
+        "r": 75,
         "layer": "object12",
         "oy": 30
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 29,
-        "r": 70,
+        "r": 75,
         "layer": "object12",
         "oy": 30
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 31,
-        "r": 70,
+        "r": 75,
         "layer": "object12",
         "oy": 30
       },
       {
         "id": "tile_mvzbna04",
         "c": 4,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 30,
         "oy": 14
@@ -190232,7 +191393,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 9,
-        "r": 78,
+        "r": 83,
         "layer": "object6",
         "ox": 30,
         "oy": 14
@@ -190240,7 +191401,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 4,
-        "r": 80,
+        "r": 85,
         "layer": "object6",
         "ox": 28.666667,
         "oy": 14
@@ -190248,7 +191409,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 80,
+        "r": 85,
         "layer": "object6",
         "ox": 30,
         "oy": 14
@@ -190256,7 +191417,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 4,
-        "r": 82,
+        "r": 87,
         "layer": "object6",
         "ox": 28.66666699999999,
         "oy": 14,
@@ -190265,7 +191426,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 82,
+        "r": 87,
         "layer": "object6",
         "ox": 30,
         "oy": 14
@@ -190273,7 +191434,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 84,
+        "r": 89,
         "layer": "object6",
         "ox": 30,
         "oy": 14
@@ -190281,7 +191442,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 4,
-        "r": 84,
+        "r": 89,
         "layer": "object6",
         "ox": 28.66666699999996,
         "oy": 14
@@ -190289,7 +191450,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 6,
-        "r": 78,
+        "r": 83,
         "layer": "object17",
         "ox": 20,
         "oy": 10,
@@ -190298,7 +191459,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 8,
-        "r": 80,
+        "r": 85,
         "layer": "object17",
         "oy": 20,
         "sortDepth": 1.5
@@ -190306,7 +191467,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 4,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190314,7 +191475,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 13,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190322,13 +191483,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 10,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 22,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190336,7 +191497,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 41,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190344,7 +191505,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 32,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190352,14 +191513,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 48,
-        "r": 74,
+        "r": 79,
         "layer": "object12",
         "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 24,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190367,7 +191528,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 43,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "oy": 30,
         "ox": 10
@@ -190375,7 +191536,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 34,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190383,14 +191544,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 50,
-        "r": 74,
+        "r": 79,
         "layer": "object12",
         "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 19,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190398,7 +191559,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 38,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190406,7 +191567,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 29,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190414,7 +191575,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 33,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -190422,14 +191583,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 45,
-        "r": 74,
+        "r": 79,
         "layer": "object12",
         "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 16,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190437,13 +191598,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 13,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 35,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190451,14 +191612,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 51,
-        "r": 74,
+        "r": 79,
         "layer": "object12",
         "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 26,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190466,7 +191627,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 30,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -190474,7 +191635,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 3,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190482,7 +191643,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 12,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190490,13 +191651,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 9,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 21,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190504,7 +191665,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 40,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190512,7 +191673,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 31,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190520,7 +191681,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 35,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -190528,7 +191689,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 37,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -190536,7 +191697,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 36,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -190544,14 +191705,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 47,
-        "r": 74,
+        "r": 79,
         "layer": "object12",
         "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 23,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190559,7 +191720,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 42,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190567,7 +191728,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 33,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190575,14 +191736,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 49,
-        "r": 74,
+        "r": 79,
         "layer": "object12",
         "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 18,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190590,25 +191751,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 15,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 16,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 17,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 37,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190616,7 +191777,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 28,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190624,7 +191785,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 32,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -190632,7 +191793,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 15,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190640,13 +191801,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 12,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 2,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190654,21 +191815,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 66,
+        "r": 71,
         "layer": "object12",
         "ox": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 66,
+        "r": 71,
         "layer": "object12",
         "ox": -30
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 11,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -190676,20 +191837,20 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 8,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 42,
+        "r": 47,
         "layer": "object12",
         "oy": 26
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 33,
+        "r": 38,
         "layer": "object12",
         "ox": 10,
         "oy": 20.66666699999996
@@ -190697,7 +191858,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 10,
+        "r": 15,
         "layer": "object12",
         "ox": 10,
         "oy": 8
@@ -190705,7 +191866,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 14,
+        "r": 19,
         "layer": "object12",
         "ox": 10,
         "oy": 16.666667
@@ -190713,7 +191874,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190721,7 +191882,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 6,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190729,7 +191890,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 31,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190737,7 +191898,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 35,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190745,7 +191906,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 36,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190753,7 +191914,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 26,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190761,7 +191922,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 21,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190769,7 +191930,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 16,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190777,7 +191938,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 11,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190785,7 +191946,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 5,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190793,7 +191954,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 30,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190801,7 +191962,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 34,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190809,7 +191970,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 25,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190817,7 +191978,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 20,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190825,7 +191986,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 15,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190833,7 +191994,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 10,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190841,7 +192002,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 4,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190849,7 +192010,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 29,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190857,7 +192018,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 33,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190865,7 +192026,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 24,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190873,7 +192034,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 19,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190881,7 +192042,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 14,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190889,7 +192050,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 9,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190897,7 +192058,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 3,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190905,7 +192066,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 28,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190913,7 +192074,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 32,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190921,7 +192082,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 23,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190929,7 +192090,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 18,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190937,7 +192098,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 13,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190945,7 +192106,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 8,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190953,7 +192114,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 2,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190961,7 +192122,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 1,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 15.333333
@@ -190969,7 +192130,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 27,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190977,7 +192138,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 22,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190985,7 +192146,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 17,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -190993,7 +192154,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 12,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -191001,7 +192162,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 7,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "ox": 10,
         "oy": 0.6666669999999613
@@ -191009,7 +192170,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 0,
-        "r": 33,
+        "r": 38,
         "layer": "object12",
         "oy": 20.666667,
         "ox": -30
@@ -191017,7 +192178,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": -1,
-        "r": 10,
+        "r": 15,
         "layer": "object12",
         "oy": 8,
         "ox": 10
@@ -191025,7 +192186,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": -1,
-        "r": 14,
+        "r": 19,
         "layer": "object12",
         "oy": 16.666667,
         "ox": 10
@@ -191033,7 +192194,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": -1,
-        "r": 19,
+        "r": 24,
         "layer": "object12",
         "oy": 0.6666669999999613,
         "ox": 10
@@ -191041,7 +192202,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": -1,
-        "r": 34,
+        "r": 39,
         "layer": "object12",
         "ox": 10,
         "oy": 0.666667
@@ -191049,7 +192210,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 20,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -191057,7 +192218,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 39,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -191065,7 +192226,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 30,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -191073,7 +192234,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 34,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -191081,14 +192242,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 46,
-        "r": 74,
+        "r": 79,
         "layer": "object12",
         "oy": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 17,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -191096,13 +192257,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 14,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 36,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -191110,7 +192271,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 49,
-        "r": 77,
+        "r": 82,
         "layer": "object12",
         "oy": 30,
         "ox": 30
@@ -191118,7 +192279,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 27,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -191126,7 +192287,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 31,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 20,
         "oy": 4
@@ -191134,7 +192295,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 14,
-        "r": 80,
+        "r": 85,
         "layer": "object12",
         "ox": 10,
         "oy": 30
@@ -191142,13 +192303,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 11,
-        "r": 61,
+        "r": 66,
         "layer": "object12"
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 17,
-        "r": 60,
+        "r": 65,
         "layer": "object12",
         "oy": 10
       },
@@ -191156,7 +192317,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 43,
-        "r": 77,
+        "r": 82,
         "layer": "object12",
         "ox": 20,
         "oy": 20
@@ -191164,146 +192325,146 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 44,
-        "r": 81,
+        "r": 86,
         "layer": "object12"
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 25,
-        "r": 81,
+        "r": 86,
         "layer": "object12",
         "ox": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 1,
-        "r": 81,
+        "r": 86,
         "layer": "object12",
         "ox": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 26,
-        "r": 67,
+        "r": 72,
         "layer": "object12",
         "oy": 14
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 30,
-        "r": 67,
+        "r": 72,
         "layer": "object12",
         "oy": 14
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 28,
-        "r": 67,
+        "r": 72,
         "layer": "object12",
         "oy": 14
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 27,
-        "r": 67,
+        "r": 72,
         "layer": "object12",
         "oy": 14
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 31,
-        "r": 67,
+        "r": 72,
         "layer": "object12",
         "oy": 14
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 29,
-        "r": 67,
+        "r": 72,
         "layer": "object12",
         "oy": 14
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 51,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 55,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 56,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 57,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 50,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 54,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 49,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 53,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 48,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 48,
-        "r": 55,
+        "r": 60,
         "layer": "object31",
         "oy": 14
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 62,
-        "r": 55,
+        "r": 60,
         "layer": "object31",
         "oy": 4
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 56,
-        "r": 55,
+        "r": 60,
         "layer": "object31",
         "oy": 4,
         "ox": 20
@@ -191311,7 +192472,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 42,
-        "r": 55,
+        "r": 60,
         "layer": "object31",
         "oy": 4,
         "ox": 20
@@ -191319,21 +192480,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 52,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 34
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 35,
+        "r": 40,
         "layer": "object18",
         "ox": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 6,
-        "r": 38,
+        "r": 43,
         "layer": "object18",
         "ox": 20.666667,
         "oy": 30
@@ -191341,7 +192502,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 38,
+        "r": 43,
         "layer": "object18",
         "ox": 30,
         "oy": 10,
@@ -191350,14 +192511,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 33,
+        "r": 38,
         "layer": "object18",
         "ox": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 32,
+        "r": 37,
         "layer": "object18",
         "ox": 30,
         "oy": 15.333333
@@ -191365,7 +192526,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 15,
-        "r": 38,
+        "r": 43,
         "layer": "object18",
         "ox": 17.333333,
         "oy": 2.666667
@@ -191373,7 +192534,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbn4vv",
         "c": 15,
-        "r": 39,
+        "r": 44,
         "layer": "object18",
         "ox": 18.666667,
         "oy": 12
@@ -191381,7 +192542,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbvnsy",
         "c": 15,
-        "r": 38,
+        "r": 43,
         "layer": "object11",
         "ox": 1.333333,
         "oy": -3.333333
@@ -191389,7 +192550,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1jix",
         "c": 2,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -191397,7 +192558,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 3,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -191405,7 +192566,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph143o",
         "c": 2,
-        "r": 75,
+        "r": 80,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -191413,7 +192574,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 3,
-        "r": 75,
+        "r": 80,
         "layer": "object6",
         "oy": 20,
         "ox": 10
@@ -191421,7 +192582,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 3,
-        "r": 75,
+        "r": 80,
         "layer": "top",
         "ox": 20,
         "oy": 10,
@@ -191430,7 +192591,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 51,
-        "r": 53,
+        "r": 58,
         "layer": "top",
         "ox": 30,
         "oy": 10,
@@ -191439,7 +192600,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 3,
-        "r": 75,
+        "r": 80,
         "layer": "object19",
         "ox": 20,
         "oy": 10,
@@ -191448,7 +192609,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbolt4",
         "c": 0,
-        "r": 35,
+        "r": 40,
         "layer": "object18",
         "ox": 30,
         "oy": 30
@@ -191456,7 +192617,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbna04",
         "c": 6,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 22,
         "oy": 32.666667
@@ -191464,35 +192625,35 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 3,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "oy": 0.6666669999999613
       },
       {
         "id": "tile_mvodgug9",
         "c": 1,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "oy": 0.6666669999999613
       },
       {
         "id": "tile_mvodgug9",
         "c": -1,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "oy": 0.6666669999999613
       },
       {
         "id": "tile_mvoddiqi",
         "c": 5,
-        "r": 40,
+        "r": 45,
         "layer": "object18",
         "oy": 0.6666669999999613
       },
       {
         "id": "tile_mvzbna04",
         "c": 20,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 31.333333,
         "oy": 32
@@ -191501,7 +192662,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 20,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "ox": 30,
         "oy": 10
@@ -191510,21 +192671,21 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 43,
-        "r": 52,
+        "r": 57,
         "layer": "object31"
       },
       {
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 57,
-        "r": 52,
+        "r": 57,
         "layer": "object31"
       },
       {
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 9,
-        "r": 39,
+        "r": 44,
         "layer": "object18",
         "oy": 20,
         "ox": 30
@@ -191533,7 +192694,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 6,
-        "r": 39,
+        "r": 44,
         "layer": "object18",
         "oy": 20,
         "ox": 20
@@ -191541,7 +192702,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 9,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 30,
         "oy": 32
@@ -191549,7 +192710,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 24,
-        "r": 36,
+        "r": 41,
         "layer": "object18",
         "ox": 10,
         "oy": 32
@@ -191558,7 +192719,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 24,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "ox": 10,
         "oy": 10
@@ -191567,7 +192728,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 46,
-        "r": 52,
+        "r": 57,
         "layer": "object31",
         "ox": 20
       },
@@ -191575,14 +192736,14 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 60,
-        "r": 52,
+        "r": 57,
         "layer": "object31",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 37,
+        "r": 42,
         "layer": "object18",
         "oy": 30,
         "ox": 18
@@ -191590,7 +192751,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 37,
-        "r": 39,
+        "r": 44,
         "layer": "object18",
         "oy": 30,
         "ox": 18
@@ -191598,7 +192759,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 20,
-        "r": 40,
+        "r": 45,
         "layer": "object20",
         "ox": 10,
         "oy": 14.666667
@@ -191606,7 +192767,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 26,
-        "r": 40,
+        "r": 45,
         "layer": "object20",
         "ox": 30,
         "oy": 16
@@ -191614,7 +192775,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 12,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "ox": 10,
         "oy": 26
@@ -191622,14 +192783,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 2,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "oy": 26
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 14,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "ox": 10,
         "oy": 26
@@ -191637,7 +192798,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 15,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "ox": 10,
         "oy": 26
@@ -191645,7 +192806,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 16,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 16.666667,
         "oy": 2.666667
@@ -191653,7 +192814,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 15,
-        "r": 39,
+        "r": 44,
         "layer": "object20",
         "ox": 16.666667,
         "oy": 2.666667
@@ -191661,42 +192822,42 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 4,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "oy": 26
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 6,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "oy": 26
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 7,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "oy": 40
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 10,
-        "r": 43,
+        "r": 48,
         "layer": "object20",
         "ox": 10
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 5,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "oy": 26
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 18,
-        "r": 40,
+        "r": 45,
         "layer": "object20",
         "ox": 16,
         "oy": 14.666667
@@ -191704,7 +192865,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 19,
-        "r": 40,
+        "r": 45,
         "layer": "object20",
         "ox": 10,
         "oy": 14.666667
@@ -191712,7 +192873,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 25,
-        "r": 40,
+        "r": 45,
         "layer": "object20",
         "ox": 30,
         "oy": 16
@@ -191720,7 +192881,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 11,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "ox": 10,
         "oy": 26
@@ -191728,14 +192889,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 1,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "oy": 26
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 13,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "ox": 10,
         "oy": 26
@@ -191743,14 +192904,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 3,
-        "r": 42,
+        "r": 47,
         "layer": "object20",
         "oy": 26
       },
       {
         "id": "tile_mwdqrv1c",
         "c": 24,
-        "r": 40,
+        "r": 45,
         "layer": "object20",
         "ox": 30,
         "oy": 30
@@ -191758,7 +192919,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdqrv1c",
         "c": 21,
-        "r": 40,
+        "r": 45,
         "layer": "object20",
         "oy": 30,
         "ox": 10
@@ -191766,7 +192927,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 2,
-        "r": 74,
+        "r": 79,
         "layer": "object17",
         "ox": 10,
         "oy": 10
@@ -191774,21 +192935,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 24,
-        "r": 73,
+        "r": 78,
         "layer": "object17",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 2,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333
@@ -191796,14 +192957,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 2,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333
@@ -191811,14 +192972,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 2,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333
@@ -191826,14 +192987,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 2,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 9,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333,
@@ -191842,7 +193003,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 1,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "ox": 40,
         "oy": 24.666667
@@ -191850,14 +193011,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbna04",
         "c": 9,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 24.666667
       },
       {
         "id": "tile_mvocpp0c",
         "c": 14,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20,
@@ -191866,7 +193027,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 16,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -191874,7 +193035,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 12,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -191882,14 +193043,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 11,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 18,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333
@@ -191897,14 +193058,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 11,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 18,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333
@@ -191912,14 +193073,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 11,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 18,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333
@@ -191927,14 +193088,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 11,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 18,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 20,
         "ox": -1.333333,
@@ -191943,7 +193104,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 10,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "ox": 40,
         "oy": 24.666667
@@ -191951,14 +193112,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbna04",
         "c": 18,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 24.666667
       },
       {
         "id": "tile_mvocpp0c",
         "c": 21,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -191966,7 +193127,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 23,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20,
@@ -191975,7 +193136,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 25,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -191983,14 +193144,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 20,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 26,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 20,
         "ox": 38.66666699999996
@@ -191998,14 +193159,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 20,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 26,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 20,
         "ox": 38.66666699999996
@@ -192013,14 +193174,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 20,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 26,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 20,
         "ox": 38.66666699999996
@@ -192028,14 +193189,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 20,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 26,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 20,
         "ox": 38.66666699999996,
@@ -192044,21 +193205,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 20,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 24.666667000000018
       },
       {
         "id": "tile_mvzbna04",
         "c": 27,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 24.666667000000018
       },
       {
         "id": "tile_mvocpp0c",
         "c": 32,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20,
@@ -192067,7 +193228,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvodgug9",
         "c": 30,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -192075,7 +193236,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 34,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 10.666666999999961,
         "ox": 20
@@ -192083,14 +193244,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 29,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 35,
-        "r": 29,
+        "r": 34,
         "layer": "object21",
         "oy": 20,
         "ox": 38
@@ -192098,14 +193259,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 29,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 35,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "oy": 20,
         "ox": 38
@@ -192113,14 +193274,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 29,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 35,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 20,
         "ox": 38
@@ -192128,14 +193289,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 29,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 10
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 35,
-        "r": 25,
+        "r": 30,
         "layer": "object21",
         "oy": 20,
         "ox": 38,
@@ -192144,14 +193305,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 29,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 24.666667000000018
       },
       {
         "id": "tile_mvzbna04",
         "c": 36,
-        "r": 21,
+        "r": 26,
         "layer": "object21",
         "oy": 24.666667,
         "ox": -0.666667
@@ -192159,7 +193320,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 8,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 18.666667,
         "oy": 7.333333,
@@ -192168,7 +193329,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 10,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 20,
         "oy": 7.333333
@@ -192176,7 +193337,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 28,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 20,
         "oy": 7.333333
@@ -192184,7 +193345,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 26,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 18.66666699999996,
         "oy": 7.333333000000039
@@ -192192,7 +193353,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 19,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 20,
         "oy": 7.333333
@@ -192200,7 +193361,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzc5x73",
         "c": 17,
-        "r": 30,
+        "r": 35,
         "layer": "object18",
         "ox": 18.66666699999996,
         "oy": 7.333333000000039
@@ -192208,14 +193369,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobex5o",
         "c": 6,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 1.333333
       },
       {
         "id": "tile_mvobex5o",
         "c": 4,
-        "r": 13,
+        "r": 18,
         "layer": "object10",
         "oy": 21.33333300000004,
         "doorMode": "picture"
@@ -192223,28 +193384,28 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobex5o",
         "c": 10,
-        "r": 13,
+        "r": 18,
         "layer": "object10",
         "oy": 21.333332999999982
       },
       {
         "id": "tile_mvobex5o",
         "c": 15,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "oy": 1.3333330000000387
       },
       {
         "id": "tile_mvobex5o",
         "c": 21,
-        "r": 13,
+        "r": 18,
         "layer": "object10",
         "oy": 21.33333300000004
       },
       {
         "id": "tile_mvobzfro",
         "c": 24,
-        "r": 32,
+        "r": 37,
         "layer": "object10",
         "oy": 28,
         "sortDepth": 0
@@ -192252,21 +193413,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 33,
-        "r": 32,
+        "r": 37,
         "layer": "object10",
         "oy": 28
       },
       {
         "id": "tile_mvobzfro",
         "c": 24,
-        "r": 23,
+        "r": 28,
         "layer": "object10",
         "oy": 1.3333330000000387
       },
       {
         "id": "tile_mvobzfro",
         "c": 24,
-        "r": 13,
+        "r": 18,
         "layer": "object10",
         "oy": 21.33333300000004,
         "doorMode": "picture"
@@ -192274,7 +193435,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 16,
-        "r": 5,
+        "r": 10,
         "layer": "object10",
         "oy": 11.333333000000039,
         "doorMode": "picture"
@@ -192282,7 +193443,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 9,
-        "r": 4,
+        "r": 9,
         "layer": "object10",
         "oy": 17.333333,
         "ox": 20,
@@ -192292,14 +193453,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 33,
-        "r": 23,
+        "r": 28,
         "layer": "object10",
         "oy": 1.3333330000000387
       },
       {
         "id": "tile_mvobzfro",
         "c": 32,
-        "r": 13,
+        "r": 18,
         "layer": "object10",
         "oy": 21.33333300000004,
         "doorMode": "picture"
@@ -192307,7 +193468,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 55,
-        "r": 44,
+        "r": 49,
         "layer": "object10",
         "oy": 6.666666999999961,
         "doorMode": "memory"
@@ -192315,14 +193476,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvobzfro",
         "c": 45,
-        "r": 44,
+        "r": 49,
         "layer": "object10",
         "oy": 6.666666999999961
       },
       {
         "id": "color_mu8nxukw",
         "c": 10,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "ox": 20,
         "oy": 10
@@ -192330,7 +193491,7 @@ const BATTLE_MAPS = [
       {
         "id": "color_mu8nxukw",
         "c": 10,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "ox": 20,
         "oy": 10
@@ -192338,7 +193499,7 @@ const BATTLE_MAPS = [
       {
         "id": "color_mu8nxukw",
         "c": 19,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "ox": 20,
         "oy": 10
@@ -192346,7 +193507,7 @@ const BATTLE_MAPS = [
       {
         "id": "color_mu8nxukw",
         "c": 19,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "ox": 20,
         "oy": 10
@@ -192354,7 +193515,7 @@ const BATTLE_MAPS = [
       {
         "id": "color_mu8nxukw",
         "c": 28,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "ox": 20,
         "oy": 10
@@ -192362,7 +193523,7 @@ const BATTLE_MAPS = [
       {
         "id": "color_mu8nxukw",
         "c": 28,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "ox": 20,
         "oy": 20
@@ -192370,7 +193531,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 36,
-        "r": 17,
+        "r": 22,
         "layer": "object34",
         "oy": 20,
         "ox": -2
@@ -192378,7 +193539,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 36,
-        "r": 19,
+        "r": 24,
         "layer": "object34",
         "oy": 20,
         "ox": -2
@@ -192386,7 +193547,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbvnsy",
         "c": 35,
-        "r": 20,
+        "r": 25,
         "layer": "object21",
         "ox": 19.33333300000004,
         "oy": 23.333332999999982
@@ -192394,7 +193555,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 18,
-        "r": 52,
+        "r": 57,
         "layer": "object19",
         "ox": 10,
         "oy": 10,
@@ -192403,7 +193564,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 29,
-        "r": 52,
+        "r": 57,
         "layer": "object19",
         "ox": 30,
         "oy": 10,
@@ -192412,7 +193573,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 51,
-        "r": 53,
+        "r": 58,
         "layer": "object19",
         "ox": 30,
         "oy": 10,
@@ -192421,7 +193582,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 32,
-        "r": 22,
+        "r": 27,
         "layer": "object19",
         "ox": 20,
         "oy": 10,
@@ -192430,7 +193591,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 23,
-        "r": 22,
+        "r": 27,
         "layer": "object19",
         "ox": 20,
         "oy": 10,
@@ -192439,7 +193600,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 14,
-        "r": 22,
+        "r": 27,
         "layer": "object19",
         "ox": 20,
         "oy": 10,
@@ -192448,7 +193609,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 5,
-        "r": 22,
+        "r": 27,
         "layer": "object19",
         "ox": 20,
         "oy": 10,
@@ -192457,7 +193618,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 8,
-        "r": 8,
+        "r": 13,
         "layer": "object19",
         "ox": 20,
         "oy": 10,
@@ -192466,7 +193627,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 28,
-        "r": 7,
+        "r": 12,
         "layer": "object19",
         "oy": 20,
         "blend": "hard-light"
@@ -192474,7 +193635,16 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 50,
-        "r": 2,
+        "r": 7,
+        "layer": "object19",
+        "oy": 20,
+        "blend": "hard-light",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 60,
+        "r": 7,
         "layer": "object19",
         "oy": 20,
         "blend": "hard-light",
@@ -192483,7 +193653,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 14,
-        "r": 5,
+        "r": 10,
         "layer": "object19",
         "blend": "hard-light",
         "ox": 10
@@ -192491,7 +193661,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8nxz4",
         "c": 15,
-        "r": 13,
+        "r": 18,
         "layer": "object19",
         "blend": "hard-light",
         "oy": 10
@@ -192499,7 +193669,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1jix",
         "c": 57,
-        "r": 29,
+        "r": 34,
         "layer": "object23",
         "ox": 16.666667,
         "oy": 21.333333,
@@ -192508,7 +193678,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 59,
-        "r": 29,
+        "r": 34,
         "layer": "object23",
         "ox": 16,
         "oy": 21.333333,
@@ -192517,7 +193687,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1jix",
         "c": 57,
-        "r": 29,
+        "r": 34,
         "layer": "object23",
         "ox": 16.666667,
         "oy": -8.666667,
@@ -192526,7 +193696,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 59,
-        "r": 29,
+        "r": 34,
         "layer": "object23",
         "ox": 16,
         "oy": -8.666667,
@@ -192535,7 +193705,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1jix",
         "c": 8,
-        "r": 6,
+        "r": 11,
         "layer": "object23",
         "ox": 20,
         "oy": 10,
@@ -192544,7 +193714,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1odn",
         "c": 10,
-        "r": 6,
+        "r": 11,
         "layer": "object23",
         "ox": 20,
         "oy": 10,
@@ -192553,7 +193723,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 12,
-        "r": 6,
+        "r": 11,
         "layer": "object23",
         "ox": 10,
         "oy": 10,
@@ -192562,7 +193732,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1jix",
         "c": 57,
-        "r": 27,
+        "r": 32,
         "layer": "object23",
         "ox": 16.666667,
         "sortDepth": 0
@@ -192570,7 +193740,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1tds",
         "c": 59,
-        "r": 27,
+        "r": 32,
         "layer": "object23",
         "ox": 16,
         "sortDepth": 0
@@ -192578,7 +193748,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph143o",
         "c": 8,
-        "r": 8,
+        "r": 13,
         "layer": "object23",
         "ox": 20,
         "oy": 10,
@@ -192587,7 +193757,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph143o",
         "c": 57,
-        "r": 31,
+        "r": 36,
         "layer": "object23",
         "ox": 16.666667,
         "oy": 20
@@ -192595,7 +193765,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph19b4",
         "c": 10,
-        "r": 8,
+        "r": 13,
         "layer": "object23",
         "ox": 20,
         "oy": 10,
@@ -192604,7 +193774,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 12,
-        "r": 8,
+        "r": 13,
         "layer": "object23",
         "ox": 10,
         "oy": 10,
@@ -192613,7 +193783,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvph1e62",
         "c": 59,
-        "r": 31,
+        "r": 36,
         "layer": "object23",
         "ox": 16,
         "oy": 20
@@ -192621,7 +193791,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3nuyx",
         "c": 10,
-        "r": 9,
+        "r": 14,
         "layer": "object23",
         "ox": 8.666667000000018,
         "sortDepth": 0
@@ -192630,7 +193800,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3nuyx",
         "sortDepth": 0,
         "c": 21,
-        "r": 9,
+        "r": 14,
         "layer": "object24",
         "ox": 34.666667,
         "oy": 15.333333,
@@ -192640,7 +193810,7 @@ const BATTLE_MAPS = [
         "id": "tile_mvr3nuyx",
         "sortDepth": 0,
         "c": 36,
-        "r": 9,
+        "r": 14,
         "layer": "object24",
         "ox": 20,
         "rot": 3,
@@ -192649,7 +193819,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbn4vv",
         "c": 5,
-        "r": 6,
+        "r": 11,
         "layer": "object23",
         "ox": 11.333333,
         "oy": 31.333333
@@ -192657,7 +193827,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 10,
+        "r": 15,
         "layer": "object23",
         "ox": 29.333333,
         "oy": 10
@@ -192665,7 +193835,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 0,
-        "r": 9,
+        "r": 14,
         "layer": "object23",
         "ox": 29.333333,
         "oy": 6.666667
@@ -192673,7 +193843,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_life_ring_red",
         "c": 34,
-        "r": 22,
+        "r": 27,
         "layer": "object21",
         "ox": 30,
         "oy": 30
@@ -192681,7 +193851,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_life_ring_blue",
         "c": 31,
-        "r": 23,
+        "r": 28,
         "layer": "object21",
         "ox": 20,
         "oy": 10
@@ -192689,7 +193859,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvqyrysf",
         "c": 16,
-        "r": 27,
+        "r": 32,
         "layer": "object21",
         "ox": 30,
         "oy": 30
@@ -192697,7 +193867,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbolt4",
         "c": 18,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "ox": 6,
         "oy": 2
@@ -192705,7 +193875,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 14,
-        "r": 26,
+        "r": 31,
         "layer": "object9",
         "ox": 20,
         "oy": 10,
@@ -192718,7 +193888,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_street_claw_machine",
         "c": 36,
-        "r": 68,
+        "r": 73,
         "layer": "object9",
         "ox": 10,
         "sortDepth": 0
@@ -192726,7 +193896,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 23,
-        "r": 9,
+        "r": 14,
         "layer": "object23",
         "ox": 30,
         "oy": 15.333333
@@ -192734,14 +193904,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 34,
-        "r": 9,
+        "r": 14,
         "layer": "object23",
         "oy": 15.333333
       },
       {
         "id": "tile_mwdkcaac",
         "c": 26,
-        "r": 9,
+        "r": 14,
         "layer": "object23",
         "ox": 14,
         "oy": 15.333333
@@ -192749,7 +193919,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 29,
-        "r": 9,
+        "r": 14,
         "layer": "object23",
         "ox": 20.666667,
         "oy": 15.333333
@@ -192757,7 +193927,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 32,
-        "r": 9,
+        "r": 14,
         "layer": "object23",
         "ox": 12.666667,
         "oy": 15.333333
@@ -192766,7 +193936,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 36,
-        "r": 5,
+        "r": 10,
         "layer": "object23",
         "ox": 6,
         "oy": 7.33333300000001
@@ -192774,44 +193944,26 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
-        "c": 40,
-        "r": 0,
-        "layer": "object23",
-        "ox": 26.66666699999996,
-        "oy": 7.333332999999996
+        "c": 87,
+        "r": 8,
+        "layer": "object6",
+        "ox": 36.66666699999996,
+        "oy": 7.333332999999982
       },
       {
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
-        "c": 46,
-        "r": 0,
-        "layer": "object23",
-        "ox": 26.66666699999996,
-        "oy": 7.333332999999996
-      },
-      {
-        "id": "tile_poolcore_pillar",
-        "sortDepth": 4,
-        "c": 60,
-        "r": 0,
-        "layer": "object23",
-        "ox": 26.66666699999996,
-        "oy": 7.333332999999996
-      },
-      {
-        "id": "tile_poolcore_pillar",
-        "sortDepth": 4,
-        "c": 54,
-        "r": 0,
-        "layer": "object23",
-        "ox": 26.66666699999996,
-        "oy": 7.333332999999996
+        "c": 81,
+        "r": 8,
+        "layer": "object6",
+        "ox": 36.66666699999996,
+        "oy": 7.333332999999982
       },
       {
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 63,
-        "r": 0,
+        "r": 5,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 7.333332999999996
@@ -192819,7 +193971,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 2,
+        "r": 7,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192827,7 +193979,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 46,
+        "r": 51,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192835,7 +193987,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 42,
+        "r": 47,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192843,7 +193995,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 38,
+        "r": 43,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192851,7 +194003,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 34,
+        "r": 39,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192859,7 +194011,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 30,
+        "r": 35,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192867,7 +194019,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 26,
+        "r": 31,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192875,7 +194027,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 22,
+        "r": 27,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192883,7 +194035,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 18,
+        "r": 23,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192891,7 +194043,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 14,
+        "r": 19,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192899,7 +194051,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 10,
+        "r": 15,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004
@@ -192907,7 +194059,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 6,
+        "r": 11,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.666667000000004,
@@ -192916,7 +194068,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 4,
+        "r": 9,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192924,7 +194076,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 48,
+        "r": 53,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192932,7 +194084,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 50,
+        "r": 55,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192940,7 +194092,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 44,
+        "r": 49,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192948,7 +194100,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 40,
+        "r": 45,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192956,7 +194108,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 36,
+        "r": 41,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192964,7 +194116,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 32,
+        "r": 37,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192972,7 +194124,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 28,
+        "r": 33,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192980,7 +194132,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 24,
+        "r": 29,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192988,7 +194140,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 20,
+        "r": 25,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -192996,7 +194148,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 16,
+        "r": 21,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -193004,7 +194156,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 12,
+        "r": 17,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -193012,7 +194164,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 63,
-        "r": 8,
+        "r": 13,
         "layer": "object23",
         "ox": 26.66666699999996,
         "oy": 6.66666699999999
@@ -193020,7 +194172,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 21.333333
@@ -193028,7 +194180,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 21.333333
@@ -193036,7 +194188,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 21.333333
@@ -193044,7 +194196,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "ox": 44,
         "oy": 21.333333
@@ -193052,7 +194204,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "ox": 4,
         "oy": 21.333333
@@ -193060,7 +194212,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 21.333333
@@ -193068,7 +194220,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "oy": 21.33333300000004,
         "ox": 37.33333300000004
@@ -193076,7 +194228,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 2.666667
@@ -193084,7 +194236,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 2.666667
@@ -193092,7 +194244,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 2.666667
@@ -193100,7 +194252,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "ox": 42.666667,
         "oy": 2.666667
@@ -193108,7 +194260,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "ox": 4,
         "oy": 2.666667
@@ -193116,7 +194268,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 2.666667
@@ -193124,7 +194276,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "oy": 2.666667,
         "ox": 37.333333
@@ -193132,7 +194284,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 24.666667
@@ -193140,7 +194292,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 24.666667
@@ -193148,7 +194300,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 24.666667
@@ -193156,7 +194308,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "ox": 43.333333,
         "oy": 24.666667
@@ -193164,7 +194316,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "ox": 4,
         "oy": 24.666667
@@ -193172,7 +194324,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 24.666667
@@ -193180,7 +194332,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "oy": 24.666667,
         "ox": 37.333333
@@ -193188,7 +194340,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 6
@@ -193196,7 +194348,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 6
@@ -193204,7 +194356,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 6
@@ -193212,7 +194364,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "ox": 58,
         "oy": 6
@@ -193220,7 +194372,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "ox": 4,
         "oy": 6
@@ -193228,7 +194380,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 6
@@ -193236,7 +194388,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "oy": 6,
         "ox": 37.333333
@@ -193244,7 +194396,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 28
@@ -193252,7 +194404,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 28
@@ -193260,7 +194412,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 28
@@ -193268,7 +194420,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 52,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "ox": 4.666667,
         "oy": 28
@@ -193276,7 +194428,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 54,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "ox": 14,
         "oy": 28
@@ -193284,7 +194436,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 28
@@ -193292,7 +194444,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "oy": 28,
         "ox": 37.333333
@@ -193300,7 +194452,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 9.333333
@@ -193308,7 +194460,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 9.333333
@@ -193316,7 +194468,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 9.333333
@@ -193324,7 +194476,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "ox": 40.666667,
         "oy": 9.333333
@@ -193332,7 +194484,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "ox": 4,
         "oy": 9.333333
@@ -193340,7 +194492,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 9.333333
@@ -193348,7 +194500,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "oy": 9.333333,
         "ox": 37.333333
@@ -193356,7 +194508,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 31.333333
@@ -193364,7 +194516,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 31.333333
@@ -193372,7 +194524,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 31.333333
@@ -193380,7 +194532,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "ox": 40.666667,
         "oy": 31.333333
@@ -193388,7 +194540,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "ox": 4,
         "oy": 31.333333
@@ -193396,7 +194548,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 31.333333
@@ -193404,7 +194556,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "oy": 31.333333,
         "ox": 37.333333
@@ -193412,7 +194564,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 13.333333
@@ -193420,7 +194572,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 13.333333
@@ -193428,7 +194580,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 13.333333
@@ -193436,7 +194588,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "ox": 42,
         "oy": 13.333333
@@ -193444,7 +194596,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "ox": 4,
         "oy": 13.333333
@@ -193452,7 +194604,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 13.333333
@@ -193460,7 +194612,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "oy": 13.333333,
         "ox": 37.333333
@@ -193468,7 +194620,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 35.333333
@@ -193476,7 +194628,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "ox": 21.333333,
         "oy": 35.333333
@@ -193484,7 +194636,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 35.333333
@@ -193492,7 +194644,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 52,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "ox": 18,
         "oy": 35.333333
@@ -193500,7 +194652,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "ox": 4,
         "oy": 35.333333
@@ -193508,7 +194660,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 35.333333
@@ -193516,7 +194668,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "oy": 35.333333,
         "ox": 37.333333
@@ -193524,7 +194676,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 42,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "ox": 37.333333,
         "oy": 16.666667
@@ -193532,7 +194684,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "ox": 21.33333300000004,
         "oy": 16.666667000000018
@@ -193540,7 +194692,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 48,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "ox": 29.333333,
         "oy": 16.666667
@@ -193548,7 +194700,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 52,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "ox": 16.66666699999996,
         "oy": 16.666667000000018
@@ -193556,7 +194708,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "ox": 4,
         "oy": 16.666667
@@ -193564,7 +194716,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 16.666667
@@ -193572,7 +194724,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 58,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "oy": 16.666667,
         "ox": 37.333333
@@ -193580,7 +194732,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkb1l7",
         "c": 43,
-        "r": 9,
+        "r": 14,
         "layer": "object25",
         "ox": -2.666667,
         "oy": -1.333333
@@ -193588,7 +194740,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 45,
-        "r": 9,
+        "r": 14,
         "layer": "object25",
         "ox": 21.333333,
         "oy": -1.333333
@@ -193596,7 +194748,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 51,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "ox": 36.666667,
         "oy": 38.666667
@@ -193604,7 +194756,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 55,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "ox": 4,
         "oy": 38.666667
@@ -193612,7 +194764,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcaac",
         "c": 57,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "ox": 16.666667,
         "oy": 38.666667
@@ -193620,7 +194772,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 59,
-        "r": 9,
+        "r": 14,
         "layer": "object25",
         "oy": -1.333333,
         "ox": -2.666667
@@ -193628,7 +194780,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 43,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "oy": 14,
         "ox": -2.666667
@@ -193636,7 +194788,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 45,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "ox": 22,
         "oy": 14
@@ -193644,7 +194796,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 48,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "ox": 30,
         "oy": 14
@@ -193652,7 +194804,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 52,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "oy": 14,
         "ox": 3.333333
@@ -193660,7 +194812,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 55,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "oy": 14,
         "ox": 5.333333
@@ -193668,7 +194820,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdklejx",
         "c": 56,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "oy": 14,
         "ox": 28.666667
@@ -193676,7 +194828,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcymx",
         "c": 58,
-        "r": 38,
+        "r": 43,
         "layer": "object25",
         "ox": 22,
         "oy": 14,
@@ -193685,7 +194837,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mw4d9qnu",
         "c": 58,
-        "r": 35,
+        "r": 40,
         "layer": "object26",
         "ox": 20,
         "oy": 20
@@ -193693,7 +194845,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mw4d9qnu",
         "c": 54,
-        "r": 33,
+        "r": 38,
         "layer": "object26",
         "ox": 30,
         "oy": 20
@@ -193701,14 +194853,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mw4d9qnu",
         "c": 59,
-        "r": 25,
+        "r": 30,
         "layer": "object26",
         "ox": 30
       },
       {
         "id": "tile_mvqyrysf",
         "c": 58,
-        "r": 32,
+        "r": 37,
         "layer": "object26",
         "ox": 30,
         "oy": 30
@@ -193716,7 +194868,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvqyrysf",
         "c": 46,
-        "r": 15,
+        "r": 20,
         "layer": "object26",
         "oy": 10,
         "ox": 10.666666999999961
@@ -193724,7 +194876,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvqyrysf",
         "c": 44,
-        "r": 38,
+        "r": 43,
         "layer": "object26",
         "ox": 10,
         "fx": true
@@ -193732,14 +194884,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwbro91n",
         "c": 12,
-        "r": 5,
+        "r": 10,
         "layer": "object9",
         "sortDepth": 0
       },
       {
         "id": "tile_mwbro91n",
         "c": 59,
-        "r": 25,
+        "r": 30,
         "layer": "object9",
         "ox": 20,
         "oy": 30
@@ -193747,14 +194899,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_new_decor_fire_extinguisher",
         "c": 37,
-        "r": 61,
+        "r": 66,
         "layer": "object16",
         "oy": 10
       },
       {
         "id": "tile_eoc_hydrant_red",
         "c": 29,
-        "r": 47,
+        "r": 52,
         "layer": "object14",
         "ox": 20,
         "oy": 13.333333
@@ -193762,7 +194914,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mw49f97t",
         "c": 56,
-        "r": 66,
+        "r": 71,
         "layer": "object7",
         "ox": 10.666666999999961,
         "oy": 25.33333300000004
@@ -193770,7 +194922,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 38,
+        "r": 43,
         "layer": "object26",
         "rot": 3,
         "oy": 8,
@@ -193780,7 +194932,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 33,
+        "r": 38,
         "layer": "object26",
         "rot": 3,
         "oy": 13.333333,
@@ -193790,7 +194942,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 28,
+        "r": 33,
         "layer": "object26",
         "rot": 3,
         "oy": 18.666667,
@@ -193800,7 +194952,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 23,
+        "r": 28,
         "layer": "object26",
         "rot": 3,
         "oy": 23.333333,
@@ -193810,7 +194962,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 14,
+        "r": 19,
         "layer": "object26",
         "rot": 3,
         "ox": 17.333333,
@@ -193820,7 +194972,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 18,
+        "r": 23,
         "layer": "object26",
         "rot": 3,
         "oy": 28.666667,
@@ -193830,7 +194982,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 35,
+        "r": 40,
         "layer": "object26",
         "rot": 3,
         "oy": 31.333333,
@@ -193840,7 +194992,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 31,
+        "r": 36,
         "layer": "object26",
         "rot": 3,
         "oy": -4,
@@ -193850,7 +195002,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 26,
+        "r": 31,
         "layer": "object26",
         "rot": 3,
         "oy": 1.333333,
@@ -193860,7 +195012,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 21,
+        "r": 26,
         "layer": "object26",
         "rot": 3,
         "oy": 6,
@@ -193870,7 +195022,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 11,
+        "r": 16,
         "layer": "object26",
         "rot": 3,
         "oy": 16,
@@ -193880,7 +195032,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 9,
+        "r": 14,
         "layer": "object26",
         "rot": 3,
         "oy": -1.333333,
@@ -193890,7 +195042,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgchw5x",
         "c": 45,
-        "r": 16,
+        "r": 21,
         "layer": "object26",
         "rot": 3,
         "oy": 11.333333,
@@ -193900,7 +195052,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgdh193",
         "c": 34,
-        "r": 45,
+        "r": 50,
         "layer": "object14",
         "ox": 10,
         "oy": 36,
@@ -193909,663 +195061,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 43,
-        "r": 38,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 14,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 18,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 22,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 26,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 30,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 34,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 38,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 14,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 18,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 22,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 26,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 30,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 34,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 38,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 38,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 38,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 38,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 38,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 38,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 38,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 38,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 11,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 3.333332999999982
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 11,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 3.333332999999982
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 50,
-        "r": 11,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.333332999999982
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 14,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 14,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 14,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 14,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 14,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 14,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 14,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 14,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 18,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 18,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 18,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 18,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 18,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 18,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 18,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 18,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 22,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 22,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 22,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 22,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 22,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 22,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 22,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 22,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 26,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 25,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 3.3333330000000387
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 25,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 3.3333330000000387
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 26,
-        "layer": "object27",
-        "ox": 34,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 26,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 26,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 26,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 26,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 30,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 30,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 30,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 30,
-        "layer": "object27",
-        "ox": 34,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 30,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 30,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 30,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 30,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 34,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 34,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 34,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 34,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 34,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 34,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 34,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 34,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 36,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 9,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 14
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 43,
-        "r": 12,
+        "r": 43,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194576,12 +195072,12 @@ const BATTLE_MAPS = [
         "r": 16,
         "layer": "object27",
         "ox": 4,
-        "oy": 33.333333
+        "oy": 3.333333
       },
       {
         "id": "tile_mwggq9a4",
         "c": 43,
-        "r": 20,
+        "r": 19,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194589,7 +195085,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 43,
-        "r": 24,
+        "r": 23,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194597,7 +195093,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 43,
-        "r": 28,
+        "r": 27,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194605,7 +195101,23 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 43,
-        "r": 32,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 39,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194613,23 +195125,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 45,
-        "r": 36,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 9,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 14
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 45,
-        "r": 12,
+        "r": 43,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194640,12 +195136,12 @@ const BATTLE_MAPS = [
         "r": 16,
         "layer": "object27",
         "ox": 4,
-        "oy": 33.333333
+        "oy": 3.333333
       },
       {
         "id": "tile_mwggq9a4",
         "c": 45,
-        "r": 20,
+        "r": 19,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194653,7 +195149,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 45,
-        "r": 24,
+        "r": 23,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194661,7 +195157,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 45,
-        "r": 28,
+        "r": 27,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194669,7 +195165,23 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 45,
-        "r": 32,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 39,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194677,7 +195189,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 46,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194685,7 +195197,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194693,7 +195205,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194701,7 +195213,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 57,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194709,7 +195221,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194717,7 +195229,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 53,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194725,7 +195237,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 51,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194733,7 +195245,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 49,
-        "r": 36,
+        "r": 43,
         "layer": "object27",
         "ox": 44,
         "oy": 33.333333
@@ -194741,7 +195253,647 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 46,
-        "r": 9,
+        "r": 16,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 16,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 50,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 19,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 19,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 19,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 23,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 23,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 23,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 27,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 27,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 27,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 31,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 30,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.3333330000000387
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 30,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.3333330000000387
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 31,
+        "layer": "object27",
+        "ox": 34,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 31,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 35,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 35,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 35,
+        "layer": "object27",
+        "ox": 34,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 35,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 39,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 39,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 39,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 33,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 33,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 41,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 41,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 41,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 14,
         "layer": "object27",
         "ox": 14,
         "oy": 14
@@ -194749,7 +195901,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 9,
+        "r": 14,
         "layer": "object27",
         "ox": 14,
         "oy": 14
@@ -194757,7 +195909,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 9,
+        "r": 14,
         "layer": "object27",
         "ox": 4,
         "oy": 14
@@ -194765,7 +195917,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 57,
-        "r": 9,
+        "r": 14,
         "layer": "object27",
         "ox": 4,
         "oy": 14
@@ -194773,7 +195925,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 9,
+        "r": 14,
         "layer": "object27",
         "ox": 4,
         "oy": 14
@@ -194781,7 +195933,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 53,
-        "r": 9,
+        "r": 14,
         "layer": "object27",
         "ox": 4,
         "oy": 14
@@ -194789,7 +195941,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 51,
-        "r": 9,
+        "r": 14,
         "layer": "object27",
         "ox": 4,
         "oy": 14
@@ -194797,7 +195949,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 50,
-        "r": 9,
+        "r": 14,
         "layer": "object27",
         "ox": 5.333333000000039,
         "oy": 13.333332999999982
@@ -194805,7 +195957,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 46,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194813,7 +195965,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194821,7 +195973,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194829,7 +195981,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 57,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194837,7 +195989,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194845,7 +195997,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 53,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194853,7 +196005,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 51,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194861,7 +196013,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 50,
-        "r": 12,
+        "r": 17,
         "layer": "object27",
         "ox": 4,
         "oy": 33.33333300000004
@@ -194869,7 +196021,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 46,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194877,7 +196029,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194885,7 +196037,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194893,7 +196045,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 57,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194901,7 +196053,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194909,7 +196061,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 53,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194917,7 +196069,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 51,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -194925,7 +196077,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 49,
-        "r": 16,
+        "r": 21,
         "layer": "object27",
         "ox": 44,
         "oy": 33.333333
@@ -194933,7 +196085,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 46,
-        "r": 20,
+        "r": 25,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194941,7 +196093,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 20,
+        "r": 25,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -194949,87 +196101,87 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 20,
+        "r": 25,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 20,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 55,
-        "r": 20,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 53,
-        "r": 20,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 51,
-        "r": 20,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 49,
-        "r": 20,
-        "layer": "object27",
-        "ox": 44,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 46,
-        "r": 24,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 24,
-        "layer": "object27",
-        "ox": 14,
-        "oy": 33.33333300000004
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 59,
-        "r": 24,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.333333
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 57,
-        "r": 24,
-        "layer": "object27",
-        "ox": 4,
-        "oy": 33.33333300000004
       },
       {
         "id": "tile_mwggq9a4",
         "c": 57,
         "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 25,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 29,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 29,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 30,
         "layer": "object27",
         "ox": 14,
         "oy": 3.3333330000000387
@@ -195037,7 +196189,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 24,
+        "r": 29,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195045,7 +196197,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 53,
-        "r": 24,
+        "r": 29,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195053,7 +196205,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 51,
-        "r": 24,
+        "r": 29,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195061,7 +196213,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 49,
-        "r": 24,
+        "r": 29,
         "layer": "object27",
         "ox": 44,
         "oy": 33.333333
@@ -195069,7 +196221,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 46,
-        "r": 28,
+        "r": 33,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -195077,7 +196229,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 57,
-        "r": 30,
+        "r": 35,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -195085,7 +196237,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 28,
+        "r": 33,
         "layer": "object27",
         "ox": 34,
         "oy": 33.33333300000004
@@ -195093,7 +196245,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 28,
+        "r": 33,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195101,7 +196253,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 53,
-        "r": 28,
+        "r": 33,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195109,7 +196261,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 51,
-        "r": 28,
+        "r": 33,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195117,7 +196269,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 49,
-        "r": 28,
+        "r": 33,
         "layer": "object27",
         "ox": 44,
         "oy": 33.333333
@@ -195125,7 +196277,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 46,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -195133,7 +196285,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 14,
         "oy": 33.33333300000004
@@ -195141,7 +196293,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 59,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195149,7 +196301,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 57,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195157,7 +196309,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 55,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195165,7 +196317,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 53,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195173,7 +196325,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 51,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 4,
         "oy": 33.333333
@@ -195181,7 +196333,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 49,
-        "r": 32,
+        "r": 37,
         "layer": "object27",
         "ox": 44,
         "oy": 33.333333
@@ -195189,7 +196341,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 9,
+        "r": 14,
         "layer": "object28",
         "ox": 14.666666999999961,
         "oy": 14.666667000000018
@@ -195197,7 +196349,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 9,
+        "r": 14,
         "layer": "object28",
         "ox": 46,
         "oy": 14.666667
@@ -195205,7 +196357,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 9,
+        "r": 14,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195213,7 +196365,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 9,
+        "r": 14,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195221,7 +196373,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 9,
+        "r": 14,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195229,7 +196381,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 9,
+        "r": 14,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195237,7 +196389,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 38,
+        "r": 43,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 33.333333
@@ -195245,7 +196397,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 54,
-        "r": 41,
+        "r": 46,
         "layer": "object28",
         "ox": -154,
         "oy": -86.666667
@@ -195253,7 +196405,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 38,
+        "r": 43,
         "layer": "object28",
         "ox": 14,
         "oy": 33.333333
@@ -195261,7 +196413,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 38,
+        "r": 43,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 33.333333
@@ -195269,7 +196421,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 38,
+        "r": 43,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 33.333333
@@ -195277,7 +196429,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 38,
+        "r": 43,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 33.333333
@@ -195285,7 +196437,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 37,
+        "r": 42,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195293,15 +196445,63 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 54,
+        "r": 45,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
         "r": 40,
         "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 43,
+        "layer": "object28",
         "ox": -154,
         "oy": -105.333333
       },
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 37,
+        "r": 40,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195309,7 +196509,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 37,
+        "r": 40,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195317,7 +196517,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 37,
+        "r": 40,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195325,7 +196525,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 37,
+        "r": 40,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195333,23 +196533,23 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 35,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 54,
         "r": 38,
         "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 41,
+        "layer": "object28",
         "ox": -154,
         "oy": -105.333333
       },
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 35,
+        "r": 38,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195357,7 +196557,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 35,
+        "r": 38,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195365,7 +196565,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 35,
+        "r": 38,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195373,7 +196573,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 35,
+        "r": 38,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195381,63 +196581,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 33,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 54,
         "r": 36,
         "layer": "object28",
-        "ox": -154,
-        "oy": -105.333333
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 59,
-        "r": 33,
-        "layer": "object28",
-        "ox": 14,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 57,
-        "r": 33,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 55,
-        "r": 33,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 53,
-        "r": 33,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 51,
-        "r": 31,
-        "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
       },
       {
         "id": "tile_poolwater_dark",
         "c": 54,
-        "r": 34,
+        "r": 39,
         "layer": "object28",
         "ox": -154,
         "oy": -105.333333
@@ -195445,7 +196597,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 31,
+        "r": 36,
         "layer": "object28",
         "ox": 14,
         "oy": 34.66666699999996
@@ -195453,7 +196605,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 31,
+        "r": 36,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 34.666667
@@ -195461,7 +196613,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 31,
+        "r": 36,
         "layer": "object28",
         "ox": 20,
         "oy": 14.666667
@@ -195469,7 +196621,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 31,
+        "r": 36,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195477,7 +196629,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 31,
+        "r": 36,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195485,7 +196637,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 29,
+        "r": 34,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195493,15 +196645,55 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 54,
+        "r": 37,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 34,
+        "layer": "object28",
+        "ox": 20,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 34,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 34,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
         "r": 32,
         "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 35,
+        "layer": "object28",
         "ox": -154,
         "oy": -105.333333
       },
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 29,
+        "r": 32,
         "layer": "object28",
         "ox": 20,
         "oy": 14.666667
@@ -195509,7 +196701,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 29,
+        "r": 32,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195517,7 +196709,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 29,
+        "r": 32,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195525,55 +196717,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 27,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 54,
         "r": 30,
         "layer": "object28",
-        "ox": -154,
-        "oy": -105.333333
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 55,
-        "r": 27,
-        "layer": "object28",
-        "ox": 20,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 55,
-        "r": 27,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 53,
-        "r": 27,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 51,
-        "r": 25,
-        "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
       },
       {
         "id": "tile_poolwater_dark",
         "c": 54,
-        "r": 28,
+        "r": 33,
         "layer": "object28",
         "ox": -154,
         "oy": -105.333333
@@ -195581,7 +196733,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 25,
+        "r": 30,
         "layer": "object28",
         "ox": 14,
         "oy": 2.666667
@@ -195589,7 +196741,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 25,
+        "r": 30,
         "layer": "object28",
         "ox": 14.666666999999961,
         "oy": 4.666666999999961
@@ -195597,7 +196749,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 25,
+        "r": 30,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195605,7 +196757,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 25,
+        "r": 30,
         "layer": "object28",
         "ox": 18.666667,
         "oy": 14.666667
@@ -195613,7 +196765,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 25,
+        "r": 30,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195621,7 +196773,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 23,
+        "r": 28,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195629,15 +196781,63 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 54,
+        "r": 31,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
         "r": 26,
         "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 29,
+        "layer": "object28",
         "ox": -154,
         "oy": -105.333333
       },
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 23,
+        "r": 26,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195645,7 +196845,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 23,
+        "r": 26,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195653,7 +196853,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 23,
+        "r": 26,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195661,7 +196861,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 23,
+        "r": 26,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195669,23 +196869,23 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 21,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 54,
         "r": 24,
         "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 27,
+        "layer": "object28",
         "ox": -154,
         "oy": -105.333333
       },
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 21,
+        "r": 24,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195693,7 +196893,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 21,
+        "r": 24,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195701,7 +196901,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 21,
+        "r": 24,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195709,7 +196909,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 21,
+        "r": 24,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195717,23 +196917,23 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 19,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 54,
         "r": 22,
         "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 25,
+        "layer": "object28",
         "ox": -154,
         "oy": -105.333333
       },
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 19,
+        "r": 22,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195741,7 +196941,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 19,
+        "r": 22,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195749,7 +196949,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 19,
+        "r": 22,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195757,7 +196957,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 19,
+        "r": 22,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195765,63 +196965,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 17,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 54,
         "r": 20,
         "layer": "object28",
-        "ox": -154,
-        "oy": -105.333333
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 59,
-        "r": 17,
-        "layer": "object28",
-        "ox": 14,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 57,
-        "r": 17,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 55,
-        "r": 17,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 53,
-        "r": 17,
-        "layer": "object28",
-        "ox": 14.666667,
-        "oy": 14.666667
-      },
-      {
-        "id": "tile_poolwater_dark",
-        "c": 51,
-        "r": 15,
-        "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
       },
       {
         "id": "tile_poolwater_dark",
         "c": 54,
-        "r": 18,
+        "r": 23,
         "layer": "object28",
         "ox": -154,
         "oy": -105.333333
@@ -195829,7 +196981,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 15,
+        "r": 20,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195837,7 +196989,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 15,
+        "r": 20,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195845,7 +196997,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 15,
+        "r": 20,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195853,7 +197005,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 15,
+        "r": 20,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195861,7 +197013,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 13,
+        "r": 18,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195869,7 +197021,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 13,
+        "r": 18,
         "layer": "object28",
         "ox": 46,
         "oy": 14.666667
@@ -195877,7 +197029,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 13,
+        "r": 18,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195885,7 +197037,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 13,
+        "r": 18,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195893,7 +197045,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 13,
+        "r": 18,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195901,7 +197053,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 13,
+        "r": 18,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195909,7 +197061,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 11,
+        "r": 16,
         "layer": "object28",
         "ox": 14.666666999999961,
         "oy": 14.666667000000018
@@ -195917,7 +197069,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 11,
+        "r": 16,
         "layer": "object28",
         "ox": 46,
         "oy": 14.666667
@@ -195925,7 +197077,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 11,
+        "r": 16,
         "layer": "object28",
         "ox": 14,
         "oy": 14.666667
@@ -195933,7 +197085,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 11,
+        "r": 16,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195941,7 +197093,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 11,
+        "r": 16,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195949,7 +197101,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 11,
+        "r": 16,
         "layer": "object28",
         "ox": 14.666667,
         "oy": 14.666667
@@ -195957,7 +197109,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 24,
-        "r": 9,
+        "r": 14,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -195965,7 +197117,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 24,
-        "r": 11,
+        "r": 16,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -195973,7 +197125,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 26,
-        "r": 9,
+        "r": 14,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -195981,7 +197133,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 26,
-        "r": 11,
+        "r": 16,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -195989,7 +197141,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 28,
-        "r": 9,
+        "r": 14,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -195997,7 +197149,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 28,
-        "r": 11,
+        "r": 16,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -196005,7 +197157,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 30,
-        "r": 9,
+        "r": 14,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -196013,7 +197165,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 30,
-        "r": 11,
+        "r": 16,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -196021,7 +197173,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 32,
-        "r": 9,
+        "r": 14,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -196029,7 +197181,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 32,
-        "r": 11,
+        "r": 16,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -196037,7 +197189,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 34,
-        "r": 9,
+        "r": 14,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -196045,7 +197197,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 34,
-        "r": 11,
+        "r": 16,
         "layer": "object8",
         "oy": 30,
         "ox": -2
@@ -196053,7 +197205,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 34,
-        "r": 9,
+        "r": 14,
         "layer": "object8",
         "ox": 18,
         "oy": 30
@@ -196061,7 +197213,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 34,
-        "r": 11,
+        "r": 16,
         "layer": "object8",
         "ox": 18,
         "oy": 30
@@ -196069,14 +197221,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 7,
-        "r": 7,
+        "r": 12,
         "layer": "object30",
         "ox": 21.333333
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 9,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 9.333333,
         "oy": 20
@@ -196084,7 +197236,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 9,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 9.333333,
         "oy": 20
@@ -196092,7 +197244,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 9,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 9.333333,
         "oy": 20
@@ -196100,14 +197252,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 7,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 21.333333
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 7,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 21.333332999999982,
         "oy": 20
@@ -196115,7 +197267,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 7,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 21.333332999999982,
         "oy": 20
@@ -196123,35 +197275,35 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 7,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 21.333333
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 7,
-        "r": 8,
+        "r": 13,
         "layer": "object30",
         "ox": 21.333333
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 7,
-        "r": 8,
+        "r": 13,
         "layer": "object30",
         "ox": 21.333332999999982
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 6,
-        "r": 7,
+        "r": 12,
         "layer": "object30",
         "ox": 31.333332999999982
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 8,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 19.333333,
         "oy": 20
@@ -196159,7 +197311,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 8,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 19.333333,
         "oy": 20
@@ -196167,7 +197319,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 8,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 19.333333,
         "oy": 20
@@ -196175,14 +197327,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 6,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 31.333332999999982
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 6,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 31.333332999999982,
         "oy": 20
@@ -196190,7 +197342,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 6,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 31.333332999999982,
         "oy": 20
@@ -196198,35 +197350,35 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwgn2tt1",
         "c": 6,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 31.333332999999982
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 6,
-        "r": 8,
+        "r": 13,
         "layer": "object30",
         "ox": 31.333332999999982
       },
       {
         "id": "tile_mwgn2tt1",
         "c": 6,
-        "r": 8,
+        "r": 13,
         "layer": "object30",
         "ox": 31.333332999999982
       },
       {
         "id": "tile_mwggq9a4",
         "c": 4,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 32
       },
       {
         "id": "tile_mwggq9a4",
         "c": 10,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 8.666667,
         "oy": -3.333333
@@ -196234,7 +197386,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 10,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 8.666667,
         "oy": 9.333333
@@ -196242,7 +197394,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 14,
-        "r": 6,
+        "r": 11,
         "layer": "object30",
         "ox": 8.666667,
         "oy": 40.666667
@@ -196250,7 +197402,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 17,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 38.666667,
         "oy": 12
@@ -196258,7 +197410,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 18,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 8.666666999999961,
         "oy": 0.6666670000000181
@@ -196266,7 +197418,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 14,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 8.666667,
         "oy": 40.666667
@@ -196274,7 +197426,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 14,
-        "r": 8,
+        "r": 13,
         "layer": "object30",
         "ox": 8.666667,
         "oy": 40.666667
@@ -196282,7 +197434,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 16,
-        "r": 7,
+        "r": 12,
         "layer": "object30",
         "ox": 8.666666999999961,
         "oy": 0.6666670000000181
@@ -196290,7 +197442,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 16,
-        "r": 7,
+        "r": 12,
         "layer": "object30",
         "ox": 26,
         "oy": 0.666667
@@ -196298,7 +197450,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 19,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 38.666667,
         "oy": 12
@@ -196306,7 +197458,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 20,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 8.666666999999961,
         "oy": 0.6666670000000181
@@ -196314,7 +197466,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 16,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 8.666666999999961,
         "oy": 0.6666670000000181
@@ -196322,7 +197474,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 16,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 8.666666999999961,
         "oy": 0.6666670000000181
@@ -196330,7 +197482,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 16,
-        "r": 9,
+        "r": 14,
         "layer": "object30",
         "ox": 26,
         "oy": 0.666667
@@ -196338,7 +197490,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 12,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 8.666667000000018,
         "oy": 36.66666700000002
@@ -196346,7 +197498,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 12,
-        "r": 10,
+        "r": 15,
         "layer": "object30",
         "ox": 8.666667,
         "oy": 9.333333
@@ -196354,39 +197506,30 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 2,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 32
       },
       {
         "id": "tile_mwggq9a4",
         "c": 2,
-        "r": 11,
+        "r": 16,
         "layer": "object30",
         "ox": 10.666667
       },
       {
         "id": "tile_mwgnngo0",
-        "c": 42,
-        "r": -1,
-        "layer": "ground4",
-        "oy": 20,
-        "ox": 6.666666999999961,
-        "sortDepth": 5
-      },
-      {
-        "id": "tile_mwgnngo0",
-        "c": 56,
-        "r": -1,
-        "layer": "ground4",
-        "oy": 20,
-        "ox": 6.666667,
-        "sortDepth": 5
+        "c": 83,
+        "r": 7,
+        "layer": "object6",
+        "ox": 16.666667,
+        "sortDepth": 3.25,
+        "oy": -9.333333
       },
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 60,
+        "r": 65,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 11.333333
@@ -196394,7 +197537,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 67,
+        "r": 72,
         "layer": "object32",
         "ox": 25.33333300000004,
         "oy": 29.33333300000004
@@ -196402,7 +197545,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 66,
+        "r": 71,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196410,7 +197553,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 64,
+        "r": 69,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196418,7 +197561,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 49,
-        "r": 62,
+        "r": 67,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196426,7 +197569,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 60,
+        "r": 65,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 11.333333
@@ -196434,7 +197577,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 67,
+        "r": 72,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 29.333333
@@ -196442,7 +197585,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 66,
+        "r": 71,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196450,7 +197593,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 64,
+        "r": 69,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196458,7 +197601,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 51,
-        "r": 62,
+        "r": 67,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196466,7 +197609,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 60,
+        "r": 65,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 11.333333
@@ -196474,7 +197617,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 67,
+        "r": 72,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 29.333333
@@ -196482,7 +197625,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 66,
+        "r": 71,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196490,7 +197633,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 64,
+        "r": 69,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196498,7 +197641,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 53,
-        "r": 62,
+        "r": 67,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196506,7 +197649,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 60,
+        "r": 65,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 11.333333
@@ -196514,7 +197657,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 54,
-        "r": 66,
+        "r": 71,
         "layer": "object32",
         "ox": 8,
         "oy": 10
@@ -196522,7 +197665,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 54,
-        "r": 64,
+        "r": 69,
         "layer": "object32",
         "ox": 8,
         "oy": 10
@@ -196530,7 +197673,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 55,
-        "r": 62,
+        "r": 67,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 10
@@ -196538,7 +197681,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 60,
+        "r": 65,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 11.333333
@@ -196546,7 +197689,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 56,
-        "r": 63,
+        "r": 68,
         "layer": "object32",
         "ox": 5.333333000000039,
         "oy": 12
@@ -196554,7 +197697,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 57,
-        "r": 62,
+        "r": 67,
         "layer": "object32",
         "ox": 25.333333,
         "oy": 11.333333
@@ -196562,7 +197705,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 60,
+        "r": 65,
         "layer": "object32",
         "ox": 5.333333,
         "oy": 11.333333
@@ -196570,7 +197713,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_dark",
         "c": 59,
-        "r": 62,
+        "r": 67,
         "layer": "object32",
         "ox": 5.333333,
         "oy": 11.333333
@@ -196578,7 +197721,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 60,
-        "r": 64,
+        "r": 69,
         "layer": "object32",
         "ox": 4.666667,
         "oy": 10
@@ -196586,7 +197729,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 60,
-        "r": 66,
+        "r": 71,
         "layer": "object32",
         "ox": 4.666667,
         "oy": 10
@@ -196594,7 +197737,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 60,
-        "r": 67,
+        "r": 72,
         "layer": "object32",
         "ox": 4.666667,
         "oy": 10
@@ -196602,14 +197745,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 60,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961
       },
       {
         "id": "tile_poolwater_s_dark",
         "c": 60,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961,
         "oy": 30
@@ -196617,14 +197760,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 57,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961
       },
       {
         "id": "tile_poolwater_s_dark",
         "c": 57,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961,
         "oy": 30
@@ -196632,14 +197775,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 59,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961
       },
       {
         "id": "tile_poolwater_s_dark",
         "c": 59,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961,
         "oy": 30
@@ -196647,14 +197790,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 56,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961
       },
       {
         "id": "tile_poolwater_s_dark",
         "c": 56,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961,
         "oy": 30
@@ -196662,14 +197805,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 58,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961
       },
       {
         "id": "tile_poolwater_s_dark",
         "c": 58,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961,
         "oy": 30
@@ -196677,14 +197820,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 55,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961
       },
       {
         "id": "tile_poolwater_s_dark",
         "c": 55,
-        "r": 68,
+        "r": 73,
         "layer": "object32",
         "ox": 4.666666999999961,
         "oy": 30
@@ -196692,7 +197835,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_s_dark",
         "c": 60,
-        "r": 65,
+        "r": 70,
         "layer": "object32",
         "ox": 4.666667,
         "oy": 10
@@ -196700,7 +197843,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_deep_dark",
         "c": 47,
-        "r": 60,
+        "r": 65,
         "layer": "object32",
         "ox": 25.33333300000004,
         "oy": 10.666666999999961
@@ -196708,7 +197851,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_deep_dark",
         "c": 47,
-        "r": 67,
+        "r": 72,
         "layer": "object32",
         "ox": 25.33333300000004,
         "oy": 30.66666699999996
@@ -196716,7 +197859,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_deep_dark",
         "c": 47,
-        "r": 66,
+        "r": 71,
         "layer": "object32",
         "ox": 25.33333300000004,
         "oy": 10.666666999999961
@@ -196724,7 +197867,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_deep_dark",
         "c": 47,
-        "r": 64,
+        "r": 69,
         "layer": "object32",
         "ox": 25.33333300000004,
         "oy": 10.666666999999961
@@ -196732,7 +197875,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolwater_deep_dark",
         "c": 47,
-        "r": 62,
+        "r": 67,
         "layer": "object32",
         "ox": 25.33333300000004,
         "oy": 10.666666999999961
@@ -196740,7 +197883,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 46,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "ox": 20,
         "oy": 20
@@ -196748,14 +197891,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvzbmx47",
         "c": 43,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 30
       },
       {
         "id": "tile_mvzbna04",
         "c": 60,
-        "r": 42,
+        "r": 47,
         "layer": "object31",
         "oy": 30,
         "ox": 21.33333300000004
@@ -196763,49 +197906,49 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 48,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 6
       },
       {
         "id": "tile_mvocpp0c",
         "c": 50,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 6
       },
       {
         "id": "tile_mvocpp0c",
         "c": 56,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 6
       },
       {
         "id": "tile_mvocpp0c",
         "c": 54,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 6
       },
       {
         "id": "tile_mvodgug9",
         "c": 52,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 6
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 57,
-        "r": 48,
+        "r": 53,
         "layer": "object12",
         "oy": 15.333333000000039
       },
       {
         "id": "tile_mvzbna04",
         "c": 57,
-        "r": 46,
+        "r": 51,
         "layer": "object31",
         "oy": 20,
         "ox": 1.333333
@@ -196813,20 +197956,20 @@ const BATTLE_MAPS = [
       {
         "id": "tile_hq_potted_plant",
         "c": 59,
-        "r": 63,
+        "r": 68,
         "layer": "object34"
       },
       {
         "id": "tile_mwfznsie",
         "c": 35,
-        "r": 6,
+        "r": 11,
         "layer": "object34",
         "oy": 30
       },
       {
         "id": "tile_mwfznsia",
         "c": 31,
-        "r": 72,
+        "r": 77,
         "layer": "object34",
         "ox": 30,
         "oy": 20
@@ -196834,14 +197977,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwfznsia",
         "c": 30,
-        "r": 40,
+        "r": 45,
         "layer": "object34",
         "oy": 20
       },
       {
         "id": "tile_mwdka8vr",
         "c": 61,
-        "r": 25,
+        "r": 30,
         "layer": "object34",
         "ox": 30,
         "oy": 30
@@ -196849,7 +197992,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 61,
-        "r": 27,
+        "r": 32,
         "layer": "object34",
         "ox": 20,
         "oy": 20
@@ -196857,7 +198000,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwfznsic",
         "c": 61,
-        "r": 26,
+        "r": 31,
         "layer": "object34",
         "ox": 10,
         "oy": 20,
@@ -196866,21 +198009,22 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvquvyy8",
         "c": 5,
-        "r": 8,
+        "r": 13,
         "layer": "object34",
         "oy": 30
       },
       {
         "id": "tile_mw49f97t",
-        "c": 54,
-        "r": 3,
+        "c": 57,
+        "r": 7,
         "layer": "object34",
-        "oy": 10
+        "oy": 30,
+        "ox": 10
       },
       {
         "id": "tile_mw49f97t",
         "c": 51,
-        "r": 56,
+        "r": 61,
         "layer": "object34",
         "ox": 30,
         "oy": 20
@@ -196888,7 +198032,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_ore_small",
         "c": 18,
-        "r": 62,
+        "r": 67,
         "layer": "object9",
         "ox": 30,
         "oy": 10
@@ -196896,13 +198040,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_ore_large",
         "c": 39,
-        "r": 57,
+        "r": 62,
         "layer": "object9"
       },
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 37,
-        "r": 30,
+        "r": 35,
         "layer": "object34",
         "ox": 20,
         "oy": 10,
@@ -196911,7 +198055,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 39,
-        "r": 27,
+        "r": 32,
         "layer": "object34",
         "ox": 2.666667,
         "oy": 10,
@@ -196920,7 +198064,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 37,
-        "r": 24,
+        "r": 29,
         "layer": "object34",
         "ox": 20,
         "oy": 30,
@@ -196929,7 +198073,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 39,
-        "r": 20,
+        "r": 25,
         "layer": "object34",
         "ox": 2.666667,
         "sortDepth": 1.75
@@ -196937,7 +198081,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 37,
-        "r": 14,
+        "r": 19,
         "layer": "object34",
         "ox": 20,
         "oy": 10,
@@ -196946,7 +198090,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 38,
-        "r": 17,
+        "r": 22,
         "layer": "object34",
         "ox": 30,
         "oy": 30,
@@ -196955,7 +198099,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 37,
-        "r": 30,
+        "r": 35,
         "layer": "object34",
         "ox": 20,
         "oy": 10,
@@ -196964,7 +198108,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 39,
-        "r": 27,
+        "r": 32,
         "layer": "object34",
         "ox": 2.666667,
         "oy": 10,
@@ -196973,7 +198117,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 37,
-        "r": 24,
+        "r": 29,
         "layer": "object34",
         "ox": 20,
         "oy": 30,
@@ -196982,7 +198126,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 39,
-        "r": 20,
+        "r": 25,
         "layer": "object34",
         "ox": 2.666667,
         "sortDepth": 1.75
@@ -196990,7 +198134,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 37,
-        "r": 14,
+        "r": 19,
         "layer": "object34",
         "ox": 20,
         "oy": 10,
@@ -196999,7 +198143,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_wirefence_h",
         "c": 38,
-        "r": 17,
+        "r": 22,
         "layer": "object34",
         "ox": 30,
         "oy": 30,
@@ -197008,7 +198152,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_ore_rare",
         "c": 6,
-        "r": 7,
+        "r": 12,
         "layer": "object34",
         "ox": 30,
         "oy": 10,
@@ -197017,14 +198161,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_obstacle_ore_small",
         "c": 6,
-        "r": 27,
+        "r": 32,
         "layer": "object34",
         "oy": 10
       },
       {
         "id": "tile_interactive_pickup_almond_water",
         "c": 40,
-        "r": 75,
+        "r": 80,
         "layer": "object9",
         "ox": 10,
         "oy": 10
@@ -197032,14 +198176,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_pickup_almond_water",
         "c": 12,
-        "r": 49,
+        "r": 54,
         "layer": "object9",
         "ox": 20
       },
       {
         "id": "tile_interactive_pickup_adrenaline",
         "c": 24,
-        "r": 41,
+        "r": 46,
         "layer": "object9",
         "ox": 20,
         "oy": 20
@@ -197047,14 +198191,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_pickup_battery",
         "c": 8,
-        "r": 34,
+        "r": 39,
         "layer": "object9",
         "oy": 20
       },
       {
         "id": "tile_interactive_pickup_battery",
         "c": 36,
-        "r": 50,
+        "r": 55,
         "layer": "object9",
         "ox": 30,
         "oy": 30
@@ -197062,7 +198206,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_ammo_crate",
         "c": 40,
-        "r": 48,
+        "r": 53,
         "layer": "object9",
         "ox": 16,
         "sortDepth": 0,
@@ -197076,7 +198220,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 57,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "lockerLoot": {
           "kind": "item",
@@ -197089,7 +198233,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvymwgxl",
         "c": 61,
-        "r": 56,
+        "r": 61,
         "layer": "object9",
         "ox": 20,
         "oy": 20,
@@ -197102,7 +198246,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 61,
-        "r": 30,
+        "r": 35,
         "layer": "object34",
         "ox": 10,
         "oy": 20
@@ -197110,7 +198254,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdka8vr",
         "c": 37,
-        "r": 34,
+        "r": 39,
         "layer": "object34",
         "oy": 18,
         "ox": 8.666667
@@ -197118,14 +198262,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_hq_potted_plant",
         "c": 61,
-        "r": 28,
+        "r": 33,
         "layer": "object34",
         "oy": 30
       },
       {
         "id": "tile_hq_potted_plant",
         "c": 37,
-        "r": 34,
+        "r": 39,
         "layer": "object34",
         "ox": 30,
         "oy": 8
@@ -197133,7 +198277,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_forest_layer_125",
         "c": 61,
-        "r": 28,
+        "r": 33,
         "layer": "object34",
         "ox": 10,
         "oy": 10
@@ -197141,6 +198285,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 2,
+        "r": 58,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 2,
         "r": 53,
         "layer": "ground5",
         "oy": 30,
@@ -197149,7 +198301,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 2,
-        "r": 48,
+        "r": 54,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197157,15 +198309,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 2,
-        "r": 49,
+        "r": 56,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 2,
-        "r": 51,
+        "c": 4,
+        "r": 58,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197181,7 +198333,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 4,
-        "r": 48,
+        "r": 54,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197189,15 +198341,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 4,
-        "r": 49,
+        "r": 56,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 4,
-        "r": 51,
+        "c": 6,
+        "r": 58,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197213,7 +198365,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 6,
-        "r": 48,
+        "r": 54,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197221,15 +198373,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 6,
-        "r": 49,
+        "r": 56,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 6,
-        "r": 51,
+        "c": 8,
+        "r": 58,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197245,7 +198397,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 8,
-        "r": 48,
+        "r": 54,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197253,15 +198405,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 8,
-        "r": 49,
+        "r": 56,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 8,
-        "r": 51,
+        "c": 10,
+        "r": 58,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197277,7 +198429,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 10,
-        "r": 48,
+        "r": 54,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
@@ -197285,18 +198437,18 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 10,
-        "r": 49,
+        "r": 56,
         "layer": "ground5",
         "oy": 30,
         "ox": 20
       },
       {
         "id": "tile_mwggq9a4",
-        "c": 10,
-        "r": 51,
+        "c": 11,
+        "r": 58,
         "layer": "ground5",
         "oy": 30,
-        "ox": 20
+        "ox": 30
       },
       {
         "id": "tile_mwggq9a4",
@@ -197309,7 +198461,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 11,
-        "r": 48,
+        "r": 54,
         "layer": "ground5",
         "oy": 30,
         "ox": 30
@@ -197317,15 +198469,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwggq9a4",
         "c": 11,
-        "r": 49,
-        "layer": "ground5",
-        "oy": 30,
-        "ox": 30
-      },
-      {
-        "id": "tile_mwggq9a4",
-        "c": 11,
-        "r": 51,
+        "r": 56,
         "layer": "ground5",
         "oy": 30,
         "ox": 30
@@ -197333,7 +198477,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 32,
-        "r": 62,
+        "r": 67,
         "layer": "object",
         "ox": 20,
         "oy": 20,
@@ -197342,7 +198486,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 34,
-        "r": 62,
+        "r": 67,
         "layer": "object",
         "ox": 20,
         "oy": 20,
@@ -197351,284 +198495,284 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 52,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 55,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 58,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 61,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 64,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 64,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 67,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 67,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 70,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 70,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 73,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 73,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 79,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 79,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 82,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 82,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 75,
+        "r": 80,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 78,
+        "r": 83,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 72,
+        "r": 77,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 69,
+        "r": 74,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 66,
+        "r": 71,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 63,
+        "r": 68,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 60,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 82,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 79,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 88,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 91,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 54,
+        "r": 59,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 51,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 48,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 48,
+        "r": 53,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 45,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 42,
+        "r": 47,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 51,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "ox": 20
       },
@@ -197636,7 +198780,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 56,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "ox": 20
       },
@@ -197644,7 +198788,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 51,
-        "r": 77,
+        "r": 82,
         "layer": "object6",
         "ox": 18.666667,
         "oy": 8
@@ -197653,7 +198797,7 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 98,
-        "r": 77,
+        "r": 82,
         "layer": "object6",
         "ox": 20,
         "oy": 10
@@ -197661,7 +198805,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 107,
-        "r": 55,
+        "r": 60,
         "layer": "object6",
         "sortDepth": 3.5,
         "ox": -20,
@@ -197670,523 +198814,523 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 76,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 77,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 79,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 78,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 81,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 82,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 83,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 84,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 80,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 75,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 73,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 72,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 70,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 69,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 68,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 67,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 71,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 74,
-        "r": 60,
+        "r": 65,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 88,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 90,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 91,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 93,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 89,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 92,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 96,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 94,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 95,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 39,
+        "r": 44,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 36,
+        "r": 41,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 76,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 33,
+        "r": 38,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 94,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 79,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 82,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 88,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 91,
-        "r": 30,
+        "r": 35,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 86,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 83,
-        "r": 27,
+        "r": 32,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 83,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 86,
-        "r": 24,
+        "r": 29,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 83,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 86,
-        "r": 21,
+        "r": 26,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 83,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 86,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 83,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 86,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 80,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 77,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 74,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 71,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 89,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 92,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 95,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 71,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 74,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 77,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 80,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 89,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 92,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 95,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 98,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 98,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 101,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 101,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 79,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 80,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 81,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 82,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 84,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 83,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 85,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 86,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 87,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 88,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 89,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 91,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 92,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 93,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 90,
-        "r": 33,
+        "r": 38,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 67,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 70,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 73,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_pillar",
         "c": 69,
-        "r": 54,
+        "r": 59,
         "layer": "ground4",
         "sortDepth": 4,
         "ox": 20
@@ -198194,14 +199338,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 68,
-        "r": 54,
+        "r": 59,
         "layer": "object17",
         "oy": 30
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 55,
+        "r": 60,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -198209,7 +199353,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 57,
+        "r": 62,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -198217,7 +199361,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 59,
+        "r": 64,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -198225,7 +199369,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 61,
+        "r": 66,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -198233,7 +199377,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 63,
+        "r": 68,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -198241,7 +199385,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 65,
+        "r": 70,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -198249,7 +199393,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 67,
+        "r": 72,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -198258,14 +199402,14 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_pillar",
         "sortDepth": 4,
         "c": 65,
-        "r": 71,
+        "r": 76,
         "layer": "object17",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 65,
-        "r": 69,
+        "r": 74,
         "layer": "object29",
         "oy": 15.333333000000039,
         "ox": 20
@@ -198273,7 +199417,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 64,
-        "r": 71,
+        "r": 76,
         "layer": "object6",
         "oy": 20,
         "ox": 0.666667
@@ -198281,14 +199425,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 51,
-        "r": 73,
+        "r": 78,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 51,
-        "r": 75,
+        "r": 80,
         "layer": "object29",
         "ox": 20,
         "oy": -4.666667
@@ -198296,14 +199440,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 66,
-        "r": 54,
+        "r": 59,
         "layer": "object17",
         "oy": 30
       },
       {
         "id": "tile_mvzbna04",
         "c": 65,
-        "r": 55,
+        "r": 60,
         "layer": "object29",
         "ox": 20,
         "oy": 4,
@@ -198312,7 +199456,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 65,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198320,7 +199464,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 67,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198328,7 +199472,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 69,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198336,7 +199480,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 71,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198344,7 +199488,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 73,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198352,7 +199496,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 75,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198360,7 +199504,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 77,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198368,7 +199512,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 79,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198376,7 +199520,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3kqob",
         "c": 81,
-        "r": 74,
+        "r": 79,
         "layer": "object6",
         "oy": 30,
         "fx": true
@@ -198384,7 +199528,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 84,
-        "r": 73,
+        "r": 78,
         "layer": "ground6",
         "ox": 34.666667,
         "fx": true,
@@ -198394,8 +199538,57 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 84,
+        "r": 76,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 74,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 72,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 70,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
         "r": 71,
         "layer": "ground6",
+        "fx": false,
+        "rot": 2,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 68,
+        "layer": "ground6",
         "ox": 34.666667,
         "fx": true,
         "rot": 2,
@@ -198403,48 +199596,18 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 84,
+        "c": 87,
         "r": 69,
         "layer": "ground6",
-        "ox": 34.666667,
-        "fx": true,
+        "fx": false,
         "rot": 2,
-        "oy": 30
+        "ox": 5.333333
       },
       {
         "id": "tile_mvr40sp8",
         "c": 84,
-        "r": 67,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "fx": true,
-        "rot": 2,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 84,
-        "r": 65,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "fx": true,
-        "rot": 2,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 87,
         "r": 66,
         "layer": "ground6",
-        "fx": false,
-        "rot": 2,
-        "ox": 5.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 84,
-        "r": 63,
-        "layer": "ground6",
         "ox": 34.666667,
         "fx": true,
         "rot": 2,
@@ -198453,35 +199616,16 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 87,
+        "r": 67,
+        "layer": "ground6",
+        "fx": false,
+        "rot": 2,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
         "r": 64,
-        "layer": "ground6",
-        "fx": false,
-        "rot": 2,
-        "ox": 5.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 84,
-        "r": 61,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "fx": true,
-        "rot": 2,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 87,
-        "r": 62,
-        "layer": "ground6",
-        "fx": false,
-        "rot": 2,
-        "ox": 5.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 84,
-        "r": 59,
         "layer": "ground6",
         "ox": 34.666667,
         "fx": true,
@@ -198491,7 +199635,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 60,
+        "r": 65,
         "layer": "ground6",
         "fx": false,
         "rot": 2,
@@ -198500,7 +199644,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 84,
-        "r": 75,
+        "r": 80,
         "layer": "ground4",
         "ox": 29.333333,
         "oy": 27.333333,
@@ -198510,15 +199654,6 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 37,
-        "layer": "object25",
-        "oy": 32,
-        "rot": 0,
-        "ox": 37.33333300000004
-      },
-      {
-        "id": "tile_mwdkcn5r",
-        "c": 48,
         "r": 42,
         "layer": "object25",
         "oy": 32,
@@ -198527,8 +199662,17 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwdkcn5r",
+        "c": 48,
+        "r": 47,
+        "layer": "object25",
+        "oy": 32,
+        "rot": 0,
+        "ox": 37.33333300000004
+      },
+      {
+        "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 36,
+        "r": 41,
         "layer": "object25",
         "rot": 0,
         "ox": 37.333333
@@ -198536,7 +199680,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "oy": 22,
         "rot": 0,
@@ -198545,7 +199689,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "oy": 4,
         "rot": 0,
@@ -198554,7 +199698,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "oy": 26,
         "rot": 0,
@@ -198563,7 +199707,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "oy": 7.333333,
         "rot": 0,
@@ -198572,7 +199716,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "oy": 28.666667,
         "rot": 0,
@@ -198581,7 +199725,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "oy": 10,
         "rot": 0,
@@ -198590,7 +199734,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "oy": 31.333333,
         "rot": 0,
@@ -198599,7 +199743,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "oy": 13.333333,
         "rot": 0,
@@ -198608,7 +199752,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "oy": 34.666667,
         "rot": 0,
@@ -198617,7 +199761,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "oy": 16.666667,
         "rot": 0,
@@ -198626,7 +199770,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 45,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "oy": 38.666667,
         "rot": 0,
@@ -198635,7 +199779,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwuj8w8i",
         "c": 55,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "oy": 39.33333299999998,
         "ox": 12.666666999999961
@@ -198643,7 +199787,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwuj8w8i",
         "c": 58,
-        "r": 9,
+        "r": 14,
         "layer": "object25",
         "oy": -0.666667,
         "ox": 4
@@ -198651,7 +199795,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 37,
+        "r": 42,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198660,7 +199804,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 35,
+        "r": 40,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198669,7 +199813,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 33,
+        "r": 38,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198678,7 +199822,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 31,
+        "r": 36,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198687,7 +199831,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 28,
+        "r": 33,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198696,7 +199840,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 26,
+        "r": 31,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198705,7 +199849,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198714,7 +199858,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198723,7 +199867,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 18,
+        "r": 23,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198732,7 +199876,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 16,
+        "r": 21,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198741,7 +199885,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198750,7 +199894,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198759,7 +199903,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwdkcn5r",
         "c": 49,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "fx": true,
         "ox": 24,
@@ -198768,7 +199912,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwuj8w8i",
         "c": 52,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "ox": 5.333333000000039,
         "fx": true,
@@ -198777,7 +199921,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwuj8w8i",
         "c": 49,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "fx": true,
         "ox": 16.66666699999996,
@@ -198786,7 +199930,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 9,
+        "r": 14,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198794,7 +199938,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 11,
+        "r": 16,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198802,7 +199946,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 13,
+        "r": 18,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198810,7 +199954,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 15,
+        "r": 20,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198818,7 +199962,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 17,
+        "r": 22,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198826,7 +199970,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 19,
+        "r": 24,
         "layer": "object25",
         "fx": true,
         "ox": 10
@@ -198834,7 +199978,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 21,
+        "r": 26,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198842,7 +199986,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 23,
+        "r": 28,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198850,7 +199994,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 25,
+        "r": 30,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198858,7 +200002,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 27,
+        "r": 32,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198866,7 +200010,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 29,
+        "r": 34,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198874,31 +200018,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mwujtpva",
         "c": 48,
-        "r": 31,
-        "layer": "object25",
-        "ox": 10,
-        "fx": true
-      },
-      {
-        "id": "tile_mwujtpva",
-        "c": 48,
-        "r": 33,
-        "layer": "object25",
-        "ox": 10,
-        "fx": true
-      },
-      {
-        "id": "tile_mwujtpva",
-        "c": 48,
-        "r": 35,
-        "layer": "object25",
-        "ox": 10,
-        "fx": true
-      },
-      {
-        "id": "tile_mwujtpva",
-        "c": 48,
-        "r": 37,
+        "r": 36,
         "layer": "object25",
         "ox": 10,
         "fx": true
@@ -198907,6 +200027,30 @@ const BATTLE_MAPS = [
         "id": "tile_mwujtpva",
         "c": 48,
         "r": 38,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 40,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 42,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 43,
         "layer": "object25",
         "ox": 10,
         "oy": 34,
@@ -198915,123 +200059,123 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr3nuyx",
         "c": 54,
-        "r": 9,
+        "r": 14,
         "layer": "object25",
         "oy": 20
       },
       {
         "id": "tile_mvr3nuyx",
         "c": 54,
-        "r": 8,
+        "r": 13,
         "layer": "object25",
         "oy": 46
       },
       {
         "id": "tile_mvocpp0c",
         "c": 53,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 55,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 57,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 59,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 61,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 65,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 67,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 69,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 73,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 85,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 83,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 81,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 75,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 77,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 63,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvodgug9",
         "c": 79,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 71,
-        "r": 78,
+        "r": 83,
         "layer": "object6"
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 51,
-        "r": 75,
+        "r": 80,
         "layer": "object29",
         "ox": 20,
         "oy": 23.333333
@@ -199039,79 +200183,79 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvocpp0c",
         "c": 87,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 89,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 91,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 93,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 95,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 97,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 97,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 98,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 99,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 74,
-        "r": 68,
+        "r": 73,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 75,
-        "r": 68,
+        "r": 73,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 76,
-        "r": 68,
+        "r": 73,
         "layer": "ground7"
       },
       {
         "id": "tile_mvr32pqo",
         "c": 73,
-        "r": 64,
+        "r": 69,
         "layer": "ground6",
         "ox": 20,
         "oy": -2
@@ -199119,7 +200263,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 73,
-        "r": 67,
+        "r": 72,
         "layer": "ground6",
         "oy": 3.3333330000000387,
         "ox": 20
@@ -199127,7 +200271,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 75,
-        "r": 64,
+        "r": 69,
         "layer": "ground6",
         "ox": 20,
         "oy": -2
@@ -199135,7 +200279,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 75,
-        "r": 67,
+        "r": 72,
         "layer": "ground6",
         "oy": 3.3333330000000387,
         "ox": 20
@@ -199143,97 +200287,97 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 100,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 102,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 101,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 104,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 103,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 105,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 106,
-        "r": 60,
+        "r": 65,
         "layer": "object25"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 97,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 100,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 103,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 99,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 101,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 103,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 105,
-        "r": 78,
+        "r": 83,
         "layer": "object15"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 57,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_pillar",
         "c": 106,
-        "r": 77,
+        "r": 82,
         "layer": "object6",
         "ox": 20,
         "oy": 10
@@ -199241,63 +200385,42 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 58,
+        "r": 63,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 60,
+        "r": 65,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 62,
+        "r": 67,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 64,
+        "r": 69,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 66,
+        "r": 71,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 68,
-        "layer": "object29",
-        "ox": 20
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 106,
-        "r": 70,
-        "layer": "object29",
-        "ox": 20
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 106,
-        "r": 72,
-        "layer": "object29",
-        "ox": 20
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 106,
-        "r": 74,
+        "r": 73,
         "layer": "object29",
         "ox": 20
       },
@@ -199305,6 +200428,27 @@ const BATTLE_MAPS = [
         "id": "tile_mvoa0cqd",
         "c": 106,
         "r": 75,
+        "layer": "object29",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 77,
+        "layer": "object29",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 79,
+        "layer": "object29",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 80,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199312,70 +200456,70 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 67,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 69,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 71,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 73,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 75,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 77,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 79,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 81,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr32pqo",
         "c": 83,
-        "r": 59,
+        "r": 64,
         "layer": "ground7",
         "oy": 3.333333
       },
       {
         "id": "tile_mvr40sp8",
         "c": 76,
-        "r": 65,
+        "r": 70,
         "layer": "ground6",
         "ox": 46.666667,
         "oy": 26.666667
@@ -199383,7 +200527,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 72,
-        "r": 65,
+        "r": 70,
         "layer": "ground6",
         "ox": 36.66666699999996,
         "oy": 32
@@ -199391,7 +200535,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 76,
-        "r": 64,
+        "r": 69,
         "layer": "ground6",
         "ox": 46.666667,
         "oy": 16.666667
@@ -199399,7 +200543,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 72,
-        "r": 64,
+        "r": 69,
         "layer": "ground6",
         "ox": 36.66666699999996,
         "oy": 12
@@ -199407,21 +200551,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 73,
-        "r": 67,
+        "r": 72,
         "layer": "ground6",
         "oy": 2
       },
       {
         "id": "tile_mvr2fi62",
         "c": 73,
-        "r": 64,
+        "r": 69,
         "layer": "ground6",
         "oy": -1.333333
       },
       {
         "id": "tile_mvr2fi62",
         "c": 77,
-        "r": 67,
+        "r": 72,
         "layer": "ground6",
         "oy": 2.666667,
         "ox": 10
@@ -199429,7 +200573,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 77,
-        "r": 63,
+        "r": 68,
         "layer": "ground6",
         "oy": 38,
         "ox": 10
@@ -199437,21 +200581,21 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 73,
-        "r": 68,
+        "r": 73,
         "layer": "ground7",
         "ox": 10
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 76,
-        "r": 68,
+        "r": 73,
         "layer": "ground7",
         "ox": 27.333333
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 52,
+        "r": 57,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -199459,7 +200603,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 50,
+        "r": 55,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -199467,7 +200611,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 48,
+        "r": 53,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -199475,7 +200619,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 46,
+        "r": 51,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -199483,7 +200627,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 44,
+        "r": 49,
         "layer": "object29",
         "ox": 20,
         "oy": 20
@@ -199491,7 +200635,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 42,
+        "r": 47,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199499,7 +200643,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 40,
+        "r": 45,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199507,7 +200651,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 38,
+        "r": 43,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199515,7 +200659,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 36,
+        "r": 41,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199523,7 +200667,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 34,
+        "r": 39,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199531,7 +200675,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 32,
+        "r": 37,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199539,7 +200683,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 30,
+        "r": 35,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199547,7 +200691,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 28,
+        "r": 33,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199555,7 +200699,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 26,
+        "r": 31,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199563,7 +200707,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 24,
+        "r": 29,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199571,7 +200715,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 22,
+        "r": 27,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199579,7 +200723,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 20,
+        "r": 25,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199587,7 +200731,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 18,
+        "r": 23,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199595,7 +200739,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 16,
+        "r": 21,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199603,7 +200747,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 14,
+        "r": 19,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199611,7 +200755,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 12,
+        "r": 17,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199619,7 +200763,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 10,
+        "r": 15,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199627,7 +200771,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 8,
+        "r": 13,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199635,7 +200779,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 6,
+        "r": 11,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199643,7 +200787,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoa0cqd",
         "c": 69,
-        "r": 4,
+        "r": 9,
         "layer": "object29",
         "ox": 20,
         "oy": 30
@@ -199651,7 +200795,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_pillar",
         "c": 69,
-        "r": 2,
+        "r": 7,
         "layer": "object23",
         "ox": 20,
         "oy": 30
@@ -199659,577 +200803,565 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvoddiqi",
         "c": 71,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 73,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 77,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 81,
-        "r": 4,
-        "layer": "object23"
-      },
-      {
-        "id": "tile_mvoddiqi",
-        "c": 85,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 89,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 93,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 97,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 101,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvoddiqi",
         "c": 103,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 75,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 79,
-        "r": 4,
-        "layer": "object23"
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 83,
-        "r": 4,
-        "layer": "object23"
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 87,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 91,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 95,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_mvocpp0c",
         "c": 99,
-        "r": 4,
+        "r": 9,
         "layer": "object23"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 71,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 72,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 73,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 75,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 76,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 74,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 77,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 78,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 79,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 80,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 81,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 82,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 89,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 90,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 91,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 92,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 93,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 94,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 95,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 96,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 97,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 98,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 99,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 100,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 102,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 103,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 101,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 71,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 72,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 74,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 75,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 77,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 78,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 73,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 76,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 80,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 79,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 83,
-        "r": 7,
-        "layer": "ground7"
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 86,
-        "r": 7,
-        "layer": "ground7"
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 87,
-        "r": 7,
-        "layer": "ground7"
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 90,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 92,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 94,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 96,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 104,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 103,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 102,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 99,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 98,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 97,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 95,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 91,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 81,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 82,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 84,
-        "r": 7,
-        "layer": "ground7"
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 85,
-        "r": 7,
-        "layer": "ground7"
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 88,
-        "r": 7,
-        "layer": "ground7"
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 89,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 93,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 101,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 100,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 105,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 106,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 107,
-        "r": 7,
+        "r": 12,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 69,
+        "r": 74,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 72,
+        "r": 77,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 75,
+        "r": 80,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 78,
+        "r": 83,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 101,
-        "r": 69,
+        "r": 74,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 101,
-        "r": 72,
+        "r": 77,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 101,
-        "r": 75,
+        "r": 80,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 101,
-        "r": 78,
+        "r": 83,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 98,
-        "r": 69,
+        "r": 74,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 98,
-        "r": 72,
+        "r": 77,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 98,
-        "r": 75,
+        "r": 80,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 98,
-        "r": 78,
+        "r": 83,
         "layer": "ground7",
         "oy": -6.666667
       },
       {
         "id": "tile_mvr2fi62",
         "c": 87,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "fx": true,
         "oy": 2
@@ -200237,49 +201369,49 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 68,
+        "r": 73,
         "layer": "ground6",
         "ox": 6.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 70,
+        "r": 75,
         "layer": "ground6",
         "ox": 6.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 72,
+        "r": 77,
         "layer": "ground6",
         "ox": 6.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 74,
+        "r": 79,
         "layer": "ground6",
         "ox": 6.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 76,
+        "r": 81,
         "layer": "ground6",
         "ox": 6.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 78,
+        "r": 83,
         "layer": "ground6",
         "ox": 6.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 97,
-        "r": 76,
+        "r": 81,
         "layer": "ground6",
         "ox": 30,
         "oy": 20
@@ -200287,7 +201419,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 97,
-        "r": 74,
+        "r": 79,
         "layer": "ground6",
         "ox": 30,
         "oy": 30
@@ -200295,7 +201427,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 97,
-        "r": 72,
+        "r": 77,
         "layer": "ground6",
         "ox": 30,
         "oy": 30
@@ -200303,7 +201435,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 97,
-        "r": 70,
+        "r": 75,
         "layer": "ground6",
         "ox": 30,
         "oy": 30
@@ -200311,7 +201443,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 97,
-        "r": 68,
+        "r": 73,
         "layer": "ground6",
         "ox": 30,
         "oy": 30
@@ -200319,7 +201451,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 105,
-        "r": 68,
+        "r": 73,
         "layer": "ground6",
         "ox": 4.666667,
         "oy": -3.333333
@@ -200327,7 +201459,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 103,
-        "r": 68,
+        "r": 73,
         "layer": "ground6",
         "ox": 4.666667,
         "oy": -3.333333
@@ -200335,7 +201467,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 101,
-        "r": 68,
+        "r": 73,
         "layer": "ground6",
         "ox": 4.666667,
         "oy": -3.333333
@@ -200343,7 +201475,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 99,
-        "r": 68,
+        "r": 73,
         "layer": "ground6",
         "ox": 4.666667,
         "oy": -3.333333
@@ -200351,7 +201483,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 97,
-        "r": 68,
+        "r": 73,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": -3.333333
@@ -200359,91 +201491,91 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 88,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 90,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 92,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 94,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 96,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 98,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 100,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 102,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 104,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 106,
-        "r": 59,
+        "r": 64,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 71,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 32.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 73,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 32.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 74,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 32.666667,
         "ox": 20
@@ -200451,7 +201583,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 79,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200459,7 +201591,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 81,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200467,7 +201599,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 83,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200475,7 +201607,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 85,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200483,7 +201615,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 87,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200491,7 +201623,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 89,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200499,7 +201631,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 91,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200507,42 +201639,42 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 97,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 99,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 101,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 103,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 105,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 34
       },
       {
         "id": "tile_mvr32pqo",
         "c": 93,
-        "r": 56,
+        "r": 61,
         "layer": "ground6",
         "oy": 33.333333,
         "ox": -13.333333
@@ -200550,7 +201682,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 79,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200558,7 +201690,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 81,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200566,7 +201698,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 83,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200574,7 +201706,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 85,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200582,7 +201714,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 87,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200590,7 +201722,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 89,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200598,7 +201730,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 91,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200606,7 +201738,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 93,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": -14,
         "oy": 2.666667
@@ -200614,28 +201746,28 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 76,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 78,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 80,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 81,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30,
         "ox": 30
@@ -200643,344 +201775,378 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 89,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 91,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 93,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 95,
-        "r": 29,
+        "r": 34,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 71,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 73,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 75,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 77,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 79,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 81,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 83,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 85,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 87,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 89,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 91,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 93,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 95,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 97,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 99,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 101,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 89,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 91,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 93,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 95,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 97,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 99,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 101,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 54,
+        "r": 59,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 52,
+        "r": 57,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 50,
+        "r": 55,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 48,
+        "r": 53,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 46,
+        "r": 51,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 44,
+        "r": 49,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 42,
+        "r": 47,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 40,
+        "r": 45,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 38,
+        "r": 43,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 36,
+        "r": 41,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 34,
+        "r": 39,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 32,
+        "r": 37,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 30,
+        "r": 35,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 28,
+        "r": 33,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 26,
+        "r": 31,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 24,
+        "r": 29,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 22,
+        "r": 27,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 20,
+        "r": 25,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 18,
+        "r": 23,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 16,
+        "r": 21,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 14,
+        "r": 19,
         "layer": "object29",
         "ox": 20
       },
       {
         "id": "tile_mvoa0cqd",
         "c": 106,
-        "r": 12,
+        "r": 17,
         "layer": "object29",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 15,
+        "layer": "object29",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 13,
+        "layer": "object29",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 11,
+        "layer": "object29",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 105,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 106,
+        "r": 8,
+        "layer": "object23",
         "ox": 20
       },
       {
@@ -200988,301 +202154,267 @@ const BATTLE_MAPS = [
         "c": 106,
         "r": 10,
         "layer": "object29",
-        "ox": 20
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 106,
-        "r": 8,
-        "layer": "object29",
-        "ox": 20
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 106,
-        "r": 6,
-        "layer": "object29",
-        "ox": 20
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 105,
-        "r": 4,
-        "layer": "object23"
-      },
-      {
-        "id": "tile_poolcore_pillar",
-        "c": 106,
-        "r": 3,
-        "layer": "object23",
-        "ox": 20
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 106,
-        "r": 5,
-        "layer": "object29",
         "ox": 20,
         "oy": 10
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 15,
+        "r": 20,
         "layer": "ground4"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 18,
+        "r": 23,
         "layer": "ground4"
       },
       {
         "id": "tile_mvr32pqo",
         "c": 103,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 105,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 81,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 79,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 71,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 73,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 75,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 77,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 103,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 105,
-        "r": 14,
+        "r": 19,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 104,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 105,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 106,
-        "r": 21,
+        "r": 26,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 97,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 100,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 104,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 103,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_mvr32pqo",
         "c": 105,
-        "r": 45,
+        "r": 50,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 103,
-        "r": 45,
+        "r": 50,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 101,
-        "r": 45,
+        "r": 50,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 99,
-        "r": 45,
+        "r": 50,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 97,
-        "r": 45,
+        "r": 50,
         "layer": "ground6",
         "oy": 2.666667
       },
       {
         "id": "tile_mvr32pqo",
         "c": 105,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 103,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 101,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 99,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_mvr32pqo",
         "c": 97,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "oy": 30
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 97,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 98,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 99,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 100,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 101,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 102,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 103,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 104,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 105,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 106,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_mvr40sp8",
         "c": 96,
-        "r": 45,
+        "r": 50,
         "layer": "ground6",
         "ox": 10,
         "oy": 20
@@ -201290,7 +202422,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 94,
-        "r": 45,
+        "r": 50,
         "layer": "ground6",
         "oy": -4,
         "ox": -5.333333
@@ -201298,7 +202430,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 78,
-        "r": 44,
+        "r": 49,
         "layer": "ground6",
         "oy": 35.333333,
         "ox": 7.333333
@@ -201306,7 +202438,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 93,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "oy": 40,
         "ox": 34.666667
@@ -201314,7 +202446,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 78,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "oy": 39.333333,
         "ox": 7.333333
@@ -201322,175 +202454,15 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 96,
-        "r": 47,
-        "layer": "ground6",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 94,
-        "r": 47,
-        "layer": "ground6",
-        "oy": -4,
-        "ox": -5.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
-        "r": 46,
-        "layer": "ground6",
-        "oy": 35.333333,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 93,
-        "r": 34,
-        "layer": "ground6",
-        "oy": 39.333333,
-        "ox": 34.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
-        "r": 34,
-        "layer": "ground6",
-        "oy": 38.666667,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 96,
-        "r": 49,
-        "layer": "ground6",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 94,
-        "r": 49,
-        "layer": "ground6",
-        "oy": -4,
-        "ox": -5.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
-        "r": 48,
-        "layer": "ground6",
-        "oy": 35.333333,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 93,
-        "r": 36,
-        "layer": "ground6",
-        "oy": 38.666667,
-        "ox": 34.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
-        "r": 36,
-        "layer": "ground6",
-        "oy": 38,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 96,
-        "r": 51,
-        "layer": "ground6",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 94,
-        "r": 51,
-        "layer": "ground6",
-        "oy": -4,
-        "ox": -5.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
-        "r": 50,
-        "layer": "ground6",
-        "oy": 35.333333,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 93,
-        "r": 38,
-        "layer": "ground6",
-        "oy": 38,
-        "ox": 34.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
-        "r": 38,
-        "layer": "ground6",
-        "oy": 37.333333,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 96,
-        "r": 53,
-        "layer": "ground6",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 94,
-        "r": 53,
-        "layer": "ground6",
-        "oy": -4,
-        "ox": -5.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
         "r": 52,
         "layer": "ground6",
-        "oy": 35.333333,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 93,
-        "r": 40,
-        "layer": "ground6",
-        "oy": 37.333333,
-        "ox": 34.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 78,
-        "r": 40,
-        "layer": "ground6",
-        "oy": 36.666667,
-        "ox": 7.333333
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 96,
-        "r": 55,
-        "layer": "ground6",
         "ox": 10,
         "oy": 20
       },
       {
         "id": "tile_mvr40sp8",
         "c": 94,
-        "r": 55,
+        "r": 52,
         "layer": "ground6",
         "oy": -4,
         "ox": -5.333333
@@ -201498,7 +202470,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 78,
-        "r": 54,
+        "r": 51,
         "layer": "ground6",
         "oy": 35.333333,
         "ox": 7.333333
@@ -201506,7 +202478,167 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 93,
-        "r": 42,
+        "r": 39,
+        "layer": "ground6",
+        "oy": 39.333333,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 39,
+        "layer": "ground6",
+        "oy": 38.666667,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 54,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 54,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 53,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 41,
+        "layer": "ground6",
+        "oy": 38.666667,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 41,
+        "layer": "ground6",
+        "oy": 38,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 56,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 56,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 55,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 43,
+        "layer": "ground6",
+        "oy": 38,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 43,
+        "layer": "ground6",
+        "oy": 37.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 58,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 58,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 57,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 45,
+        "layer": "ground6",
+        "oy": 37.333333,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 45,
+        "layer": "ground6",
+        "oy": 36.666667,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 60,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 60,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 59,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 47,
         "layer": "ground6",
         "oy": 36.666667,
         "ox": 34.666667
@@ -201514,7 +202646,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 78,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "oy": 36,
         "ox": 7.333333
@@ -201522,7 +202654,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 75,
-        "r": 30,
+        "r": 35,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": 24
@@ -201530,7 +202662,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 96,
-        "r": 30,
+        "r": 35,
         "layer": "ground6",
         "ox": 6.666667,
         "oy": 24
@@ -201538,7 +202670,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 75,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": 24
@@ -201546,7 +202678,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 96,
-        "r": 32,
+        "r": 37,
         "layer": "ground6",
         "ox": 6.666667,
         "oy": 24
@@ -201554,7 +202686,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 75,
-        "r": 34,
+        "r": 39,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": 24
@@ -201562,7 +202694,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 96,
-        "r": 34,
+        "r": 39,
         "layer": "ground6",
         "ox": 6.666667,
         "oy": 24
@@ -201570,55 +202702,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 75,
-        "r": 36,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 96,
-        "r": 36,
-        "layer": "ground6",
-        "ox": 6.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 75,
-        "r": 38,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 96,
-        "r": 38,
-        "layer": "ground6",
-        "ox": 6.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 75,
-        "r": 40,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 96,
-        "r": 40,
-        "layer": "ground6",
-        "ox": 6.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 75,
-        "r": 42,
+        "r": 41,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": 24
@@ -201628,13 +202712,61 @@ const BATTLE_MAPS = [
         "c": 96,
         "r": 41,
         "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 43,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 43,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 45,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 45,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 47,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 46,
+        "layer": "ground6",
         "ox": 6.666666999999961,
         "oy": 24
       },
       {
         "id": "tile_mvr40sp8",
         "c": 75,
-        "r": 44,
+        "r": 49,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": 24
@@ -201642,7 +202774,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 75,
-        "r": 46,
+        "r": 51,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": 24
@@ -201650,31 +202782,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 75,
-        "r": 48,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 75,
-        "r": 50,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 75,
-        "r": 52,
-        "layer": "ground6",
-        "ox": 34.666667,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 75,
-        "r": 54,
+        "r": 53,
         "layer": "ground6",
         "ox": 34.666667,
         "oy": 24
@@ -201684,13 +202792,37 @@ const BATTLE_MAPS = [
         "c": 75,
         "r": 55,
         "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 57,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 59,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 60,
+        "layer": "ground6",
         "ox": 34.66666699999996,
         "oy": 24
       },
       {
         "id": "tile_mvr2fi62",
         "c": 76,
-        "r": 56,
+        "r": 61,
         "layer": "object23",
         "oy": 32,
         "ox": -2
@@ -201698,7 +202830,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 78,
-        "r": 31,
+        "r": 36,
         "layer": "object23",
         "oy": 42,
         "ox": 11.333333
@@ -201706,7 +202838,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 83,
-        "r": 29,
+        "r": 34,
         "layer": "object23",
         "oy": 32,
         "ox": 1.3333330000000387
@@ -201714,7 +202846,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 88,
-        "r": 20,
+        "r": 25,
         "layer": "object23",
         "oy": 2,
         "ox": 11.333333
@@ -201722,14 +202854,14 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 83,
-        "r": 20,
+        "r": 25,
         "layer": "object23",
         "oy": 2
       },
       {
         "id": "tile_mvr2fi62",
         "c": 88,
-        "r": 29,
+        "r": 34,
         "layer": "object23",
         "oy": 32,
         "ox": 11.333333000000039
@@ -201737,7 +202869,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 94,
-        "r": 31,
+        "r": 36,
         "layer": "object23",
         "oy": 41.333333,
         "ox": -2
@@ -201745,7 +202877,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 96,
-        "r": 44,
+        "r": 49,
         "layer": "object23",
         "oy": 41.333333,
         "ox": 13.333333
@@ -201753,7 +202885,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 96,
-        "r": 42,
+        "r": 47,
         "layer": "object23",
         "oy": 30,
         "ox": 10.666667
@@ -201761,7 +202893,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 96,
-        "r": 56,
+        "r": 61,
         "layer": "object23",
         "oy": 33.333333,
         "ox": 14
@@ -201769,7 +202901,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 93,
-        "r": 56,
+        "r": 61,
         "layer": "object23",
         "oy": 33.333333,
         "ox": 38.666667
@@ -201777,7 +202909,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 78,
-        "r": 56,
+        "r": 61,
         "layer": "object23",
         "oy": 32.666667,
         "ox": 10.666667
@@ -201785,7 +202917,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 85,
-        "r": 39,
+        "r": 44,
         "layer": "object23",
         "oy": 32.666667,
         "ox": -0.666667
@@ -201793,7 +202925,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 84,
-        "r": 48,
+        "r": 53,
         "layer": "object23",
         "oy": 2.6666669999999613,
         "ox": 39.33333300000004
@@ -201801,7 +202933,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 87,
-        "r": 39,
+        "r": 44,
         "layer": "object23",
         "oy": 32.666667,
         "ox": 11.333333
@@ -201809,7 +202941,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr2fi62",
         "c": 87,
-        "r": 48,
+        "r": 53,
         "layer": "object23",
         "oy": 2.6666669999999613,
         "ox": 11.333333000000039
@@ -201817,7 +202949,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 83,
-        "r": 27,
+        "r": 32,
         "layer": "ground6",
         "oy": 50,
         "ox": -4.666667
@@ -201825,71 +202957,71 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 88,
+        "r": 33,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
+        "r": 30,
+        "layer": "ground6",
+        "oy": 50,
+        "ox": -4.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 31,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
         "r": 28,
         "layer": "ground6",
-        "oy": 13.333333,
-        "ox": 6.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 83,
-        "r": 25,
-        "layer": "ground6",
         "oy": 50,
         "ox": -4.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 88,
+        "r": 29,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
         "r": 26,
         "layer": "ground6",
-        "oy": 13.333333,
-        "ox": 6.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 83,
-        "r": 23,
-        "layer": "ground6",
         "oy": 50,
         "ox": -4.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 88,
+        "r": 27,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
         "r": 24,
         "layer": "ground6",
-        "oy": 13.333333,
-        "ox": 6.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 83,
-        "r": 21,
-        "layer": "ground6",
         "oy": 50,
         "ox": -4.666667
       },
       {
         "id": "tile_mvr40sp8",
         "c": 88,
-        "r": 22,
-        "layer": "ground6",
-        "oy": 13.333333,
-        "ox": 6.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 83,
-        "r": 19,
-        "layer": "ground6",
-        "oy": 50,
-        "ox": -4.666667
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 88,
-        "r": 20,
+        "r": 25,
         "layer": "ground6",
         "oy": 13.333333,
         "ox": 6.666667
@@ -201897,25 +203029,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 40,
+        "r": 45,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 85,
-        "r": 46,
+        "r": 51,
         "layer": "ground7"
       },
       {
         "id": "tile_mvr40sp8",
         "c": 85,
-        "r": 40,
+        "r": 45,
         "layer": "ground6",
         "ox": -5.333333,
         "oy": 15.333333
@@ -201923,7 +203055,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 85,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "ox": -5.333333,
         "oy": 15.333333
@@ -201931,7 +203063,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 85,
-        "r": 44,
+        "r": 49,
         "layer": "ground6",
         "ox": -5.333333,
         "oy": 15.333333
@@ -201939,7 +203071,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 85,
-        "r": 46,
+        "r": 51,
         "layer": "ground6",
         "ox": -5.333333,
         "oy": 15.333333
@@ -201947,7 +203079,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 40,
+        "r": 45,
         "layer": "ground6",
         "ox": 7.333333,
         "oy": 15.333333
@@ -201955,7 +203087,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 42,
+        "r": 47,
         "layer": "ground6",
         "ox": 7.333333,
         "oy": 15.333333
@@ -201963,7 +203095,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 44,
+        "r": 49,
         "layer": "ground6",
         "ox": 7.333333,
         "oy": 15.333333
@@ -201971,7 +203103,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr40sp8",
         "c": 87,
-        "r": 46,
+        "r": 51,
         "layer": "ground6",
         "ox": 7.333333,
         "oy": 15.333333
@@ -201979,7 +203111,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 85,
-        "r": 39,
+        "r": 44,
         "layer": "ground6",
         "oy": 32.66666699999996,
         "ox": 20
@@ -201987,7 +203119,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvr32pqo",
         "c": 85,
-        "r": 48,
+        "r": 53,
         "layer": "ground6",
         "ox": 20,
         "oy": 2.666667
@@ -201995,25 +203127,25 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 85,
-        "r": 49,
+        "r": 54,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 86,
-        "r": 49,
+        "r": 54,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 87,
-        "r": 49,
+        "r": 54,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 73,
-        "r": 64,
+        "r": 69,
         "layer": "ground8",
         "ox": 10,
         "oy": 30
@@ -202021,7 +203153,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_l",
         "c": 75,
-        "r": 64,
+        "r": 69,
         "layer": "ground8",
         "oy": 30,
         "ox": -6
@@ -202029,7 +203161,7 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_electric_light_02",
         "c": 57,
-        "r": 72,
+        "r": 77,
         "layer": "object9",
         "ox": 30,
         "oy": 10
@@ -202037,565 +203169,980 @@ const BATTLE_MAPS = [
       {
         "id": "tile_interactive_electric_light_02",
         "c": 61,
-        "r": 72,
+        "r": 77,
         "layer": "object9",
         "oy": 10
       },
       {
-        "id": "tile_interactive_electric_light_02",
-        "c": 85,
-        "r": 49,
-        "layer": "top",
-        "ox": 10
-      },
-      {
         "id": "tile_forest_gradient",
         "c": 67,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 68,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 69,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 70,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 71,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 72,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 73,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 74,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 75,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 77,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 78,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 76,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 79,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 80,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 81,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 82,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 83,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 84,
-        "r": 72,
+        "r": 77,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 88,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 89,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 90,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 91,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 92,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 93,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 95,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 97,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 96,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 94,
-        "r": 77,
+        "r": 82,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 79,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 81,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 82,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 80,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 71,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 73,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 72,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 74,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 75,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 84,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 86,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 88,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 89,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 91,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 92,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 93,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 83,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 85,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 90,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 87,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 97,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 98,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 99,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 101,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 102,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 103,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 105,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 106,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 104,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
       },
       {
         "id": "tile_forest_gradient",
         "c": 100,
-        "r": 54,
+        "r": 59,
         "layer": "object35"
-      },
-      {
-        "id": "tile_interactive_electric_light_02",
-        "c": 98,
-        "r": 60,
-        "layer": "ground9"
-      },
-      {
-        "id": "tile_interactive_electric_light_02",
-        "c": 104,
-        "r": 60,
-        "layer": "ground9",
-        "ox": 10,
-        "oy": 10
-      },
-      {
-        "id": "tile_interactive_electric_light_02",
-        "c": 79,
-        "r": 33,
-        "layer": "ground9",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_interactive_electric_light_02",
-        "c": 91,
-        "r": 33,
-        "layer": "ground9",
-        "ox": 30,
-        "oy": 20
-      },
-      {
-        "id": "tile_interactive_electric_light_02",
-        "c": 85,
-        "r": 33,
-        "layer": "ground9",
-        "ox": 20,
-        "oy": 20
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 71,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 72,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 73,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 74,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
         "c": 75,
-        "r": 43,
+        "r": 48,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 71,
-        "r": 40,
+        "r": 45,
         "layer": "ground7"
       },
       {
         "id": "tile_poolcore_floor_l",
         "c": 74,
-        "r": 40,
+        "r": 45,
         "layer": "ground7"
       },
       {
         "id": "tile_interactive_electric_light_02_blue",
         "c": 74,
-        "r": 69,
+        "r": 74,
         "layer": "ground9",
         "ox": 20
       },
       {
         "id": "tile_interactive_electric_light_02_blue",
         "c": 68,
-        "r": 61,
+        "r": 66,
         "layer": "ground9",
         "ox": 10
       },
       {
         "id": "tile_interactive_electric_light_02_blue",
-        "c": 72,
-        "r": 61,
+        "c": 74,
+        "r": 66,
         "layer": "ground9",
-        "ox": 10
-      },
-      {
-        "id": "tile_interactive_electric_light_02_blue",
-        "c": 76,
-        "r": 61,
-        "layer": "ground9",
-        "ox": 30
+        "ox": 20
       },
       {
         "id": "tile_interactive_electric_light_02_blue",
         "c": 81,
-        "r": 61,
+        "r": 65,
         "layer": "ground9",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 91,
+        "r": 65,
+        "layer": "ground9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 102,
+        "r": 65,
+        "layer": "ground9",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 96,
+        "r": 65,
+        "layer": "ground9",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 83,
+        "r": 12,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 86,
+        "r": 12,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_mvr2g292",
+        "c": 83,
+        "r": 14,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr2g292",
+        "c": 85,
+        "r": 14,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr2g292",
+        "c": 87,
+        "r": 14,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 82,
+        "r": 12,
+        "layer": "ground6",
+        "oy": 8,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 12,
+        "layer": "ground6",
+        "ox": 8,
+        "oy": 8
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 101,
+        "r": 51,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 85,
+        "r": 54,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 81,
+        "r": 38,
+        "layer": "ground9",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 89,
+        "r": 39,
+        "layer": "ground9",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 91,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 97,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 103,
+        "r": 26,
+        "layer": "ground9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 71,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 75,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 80,
+        "r": 26,
+        "layer": "ground9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 80,
+        "r": 12,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 85,
+        "r": 15,
+        "layer": "ground9",
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 89,
+        "r": 12,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 64,
+        "r": 81,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 105,
+        "r": 76,
+        "layer": "object9",
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 40,
+        "r": 47,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 44,
+        "r": 10,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 105,
+        "r": 23,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 86,
+        "r": 49,
+        "layer": "object9",
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 71,
+        "r": 43,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 104,
+        "r": 78,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 100,
+        "r": 78,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 74,
+        "r": 68,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 105,
+        "r": 48,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 105,
+        "r": 19,
+        "layer": "object9",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 70,
+        "r": 19,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 105,
+        "r": 72,
+        "layer": "object9",
+        "oy": 30
+      },
+      {
+        "id": "tile_street_capsule_toy_machines",
+        "c": 38,
+        "r": 7,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_interactive_pickup_almond_water",
+        "c": 100,
+        "r": 75,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 37,
+        "r": 52,
+        "layer": "object14",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 36,
+        "r": 52,
+        "layer": "object14",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 36,
+        "r": 52,
+        "layer": "object14",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvpj1fdy",
+        "c": 64,
+        "r": 78,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvr11zmd",
+        "c": 70,
+        "r": 59,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 69,
+        "r": 68,
+        "layer": "object15",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 80,
+        "r": 75,
+        "layer": "object15",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 93,
+        "r": 69,
+        "layer": "object15",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 90,
+        "r": 78,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 103,
+        "r": 69,
+        "layer": "object15",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 90,
+        "r": 54,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 80,
+        "r": 45,
+        "layer": "object15",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 73,
+        "r": 55,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 91,
+        "r": 40,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 73,
+        "r": 28,
+        "layer": "object15",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 103,
+        "r": 39,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 77,
+        "r": 16,
+        "layer": "object15",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 85,
+        "r": 16,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 89,
+        "r": 14,
+        "layer": "object15",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 104,
+        "r": 32,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 92,
+        "r": 28,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_life_ring_red",
+        "c": 59,
+        "r": 78,
+        "layer": "object6",
         "ox": 30
       }
     ],
     "solid": [
-      "10,79",
-      "10,80",
-      "10,81",
-      "10,82",
-      "10,83",
       "10,84",
-      "12,80",
-      "13,80",
-      "12,81",
-      "13,81",
-      "14,80",
-      "15,80",
-      "14,81",
-      "15,81",
-      "16,80",
-      "17,80",
-      "16,81",
-      "17,81",
-      "18,80",
-      "19,80",
-      "18,81",
-      "19,81",
-      "20,80",
-      "21,80",
-      "20,81",
-      "21,81",
-      "22,80",
-      "23,80",
-      "22,81",
-      "23,81",
-      "24,80",
-      "25,80",
-      "24,81",
-      "25,81",
-      "26,80",
-      "27,80",
-      "26,81",
-      "27,81",
-      "28,80",
-      "29,80",
-      "28,81",
-      "29,81",
-      "30,80",
-      "31,80",
-      "30,81",
-      "31,81",
-      "32,80",
-      "33,80",
-      "32,81",
-      "33,81",
-      "34,80",
-      "35,80",
-      "34,81",
-      "35,81",
-      "36,80",
-      "37,80",
-      "36,81",
-      "37,81",
-      "38,80",
-      "39,80",
-      "38,81",
-      "39,81",
-      "40,80",
-      "41,80",
-      "40,81",
-      "41,81",
-      "42,80",
-      "43,80",
-      "42,81",
-      "43,81",
-      "44,80",
-      "45,80",
-      "44,81",
-      "45,81",
-      "5,79",
-      "5,80",
-      "5,81",
-      "5,82",
-      "5,83",
+      "10,85",
+      "10,86",
+      "10,87",
+      "10,88",
+      "10,89",
+      "12,85",
+      "13,85",
+      "12,86",
+      "13,86",
+      "14,85",
+      "15,85",
+      "14,86",
+      "15,86",
+      "16,85",
+      "17,85",
+      "16,86",
+      "17,86",
+      "18,85",
+      "19,85",
+      "18,86",
+      "19,86",
+      "20,85",
+      "21,85",
+      "20,86",
+      "21,86",
+      "22,85",
+      "23,85",
+      "22,86",
+      "23,86",
+      "24,85",
+      "25,85",
+      "24,86",
+      "25,86",
+      "26,85",
+      "27,85",
+      "26,86",
+      "27,86",
+      "28,85",
+      "29,85",
+      "28,86",
+      "29,86",
+      "30,85",
+      "31,85",
+      "30,86",
+      "31,86",
+      "32,85",
+      "33,85",
+      "32,86",
+      "33,86",
+      "34,85",
+      "35,85",
+      "34,86",
+      "35,86",
+      "36,85",
+      "37,85",
+      "36,86",
+      "37,86",
+      "38,85",
+      "39,85",
+      "38,86",
+      "39,86",
+      "40,85",
+      "41,85",
+      "40,86",
+      "41,86",
+      "42,85",
+      "43,85",
+      "42,86",
+      "43,86",
+      "44,85",
+      "45,85",
+      "44,86",
+      "45,86",
       "5,84",
-      "4,79",
-      "3,79",
-      "2,79",
+      "5,85",
+      "5,86",
+      "5,87",
+      "5,88",
+      "5,89",
+      "4,84",
+      "3,84",
+      "2,84",
+      "1,84",
+      "1,83",
+      "1,82",
+      "1,81",
+      "1,80",
       "1,79",
       "1,78",
       "1,77",
@@ -202626,119 +204173,119 @@ const BATTLE_MAPS = [
       "1,52",
       "1,51",
       "1,50",
-      "1,49",
-      "1,48",
-      "1,47",
-      "1,46",
-      "1,45",
+      "1,44",
+      "1,43",
+      "1,42",
+      "1,41",
+      "1,40",
       "1,39",
-      "1,38",
-      "1,37",
-      "1,36",
-      "1,35",
-      "1,34",
-      "2,32",
-      "2,33",
-      "3,32",
-      "3,33",
-      "4,32",
-      "4,33",
-      "5,32",
-      "5,33",
-      "7,32",
-      "7,33",
-      "8,32",
-      "8,33",
-      "9,32",
-      "9,33",
-      "10,32",
-      "10,33",
-      "11,32",
-      "11,33",
-      "12,32",
-      "12,33",
-      "13,32",
-      "13,33",
-      "14,32",
-      "14,33",
-      "16,33",
-      "17,33",
-      "18,33",
-      "19,33",
-      "20,33",
-      "21,33",
-      "22,33",
-      "23,33",
-      "23,32",
-      "22,32",
-      "21,32",
-      "20,32",
-      "19,32",
-      "18,32",
-      "17,32",
-      "16,32",
-      "25,33",
-      "26,33",
-      "27,33",
-      "28,33",
-      "29,33",
-      "30,33",
-      "25,32",
-      "26,32",
-      "27,32",
-      "28,32",
-      "29,32",
-      "30,32",
-      "31,32",
-      "31,33",
-      "32,32",
-      "32,33",
-      "34,32",
-      "34,33",
-      "35,32",
-      "35,33",
-      "36,32",
-      "36,33",
-      "4,75",
-      "3,75",
-      "2,75",
-      "2,76",
-      "3,76",
-      "4,76",
-      "25,75",
-      "26,75",
-      "27,75",
-      "28,75",
-      "29,75",
-      "31,75",
-      "32,75",
-      "25,74",
-      "37,75",
-      "37,74",
-      "38,74",
-      "41,74",
-      "42,74",
-      "43,74",
-      "44,74",
-      "44,75",
-      "44,76",
-      "44,77",
-      "44,78",
+      "2,37",
+      "2,38",
+      "3,37",
+      "3,38",
+      "4,37",
+      "4,38",
+      "5,37",
+      "5,38",
+      "7,37",
+      "7,38",
+      "8,37",
+      "8,38",
+      "9,37",
+      "9,38",
+      "10,37",
+      "10,38",
+      "11,37",
+      "11,38",
+      "12,37",
+      "12,38",
+      "13,37",
+      "13,38",
+      "14,37",
+      "14,38",
+      "16,38",
+      "17,38",
+      "18,38",
+      "19,38",
+      "20,38",
+      "21,38",
+      "22,38",
+      "23,38",
+      "23,37",
+      "22,37",
+      "21,37",
+      "20,37",
+      "19,37",
+      "18,37",
+      "17,37",
+      "16,37",
+      "25,38",
+      "26,38",
+      "27,38",
+      "28,38",
+      "29,38",
+      "30,38",
+      "25,37",
+      "26,37",
+      "27,37",
+      "28,37",
+      "29,37",
+      "30,37",
+      "31,37",
+      "31,38",
+      "32,37",
+      "32,38",
+      "34,37",
+      "34,38",
+      "35,37",
+      "35,38",
+      "36,37",
+      "36,38",
+      "4,80",
+      "3,80",
+      "2,80",
+      "2,81",
+      "3,81",
+      "4,81",
+      "25,80",
+      "26,80",
+      "27,80",
+      "28,80",
+      "29,80",
+      "31,80",
+      "32,80",
+      "25,79",
+      "37,80",
+      "37,79",
+      "38,79",
+      "41,79",
+      "42,79",
+      "43,79",
       "44,79",
-      "45,74",
-      "46,74",
-      "47,74",
-      "48,74",
-      "49,74",
-      "50,74",
-      "51,74",
-      "52,74",
-      "57,74",
-      "58,74",
-      "59,74",
-      "60,74",
-      "61,74",
-      "62,74",
+      "44,80",
+      "44,81",
+      "44,82",
+      "44,83",
+      "44,84",
+      "45,79",
+      "46,79",
+      "47,79",
+      "48,79",
+      "49,79",
+      "50,79",
+      "51,79",
+      "52,79",
+      "57,79",
+      "58,79",
+      "59,79",
+      "60,79",
+      "61,79",
+      "62,79",
+      "63,79",
+      "63,78",
+      "63,77",
+      "63,76",
+      "63,75",
       "63,74",
       "63,73",
       "63,72",
@@ -202752,41 +204299,94 @@ const BATTLE_MAPS = [
       "63,64",
       "63,63",
       "63,62",
-      "63,61",
-      "63,60",
-      "63,59",
-      "63,58",
-      "63,57",
-      "62,57",
-      "64,57",
-      "65,57",
-      "48,57",
-      "49,57",
-      "50,57",
-      "51,57",
-      "52,57",
-      "54,57",
-      "55,57",
-      "56,57",
-      "57,57",
-      "39,57",
-      "40,57",
-      "41,57",
-      "42,57",
-      "43,57",
-      "43,56",
-      "48,56",
-      "2,66",
-      "16,66",
-      "17,66",
-      "18,66",
-      "19,66",
-      "20,66",
-      "21,66",
-      "3,66",
-      "4,66",
-      "6,66",
-      "7,66",
+      "62,62",
+      "64,62",
+      "65,62",
+      "48,62",
+      "49,62",
+      "50,62",
+      "51,62",
+      "52,62",
+      "54,62",
+      "55,62",
+      "56,62",
+      "57,62",
+      "39,62",
+      "40,62",
+      "41,62",
+      "42,62",
+      "43,62",
+      "43,61",
+      "48,61",
+      "2,71",
+      "16,71",
+      "17,71",
+      "18,71",
+      "19,71",
+      "20,71",
+      "21,71",
+      "3,71",
+      "4,71",
+      "6,71",
+      "7,71",
+      "8,71",
+      "9,71",
+      "10,71",
+      "11,71",
+      "12,71",
+      "13,71",
+      "14,71",
+      "15,71",
+      "23,71",
+      "24,71",
+      "25,71",
+      "25,72",
+      "25,73",
+      "25,74",
+      "25,75",
+      "25,76",
+      "25,77",
+      "25,78",
+      "26,75",
+      "27,75",
+      "28,75",
+      "29,75",
+      "30,75",
+      "31,75",
+      "32,75",
+      "32,74",
+      "33,74",
+      "34,74",
+      "35,74",
+      "36,74",
+      "37,74",
+      "32,76",
+      "32,77",
+      "32,78",
+      "32,79",
+      "38,72",
+      "38,73",
+      "38,74",
+      "38,75",
+      "38,76",
+      "38,77",
+      "38,78",
+      "38,71",
+      "38,70",
+      "38,69",
+      "35,71",
+      "36,71",
+      "37,71",
+      "33,71",
+      "32,71",
+      "31,71",
+      "30,71",
+      "29,71",
+      "28,71",
+      "27,71",
+      "26,71",
+      "24,78",
+      "24,79",
       "8,66",
       "9,66",
       "10,66",
@@ -202795,89 +204395,56 @@ const BATTLE_MAPS = [
       "13,66",
       "14,66",
       "15,66",
-      "23,66",
-      "24,66",
-      "25,66",
-      "25,67",
-      "25,68",
-      "25,69",
-      "25,70",
-      "25,71",
-      "25,72",
-      "25,73",
-      "26,70",
-      "27,70",
-      "28,70",
-      "29,70",
-      "30,70",
-      "31,70",
-      "32,70",
-      "32,69",
-      "33,69",
-      "34,69",
-      "35,69",
-      "36,69",
-      "37,69",
-      "32,71",
-      "32,72",
-      "32,73",
-      "32,74",
-      "38,67",
-      "38,68",
-      "38,69",
-      "38,70",
-      "38,71",
-      "38,72",
-      "38,73",
-      "38,66",
-      "38,65",
-      "38,64",
-      "35,66",
-      "36,66",
-      "37,66",
-      "33,66",
-      "32,66",
-      "31,66",
-      "30,66",
-      "29,66",
-      "28,66",
-      "27,66",
-      "26,66",
-      "24,73",
-      "24,74",
-      "8,61",
-      "9,61",
-      "10,61",
-      "11,61",
-      "12,61",
-      "13,61",
-      "14,61",
-      "15,61",
-      "16,61",
-      "17,61",
-      "7,61",
-      "7,62",
-      "7,63",
-      "7,64",
+      "16,66",
+      "17,66",
+      "7,66",
+      "7,67",
+      "7,68",
+      "7,69",
+      "7,70",
       "7,65",
-      "7,60",
-      "8,60",
-      "9,60",
-      "10,60",
-      "11,60",
-      "12,60",
-      "13,60",
-      "14,60",
-      "15,60",
-      "16,60",
-      "17,60",
-      "15,52",
-      "15,53",
-      "15,54",
-      "15,55",
-      "15,56",
+      "8,65",
+      "9,65",
+      "10,65",
+      "11,65",
+      "12,65",
+      "13,65",
+      "14,65",
+      "15,65",
+      "16,65",
+      "17,65",
       "15,57",
       "15,58",
+      "15,59",
+      "15,60",
+      "15,61",
+      "15,62",
+      "15,63",
+      "16,59",
+      "17,59",
+      "18,59",
+      "19,59",
+      "20,59",
+      "21,59",
+      "22,59",
+      "23,59",
+      "24,59",
+      "25,59",
+      "26,59",
+      "27,59",
+      "28,59",
+      "29,59",
+      "30,59",
+      "31,59",
+      "32,59",
+      "33,59",
+      "34,59",
+      "2,64",
+      "2,63",
+      "3,63",
+      "3,64",
+      "4,64",
+      "4,63",
       "16,54",
       "17,54",
       "18,54",
@@ -202897,76 +204464,46 @@ const BATTLE_MAPS = [
       "32,54",
       "33,54",
       "34,54",
-      "2,59",
-      "2,58",
-      "3,58",
-      "3,59",
-      "4,59",
-      "4,58",
+      "35,54",
+      "36,54",
+      "37,54",
+      "16,53",
+      "16,52",
+      "16,51",
+      "16,50",
       "16,49",
-      "17,49",
-      "18,49",
-      "19,49",
-      "20,49",
-      "21,49",
-      "22,49",
-      "23,49",
-      "24,49",
-      "25,49",
-      "26,49",
-      "27,49",
-      "28,49",
-      "29,49",
-      "30,49",
-      "31,49",
-      "32,49",
-      "33,49",
-      "34,49",
-      "35,49",
-      "36,49",
-      "37,49",
       "16,48",
       "16,47",
       "16,46",
       "16,45",
       "16,44",
       "16,43",
-      "16,42",
-      "16,41",
-      "16,40",
-      "16,39",
-      "16,38",
-      "11,38",
-      "12,38",
-      "13,38",
-      "14,38",
-      "15,38",
-      "11,45",
-      "12,45",
-      "13,45",
-      "14,45",
-      "15,45",
-      "6,45",
-      "5,45",
-      "4,45",
-      "3,45",
-      "2,45",
-      "6,43",
-      "7,43",
-      "8,43",
-      "6,44",
-      "11,44",
-      "31,43",
-      "32,43",
-      "34,43",
-      "35,43",
-      "36,43",
-      "37,43",
-      "38,43",
-      "38,44",
-      "38,45",
-      "38,46",
-      "38,47",
+      "11,43",
+      "12,43",
+      "13,43",
+      "14,43",
+      "15,43",
+      "11,50",
+      "12,50",
+      "13,50",
+      "14,50",
+      "15,50",
+      "6,50",
+      "5,50",
+      "4,50",
+      "3,50",
+      "2,50",
+      "6,48",
+      "7,48",
+      "8,48",
+      "6,49",
+      "11,49",
+      "31,48",
+      "32,48",
+      "34,48",
+      "35,48",
+      "36,48",
+      "37,48",
       "38,48",
       "38,49",
       "38,50",
@@ -202981,250 +204518,288 @@ const BATTLE_MAPS = [
       "38,59",
       "38,60",
       "38,61",
-      "37,61",
-      "36,61",
-      "35,61",
-      "34,61",
-      "33,61",
-      "32,61",
-      "31,61",
-      "30,61",
-      "29,61",
-      "28,61",
-      "27,61",
-      "26,61",
-      "18,60",
-      "18,61",
-      "26,60",
-      "26,59",
-      "26,58",
-      "26,57",
-      "18,59",
-      "18,58",
-      "18,57",
-      "19,58",
-      "20,58",
-      "21,58",
-      "22,58",
-      "23,58",
-      "24,58",
-      "25,58",
-      "19,57",
-      "20,57",
-      "21,57",
-      "22,57",
-      "23,57",
-      "24,57",
-      "25,57",
-      "43,55",
-      "48,55",
+      "38,62",
+      "38,63",
+      "38,64",
+      "38,65",
+      "38,66",
+      "37,66",
+      "36,66",
+      "35,66",
+      "34,66",
+      "33,66",
+      "32,66",
+      "31,66",
+      "30,66",
+      "29,66",
+      "28,66",
+      "27,66",
+      "26,66",
+      "18,65",
+      "18,66",
+      "26,65",
+      "26,64",
+      "26,63",
+      "26,62",
+      "18,64",
+      "18,63",
+      "18,62",
+      "19,63",
+      "20,63",
+      "21,63",
+      "22,63",
+      "23,63",
+      "24,63",
+      "25,63",
+      "19,62",
+      "20,62",
+      "21,62",
+      "22,62",
+      "23,62",
+      "24,62",
+      "25,62",
+      "43,60",
+      "48,60",
+      "44,60",
+      "57,61",
+      "57,60",
+      "61,60",
+      "62,60",
+      "62,61",
+      "44,59",
+      "44,58",
+      "44,57",
+      "44,56",
       "44,55",
-      "57,56",
-      "57,55",
-      "61,55",
-      "62,55",
-      "62,56",
       "44,54",
       "44,53",
       "44,52",
       "44,51",
       "44,50",
-      "44,49",
-      "44,48",
-      "44,47",
-      "44,46",
-      "44,45",
-      "46,45",
-      "47,45",
-      "48,45",
-      "49,45",
-      "50,45",
-      "51,45",
-      "52,45",
-      "53,45",
-      "54,45",
-      "56,45",
-      "57,45",
-      "58,45",
-      "59,45",
-      "60,45",
-      "61,45",
-      "61,46",
-      "61,47",
-      "61,48",
-      "61,49",
+      "46,50",
+      "47,50",
+      "48,50",
+      "49,50",
+      "50,50",
+      "51,50",
+      "52,50",
+      "53,50",
+      "54,50",
+      "56,50",
+      "57,50",
+      "58,50",
+      "59,50",
+      "60,50",
       "61,50",
       "61,51",
-      "47,48",
-      "47,49",
-      "47,50",
-      "47,51",
-      "48,48",
-      "49,48",
-      "50,48",
-      "51,48",
-      "52,48",
-      "53,48",
-      "54,48",
-      "55,48",
-      "56,48",
-      "57,48",
-      "58,48",
-      "58,49",
-      "58,50",
-      "58,51",
-      "47,52",
+      "61,52",
+      "61,53",
+      "61,54",
+      "61,55",
+      "61,56",
       "47,53",
       "47,54",
       "47,55",
       "47,56",
-      "58,52",
+      "48,53",
+      "49,53",
+      "50,53",
+      "51,53",
+      "52,53",
+      "53,53",
+      "54,53",
+      "55,53",
+      "56,53",
+      "57,53",
       "58,53",
       "58,54",
       "58,55",
-      "61,52",
-      "61,53",
-      "61,54",
-      "17,42",
-      "21,42",
-      "25,42",
-      "26,42",
-      "27,42",
-      "29,42",
-      "30,42",
-      "30,43",
-      "18,42",
-      "21,41",
-      "22,41",
-      "25,41",
-      "17,39",
-      "18,39",
-      "19,39",
-      "20,39",
-      "21,39",
-      "21,40",
-      "25,40",
-      "25,39",
-      "26,39",
-      "27,39",
-      "28,39",
-      "29,39",
-      "30,39",
-      "31,39",
-      "32,39",
-      "33,39",
-      "34,39",
-      "35,39",
-      "36,39",
-      "37,39",
-      "38,39",
-      "38,40",
-      "38,41",
-      "38,42",
+      "58,56",
+      "47,57",
+      "47,58",
+      "47,59",
+      "47,60",
+      "47,61",
+      "58,57",
+      "58,58",
+      "58,59",
+      "58,60",
+      "61,57",
+      "61,58",
+      "61,59",
+      "17,47",
+      "21,47",
+      "25,47",
+      "26,47",
+      "27,47",
+      "29,47",
+      "30,47",
+      "30,48",
+      "18,47",
+      "21,46",
+      "22,46",
+      "25,46",
+      "17,44",
+      "18,44",
+      "19,44",
+      "20,44",
+      "21,44",
+      "21,45",
+      "25,45",
+      "25,44",
+      "26,44",
+      "27,44",
+      "28,44",
+      "29,44",
+      "30,44",
+      "31,44",
+      "32,44",
+      "33,44",
+      "34,44",
+      "35,44",
+      "36,44",
+      "37,44",
+      "38,44",
+      "38,45",
+      "38,46",
+      "38,47",
+      "9,36",
+      "9,35",
+      "9,34",
+      "9,33",
+      "9,32",
       "9,31",
       "9,30",
       "9,29",
       "9,28",
       "9,27",
-      "9,26",
-      "9,25",
-      "9,24",
-      "9,23",
-      "9,22",
-      "11,22",
-      "11,23",
-      "11,24",
-      "11,25",
-      "11,26",
       "11,27",
       "11,28",
       "11,29",
       "11,30",
       "11,31",
-      "18,22",
-      "18,23",
-      "18,24",
-      "18,25",
-      "18,26",
+      "11,32",
+      "11,33",
+      "11,34",
+      "11,35",
+      "11,36",
       "18,27",
       "18,28",
       "18,29",
       "18,30",
       "18,31",
-      "20,22",
-      "20,23",
-      "20,24",
-      "20,25",
-      "20,26",
+      "18,32",
+      "18,33",
+      "18,34",
+      "18,35",
+      "18,36",
       "20,27",
       "20,28",
       "20,29",
       "20,30",
       "20,31",
-      "27,22",
-      "27,23",
-      "27,24",
-      "27,25",
-      "27,26",
+      "20,32",
+      "20,33",
+      "20,34",
+      "20,35",
+      "20,36",
+      "27,27",
       "27,28",
       "27,29",
       "27,30",
       "27,31",
-      "29,22",
-      "29,23",
-      "29,24",
-      "29,25",
-      "29,26",
+      "27,33",
+      "27,34",
+      "27,35",
+      "27,36",
       "29,27",
       "29,28",
       "29,29",
       "29,30",
       "29,31",
-      "36,22",
-      "36,23",
-      "36,24",
-      "36,26",
+      "29,32",
+      "29,33",
+      "29,34",
+      "29,35",
+      "29,36",
       "36,27",
       "36,28",
       "36,29",
-      "36,30",
       "36,31",
-      "36,25",
-      "10,31",
-      "21,31",
-      "27,27",
-      "30,31",
-      "37,31",
-      "37,33",
-      "37,32",
+      "36,32",
+      "36,33",
+      "36,34",
+      "36,35",
+      "36,36",
+      "36,30",
+      "10,36",
+      "21,36",
+      "27,32",
+      "30,36",
+      "37,36",
+      "37,38",
+      "37,37",
+      "4,29",
+      "5,29",
+      "8,29",
+      "7,29",
+      "13,29",
+      "14,29",
+      "16,29",
+      "17,29",
+      "21,29",
+      "22,29",
+      "23,29",
+      "25,29",
+      "26,29",
+      "30,29",
+      "31,29",
+      "32,29",
+      "34,29",
+      "35,29",
+      "1,24",
+      "2,24",
+      "3,24",
       "4,24",
       "5,24",
-      "8,24",
+      "6,24",
       "7,24",
+      "8,24",
+      "9,24",
+      "10,24",
+      "11,24",
+      "12,24",
       "13,24",
       "14,24",
+      "15,24",
       "16,24",
       "17,24",
+      "18,24",
+      "19,24",
+      "20,24",
       "21,24",
       "22,24",
       "23,24",
       "25,24",
       "26,24",
+      "27,24",
+      "29,24",
       "30,24",
       "31,24",
       "32,24",
+      "33,24",
       "34,24",
       "35,24",
-      "1,19",
+      "36,24",
+      "24,24",
+      "28,24",
       "2,19",
       "3,19",
-      "4,19",
       "5,19",
       "6,19",
       "7,19",
       "8,19",
       "9,19",
-      "10,19",
       "11,19",
       "12,19",
       "13,19",
@@ -203235,61 +204810,47 @@ const BATTLE_MAPS = [
       "18,19",
       "19,19",
       "20,19",
-      "21,19",
       "22,19",
       "23,19",
       "25,19",
       "26,19",
       "27,19",
+      "28,19",
       "29,19",
       "30,19",
       "31,19",
-      "32,19",
       "33,19",
       "34,19",
       "35,19",
       "36,19",
-      "24,19",
-      "28,19",
-      "2,14",
-      "3,14",
-      "5,14",
-      "6,14",
-      "7,14",
-      "8,14",
-      "9,14",
-      "11,14",
-      "12,14",
-      "13,14",
-      "14,14",
-      "15,14",
-      "16,14",
-      "17,14",
-      "18,14",
-      "19,14",
-      "20,14",
-      "22,14",
-      "23,14",
-      "25,14",
-      "26,14",
-      "27,14",
-      "28,14",
-      "29,14",
-      "30,14",
-      "31,14",
-      "33,14",
-      "34,14",
-      "35,14",
-      "36,14",
-      "37,20",
+      "37,25",
+      "37,26",
+      "37,24",
+      "37,23",
+      "37,22",
       "37,21",
+      "37,20",
       "37,19",
       "37,18",
-      "37,17",
-      "37,16",
-      "37,15",
-      "37,14",
-      "37,13",
+      "25,18",
+      "26,18",
+      "27,18",
+      "28,18",
+      "29,18",
+      "30,18",
+      "31,18",
+      "33,18",
+      "34,18",
+      "35,18",
+      "36,18",
+      "22,18",
+      "23,18",
+      "19,13",
+      "20,13",
+      "21,13",
+      "22,13",
+      "23,13",
+      "24,13",
       "25,13",
       "26,13",
       "27,13",
@@ -203297,87 +204858,63 @@ const BATTLE_MAPS = [
       "29,13",
       "30,13",
       "31,13",
+      "32,13",
       "33,13",
       "34,13",
       "35,13",
       "36,13",
-      "22,13",
-      "23,13",
-      "19,8",
-      "20,8",
-      "21,8",
-      "22,8",
-      "23,8",
-      "24,8",
-      "25,8",
-      "26,8",
-      "27,8",
-      "28,8",
-      "29,8",
-      "30,8",
-      "31,8",
-      "32,8",
-      "33,8",
-      "34,8",
-      "35,8",
-      "36,8",
+      "37,13",
+      "14,11",
+      "15,11",
+      "17,11",
+      "18,11",
+      "8,11",
+      "7,11",
+      "6,11",
+      "6,12",
+      "6,13",
+      "6,14",
+      "6,15",
+      "5,15",
+      "4,15",
+      "3,15",
+      "2,15",
+      "1,15",
+      "19,12",
+      "1,16",
+      "1,17",
+      "1,18",
+      "1,19",
+      "9,14",
+      "8,14",
+      "9,10",
+      "8,10",
+      "11,10",
+      "12,10",
+      "13,10",
+      "12,11",
+      "13,11",
+      "11,11",
+      "10,10",
+      "37,12",
+      "37,11",
+      "37,10",
+      "37,9",
       "37,8",
-      "14,6",
-      "15,6",
-      "17,6",
-      "18,6",
-      "8,6",
-      "7,6",
-      "6,6",
-      "6,7",
-      "6,8",
-      "6,9",
-      "6,10",
-      "5,10",
-      "4,10",
-      "3,10",
-      "2,10",
-      "1,10",
-      "19,7",
-      "1,11",
-      "1,12",
-      "1,13",
-      "1,14",
-      "9,9",
-      "8,9",
-      "9,5",
-      "8,5",
-      "11,5",
-      "12,5",
-      "13,5",
-      "12,6",
-      "13,6",
-      "11,6",
-      "10,5",
-      "37,7",
-      "37,6",
-      "37,5",
-      "37,4",
-      "37,3",
-      "38,3",
-      "39,3",
-      "40,3",
-      "41,3",
-      "42,3",
-      "47,3",
-      "48,3",
-      "49,3",
-      "50,3",
-      "51,3",
-      "52,3",
-      "53,3",
-      "54,3",
-      "55,3",
-      "64,6",
-      "64,7",
-      "64,8",
-      "64,9",
-      "64,10",
+      "38,8",
+      "39,8",
+      "40,8",
+      "41,8",
+      "42,8",
+      "47,8",
+      "48,8",
+      "49,8",
+      "50,8",
+      "51,8",
+      "52,8",
+      "53,8",
+      "54,8",
+      "55,8",
       "64,11",
       "64,12",
       "64,13",
@@ -203385,19 +204922,19 @@ const BATTLE_MAPS = [
       "64,15",
       "64,16",
       "64,17",
+      "64,18",
       "64,19",
       "64,20",
+      "64,21",
       "64,22",
-      "64,23",
       "64,24",
       "64,25",
-      "64,18",
-      "64,21",
-      "64,26",
       "64,27",
       "64,28",
       "64,29",
       "64,30",
+      "64,23",
+      "64,26",
       "64,31",
       "64,32",
       "64,33",
@@ -203408,186 +204945,224 @@ const BATTLE_MAPS = [
       "64,38",
       "64,39",
       "64,40",
+      "64,41",
       "64,42",
       "64,43",
       "64,44",
       "64,45",
-      "64,46",
       "64,47",
       "64,48",
-      "64,41",
       "64,49",
       "64,50",
       "64,51",
-      "62,53",
-      "63,53",
-      "64,53",
       "64,52",
-      "10,38",
-      "7,38",
-      "6,38",
-      "5,38",
-      "4,38",
-      "3,38",
-      "2,38",
-      "7,39",
-      "7,40",
-      "7,41",
-      "7,42",
-      "10,39",
-      "10,40",
-      "10,42",
-      "39,62",
-      "40,63",
-      "40,64",
-      "39,64",
-      "39,65",
-      "58,66",
-      "58,65",
-      "59,65",
-      "1,15",
-      "1,16",
-      "1,18",
-      "1,17",
-      "22,60",
-      "22,61",
-      "21,61",
-      "21,60",
-      "20,60",
-      "20,61",
-      "19,61",
-      "19,60",
-      "26,67",
-      "27,67",
-      "28,67",
-      "37,73",
-      "17,40",
-      "17,41",
-      "18,40",
-      "18,41",
-      "19,40",
-      "20,40",
-      "20,41",
-      "9,8",
-      "10,8",
-      "18,62",
-      "18,63",
-      "8,65",
-      "9,65",
-      "10,65",
-      "11,65",
-      "12,65",
-      "13,65",
-      "14,65",
-      "15,65",
-      "16,65",
-      "17,65",
-      "19,65",
-      "20,65",
+      "64,53",
+      "64,46",
+      "64,54",
+      "64,55",
+      "64,56",
+      "62,58",
+      "63,58",
+      "64,58",
+      "64,57",
+      "10,43",
+      "7,43",
+      "6,43",
+      "5,43",
+      "4,43",
+      "3,43",
+      "2,43",
+      "7,44",
+      "7,45",
+      "7,46",
+      "7,47",
+      "10,44",
+      "10,45",
+      "10,47",
+      "39,67",
+      "40,68",
+      "40,69",
+      "39,69",
+      "39,70",
+      "58,71",
+      "58,70",
+      "59,70",
+      "1,20",
+      "1,21",
+      "1,23",
+      "1,22",
+      "22,65",
+      "22,66",
+      "21,66",
       "21,65",
-      "18,65",
-      "23,65",
-      "24,65",
-      "6,65",
-      "4,65",
-      "3,65",
-      "2,65",
-      "33,65",
-      "32,65",
-      "31,65",
-      "30,65",
-      "29,65",
-      "28,65",
+      "20,65",
+      "20,66",
+      "19,66",
+      "19,65",
+      "26,72",
+      "27,72",
+      "28,72",
+      "37,78",
+      "17,45",
+      "17,46",
+      "18,45",
+      "18,46",
+      "19,45",
+      "20,45",
+      "20,46",
+      "9,13",
+      "10,13",
+      "18,67",
+      "18,68",
+      "8,70",
+      "9,70",
+      "10,70",
+      "11,70",
+      "12,70",
+      "13,70",
+      "14,70",
+      "15,70",
+      "16,70",
+      "17,70",
+      "19,70",
+      "20,70",
+      "21,70",
+      "18,70",
+      "23,70",
+      "24,70",
+      "6,70",
+      "4,70",
+      "3,70",
+      "2,70",
+      "33,70",
+      "32,70",
+      "31,70",
+      "30,70",
+      "29,70",
+      "28,70",
+      "27,70",
+      "26,70",
+      "35,70",
+      "36,70",
+      "37,70",
       "27,65",
-      "26,65",
+      "28,65",
+      "29,65",
+      "30,65",
+      "31,65",
+      "32,65",
+      "33,65",
+      "34,65",
       "35,65",
       "36,65",
       "37,65",
-      "27,60",
-      "28,60",
-      "29,60",
-      "30,60",
-      "31,60",
-      "32,60",
-      "33,60",
-      "34,60",
-      "35,60",
-      "36,60",
-      "37,60",
-      "16,53",
-      "17,53",
-      "18,53",
-      "19,53",
-      "20,53",
-      "21,53",
-      "22,53",
-      "23,53",
-      "24,53",
-      "25,53",
-      "26,53",
-      "27,53",
-      "28,53",
-      "29,53",
-      "30,53",
-      "31,53",
-      "32,53",
-      "33,53",
-      "34,53",
-      "17,47",
-      "18,47",
-      "19,47",
-      "20,47",
-      "21,47",
-      "22,47",
-      "23,47",
-      "24,47",
-      "25,47",
-      "26,47",
-      "27,47",
-      "28,47",
-      "29,47",
-      "30,47",
+      "16,58",
+      "17,58",
+      "18,58",
+      "19,58",
+      "20,58",
+      "21,58",
+      "22,58",
+      "23,58",
+      "24,58",
+      "25,58",
+      "26,58",
+      "27,58",
+      "28,58",
+      "29,58",
+      "30,58",
+      "31,58",
+      "32,58",
+      "33,58",
+      "34,58",
+      "17,52",
+      "18,52",
+      "19,52",
+      "20,52",
+      "21,52",
+      "22,52",
+      "23,52",
+      "24,52",
+      "25,52",
+      "26,52",
+      "27,52",
+      "28,52",
+      "29,52",
+      "30,52",
+      "31,52",
+      "32,52",
+      "33,52",
+      "34,52",
       "31,47",
       "32,47",
-      "33,47",
       "34,47",
-      "31,42",
-      "32,42",
-      "34,42",
-      "35,42",
-      "36,42",
-      "37,42",
-      "29,41",
-      "27,41",
-      "26,41",
-      "31,38",
-      "32,38",
-      "33,38",
-      "34,38",
-      "35,38",
-      "36,38",
-      "37,38",
-      "38,38",
-      "25,38",
-      "26,38",
-      "27,38",
-      "28,38",
-      "29,38",
-      "30,38",
-      "21,38",
-      "20,38",
-      "19,38",
-      "18,38",
-      "17,38",
+      "35,47",
+      "36,47",
+      "37,47",
+      "29,46",
+      "27,46",
+      "26,46",
+      "31,43",
+      "32,43",
+      "33,43",
+      "34,43",
+      "35,43",
+      "36,43",
+      "37,43",
+      "38,43",
+      "25,43",
+      "26,43",
+      "27,43",
+      "28,43",
+      "29,43",
+      "30,43",
+      "21,43",
+      "20,43",
+      "19,43",
+      "18,43",
+      "17,43",
+      "2,23",
+      "3,23",
+      "4,23",
+      "5,23",
+      "6,23",
+      "7,23",
+      "8,23",
+      "9,23",
+      "10,23",
+      "11,23",
+      "12,23",
+      "13,23",
+      "14,23",
+      "15,23",
+      "16,23",
+      "17,23",
+      "18,23",
+      "19,23",
+      "20,23",
+      "21,23",
+      "22,23",
+      "23,23",
+      "24,23",
+      "25,23",
+      "26,23",
+      "27,23",
+      "28,23",
+      "29,23",
+      "30,23",
+      "31,23",
+      "32,23",
+      "33,23",
+      "34,23",
+      "35,23",
+      "36,23",
       "2,18",
       "3,18",
-      "4,18",
       "5,18",
       "6,18",
       "7,18",
       "8,18",
       "9,18",
-      "10,18",
       "11,18",
       "12,18",
       "13,18",
@@ -203598,343 +205173,9 @@ const BATTLE_MAPS = [
       "18,18",
       "19,18",
       "20,18",
-      "21,18",
-      "22,18",
-      "23,18",
-      "24,18",
-      "25,18",
-      "26,18",
-      "27,18",
-      "28,18",
-      "29,18",
-      "30,18",
-      "31,18",
-      "32,18",
-      "33,18",
-      "34,18",
-      "35,18",
-      "36,18",
-      "2,13",
-      "3,13",
-      "5,13",
-      "6,13",
-      "7,13",
-      "8,13",
-      "9,13",
-      "11,13",
-      "12,13",
-      "13,13",
-      "14,13",
-      "15,13",
-      "16,13",
-      "17,13",
-      "18,13",
-      "19,13",
-      "20,13",
-      "44,44",
-      "46,44",
-      "47,44",
-      "48,44",
-      "49,44",
-      "50,44",
-      "51,44",
-      "52,44",
-      "53,44",
-      "54,44",
-      "56,44",
-      "57,44",
-      "58,44",
-      "59,44",
-      "60,44",
-      "49,56",
-      "50,56",
-      "51,56",
-      "52,56",
-      "53,56",
-      "54,56",
-      "55,56",
-      "56,56",
-      "39,56",
-      "40,56",
-      "41,56",
-      "42,56",
-      "63,56",
-      "64,56",
-      "65,56",
-      "62,54",
-      "41,73",
-      "42,73",
-      "43,73",
-      "44,73",
-      "26,71",
-      "27,71",
-      "28,71",
-      "30,71",
-      "31,71",
-      "29,71",
-      "26,72",
-      "27,72",
-      "28,72",
-      "29,72",
-      "30,72",
-      "31,72",
-      "8,62",
-      "9,62",
-      "10,62",
-      "11,62",
-      "12,62",
-      "13,62",
-      "15,62",
-      "16,62",
-      "17,62",
-      "14,62",
-      "17,63",
-      "16,63",
-      "15,63",
-      "14,63",
-      "13,63",
-      "12,63",
-      "11,63",
-      "10,63",
-      "9,63",
-      "8,63",
-      "8,64",
-      "9,64",
-      "10,64",
-      "11,64",
-      "12,64",
-      "13,64",
-      "14,64",
-      "15,64",
-      "16,64",
-      "17,64",
-      "18,64",
-      "0,22",
-      "1,22",
-      "2,22",
-      "0,20",
-      "0,21",
-      "1,20",
-      "1,21",
-      "2,20",
-      "2,21",
-      "3,20",
-      "4,20",
-      "5,20",
-      "6,20",
-      "7,20",
-      "8,20",
-      "9,20",
-      "10,20",
-      "11,20",
-      "12,20",
-      "13,20",
-      "14,20",
-      "16,20",
-      "17,20",
-      "18,20",
-      "19,20",
-      "20,20",
-      "21,20",
-      "15,20",
-      "3,21",
-      "4,21",
-      "5,21",
-      "6,21",
-      "8,21",
-      "9,21",
-      "10,21",
-      "11,21",
-      "12,21",
-      "14,21",
-      "15,21",
-      "16,21",
-      "17,21",
-      "18,21",
-      "20,21",
-      "21,21",
-      "22,21",
-      "7,21",
-      "13,21",
-      "19,21",
-      "22,20",
-      "0,23",
-      "1,23",
-      "2,23",
-      "0,24",
-      "1,24",
-      "0,25",
-      "1,25",
-      "0,26",
-      "1,26",
-      "0,27",
-      "1,27",
-      "0,28",
-      "1,28",
-      "0,29",
-      "1,29",
-      "0,30",
-      "1,30",
-      "0,31",
-      "1,31",
-      "2,31",
-      "2,30",
-      "2,27",
-      "2,26",
-      "2,25",
-      "2,24",
-      "2,29",
-      "2,28",
-      "23,20",
-      "24,20",
-      "25,20",
-      "27,20",
-      "28,20",
-      "29,20",
-      "31,20",
-      "32,20",
-      "33,20",
-      "34,20",
-      "35,20",
-      "30,20",
-      "26,20",
-      "36,20",
-      "36,21",
-      "35,21",
-      "34,21",
-      "33,21",
-      "32,21",
-      "31,21",
-      "30,21",
-      "29,21",
-      "28,21",
-      "27,21",
-      "26,21",
-      "25,21",
-      "24,21",
-      "23,21",
-      "28,22",
-      "28,23",
-      "28,24",
-      "28,25",
-      "28,26",
-      "28,27",
-      "28,28",
-      "28,29",
-      "28,30",
-      "28,31",
-      "19,22",
-      "19,23",
-      "19,24",
-      "19,25",
-      "19,26",
-      "19,27",
-      "19,28",
-      "19,29",
-      "19,30",
-      "19,31",
-      "10,41",
-      "11,39",
-      "12,39",
-      "13,39",
-      "14,39",
-      "15,39",
-      "11,40",
-      "12,40",
-      "13,40",
-      "14,40",
-      "15,40",
-      "11,41",
-      "12,41",
-      "13,41",
-      "14,41",
-      "15,41",
-      "11,42",
-      "12,42",
-      "13,42",
-      "14,42",
-      "15,42",
-      "13,43",
-      "14,43",
-      "15,43",
-      "12,43",
-      "12,44",
-      "13,44",
-      "14,44",
-      "15,44",
-      "11,43",
-      "10,43",
-      "6,39",
-      "5,39",
-      "4,39",
-      "3,39",
-      "2,39",
-      "2,40",
-      "4,40",
-      "5,40",
-      "6,40",
-      "6,41",
-      "5,41",
-      "4,41",
-      "3,41",
-      "2,41",
-      "3,40",
-      "6,42",
-      "5,42",
-      "4,42",
-      "3,42",
-      "2,42",
-      "5,43",
-      "4,43",
-      "3,43",
-      "2,43",
-      "5,44",
-      "4,44",
-      "3,44",
-      "2,44",
-      "7,5",
-      "6,5",
-      "15,5",
-      "14,5",
-      "17,5",
-      "18,5",
-      "20,7",
-      "21,7",
-      "22,7",
-      "23,7",
-      "24,7",
-      "25,7",
-      "26,7",
-      "27,7",
-      "28,7",
-      "29,7",
-      "30,7",
-      "31,7",
-      "32,7",
-      "33,7",
-      "34,7",
-      "35,7",
-      "36,7",
-      "26,40",
-      "27,40",
-      "28,40",
-      "29,40",
-      "30,40",
-      "30,41",
-      "31,40",
-      "32,40",
-      "33,40",
-      "34,40",
-      "35,40",
-      "36,40",
-      "37,40",
-      "31,41",
-      "32,41",
-      "33,41",
-      "34,41",
-      "35,41",
-      "36,41",
-      "37,41",
+      "44,49",
+      "46,49",
+      "47,49",
       "48,49",
       "49,49",
       "50,49",
@@ -203942,466 +205183,300 @@ const BATTLE_MAPS = [
       "52,49",
       "53,49",
       "54,49",
-      "55,49",
       "56,49",
       "57,49",
-      "57,50",
-      "56,50",
-      "54,50",
-      "52,50",
-      "51,50",
-      "50,50",
-      "49,50",
-      "48,50",
-      "53,50",
-      "55,50",
-      "48,51",
-      "49,51",
-      "50,51",
-      "51,51",
-      "52,51",
-      "53,51",
-      "54,51",
-      "55,51",
-      "56,51",
-      "57,51",
-      "39,55",
-      "40,55",
-      "41,55",
-      "42,55",
-      "43,54",
-      "42,54",
-      "41,54",
-      "40,54",
-      "39,54",
-      "39,53",
-      "40,53",
-      "41,53",
-      "42,53",
-      "43,53",
-      "43,52",
-      "42,52",
-      "41,52",
-      "40,52",
-      "39,52",
-      "20,3",
-      "21,3",
-      "22,3",
-      "20,4",
-      "21,4",
-      "22,4",
-      "20,5",
-      "21,5",
-      "22,5",
-      "23,3",
-      "24,3",
-      "25,3",
-      "23,4",
-      "24,4",
-      "25,4",
-      "23,5",
-      "24,5",
-      "25,5",
-      "26,3",
-      "27,3",
-      "28,3",
-      "26,4",
-      "27,4",
-      "28,4",
-      "26,5",
-      "27,5",
-      "28,5",
-      "20,0",
-      "21,0",
-      "22,0",
-      "20,1",
-      "21,1",
-      "22,1",
-      "20,2",
-      "21,2",
-      "22,2",
-      "23,0",
-      "23,1",
-      "23,2",
-      "24,0",
-      "24,1",
-      "24,2",
-      "25,0",
-      "25,1",
-      "25,2",
-      "26,0",
-      "26,1",
-      "26,2",
-      "27,0",
-      "27,1",
-      "27,2",
-      "28,0",
-      "28,1",
-      "28,2",
-      "29,0",
-      "29,1",
-      "29,2",
-      "30,0",
-      "30,1",
-      "30,2",
-      "31,0",
-      "31,1",
-      "31,2",
-      "32,0",
-      "32,1",
-      "32,2",
-      "33,0",
-      "33,1",
-      "33,2",
-      "34,1",
-      "34,2",
-      "32,3",
-      "33,3",
-      "35,1",
-      "35,2",
-      "36,1",
-      "36,2",
-      "34,0",
-      "35,0",
-      "36,0",
-      "31,3",
-      "31,4",
-      "32,4",
-      "33,4",
-      "31,5",
-      "32,5",
-      "33,5",
-      "29,3",
-      "30,3",
-      "29,4",
-      "30,4",
-      "29,5",
-      "30,5",
-      "3,7",
-      "4,7",
-      "5,7",
-      "2,5",
-      "2,6",
-      "2,7",
-      "1,5",
-      "1,6",
-      "1,7",
-      "2,4",
-      "3,4",
-      "4,4",
-      "5,4",
-      "3,5",
-      "4,5",
-      "5,5",
-      "3,6",
-      "4,6",
-      "5,6",
-      "3,3",
-      "4,3",
-      "5,3",
-      "3,2",
-      "4,2",
-      "5,2",
-      "3,1",
-      "4,1",
-      "5,1",
-      "3,0",
-      "4,0",
-      "5,0",
-      "2,1",
-      "2,2",
-      "2,3",
-      "1,0",
-      "2,0",
-      "6,0",
-      "7,0",
-      "8,0",
-      "6,1",
-      "7,1",
-      "8,1",
-      "6,2",
-      "7,2",
-      "8,2",
-      "9,0",
-      "9,1",
-      "9,2",
-      "10,0",
-      "10,1",
-      "10,2",
-      "11,0",
-      "11,1",
-      "11,2",
-      "12,0",
-      "12,1",
-      "12,2",
-      "13,0",
-      "14,0",
-      "13,1",
-      "14,1",
-      "13,2",
-      "14,2",
-      "15,0",
-      "15,1",
-      "15,2",
-      "16,0",
-      "16,1",
-      "16,2",
-      "17,0",
-      "17,1",
-      "17,2",
-      "18,0",
-      "18,1",
-      "18,2",
-      "19,0",
-      "19,1",
-      "19,2",
-      "6,3",
-      "7,3",
-      "9,3",
-      "10,3",
-      "11,3",
-      "12,3",
-      "13,3",
-      "14,3",
-      "15,3",
-      "16,3",
-      "17,3",
-      "18,3",
-      "19,3",
-      "8,3",
-      "34,3",
-      "34,4",
-      "34,5",
-      "35,3",
-      "36,3",
-      "36,4",
-      "35,4",
-      "35,5",
-      "36,5",
-      "0,7",
-      "0,6",
-      "0,5",
-      "0,4",
-      "1,2",
-      "1,3",
-      "1,4",
-      "0,3",
-      "0,2",
-      "0,1",
-      "0,0",
-      "1,1",
-      "0,8",
-      "0,9",
-      "0,11",
-      "0,12",
-      "0,13",
-      "0,14",
-      "0,15",
-      "0,16",
-      "0,17",
-      "0,18",
-      "0,19",
-      "0,10",
-      "38,0",
-      "39,0",
-      "40,0",
-      "38,1",
-      "39,1",
-      "40,1",
-      "38,2",
-      "39,2",
-      "40,2",
-      "37,0",
-      "37,1",
-      "37,2",
-      "41,0",
-      "42,0",
-      "43,0",
-      "41,1",
-      "42,1",
-      "43,1",
-      "41,2",
-      "42,2",
-      "43,2",
-      "44,0",
-      "44,1",
-      "44,2",
-      "45,0",
-      "45,1",
-      "45,2",
-      "46,0",
-      "46,1",
-      "46,2",
-      "47,0",
-      "47,1",
-      "47,2",
-      "48,0",
-      "49,0",
-      "48,1",
-      "49,1",
-      "48,2",
-      "49,2",
-      "50,0",
-      "50,1",
-      "50,2",
-      "51,0",
-      "51,1",
-      "51,2",
-      "52,0",
-      "52,1",
-      "52,2",
-      "53,0",
-      "54,0",
-      "53,1",
-      "54,1",
-      "53,2",
-      "54,2",
-      "55,0",
-      "56,0",
-      "55,1",
-      "56,1",
-      "55,2",
-      "56,2",
-      "57,0",
-      "58,0",
-      "57,1",
-      "58,1",
-      "57,2",
-      "58,2",
-      "59,0",
-      "60,0",
-      "61,0",
-      "59,1",
-      "60,1",
-      "61,1",
-      "59,2",
-      "60,2",
-      "61,2",
-      "63,0",
-      "64,0",
-      "63,1",
-      "64,1",
-      "62,2",
-      "63,2",
-      "64,2",
-      "61,44",
-      "26,69",
-      "27,69",
-      "28,69",
-      "29,69",
-      "30,69",
-      "31,69",
-      "7,59",
-      "8,59",
-      "9,59",
-      "10,59",
-      "11,59",
-      "12,59",
-      "13,59",
-      "14,59",
-      "16,59",
-      "17,59",
-      "15,59",
-      "59,66",
-      "57,65",
-      "64,3",
-      "64,4",
-      "64,5",
-      "61,3",
-      "62,3",
-      "63,3",
-      "62,1",
-      "62,0",
-      "45,73",
-      "46,73",
-      "47,73",
-      "48,73",
-      "49,73",
-      "50,73",
-      "51,73",
-      "52,73",
-      "57,73",
-      "58,73",
-      "59,73",
-      "60,73",
-      "61,73",
-      "62,73",
-      "26,74",
-      "27,74",
-      "28,74",
-      "29,74",
-      "31,74",
-      "43,45",
-      "43,44",
-      "56,3",
-      "57,3",
-      "58,3",
-      "59,3",
-      "60,3",
-      "32,68",
-      "33,68",
-      "34,68",
-      "35,68",
-      "36,68",
-      "37,68",
-      "9,43",
-      "3,22",
-      "3,23",
+      "58,49",
+      "59,49",
+      "60,49",
+      "49,61",
+      "50,61",
+      "51,61",
+      "52,61",
+      "53,61",
+      "54,61",
+      "55,61",
+      "56,61",
+      "39,61",
+      "40,61",
+      "41,61",
+      "42,61",
+      "63,61",
+      "64,61",
+      "65,61",
+      "62,59",
+      "41,78",
+      "42,78",
+      "43,78",
+      "44,78",
+      "26,76",
+      "27,76",
+      "28,76",
+      "30,76",
+      "31,76",
+      "29,76",
+      "26,77",
+      "27,77",
+      "28,77",
+      "29,77",
+      "30,77",
+      "31,77",
+      "8,67",
+      "9,67",
+      "10,67",
+      "11,67",
+      "12,67",
+      "13,67",
+      "15,67",
+      "16,67",
+      "17,67",
+      "14,67",
+      "17,68",
+      "16,68",
+      "15,68",
+      "14,68",
+      "13,68",
+      "12,68",
+      "11,68",
+      "10,68",
+      "9,68",
+      "8,68",
+      "8,69",
+      "9,69",
+      "10,69",
+      "11,69",
+      "12,69",
+      "13,69",
+      "14,69",
+      "15,69",
+      "16,69",
+      "17,69",
+      "18,69",
+      "0,27",
+      "1,27",
+      "2,27",
+      "0,25",
+      "0,26",
+      "1,25",
+      "1,26",
+      "2,25",
+      "2,26",
       "3,25",
-      "3,26",
-      "3,27",
-      "3,28",
-      "3,29",
-      "3,30",
-      "3,24",
-      "3,31",
-      "12,22",
-      "12,23",
+      "4,25",
+      "5,25",
+      "6,25",
+      "7,25",
+      "8,25",
+      "9,25",
+      "10,25",
+      "11,25",
       "12,25",
+      "13,25",
+      "14,25",
+      "16,25",
+      "17,25",
+      "18,25",
+      "19,25",
+      "20,25",
+      "21,25",
+      "15,25",
+      "3,26",
+      "4,26",
+      "5,26",
+      "6,26",
+      "8,26",
+      "9,26",
+      "10,26",
+      "11,26",
       "12,26",
-      "12,27",
-      "12,24",
-      "12,28",
-      "12,29",
-      "12,30",
-      "12,31",
-      "62,27",
-      "62,26",
-      "61,28",
-      "61,25",
-      "60,26",
-      "43,3",
-      "44,3",
-      "45,3",
-      "46,3",
-      "59,27",
-      "60,27",
-      "61,27",
-      "56,34",
-      "58,35",
-      "55,43",
-      "54,43",
-      "56,43",
-      "48,52",
-      "49,52",
-      "50,52",
-      "51,52",
-      "52,52",
-      "53,52",
-      "54,52",
-      "55,52",
-      "56,52",
-      "57,52",
-      "48,53",
-      "49,53",
-      "50,53",
-      "52,53",
-      "54,53",
-      "55,53",
-      "56,53",
-      "57,53",
-      "53,53",
-      "51,53",
+      "14,26",
+      "15,26",
+      "16,26",
+      "17,26",
+      "18,26",
+      "20,26",
+      "21,26",
+      "22,26",
+      "7,26",
+      "13,26",
+      "19,26",
+      "22,25",
+      "0,28",
+      "1,28",
+      "2,28",
+      "0,29",
+      "1,29",
+      "0,30",
+      "1,30",
+      "0,31",
+      "1,31",
+      "0,32",
+      "1,32",
+      "0,33",
+      "1,33",
+      "0,34",
+      "1,34",
+      "0,35",
+      "1,35",
+      "0,36",
+      "1,36",
+      "2,36",
+      "2,35",
+      "2,32",
+      "2,31",
+      "2,30",
+      "2,29",
+      "2,34",
+      "2,33",
+      "23,25",
+      "24,25",
+      "25,25",
+      "27,25",
+      "28,25",
+      "29,25",
+      "31,25",
+      "32,25",
+      "33,25",
+      "34,25",
+      "35,25",
+      "30,25",
+      "26,25",
+      "36,25",
+      "36,26",
+      "35,26",
+      "34,26",
+      "33,26",
+      "32,26",
+      "31,26",
+      "30,26",
+      "29,26",
+      "28,26",
+      "27,26",
+      "26,26",
+      "25,26",
+      "24,26",
+      "23,26",
+      "28,27",
+      "28,28",
+      "28,29",
+      "28,30",
+      "28,31",
+      "28,32",
+      "28,33",
+      "28,34",
+      "28,35",
+      "28,36",
+      "19,27",
+      "19,28",
+      "19,29",
+      "19,30",
+      "19,31",
+      "19,32",
+      "19,33",
+      "19,34",
+      "19,35",
+      "19,36",
+      "10,46",
+      "11,44",
+      "12,44",
+      "13,44",
+      "14,44",
+      "15,44",
+      "11,45",
+      "12,45",
+      "13,45",
+      "14,45",
+      "15,45",
+      "11,46",
+      "12,46",
+      "13,46",
+      "14,46",
+      "15,46",
+      "11,47",
+      "12,47",
+      "13,47",
+      "14,47",
+      "15,47",
+      "13,48",
+      "14,48",
+      "15,48",
+      "12,48",
+      "12,49",
+      "13,49",
+      "14,49",
+      "15,49",
+      "11,48",
+      "10,48",
+      "6,44",
+      "5,44",
+      "4,44",
+      "3,44",
+      "2,44",
+      "2,45",
+      "4,45",
+      "5,45",
+      "6,45",
+      "6,46",
+      "5,46",
+      "4,46",
+      "3,46",
+      "2,46",
+      "3,45",
+      "6,47",
+      "5,47",
+      "4,47",
+      "3,47",
+      "2,47",
+      "5,48",
+      "4,48",
+      "3,48",
+      "2,48",
+      "5,49",
+      "4,49",
+      "3,49",
+      "2,49",
+      "7,10",
+      "6,10",
+      "15,10",
+      "14,10",
+      "17,10",
+      "18,10",
+      "20,12",
+      "21,12",
+      "22,12",
+      "23,12",
+      "24,12",
+      "25,12",
+      "26,12",
+      "27,12",
+      "28,12",
+      "29,12",
+      "30,12",
+      "31,12",
+      "32,12",
+      "33,12",
+      "34,12",
+      "35,12",
+      "36,12",
+      "26,45",
+      "27,45",
+      "28,45",
+      "29,45",
+      "30,45",
+      "30,46",
+      "31,45",
+      "32,45",
+      "33,45",
+      "34,45",
+      "35,45",
+      "36,45",
+      "37,45",
+      "31,46",
+      "32,46",
+      "33,46",
+      "34,46",
+      "35,46",
+      "36,46",
+      "37,46",
       "48,54",
       "49,54",
       "50,54",
@@ -204412,456 +205487,908 @@ const BATTLE_MAPS = [
       "55,54",
       "56,54",
       "57,54",
-      "49,55",
-      "50,55",
-      "51,55",
-      "52,55",
-      "53,55",
-      "54,55",
-      "55,55",
+      "57,55",
       "56,55",
-      "64,54",
-      "64,55",
-      "65,55",
-      "65,54",
-      "65,53",
-      "65,52",
-      "65,51",
-      "66,51",
-      "66,52",
-      "66,53",
-      "66,54",
-      "0,40",
-      "0,41",
-      "0,42",
-      "0,43",
-      "0,44",
-      "1,44",
-      "1,43",
-      "1,42",
-      "1,41",
-      "1,40",
-      "0,32",
-      "0,33",
-      "1,32",
-      "1,33",
-      "1,80",
-      "2,80",
-      "3,80",
-      "4,80",
-      "2,81",
-      "3,81",
-      "1,81",
-      "4,81",
-      "0,64",
-      "0,65",
-      "0,66",
-      "0,34",
-      "1,8",
-      "2,8",
-      "3,8",
-      "4,8",
-      "5,8",
-      "1,9",
+      "54,55",
+      "52,55",
+      "51,55",
+      "50,55",
+      "49,55",
+      "48,55",
+      "53,55",
+      "55,55",
+      "48,56",
+      "49,56",
+      "50,56",
+      "51,56",
+      "52,56",
+      "53,56",
+      "54,56",
+      "55,56",
+      "56,56",
+      "57,56",
+      "39,60",
+      "40,60",
+      "41,60",
+      "42,60",
+      "43,59",
+      "42,59",
+      "41,59",
+      "40,59",
+      "39,59",
+      "39,58",
+      "40,58",
+      "41,58",
+      "42,58",
+      "43,58",
+      "43,57",
+      "42,57",
+      "41,57",
+      "40,57",
+      "39,57",
+      "20,8",
+      "21,8",
+      "22,8",
+      "20,9",
+      "21,9",
+      "22,9",
+      "20,10",
+      "21,10",
+      "22,10",
+      "23,8",
+      "24,8",
+      "25,8",
+      "23,9",
+      "24,9",
+      "25,9",
+      "23,10",
+      "24,10",
+      "25,10",
+      "26,8",
+      "27,8",
+      "28,8",
+      "26,9",
+      "27,9",
+      "28,9",
+      "26,10",
+      "27,10",
+      "28,10",
+      "20,5",
+      "21,5",
+      "22,5",
+      "20,6",
+      "21,6",
+      "22,6",
+      "20,7",
+      "21,7",
+      "22,7",
+      "23,5",
+      "23,6",
+      "23,7",
+      "24,5",
+      "24,6",
+      "24,7",
+      "25,5",
+      "25,6",
+      "25,7",
+      "26,5",
+      "26,6",
+      "26,7",
+      "27,5",
+      "27,6",
+      "27,7",
+      "28,5",
+      "28,6",
+      "28,7",
+      "29,5",
+      "29,6",
+      "29,7",
+      "30,5",
+      "30,6",
+      "30,7",
+      "31,5",
+      "31,6",
+      "31,7",
+      "32,5",
+      "32,6",
+      "32,7",
+      "33,5",
+      "33,6",
+      "33,7",
+      "34,6",
+      "34,7",
+      "32,8",
+      "33,8",
+      "35,6",
+      "35,7",
+      "36,6",
+      "36,7",
+      "34,5",
+      "35,5",
+      "36,5",
+      "31,8",
+      "31,9",
+      "32,9",
+      "33,9",
+      "31,10",
+      "32,10",
+      "33,10",
+      "29,8",
+      "30,8",
+      "29,9",
+      "30,9",
+      "29,10",
+      "30,10",
+      "3,12",
+      "4,12",
+      "5,12",
+      "2,10",
+      "2,11",
+      "2,12",
+      "1,10",
+      "1,11",
+      "1,12",
       "2,9",
       "3,9",
       "4,9",
       "5,9",
-      "8,4",
-      "7,4",
-      "6,4",
-      "11,4",
-      "12,4",
-      "13,4",
-      "14,4",
-      "15,4",
-      "16,4",
-      "17,4",
-      "18,4",
-      "20,6",
-      "21,6",
-      "22,6",
-      "23,6",
-      "24,6",
-      "25,6",
-      "26,6",
-      "27,6",
-      "28,6",
-      "29,6",
-      "30,6",
-      "31,6",
-      "32,6",
-      "33,6",
-      "34,6",
-      "35,6",
-      "36,6",
-      "19,4",
+      "3,10",
+      "4,10",
+      "5,10",
+      "3,11",
+      "4,11",
+      "5,11",
+      "3,8",
+      "4,8",
+      "5,8",
+      "3,7",
+      "4,7",
+      "5,7",
+      "3,6",
+      "4,6",
+      "5,6",
+      "3,5",
+      "4,5",
+      "5,5",
+      "2,6",
+      "2,7",
+      "2,8",
+      "1,5",
+      "2,5",
+      "6,5",
+      "7,5",
+      "8,5",
+      "6,6",
+      "7,6",
+      "8,6",
+      "6,7",
+      "7,7",
+      "8,7",
+      "9,5",
+      "9,6",
+      "9,7",
+      "10,5",
+      "10,6",
+      "10,7",
+      "11,5",
+      "11,6",
+      "11,7",
+      "12,5",
+      "12,6",
+      "12,7",
+      "13,5",
+      "14,5",
+      "13,6",
+      "14,6",
+      "13,7",
+      "14,7",
+      "15,5",
+      "15,6",
+      "15,7",
+      "16,5",
+      "16,6",
+      "16,7",
+      "17,5",
+      "17,6",
+      "17,7",
+      "18,5",
+      "18,6",
+      "18,7",
       "19,5",
-      "24,72",
-      "26,73",
-      "27,73",
-      "28,73",
-      "29,73",
-      "31,73",
-      "30,73",
-      "47,47",
-      "48,47",
-      "49,47",
-      "50,47",
-      "51,47",
-      "52,47",
-      "53,47",
-      "54,47",
-      "55,47",
-      "56,47",
-      "57,47",
-      "58,47",
-      "6,79",
-      "7,79",
-      "9,81",
-      "8,81",
-      "62,58",
-      "5,23",
-      "5,22",
-      "4,23",
-      "4,22",
-      "6,22",
-      "7,22",
-      "8,22",
-      "8,23",
-      "7,23",
-      "14,22",
-      "14,23",
-      "13,22",
-      "13,23",
-      "16,22",
-      "16,23",
-      "17,22",
-      "17,23",
-      "22,23",
-      "22,22",
-      "23,22",
-      "23,23",
-      "25,23",
-      "25,22",
-      "26,22",
-      "26,23",
-      "24,22",
-      "15,22",
-      "33,22",
-      "32,22",
-      "32,23",
-      "31,23",
-      "31,22",
-      "34,22",
-      "34,23",
-      "35,23",
-      "35,22",
-      "39,31",
-      "38,31",
-      "39,28",
-      "40,28",
-      "39,21",
-      "40,21",
-      "39,19",
-      "40,19",
-      "38,15",
-      "39,15",
-      "38,26",
-      "39,26",
-      "41,50",
-      "58,32",
-      "37,34",
-      "38,35",
-      "61,30",
-      "61,29",
-      "62,28",
-      "61,31",
-      "60,25",
-      "54,4",
-      "38,36",
-      "38,37",
-      "58,67",
       "19,6",
-      "63,54",
-      "63,55",
-      "66,55",
-      "67,55",
-      "68,55",
+      "19,7",
+      "6,8",
+      "7,8",
+      "9,8",
+      "10,8",
+      "11,8",
+      "12,8",
+      "13,8",
+      "14,8",
+      "15,8",
+      "16,8",
+      "17,8",
+      "18,8",
+      "19,8",
+      "8,8",
+      "34,8",
+      "34,9",
+      "34,10",
+      "35,8",
+      "36,8",
+      "36,9",
+      "35,9",
+      "35,10",
+      "36,10",
+      "0,12",
+      "0,11",
+      "0,10",
+      "0,9",
+      "1,7",
+      "1,8",
+      "1,9",
+      "0,8",
+      "0,7",
+      "0,6",
+      "0,5",
+      "1,6",
+      "0,13",
+      "0,14",
+      "0,16",
+      "0,17",
+      "0,18",
+      "0,19",
+      "0,20",
+      "0,21",
+      "0,22",
+      "0,23",
+      "0,24",
+      "0,15",
+      "38,5",
+      "39,5",
+      "40,5",
+      "38,6",
+      "39,6",
+      "40,6",
+      "38,7",
+      "39,7",
+      "40,7",
+      "37,5",
+      "37,6",
+      "37,7",
+      "41,5",
+      "42,5",
+      "43,5",
+      "41,6",
+      "42,6",
+      "43,6",
+      "41,7",
+      "42,7",
+      "43,7",
+      "44,5",
+      "44,6",
+      "44,7",
+      "45,5",
+      "45,6",
+      "45,7",
+      "46,5",
+      "46,6",
+      "46,7",
+      "47,5",
+      "47,6",
+      "47,7",
+      "48,5",
+      "49,5",
+      "48,6",
+      "49,6",
+      "48,7",
+      "49,7",
+      "50,5",
+      "50,6",
+      "50,7",
+      "51,5",
+      "51,6",
+      "51,7",
+      "52,5",
+      "52,6",
+      "52,7",
+      "53,5",
+      "54,5",
+      "53,6",
+      "54,6",
+      "53,7",
+      "54,7",
+      "55,5",
+      "56,5",
+      "55,6",
+      "56,6",
+      "55,7",
+      "56,7",
+      "57,5",
+      "58,5",
+      "57,6",
+      "58,6",
+      "57,7",
+      "58,7",
+      "59,5",
+      "60,5",
+      "61,5",
+      "59,6",
+      "60,6",
+      "61,6",
+      "59,7",
+      "60,7",
+      "61,7",
+      "63,5",
+      "64,5",
+      "63,6",
+      "64,6",
+      "62,7",
+      "63,7",
+      "64,7",
+      "61,49",
+      "26,74",
+      "27,74",
+      "28,74",
+      "29,74",
+      "30,74",
+      "31,74",
+      "7,64",
+      "8,64",
+      "9,64",
+      "10,64",
+      "11,64",
+      "12,64",
+      "13,64",
+      "14,64",
+      "16,64",
+      "17,64",
+      "15,64",
+      "59,71",
+      "57,70",
+      "64,8",
+      "64,9",
+      "64,10",
+      "61,8",
+      "62,8",
+      "63,8",
+      "62,6",
+      "62,5",
+      "45,78",
+      "46,78",
+      "47,78",
+      "48,78",
+      "49,78",
+      "50,78",
+      "51,78",
+      "52,78",
+      "57,78",
+      "58,78",
+      "59,78",
+      "60,78",
+      "61,78",
+      "62,78",
+      "26,79",
+      "27,79",
+      "28,79",
+      "29,79",
+      "31,79",
+      "43,50",
+      "43,49",
+      "56,8",
+      "57,8",
+      "58,8",
+      "59,8",
+      "60,8",
+      "32,73",
+      "33,73",
+      "34,73",
+      "35,73",
+      "36,73",
+      "37,73",
+      "9,48",
+      "3,27",
+      "3,28",
+      "3,30",
+      "3,31",
+      "3,32",
+      "3,33",
+      "3,34",
+      "3,35",
+      "3,29",
+      "3,36",
+      "12,27",
+      "12,28",
+      "12,30",
+      "12,31",
+      "12,32",
+      "12,29",
+      "12,33",
+      "12,34",
+      "12,35",
+      "12,36",
+      "62,32",
+      "62,31",
+      "61,33",
+      "61,30",
+      "60,31",
+      "43,8",
+      "44,8",
+      "45,8",
+      "46,8",
+      "59,32",
+      "60,32",
+      "61,32",
+      "56,39",
+      "58,40",
+      "55,48",
+      "54,48",
+      "56,48",
+      "48,57",
+      "49,57",
+      "50,57",
+      "51,57",
+      "52,57",
+      "53,57",
+      "54,57",
+      "55,57",
+      "56,57",
+      "57,57",
+      "48,58",
+      "49,58",
+      "50,58",
+      "52,58",
+      "54,58",
+      "55,58",
+      "56,58",
+      "57,58",
+      "53,58",
+      "51,58",
+      "48,59",
+      "49,59",
+      "50,59",
+      "51,59",
+      "52,59",
+      "53,59",
+      "54,59",
+      "55,59",
+      "56,59",
+      "57,59",
+      "49,60",
+      "50,60",
+      "51,60",
+      "52,60",
+      "53,60",
+      "54,60",
+      "55,60",
+      "56,60",
+      "64,59",
+      "64,60",
+      "65,60",
+      "65,59",
+      "65,58",
+      "65,57",
+      "65,56",
       "66,56",
-      "67,56",
-      "68,56",
       "66,57",
+      "66,58",
+      "66,59",
+      "0,45",
+      "0,46",
+      "0,47",
+      "0,48",
+      "0,49",
+      "1,49",
+      "1,48",
+      "1,47",
+      "1,46",
+      "1,45",
+      "0,37",
+      "0,38",
+      "1,37",
+      "1,38",
+      "1,85",
+      "2,85",
+      "3,85",
+      "4,85",
+      "2,86",
+      "3,86",
+      "1,86",
+      "4,86",
+      "0,69",
+      "0,70",
+      "0,71",
+      "0,39",
+      "1,13",
+      "2,13",
+      "3,13",
+      "4,13",
+      "5,13",
+      "1,14",
+      "2,14",
+      "3,14",
+      "4,14",
+      "5,14",
+      "8,9",
+      "7,9",
+      "6,9",
+      "11,9",
+      "12,9",
+      "13,9",
+      "14,9",
+      "15,9",
+      "16,9",
+      "17,9",
+      "18,9",
+      "20,11",
+      "21,11",
+      "22,11",
+      "23,11",
+      "24,11",
+      "25,11",
+      "26,11",
+      "27,11",
+      "28,11",
+      "29,11",
+      "30,11",
+      "31,11",
+      "32,11",
+      "33,11",
+      "34,11",
+      "35,11",
+      "36,11",
+      "19,9",
+      "19,10",
+      "24,77",
+      "26,78",
+      "27,78",
+      "28,78",
+      "29,78",
+      "31,78",
+      "30,78",
+      "47,52",
+      "48,52",
+      "49,52",
+      "50,52",
+      "51,52",
+      "52,52",
+      "53,52",
+      "54,52",
+      "55,52",
+      "56,52",
+      "57,52",
+      "58,52",
+      "6,84",
+      "7,84",
+      "9,86",
+      "8,86",
+      "62,63",
+      "5,28",
+      "5,27",
+      "4,28",
+      "4,27",
+      "6,27",
+      "7,27",
+      "8,27",
+      "8,28",
+      "7,28",
+      "14,27",
+      "14,28",
+      "13,27",
+      "13,28",
+      "16,27",
+      "16,28",
+      "17,27",
+      "17,28",
+      "22,28",
+      "22,27",
+      "23,27",
+      "23,28",
+      "25,28",
+      "25,27",
+      "26,27",
+      "26,28",
+      "24,27",
+      "15,27",
+      "33,27",
+      "32,27",
+      "32,28",
+      "31,28",
+      "31,27",
+      "34,27",
+      "34,28",
+      "35,28",
+      "35,27",
+      "39,36",
+      "38,36",
+      "39,33",
+      "40,33",
+      "39,26",
+      "40,26",
+      "39,24",
+      "40,24",
+      "38,20",
+      "39,20",
+      "38,31",
+      "39,31",
+      "41,55",
+      "58,37",
+      "37,39",
+      "38,40",
+      "61,35",
+      "61,34",
+      "62,33",
+      "61,36",
+      "60,30",
+      "54,9",
+      "38,41",
+      "38,42",
+      "58,72",
+      "19,11",
+      "63,59",
+      "63,60",
+      "66,60",
+      "67,60",
+      "68,60",
+      "66,61",
+      "67,61",
+      "68,61",
+      "66,62",
+      "67,62",
+      "68,62",
+      "69,60",
+      "69,61",
+      "69,62",
+      "70,60",
+      "70,61",
+      "70,62",
+      "68,59",
+      "69,59",
+      "70,59",
+      "68,58",
+      "69,58",
+      "70,58",
+      "67,58",
+      "67,59",
       "67,57",
       "68,57",
-      "69,55",
-      "69,56",
       "69,57",
-      "70,55",
-      "70,56",
-      "70,57",
+      "67,56",
+      "68,56",
+      "69,56",
+      "67,55",
+      "68,55",
+      "69,55",
+      "67,54",
       "68,54",
       "69,54",
       "70,54",
+      "70,55",
+      "70,56",
+      "70,57",
+      "68,51",
+      "69,51",
+      "70,51",
+      "68,52",
+      "69,52",
+      "70,52",
       "68,53",
       "69,53",
       "70,53",
-      "67,53",
-      "67,54",
-      "67,52",
-      "68,52",
-      "69,52",
       "67,51",
-      "68,51",
-      "69,51",
-      "67,50",
-      "68,50",
-      "69,50",
-      "67,49",
-      "68,49",
-      "69,49",
-      "70,49",
-      "70,50",
-      "70,51",
-      "70,52",
-      "68,46",
-      "69,46",
-      "70,46",
-      "68,47",
-      "69,47",
-      "70,47",
-      "68,48",
-      "69,48",
-      "70,48",
-      "67,46",
-      "67,47",
-      "67,48",
-      "66,46",
-      "66,47",
-      "66,48",
-      "66,49",
-      "65,47",
-      "65,48",
-      "65,49",
+      "67,52",
+      "67,53",
+      "66,51",
+      "66,52",
+      "66,53",
+      "66,54",
+      "65,52",
+      "65,53",
+      "65,54",
+      "65,55",
+      "66,55",
       "65,50",
       "66,50",
+      "67,50",
+      "65,51",
+      "65,49",
+      "66,49",
+      "67,49",
+      "66,48",
+      "67,48",
+      "68,48",
+      "68,49",
+      "68,50",
+      "66,47",
+      "67,47",
+      "68,47",
+      "69,47",
+      "69,48",
+      "69,49",
+      "70,48",
+      "70,49",
+      "69,50",
+      "70,50",
+      "67,41",
+      "68,41",
+      "69,41",
+      "67,42",
+      "68,42",
+      "69,42",
+      "67,43",
+      "68,43",
+      "69,43",
+      "66,41",
+      "66,42",
+      "66,43",
+      "65,42",
+      "65,43",
+      "65,44",
+      "66,44",
+      "67,44",
       "65,45",
       "66,45",
       "67,45",
       "65,46",
-      "65,44",
-      "66,44",
-      "67,44",
-      "66,43",
-      "67,43",
-      "68,43",
-      "68,44",
+      "66,46",
+      "67,46",
+      "65,47",
+      "65,48",
+      "68,46",
+      "69,46",
       "68,45",
-      "66,42",
-      "67,42",
-      "68,42",
-      "69,42",
-      "69,43",
-      "69,44",
-      "70,43",
-      "70,44",
       "69,45",
       "70,45",
-      "67,36",
-      "68,36",
-      "69,36",
-      "67,37",
-      "68,37",
-      "69,37",
-      "67,38",
-      "68,38",
-      "69,38",
-      "66,36",
-      "66,37",
-      "66,38",
-      "65,37",
-      "65,38",
-      "65,39",
-      "66,39",
-      "67,39",
-      "65,40",
-      "66,40",
-      "67,40",
-      "65,41",
-      "66,41",
-      "67,41",
-      "65,42",
-      "65,43",
-      "68,41",
-      "69,41",
+      "70,46",
+      "70,47",
+      "68,44",
+      "69,44",
+      "70,44",
+      "70,43",
+      "70,41",
+      "70,42",
       "68,40",
       "69,40",
       "70,40",
-      "70,41",
-      "70,42",
       "68,39",
       "69,39",
       "70,39",
+      "68,38",
+      "69,38",
       "70,38",
+      "67,38",
+      "67,39",
+      "67,40",
+      "66,38",
+      "66,39",
+      "66,40",
+      "65,38",
+      "65,39",
+      "65,40",
+      "65,41",
+      "66,28",
+      "67,28",
+      "68,28",
+      "66,29",
+      "67,29",
+      "68,29",
+      "66,30",
+      "67,30",
+      "68,30",
+      "65,28",
+      "65,29",
+      "65,30",
+      "65,31",
+      "66,31",
+      "67,31",
+      "65,32",
+      "66,32",
+      "67,32",
+      "65,33",
+      "66,33",
+      "67,33",
+      "65,34",
+      "66,34",
+      "67,34",
+      "65,35",
+      "66,35",
+      "67,35",
+      "68,34",
+      "68,35",
+      "66,36",
+      "67,36",
+      "68,36",
+      "66,37",
+      "67,37",
+      "68,37",
+      "69,35",
+      "69,36",
+      "69,37",
+      "65,36",
+      "65,37",
       "70,36",
       "70,37",
-      "68,35",
-      "69,35",
       "70,35",
-      "68,34",
       "69,34",
       "70,34",
       "68,33",
       "69,33",
       "70,33",
-      "67,33",
-      "67,34",
-      "67,35",
-      "66,33",
-      "66,34",
-      "66,35",
-      "65,33",
-      "65,34",
-      "65,35",
-      "65,36",
-      "66,23",
-      "67,23",
-      "68,23",
-      "66,24",
-      "67,24",
-      "68,24",
-      "66,25",
-      "67,25",
-      "68,25",
-      "65,23",
-      "65,24",
-      "65,25",
-      "65,26",
-      "66,26",
-      "67,26",
-      "65,27",
-      "66,27",
-      "67,27",
-      "65,28",
-      "66,28",
-      "67,28",
-      "65,29",
-      "66,29",
-      "67,29",
-      "65,30",
-      "66,30",
-      "67,30",
-      "68,29",
-      "68,30",
-      "66,31",
-      "67,31",
-      "68,31",
-      "66,32",
-      "67,32",
       "68,32",
-      "69,30",
-      "69,31",
       "69,32",
-      "65,31",
-      "65,32",
-      "70,31",
       "70,32",
+      "68,31",
+      "69,31",
+      "70,31",
+      "69,30",
       "70,30",
       "69,29",
       "70,29",
-      "68,28",
       "69,28",
       "70,28",
       "68,27",
       "69,27",
       "70,27",
+      "67,26",
       "68,26",
       "69,26",
-      "70,26",
+      "67,27",
+      "67,25",
+      "68,25",
       "69,25",
-      "70,25",
+      "67,24",
+      "68,24",
       "69,24",
+      "66,24",
+      "66,25",
+      "66,26",
+      "65,26",
+      "65,27",
+      "66,27",
+      "67,17",
+      "68,17",
+      "69,17",
+      "67,18",
+      "68,18",
+      "69,18",
+      "67,19",
+      "68,19",
+      "69,19",
+      "66,17",
+      "66,18",
+      "66,19",
+      "65,18",
+      "65,19",
+      "65,20",
+      "66,20",
+      "67,20",
+      "65,21",
+      "66,21",
+      "67,21",
+      "65,22",
+      "66,22",
+      "67,22",
+      "65,23",
+      "66,23",
+      "67,23",
+      "65,24",
+      "65,25",
+      "70,25",
+      "70,26",
       "70,24",
+      "68,23",
       "69,23",
       "70,23",
       "68,22",
       "69,22",
       "70,22",
-      "67,21",
       "68,21",
       "69,21",
-      "67,22",
-      "67,20",
+      "70,21",
       "68,20",
       "69,20",
-      "67,19",
-      "68,19",
-      "69,19",
-      "66,19",
-      "66,20",
-      "66,21",
-      "65,21",
-      "65,22",
-      "66,22",
-      "67,12",
-      "68,12",
-      "69,12",
-      "67,13",
-      "68,13",
-      "69,13",
-      "67,14",
-      "68,14",
-      "69,14",
-      "66,12",
-      "66,13",
-      "66,14",
-      "65,13",
-      "65,14",
-      "65,15",
-      "66,15",
-      "67,15",
-      "65,16",
-      "66,16",
-      "67,16",
-      "65,17",
-      "66,17",
-      "67,17",
-      "65,18",
-      "66,18",
-      "67,18",
-      "65,19",
-      "65,20",
       "70,20",
-      "70,21",
       "70,19",
-      "68,18",
-      "69,18",
-      "70,18",
-      "68,17",
-      "69,17",
-      "70,17",
-      "68,16",
-      "69,16",
-      "70,16",
-      "68,15",
-      "69,15",
-      "70,15",
-      "70,14",
-      "65,0",
-      "66,0",
-      "67,0",
-      "65,1",
-      "66,1",
-      "67,1",
-      "65,2",
-      "66,2",
-      "67,2",
-      "65,3",
-      "66,3",
-      "67,3",
-      "65,4",
-      "66,4",
-      "67,4",
       "65,5",
       "66,5",
       "67,5",
@@ -204880,22 +206407,52 @@ const BATTLE_MAPS = [
       "65,10",
       "66,10",
       "67,10",
-      "68,8",
-      "68,9",
-      "68,10",
+      "65,11",
       "66,11",
       "67,11",
-      "68,11",
-      "65,11",
       "65,12",
-      "69,11",
-      "70,12",
+      "66,12",
+      "67,12",
+      "65,13",
+      "66,13",
+      "67,13",
+      "65,14",
+      "66,14",
+      "67,14",
+      "65,15",
+      "66,15",
+      "67,15",
+      "68,13",
+      "68,14",
+      "68,15",
+      "66,16",
+      "67,16",
+      "68,16",
+      "65,16",
+      "65,17",
+      "69,16",
+      "70,17",
+      "70,18",
+      "70,16",
+      "69,15",
+      "70,15",
+      "69,14",
+      "70,14",
+      "69,13",
       "70,13",
+      "68,12",
+      "69,12",
+      "70,12",
+      "68,11",
+      "69,11",
       "70,11",
+      "68,10",
       "69,10",
       "70,10",
+      "68,9",
       "69,9",
       "70,9",
+      "68,8",
       "69,8",
       "70,8",
       "68,7",
@@ -204907,542 +206464,501 @@ const BATTLE_MAPS = [
       "68,5",
       "69,5",
       "70,5",
-      "68,4",
-      "69,4",
-      "70,4",
-      "68,3",
-      "69,3",
-      "70,3",
-      "68,2",
-      "69,2",
-      "70,2",
-      "68,1",
-      "69,1",
-      "70,1",
-      "68,0",
-      "69,0",
-      "70,0",
-      "71,0",
-      "71,1",
-      "71,2",
-      "72,0",
-      "72,1",
-      "72,2",
-      "73,0",
-      "73,1",
-      "73,2",
-      "71,3",
-      "72,3",
-      "73,3",
-      "74,1",
-      "75,1",
-      "74,2",
-      "75,2",
-      "74,3",
-      "75,3",
-      "76,1",
-      "76,2",
-      "76,3",
-      "77,1",
-      "77,2",
-      "77,3",
-      "78,1",
-      "78,2",
-      "78,3",
-      "79,1",
-      "80,1",
-      "79,2",
-      "80,2",
-      "79,3",
-      "80,3",
-      "81,1",
-      "81,2",
-      "81,3",
-      "82,1",
-      "82,2",
-      "82,3",
-      "83,1",
-      "83,2",
-      "83,3",
-      "84,1",
-      "84,2",
-      "84,3",
-      "85,1",
-      "85,2",
-      "85,3",
-      "74,0",
-      "75,0",
-      "76,0",
-      "77,0",
-      "78,0",
-      "79,0",
-      "80,0",
-      "81,0",
-      "82,0",
-      "83,0",
-      "84,0",
-      "85,0",
-      "86,0",
-      "87,0",
-      "88,0",
-      "86,1",
-      "87,1",
-      "88,1",
-      "86,2",
-      "87,2",
-      "88,2",
-      "89,1",
-      "90,1",
-      "89,2",
-      "90,2",
-      "88,3",
-      "89,3",
-      "90,3",
-      "91,1",
-      "91,2",
-      "91,3",
-      "92,1",
-      "92,2",
-      "92,3",
-      "89,4",
-      "90,4",
-      "91,4",
-      "88,4",
-      "87,3",
-      "87,4",
-      "86,3",
-      "86,4",
-      "85,4",
-      "84,4",
-      "83,4",
-      "83,5",
-      "84,5",
-      "85,5",
-      "82,4",
-      "82,5",
-      "81,4",
-      "81,5",
-      "80,4",
-      "80,5",
-      "80,6",
-      "81,6",
-      "82,6",
-      "79,4",
-      "79,5",
-      "79,6",
-      "78,4",
-      "78,5",
-      "78,6",
-      "77,4",
-      "77,5",
-      "77,6",
-      "76,4",
-      "76,5",
-      "76,6",
-      "75,4",
-      "75,5",
-      "75,6",
-      "74,4",
-      "74,5",
-      "74,6",
-      "73,4",
-      "73,5",
-      "73,6",
-      "72,4",
-      "72,5",
-      "72,6",
-      "71,4",
       "71,5",
       "71,6",
       "71,7",
+      "72,5",
+      "72,6",
       "72,7",
+      "73,5",
+      "73,6",
       "73,7",
+      "71,8",
+      "72,8",
+      "73,8",
+      "74,6",
+      "75,6",
       "74,7",
       "75,7",
+      "74,8",
+      "75,8",
+      "76,6",
       "76,7",
+      "76,8",
+      "77,6",
       "77,7",
+      "77,8",
+      "78,6",
       "78,7",
+      "78,8",
+      "79,6",
+      "80,6",
       "79,7",
       "80,7",
+      "79,8",
+      "80,8",
+      "81,6",
       "81,7",
+      "81,8",
+      "82,6",
       "82,7",
+      "82,8",
       "83,6",
       "83,7",
+      "83,8",
       "84,6",
       "84,7",
+      "84,8",
       "85,6",
       "85,7",
+      "85,8",
+      "74,5",
+      "75,5",
+      "76,5",
+      "77,5",
+      "78,5",
+      "79,5",
+      "80,5",
+      "81,5",
+      "82,5",
+      "83,5",
+      "84,5",
+      "85,5",
       "86,5",
-      "86,6",
-      "86,7",
       "87,5",
-      "87,6",
-      "87,7",
       "88,5",
-      "89,5",
+      "86,6",
+      "87,6",
       "88,6",
-      "89,6",
+      "86,7",
+      "87,7",
       "88,7",
-      "89,7",
-      "90,5",
+      "89,6",
       "90,6",
+      "89,7",
       "90,7",
-      "91,5",
-      "92,5",
+      "88,8",
+      "89,8",
+      "90,8",
       "91,6",
-      "92,6",
       "91,7",
+      "91,8",
+      "92,6",
       "92,7",
-      "93,5",
-      "94,5",
+      "92,8",
+      "89,9",
+      "90,9",
+      "91,9",
+      "88,9",
+      "87,8",
+      "87,9",
+      "86,8",
+      "86,9",
+      "85,9",
+      "84,9",
+      "83,9",
+      "83,10",
+      "82,9",
+      "82,10",
+      "81,9",
+      "81,10",
+      "80,9",
+      "80,10",
+      "80,11",
+      "81,11",
+      "82,11",
+      "79,9",
+      "79,10",
+      "79,11",
+      "78,9",
+      "78,10",
+      "78,11",
+      "77,9",
+      "77,10",
+      "77,11",
+      "76,9",
+      "76,10",
+      "76,11",
+      "75,9",
+      "75,10",
+      "75,11",
+      "74,9",
+      "74,10",
+      "74,11",
+      "73,9",
+      "73,10",
+      "73,11",
+      "72,9",
+      "72,10",
+      "72,11",
+      "71,9",
+      "71,10",
+      "71,11",
+      "71,12",
+      "72,12",
+      "73,12",
+      "74,12",
+      "75,12",
+      "76,12",
+      "77,12",
+      "78,12",
+      "79,12",
+      "80,12",
+      "81,12",
+      "82,12",
+      "86,10",
+      "86,11",
+      "87,10",
+      "87,11",
+      "88,10",
+      "89,10",
+      "88,11",
+      "89,11",
+      "89,12",
+      "90,10",
+      "90,11",
+      "90,12",
+      "91,10",
+      "92,10",
+      "91,11",
+      "92,11",
+      "91,12",
+      "92,12",
+      "93,10",
+      "94,10",
+      "93,11",
+      "94,11",
+      "93,12",
+      "94,12",
+      "95,10",
+      "95,11",
+      "95,12",
+      "96,10",
+      "96,11",
+      "96,12",
+      "97,10",
+      "97,11",
+      "97,12",
+      "98,10",
+      "98,11",
+      "98,12",
+      "99,10",
+      "99,11",
+      "99,12",
+      "100,10",
+      "100,11",
+      "100,12",
+      "101,10",
+      "101,11",
+      "101,12",
+      "102,10",
+      "102,11",
+      "102,12",
+      "103,10",
+      "103,11",
+      "103,12",
+      "101,9",
+      "102,9",
+      "103,9",
+      "102,8",
+      "103,8",
+      "104,8",
+      "104,9",
+      "104,10",
+      "102,7",
+      "103,7",
+      "104,7",
+      "102,6",
+      "103,6",
+      "104,6",
+      "102,5",
+      "103,5",
+      "104,5",
+      "89,5",
+      "90,5",
       "93,6",
       "94,6",
+      "95,6",
       "93,7",
       "94,7",
-      "95,5",
-      "95,6",
       "95,7",
-      "96,5",
+      "93,8",
+      "94,8",
+      "95,8",
       "96,6",
-      "96,7",
-      "97,5",
       "97,6",
-      "97,7",
-      "98,5",
       "98,6",
+      "96,7",
+      "97,7",
       "98,7",
-      "99,5",
+      "96,8",
+      "97,8",
+      "98,8",
       "99,6",
-      "99,7",
-      "100,5",
       "100,6",
+      "99,7",
       "100,7",
-      "101,5",
+      "99,8",
+      "100,8",
       "101,6",
       "101,7",
-      "102,5",
-      "102,6",
-      "102,7",
-      "103,5",
-      "103,6",
-      "103,7",
-      "101,4",
-      "102,4",
-      "103,4",
-      "102,3",
-      "103,3",
-      "104,3",
-      "104,4",
-      "104,5",
-      "102,2",
-      "103,2",
-      "104,2",
-      "102,1",
-      "103,1",
-      "104,1",
-      "102,0",
-      "103,0",
-      "104,0",
-      "89,0",
-      "90,0",
-      "93,1",
-      "94,1",
-      "95,1",
-      "93,2",
-      "94,2",
-      "95,2",
-      "93,3",
-      "94,3",
-      "95,3",
-      "96,1",
-      "97,1",
-      "98,1",
-      "96,2",
-      "97,2",
-      "98,2",
-      "96,3",
-      "97,3",
-      "98,3",
-      "99,1",
-      "100,1",
-      "99,2",
-      "100,2",
-      "99,3",
-      "100,3",
-      "101,1",
-      "101,2",
-      "101,3",
-      "99,0",
-      "100,0",
-      "101,0",
-      "96,0",
-      "97,0",
-      "98,0",
-      "94,0",
-      "95,0",
-      "92,0",
-      "93,0",
-      "91,0",
-      "113,4",
-      "114,4",
-      "115,4",
-      "113,5",
-      "114,5",
-      "115,5",
-      "113,6",
+      "101,8",
+      "99,5",
+      "100,5",
+      "101,5",
+      "96,5",
+      "97,5",
+      "98,5",
+      "94,5",
+      "95,5",
+      "92,5",
+      "93,5",
+      "91,5",
+      "113,9",
+      "114,9",
+      "115,9",
+      "113,10",
+      "114,10",
+      "115,10",
+      "113,11",
+      "114,11",
+      "115,11",
+      "112,9",
+      "112,10",
+      "112,11",
+      "111,9",
+      "111,10",
+      "111,11",
+      "109,9",
+      "110,9",
+      "109,10",
+      "110,10",
+      "109,11",
+      "110,11",
+      "108,9",
+      "108,10",
+      "108,11",
+      "107,9",
+      "107,10",
+      "107,11",
+      "106,9",
+      "106,10",
+      "106,11",
+      "105,9",
+      "105,10",
+      "105,11",
+      "104,11",
+      "104,12",
+      "105,12",
+      "106,12",
+      "107,12",
+      "108,12",
+      "109,12",
+      "110,12",
+      "111,12",
+      "112,12",
+      "113,12",
+      "114,12",
+      "115,12",
+      "114,8",
+      "115,8",
+      "114,7",
+      "115,7",
       "114,6",
       "115,6",
-      "112,4",
-      "112,5",
-      "112,6",
-      "111,4",
+      "114,5",
+      "115,5",
+      "113,5",
+      "113,6",
+      "113,7",
       "111,5",
+      "112,5",
       "111,6",
-      "109,4",
-      "110,4",
+      "112,6",
+      "111,7",
+      "112,7",
       "109,5",
       "110,5",
       "109,6",
       "110,6",
-      "108,4",
-      "108,5",
-      "108,6",
-      "107,4",
-      "107,5",
-      "107,6",
-      "106,4",
-      "106,5",
-      "106,6",
-      "105,4",
-      "105,5",
-      "105,6",
-      "104,6",
-      "104,7",
-      "105,7",
-      "106,7",
-      "107,7",
-      "108,7",
       "109,7",
       "110,7",
-      "111,7",
-      "112,7",
-      "113,7",
-      "114,7",
-      "115,7",
-      "114,3",
-      "115,3",
-      "114,2",
-      "115,2",
-      "114,1",
-      "115,1",
-      "114,0",
-      "115,0",
-      "113,0",
-      "113,1",
-      "113,2",
-      "111,0",
-      "112,0",
-      "111,1",
-      "112,1",
-      "111,2",
-      "112,2",
-      "109,0",
-      "110,0",
-      "109,1",
-      "110,1",
-      "109,2",
-      "110,2",
-      "107,0",
-      "108,0",
-      "107,1",
-      "108,1",
-      "107,2",
-      "108,2",
-      "105,0",
-      "106,0",
-      "105,1",
-      "106,1",
-      "105,2",
-      "106,2",
-      "95,4",
-      "96,4",
-      "97,4",
-      "94,4",
-      "92,4",
-      "93,4",
-      "99,4",
-      "100,4",
-      "107,3",
-      "108,3",
-      "109,3",
-      "110,3",
-      "111,3",
-      "112,3",
-      "113,3",
-      "105,3",
-      "98,4",
-      "106,3",
+      "107,5",
+      "108,5",
+      "107,6",
+      "108,6",
+      "107,7",
+      "108,7",
+      "105,5",
+      "106,5",
+      "105,6",
+      "106,6",
+      "105,7",
+      "106,7",
+      "95,9",
+      "96,9",
+      "97,9",
+      "94,9",
+      "92,9",
+      "93,9",
+      "99,9",
+      "100,9",
+      "107,8",
+      "108,8",
+      "109,8",
       "110,8",
       "111,8",
       "112,8",
-      "110,9",
-      "111,9",
-      "112,9",
-      "110,10",
-      "111,10",
-      "112,10",
-      "109,9",
-      "109,10",
-      "109,11",
-      "110,11",
-      "111,11",
-      "108,9",
-      "108,10",
-      "108,11",
-      "108,8",
-      "109,8",
-      "107,8",
-      "107,9",
-      "107,10",
-      "107,11",
-      "107,12",
-      "108,12",
-      "109,12",
-      "107,13",
-      "108,13",
-      "109,13",
-      "107,14",
-      "108,14",
-      "109,14",
-      "107,15",
-      "108,15",
-      "109,15",
-      "110,13",
-      "110,14",
-      "110,15",
-      "108,16",
-      "109,16",
-      "110,16",
-      "108,17",
-      "109,17",
-      "110,17",
-      "108,18",
-      "109,18",
-      "110,18",
-      "108,19",
-      "109,19",
-      "110,19",
-      "108,20",
-      "109,20",
-      "110,20",
-      "107,16",
-      "107,17",
-      "107,18",
-      "107,19",
-      "107,20",
-      "110,21",
-      "111,20",
-      "111,21",
-      "111,22",
-      "112,21",
-      "113,21",
-      "112,22",
-      "113,22",
-      "111,23",
-      "112,23",
-      "113,23",
-      "112,20",
-      "113,20",
-      "114,20",
-      "114,21",
-      "114,22",
-      "113,19",
-      "114,19",
-      "115,19",
-      "115,20",
-      "115,21",
-      "113,17",
-      "114,17",
-      "115,17",
-      "113,18",
-      "114,18",
-      "115,18",
-      "113,16",
-      "114,16",
-      "115,16",
-      "113,15",
-      "114,15",
-      "115,15",
-      "114,14",
-      "115,14",
-      "114,12",
-      "115,12",
-      "114,13",
-      "115,13",
-      "114,11",
-      "115,11",
-      "114,9",
-      "115,9",
-      "114,10",
-      "115,10",
-      "114,8",
-      "115,8",
       "113,8",
-      "113,9",
-      "113,10",
-      "112,11",
-      "113,11",
-      "110,12",
-      "111,12",
-      "112,12",
+      "105,8",
+      "98,9",
+      "106,8",
+      "110,13",
       "111,13",
       "112,13",
+      "110,14",
       "111,14",
       "112,14",
+      "110,15",
       "111,15",
       "112,15",
+      "109,14",
+      "109,15",
+      "109,16",
+      "110,16",
       "111,16",
+      "108,14",
+      "108,15",
+      "108,16",
+      "108,13",
+      "109,13",
+      "107,13",
+      "107,14",
+      "107,15",
+      "107,16",
+      "107,17",
+      "108,17",
+      "109,17",
+      "107,18",
+      "108,18",
+      "109,18",
+      "107,19",
+      "108,19",
+      "109,19",
+      "107,20",
+      "108,20",
+      "109,20",
+      "110,18",
+      "110,19",
+      "110,20",
+      "108,21",
+      "109,21",
+      "110,21",
+      "108,22",
+      "109,22",
+      "110,22",
+      "108,23",
+      "109,23",
+      "110,23",
+      "108,24",
+      "109,24",
+      "110,24",
+      "108,25",
+      "109,25",
+      "110,25",
+      "107,21",
+      "107,22",
+      "107,23",
+      "107,24",
+      "107,25",
+      "110,26",
+      "111,25",
+      "111,26",
+      "111,27",
+      "112,26",
+      "113,26",
+      "112,27",
+      "113,27",
+      "111,28",
+      "112,28",
+      "113,28",
+      "112,25",
+      "113,25",
+      "114,25",
+      "114,26",
+      "114,27",
+      "113,24",
+      "114,24",
+      "115,24",
+      "115,25",
+      "115,26",
+      "113,22",
+      "114,22",
+      "115,22",
+      "113,23",
+      "114,23",
+      "115,23",
+      "113,21",
+      "114,21",
+      "115,21",
+      "113,20",
+      "114,20",
+      "115,20",
+      "114,19",
+      "115,19",
+      "114,17",
+      "115,17",
+      "114,18",
+      "115,18",
+      "114,16",
+      "115,16",
+      "114,14",
+      "115,14",
+      "114,15",
+      "115,15",
+      "114,13",
+      "115,13",
+      "113,13",
+      "113,14",
+      "113,15",
       "112,16",
+      "113,16",
+      "110,17",
       "111,17",
       "112,17",
       "111,18",
       "112,18",
       "111,19",
       "112,19",
-      "113,14",
-      "113,13",
-      "113,12",
-      "107,21",
-      "108,21",
-      "109,21",
-      "107,22",
-      "108,22",
-      "109,22",
-      "107,23",
-      "108,23",
-      "109,23",
-      "107,24",
-      "108,24",
-      "109,24",
-      "107,25",
-      "108,25",
-      "109,25",
-      "110,24",
-      "110,25",
+      "111,20",
+      "112,20",
+      "111,21",
+      "112,21",
+      "111,22",
+      "112,22",
+      "111,23",
+      "112,23",
+      "111,24",
+      "112,24",
+      "113,19",
+      "113,18",
+      "113,17",
+      "107,26",
       "108,26",
       "109,26",
-      "110,26",
+      "107,27",
       "108,27",
       "109,27",
-      "110,27",
+      "107,28",
       "108,28",
       "109,28",
-      "110,28",
+      "107,29",
       "108,29",
       "109,29",
-      "110,29",
+      "107,30",
       "108,30",
       "109,30",
+      "110,29",
       "110,30",
       "108,31",
       "109,31",
@@ -205456,35 +206972,35 @@ const BATTLE_MAPS = [
       "108,34",
       "109,34",
       "110,34",
-      "107,31",
-      "107,32",
+      "108,35",
+      "109,35",
+      "110,35",
+      "108,36",
+      "109,36",
+      "110,36",
+      "108,37",
+      "109,37",
+      "110,37",
+      "108,38",
+      "109,38",
+      "110,38",
+      "108,39",
+      "109,39",
+      "110,39",
+      "107,36",
+      "107,37",
+      "107,38",
+      "107,35",
+      "107,34",
       "107,33",
-      "107,30",
-      "107,29",
-      "107,28",
-      "107,27",
-      "107,26",
-      "110,23",
-      "110,22",
-      "111,24",
-      "112,24",
-      "113,24",
-      "114,23",
-      "114,24",
-      "112,25",
-      "113,25",
-      "114,25",
-      "112,26",
-      "113,26",
-      "114,26",
-      "112,27",
-      "113,27",
-      "114,27",
-      "112,28",
-      "113,28",
-      "114,28",
+      "107,32",
+      "107,31",
+      "110,28",
+      "110,27",
+      "111,29",
       "112,29",
       "113,29",
+      "114,28",
       "114,29",
       "112,30",
       "113,30",
@@ -205492,44 +207008,49 @@ const BATTLE_MAPS = [
       "112,31",
       "113,31",
       "114,31",
-      "111,30",
-      "111,31",
-      "111,32",
       "112,32",
       "113,32",
-      "111,33",
+      "114,32",
       "112,33",
       "113,33",
-      "111,34",
+      "114,33",
       "112,34",
       "113,34",
-      "111,35",
+      "114,34",
       "112,35",
       "113,35",
-      "111,29",
-      "111,27",
-      "111,28",
-      "111,25",
-      "111,26",
-      "115,22",
-      "115,23",
-      "115,24",
-      "115,25",
-      "115,26",
+      "114,35",
+      "112,36",
+      "113,36",
+      "114,36",
+      "111,35",
+      "111,36",
+      "111,37",
+      "112,37",
+      "113,37",
+      "111,38",
+      "112,38",
+      "113,38",
+      "111,39",
+      "112,39",
+      "113,39",
+      "111,40",
+      "112,40",
+      "113,40",
+      "111,34",
+      "111,32",
+      "111,33",
+      "111,30",
+      "111,31",
       "115,27",
       "115,28",
       "115,29",
       "115,30",
       "115,31",
-      "114,32",
       "115,32",
-      "114,33",
       "115,33",
-      "114,34",
       "115,34",
-      "114,35",
       "115,35",
-      "114,36",
       "115,36",
       "114,37",
       "115,37",
@@ -205537,263 +207058,263 @@ const BATTLE_MAPS = [
       "115,38",
       "114,39",
       "115,39",
-      "113,38",
-      "113,39",
-      "113,40",
       "114,40",
       "115,40",
-      "113,41",
       "114,41",
       "115,41",
-      "111,40",
-      "112,40",
-      "111,41",
-      "112,41",
-      "111,42",
-      "112,42",
-      "113,42",
-      "109,39",
-      "110,39",
-      "111,39",
-      "109,40",
-      "110,40",
-      "109,41",
-      "110,41",
-      "108,38",
-      "109,38",
-      "110,38",
-      "108,39",
-      "108,40",
-      "107,37",
-      "108,37",
-      "109,37",
-      "107,38",
-      "107,39",
-      "107,36",
-      "108,36",
-      "109,36",
-      "107,35",
-      "108,35",
-      "109,35",
-      "107,34",
-      "110,48",
-      "111,48",
-      "112,48",
-      "110,49",
-      "111,49",
-      "112,49",
-      "110,50",
-      "111,50",
-      "112,50",
-      "110,51",
-      "111,51",
-      "112,51",
-      "109,48",
-      "109,49",
-      "109,50",
-      "108,47",
-      "109,47",
-      "110,47",
-      "108,48",
-      "108,49",
-      "108,46",
-      "109,46",
-      "110,46",
-      "108,45",
-      "109,45",
-      "110,45",
-      "107,44",
-      "108,44",
-      "109,44",
-      "107,45",
-      "107,46",
-      "107,43",
-      "108,43",
-      "109,43",
-      "107,42",
-      "108,42",
-      "109,42",
-      "107,41",
-      "108,41",
-      "107,40",
-      "110,36",
-      "111,36",
-      "110,37",
-      "111,37",
-      "111,38",
-      "110,35",
-      "112,36",
-      "112,37",
-      "113,36",
-      "113,37",
-      "112,38",
-      "112,39",
       "114,42",
       "115,42",
-      "113,43",
       "114,43",
       "115,43",
-      "112,43",
-      "111,43",
-      "110,42",
-      "110,43",
-      "110,44",
-      "111,44",
-      "112,44",
+      "114,44",
+      "115,44",
+      "113,43",
+      "113,44",
+      "113,45",
+      "114,45",
+      "115,45",
+      "113,46",
+      "114,46",
+      "115,46",
       "111,45",
       "112,45",
       "111,46",
       "112,46",
       "111,47",
       "112,47",
-      "113,46",
       "113,47",
-      "113,48",
-      "113,49",
-      "114,48",
-      "114,49",
-      "113,50",
-      "114,50",
-      "115,48",
-      "115,49",
-      "115,50",
-      "114,47",
-      "115,47",
-      "114,46",
-      "115,46",
-      "114,45",
-      "115,45",
-      "114,44",
-      "115,44",
-      "113,45",
-      "113,51",
-      "114,51",
-      "112,52",
-      "113,52",
-      "114,52",
+      "109,44",
+      "110,44",
+      "111,44",
+      "109,45",
+      "110,45",
+      "109,46",
+      "110,46",
+      "108,43",
+      "109,43",
+      "110,43",
+      "108,44",
+      "108,45",
+      "107,42",
+      "108,42",
+      "109,42",
+      "107,43",
+      "107,44",
+      "107,41",
+      "108,41",
+      "109,41",
+      "107,40",
+      "108,40",
+      "109,40",
+      "107,39",
+      "110,53",
+      "111,53",
       "112,53",
-      "113,53",
-      "114,53",
+      "110,54",
+      "111,54",
       "112,54",
-      "113,54",
-      "114,54",
+      "110,55",
+      "111,55",
       "112,55",
-      "113,55",
-      "114,55",
+      "110,56",
+      "111,56",
       "112,56",
-      "113,56",
-      "114,56",
-      "115,54",
-      "115,55",
-      "115,56",
-      "115,53",
-      "115,51",
-      "115,52",
-      "113,44",
-      "107,47",
-      "107,48",
-      "107,49",
-      "107,50",
-      "108,50",
-      "107,51",
-      "108,51",
-      "109,51",
-      "107,52",
+      "109,53",
+      "109,54",
+      "109,55",
       "108,52",
       "109,52",
-      "107,53",
-      "108,53",
-      "109,53",
       "110,52",
-      "110,53",
+      "108,53",
       "108,54",
-      "109,54",
-      "110,54",
-      "108,55",
-      "109,55",
-      "110,55",
-      "108,56",
-      "109,56",
-      "110,56",
-      "108,57",
-      "109,57",
-      "110,57",
-      "108,58",
-      "109,58",
-      "110,58",
-      "110,62",
-      "111,62",
-      "112,62",
-      "110,63",
-      "111,63",
-      "112,63",
-      "110,64",
-      "111,64",
-      "112,64",
-      "109,62",
-      "109,63",
-      "109,64",
-      "108,63",
-      "108,64",
-      "108,65",
-      "109,65",
-      "110,65",
-      "108,62",
-      "107,61",
-      "108,61",
-      "109,61",
-      "107,62",
-      "107,63",
-      "107,60",
-      "108,60",
-      "109,60",
-      "107,59",
-      "108,59",
-      "109,59",
-      "107,58",
-      "107,57",
-      "107,56",
-      "107,55",
+      "108,51",
+      "109,51",
+      "110,51",
+      "108,50",
+      "109,50",
+      "110,50",
+      "107,49",
+      "108,49",
+      "109,49",
+      "107,50",
+      "107,51",
+      "107,48",
+      "108,48",
+      "109,48",
+      "107,47",
+      "108,47",
+      "109,47",
+      "107,46",
+      "108,46",
+      "107,45",
+      "110,41",
+      "111,41",
+      "110,42",
+      "111,42",
+      "111,43",
+      "110,40",
+      "112,41",
+      "112,42",
+      "113,41",
+      "113,42",
+      "112,43",
+      "112,44",
+      "114,47",
+      "115,47",
+      "113,48",
+      "114,48",
+      "115,48",
+      "112,48",
+      "111,48",
+      "110,47",
+      "110,48",
+      "110,49",
+      "111,49",
+      "112,49",
+      "111,50",
+      "112,50",
+      "111,51",
+      "112,51",
       "111,52",
-      "111,53",
-      "111,54",
-      "111,55",
-      "111,56",
-      "111,57",
+      "112,52",
+      "113,51",
+      "113,52",
+      "113,53",
+      "113,54",
+      "114,53",
+      "114,54",
+      "113,55",
+      "114,55",
+      "115,53",
+      "115,54",
+      "115,55",
+      "114,52",
+      "115,52",
+      "114,51",
+      "115,51",
+      "114,50",
+      "115,50",
+      "114,49",
+      "115,49",
+      "113,50",
+      "113,56",
+      "114,56",
       "112,57",
       "113,57",
-      "111,58",
+      "114,57",
       "112,58",
       "113,58",
-      "111,59",
+      "114,58",
       "112,59",
       "113,59",
-      "111,60",
+      "114,59",
       "112,60",
       "113,60",
-      "111,61",
+      "114,60",
       "112,61",
       "113,61",
-      "113,62",
-      "110,61",
-      "110,60",
-      "110,59",
-      "107,54",
-      "114,57",
-      "114,58",
-      "114,59",
-      "115,57",
-      "115,58",
-      "115,59",
-      "114,60",
-      "115,60",
       "114,61",
+      "115,59",
+      "115,60",
       "115,61",
+      "115,58",
+      "115,56",
+      "115,57",
+      "113,49",
+      "107,52",
+      "107,53",
+      "107,54",
+      "107,55",
+      "108,55",
+      "107,56",
+      "108,56",
+      "109,56",
+      "107,57",
+      "108,57",
+      "109,57",
+      "107,58",
+      "108,58",
+      "109,58",
+      "110,57",
+      "110,58",
+      "108,59",
+      "109,59",
+      "110,59",
+      "108,60",
+      "109,60",
+      "110,60",
+      "108,61",
+      "109,61",
+      "110,61",
+      "108,62",
+      "109,62",
+      "110,62",
+      "108,63",
+      "109,63",
+      "110,63",
+      "110,67",
+      "111,67",
+      "112,67",
+      "110,68",
+      "111,68",
+      "112,68",
+      "110,69",
+      "111,69",
+      "112,69",
+      "109,67",
+      "109,68",
+      "109,69",
+      "108,68",
+      "108,69",
+      "108,70",
+      "109,70",
+      "110,70",
+      "108,67",
+      "107,66",
+      "108,66",
+      "109,66",
+      "107,67",
+      "107,68",
+      "107,65",
+      "108,65",
+      "109,65",
+      "107,64",
+      "108,64",
+      "109,64",
+      "107,63",
+      "107,62",
+      "107,61",
+      "107,60",
+      "111,57",
+      "111,58",
+      "111,59",
+      "111,60",
+      "111,61",
+      "111,62",
+      "112,62",
+      "113,62",
+      "111,63",
+      "112,63",
+      "113,63",
+      "111,64",
+      "112,64",
+      "113,64",
+      "111,65",
+      "112,65",
+      "113,65",
+      "111,66",
+      "112,66",
+      "113,66",
+      "113,67",
+      "110,66",
+      "110,65",
+      "110,64",
+      "107,59",
       "114,62",
-      "115,62",
       "114,63",
-      "115,63",
       "114,64",
+      "115,62",
+      "115,63",
       "115,64",
       "114,65",
       "115,65",
@@ -205807,80 +207328,75 @@ const BATTLE_MAPS = [
       "115,69",
       "114,70",
       "115,70",
-      "112,75",
-      "113,75",
-      "114,75",
-      "112,76",
-      "113,76",
-      "114,76",
-      "112,77",
-      "113,77",
-      "114,77",
-      "112,78",
-      "113,78",
-      "114,78",
-      "115,77",
-      "115,78",
-      "113,79",
-      "114,79",
-      "115,79",
-      "115,76",
-      "115,75",
-      "114,74",
-      "115,74",
-      "114,73",
-      "115,73",
-      "114,72",
-      "115,72",
       "114,71",
       "115,71",
-      "113,69",
-      "113,70",
+      "114,72",
+      "115,72",
+      "114,73",
+      "115,73",
+      "114,74",
+      "115,74",
+      "114,75",
+      "115,75",
+      "112,80",
+      "113,80",
+      "114,80",
+      "112,81",
+      "113,81",
+      "114,81",
+      "112,82",
+      "113,82",
+      "114,82",
+      "112,83",
+      "113,83",
+      "114,83",
+      "115,82",
+      "115,83",
+      "113,84",
+      "114,84",
+      "115,84",
+      "115,81",
+      "115,80",
+      "114,79",
+      "115,79",
+      "114,78",
+      "115,78",
+      "114,77",
+      "115,77",
+      "114,76",
+      "115,76",
+      "113,74",
+      "113,75",
+      "113,76",
+      "113,72",
+      "113,73",
       "113,71",
-      "113,67",
+      "112,70",
+      "113,70",
+      "112,71",
+      "112,72",
+      "113,69",
       "113,68",
-      "113,66",
-      "112,65",
-      "113,65",
-      "112,66",
-      "112,67",
-      "113,64",
-      "113,63",
-      "111,65",
-      "108,66",
-      "109,66",
-      "110,66",
-      "107,64",
-      "107,65",
-      "107,66",
-      "107,67",
-      "108,67",
-      "109,67",
-      "107,68",
-      "108,68",
-      "109,68",
-      "107,69",
-      "108,69",
-      "109,69",
-      "107,70",
-      "108,70",
-      "109,70",
-      "110,69",
-      "110,70",
+      "111,70",
       "108,71",
       "109,71",
       "110,71",
+      "107,69",
+      "107,70",
+      "107,71",
+      "107,72",
       "108,72",
       "109,72",
-      "110,72",
+      "107,73",
       "108,73",
       "109,73",
-      "110,73",
+      "107,74",
       "108,74",
       "109,74",
-      "110,74",
+      "107,75",
       "108,75",
       "109,75",
+      "110,74",
       "110,75",
       "108,76",
       "109,76",
@@ -205894,560 +207410,565 @@ const BATTLE_MAPS = [
       "108,79",
       "109,79",
       "110,79",
-      "107,75",
-      "107,76",
-      "107,77",
-      "107,74",
-      "107,73",
-      "107,72",
-      "107,71",
-      "110,68",
-      "110,67",
-      "111,67",
-      "111,68",
-      "111,69",
-      "111,66",
-      "112,68",
-      "112,69",
-      "111,70",
-      "112,70",
-      "111,71",
-      "112,71",
-      "111,72",
-      "112,72",
-      "113,72",
-      "111,73",
-      "112,73",
-      "113,73",
-      "111,74",
-      "112,74",
-      "113,74",
-      "111,75",
-      "111,76",
-      "111,77",
-      "111,78",
-      "111,79",
-      "112,79",
-      "111,80",
-      "112,80",
-      "113,80",
-      "111,81",
-      "112,81",
-      "113,81",
-      "111,82",
-      "112,82",
-      "113,82",
-      "111,83",
-      "112,83",
-      "113,83",
-      "111,84",
-      "112,84",
-      "113,84",
-      "114,81",
-      "115,81",
-      "114,82",
-      "115,82",
-      "114,83",
-      "115,83",
-      "114,84",
-      "115,84",
-      "114,80",
-      "115,80",
+      "108,80",
       "109,80",
       "110,80",
+      "108,81",
       "109,81",
       "110,81",
+      "108,82",
       "109,82",
       "110,82",
-      "108,80",
-      "108,81",
-      "107,78",
-      "107,79",
+      "108,83",
+      "109,83",
+      "110,83",
+      "108,84",
+      "109,84",
+      "110,84",
       "107,80",
       "107,81",
       "107,82",
-      "108,82",
+      "107,79",
+      "107,78",
+      "107,77",
+      "107,76",
+      "110,73",
+      "110,72",
+      "111,72",
+      "111,73",
+      "111,74",
+      "111,71",
+      "112,73",
+      "112,74",
+      "111,75",
+      "112,75",
+      "111,76",
+      "112,76",
+      "111,77",
+      "112,77",
+      "113,77",
+      "111,78",
+      "112,78",
+      "113,78",
+      "111,79",
+      "112,79",
+      "113,79",
+      "111,80",
+      "111,81",
+      "111,82",
+      "111,83",
+      "111,84",
+      "112,84",
+      "111,85",
+      "112,85",
+      "113,85",
+      "111,86",
+      "112,86",
+      "113,86",
+      "111,87",
+      "112,87",
+      "113,87",
+      "111,88",
+      "112,88",
+      "113,88",
+      "111,89",
+      "112,89",
+      "113,89",
+      "114,86",
+      "115,86",
+      "114,87",
+      "115,87",
+      "114,88",
+      "115,88",
+      "114,89",
+      "115,89",
+      "114,85",
+      "115,85",
+      "109,85",
+      "110,85",
+      "109,86",
+      "110,86",
+      "109,87",
+      "110,87",
+      "108,85",
+      "108,86",
       "107,83",
-      "108,83",
-      "109,83",
-      "106,81",
-      "106,82",
-      "106,83",
-      "105,81",
-      "105,82",
-      "105,83",
-      "104,81",
-      "104,82",
-      "104,83",
-      "103,80",
-      "104,80",
-      "105,80",
-      "103,81",
-      "103,82",
-      "102,80",
-      "102,81",
-      "102,82",
-      "101,80",
-      "101,81",
-      "101,82",
-      "100,80",
-      "100,81",
-      "100,82",
-      "99,80",
-      "99,81",
-      "99,82",
-      "98,80",
-      "98,81",
-      "98,82",
-      "106,80",
-      "110,83",
-      "109,84",
-      "110,84",
-      "108,84",
-      "106,84",
       "107,84",
-      "104,84",
-      "105,84",
-      "102,83",
-      "103,83",
-      "102,84",
-      "103,84",
-      "101,83",
-      "101,84",
-      "100,83",
-      "100,84",
-      "99,83",
-      "99,84",
-      "97,82",
-      "97,83",
-      "98,83",
-      "97,84",
-      "98,84",
-      "96,82",
-      "96,83",
-      "96,84",
-      "95,82",
-      "95,83",
-      "95,84",
-      "94,82",
-      "94,83",
-      "94,84",
-      "93,82",
-      "93,83",
-      "93,84",
-      "92,82",
-      "92,83",
-      "92,84",
-      "90,82",
-      "91,82",
-      "90,83",
-      "91,83",
-      "90,84",
-      "91,84",
-      "87,82",
-      "88,82",
-      "89,82",
-      "87,83",
-      "88,83",
-      "89,83",
-      "87,84",
-      "88,84",
-      "89,84",
-      "86,82",
-      "86,83",
-      "86,84",
-      "85,82",
-      "85,83",
-      "85,84",
-      "84,82",
-      "84,83",
-      "84,84",
-      "83,82",
-      "83,83",
-      "83,84",
-      "82,82",
-      "82,83",
-      "82,84",
-      "79,82",
-      "80,82",
-      "81,82",
-      "79,83",
-      "80,83",
-      "81,83",
-      "79,84",
-      "80,84",
-      "81,84",
-      "77,82",
-      "78,82",
-      "77,83",
-      "78,83",
-      "77,84",
-      "78,84",
-      "76,82",
-      "76,83",
-      "76,84",
-      "75,82",
-      "75,83",
-      "75,84",
-      "73,82",
-      "74,82",
-      "73,83",
-      "74,83",
-      "73,84",
-      "74,84",
-      "72,82",
-      "72,83",
-      "72,84",
-      "71,82",
-      "71,83",
-      "71,84",
-      "71,81",
-      "72,81",
-      "73,81",
-      "71,80",
-      "72,80",
-      "73,80",
-      "74,80",
-      "74,81",
-      "75,80",
-      "75,81",
-      "76,80",
-      "76,81",
-      "77,80",
-      "77,81",
-      "78,80",
-      "79,80",
-      "78,81",
-      "79,81",
-      "80,80",
-      "80,81",
-      "81,81",
-      "82,81",
-      "83,81",
-      "84,81",
-      "85,81",
-      "86,81",
-      "87,81",
-      "88,81",
-      "89,81",
-      "90,81",
-      "91,81",
-      "92,81",
-      "93,81",
-      "94,81",
-      "95,81",
-      "96,81",
-      "97,81",
-      "96,80",
-      "97,80",
-      "95,80",
-      "93,80",
-      "94,80",
-      "92,80",
-      "91,80",
-      "90,80",
-      "89,80",
-      "88,80",
-      "86,80",
-      "87,80",
-      "85,80",
-      "83,80",
-      "84,80",
-      "82,80",
-      "81,80",
-      "68,80",
-      "69,80",
-      "70,80",
-      "68,81",
-      "69,81",
-      "70,81",
-      "68,82",
-      "69,82",
-      "70,82",
-      "67,80",
-      "67,81",
-      "67,82",
-      "65,80",
-      "66,80",
-      "65,81",
-      "66,81",
-      "65,82",
-      "66,82",
-      "64,80",
-      "64,81",
-      "64,82",
-      "62,80",
-      "63,80",
-      "62,81",
-      "63,81",
-      "62,82",
-      "63,82",
-      "61,80",
-      "61,81",
-      "61,82",
-      "60,80",
-      "60,81",
-      "60,82",
-      "59,80",
-      "59,81",
-      "59,82",
-      "58,80",
-      "58,81",
-      "58,82",
-      "57,80",
-      "57,81",
-      "57,82",
-      "56,80",
-      "56,81",
-      "56,82",
-      "55,80",
-      "55,81",
-      "55,82",
-      "54,80",
-      "54,81",
-      "54,82",
-      "53,80",
-      "53,81",
-      "53,82",
-      "52,80",
-      "52,81",
-      "52,82",
-      "51,80",
-      "51,81",
-      "51,82",
-      "50,80",
-      "50,81",
-      "50,82",
-      "49,80",
-      "49,81",
-      "49,82",
+      "107,85",
+      "107,86",
+      "107,87",
+      "108,87",
+      "107,88",
+      "108,88",
+      "109,88",
+      "106,86",
+      "106,87",
+      "106,88",
+      "105,86",
+      "105,87",
+      "105,88",
+      "104,86",
+      "104,87",
+      "104,88",
+      "103,85",
+      "104,85",
+      "105,85",
+      "103,86",
+      "103,87",
+      "102,85",
+      "102,86",
+      "102,87",
+      "101,85",
+      "101,86",
+      "101,87",
+      "100,85",
+      "100,86",
+      "100,87",
+      "99,85",
+      "99,86",
+      "99,87",
+      "98,85",
+      "98,86",
+      "98,87",
+      "106,85",
+      "110,88",
+      "109,89",
+      "110,89",
+      "108,89",
+      "106,89",
+      "107,89",
+      "104,89",
+      "105,89",
+      "102,88",
+      "103,88",
+      "102,89",
+      "103,89",
+      "101,88",
+      "101,89",
+      "100,88",
+      "100,89",
+      "99,88",
+      "99,89",
+      "97,87",
+      "97,88",
+      "98,88",
+      "97,89",
+      "98,89",
+      "96,87",
+      "96,88",
+      "96,89",
+      "95,87",
+      "95,88",
+      "95,89",
+      "94,87",
+      "94,88",
+      "94,89",
+      "93,87",
+      "93,88",
+      "93,89",
+      "92,87",
+      "92,88",
+      "92,89",
+      "90,87",
+      "91,87",
+      "90,88",
+      "91,88",
+      "90,89",
+      "91,89",
+      "87,87",
+      "88,87",
+      "89,87",
+      "87,88",
+      "88,88",
+      "89,88",
+      "87,89",
+      "88,89",
+      "89,89",
+      "86,87",
+      "86,88",
+      "86,89",
+      "85,87",
+      "85,88",
+      "85,89",
+      "84,87",
+      "84,88",
+      "84,89",
+      "83,87",
+      "83,88",
+      "83,89",
+      "82,87",
+      "82,88",
+      "82,89",
+      "79,87",
+      "80,87",
+      "81,87",
+      "79,88",
+      "80,88",
+      "81,88",
+      "79,89",
+      "80,89",
+      "81,89",
+      "77,87",
+      "78,87",
+      "77,88",
+      "78,88",
+      "77,89",
+      "78,89",
+      "76,87",
+      "76,88",
+      "76,89",
+      "75,87",
+      "75,88",
+      "75,89",
+      "73,87",
+      "74,87",
+      "73,88",
+      "74,88",
+      "73,89",
+      "74,89",
+      "72,87",
+      "72,88",
+      "72,89",
+      "71,87",
+      "71,88",
+      "71,89",
+      "71,86",
+      "72,86",
+      "73,86",
+      "71,85",
+      "72,85",
+      "73,85",
+      "74,85",
+      "74,86",
+      "75,85",
+      "75,86",
+      "76,85",
+      "76,86",
+      "77,85",
+      "77,86",
+      "78,85",
+      "79,85",
+      "78,86",
+      "79,86",
+      "80,85",
+      "80,86",
+      "81,86",
+      "82,86",
+      "83,86",
+      "84,86",
+      "85,86",
+      "86,86",
+      "87,86",
+      "88,86",
+      "89,86",
+      "90,86",
+      "91,86",
+      "92,86",
+      "93,86",
+      "94,86",
+      "95,86",
+      "96,86",
+      "97,86",
+      "96,85",
+      "97,85",
+      "95,85",
+      "93,85",
+      "94,85",
+      "92,85",
+      "91,85",
+      "90,85",
+      "89,85",
+      "88,85",
+      "86,85",
+      "87,85",
+      "85,85",
+      "83,85",
+      "84,85",
+      "82,85",
+      "81,85",
+      "68,85",
+      "69,85",
+      "70,85",
+      "68,86",
+      "69,86",
+      "70,86",
+      "68,87",
+      "69,87",
+      "70,87",
+      "67,85",
+      "67,86",
+      "67,87",
+      "65,85",
+      "66,85",
+      "65,86",
+      "66,86",
+      "65,87",
+      "66,87",
+      "64,85",
+      "64,86",
+      "64,87",
+      "62,85",
+      "63,85",
+      "62,86",
+      "63,86",
+      "62,87",
+      "63,87",
+      "61,85",
+      "61,86",
+      "61,87",
+      "60,85",
+      "60,86",
+      "60,87",
+      "59,85",
+      "59,86",
+      "59,87",
+      "58,85",
+      "58,86",
+      "58,87",
+      "57,85",
+      "57,86",
+      "57,87",
+      "56,85",
+      "56,86",
+      "56,87",
+      "55,85",
+      "55,86",
+      "55,87",
+      "54,85",
+      "54,86",
+      "54,87",
+      "53,85",
+      "53,86",
+      "53,87",
+      "52,85",
+      "52,86",
+      "52,87",
+      "51,85",
+      "51,86",
+      "51,87",
+      "50,85",
+      "50,86",
+      "50,87",
+      "49,85",
+      "49,86",
+      "49,87",
+      "48,85",
+      "48,86",
+      "48,87",
+      "47,85",
+      "47,86",
+      "47,87",
+      "46,85",
+      "46,86",
+      "46,87",
+      "45,87",
+      "45,84",
+      "46,84",
+      "47,84",
+      "45,83",
+      "46,83",
+      "47,83",
+      "45,82",
+      "46,82",
+      "47,82",
+      "45,81",
+      "46,81",
+      "47,81",
+      "45,80",
+      "46,80",
+      "47,80",
       "48,80",
       "48,81",
       "48,82",
-      "47,80",
-      "47,81",
-      "47,82",
-      "46,80",
-      "46,81",
-      "46,82",
-      "45,82",
-      "45,79",
-      "46,79",
-      "47,79",
-      "45,78",
-      "46,78",
-      "47,78",
-      "45,77",
-      "46,77",
-      "47,77",
-      "45,76",
-      "46,76",
-      "47,76",
-      "45,75",
-      "46,75",
-      "47,75",
-      "48,75",
-      "48,76",
-      "48,77",
-      "49,75",
-      "50,75",
-      "49,76",
-      "50,76",
-      "49,77",
-      "50,77",
-      "51,75",
-      "51,76",
-      "51,77",
-      "49,78",
-      "50,78",
-      "51,78",
-      "49,79",
-      "50,79",
-      "51,79",
-      "48,78",
-      "48,79",
-      "47,83",
-      "48,83",
+      "49,80",
+      "50,80",
+      "49,81",
+      "50,81",
+      "49,82",
+      "50,82",
+      "51,80",
+      "51,81",
+      "51,82",
       "49,83",
-      "47,84",
-      "48,84",
-      "49,84",
       "50,83",
-      "50,84",
       "51,83",
+      "49,84",
+      "50,84",
       "51,84",
-      "52,83",
-      "53,83",
-      "52,84",
-      "53,84",
-      "54,83",
-      "55,83",
-      "54,84",
-      "55,84",
-      "56,83",
-      "56,84",
-      "57,83",
-      "57,84",
-      "58,83",
-      "58,84",
-      "59,83",
-      "60,83",
-      "59,84",
-      "60,84",
-      "61,83",
-      "61,84",
-      "62,83",
-      "62,84",
-      "63,83",
-      "64,83",
-      "63,84",
-      "64,84",
-      "65,83",
-      "65,84",
-      "66,83",
-      "66,84",
-      "67,83",
-      "68,83",
-      "67,84",
-      "68,84",
-      "69,83",
-      "70,83",
-      "69,84",
-      "70,84",
-      "45,83",
-      "46,83",
-      "45,84",
-      "46,84",
-      "43,82",
-      "44,82",
-      "43,83",
-      "44,83",
-      "43,84",
-      "44,84",
-      "41,82",
-      "42,82",
-      "41,83",
-      "42,83",
-      "41,84",
-      "42,84",
-      "39,82",
-      "40,82",
-      "39,83",
-      "40,83",
-      "39,84",
-      "40,84",
-      "38,82",
-      "38,83",
-      "38,84",
-      "36,82",
-      "37,82",
-      "36,83",
-      "37,83",
-      "36,84",
-      "37,84",
-      "35,82",
-      "35,83",
-      "35,84",
-      "34,82",
-      "34,83",
-      "33,82",
-      "33,83",
-      "14,82",
-      "15,82",
-      "16,82",
-      "14,83",
-      "15,83",
-      "16,83",
-      "14,84",
-      "15,84",
-      "16,84",
-      "13,82",
-      "13,83",
-      "13,84",
-      "12,82",
-      "12,83",
-      "12,84",
-      "11,82",
-      "11,83",
-      "11,84",
-      "17,82",
-      "18,82",
-      "17,83",
-      "18,83",
-      "17,84",
-      "18,84",
-      "20,82",
-      "21,82",
-      "22,82",
-      "20,83",
-      "21,83",
-      "22,83",
-      "20,84",
-      "21,84",
-      "22,84",
-      "23,82",
-      "24,82",
-      "23,83",
-      "24,83",
-      "23,84",
-      "24,84",
-      "25,82",
-      "26,82",
-      "25,83",
-      "26,83",
-      "25,84",
-      "26,84",
-      "27,82",
-      "27,83",
-      "27,84",
-      "28,83",
-      "29,83",
-      "28,84",
-      "29,84",
-      "30,83",
-      "31,83",
-      "30,84",
-      "31,84",
-      "32,83",
-      "32,84",
-      "33,84",
-      "34,84",
-      "29,82",
-      "30,82",
-      "31,82",
-      "28,82",
-      "19,82",
-      "19,83",
-      "19,84",
-      "32,82",
-      "64,58",
-      "65,58",
-      "64,59",
-      "65,59",
-      "66,58",
-      "66,59",
-      "65,60",
-      "66,60",
-      "64,60",
-      "64,61",
-      "65,61",
-      "64,62",
-      "65,62",
+      "48,83",
+      "48,84",
+      "47,88",
+      "48,88",
+      "49,88",
+      "47,89",
+      "48,89",
+      "49,89",
+      "50,88",
+      "50,89",
+      "51,88",
+      "51,89",
+      "52,88",
+      "53,88",
+      "52,89",
+      "53,89",
+      "54,88",
+      "55,88",
+      "54,89",
+      "55,89",
+      "56,88",
+      "56,89",
+      "57,88",
+      "57,89",
+      "58,88",
+      "58,89",
+      "59,88",
+      "60,88",
+      "59,89",
+      "60,89",
+      "61,88",
+      "61,89",
+      "62,88",
+      "62,89",
+      "63,88",
+      "64,88",
+      "63,89",
+      "64,89",
+      "65,88",
+      "65,89",
+      "66,88",
+      "66,89",
+      "67,88",
+      "68,88",
+      "67,89",
+      "68,89",
+      "69,88",
+      "70,88",
+      "69,89",
+      "70,89",
+      "45,88",
+      "46,88",
+      "45,89",
+      "46,89",
+      "43,87",
+      "44,87",
+      "43,88",
+      "44,88",
+      "43,89",
+      "44,89",
+      "41,87",
+      "42,87",
+      "41,88",
+      "42,88",
+      "41,89",
+      "42,89",
+      "39,87",
+      "40,87",
+      "39,88",
+      "40,88",
+      "39,89",
+      "40,89",
+      "38,87",
+      "38,88",
+      "38,89",
+      "36,87",
+      "37,87",
+      "36,88",
+      "37,88",
+      "36,89",
+      "37,89",
+      "35,87",
+      "35,88",
+      "35,89",
+      "34,87",
+      "34,88",
+      "33,87",
+      "33,88",
+      "14,87",
+      "15,87",
+      "16,87",
+      "14,88",
+      "15,88",
+      "16,88",
+      "14,89",
+      "15,89",
+      "16,89",
+      "13,87",
+      "13,88",
+      "13,89",
+      "12,87",
+      "12,88",
+      "12,89",
+      "11,87",
+      "11,88",
+      "11,89",
+      "17,87",
+      "18,87",
+      "17,88",
+      "18,88",
+      "17,89",
+      "18,89",
+      "20,87",
+      "21,87",
+      "22,87",
+      "20,88",
+      "21,88",
+      "22,88",
+      "20,89",
+      "21,89",
+      "22,89",
+      "23,87",
+      "24,87",
+      "23,88",
+      "24,88",
+      "23,89",
+      "24,89",
+      "25,87",
+      "26,87",
+      "25,88",
+      "26,88",
+      "25,89",
+      "26,89",
+      "27,87",
+      "27,88",
+      "27,89",
+      "28,88",
+      "29,88",
+      "28,89",
+      "29,89",
+      "30,88",
+      "31,88",
+      "30,89",
+      "31,89",
+      "32,88",
+      "32,89",
+      "33,89",
+      "34,89",
+      "29,87",
+      "30,87",
+      "31,87",
+      "28,87",
+      "19,87",
+      "19,88",
+      "19,89",
+      "32,87",
       "64,63",
       "65,63",
-      "66,62",
-      "66,63",
-      "66,61",
+      "64,64",
       "65,64",
+      "66,63",
       "66,64",
       "65,65",
       "66,65",
+      "64,65",
+      "64,66",
       "65,66",
-      "66,66",
+      "64,67",
       "65,67",
-      "66,67",
+      "64,68",
       "65,68",
+      "66,67",
       "66,68",
+      "66,66",
       "65,69",
       "66,69",
       "65,70",
@@ -206456,25 +207977,42 @@ const BATTLE_MAPS = [
       "66,71",
       "65,72",
       "66,72",
-      "64,71",
-      "64,72",
-      "64,73",
       "65,73",
       "66,73",
       "65,74",
       "66,74",
+      "65,75",
+      "66,75",
+      "65,76",
+      "66,76",
+      "65,77",
+      "66,77",
+      "64,76",
+      "64,77",
+      "64,78",
+      "65,78",
+      "66,78",
+      "65,79",
+      "66,79",
+      "64,79",
+      "64,75",
       "64,74",
+      "64,71",
+      "64,72",
       "64,70",
       "64,69",
-      "64,66",
-      "64,67",
-      "64,65",
-      "64,64",
-      "64,68"
+      "64,73",
+      "80,39",
+      "83,11",
+      "84,11",
+      "84,10",
+      "85,10",
+      "85,11"
     ],
     "breakable": [],
     "coreSpots": [
-      "57,14"
+      "57,19",
+      "86,21"
     ],
     "coreCount": 1,
     "difficulty": 3,
@@ -206529,335 +208067,355 @@ const BATTLE_MAPS = [
       "reward": 8
     },
     "solidOffsets": {
-      "10,79": [
-        10,
-        11
-      ],
-      "10,80": [
-        10,
-        11
-      ],
-      "10,81": [
-        10,
-        11
-      ],
-      "10,82": [
-        10,
-        11
-      ],
-      "10,83": [
-        10,
-        11
-      ],
       "10,84": [
         10,
         11
       ],
-      "12,81": [
+      "10,85": [
+        10,
+        11
+      ],
+      "10,86": [
+        10,
+        11
+      ],
+      "10,87": [
+        10,
+        11
+      ],
+      "10,88": [
+        10,
+        11
+      ],
+      "10,89": [
+        10,
+        11
+      ],
+      "12,86": [
         -31,
         -29
       ],
-      "12,80": [
+      "12,85": [
         -31,
         -29
       ],
-      "13,80": [
+      "13,85": [
         -31,
         -29
       ],
-      "13,81": [
+      "13,86": [
         -31,
         -29
       ],
-      "14,81": [
+      "14,86": [
         -31,
         -29
       ],
-      "14,80": [
+      "14,85": [
         -31,
         -29
       ],
-      "15,80": [
+      "15,85": [
         -31,
         -29
       ],
-      "15,81": [
+      "15,86": [
         -31,
         -29
       ],
-      "16,81": [
+      "16,86": [
         -31,
         -29
       ],
-      "16,80": [
+      "16,85": [
         -31,
         -29
       ],
-      "17,80": [
+      "17,85": [
         -31,
         -29
       ],
-      "17,81": [
+      "17,86": [
         -31,
         -29
       ],
-      "18,81": [
+      "18,86": [
         -31,
         -29
       ],
-      "18,80": [
+      "18,85": [
         -31,
         -29
       ],
-      "19,80": [
+      "19,85": [
         -31,
         -29
       ],
-      "19,81": [
+      "19,86": [
         -31,
         -29
       ],
-      "20,81": [
+      "20,86": [
         -31,
         -29
       ],
-      "20,80": [
+      "20,85": [
         -31,
         -29
       ],
-      "21,80": [
+      "21,85": [
         -31,
         -29
       ],
-      "21,81": [
+      "21,86": [
         -31,
         -29
       ],
-      "22,81": [
+      "22,86": [
         -31,
         -29
       ],
-      "22,80": [
+      "22,85": [
         -31,
         -29
       ],
-      "23,80": [
+      "23,85": [
         -31,
         -29
       ],
-      "23,81": [
+      "23,86": [
         -31,
         -29
       ],
-      "24,80": [
+      "24,85": [
         -31,
         -29
       ],
-      "24,81": [
+      "24,86": [
         -31,
         -29
       ],
-      "25,80": [
+      "25,85": [
         -31,
         -29
       ],
-      "25,81": [
+      "25,86": [
         -31,
         -29
       ],
-      "26,80": [
+      "26,85": [
         -31,
         -29
       ],
-      "26,81": [
+      "26,86": [
         -31,
         -29
       ],
-      "27,80": [
+      "27,85": [
         -31,
         -29
       ],
-      "27,81": [
+      "27,86": [
         -31,
         -29
       ],
-      "28,80": [
+      "28,85": [
         -31,
         -29
       ],
-      "28,81": [
+      "28,86": [
         -31,
         -29
       ],
-      "29,80": [
+      "29,85": [
         -31,
         -29
       ],
-      "29,81": [
+      "29,86": [
         -31,
         -29
       ],
-      "30,80": [
+      "30,85": [
         -31,
         -29
       ],
-      "30,81": [
+      "30,86": [
         -31,
         -29
       ],
-      "31,80": [
+      "31,85": [
         -31,
         -29
       ],
-      "31,81": [
+      "31,86": [
         -31,
         -29
       ],
-      "32,80": [
+      "32,85": [
         -31,
         -29
       ],
-      "32,81": [
+      "32,86": [
         -31,
         -29
       ],
-      "33,80": [
+      "33,85": [
         -31,
         -29
       ],
-      "33,81": [
+      "33,86": [
         -31,
         -29
       ],
-      "34,80": [
+      "34,85": [
         -31,
         -29
       ],
-      "34,81": [
+      "34,86": [
         -31,
         -29
       ],
-      "35,80": [
+      "35,85": [
         -31,
         -29
       ],
-      "35,81": [
+      "35,86": [
         -31,
         -29
       ],
-      "36,80": [
+      "36,85": [
         -31,
         -29
       ],
-      "36,81": [
+      "36,86": [
         -31,
         -29
       ],
-      "37,80": [
+      "37,85": [
         -31,
         -29
       ],
-      "37,81": [
+      "37,86": [
         -31,
         -29
       ],
-      "38,80": [
+      "38,85": [
         -31,
         -29
       ],
-      "38,81": [
+      "38,86": [
         -31,
         -29
       ],
-      "39,80": [
+      "39,85": [
         -31,
         -29
       ],
-      "39,81": [
+      "39,86": [
         -31,
         -29
       ],
-      "40,80": [
+      "40,85": [
         -31,
         -29
       ],
-      "40,81": [
+      "40,86": [
         -31,
         -29
       ],
-      "41,80": [
+      "41,85": [
         -31,
         -29
       ],
-      "41,81": [
+      "41,86": [
         -31,
         -29
       ],
-      "42,80": [
+      "42,85": [
         -31,
         -29
       ],
-      "42,81": [
+      "42,86": [
         -31,
         -29
       ],
-      "43,80": [
+      "43,85": [
         -31,
         -29
       ],
-      "43,81": [
+      "43,86": [
         -31,
         -29
       ],
-      "44,80": [
+      "44,85": [
         -31,
         -29
       ],
-      "44,81": [
+      "44,86": [
         -31,
         -29
       ],
-      "45,80": [
+      "45,85": [
         -31,
         -29
       ],
-      "45,81": [
+      "45,86": [
         -31,
         -29
+      ],
+      "5,89": [
+        10,
+        9
+      ],
+      "5,88": [
+        10,
+        9
+      ],
+      "5,87": [
+        10,
+        9
+      ],
+      "5,86": [
+        10,
+        9
+      ],
+      "5,85": [
+        10,
+        9
       ],
       "5,84": [
         10,
         9
       ],
-      "5,83": [
+      "4,84": [
         10,
         9
       ],
-      "5,82": [
+      "3,84": [
         10,
         9
       ],
-      "5,81": [
+      "2,84": [
         10,
         9
       ],
-      "5,80": [
+      "1,84": [
         10,
         9
       ],
-      "5,79": [
+      "1,83": [
         10,
         9
       ],
-      "4,79": [
+      "1,82": [
         10,
         9
       ],
-      "3,79": [
+      "1,81": [
         10,
         9
       ],
-      "2,79": [
+      "1,80": [
         10,
         9
       ],
@@ -206981,23 +208539,23 @@ const BATTLE_MAPS = [
         10,
         9
       ],
-      "1,49": [
+      "1,44": [
         10,
         9
       ],
-      "1,48": [
+      "1,43": [
         10,
         9
       ],
-      "1,47": [
+      "1,42": [
         10,
         9
       ],
-      "1,46": [
+      "1,41": [
         10,
         9
       ],
-      "1,45": [
+      "1,40": [
         10,
         9
       ],
@@ -207005,857 +208563,817 @@ const BATTLE_MAPS = [
         10,
         9
       ],
-      "1,38": [
+      "2,37": [
         10,
         9
       ],
-      "1,37": [
+      "2,38": [
         10,
         9
       ],
-      "1,36": [
+      "3,38": [
         10,
         9
       ],
-      "1,35": [
+      "3,37": [
         10,
         9
       ],
-      "1,34": [
+      "4,37": [
         10,
         9
       ],
-      "2,32": [
+      "4,38": [
         10,
         9
       ],
-      "2,33": [
-        10,
-        9
-      ],
-      "3,33": [
-        10,
-        9
-      ],
-      "3,32": [
-        10,
-        9
-      ],
-      "4,32": [
-        10,
-        9
-      ],
-      "4,33": [
-        10,
-        9
-      ],
-      "5,33": [
+      "5,38": [
         0,
         9
       ],
-      "5,32": [
+      "5,37": [
         0,
         9
       ],
-      "7,32": [
+      "7,37": [
         0,
         8
       ],
-      "7,33": [
+      "7,38": [
         0,
         8
       ],
-      "8,33": [
+      "8,38": [
         0,
         8
       ],
-      "8,32": [
+      "8,37": [
         0,
         8
       ],
-      "9,32": [
+      "9,37": [
         0,
         8
       ],
-      "9,33": [
+      "9,38": [
         0,
         8
       ],
-      "10,33": [
+      "10,38": [
         0,
         8
       ],
-      "10,32": [
+      "10,37": [
         0,
         8
       ],
-      "11,32": [
+      "11,37": [
         0,
         8
       ],
-      "11,33": [
+      "11,38": [
         0,
         8
       ],
-      "12,33": [
+      "12,38": [
         0,
         8
       ],
-      "12,32": [
+      "12,37": [
         0,
         8
       ],
-      "13,32": [
+      "13,37": [
         0,
         8
       ],
-      "13,33": [
+      "13,38": [
         0,
         8
       ],
-      "14,32": [
+      "14,37": [
         0,
         8
       ],
-      "14,33": [
+      "14,38": [
         0,
         8
       ],
-      "16,32": [
+      "16,37": [
         0,
         8
       ],
-      "16,33": [
+      "16,38": [
         0,
         8
       ],
-      "17,32": [
+      "17,37": [
         0,
         8
       ],
-      "17,33": [
+      "17,38": [
         0,
         8
       ],
-      "18,32": [
+      "18,37": [
         0,
         8
       ],
-      "18,33": [
+      "18,38": [
         0,
         8
       ],
-      "19,32": [
+      "19,37": [
         0,
         8
       ],
-      "19,33": [
+      "19,38": [
         0,
         8
       ],
-      "20,32": [
+      "20,37": [
         0,
         8
       ],
-      "20,33": [
+      "20,38": [
         0,
         8
       ],
-      "21,32": [
+      "21,37": [
         0,
         8
       ],
-      "21,33": [
+      "21,38": [
         0,
         8
       ],
-      "22,32": [
+      "22,37": [
         0,
         8
       ],
-      "22,33": [
+      "22,38": [
         0,
         8
       ],
-      "23,32": [
+      "23,37": [
         0,
         8
       ],
-      "23,33": [
+      "23,38": [
         0,
         8
       ],
-      "25,32": [
+      "25,37": [
         0,
         8
       ],
-      "25,33": [
+      "25,38": [
         0,
         8
       ],
-      "26,33": [
+      "26,38": [
         0,
         8
       ],
-      "26,32": [
+      "26,37": [
         0,
         8
       ],
-      "28,32": [
+      "28,37": [
         0,
         8
       ],
-      "27,33": [
+      "27,38": [
         0,
         8
       ],
-      "29,33": [
+      "29,38": [
         0,
         8
       ],
-      "27,32": [
+      "27,37": [
         0,
         8
       ],
-      "29,32": [
+      "29,37": [
         0,
         8
       ],
-      "30,33": [
+      "30,38": [
         0,
         8
       ],
-      "30,32": [
+      "30,37": [
         0,
         8
       ],
-      "28,33": [
+      "28,38": [
         0,
         8
       ],
-      "31,32": [
+      "31,37": [
         0,
         8
       ],
-      "32,32": [
+      "32,37": [
         0,
         8
       ],
-      "32,33": [
+      "32,38": [
         0,
         8
       ],
-      "31,33": [
+      "31,38": [
         0,
         8
       ],
-      "34,33": [
+      "34,38": [
         0,
         8
       ],
-      "34,32": [
+      "34,37": [
         0,
         8
       ],
-      "35,32": [
+      "35,37": [
         0,
         8
       ],
-      "35,33": [
+      "35,38": [
         0,
         8
       ],
-      "36,33": [
+      "36,38": [
         0,
         8
       ],
-      "36,32": [
+      "36,37": [
         0,
         8
       ],
-      "2,75": [
+      "2,80": [
         9,
         0
       ],
-      "2,76": [
+      "2,81": [
         9,
         -13
       ],
-      "3,75": [
+      "3,80": [
         9,
         0
       ],
-      "3,76": [
+      "3,81": [
         9,
         -13
       ],
-      "4,75": [
+      "4,80": [
         9,
         0
       ],
-      "4,76": [
+      "4,81": [
         9,
         -13
       ],
-      "25,74": [
+      "25,79": [
         1,
         -16
       ],
-      "25,75": [
+      "25,80": [
         1,
         -16
       ],
-      "26,75": [
+      "26,80": [
         1,
         -16
       ],
-      "27,75": [
+      "27,80": [
         1,
         -16
       ],
-      "28,75": [
+      "28,80": [
         1,
         -16
       ],
-      "29,75": [
+      "29,80": [
         1,
         -16
       ],
-      "31,75": [
+      "31,80": [
         1,
         -16
       ],
-      "32,75": [
+      "32,80": [
         1,
         -16
       ],
-      "2,66": [
+      "2,71": [
         0,
         -7
       ],
-      "3,66": [
+      "3,71": [
         0,
         -7
       ],
-      "4,66": [
+      "4,71": [
         0,
         -7
       ],
-      "6,66": [
+      "6,71": [
         0,
         -7
       ],
-      "7,66": [
+      "7,71": [
         0,
         -7
       ],
-      "8,66": [
+      "8,71": [
         0,
         -7
       ],
-      "9,66": [
+      "9,71": [
         0,
         -7
       ],
-      "10,66": [
+      "10,71": [
         0,
         -7
       ],
-      "11,66": [
+      "11,71": [
         0,
         -7
       ],
-      "12,66": [
+      "12,71": [
         0,
         -7
       ],
-      "13,66": [
+      "13,71": [
         0,
         -7
       ],
-      "14,66": [
+      "14,71": [
         0,
         -7
       ],
-      "15,66": [
+      "15,71": [
         0,
         -7
       ],
-      "16,66": [
+      "16,71": [
         0,
         -7
       ],
-      "17,66": [
+      "17,71": [
         0,
         -7
       ],
-      "18,66": [
+      "18,71": [
         0,
         -7
       ],
-      "19,66": [
+      "19,71": [
         0,
         -7
       ],
-      "20,66": [
+      "20,71": [
         0,
         -7
       ],
-      "21,66": [
+      "21,71": [
         0,
         -7
       ],
-      "23,66": [
+      "23,71": [
         0,
         -7
       ],
-      "24,66": [
+      "24,71": [
         0,
         -7
       ],
-      "26,66": [
+      "26,71": [
         0,
         -7
       ],
-      "27,66": [
+      "27,71": [
         0,
         -7
       ],
-      "28,66": [
+      "28,71": [
         0,
         -7
       ],
-      "29,66": [
+      "29,71": [
         0,
         -7
       ],
-      "30,66": [
+      "30,71": [
         0,
         -7
       ],
-      "31,66": [
+      "31,71": [
         0,
         -7
       ],
-      "32,66": [
+      "32,71": [
         0,
         -7
       ],
-      "33,66": [
+      "33,71": [
         0,
         -7
       ],
-      "35,66": [
+      "35,71": [
         0,
         -7
       ],
-      "36,66": [
+      "36,71": [
         0,
         -7
       ],
-      "37,66": [
+      "37,71": [
         0,
         -7
       ],
-      "24,74": [
+      "24,79": [
         1,
         -13
-      ],
-      "15,52": [
-        11,
-        5
-      ],
-      "15,53": [
-        11,
-        -15
-      ],
-      "15,54": [
-        11,
-        -15
-      ],
-      "15,55": [
-        11,
-        -15
-      ],
-      "15,56": [
-        11,
-        -15
       ],
       "15,57": [
         11,
-        -15
+        5
       ],
       "15,58": [
         11,
         -15
       ],
-      "16,54": [
+      "15,59": [
         11,
         -15
       ],
-      "17,54": [
+      "15,60": [
         11,
         -15
       ],
-      "18,54": [
+      "15,61": [
         11,
         -15
       ],
-      "19,54": [
+      "15,62": [
         11,
         -15
       ],
-      "20,54": [
+      "15,63": [
         11,
         -15
       ],
-      "21,54": [
+      "16,59": [
         11,
         -15
       ],
-      "22,54": [
+      "17,59": [
         11,
         -15
       ],
-      "23,54": [
+      "18,59": [
         11,
         -15
       ],
-      "24,54": [
+      "19,59": [
         11,
         -15
       ],
-      "25,54": [
+      "20,59": [
         11,
         -15
       ],
-      "27,54": [
+      "21,59": [
         11,
         -15
       ],
-      "26,54": [
+      "22,59": [
         11,
         -15
       ],
-      "28,54": [
+      "23,59": [
         11,
         -15
       ],
-      "29,54": [
+      "24,59": [
         11,
         -15
       ],
-      "30,54": [
+      "25,59": [
         11,
         -15
       ],
-      "31,54": [
+      "27,59": [
         11,
         -15
       ],
-      "32,54": [
+      "26,59": [
         11,
         -15
       ],
-      "33,54": [
+      "28,59": [
         11,
         -15
       ],
-      "34,54": [
+      "29,59": [
         11,
         -15
       ],
-      "2,59": [
+      "30,59": [
+        11,
+        -15
+      ],
+      "31,59": [
+        11,
+        -15
+      ],
+      "32,59": [
+        11,
+        -15
+      ],
+      "33,59": [
+        11,
+        -15
+      ],
+      "34,59": [
+        11,
+        -15
+      ],
+      "2,64": [
         9,
         -10
       ],
-      "2,58": [
+      "2,63": [
         9,
         -10
       ],
-      "3,58": [
+      "3,63": [
         9,
         -10
       ],
-      "3,59": [
+      "3,64": [
         9,
         -10
       ],
-      "4,59": [
+      "4,64": [
         9,
         -10
       ],
-      "4,58": [
+      "4,63": [
         9,
         -10
       ],
-      "2,45": [
+      "2,50": [
         6,
         -25
       ],
-      "3,45": [
+      "3,50": [
         6,
         -25
       ],
-      "4,45": [
+      "4,50": [
         6,
         -25
       ],
-      "5,45": [
+      "5,50": [
         6,
         -25
       ],
-      "6,45": [
+      "6,50": [
         6,
         -25
       ],
-      "11,45": [
+      "11,50": [
         6,
         -25
       ],
-      "12,45": [
+      "12,50": [
         6,
         -25
       ],
-      "13,45": [
+      "13,50": [
         6,
         -25
       ],
-      "14,45": [
+      "14,50": [
         6,
         -25
       ],
-      "15,45": [
+      "15,50": [
         6,
         -25
       ],
-      "8,43": [
+      "8,48": [
         -14,
         -16
       ],
-      "7,43": [
+      "7,48": [
         -2,
         -9
       ],
-      "6,43": [
+      "6,48": [
         -15,
         -6
       ],
-      "6,44": [
+      "6,49": [
         -2,
         -19
       ],
-      "11,44": [
+      "11,49": [
         6,
         -19
       ],
-      "16,49": [
+      "16,54": [
         0,
         -23
       ],
-      "17,49": [
+      "17,54": [
         0,
         -23
       ],
-      "18,49": [
+      "18,54": [
         0,
         -23
       ],
-      "19,49": [
+      "19,54": [
         0,
         -23
       ],
-      "20,49": [
+      "20,54": [
         0,
         -23
       ],
-      "21,49": [
+      "21,54": [
         0,
         -23
       ],
-      "22,49": [
+      "22,54": [
         0,
         -23
       ],
-      "23,49": [
+      "23,54": [
         0,
         -23
       ],
-      "24,49": [
+      "24,54": [
         0,
         -23
       ],
-      "26,49": [
+      "26,54": [
         0,
         -23
       ],
-      "25,49": [
+      "25,54": [
         0,
         -23
       ],
-      "27,49": [
+      "27,54": [
         0,
         -23
       ],
-      "28,49": [
+      "28,54": [
         0,
         -23
       ],
-      "29,49": [
+      "29,54": [
         0,
         -23
       ],
-      "30,49": [
+      "30,54": [
         0,
         -23
       ],
-      "31,49": [
+      "31,54": [
         0,
         -23
       ],
-      "32,49": [
+      "32,54": [
         0,
         -23
       ],
-      "33,49": [
+      "33,54": [
         0,
         -23
       ],
-      "34,49": [
+      "34,54": [
         0,
         -23
       ],
-      "35,49": [
+      "35,54": [
         0,
         -23
       ],
-      "36,49": [
+      "36,54": [
         0,
         -23
       ],
-      "37,49": [
+      "37,54": [
         0,
         -23
       ],
-      "18,60": [
+      "18,65": [
         -20,
         0
       ],
-      "18,61": [
+      "18,66": [
         -20,
         0
       ],
-      "26,57": [
+      "26,62": [
         10,
         0
       ],
-      "26,58": [
+      "26,63": [
         10,
         0
       ],
-      "26,59": [
+      "26,64": [
         10,
         0
       ],
-      "26,60": [
+      "26,65": [
         10,
         0
       ],
-      "26,61": [
+      "26,66": [
         10,
         0
       ],
-      "18,57": [
+      "18,62": [
         -19,
         0
       ],
-      "18,58": [
+      "18,63": [
         -19,
         0
       ],
-      "18,59": [
+      "18,64": [
         -19,
         0
       ],
-      "19,58": [
+      "19,63": [
         -19,
         1
       ],
-      "20,58": [
+      "20,63": [
         -19,
         -23
       ],
-      "21,58": [
+      "21,63": [
         -19,
         -23
       ],
-      "22,58": [
+      "22,63": [
         -19,
         1
       ],
-      "23,58": [
+      "23,63": [
         -19,
         1
       ],
-      "24,58": [
+      "24,63": [
         -19,
         1
       ],
-      "25,58": [
+      "25,63": [
         17,
         2
       ],
-      "19,57": [
+      "19,62": [
         -18,
         0
       ],
-      "20,57": [
+      "20,62": [
         -18,
         0
       ],
-      "21,57": [
+      "21,62": [
         -18,
         0
       ],
-      "22,57": [
+      "22,62": [
         -18,
         0
       ],
-      "23,57": [
+      "23,62": [
         -18,
         0
       ],
-      "24,57": [
+      "24,62": [
         -18,
         0
       ],
-      "25,57": [
+      "25,62": [
         16,
         1
       ],
-      "44,55": [
+      "44,60": [
         -16,
         11
-      ],
-      "44,45": [
-        -19,
-        13
-      ],
-      "44,46": [
-        -19,
-        13
-      ],
-      "44,47": [
-        -19,
-        13
-      ],
-      "44,48": [
-        -19,
-        13
-      ],
-      "44,49": [
-        -19,
-        13
       ],
       "44,50": [
         -19,
@@ -207877,105 +209395,145 @@ const BATTLE_MAPS = [
         -19,
         13
       ],
-      "47,56": [
+      "44,55": [
+        -19,
+        13
+      ],
+      "44,56": [
+        -19,
+        13
+      ],
+      "44,57": [
+        -19,
+        13
+      ],
+      "44,58": [
+        -19,
+        13
+      ],
+      "44,59": [
+        -19,
+        13
+      ],
+      "47,61": [
         0,
         -27
       ],
-      "57,48": [
+      "57,53": [
         -18,
         -1
-      ],
-      "58,48": [
-        -18,
-        -1
-      ],
-      "58,49": [
-        -18,
-        -1
-      ],
-      "58,50": [
-        -18,
-        -1
-      ],
-      "58,51": [
-        -18,
-        -1
-      ],
-      "58,52": [
-        -18,
-        -3
       ],
       "58,53": [
         -18,
-        -3
+        -1
       ],
       "58,54": [
         -18,
-        -3
+        -1
       ],
       "58,55": [
         -18,
+        -1
+      ],
+      "58,56": [
+        -18,
+        -1
+      ],
+      "58,57": [
+        -18,
         -3
       ],
-      "57,57": [
+      "58,58": [
+        -18,
+        -3
+      ],
+      "58,59": [
+        -18,
+        -3
+      ],
+      "58,60": [
+        -18,
+        -3
+      ],
+      "57,62": [
         -10,
         0
       ],
-      "57,56": [
+      "57,61": [
         -10,
         0
       ],
-      "57,55": [
+      "57,60": [
         -10,
         0
       ],
-      "62,57": [
+      "62,62": [
         -7,
         0
       ],
-      "62,56": [
+      "62,61": [
         -7,
         0
       ],
-      "62,55": [
+      "62,60": [
         -7,
         0
       ],
-      "63,57": [
+      "63,62": [
         -8,
         0
       ],
-      "64,57": [
+      "64,62": [
         -8,
         0
       ],
-      "65,57": [
+      "65,62": [
         -8,
         0
       ],
-      "18,42": [
+      "18,47": [
         -19,
         0
       ],
-      "21,42": [
+      "21,47": [
         -17,
         0
       ],
-      "30,43": [
+      "30,48": [
         17,
         0
       ],
-      "21,41": [
+      "21,46": [
         -18,
         0
       ],
-      "22,41": [
+      "22,46": [
         -31,
         -12
       ],
-      "25,41": [
+      "25,46": [
         -2,
         -2
+      ],
+      "9,36": [
+        20,
+        -14
+      ],
+      "9,35": [
+        20,
+        -14
+      ],
+      "9,34": [
+        20,
+        -14
+      ],
+      "9,33": [
+        20,
+        -14
+      ],
+      "9,32": [
+        20,
+        -14
       ],
       "9,31": [
         20,
@@ -207997,46 +209555,6 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
-      "9,26": [
-        20,
-        -14
-      ],
-      "9,25": [
-        20,
-        -14
-      ],
-      "9,24": [
-        20,
-        -14
-      ],
-      "9,23": [
-        20,
-        -14
-      ],
-      "9,22": [
-        20,
-        -14
-      ],
-      "11,22": [
-        -21,
-        -15
-      ],
-      "11,23": [
-        -21,
-        -15
-      ],
-      "11,24": [
-        -21,
-        -15
-      ],
-      "11,25": [
-        -21,
-        -15
-      ],
-      "11,26": [
-        -21,
-        -15
-      ],
       "11,27": [
         -21,
         -15
@@ -208057,6 +209575,46 @@ const BATTLE_MAPS = [
         -21,
         -15
       ],
+      "11,32": [
+        -21,
+        -15
+      ],
+      "11,33": [
+        -21,
+        -15
+      ],
+      "11,34": [
+        -21,
+        -15
+      ],
+      "11,35": [
+        -21,
+        -15
+      ],
+      "11,36": [
+        -21,
+        -15
+      ],
+      "18,36": [
+        20,
+        -14
+      ],
+      "18,35": [
+        20,
+        -14
+      ],
+      "18,34": [
+        20,
+        -14
+      ],
+      "18,33": [
+        20,
+        -14
+      ],
+      "18,32": [
+        20,
+        -14
+      ],
       "18,31": [
         20,
         -14
@@ -208074,46 +209632,6 @@ const BATTLE_MAPS = [
         -14
       ],
       "18,27": [
-        20,
-        -14
-      ],
-      "18,26": [
-        20,
-        -14
-      ],
-      "18,25": [
-        20,
-        -14
-      ],
-      "18,24": [
-        20,
-        -14
-      ],
-      "18,23": [
-        20,
-        -14
-      ],
-      "18,22": [
-        20,
-        -14
-      ],
-      "20,22": [
-        20,
-        -14
-      ],
-      "20,23": [
-        20,
-        -14
-      ],
-      "20,24": [
-        20,
-        -14
-      ],
-      "20,25": [
-        20,
-        -14
-      ],
-      "20,26": [
         20,
         -14
       ],
@@ -208137,6 +209655,62 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
+      "20,32": [
+        20,
+        -14
+      ],
+      "20,33": [
+        20,
+        -14
+      ],
+      "20,34": [
+        20,
+        -14
+      ],
+      "20,35": [
+        20,
+        -14
+      ],
+      "20,36": [
+        20,
+        -14
+      ],
+      "27,36": [
+        20,
+        -14
+      ],
+      "29,36": [
+        20,
+        -14
+      ],
+      "29,35": [
+        20,
+        -14
+      ],
+      "29,34": [
+        20,
+        -14
+      ],
+      "27,34": [
+        20,
+        -14
+      ],
+      "27,35": [
+        20,
+        -14
+      ],
+      "27,33": [
+        20,
+        -14
+      ],
+      "29,33": [
+        20,
+        -14
+      ],
+      "29,32": [
+        20,
+        -14
+      ],
       "27,31": [
         20,
         -14
@@ -208149,7 +209723,7 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
-      "29,29": [
+      "27,30": [
         20,
         -14
       ],
@@ -208157,11 +209731,7 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
-      "27,30": [
-        20,
-        -14
-      ],
-      "27,28": [
+      "29,29": [
         20,
         -14
       ],
@@ -208169,63 +209739,15 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
+      "27,28": [
+        20,
+        -14
+      ],
+      "27,27": [
+        20,
+        -14
+      ],
       "29,27": [
-        20,
-        -14
-      ],
-      "27,26": [
-        20,
-        -14
-      ],
-      "29,26": [
-        20,
-        -14
-      ],
-      "29,25": [
-        20,
-        -14
-      ],
-      "27,25": [
-        20,
-        -14
-      ],
-      "27,24": [
-        20,
-        -14
-      ],
-      "29,24": [
-        20,
-        -14
-      ],
-      "29,23": [
-        20,
-        -14
-      ],
-      "27,23": [
-        20,
-        -14
-      ],
-      "27,22": [
-        20,
-        -14
-      ],
-      "29,22": [
-        20,
-        -14
-      ],
-      "36,22": [
-        20,
-        -14
-      ],
-      "36,23": [
-        20,
-        -14
-      ],
-      "36,24": [
-        20,
-        -14
-      ],
-      "36,26": [
         20,
         -14
       ],
@@ -208241,65 +209763,61 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
-      "36,30": [
-        20,
-        -14
-      ],
       "36,31": [
         20,
         -14
       ],
-      "10,31": [
-        -21,
-        0
-      ],
-      "21,31": [
-        -21,
-        0
-      ],
-      "30,31": [
-        -21,
-        0
-      ],
-      "37,31": [
-        -21,
-        0
-      ],
-      "27,27": [
+      "36,32": [
         20,
         -14
       ],
-      "37,32": [
-        -22,
-        0
-      ],
-      "37,33": [
-        -22,
-        0
-      ],
-      "36,25": [
-        19,
+      "36,33": [
+        20,
         -14
       ],
-      "37,13": [
+      "36,34": [
+        20,
+        -14
+      ],
+      "36,35": [
+        20,
+        -14
+      ],
+      "36,36": [
+        20,
+        -14
+      ],
+      "10,36": [
+        -21,
+        0
+      ],
+      "21,36": [
+        -21,
+        0
+      ],
+      "30,36": [
+        -21,
+        0
+      ],
+      "37,36": [
+        -21,
+        0
+      ],
+      "27,32": [
+        20,
+        -14
+      ],
+      "37,37": [
         -22,
         0
       ],
-      "37,14": [
+      "37,38": [
         -22,
         0
       ],
-      "37,15": [
-        -22,
-        0
-      ],
-      "37,16": [
-        -22,
-        0
-      ],
-      "37,17": [
-        -22,
-        0
+      "36,30": [
+        19,
+        -14
       ],
       "37,18": [
         -22,
@@ -208317,233 +209835,273 @@ const BATTLE_MAPS = [
         -22,
         0
       ],
-      "37,8": [
+      "37,22": [
+        -22,
+        0
+      ],
+      "37,23": [
+        -22,
+        0
+      ],
+      "37,24": [
+        -22,
+        0
+      ],
+      "37,25": [
+        -22,
+        0
+      ],
+      "37,26": [
+        -22,
+        0
+      ],
+      "37,13": [
         -13,
         9
       ],
-      "36,8": [
+      "36,13": [
         -13,
         9
       ],
-      "35,8": [
+      "35,13": [
         -13,
         9
       ],
-      "34,8": [
+      "34,13": [
         -13,
         9
       ],
-      "33,8": [
+      "33,13": [
         -13,
         9
       ],
-      "32,8": [
+      "32,13": [
         -13,
         9
       ],
-      "31,8": [
+      "31,13": [
         -13,
         9
       ],
-      "30,8": [
+      "30,13": [
         -13,
         9
       ],
-      "29,8": [
+      "29,13": [
         -13,
         9
       ],
-      "28,8": [
+      "28,13": [
         -13,
         9
       ],
-      "26,8": [
+      "26,13": [
         -13,
         9
       ],
-      "27,8": [
+      "27,13": [
         -13,
         9
       ],
-      "25,8": [
+      "25,13": [
         -13,
         9
       ],
-      "24,8": [
+      "24,13": [
         -13,
         9
       ],
-      "23,8": [
+      "23,13": [
         -13,
         9
       ],
-      "22,8": [
+      "22,13": [
         -13,
         9
       ],
-      "21,8": [
+      "21,13": [
         -13,
         9
       ],
-      "20,8": [
+      "20,13": [
         -13,
         9
       ],
-      "19,8": [
+      "19,13": [
         -13,
         9
       ],
-      "19,7": [
+      "19,12": [
         -13,
         9
       ],
-      "8,6": [
+      "8,11": [
         -18,
         1
       ],
-      "7,6": [
+      "7,11": [
         -7,
         0
       ],
-      "6,6": [
+      "6,11": [
         -7,
         0
       ],
-      "6,7": [
+      "6,12": [
         -7,
         0
       ],
-      "6,8": [
+      "6,13": [
         -7,
         0
       ],
-      "6,9": [
+      "6,14": [
         -7,
         0
       ],
-      "6,10": [
+      "6,15": [
         -7,
         0
       ],
-      "1,10": [
+      "1,15": [
         10,
         0
       ],
-      "1,11": [
+      "1,16": [
         10,
         0
       ],
-      "1,12": [
+      "1,17": [
         10,
         0
       ],
-      "1,13": [
+      "1,18": [
         10,
         0
       ],
-      "1,14": [
+      "1,19": [
         10,
         0
       ],
-      "8,9": [
+      "8,14": [
         21,
         -6
       ],
-      "9,9": [
+      "9,14": [
         10,
         -5
       ],
-      "9,5": [
+      "9,10": [
         -17,
         11
       ],
-      "8,5": [
+      "8,10": [
         -17,
         11
       ],
-      "10,5": [
+      "10,10": [
         20,
         12
       ],
-      "11,6": [
+      "11,11": [
         0,
         -7
       ],
-      "37,3": [
+      "37,8": [
         -12,
         9
       ],
-      "37,4": [
+      "37,9": [
         -12,
         9
       ],
-      "37,5": [
+      "37,10": [
         -12,
         9
       ],
-      "37,6": [
+      "37,11": [
         -12,
         9
       ],
-      "37,7": [
+      "37,12": [
         -12,
         9
       ],
-      "38,3": [
+      "38,8": [
         -12,
         9
       ],
-      "39,3": [
+      "39,8": [
         -12,
         9
       ],
-      "40,3": [
+      "40,8": [
         -12,
         9
       ],
-      "41,3": [
+      "41,8": [
         -12,
         9
       ],
-      "42,3": [
+      "42,8": [
         -12,
         9
       ],
-      "47,3": [
+      "47,8": [
         7,
         11
       ],
-      "48,3": [
+      "48,8": [
         7,
         11
       ],
-      "49,3": [
+      "49,8": [
         7,
         11
       ],
-      "51,3": [
+      "51,8": [
         7,
         11
       ],
-      "52,3": [
+      "52,8": [
         7,
         11
       ],
-      "53,3": [
+      "53,8": [
         7,
         11
       ],
-      "54,3": [
+      "54,8": [
         7,
         11
       ],
-      "55,3": [
+      "55,8": [
         7,
         11
       ],
-      "50,3": [
+      "50,8": [
         7,
         11
+      ],
+      "64,57": [
+        7,
+        8
+      ],
+      "64,56": [
+        7,
+        8
+      ],
+      "64,55": [
+        7,
+        8
+      ],
+      "64,54": [
+        7,
+        8
+      ],
+      "64,53": [
+        7,
+        8
       ],
       "64,52": [
         7,
@@ -208713,309 +210271,269 @@ const BATTLE_MAPS = [
         7,
         8
       ],
-      "64,10": [
-        7,
-        8
-      ],
-      "64,9": [
-        7,
-        8
-      ],
-      "64,8": [
-        7,
-        8
-      ],
-      "64,7": [
-        7,
-        8
-      ],
-      "64,6": [
-        7,
-        8
-      ],
-      "25,42": [
+      "25,47": [
         19,
         0
       ],
-      "10,38": [
+      "10,43": [
         9,
         1
       ],
-      "10,39": [
+      "10,44": [
         11,
         0
       ],
-      "10,40": [
+      "10,45": [
         11,
         0
       ],
-      "10,42": [
+      "10,47": [
         11,
         0
       ],
-      "39,65": [
+      "39,70": [
         14,
         -11
       ],
-      "40,64": [
+      "40,69": [
         0,
         -31
       ],
-      "58,66": [
+      "58,71": [
         5,
         9
       ],
-      "58,65": [
+      "58,70": [
         5,
         9
       ],
-      "59,65": [
+      "59,70": [
         5,
         9
       ],
-      "1,15": [
+      "1,20": [
         10,
         0
       ],
-      "1,16": [
+      "1,21": [
         10,
         0
       ],
-      "1,17": [
+      "1,22": [
         10,
         0
       ],
-      "1,18": [
+      "1,23": [
         10,
         0
       ],
-      "19,60": [
+      "19,65": [
         14,
         5
       ],
-      "19,61": [
+      "19,66": [
         14,
         -5
       ],
-      "20,61": [
+      "20,66": [
         8,
         -5
       ],
-      "20,60": [
+      "20,65": [
         8,
         5
       ],
-      "21,60": [
+      "21,65": [
         8,
         5
       ],
-      "22,60": [
+      "22,65": [
         8,
         5
       ],
-      "22,61": [
+      "22,66": [
         8,
         -5
       ],
-      "21,61": [
+      "21,66": [
         8,
         -5
       ],
-      "26,67": [
+      "26,72": [
         0,
         -12
       ],
-      "27,67": [
+      "27,72": [
         0,
         -12
       ],
-      "28,67": [
+      "28,72": [
         0,
         -12
       ],
-      "10,8": [
+      "10,13": [
         -27,
         15
       ],
-      "9,8": [
+      "9,13": [
         -18,
         15
       ],
-      "18,62": [
+      "18,67": [
         -19,
         -3
       ],
-      "18,63": [
+      "18,68": [
         -19,
         -3
       ],
-      "16,53": [
+      "16,58": [
         10,
         -12
       ],
-      "17,53": [
+      "17,58": [
         10,
         -12
       ],
-      "18,53": [
+      "18,58": [
         10,
         -12
       ],
-      "19,53": [
+      "19,58": [
         10,
         -12
       ],
-      "20,53": [
+      "20,58": [
         10,
         -12
       ],
-      "21,53": [
+      "21,58": [
         10,
         -12
       ],
-      "22,53": [
+      "22,58": [
         10,
         -12
       ],
-      "23,53": [
+      "23,58": [
         10,
         -12
       ],
-      "24,53": [
+      "24,58": [
         10,
         -12
       ],
-      "25,53": [
+      "25,58": [
         10,
         -12
       ],
-      "26,53": [
+      "26,58": [
         10,
         -12
       ],
-      "27,53": [
+      "27,58": [
         10,
         -12
       ],
-      "28,53": [
+      "28,58": [
         10,
         -12
       ],
-      "29,53": [
+      "29,58": [
         10,
         -12
       ],
-      "30,53": [
+      "30,58": [
         10,
         -12
       ],
-      "31,53": [
+      "31,58": [
         10,
         -12
       ],
-      "32,53": [
+      "32,58": [
         10,
         -12
       ],
-      "33,53": [
+      "33,58": [
         10,
         -12
       ],
-      "34,53": [
+      "34,58": [
         10,
         -12
       ],
-      "17,47": [
+      "17,52": [
         0,
         19
       ],
-      "18,47": [
+      "18,52": [
         0,
         19
       ],
-      "19,47": [
+      "19,52": [
         0,
         19
       ],
-      "20,47": [
+      "20,52": [
         0,
         19
       ],
-      "21,47": [
+      "21,52": [
         0,
         19
       ],
-      "22,47": [
+      "22,52": [
         0,
         19
       ],
-      "23,47": [
+      "23,52": [
         0,
         19
       ],
-      "24,47": [
+      "24,52": [
         0,
         19
       ],
-      "25,47": [
+      "25,52": [
         0,
         19
       ],
-      "26,47": [
+      "26,52": [
         0,
         19
       ],
-      "27,47": [
+      "27,52": [
         0,
         19
       ],
-      "28,47": [
+      "28,52": [
         0,
         19
       ],
-      "29,47": [
+      "29,52": [
         0,
         19
       ],
-      "30,47": [
+      "30,52": [
         0,
         19
       ],
-      "31,47": [
+      "31,52": [
         0,
         19
       ],
-      "32,47": [
+      "32,52": [
         0,
         19
       ],
-      "33,47": [
+      "33,52": [
         0,
         19
       ],
-      "34,47": [
+      "34,52": [
         -1,
         18
-      ],
-      "2,22": [
-        -1,
-        -2
-      ],
-      "2,23": [
-        -1,
-        -2
-      ],
-      "2,24": [
-        -1,
-        -2
-      ],
-      "2,25": [
-        -1,
-        -2
-      ],
-      "2,26": [
-        -1,
-        -2
       ],
       "2,27": [
         -1,
@@ -209037,25 +210555,25 @@ const BATTLE_MAPS = [
         -1,
         -2
       ],
-      "19,22": [
-        20,
-        -14
+      "2,32": [
+        -1,
+        -2
       ],
-      "19,23": [
-        20,
-        -14
+      "2,33": [
+        -1,
+        -2
       ],
-      "19,24": [
-        20,
-        -14
+      "2,34": [
+        -1,
+        -2
       ],
-      "19,25": [
-        20,
-        -14
+      "2,35": [
+        -1,
+        -2
       ],
-      "19,26": [
-        20,
-        -14
+      "2,36": [
+        -1,
+        -2
       ],
       "19,27": [
         20,
@@ -209077,19 +210595,47 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
+      "19,32": [
+        20,
+        -14
+      ],
+      "19,33": [
+        20,
+        -14
+      ],
+      "19,34": [
+        20,
+        -14
+      ],
+      "19,35": [
+        20,
+        -14
+      ],
+      "19,36": [
+        20,
+        -14
+      ],
+      "28,36": [
+        20,
+        -14
+      ],
+      "28,35": [
+        20,
+        -14
+      ],
+      "28,34": [
+        20,
+        -14
+      ],
+      "28,33": [
+        20,
+        -14
+      ],
+      "28,32": [
+        20,
+        -14
+      ],
       "28,31": [
-        20,
-        -14
-      ],
-      "28,30": [
-        20,
-        -14
-      ],
-      "28,29": [
-        20,
-        -14
-      ],
-      "28,28": [
         20,
         -14
       ],
@@ -209097,443 +210643,399 @@ const BATTLE_MAPS = [
         20,
         -14
       ],
-      "28,26": [
+      "28,28": [
         20,
         -14
       ],
-      "28,22": [
+      "28,29": [
         20,
         -14
       ],
-      "28,23": [
+      "28,30": [
         20,
         -14
       ],
-      "28,24": [
-        20,
-        -14
-      ],
-      "28,25": [
-        20,
-        -14
-      ],
-      "20,7": [
+      "20,12": [
         -12,
         9
       ],
-      "21,7": [
+      "21,12": [
         -12,
         9
       ],
-      "22,7": [
+      "22,12": [
         -12,
         9
       ],
-      "23,7": [
+      "23,12": [
         -12,
         9
       ],
-      "24,7": [
+      "24,12": [
         -12,
         9
       ],
-      "26,7": [
+      "26,12": [
         -12,
         9
       ],
-      "27,7": [
+      "27,12": [
         -12,
         9
       ],
-      "28,7": [
+      "28,12": [
         -12,
         9
       ],
-      "29,7": [
+      "29,12": [
         -12,
         9
       ],
-      "30,7": [
+      "30,12": [
         -12,
         9
       ],
-      "31,7": [
+      "31,12": [
         -12,
         9
       ],
-      "32,7": [
+      "32,12": [
         -12,
         9
       ],
-      "33,7": [
+      "33,12": [
         -12,
         9
       ],
-      "34,7": [
+      "34,12": [
         -12,
         9
       ],
-      "35,7": [
+      "35,12": [
         -12,
         9
       ],
-      "36,7": [
+      "36,12": [
         -12,
         9
       ],
-      "25,7": [
+      "25,12": [
         -13,
         9
+      ],
+      "36,10": [
+        -11,
+        0
+      ],
+      "36,9": [
+        -11,
+        0
+      ],
+      "36,8": [
+        -11,
+        0
+      ],
+      "36,7": [
+        -11,
+        0
+      ],
+      "36,6": [
+        -11,
+        0
       ],
       "36,5": [
         -11,
         0
       ],
-      "36,4": [
-        -11,
-        0
-      ],
-      "36,3": [
-        -11,
-        0
-      ],
-      "36,2": [
-        -11,
-        0
-      ],
-      "36,1": [
-        -11,
-        0
-      ],
-      "36,0": [
-        -11,
-        0
-      ],
-      "37,0": [
+      "37,5": [
         -9,
         6
       ],
-      "37,1": [
+      "37,6": [
         -9,
         6
       ],
-      "37,2": [
+      "37,7": [
         -9,
         6
       ],
-      "38,0": [
+      "38,5": [
         -9,
         6
       ],
-      "39,0": [
+      "39,5": [
         -9,
         6
       ],
-      "40,0": [
+      "40,5": [
         -9,
         6
       ],
-      "41,0": [
+      "41,5": [
         -9,
         6
       ],
-      "42,0": [
+      "42,5": [
         -9,
         6
       ],
-      "43,0": [
+      "43,5": [
         -9,
         6
       ],
-      "43,1": [
+      "43,6": [
         -9,
         6
       ],
-      "43,2": [
+      "43,7": [
         -9,
         6
       ],
-      "42,2": [
+      "42,7": [
         -9,
         6
       ],
-      "41,2": [
+      "41,7": [
         -9,
         6
       ],
-      "40,2": [
+      "40,7": [
         -9,
         6
       ],
-      "39,2": [
+      "39,7": [
         -9,
         6
       ],
-      "38,2": [
+      "38,7": [
         -9,
         6
       ],
-      "38,1": [
+      "38,6": [
         -9,
         6
       ],
-      "39,1": [
+      "39,6": [
         -9,
         6
       ],
-      "40,1": [
+      "40,6": [
         -9,
         6
       ],
-      "41,1": [
+      "41,6": [
         -9,
         6
       ],
-      "42,1": [
+      "42,6": [
         -9,
         6
       ],
-      "44,1": [
+      "44,6": [
         -9,
         6
       ],
-      "45,1": [
+      "45,6": [
         -9,
         6
       ],
-      "46,1": [
+      "46,6": [
         -9,
         6
       ],
-      "47,1": [
+      "47,6": [
         -9,
         6
       ],
-      "48,1": [
+      "48,6": [
         -9,
         6
       ],
-      "50,1": [
+      "50,6": [
         -9,
         6
       ],
-      "51,1": [
+      "51,6": [
         -9,
         6
       ],
-      "52,1": [
+      "52,6": [
         -9,
         6
       ],
-      "53,1": [
+      "53,6": [
         -9,
         6
       ],
-      "54,1": [
+      "54,6": [
         -9,
         6
       ],
-      "58,0": [
+      "58,5": [
         -9,
         6
       ],
-      "57,0": [
+      "57,5": [
         -9,
         6
       ],
-      "56,0": [
+      "56,5": [
         -9,
         6
       ],
-      "55,0": [
+      "55,5": [
         -9,
         6
       ],
-      "54,0": [
+      "54,5": [
         -9,
         6
       ],
-      "53,0": [
+      "53,5": [
         -9,
         6
       ],
-      "52,0": [
+      "52,5": [
         -9,
         6
       ],
-      "51,0": [
+      "51,5": [
         -9,
         6
       ],
-      "50,0": [
+      "50,5": [
         -9,
         6
       ],
-      "49,0": [
+      "49,5": [
         -9,
         6
       ],
-      "48,0": [
+      "48,5": [
         -9,
         6
       ],
-      "47,0": [
+      "47,5": [
         -9,
         6
       ],
-      "46,0": [
+      "46,5": [
         -9,
         6
       ],
-      "45,0": [
+      "45,5": [
         -9,
         6
       ],
-      "44,0": [
+      "44,5": [
         -9,
         6
       ],
-      "58,2": [
+      "58,7": [
         -9,
         6
       ],
-      "57,2": [
+      "57,7": [
         -9,
         6
       ],
-      "56,2": [
+      "56,7": [
         -9,
         6
       ],
-      "55,2": [
+      "55,7": [
         -9,
         6
       ],
-      "54,2": [
+      "54,7": [
         -9,
         6
       ],
-      "53,2": [
+      "53,7": [
         -9,
         6
       ],
-      "52,2": [
+      "52,7": [
         -9,
         6
       ],
-      "51,2": [
+      "51,7": [
         -9,
         6
       ],
-      "50,2": [
+      "50,7": [
         -9,
         6
       ],
-      "49,2": [
+      "49,7": [
         -9,
         6
       ],
-      "48,2": [
+      "48,7": [
         -9,
         6
       ],
-      "47,2": [
+      "47,7": [
         -9,
         6
       ],
-      "46,2": [
+      "46,7": [
         -9,
         6
       ],
-      "45,2": [
+      "45,7": [
         -9,
         6
       ],
-      "44,2": [
+      "44,7": [
         -9,
         6
       ],
-      "58,1": [
+      "58,6": [
         -9,
         6
       ],
-      "57,1": [
+      "57,6": [
         -9,
         6
       ],
-      "56,1": [
+      "56,6": [
         -9,
         6
       ],
-      "55,1": [
+      "55,6": [
         -9,
         6
       ],
-      "59,66": [
+      "59,71": [
         4,
         6
       ],
-      "57,65": [
+      "57,70": [
         -18,
         0
       ],
-      "61,3": [
+      "61,8": [
         4,
         9
       ],
-      "61,2": [
+      "61,7": [
         4,
         9
       ],
-      "61,1": [
+      "61,6": [
         4,
         9
       ],
-      "61,0": [
+      "61,5": [
         4,
         9
       ],
-      "63,1": [
+      "63,6": [
         4,
         9
       ],
-      "63,0": [
-        4,
-        9
-      ],
-      "64,0": [
-        4,
-        9
-      ],
-      "64,1": [
-        4,
-        9
-      ],
-      "64,2": [
-        4,
-        9
-      ],
-      "63,2": [
-        4,
-        9
-      ],
-      "62,2": [
-        4,
-        9
-      ],
-      "62,3": [
-        4,
-        9
-      ],
-      "63,3": [
-        4,
-        9
-      ],
-      "64,3": [
-        4,
-        9
-      ],
-      "64,4": [
+      "63,5": [
         4,
         9
       ],
@@ -209541,73 +211043,89 @@ const BATTLE_MAPS = [
         4,
         9
       ],
-      "62,1": [
+      "64,6": [
+        4,
+        9
+      ],
+      "64,7": [
+        4,
+        9
+      ],
+      "63,7": [
+        4,
+        9
+      ],
+      "62,7": [
+        4,
+        9
+      ],
+      "62,8": [
+        4,
+        9
+      ],
+      "63,8": [
+        4,
+        9
+      ],
+      "64,8": [
+        4,
+        9
+      ],
+      "64,9": [
+        4,
+        9
+      ],
+      "64,10": [
+        4,
+        9
+      ],
+      "62,6": [
         4,
         10
       ],
-      "62,0": [
+      "62,5": [
         4,
         10
       ],
-      "26,74": [
+      "26,79": [
         1,
         -1
       ],
-      "27,74": [
+      "27,79": [
         1,
         -1
       ],
-      "28,74": [
+      "28,79": [
         1,
         -1
       ],
-      "29,74": [
+      "29,79": [
         1,
         -1
       ],
-      "31,74": [
+      "31,79": [
         1,
         -1
       ],
-      "43,44": [
+      "43,49": [
         18,
         0
       ],
-      "43,45": [
+      "43,50": [
         18,
         0
       ],
-      "10,41": [
+      "10,46": [
         10,
         0
       ],
-      "10,43": [
+      "10,48": [
         10,
         0
       ],
-      "9,43": [
+      "9,48": [
         24,
         -14
-      ],
-      "3,22": [
-        -19,
-        -3
-      ],
-      "3,23": [
-        -19,
-        -3
-      ],
-      "3,24": [
-        -19,
-        -3
-      ],
-      "3,25": [
-        -19,
-        -3
-      ],
-      "3,26": [
-        -19,
-        -3
       ],
       "3,27": [
         -19,
@@ -209629,25 +211147,25 @@ const BATTLE_MAPS = [
         -19,
         -3
       ],
-      "12,22": [
-        -21,
-        -15
+      "3,32": [
+        -19,
+        -3
       ],
-      "12,23": [
-        -21,
-        -15
+      "3,33": [
+        -19,
+        -3
       ],
-      "12,24": [
-        -21,
-        -15
+      "3,34": [
+        -19,
+        -3
       ],
-      "12,25": [
-        -21,
-        -15
+      "3,35": [
+        -19,
+        -3
       ],
-      "12,26": [
-        -21,
-        -15
+      "3,36": [
+        -19,
+        -3
       ],
       "12,27": [
         -21,
@@ -209669,143 +211187,163 @@ const BATTLE_MAPS = [
         -21,
         -15
       ],
-      "61,25": [
+      "12,32": [
+        -21,
+        -15
+      ],
+      "12,33": [
+        -21,
+        -15
+      ],
+      "12,34": [
+        -21,
+        -15
+      ],
+      "12,35": [
+        -21,
+        -15
+      ],
+      "12,36": [
+        -21,
+        -15
+      ],
+      "61,30": [
         14,
         31
       ],
-      "61,28": [
+      "61,33": [
         19,
         -22
       ],
-      "43,3": [
+      "43,8": [
         -8,
         10
       ],
-      "44,3": [
+      "44,8": [
         -8,
         10
       ],
-      "45,3": [
+      "45,8": [
         -8,
         10
       ],
-      "46,3": [
+      "46,8": [
         -8,
         10
       ],
-      "59,27": [
+      "59,32": [
         25,
         -12
       ],
-      "60,27": [
+      "60,32": [
         25,
         -12
       ],
-      "56,34": [
+      "56,39": [
         10,
         11
       ],
-      "58,35": [
+      "58,40": [
         21,
         20
       ],
-      "24,72": [
+      "24,77": [
         -8,
         -9
       ],
-      "30,73": [
+      "30,78": [
         0,
         -8
       ],
-      "58,47": [
+      "58,52": [
         -19,
         0
       ],
-      "7,79": [
+      "7,84": [
         20,
         0
       ],
-      "6,79": [
+      "6,84": [
         20,
         0
       ],
-      "8,81": [
+      "8,86": [
         0,
         5
       ],
-      "9,81": [
+      "9,86": [
         0,
         5
       ],
-      "62,58": [
+      "62,63": [
         -2,
-        -23
-      ],
-      "38,26": [
-        -20,
-        -23
-      ],
-      "39,26": [
-        -20,
         -23
       ],
       "38,31": [
         -20,
-        -1
+        -23
       ],
       "39,31": [
         -20,
+        -23
+      ],
+      "38,36": [
+        -20,
         -1
       ],
-      "39,21": [
+      "39,36": [
+        -20,
+        -1
+      ],
+      "39,26": [
         2,
         -11
       ],
-      "40,21": [
+      "40,26": [
         2,
         -11
       ],
-      "39,19": [
+      "39,24": [
         -11,
         -21
       ],
-      "40,19": [
+      "40,24": [
         -11,
         -21
       ],
-      "39,15": [
+      "39,20": [
         -19,
         -2
       ],
-      "38,15": [
+      "38,20": [
         -19,
         -2
       ],
-      "41,50": [
+      "41,55": [
         -3,
         -19
       ],
-      "58,32": [
+      "58,37": [
         -9,
         20
       ],
-      "37,34": [
+      "37,39": [
         9,
         15
       ],
-      "38,35": [
+      "38,40": [
         -10,
         9
       ],
-      "62,28": [
+      "62,33": [
         -11,
         14
       ],
-      "61,31": [
+      "61,36": [
         4,
         -21
       ],
-      "60,25": [
+      "60,30": [
         -11,
         -4
       ]
@@ -209815,11 +211353,11 @@ const BATTLE_MAPS = [
     "portals": [
       {
         "c": 33,
-        "r": 43,
+        "r": 48,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           53,
-          57
+          62
         ],
         "land": [
           0,
@@ -209828,11 +211366,11 @@ const BATTLE_MAPS = [
       },
       {
         "c": 30,
-        "r": 75,
+        "r": 80,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           22,
-          66
+          71
         ],
         "land": [
           0,
@@ -209842,11 +211380,11 @@ const BATTLE_MAPS = [
       },
       {
         "c": 33,
-        "r": 24,
+        "r": 29,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           16,
-          6
+          11
         ],
         "land": [
           0,
@@ -209856,11 +211394,11 @@ const BATTLE_MAPS = [
       },
       {
         "c": 10,
-        "r": 5,
+        "r": 10,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           25,
-          58
+          63
         ],
         "oy": 12,
         "ox": -20,
@@ -209871,11 +211409,11 @@ const BATTLE_MAPS = [
       },
       {
         "c": 15,
-        "r": 24,
+        "r": 29,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           5,
-          15
+          20
         ],
         "land": [
           -41,
@@ -209885,11 +211423,11 @@ const BATTLE_MAPS = [
       },
       {
         "c": 10,
-        "r": 14,
+        "r": 19,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           24,
-          16
+          21
         ],
         "land": [
           3,
@@ -209899,11 +211437,11 @@ const BATTLE_MAPS = [
       },
       {
         "c": 20,
-        "r": 15,
+        "r": 20,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           10,
-          16
+          21
         ],
         "land": [
           0,
@@ -209914,322 +211452,562 @@ const BATTLE_MAPS = [
       },
       {
         "c": 24,
-        "r": 24,
+        "r": 29,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           6,
-          24
+          29
         ],
         "oy": -1
       },
       {
         "c": 6,
-        "r": 24,
+        "r": 29,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           24,
-          24
+          29
         ]
       },
       {
         "c": 31,
-        "r": 15,
+        "r": 20,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           33,
-          35
+          40
         ],
         "ox": 39,
         "oy": -36
       },
       {
         "c": 28,
-        "r": 42,
+        "r": 47,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           57,
-          66
+          71
         ],
         "ox": 3
       },
       {
-        "c": 56,
-        "r": 4,
-        "to": "map_mvxz356e",
-        "ox": 21,
-        "oy": -7
-      },
-      {
-        "c": 58,
-        "r": 4,
-        "to": "map_mvxz356e",
-        "oy": -7
-      },
-      {
-        "c": 59,
-        "r": 4,
-        "to": "map_mvxz356e",
-        "oy": -7
-      },
-      {
-        "c": 60,
-        "r": 4,
-        "to": "map_mvxz356e",
-        "ox": -7,
-        "oy": -7
-      },
-      {
-        "c": 57,
-        "r": 4,
-        "to": "map_mvxz356e",
-        "oy": -6
-      },
-      {
         "c": 15,
-        "r": 67,
+        "r": 72,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           55,
-          74
+          79
         ]
       },
       {
         "c": 55,
-        "r": 74,
+        "r": 79,
         "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
         "at": [
           15,
-          67
+          72
         ]
+      },
+      {
+        "c": 84,
+        "r": 10,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 85,
+        "r": 10,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 86,
+        "r": 10,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 87,
+        "r": 10,
+        "to": "map_mvxz356e"
       }
     ],
     "cols": 116,
-    "rows": 85,
+    "rows": 90,
     "spawnZone": [
-      "3,11",
-      "4,11",
-      "5,11",
-      "6,11",
-      "8,11",
-      "10,11",
-      "11,11",
-      "12,11",
-      "15,11",
-      "17,11",
-      "19,11",
-      "21,11",
-      "21,10",
-      "18,10",
-      "16,10",
-      "15,9",
-      "16,8",
-      "17,8",
-      "17,9",
-      "10,7",
-      "11,7",
-      "38,5",
-      "38,6",
-      "39,6",
-      "39,5",
-      "45,6",
-      "45,7",
-      "46,6",
-      "46,7",
-      "47,6",
-      "47,7",
-      "51,5",
-      "51,6",
-      "52,5",
-      "52,6",
-      "60,6",
-      "60,7",
-      "61,6",
-      "61,7",
-      "2,16",
       "3,16",
       "4,16",
       "5,16",
       "6,16",
-      "7,16",
       "8,16",
-      "9,16",
       "10,16",
       "11,16",
       "12,16",
-      "13,16",
-      "14,16",
       "15,16",
-      "16,16",
       "17,16",
-      "18,16",
       "19,16",
-      "20,16",
       "21,16",
-      "22,16",
-      "23,16",
-      "24,16",
-      "25,16",
-      "26,16",
-      "27,16",
-      "28,16",
-      "29,16",
-      "30,16",
-      "31,16",
-      "32,16",
-      "33,16",
-      "34,16",
-      "35,16",
-      "5,27",
-      "5,28",
-      "14,26",
-      "15,26",
-      "16,26",
-      "23,27",
-      "23,28",
-      "24,28",
-      "24,27",
-      "33,27",
-      "33,28",
-      "34,28",
-      "34,27",
-      "32,35",
-      "24,50",
-      "25,50",
-      "26,50",
-      "35,46",
-      "36,46",
-      "36,45",
-      "35,45",
-      "21,44",
-      "22,44",
-      "21,45",
-      "22,45",
-      "26,43",
-      "25,43",
-      "26,44",
-      "25,44",
-      "29,44",
-      "30,44",
-      "29,45",
-      "30,45",
-      "23,39",
-      "23,40",
-      "17,44",
-      "17,45",
-      "34,57",
-      "35,57",
-      "36,57",
-      "29,56",
-      "30,56",
-      "31,56",
-      "34,63",
-      "33,63",
-      "33,62",
-      "34,62",
-      "24,61",
-      "24,62",
-      "25,62",
-      "25,61",
-      "49,61",
-      "49,62",
-      "50,62",
-      "50,61",
-      "53,63",
-      "53,64",
-      "54,64",
-      "54,63",
-      "58,62",
-      "59,62",
-      "59,61",
-      "58,61",
-      "57,11",
-      "57,12",
-      "58,12",
-      "58,11",
-      "53,14",
-      "53,15",
-      "54,15",
-      "54,14",
-      "57,21",
-      "57,22",
-      "58,22",
-      "58,21",
-      "52,25",
-      "52,26",
-      "53,26",
-      "53,25",
-      "54,33",
-      "55,33",
-      "55,32",
-      "54,32",
-      "57,38",
-      "57,39",
-      "58,39",
-      "58,38",
+      "21,15",
+      "18,15",
+      "16,15",
+      "15,14",
+      "16,13",
+      "17,13",
+      "17,14",
+      "10,12",
+      "11,12",
+      "38,10",
+      "38,11",
+      "39,11",
+      "39,10",
+      "45,11",
       "45,12",
-      "45,13",
-      "46,13",
+      "46,11",
       "46,12",
-      "47,19",
-      "47,20",
-      "48,19",
-      "48,20",
-      "39,21",
-      "39,22",
-      "40,22",
-      "40,21",
-      "44,26",
-      "44,28",
-      "45,27",
-      "45,26",
-      "44,27",
-      "45,28",
-      "44,34",
-      "45,35",
-      "45,34",
-      "44,35",
-      "47,38",
-      "47,39",
-      "48,39",
-      "48,38",
-      "40,46",
+      "47,11",
+      "47,12",
+      "51,10",
+      "51,11",
+      "52,10",
+      "52,11",
+      "60,11",
+      "60,12",
+      "61,11",
+      "61,12",
+      "2,21",
+      "3,21",
+      "4,21",
+      "5,21",
+      "6,21",
+      "7,21",
+      "8,21",
+      "9,21",
+      "10,21",
+      "11,21",
+      "12,21",
+      "13,21",
+      "14,21",
+      "15,21",
+      "16,21",
+      "17,21",
+      "18,21",
+      "19,21",
+      "20,21",
+      "21,21",
+      "22,21",
+      "23,21",
+      "24,21",
+      "25,21",
+      "26,21",
+      "27,21",
+      "28,21",
+      "29,21",
+      "30,21",
+      "31,21",
+      "32,21",
+      "33,21",
+      "34,21",
+      "35,21",
+      "5,32",
+      "5,33",
+      "14,31",
+      "15,31",
+      "16,31",
+      "23,32",
+      "23,33",
+      "24,33",
+      "24,32",
+      "33,32",
+      "33,33",
+      "34,33",
+      "34,32",
+      "32,40",
+      "24,55",
+      "25,55",
+      "26,55",
+      "35,51",
+      "36,51",
+      "36,50",
+      "35,50",
+      "21,49",
+      "22,49",
+      "21,50",
+      "22,50",
+      "26,48",
+      "25,48",
+      "26,49",
+      "25,49",
+      "29,49",
+      "30,49",
+      "29,50",
+      "30,50",
+      "23,44",
+      "23,45",
+      "17,49",
+      "17,50",
+      "34,62",
+      "35,62",
+      "36,62",
+      "29,61",
+      "30,61",
+      "31,61",
+      "34,68",
+      "33,68",
+      "33,67",
+      "34,67",
+      "24,66",
+      "24,67",
+      "25,67",
+      "25,66",
+      "49,66",
+      "49,67",
+      "50,67",
+      "50,66",
+      "53,68",
+      "53,69",
+      "54,69",
+      "54,68",
+      "58,67",
+      "59,67",
+      "59,66",
+      "58,66",
+      "57,16",
+      "57,17",
+      "58,17",
+      "58,16",
+      "53,19",
+      "53,20",
+      "54,20",
+      "54,19",
+      "57,26",
+      "57,27",
+      "58,27",
+      "58,26",
+      "52,30",
+      "52,31",
+      "53,31",
+      "53,30",
+      "54,38",
+      "55,38",
+      "55,37",
+      "54,37",
+      "57,43",
+      "57,44",
+      "58,44",
+      "58,43",
+      "45,17",
+      "45,18",
+      "46,18",
+      "46,17",
+      "47,24",
+      "47,25",
+      "48,24",
+      "48,25",
+      "39,26",
+      "39,27",
+      "40,27",
+      "40,26",
+      "44,31",
+      "44,33",
+      "45,32",
+      "45,31",
+      "44,32",
+      "45,33",
+      "44,39",
+      "45,40",
+      "45,39",
+      "44,40",
+      "47,43",
+      "47,44",
+      "48,44",
+      "48,43",
+      "40,51",
+      "40,52",
+      "40,53",
+      "40,54",
+      "40,55",
+      "41,51",
+      "41,52",
+      "41,53",
+      "41,54",
+      "41,55",
+      "42,51",
+      "42,52",
+      "42,53",
+      "42,54",
+      "42,55",
       "40,47",
-      "40,48",
-      "40,49",
-      "40,50",
-      "41,46",
       "41,47",
-      "41,48",
-      "41,49",
-      "41,50",
-      "42,46",
       "42,47",
-      "42,48",
-      "42,49",
-      "42,50",
-      "40,42",
-      "41,42",
-      "42,42",
-      "63,43",
-      "63,44",
-      "63,45",
-      "63,46",
-      "63,47",
       "63,48",
       "63,49",
       "63,50",
       "63,51",
-      "46,54",
-      "45,68",
-      "63,10",
-      "60,71",
-      "34,71",
-      "42,77",
-      "35,73",
-      "26,76",
-      "30,77",
-      "19,68",
-      "11,35"
+      "63,52",
+      "63,53",
+      "63,54",
+      "63,55",
+      "63,56",
+      "46,59",
+      "45,73",
+      "63,15",
+      "60,76",
+      "34,76",
+      "42,82",
+      "35,78",
+      "26,81",
+      "30,82",
+      "19,73",
+      "11,40",
+      "76,21",
+      "77,21",
+      "78,21",
+      "80,21",
+      "82,21",
+      "83,22",
+      "85,22",
+      "89,22",
+      "92,22",
+      "94,22",
+      "96,22",
+      "97,22",
+      "99,23",
+      "100,23",
+      "101,23",
+      "101,22",
+      "102,22",
+      "103,22",
+      "104,22",
+      "105,22",
+      "102,21",
+      "86,23",
+      "86,26",
+      "86,29",
+      "86,31",
+      "85,32",
+      "84,33",
+      "85,34",
+      "79,36",
+      "80,36",
+      "84,36",
+      "86,36",
+      "88,36",
+      "90,36",
+      "91,36",
+      "92,36",
+      "93,36",
+      "94,36",
+      "75,62",
+      "76,62",
+      "79,62",
+      "82,62",
+      "85,62",
+      "87,63",
+      "89,63",
+      "91,63",
+      "93,63",
+      "95,63",
+      "97,63",
+      "98,63",
+      "99,63",
+      "101,63",
+      "102,63",
+      "103,63",
+      "104,63",
+      "105,63",
+      "106,63",
+      "106,62",
+      "95,37",
+      "95,40",
+      "95,42",
+      "95,45",
+      "95,46",
+      "96,48",
+      "96,49",
+      "96,51",
+      "96,52",
+      "96,54",
+      "96,56",
+      "95,58",
+      "95,59",
+      "95,60",
+      "77,37",
+      "77,40",
+      "77,43",
+      "77,46",
+      "77,47",
+      "77,49",
+      "78,50",
+      "78,52",
+      "78,54",
+      "78,56",
+      "78,58",
+      "77,59",
+      "77,60",
+      "77,61",
+      "102,76",
+      "103,77",
+      "103,79",
+      "101,79",
+      "99,78",
+      "99,76",
+      "101,75",
+      "103,75",
+      "103,76",
+      "104,76",
+      "58,81",
+      "60,81",
+      "68,81",
+      "71,81",
+      "74,82",
+      "78,82",
+      "81,82",
+      "83,82",
+      "84,82",
+      "84,81",
+      "86,81",
+      "87,80",
+      "86,78",
+      "85,77",
+      "81,67",
+      "81,68",
+      "82,72",
+      "82,73",
+      "82,74",
+      "82,75",
+      "82,45",
+      "82,52",
+      "82,54",
+      "82,56",
+      "83,57",
+      "86,58",
+      "89,58",
+      "91,57",
+      "91,54",
+      "91,51",
+      "91,48",
+      "91,46",
+      "90,44",
+      "88,41",
+      "86,41",
+      "84,41",
+      "78,30",
+      "76,30",
+      "72,29",
+      "72,30",
+      "73,34",
+      "73,37",
+      "73,39",
+      "74,39",
+      "94,31",
+      "96,31",
+      "101,33",
+      "101,36",
+      "101,40",
+      "101,43",
+      "101,57",
+      "101,56",
+      "100,53",
+      "101,53",
+      "103,55",
+      "102,57",
+      "101,58",
+      "72,51",
+      "72,53",
+      "73,56",
+      "72,58",
+      "72,59",
+      "73,59",
+      "74,55",
+      "73,52",
+      "73,51",
+      "73,50",
+      "73,49",
+      "80,32",
+      "80,31",
+      "81,29",
+      "81,28",
+      "79,27",
+      "76,27",
+      "74,27",
+      "74,28",
+      "72,16",
+      "72,17",
+      "76,17",
+      "83,17",
+      "86,17",
+      "90,18",
+      "95,18",
+      "97,18",
+      "100,18",
+      "102,18",
+      "104,17",
+      "104,16",
+      "105,15",
+      "104,15",
+      "102,14",
+      "97,14",
+      "94,14",
+      "91,14",
+      "89,15",
+      "87,15",
+      "84,15",
+      "81,15",
+      "79,16",
+      "77,15",
+      "75,15",
+      "74,15",
+      "73,14",
+      "74,13",
+      "77,14",
+      "80,14",
+      "80,15",
+      "71,19",
+      "74,18",
+      "83,19",
+      "87,19",
+      "88,19",
+      "89,19",
+      "91,19",
+      "92,19",
+      "91,24",
+      "87,24",
+      "82,24",
+      "79,24",
+      "76,24",
+      "75,24",
+      "73,24",
+      "74,24",
+      "76,23",
+      "80,22",
+      "82,22",
+      "89,23",
+      "91,23",
+      "93,24",
+      "86,43",
+      "84,43",
+      "81,43",
+      "81,44",
+      "85,45",
+      "87,45",
+      "89,45",
+      "89,46",
+      "89,47",
+      "86,47",
+      "79,46",
+      "79,47",
+      "80,49",
+      "82,50",
+      "83,50",
+      "84,49",
+      "84,47",
+      "83,46",
+      "82,47",
+      "81,50",
+      "81,53",
+      "81,56",
+      "81,57",
+      "81,58",
+      "81,59",
+      "81,60",
+      "82,59"
     ],
     "layerOrder": [
       {
@@ -210398,551 +212176,531 @@ const BATTLE_MAPS = [
     ],
     "hiddenPickups": [],
     "edges": [
-      "21,70,B",
-      "22,70,B",
-      "23,70,B",
-      "24,70,B",
-      "20,71,R",
-      "20,72,R",
-      "20,73,R",
-      "20,74,R",
-      "23,73,R",
-      "23,74,R",
-      "21,73,R",
-      "21,74,R",
-      "8,7,R",
-      "8,8,R",
-      "8,6,R",
-      "13,7,R",
-      "13,8,R",
-      "13,9,R",
-      "57,26,B",
-      "58,26,B",
-      "56,64,B",
-      "57,64,B",
-      "58,64,B",
-      "59,64,B",
-      "55,65,R",
-      "55,66,R",
-      "59,65,R",
-      "59,66,R",
-      "59,67,R",
-      "55,67,R",
-      "13,10,R",
-      "9,10,R",
-      "57,27,R",
-      "57,28,R",
-      "57,29,R",
-      "57,30,R",
-      "57,31,R",
+      "21,75,B",
+      "22,75,B",
+      "23,75,B",
+      "24,75,B",
+      "20,76,R",
+      "20,77,R",
+      "20,78,R",
+      "20,79,R",
+      "23,78,R",
+      "23,79,R",
+      "21,78,R",
+      "21,79,R",
+      "8,12,R",
+      "8,13,R",
+      "8,11,R",
+      "13,12,R",
+      "13,13,R",
+      "13,14,R",
+      "57,31,B",
       "58,31,B",
-      "59,31,B",
-      "60,31,B",
-      "61,31,B",
-      "60,28,R",
-      "60,29,R",
-      "60,30,R",
-      "60,31,R",
-      "60,27,R"
+      "56,69,B",
+      "57,69,B",
+      "58,69,B",
+      "59,69,B",
+      "55,70,R",
+      "55,71,R",
+      "59,70,R",
+      "59,71,R",
+      "59,72,R",
+      "55,72,R",
+      "13,15,R",
+      "9,15,R",
+      "57,32,R",
+      "57,33,R",
+      "57,34,R",
+      "57,35,R",
+      "57,36,R",
+      "58,36,B",
+      "59,36,B",
+      "60,36,B",
+      "61,36,B",
+      "60,33,R",
+      "60,34,R",
+      "60,35,R",
+      "60,36,R",
+      "60,32,R"
     ],
     "edgeOffsets": {
-      "20,73,R": [
+      "20,78,R": [
         9,
         -20
       ],
-      "20,72,R": [
+      "20,77,R": [
         9,
         -7
       ],
-      "20,71,R": [
+      "20,76,R": [
         9,
         -7
       ],
-      "21,70,B": [
+      "21,75,B": [
         9,
         -7
       ],
-      "22,70,B": [
+      "22,75,B": [
         9,
         -7
       ],
-      "23,70,B": [
+      "23,75,B": [
         9,
         -7
       ],
-      "24,70,B": [
+      "24,75,B": [
         9,
         -7
       ],
-      "20,74,R": [
+      "20,79,R": [
         8,
         -29
       ],
-      "23,73,R": [
+      "23,78,R": [
         -8,
         5
       ],
-      "23,74,R": [
+      "23,79,R": [
         -8,
         5
       ],
-      "21,73,R": [
+      "21,78,R": [
         -9,
         6
       ],
-      "21,74,R": [
+      "21,79,R": [
         -9,
         6
       ],
-      "8,6,R": [
+      "8,11,R": [
         -17,
         11
       ],
-      "8,7,R": [
+      "8,12,R": [
         -17,
         11
       ],
-      "8,8,R": [
+      "8,13,R": [
         -17,
         11
       ],
-      "13,7,R": [
+      "13,12,R": [
         8,
         -28
       ],
-      "13,8,R": [
+      "13,13,R": [
         8,
         -28
       ],
-      "13,9,R": [
+      "13,14,R": [
         8,
         -28
       ],
-      "58,26,B": [
+      "58,31,B": [
         24,
         4
       ],
-      "57,26,B": [
+      "57,31,B": [
         24,
         4
       ],
-      "55,66,R": [
+      "55,71,R": [
         8,
         13
       ],
-      "55,65,R": [
+      "55,70,R": [
         8,
         13
       ],
-      "57,64,B": [
+      "57,69,B": [
         8,
         13
       ],
-      "56,64,B": [
+      "56,69,B": [
         8,
         13
       ],
-      "58,64,B": [
+      "58,69,B": [
         8,
         13
       ],
-      "59,64,B": [
+      "59,69,B": [
         3,
         13
       ],
-      "59,65,R": [
+      "59,70,R": [
         3,
         13
       ],
-      "59,66,R": [
+      "59,71,R": [
         3,
         13
       ],
-      "59,67,R": [
+      "59,72,R": [
         3,
         -1
       ],
-      "55,67,R": [
+      "55,72,R": [
         8,
         0
       ],
-      "13,10,R": [
+      "13,15,R": [
         8,
         -27
       ],
-      "9,10,R": [
+      "9,15,R": [
         11,
         -33
       ],
-      "57,27,R": [
+      "57,32,R": [
         -21,
         9
       ],
-      "57,28,R": [
+      "57,33,R": [
         -22,
         -12
       ],
-      "57,29,R": [
+      "57,34,R": [
         -22,
         -12
       ],
-      "57,30,R": [
+      "57,35,R": [
         -22,
         -12
       ],
-      "57,31,R": [
+      "57,36,R": [
         -22,
         -12
       ],
-      "58,31,B": [
+      "58,36,B": [
         -20,
         -5
       ],
-      "59,31,B": [
+      "59,36,B": [
         -20,
         -5
       ],
-      "60,31,B": [
+      "60,36,B": [
         -20,
         -5
       ],
-      "61,31,B": [
+      "61,36,B": [
         -20,
         -5
       ],
-      "60,31,R": [
+      "60,36,R": [
         14,
         -8
       ],
-      "60,30,R": [
+      "60,35,R": [
         14,
         -11
       ],
-      "60,29,R": [
+      "60,34,R": [
         14,
         -11
       ],
-      "60,28,R": [
+      "60,33,R": [
         14,
         -11
       ],
-      "60,27,R": [
+      "60,32,R": [
         16,
         1
       ]
     },
     "deepWaterOffsets": {
-      "24,10": [
+      "24,15": [
         -2,
         -9
       ],
-      "24,11": [
+      "24,16": [
         -2,
         -9
       ],
-      "25,11": [
+      "25,16": [
         -2,
         -9
       ],
-      "26,11": [
+      "26,16": [
         -2,
         -9
       ],
-      "27,11": [
+      "27,16": [
         -2,
         -9
       ],
-      "28,11": [
+      "28,16": [
         -2,
         -9
       ],
-      "29,11": [
+      "29,16": [
         -2,
         -9
       ],
-      "30,11": [
+      "30,16": [
         -2,
         -9
       ],
-      "31,11": [
+      "31,16": [
         -2,
         -9
       ],
-      "32,11": [
+      "32,16": [
         -2,
         -9
       ],
-      "33,11": [
+      "33,16": [
         -2,
         -9
       ],
-      "34,11": [
+      "34,16": [
         -2,
         -9
       ],
-      "35,11": [
+      "35,16": [
         -2,
         -9
       ],
-      "36,11": [
+      "36,16": [
         -23,
         -9
       ],
-      "36,10": [
+      "36,15": [
         -23,
         -9
       ],
-      "35,10": [
+      "35,15": [
         -2,
         -9
       ],
-      "34,10": [
+      "34,15": [
         -2,
         -9
       ],
-      "33,10": [
+      "33,15": [
         -2,
         -9
       ],
-      "32,10": [
+      "32,15": [
         -2,
         -9
       ],
-      "31,10": [
+      "31,15": [
         -2,
         -9
       ],
-      "29,10": [
+      "29,15": [
         -2,
         -9
       ],
-      "28,10": [
+      "28,15": [
         -2,
         -9
       ],
-      "27,10": [
+      "27,15": [
         -2,
         -9
       ],
-      "26,10": [
+      "26,15": [
         -2,
         -9
       ],
-      "25,10": [
+      "25,15": [
         -2,
         -9
       ],
-      "24,12": [
+      "24,17": [
         -2,
         -9
       ],
-      "25,12": [
+      "25,17": [
         -2,
         -9
       ],
-      "26,12": [
+      "26,17": [
         -2,
         -9
       ],
-      "27,12": [
+      "27,17": [
         -2,
         -9
       ],
-      "28,12": [
+      "28,17": [
         -2,
         -9
       ],
-      "29,12": [
+      "29,17": [
         -2,
         -9
       ],
-      "30,12": [
+      "30,17": [
         -2,
         -9
       ],
-      "31,12": [
+      "31,17": [
         -2,
         -9
       ],
-      "32,12": [
+      "32,17": [
         -2,
         -9
       ],
-      "33,12": [
+      "33,17": [
         -2,
         -9
       ],
-      "34,12": [
+      "34,17": [
         -2,
         -9
       ],
-      "35,12": [
+      "35,17": [
         -2,
         -9
       ],
-      "36,12": [
+      "36,17": [
         -23,
         -9
       ],
-      "30,10": [
+      "30,15": [
         -1,
         -8
       ],
-      "50,60": [
+      "50,65": [
         0,
         12
       ],
-      "51,60": [
+      "51,65": [
         0,
         12
       ],
-      "52,60": [
+      "52,65": [
         0,
         12
       ],
-      "53,60": [
+      "53,65": [
         0,
         12
       ],
-      "54,60": [
+      "54,65": [
         0,
         12
       ],
-      "55,60": [
+      "55,65": [
         0,
         12
       ],
-      "56,60": [
+      "56,65": [
         0,
         12
       ],
-      "57,60": [
+      "57,65": [
         0,
         12
       ],
-      "58,60": [
+      "58,65": [
         0,
         12
       ],
-      "59,60": [
+      "59,65": [
         0,
         12
       ],
-      "60,60": [
+      "60,65": [
         0,
         12
       ],
-      "50,69": [
+      "50,74": [
         1,
         -13
       ],
-      "51,69": [
+      "51,74": [
         1,
         -13
       ],
-      "60,69": [
+      "60,74": [
         1,
         -13
       ],
-      "58,69": [
+      "58,74": [
         1,
         -13
       ],
-      "57,69": [
+      "57,74": [
         1,
         -13
       ],
-      "56,69": [
+      "56,74": [
         1,
         -13
       ],
-      "55,69": [
+      "55,74": [
         1,
         -13
       ],
-      "54,69": [
+      "54,74": [
         1,
         -13
       ],
-      "53,69": [
+      "53,74": [
         1,
         -13
       ],
-      "52,69": [
+      "52,74": [
         1,
         -13
       ],
-      "59,69": [
+      "59,74": [
         1,
         -13
       ],
-      "50,9": [
+      "50,14": [
         0,
         13
       ],
-      "51,9": [
+      "51,14": [
         0,
         13
       ],
-      "53,9": [
+      "53,14": [
         0,
         13
       ],
-      "55,9": [
+      "55,14": [
         0,
         13
       ],
-      "57,9": [
+      "57,14": [
         0,
         13
       ],
-      "58,9": [
+      "58,14": [
         0,
         13
       ],
-      "59,9": [
+      "59,14": [
         0,
         13
       ],
-      "60,9": [
+      "60,14": [
         0,
         13
-      ],
-      "61,9": [
-        -24,
-        13
-      ],
-      "56,9": [
-        0,
-        13
-      ],
-      "54,9": [
-        0,
-        13
-      ],
-      "52,9": [
-        0,
-        13
-      ],
-      "61,10": [
-        -24,
-        0
-      ],
-      "61,11": [
-        -24,
-        0
-      ],
-      "61,12": [
-        -24,
-        0
-      ],
-      "61,13": [
-        -24,
-        0
       ],
       "61,14": [
         -24,
-        0
+        13
+      ],
+      "56,14": [
+        0,
+        13
+      ],
+      "54,14": [
+        0,
+        13
+      ],
+      "52,14": [
+        0,
+        13
       ],
       "61,15": [
         -24,
@@ -210992,23 +212750,23 @@ const BATTLE_MAPS = [
         -24,
         0
       ],
-      "61,32": [
+      "61,27": [
         -24,
         0
       ],
-      "61,33": [
+      "61,28": [
         -24,
         0
       ],
-      "61,34": [
+      "61,29": [
         -24,
         0
       ],
-      "61,35": [
+      "61,30": [
         -24,
         0
       ],
-      "61,36": [
+      "61,31": [
         -24,
         0
       ],
@@ -211028,530 +212786,506 @@ const BATTLE_MAPS = [
         -24,
         0
       ],
-      "57,27": [
+      "61,41": [
+        -24,
+        0
+      ],
+      "61,42": [
+        -24,
+        0
+      ],
+      "61,43": [
+        -24,
+        0
+      ],
+      "61,44": [
+        -24,
+        0
+      ],
+      "61,45": [
+        -24,
+        0
+      ],
+      "57,32": [
         -22,
         0
       ],
-      "57,28": [
+      "57,33": [
         -22,
         0
       ],
-      "57,29": [
+      "57,34": [
         -22,
         0
       ],
-      "57,30": [
+      "57,35": [
         -22,
         0
       ],
-      "57,31": [
+      "57,36": [
         -22,
         0
       ],
-      "59,64": [
+      "59,69": [
         1,
         -29
       ],
-      "58,64": [
+      "58,69": [
         1,
         -29
       ],
-      "36,9": [
+      "36,14": [
         -22,
         0
       ]
     },
     "deepWater": [
-      "52,25",
-      "54,33",
-      "50,9",
-      "51,9",
-      "52,9",
-      "53,9",
-      "54,9",
-      "55,9",
-      "56,9",
-      "57,9",
-      "58,9",
-      "59,9",
-      "60,9",
-      "60,10",
-      "59,10",
-      "58,10",
-      "56,10",
-      "55,10",
-      "54,10",
-      "52,10",
-      "51,10",
-      "50,10",
-      "53,10",
-      "57,10",
-      "61,9",
-      "61,10",
-      "50,11",
-      "51,11",
-      "52,11",
-      "53,11",
-      "54,11",
-      "55,11",
-      "58,11",
-      "59,11",
-      "60,11",
-      "61,11",
-      "56,11",
-      "61,12",
-      "60,12",
-      "59,12",
-      "58,12",
-      "57,12",
-      "56,12",
-      "55,12",
-      "54,12",
-      "53,12",
-      "52,12",
-      "51,12",
-      "50,12",
-      "50,13",
-      "51,13",
-      "52,13",
-      "53,13",
-      "54,13",
-      "55,13",
-      "56,13",
-      "58,13",
-      "59,13",
-      "60,13",
-      "61,13",
-      "57,13",
+      "52,30",
+      "54,38",
       "50,14",
+      "51,14",
+      "52,14",
+      "53,14",
+      "54,14",
+      "55,14",
+      "56,14",
+      "57,14",
+      "58,14",
+      "59,14",
+      "60,14",
+      "60,15",
+      "59,15",
+      "58,15",
+      "56,15",
+      "55,15",
+      "54,15",
+      "52,15",
+      "51,15",
       "50,15",
-      "50,16",
-      "50,17",
-      "50,18",
-      "50,19",
+      "53,15",
+      "57,15",
       "61,14",
       "61,15",
-      "61,16",
-      "61,17",
-      "61,18",
-      "61,19",
-      "61,20",
-      "60,14",
-      "59,14",
-      "58,14",
-      "57,14",
-      "56,14",
-      "52,14",
-      "51,14",
-      "51,15",
-      "51,18",
-      "51,20",
-      "52,15",
-      "52,19",
-      "52,21",
+      "50,16",
       "51,16",
-      "52,17",
       "52,16",
-      "52,18",
-      "51,17",
-      "51,19",
-      "52,20",
       "53,16",
-      "53,18",
-      "53,19",
-      "53,20",
-      "53,21",
-      "53,22",
-      "53,15",
-      "53,17",
-      "55,14",
-      "55,16",
-      "55,18",
-      "55,19",
-      "55,20",
-      "55,22",
-      "55,15",
-      "54,14",
-      "53,14",
-      "54,15",
-      "57,11",
       "54,16",
-      "54,18",
-      "54,19",
-      "54,20",
-      "54,21",
-      "54,22",
-      "54,17",
-      "55,17",
-      "55,21",
-      "56,15",
-      "57,15",
-      "58,15",
-      "59,15",
-      "60,15",
-      "60,16",
-      "59,16",
+      "55,16",
       "58,16",
-      "57,16",
+      "59,16",
+      "60,16",
+      "61,16",
       "56,16",
-      "56,17",
-      "57,17",
-      "58,17",
-      "59,17",
+      "61,17",
       "60,17",
-      "60,18",
-      "59,18",
-      "58,18",
-      "57,18",
+      "59,17",
+      "58,17",
+      "57,17",
+      "56,17",
+      "55,17",
+      "54,17",
+      "53,17",
+      "52,17",
+      "51,17",
+      "50,17",
+      "50,18",
+      "51,18",
+      "52,18",
+      "53,18",
+      "54,18",
+      "55,18",
       "56,18",
-      "56,19",
-      "58,19",
-      "59,19",
-      "60,19",
-      "60,20",
-      "59,20",
-      "58,20",
-      "57,20",
-      "56,20",
-      "57,19",
-      "61,21",
-      "60,21",
-      "59,21",
-      "58,21",
-      "57,21",
-      "56,21",
+      "58,18",
+      "59,18",
+      "60,18",
+      "61,18",
+      "57,18",
+      "50,19",
       "50,20",
       "50,21",
       "50,22",
       "50,23",
       "50,24",
-      "50,25",
-      "50,26",
-      "50,27",
-      "50,28",
-      "51,21",
-      "51,22",
-      "51,24",
-      "51,25",
-      "51,26",
-      "51,27",
-      "51,28",
-      "51,29",
+      "61,19",
+      "61,20",
+      "61,21",
+      "61,22",
+      "61,23",
+      "61,24",
+      "61,25",
+      "60,19",
+      "59,19",
+      "58,19",
+      "57,19",
+      "56,19",
+      "52,19",
+      "51,19",
+      "51,20",
       "51,23",
-      "52,23",
-      "52,22",
+      "51,25",
+      "52,20",
       "52,24",
       "52,26",
-      "52,27",
-      "52,28",
-      "52,29",
+      "51,21",
+      "52,22",
+      "52,21",
+      "52,23",
+      "51,22",
+      "51,24",
+      "52,25",
+      "53,21",
       "53,23",
       "53,24",
       "53,25",
       "53,26",
       "53,27",
-      "53,28",
-      "53,29",
-      "54,23",
-      "54,24",
-      "54,26",
-      "54,27",
-      "54,28",
-      "54,29",
+      "53,20",
+      "53,22",
+      "55,19",
+      "55,21",
       "55,23",
       "55,24",
       "55,25",
-      "55,26",
-      "55,28",
-      "55,29",
-      "54,25",
-      "56,22",
-      "56,24",
-      "56,26",
-      "56,27",
-      "56,28",
-      "56,29",
-      "56,30",
       "55,27",
-      "56,25",
-      "56,23",
-      "57,23",
-      "57,24",
-      "57,25",
-      "57,26",
-      "58,26",
-      "59,26",
-      "60,26",
-      "60,25",
-      "60,24",
-      "60,23",
-      "60,22",
-      "61,22",
-      "61,23",
-      "61,24",
-      "61,25",
-      "61,26",
-      "59,22",
-      "59,23",
-      "59,24",
-      "59,25",
-      "58,22",
-      "58,24",
-      "58,25",
+      "55,20",
+      "54,19",
+      "53,19",
+      "54,20",
+      "57,16",
+      "54,21",
+      "54,23",
+      "54,24",
+      "54,25",
+      "54,26",
+      "54,27",
+      "54,22",
+      "55,22",
+      "55,26",
+      "56,20",
+      "57,20",
+      "58,20",
+      "59,20",
+      "60,20",
+      "60,21",
+      "59,21",
+      "58,21",
+      "57,21",
+      "56,21",
+      "56,22",
       "57,22",
+      "58,22",
+      "59,22",
+      "60,22",
+      "60,23",
+      "59,23",
       "58,23",
+      "57,23",
+      "56,23",
+      "56,24",
+      "58,24",
+      "59,24",
+      "60,24",
+      "60,25",
+      "59,25",
+      "58,25",
+      "57,25",
+      "56,25",
+      "57,24",
+      "61,26",
+      "60,26",
+      "59,26",
+      "58,26",
+      "57,26",
+      "56,26",
+      "50,25",
+      "50,26",
+      "50,27",
+      "50,28",
       "50,29",
       "50,30",
       "50,31",
       "50,32",
       "50,33",
-      "50,34",
-      "50,35",
-      "50,36",
+      "51,26",
+      "51,27",
+      "51,29",
       "51,30",
       "51,31",
+      "51,32",
       "51,33",
       "51,34",
-      "51,35",
-      "51,36",
-      "51,32",
-      "52,30",
+      "51,28",
+      "52,28",
+      "52,27",
+      "52,29",
       "52,31",
       "52,32",
       "52,33",
       "52,34",
-      "52,35",
-      "52,36",
-      "53,36",
-      "53,35",
-      "53,34",
-      "53,33",
-      "53,32",
-      "53,31",
+      "53,28",
+      "53,29",
       "53,30",
-      "54,30",
+      "53,31",
+      "53,32",
+      "53,33",
+      "53,34",
+      "54,28",
+      "54,29",
       "54,31",
       "54,32",
+      "54,33",
       "54,34",
-      "54,35",
-      "54,36",
-      "55,36",
-      "55,35",
-      "55,33",
-      "55,32",
-      "55,31",
+      "55,28",
+      "55,29",
       "55,30",
+      "55,31",
+      "55,33",
+      "55,34",
+      "54,30",
+      "56,27",
+      "56,29",
       "56,31",
       "56,32",
       "56,33",
       "56,34",
       "56,35",
-      "56,36",
-      "55,34",
-      "57,27",
+      "55,32",
+      "56,30",
+      "56,28",
       "57,28",
       "57,29",
       "57,30",
       "57,31",
+      "58,31",
+      "59,31",
+      "60,31",
+      "60,30",
+      "60,29",
+      "60,28",
+      "60,27",
+      "61,27",
+      "61,28",
+      "61,29",
+      "61,30",
+      "61,31",
+      "59,27",
+      "59,28",
+      "59,29",
+      "59,30",
+      "58,27",
+      "58,29",
+      "58,30",
+      "57,27",
+      "58,28",
+      "50,34",
+      "50,35",
+      "50,36",
+      "50,37",
+      "50,38",
+      "50,39",
+      "50,40",
+      "50,41",
+      "51,35",
+      "51,36",
+      "51,38",
+      "51,39",
+      "51,40",
+      "51,41",
+      "51,37",
+      "52,35",
+      "52,36",
+      "52,37",
+      "52,38",
+      "52,39",
+      "52,40",
+      "52,41",
+      "53,41",
+      "53,40",
+      "53,39",
+      "53,38",
+      "53,37",
+      "53,36",
+      "53,35",
+      "54,35",
+      "54,36",
+      "54,37",
+      "54,39",
+      "54,40",
+      "54,41",
+      "55,41",
+      "55,40",
+      "55,38",
+      "55,37",
+      "55,36",
+      "55,35",
+      "56,36",
+      "56,37",
+      "56,38",
+      "56,39",
+      "56,40",
+      "56,41",
+      "55,39",
+      "57,32",
       "57,33",
       "57,34",
       "57,35",
       "57,36",
-      "60,32",
-      "59,32",
-      "58,32",
-      "57,32",
-      "61,32",
-      "61,33",
-      "60,33",
-      "59,33",
-      "58,33",
-      "58,34",
-      "58,35",
-      "58,36",
-      "59,34",
-      "59,35",
-      "59,36",
-      "60,34",
-      "60,35",
-      "60,36",
-      "61,34",
-      "61,35",
-      "61,36",
-      "61,37",
-      "61,38",
-      "61,39",
-      "61,40",
-      "60,40",
-      "59,40",
-      "58,40",
-      "57,40",
-      "56,40",
-      "55,40",
-      "54,40",
-      "53,40",
-      "52,40",
-      "51,40",
-      "50,40",
-      "50,39",
-      "50,38",
-      "50,37",
-      "51,37",
-      "51,38",
-      "51,39",
-      "52,39",
-      "52,38",
-      "52,37",
-      "53,37",
-      "53,38",
-      "53,39",
-      "54,39",
-      "54,38",
-      "54,37",
-      "55,37",
-      "55,38",
-      "55,39",
-      "56,39",
-      "56,38",
-      "56,37",
-      "57,37",
       "57,38",
       "57,39",
-      "58,39",
-      "58,38",
-      "58,37",
-      "59,37",
-      "59,38",
-      "59,39",
-      "60,39",
-      "60,38",
+      "57,40",
+      "57,41",
       "60,37",
-      "24,10",
-      "25,10",
-      "26,10",
-      "27,10",
-      "28,10",
-      "29,10",
-      "30,10",
-      "31,10",
-      "32,10",
-      "33,10",
-      "34,10",
-      "35,10",
-      "36,10",
-      "36,11",
-      "35,11",
-      "34,11",
-      "33,11",
-      "32,11",
-      "31,11",
-      "30,11",
-      "29,11",
-      "28,11",
-      "27,11",
-      "26,11",
-      "25,11",
-      "24,11",
-      "24,12",
-      "25,12",
-      "26,12",
-      "27,12",
-      "28,12",
-      "29,12",
-      "30,12",
-      "31,12",
-      "32,12",
-      "33,12",
-      "34,12",
-      "35,12",
-      "36,12",
-      "50,60",
-      "51,60",
-      "52,60",
-      "53,60",
-      "54,60",
-      "55,60",
-      "56,60",
-      "57,60",
-      "58,60",
-      "59,60",
-      "60,60",
-      "60,61",
-      "59,61",
-      "58,61",
-      "57,61",
-      "56,61",
-      "55,61",
-      "54,61",
-      "53,61",
-      "52,61",
-      "51,61",
-      "50,61",
-      "50,62",
-      "51,62",
-      "52,62",
-      "53,62",
-      "54,62",
-      "55,62",
-      "56,62",
-      "57,62",
-      "58,62",
-      "59,62",
-      "60,62",
-      "60,63",
-      "59,63",
-      "58,63",
-      "57,63",
-      "55,63",
-      "54,63",
-      "53,63",
-      "52,63",
-      "51,63",
-      "50,63",
-      "50,64",
-      "51,64",
-      "52,64",
-      "53,64",
-      "54,64",
-      "55,64",
-      "56,64",
-      "57,64",
-      "58,64",
-      "59,64",
-      "60,64",
-      "56,63",
+      "59,37",
+      "58,37",
+      "57,37",
+      "61,37",
+      "61,38",
+      "60,38",
+      "59,38",
+      "58,38",
+      "58,39",
+      "58,40",
+      "58,41",
+      "59,39",
+      "59,40",
+      "59,41",
+      "60,39",
+      "60,40",
+      "60,41",
+      "61,39",
+      "61,40",
+      "61,41",
+      "61,42",
+      "61,43",
+      "61,44",
+      "61,45",
+      "60,45",
+      "59,45",
+      "58,45",
+      "57,45",
+      "56,45",
+      "55,45",
+      "54,45",
+      "53,45",
+      "52,45",
+      "51,45",
+      "50,45",
+      "50,44",
+      "50,43",
+      "50,42",
+      "51,42",
+      "51,43",
+      "51,44",
+      "52,44",
+      "52,43",
+      "52,42",
+      "53,42",
+      "53,43",
+      "53,44",
+      "54,44",
+      "54,43",
+      "54,42",
+      "55,42",
+      "55,43",
+      "55,44",
+      "56,44",
+      "56,43",
+      "56,42",
+      "57,42",
+      "57,43",
+      "57,44",
+      "58,44",
+      "58,43",
+      "58,42",
+      "59,42",
+      "59,43",
+      "59,44",
+      "60,44",
+      "60,43",
+      "60,42",
+      "24,15",
+      "25,15",
+      "26,15",
+      "27,15",
+      "28,15",
+      "29,15",
+      "30,15",
+      "31,15",
+      "32,15",
+      "33,15",
+      "34,15",
+      "35,15",
+      "36,15",
+      "36,16",
+      "35,16",
+      "34,16",
+      "33,16",
+      "32,16",
+      "31,16",
+      "30,16",
+      "29,16",
+      "28,16",
+      "27,16",
+      "26,16",
+      "25,16",
+      "24,16",
+      "24,17",
+      "25,17",
+      "26,17",
+      "27,17",
+      "28,17",
+      "29,17",
+      "30,17",
+      "31,17",
+      "32,17",
+      "33,17",
+      "34,17",
+      "35,17",
+      "36,17",
       "50,65",
       "51,65",
       "52,65",
       "53,65",
       "54,65",
       "55,65",
-      "50,66",
-      "51,66",
-      "52,66",
-      "53,66",
-      "54,66",
+      "56,65",
+      "57,65",
+      "58,65",
+      "59,65",
+      "60,65",
+      "60,66",
+      "59,66",
+      "58,66",
+      "57,66",
+      "56,66",
       "55,66",
+      "54,66",
+      "53,66",
+      "52,66",
+      "51,66",
+      "50,66",
       "50,67",
       "51,67",
       "52,67",
       "53,67",
       "54,67",
       "55,67",
-      "50,68",
-      "51,68",
-      "52,68",
-      "53,68",
-      "54,68",
-      "55,68",
-      "56,68",
-      "57,68",
-      "58,68",
-      "59,68",
-      "60,68",
+      "56,67",
+      "57,67",
+      "58,67",
+      "59,67",
       "60,67",
-      "60,66",
-      "60,65",
+      "60,68",
+      "59,68",
+      "58,68",
+      "57,68",
+      "55,68",
+      "54,68",
+      "53,68",
+      "52,68",
+      "51,68",
+      "50,68",
       "50,69",
       "51,69",
       "52,69",
@@ -211563,19 +213297,63 @@ const BATTLE_MAPS = [
       "58,69",
       "59,69",
       "60,69",
-      "24,9",
-      "25,9",
-      "26,9",
-      "27,9",
-      "28,9",
-      "29,9",
-      "30,9",
-      "31,9",
-      "32,9",
-      "33,9",
-      "34,9",
-      "35,9",
-      "36,9"
+      "56,68",
+      "50,70",
+      "51,70",
+      "52,70",
+      "53,70",
+      "54,70",
+      "55,70",
+      "50,71",
+      "51,71",
+      "52,71",
+      "53,71",
+      "54,71",
+      "55,71",
+      "50,72",
+      "51,72",
+      "52,72",
+      "53,72",
+      "54,72",
+      "55,72",
+      "50,73",
+      "51,73",
+      "52,73",
+      "53,73",
+      "54,73",
+      "55,73",
+      "56,73",
+      "57,73",
+      "58,73",
+      "59,73",
+      "60,73",
+      "60,72",
+      "60,71",
+      "60,70",
+      "50,74",
+      "51,74",
+      "52,74",
+      "53,74",
+      "54,74",
+      "55,74",
+      "56,74",
+      "57,74",
+      "58,74",
+      "59,74",
+      "60,74",
+      "24,14",
+      "25,14",
+      "26,14",
+      "27,14",
+      "28,14",
+      "29,14",
+      "30,14",
+      "31,14",
+      "32,14",
+      "33,14",
+      "34,14",
+      "35,14",
+      "36,14"
     ],
     "seekBase": true,
     "tileBoxes": {
@@ -211606,76 +213384,81 @@ const BATTLE_MAPS = [
       "tile_mvr3kqob": []
     },
     "deepWaterKeep": [
-      "70,73",
-      "67,73",
-      "68,73",
-      "69,73",
-      "69,74",
-      "68,74",
+      "70,78",
+      "67,78",
+      "68,78",
+      "69,78",
+      "69,79",
+      "68,79",
+      "67,79",
+      "70,79",
+      "71,79",
+      "73,79",
+      "74,79",
+      "75,79",
+      "76,79",
+      "77,79",
+      "78,79",
+      "79,79",
+      "80,79",
+      "81,79",
+      "82,79",
+      "83,79",
+      "84,79",
+      "72,79",
+      "71,78",
+      "72,78",
+      "73,78",
+      "74,78",
+      "75,78",
+      "76,78",
+      "77,78",
+      "78,78",
+      "79,78",
+      "80,78",
+      "81,78",
+      "82,78",
+      "83,78",
+      "84,78",
+      "67,77",
+      "68,77",
+      "69,77",
+      "70,77",
+      "71,77",
+      "72,77",
+      "74,77",
+      "75,77",
+      "76,77",
+      "77,77",
+      "78,77",
+      "79,77",
+      "80,77",
+      "81,77",
+      "82,77",
+      "83,77",
+      "84,77",
+      "84,76",
+      "83,76",
+      "82,76",
+      "81,76",
+      "80,76",
+      "78,76",
+      "77,76",
+      "76,76",
+      "75,76",
+      "74,76",
+      "73,76",
+      "72,76",
+      "73,77",
+      "71,76",
+      "70,76",
+      "69,76",
+      "68,76",
+      "67,76",
+      "67,75",
       "67,74",
-      "70,74",
-      "71,74",
-      "73,74",
-      "74,74",
-      "75,74",
-      "76,74",
-      "77,74",
-      "78,74",
-      "79,74",
-      "80,74",
-      "81,74",
-      "82,74",
-      "83,74",
-      "84,74",
-      "72,74",
-      "71,73",
-      "72,73",
-      "73,73",
-      "74,73",
-      "75,73",
-      "76,73",
-      "77,73",
-      "78,73",
-      "79,73",
-      "80,73",
-      "81,73",
-      "82,73",
-      "83,73",
-      "84,73",
+      "67,73",
       "67,72",
-      "68,72",
-      "69,72",
-      "70,72",
-      "71,72",
-      "72,72",
-      "74,72",
-      "75,72",
-      "76,72",
-      "77,72",
-      "78,72",
-      "79,72",
-      "80,72",
-      "81,72",
-      "82,72",
-      "83,72",
-      "84,72",
-      "84,71",
-      "83,71",
-      "82,71",
-      "81,71",
-      "80,71",
-      "78,71",
-      "77,71",
-      "76,71",
-      "75,71",
-      "74,71",
-      "73,71",
-      "72,71",
-      "73,72",
-      "71,71",
-      "70,71",
-      "69,71",
-      "68,71",
       "67,71",
       "67,70",
       "67,69",
@@ -211683,609 +213466,599 @@ const BATTLE_MAPS = [
       "67,67",
       "67,66",
       "67,65",
-      "67,64",
-      "67,63",
-      "67,62",
-      "67,61",
-      "67,60",
-      "68,60",
-      "69,60",
-      "70,60",
-      "71,60",
-      "72,60",
-      "73,60",
-      "74,60",
-      "75,60",
-      "76,60",
-      "77,60",
-      "78,60",
-      "79,60",
-      "81,60",
-      "82,60",
-      "83,60",
-      "83,61",
-      "84,61",
-      "84,60",
-      "80,60",
-      "80,61",
-      "80,62",
-      "80,63",
-      "80,64",
+      "68,65",
+      "69,65",
+      "70,65",
+      "71,65",
+      "72,65",
+      "73,65",
+      "74,65",
+      "75,65",
+      "76,65",
+      "77,65",
+      "78,65",
+      "79,65",
+      "81,65",
+      "82,65",
+      "83,65",
+      "83,66",
+      "84,66",
+      "84,65",
       "80,65",
       "80,66",
       "80,67",
       "80,68",
       "80,69",
       "80,70",
-      "79,70",
-      "79,71",
-      "68,61",
-      "69,61",
-      "71,61",
-      "72,61",
-      "73,61",
-      "74,61",
-      "75,61",
-      "76,61",
-      "77,61",
-      "79,61",
-      "82,61",
-      "82,62",
-      "83,62",
-      "84,62",
-      "84,63",
-      "84,64",
-      "84,65",
-      "84,66",
+      "80,71",
+      "80,72",
+      "80,73",
+      "80,74",
+      "80,75",
+      "79,75",
+      "79,76",
+      "68,66",
+      "69,66",
+      "71,66",
+      "72,66",
+      "73,66",
+      "74,66",
+      "75,66",
+      "76,66",
+      "77,66",
+      "79,66",
+      "82,66",
+      "82,67",
+      "83,67",
       "84,67",
       "84,68",
       "84,69",
       "84,70",
-      "83,70",
-      "82,70",
+      "84,71",
+      "84,72",
+      "84,73",
+      "84,74",
+      "84,75",
+      "83,75",
+      "82,75",
+      "81,75",
+      "81,74",
+      "81,73",
+      "81,72",
+      "81,71",
       "81,70",
       "81,69",
       "81,68",
       "81,67",
       "81,66",
-      "81,65",
-      "81,64",
-      "81,63",
-      "81,62",
-      "81,61",
-      "82,63",
-      "82,64",
-      "83,64",
-      "83,65",
-      "82,66",
-      "82,67",
       "82,68",
       "82,69",
       "83,69",
+      "83,70",
+      "82,71",
+      "82,72",
+      "82,73",
+      "82,74",
+      "83,74",
+      "83,73",
+      "83,72",
+      "83,71",
       "83,68",
-      "83,67",
-      "83,66",
-      "83,63",
-      "82,65",
-      "78,61",
-      "78,62",
-      "79,62",
-      "79,63",
-      "79,64",
-      "79,65",
-      "79,66",
-      "79,67",
+      "82,70",
+      "78,66",
       "78,67",
-      "78,68",
-      "78,69",
-      "78,70",
-      "77,70",
-      "76,70",
-      "75,70",
-      "74,70",
-      "73,70",
-      "72,70",
-      "71,70",
-      "70,70",
-      "69,70",
+      "79,67",
+      "79,68",
+      "79,69",
+      "79,70",
+      "79,71",
+      "79,72",
+      "78,72",
+      "78,73",
+      "78,74",
+      "78,75",
+      "77,75",
+      "76,75",
+      "75,75",
+      "74,75",
+      "73,75",
+      "72,75",
+      "71,75",
+      "70,75",
+      "69,75",
+      "68,75",
+      "68,74",
+      "68,73",
+      "68,72",
+      "68,71",
       "68,70",
       "68,69",
       "68,68",
       "68,67",
-      "68,66",
-      "68,65",
-      "68,64",
-      "68,63",
-      "68,62",
-      "70,61",
-      "69,62",
-      "70,62",
-      "71,62",
-      "73,62",
-      "74,62",
-      "75,62",
-      "76,62",
-      "77,62",
-      "72,62",
-      "69,63",
-      "70,63",
-      "72,63",
-      "73,63",
-      "74,63",
-      "75,63",
-      "76,63",
-      "77,63",
-      "78,63",
-      "71,63",
-      "72,64",
-      "72,65",
-      "72,66",
-      "72,67",
-      "72,68",
-      "72,69",
-      "71,69",
-      "70,69",
-      "69,69",
-      "69,68",
-      "69,67",
-      "69,66",
-      "69,65",
-      "69,64",
-      "70,64",
-      "71,64",
-      "71,65",
-      "71,66",
-      "71,67",
-      "70,67",
-      "70,68",
       "70,66",
-      "70,65",
-      "71,68",
+      "69,67",
+      "70,67",
+      "71,67",
+      "73,67",
+      "74,67",
+      "75,67",
+      "76,67",
+      "77,67",
+      "72,67",
+      "69,68",
+      "70,68",
+      "72,68",
       "73,68",
-      "73,69",
-      "74,69",
-      "75,69",
-      "76,69",
-      "77,69",
-      "77,68",
-      "76,68",
-      "75,68",
       "74,68",
-      "79,68",
-      "79,69",
-      "78,64",
-      "78,66",
-      "78,65",
-      "88,60",
-      "89,60",
-      "90,60",
-      "91,60",
-      "92,60",
-      "93,60",
-      "94,60",
-      "95,60",
-      "96,60",
-      "97,60",
-      "98,60",
-      "99,60",
-      "100,60",
-      "101,60",
-      "102,60",
-      "103,60",
-      "104,60",
-      "105,60",
-      "106,60",
-      "106,61",
-      "105,61",
-      "104,61",
-      "103,61",
-      "102,61",
-      "101,61",
-      "100,61",
-      "99,61",
-      "98,61",
-      "97,61",
-      "96,61",
-      "95,61",
-      "94,61",
-      "93,61",
-      "92,61",
-      "91,61",
-      "90,61",
-      "89,61",
-      "88,61",
-      "88,62",
-      "89,62",
-      "90,62",
-      "91,62",
-      "92,62",
-      "93,62",
-      "94,62",
-      "96,62",
-      "97,62",
-      "98,62",
-      "99,62",
-      "101,62",
-      "102,62",
-      "103,62",
-      "104,62",
-      "105,62",
-      "106,62",
-      "106,63",
-      "105,63",
-      "104,63",
-      "103,63",
-      "102,63",
-      "101,63",
-      "100,63",
-      "99,63",
-      "98,63",
-      "97,63",
-      "96,63",
-      "95,63",
-      "94,63",
-      "93,63",
-      "91,63",
-      "90,63",
-      "89,63",
-      "88,63",
-      "92,63",
-      "95,62",
-      "100,62",
-      "103,64",
-      "104,64",
-      "105,64",
-      "106,64",
-      "102,64",
-      "100,64",
-      "99,64",
-      "98,64",
-      "97,64",
-      "96,64",
-      "95,64",
-      "94,64",
-      "93,64",
-      "92,64",
-      "91,64",
-      "90,64",
-      "89,64",
-      "88,64",
+      "75,68",
+      "76,68",
+      "77,68",
+      "78,68",
+      "71,68",
+      "72,69",
+      "72,70",
+      "72,71",
+      "72,72",
+      "72,73",
+      "72,74",
+      "71,74",
+      "70,74",
+      "69,74",
+      "69,73",
+      "69,72",
+      "69,71",
+      "69,70",
+      "69,69",
+      "70,69",
+      "71,69",
+      "71,70",
+      "71,71",
+      "71,72",
+      "70,72",
+      "70,73",
+      "70,71",
+      "70,70",
+      "71,73",
+      "73,73",
+      "73,74",
+      "74,74",
+      "75,74",
+      "76,74",
+      "77,74",
+      "77,73",
+      "76,73",
+      "75,73",
+      "74,73",
+      "79,73",
+      "79,74",
+      "78,69",
+      "78,71",
+      "78,70",
       "88,65",
       "89,65",
+      "90,65",
+      "91,65",
+      "92,65",
+      "93,65",
+      "94,65",
+      "95,65",
+      "96,65",
+      "97,65",
+      "98,65",
+      "99,65",
+      "100,65",
+      "101,65",
+      "102,65",
+      "103,65",
+      "104,65",
+      "105,65",
+      "106,65",
+      "106,66",
+      "105,66",
+      "104,66",
+      "103,66",
+      "102,66",
+      "101,66",
+      "100,66",
+      "99,66",
+      "98,66",
+      "97,66",
+      "96,66",
+      "95,66",
+      "94,66",
+      "93,66",
+      "92,66",
+      "91,66",
+      "90,66",
       "89,66",
+      "88,66",
+      "88,67",
+      "89,67",
       "90,67",
       "91,67",
+      "92,67",
       "93,67",
-      "95,67",
+      "94,67",
       "96,67",
+      "97,67",
       "98,67",
       "99,67",
-      "100,67",
       "101,67",
       "102,67",
       "103,67",
       "104,67",
       "105,67",
       "106,67",
-      "106,66",
-      "106,65",
-      "105,65",
-      "104,65",
-      "103,65",
-      "102,65",
-      "101,65",
-      "100,65",
-      "99,65",
-      "98,65",
-      "97,65",
-      "96,65",
-      "94,65",
-      "93,65",
-      "91,65",
-      "90,65",
-      "88,66",
-      "90,66",
-      "92,66",
-      "93,66",
-      "95,66",
-      "96,66",
-      "98,66",
-      "99,66",
-      "100,66",
-      "101,66",
-      "103,66",
-      "104,66",
-      "105,66",
-      "102,66",
-      "97,66",
-      "94,66",
-      "91,66",
-      "92,65",
-      "95,65",
-      "101,64",
-      "88,67",
+      "106,68",
+      "105,68",
+      "104,68",
+      "103,68",
+      "102,68",
+      "101,68",
+      "100,68",
+      "99,68",
+      "98,68",
+      "97,68",
+      "96,68",
+      "95,68",
+      "94,68",
+      "93,68",
+      "91,68",
+      "90,68",
+      "89,68",
       "88,68",
+      "92,68",
+      "95,67",
+      "100,67",
+      "103,69",
+      "104,69",
+      "105,69",
+      "106,69",
+      "102,69",
+      "100,69",
+      "99,69",
+      "98,69",
+      "97,69",
+      "96,69",
+      "95,69",
+      "94,69",
+      "93,69",
+      "92,69",
+      "91,69",
+      "90,69",
+      "89,69",
       "88,69",
       "88,70",
+      "89,70",
+      "89,71",
+      "90,72",
+      "91,72",
+      "93,72",
+      "95,72",
+      "96,72",
+      "98,72",
+      "99,72",
+      "100,72",
+      "101,72",
+      "102,72",
+      "103,72",
+      "104,72",
+      "105,72",
+      "106,72",
+      "106,71",
+      "106,70",
+      "105,70",
+      "104,70",
+      "103,70",
+      "102,70",
+      "101,70",
+      "100,70",
+      "99,70",
+      "98,70",
+      "97,70",
+      "96,70",
+      "94,70",
+      "93,70",
+      "91,70",
+      "90,70",
       "88,71",
+      "90,71",
+      "92,71",
+      "93,71",
+      "95,71",
+      "96,71",
+      "98,71",
+      "99,71",
+      "100,71",
+      "101,71",
+      "103,71",
+      "104,71",
+      "105,71",
+      "102,71",
+      "97,71",
+      "94,71",
+      "91,71",
+      "92,70",
+      "95,70",
+      "101,69",
       "88,72",
       "88,73",
       "88,74",
       "88,75",
       "88,76",
       "88,77",
-      "89,77",
-      "90,77",
-      "91,77",
-      "92,77",
-      "93,77",
-      "94,77",
-      "95,77",
-      "96,77",
-      "97,77",
-      "97,78",
-      "96,78",
-      "95,78",
-      "94,78",
-      "93,78",
-      "92,78",
-      "91,78",
-      "90,78",
-      "89,78",
       "88,78",
+      "88,79",
+      "88,80",
+      "88,81",
+      "88,82",
+      "89,82",
+      "90,82",
+      "91,82",
+      "92,82",
+      "93,82",
+      "94,82",
+      "95,82",
+      "96,82",
+      "97,82",
+      "97,83",
+      "96,83",
+      "95,83",
+      "94,83",
+      "93,83",
+      "92,83",
+      "91,83",
+      "90,83",
+      "89,83",
+      "88,83",
+      "89,81",
+      "90,81",
+      "91,81",
+      "92,81",
+      "93,81",
+      "94,81",
+      "95,81",
+      "96,81",
+      "97,81",
+      "97,80",
+      "97,79",
+      "97,78",
+      "97,77",
+      "97,76",
+      "96,76",
+      "96,75",
+      "96,74",
+      "96,73",
+      "97,73",
+      "97,72",
+      "97,74",
+      "97,75",
+      "95,76",
+      "92,75",
+      "89,73",
+      "89,72",
+      "89,74",
+      "89,75",
+      "89,77",
+      "89,78",
+      "89,79",
+      "89,80",
+      "96,80",
+      "96,77",
+      "95,73",
+      "94,73",
+      "94,72",
+      "92,72",
+      "90,73",
       "89,76",
-      "90,76",
+      "90,77",
+      "90,78",
+      "91,79",
+      "91,80",
+      "92,80",
+      "96,79",
+      "96,78",
+      "95,75",
+      "94,74",
+      "93,73",
+      "92,73",
+      "91,73",
+      "90,74",
+      "90,79",
+      "90,80",
+      "91,77",
       "91,76",
+      "90,75",
+      "91,74",
+      "92,74",
+      "93,74",
+      "95,74",
+      "91,75",
+      "90,76",
       "92,76",
       "93,76",
       "94,76",
-      "95,76",
-      "96,76",
-      "97,76",
-      "97,75",
-      "97,74",
-      "97,73",
-      "97,72",
-      "97,71",
-      "96,71",
-      "96,70",
-      "96,69",
-      "96,68",
-      "97,68",
-      "97,67",
-      "97,69",
-      "97,70",
-      "95,71",
-      "92,70",
-      "89,68",
-      "89,67",
-      "89,69",
-      "89,70",
-      "89,72",
-      "89,73",
-      "89,74",
-      "89,75",
-      "96,75",
-      "96,72",
-      "95,68",
-      "94,68",
-      "94,67",
-      "92,67",
-      "90,68",
-      "89,71",
-      "90,72",
-      "90,73",
-      "91,74",
-      "91,75",
-      "92,75",
-      "96,74",
-      "96,73",
-      "95,70",
-      "94,69",
-      "93,68",
-      "92,68",
-      "91,68",
-      "90,69",
-      "90,74",
-      "90,75",
-      "91,72",
-      "91,71",
-      "90,70",
-      "91,69",
-      "92,69",
-      "93,69",
-      "95,69",
-      "91,70",
-      "90,71",
-      "92,71",
-      "93,71",
-      "94,71",
-      "93,70",
-      "94,70",
-      "94,72",
-      "94,73",
-      "95,73",
-      "95,74",
-      "95,75",
-      "94,75",
       "93,75",
-      "93,74",
-      "92,74",
-      "92,73",
-      "91,73",
-      "92,72",
-      "93,72",
-      "93,73",
-      "94,74",
-      "95,72",
-      "106,46",
-      "105,46",
-      "104,46",
-      "103,46",
-      "102,46",
-      "101,46",
-      "100,46",
-      "99,46",
-      "98,46",
-      "97,46",
-      "97,47",
-      "97,48",
-      "97,49",
-      "97,50",
+      "94,75",
+      "94,77",
+      "94,78",
+      "95,78",
+      "95,79",
+      "95,80",
+      "94,80",
+      "93,80",
+      "93,79",
+      "92,79",
+      "92,78",
+      "91,78",
+      "92,77",
+      "93,77",
+      "93,78",
+      "94,79",
+      "95,77",
+      "106,51",
+      "105,51",
+      "104,51",
+      "103,51",
+      "102,51",
+      "101,51",
+      "100,51",
+      "99,51",
+      "98,51",
       "97,51",
       "97,52",
       "97,53",
       "97,54",
       "97,55",
       "97,56",
+      "97,57",
+      "97,58",
+      "97,59",
+      "97,60",
+      "97,61",
+      "98,61",
+      "99,61",
+      "101,61",
+      "102,61",
+      "103,61",
+      "104,61",
+      "105,61",
+      "106,61",
+      "100,61",
+      "99,60",
+      "98,60",
+      "98,59",
+      "98,58",
+      "98,57",
       "98,56",
-      "99,56",
-      "101,56",
-      "102,56",
-      "103,56",
-      "104,56",
-      "105,56",
-      "106,56",
-      "100,56",
-      "99,55",
       "98,55",
       "98,54",
       "98,53",
       "98,52",
-      "98,51",
-      "98,50",
-      "98,49",
-      "98,48",
-      "98,47",
-      "99,47",
-      "103,47",
-      "104,47",
-      "105,47",
-      "106,47",
-      "106,48",
-      "106,50",
-      "106,51",
+      "99,52",
+      "103,52",
+      "104,52",
+      "105,52",
       "106,52",
       "106,53",
-      "106,54",
       "106,55",
-      "105,55",
-      "104,55",
-      "103,55",
-      "102,55",
-      "101,55",
-      "100,55",
+      "106,56",
+      "106,57",
+      "106,58",
+      "106,59",
+      "106,60",
+      "105,60",
+      "104,60",
+      "103,60",
+      "102,60",
+      "101,60",
+      "100,60",
+      "99,59",
+      "99,58",
+      "99,57",
+      "99,56",
+      "99,55",
       "99,54",
       "99,53",
-      "99,52",
-      "99,51",
-      "99,50",
-      "99,49",
-      "99,48",
-      "100,48",
-      "101,48",
-      "102,48",
-      "104,48",
-      "105,48",
-      "106,49",
-      "105,49",
-      "105,50",
-      "105,51",
-      "105,52",
-      "105,53",
-      "105,54",
-      "104,54",
-      "103,54",
-      "102,54",
-      "101,54",
-      "100,54",
       "100,53",
-      "100,52",
-      "100,51",
-      "100,50",
-      "100,49",
-      "101,49",
-      "102,49",
-      "103,49",
-      "104,49",
-      "104,50",
-      "104,51",
-      "104,52",
-      "104,53",
-      "103,53",
-      "102,53",
       "101,53",
-      "101,52",
-      "101,51",
-      "101,50",
-      "103,50",
-      "103,51",
-      "103,52",
+      "102,53",
+      "104,53",
+      "105,53",
+      "106,54",
+      "105,54",
+      "105,55",
+      "105,56",
+      "105,57",
+      "105,58",
+      "105,59",
+      "104,59",
+      "103,59",
+      "102,59",
+      "101,59",
+      "100,59",
+      "100,58",
+      "100,57",
+      "100,56",
+      "100,55",
+      "100,54",
+      "101,54",
+      "102,54",
+      "103,54",
+      "104,54",
+      "104,55",
+      "104,56",
+      "104,57",
+      "104,58",
+      "103,58",
+      "102,58",
+      "101,58",
+      "101,57",
+      "101,56",
+      "101,55",
+      "103,55",
+      "103,56",
+      "103,57",
+      "102,57",
+      "102,56",
+      "102,55",
+      "103,53",
       "102,52",
-      "102,51",
-      "102,50",
-      "103,48",
-      "102,47",
-      "100,47",
-      "101,47",
-      "92,56",
-      "91,56",
-      "90,56",
-      "89,56",
-      "88,56",
-      "87,56",
-      "86,56",
-      "85,56",
-      "84,56",
-      "83,56",
-      "82,56",
-      "81,56",
-      "80,56",
-      "79,56",
-      "79,55",
-      "80,55",
-      "81,55",
-      "82,55",
-      "84,55",
-      "85,55",
-      "86,55",
-      "87,55",
-      "89,55",
-      "90,55",
-      "91,55",
-      "92,55",
-      "93,55",
-      "93,56",
-      "88,55",
-      "83,55",
-      "79,54",
-      "80,54",
-      "81,54",
-      "82,54",
-      "83,54",
-      "84,54",
-      "85,54",
-      "86,54",
-      "87,54",
-      "88,54",
-      "89,54",
-      "90,54",
-      "91,54",
-      "92,54",
-      "93,54",
-      "88,45",
-      "88,46",
-      "88,48",
-      "88,49",
+      "100,52",
+      "101,52",
+      "92,61",
+      "91,61",
+      "90,61",
+      "89,61",
+      "88,61",
+      "87,61",
+      "86,61",
+      "85,61",
+      "84,61",
+      "83,61",
+      "82,61",
+      "81,61",
+      "80,61",
+      "79,61",
+      "79,60",
+      "80,60",
+      "81,60",
+      "82,60",
+      "84,60",
+      "85,60",
+      "86,60",
+      "87,60",
+      "89,60",
+      "90,60",
+      "91,60",
+      "92,60",
+      "93,60",
+      "93,61",
+      "88,60",
+      "83,60",
+      "79,59",
+      "80,59",
+      "81,59",
+      "82,59",
+      "83,59",
+      "84,59",
+      "85,59",
+      "86,59",
+      "87,59",
+      "88,59",
+      "89,59",
+      "90,59",
+      "91,59",
+      "92,59",
+      "93,59",
       "88,50",
       "88,51",
-      "88,52",
       "88,53",
-      "84,39",
-      "84,40",
-      "84,41",
-      "84,42",
-      "84,43",
+      "88,54",
+      "88,55",
+      "88,56",
+      "88,57",
+      "88,58",
       "84,44",
       "84,45",
       "84,46",
@@ -212296,11 +214069,11 @@ const BATTLE_MAPS = [
       "84,51",
       "84,52",
       "84,53",
-      "83,39",
-      "83,40",
-      "83,41",
-      "83,42",
-      "83,43",
+      "84,54",
+      "84,55",
+      "84,56",
+      "84,57",
+      "84,58",
       "83,44",
       "83,45",
       "83,46",
@@ -212311,268 +214084,278 @@ const BATTLE_MAPS = [
       "83,51",
       "83,52",
       "83,53",
+      "83,54",
+      "83,55",
+      "83,56",
+      "83,57",
+      "83,58",
+      "82,58",
+      "82,57",
+      "82,56",
+      "82,54",
       "82,53",
       "82,52",
-      "82,51",
+      "82,50",
       "82,49",
-      "82,48",
-      "82,47",
-      "82,45",
       "82,44",
-      "82,39",
-      "81,39",
-      "80,39",
-      "79,39",
-      "79,40",
-      "79,41",
-      "79,42",
-      "79,43",
+      "81,44",
+      "80,44",
       "79,44",
       "79,45",
       "79,46",
       "79,47",
       "79,48",
       "79,49",
-      "79,52",
-      "79,53",
       "79,50",
       "79,51",
-      "80,51",
-      "81,52",
-      "80,52",
-      "80,53",
+      "79,52",
+      "79,53",
+      "79,54",
+      "79,57",
+      "79,58",
+      "79,55",
+      "79,56",
+      "80,56",
+      "81,57",
+      "80,57",
+      "80,58",
+      "81,58",
+      "81,56",
+      "81,55",
+      "81,54",
       "81,53",
-      "81,51",
-      "81,50",
-      "81,49",
-      "81,48",
-      "82,50",
+      "82,55",
+      "80,55",
+      "80,54",
+      "80,53",
+      "80,52",
       "80,50",
       "80,49",
       "80,48",
       "80,47",
+      "80,46",
       "80,45",
-      "80,44",
-      "80,43",
-      "80,42",
-      "80,41",
-      "80,40",
-      "81,40",
-      "82,40",
-      "82,41",
-      "81,41",
-      "81,42",
-      "81,43",
-      "81,44",
       "81,45",
+      "82,45",
+      "82,46",
       "81,46",
       "81,47",
-      "80,46",
-      "82,46",
-      "82,42",
-      "82,43",
-      "85,49",
-      "86,49",
-      "87,49",
-      "87,50",
-      "86,50",
-      "85,50",
-      "87,51",
-      "86,51",
-      "85,51",
-      "89,52",
-      "86,52",
-      "85,52",
-      "86,53",
-      "87,53",
-      "85,53",
-      "87,52",
-      "89,53",
-      "90,53",
-      "91,53",
+      "81,48",
+      "81,49",
+      "81,50",
+      "81,51",
+      "81,52",
+      "80,51",
+      "82,51",
+      "82,47",
+      "82,48",
+      "85,54",
+      "86,54",
+      "87,54",
+      "87,55",
+      "86,55",
+      "85,55",
+      "87,56",
+      "86,56",
+      "85,56",
+      "89,57",
+      "86,57",
+      "85,57",
+      "86,58",
+      "87,58",
+      "85,58",
+      "87,57",
+      "89,58",
+      "90,58",
+      "91,58",
+      "92,58",
+      "93,58",
+      "93,56",
+      "93,55",
+      "93,54",
       "92,53",
+      "92,52",
+      "92,54",
+      "92,55",
+      "92,56",
+      "92,57",
+      "93,57",
+      "91,57",
+      "90,57",
+      "90,56",
+      "89,56",
+      "89,55",
+      "89,54",
+      "88,52",
+      "89,52",
+      "89,53",
+      "90,54",
+      "90,55",
+      "91,56",
+      "91,55",
+      "91,54",
+      "91,53",
+      "91,52",
+      "90,52",
+      "90,53",
       "93,53",
+      "93,52",
       "93,51",
       "93,50",
       "93,49",
-      "92,48",
-      "92,47",
-      "92,49",
-      "92,50",
-      "92,51",
-      "92,52",
-      "93,52",
-      "91,52",
-      "90,52",
-      "90,51",
-      "89,51",
-      "89,50",
-      "89,49",
-      "88,47",
-      "89,47",
-      "89,48",
-      "90,49",
-      "90,50",
-      "91,51",
-      "91,50",
-      "91,49",
-      "91,48",
-      "91,47",
-      "90,47",
-      "90,48",
       "93,48",
       "93,47",
       "93,46",
       "93,45",
+      "92,45",
+      "92,44",
+      "90,44",
+      "89,44",
+      "88,44",
+      "88,45",
+      "88,46",
+      "88,47",
+      "88,48",
+      "88,49",
+      "89,50",
+      "89,51",
+      "90,51",
+      "91,51",
+      "92,51",
+      "92,50",
+      "92,49",
+      "92,48",
+      "92,47",
+      "92,46",
+      "91,44",
+      "90,45",
+      "89,46",
+      "89,47",
+      "89,48",
+      "89,49",
+      "90,50",
+      "91,50",
+      "91,49",
+      "91,48",
+      "91,47",
+      "91,46",
+      "91,45",
+      "90,46",
+      "90,47",
+      "90,48",
+      "90,49",
+      "89,45",
       "93,44",
       "93,43",
       "93,42",
       "93,41",
       "93,40",
-      "92,40",
-      "92,39",
-      "90,39",
-      "89,39",
-      "88,39",
-      "88,40",
-      "88,41",
-      "88,42",
+      "93,39",
+      "80,38",
+      "79,38",
+      "79,39",
+      "79,40",
+      "79,41",
+      "79,42",
+      "79,43",
+      "80,43",
+      "81,43",
+      "82,43",
+      "83,43",
+      "84,43",
+      "87,43",
       "88,43",
-      "88,44",
-      "89,45",
-      "89,46",
-      "90,46",
-      "91,46",
-      "92,46",
-      "92,45",
-      "92,44",
+      "89,43",
+      "90,43",
+      "91,43",
       "92,43",
       "92,42",
       "92,41",
-      "91,39",
-      "90,40",
-      "89,41",
-      "89,42",
-      "89,43",
-      "89,44",
-      "90,45",
-      "91,45",
-      "91,44",
-      "91,43",
-      "91,42",
-      "91,41",
-      "91,40",
-      "90,41",
-      "90,42",
-      "90,43",
-      "90,44",
-      "89,40",
-      "93,39",
+      "92,40",
+      "92,39",
+      "92,38",
       "93,38",
-      "93,37",
-      "93,36",
-      "93,35",
-      "93,34",
-      "80,33",
-      "79,33",
-      "79,34",
-      "79,35",
-      "79,36",
-      "79,37",
-      "79,38",
-      "80,38",
       "81,38",
       "82,38",
       "83,38",
       "84,38",
+      "86,38",
       "87,38",
-      "88,38",
       "89,38",
       "90,38",
       "91,38",
-      "92,38",
-      "92,37",
-      "92,36",
-      "92,35",
-      "92,34",
-      "92,33",
-      "93,33",
-      "81,33",
-      "82,33",
-      "83,33",
-      "84,33",
-      "86,33",
-      "87,33",
-      "89,33",
-      "90,33",
-      "91,33",
-      "85,33",
-      "85,34",
-      "85,35",
-      "86,35",
-      "87,34",
-      "88,34",
-      "88,33",
-      "86,34",
-      "87,35",
-      "88,35",
-      "89,35",
-      "90,35",
-      "91,35",
-      "91,34",
-      "90,34",
-      "89,34",
-      "91,36",
-      "90,36",
-      "88,36",
-      "87,36",
-      "86,36",
-      "85,36",
-      "84,36",
-      "84,35",
-      "84,34",
-      "83,34",
-      "82,34",
-      "81,34",
-      "80,34",
-      "80,35",
-      "80,36",
-      "81,36",
-      "81,37",
-      "82,37",
-      "83,36",
-      "83,35",
-      "82,35",
-      "81,35",
-      "82,36",
-      "80,37",
-      "91,37",
-      "90,37",
-      "88,37",
-      "86,37",
-      "84,37",
-      "83,37",
-      "85,37",
       "85,38",
       "85,39",
-      "86,39",
+      "85,40",
+      "86,40",
       "87,39",
-      "86,38",
-      "87,37",
-      "89,37",
-      "89,36",
-      "105,42",
-      "106,42",
-      "106,41",
-      "105,41",
-      "104,41",
-      "104,42",
-      "103,42",
-      "102,42",
-      "101,42",
-      "100,42",
-      "99,42",
-      "98,42",
+      "88,39",
+      "88,38",
+      "86,39",
+      "87,40",
+      "88,40",
+      "89,40",
+      "90,40",
+      "91,40",
+      "91,39",
+      "90,39",
+      "89,39",
+      "91,41",
+      "90,41",
+      "88,41",
+      "87,41",
+      "86,41",
+      "85,41",
+      "84,41",
+      "84,40",
+      "84,39",
+      "83,39",
+      "82,39",
+      "81,39",
+      "80,39",
+      "80,40",
+      "80,41",
+      "81,41",
+      "81,42",
+      "82,42",
+      "83,41",
+      "83,40",
+      "82,40",
+      "81,40",
+      "82,41",
+      "80,42",
+      "91,42",
+      "90,42",
+      "88,42",
+      "86,42",
+      "84,42",
+      "83,42",
+      "85,42",
+      "85,43",
+      "85,44",
+      "86,44",
+      "87,44",
+      "86,43",
+      "87,42",
+      "89,42",
+      "89,41",
+      "105,47",
+      "106,47",
+      "106,46",
+      "105,46",
+      "104,46",
+      "104,47",
+      "103,47",
+      "102,47",
+      "101,47",
+      "100,47",
+      "99,47",
+      "98,47",
+      "97,47",
+      "97,46",
+      "97,45",
+      "97,44",
+      "97,43",
       "97,42",
       "97,41",
       "97,40",
@@ -212581,16 +214364,6 @@ const BATTLE_MAPS = [
       "97,37",
       "97,36",
       "97,35",
-      "97,34",
-      "97,33",
-      "97,32",
-      "97,31",
-      "97,30",
-      "98,30",
-      "98,31",
-      "98,32",
-      "98,33",
-      "98,34",
       "98,35",
       "98,36",
       "98,37",
@@ -212598,650 +214371,671 @@ const BATTLE_MAPS = [
       "98,39",
       "98,40",
       "98,41",
-      "99,41",
-      "103,41",
-      "102,41",
-      "101,41",
-      "100,41",
-      "99,30",
-      "100,30",
-      "100,31",
-      "100,32",
-      "100,33",
-      "100,34",
+      "98,42",
+      "98,43",
+      "98,44",
+      "98,45",
+      "98,46",
+      "99,46",
+      "103,46",
+      "102,46",
+      "101,46",
+      "100,46",
+      "99,35",
       "100,35",
       "100,36",
       "100,37",
       "100,38",
       "100,39",
       "100,40",
+      "100,41",
+      "100,42",
+      "100,43",
+      "100,44",
+      "100,45",
+      "99,45",
+      "99,44",
+      "99,43",
+      "99,41",
       "99,40",
       "99,39",
       "99,38",
+      "99,37",
       "99,36",
-      "99,35",
-      "99,34",
-      "99,33",
-      "99,32",
-      "99,31",
-      "101,30",
-      "101,31",
-      "101,32",
-      "101,33",
-      "101,34",
       "101,35",
       "101,36",
       "101,37",
       "101,38",
       "101,39",
       "101,40",
-      "99,37",
-      "106,30",
-      "106,31",
+      "101,41",
+      "101,42",
+      "101,43",
+      "101,44",
+      "101,45",
+      "99,42",
+      "106,35",
       "106,36",
+      "106,41",
+      "106,42",
+      "106,43",
+      "106,44",
       "106,37",
       "106,38",
       "106,39",
-      "106,32",
-      "106,33",
-      "106,34",
-      "106,35",
       "106,40",
-      "89,29",
-      "90,29",
-      "92,29",
-      "93,29",
-      "94,29",
-      "95,29",
-      "96,29",
-      "97,29",
-      "98,29",
-      "99,29",
-      "100,29",
-      "101,29",
-      "102,29",
-      "103,29",
-      "104,29",
-      "105,29",
-      "106,29",
-      "105,30",
-      "105,31",
-      "105,32",
-      "105,33",
+      "106,45",
+      "89,34",
+      "90,34",
+      "92,34",
+      "93,34",
+      "94,34",
+      "95,34",
+      "96,34",
+      "97,34",
+      "98,34",
+      "99,34",
+      "100,34",
+      "101,34",
+      "102,34",
+      "103,34",
+      "104,34",
       "105,34",
+      "106,34",
       "105,35",
       "105,36",
       "105,37",
       "105,38",
       "105,39",
       "105,40",
-      "104,40",
-      "103,40",
+      "105,41",
+      "105,42",
+      "105,43",
+      "105,44",
+      "105,45",
+      "104,45",
+      "103,45",
+      "102,45",
+      "102,44",
+      "102,43",
+      "102,42",
+      "102,41",
       "102,40",
       "102,39",
       "102,38",
       "102,37",
       "102,36",
       "102,35",
-      "102,34",
-      "102,33",
-      "102,32",
-      "102,31",
-      "102,30",
-      "103,30",
-      "104,30",
-      "104,31",
-      "104,32",
-      "104,33",
-      "104,34",
+      "103,35",
       "104,35",
       "104,36",
       "104,37",
       "104,38",
       "104,39",
+      "104,40",
+      "104,41",
+      "104,42",
+      "104,43",
+      "104,44",
+      "103,44",
+      "103,43",
+      "103,42",
+      "103,41",
+      "103,40",
       "103,39",
       "103,38",
       "103,37",
       "103,36",
-      "103,35",
-      "103,34",
-      "103,33",
-      "103,32",
-      "103,31",
+      "106,33",
+      "106,32",
+      "106,31",
+      "106,30",
+      "106,29",
       "106,28",
       "106,27",
-      "106,26",
-      "106,25",
-      "106,24",
-      "106,23",
-      "106,22",
-      "89,21",
-      "89,22",
-      "89,23",
-      "89,24",
-      "89,25",
       "89,26",
       "89,27",
       "89,28",
-      "90,28",
-      "92,28",
-      "93,28",
-      "95,28",
-      "97,28",
-      "98,28",
-      "99,28",
-      "100,28",
-      "102,28",
-      "103,28",
-      "104,28",
+      "89,29",
+      "89,30",
+      "89,31",
+      "89,32",
+      "89,33",
+      "90,33",
+      "92,33",
+      "93,33",
+      "95,33",
+      "97,33",
+      "98,33",
+      "99,33",
+      "100,33",
+      "102,33",
+      "103,33",
+      "104,33",
+      "105,33",
+      "105,32",
+      "105,31",
+      "105,30",
+      "105,29",
       "105,28",
       "105,27",
+      "106,26",
       "105,26",
-      "105,25",
-      "105,24",
-      "105,23",
-      "105,22",
-      "106,21",
-      "105,21",
-      "104,21",
-      "103,21",
-      "102,21",
-      "101,21",
-      "100,21",
-      "99,21",
-      "98,21",
-      "97,21",
-      "96,21",
-      "95,21",
-      "94,21",
-      "93,21",
-      "92,21",
-      "91,21",
-      "90,21",
-      "91,29",
-      "91,28",
-      "91,27",
-      "92,27",
-      "93,27",
-      "94,27",
-      "94,28",
-      "96,28",
-      "96,27",
-      "97,27",
-      "98,27",
-      "99,27",
-      "100,27",
-      "101,27",
-      "101,28",
-      "102,27",
-      "103,27",
-      "104,27",
       "104,26",
-      "104,25",
-      "104,24",
-      "104,23",
-      "104,22",
-      "103,22",
-      "102,22",
-      "101,22",
-      "100,22",
-      "98,22",
-      "97,22",
-      "96,22",
-      "95,22",
-      "94,22",
-      "93,22",
-      "92,22",
-      "91,22",
-      "90,22",
-      "90,23",
-      "90,24",
-      "90,25",
-      "90,26",
-      "90,27",
-      "91,26",
-      "94,26",
-      "96,26",
-      "97,26",
-      "98,26",
-      "99,26",
-      "101,26",
-      "102,26",
       "103,26",
-      "103,25",
-      "103,24",
-      "103,23",
-      "102,23",
-      "101,23",
-      "100,23",
-      "99,22",
-      "99,23",
-      "98,23",
-      "97,23",
-      "95,23",
-      "94,23",
-      "93,23",
-      "92,23",
-      "91,23",
-      "91,24",
-      "92,24",
-      "93,24",
-      "94,24",
-      "95,24",
-      "96,24",
-      "96,23",
-      "97,24",
-      "98,24",
-      "99,24",
-      "100,24",
-      "101,24",
-      "102,24",
-      "102,25",
-      "101,25",
-      "100,25",
+      "102,26",
+      "101,26",
       "100,26",
-      "99,25",
-      "98,25",
-      "97,25",
-      "95,25",
-      "94,25",
-      "93,25",
-      "92,25",
-      "91,25",
+      "99,26",
+      "98,26",
+      "97,26",
+      "96,26",
+      "95,26",
+      "94,26",
       "93,26",
       "92,26",
+      "91,26",
+      "90,26",
+      "91,34",
+      "91,33",
+      "91,32",
+      "92,32",
+      "93,32",
+      "94,32",
+      "94,33",
+      "96,33",
+      "96,32",
+      "97,32",
+      "98,32",
+      "99,32",
+      "100,32",
+      "101,32",
+      "101,33",
+      "102,32",
+      "103,32",
+      "104,32",
+      "104,31",
+      "104,30",
+      "104,29",
+      "104,28",
+      "104,27",
+      "103,27",
+      "102,27",
+      "101,27",
+      "100,27",
+      "98,27",
+      "97,27",
+      "96,27",
       "95,27",
-      "95,26",
-      "96,25",
-      "82,21",
-      "81,21",
-      "80,21",
-      "79,21",
-      "78,21",
-      "77,21",
-      "76,21",
-      "75,21",
-      "74,21",
-      "73,21",
-      "72,21",
-      "71,21",
-      "71,22",
-      "72,22",
-      "73,22",
-      "74,22",
-      "75,22",
-      "77,22",
-      "78,22",
-      "79,22",
-      "80,22",
-      "81,22",
-      "82,22",
-      "76,22",
-      "76,23",
-      "76,24",
-      "76,25",
+      "94,27",
+      "93,27",
+      "92,27",
+      "91,27",
+      "90,27",
+      "90,28",
+      "90,29",
+      "90,30",
+      "90,31",
+      "90,32",
+      "91,31",
+      "94,31",
+      "96,31",
+      "97,31",
+      "98,31",
+      "99,31",
+      "101,31",
+      "102,31",
+      "103,31",
+      "103,30",
+      "103,29",
+      "103,28",
+      "102,28",
+      "101,28",
+      "100,28",
+      "99,27",
+      "99,28",
+      "98,28",
+      "97,28",
+      "95,28",
+      "94,28",
+      "93,28",
+      "92,28",
+      "91,28",
+      "91,29",
+      "92,29",
+      "93,29",
+      "94,29",
+      "95,29",
+      "96,29",
+      "96,28",
+      "97,29",
+      "98,29",
+      "99,29",
+      "100,29",
+      "101,29",
+      "102,29",
+      "102,30",
+      "101,30",
+      "100,30",
+      "100,31",
+      "99,30",
+      "98,30",
+      "97,30",
+      "95,30",
+      "94,30",
+      "93,30",
+      "92,30",
+      "91,30",
+      "93,31",
+      "92,31",
+      "95,32",
+      "95,31",
+      "96,30",
+      "82,26",
+      "81,26",
+      "80,26",
+      "79,26",
+      "78,26",
+      "77,26",
       "76,26",
+      "75,26",
+      "74,26",
+      "73,26",
+      "72,26",
+      "71,26",
+      "71,27",
+      "72,27",
+      "73,27",
+      "74,27",
+      "75,27",
+      "77,27",
+      "78,27",
+      "79,27",
+      "80,27",
+      "81,27",
+      "82,27",
       "76,27",
       "76,28",
       "76,29",
-      "77,29",
-      "78,29",
-      "79,29",
-      "80,29",
-      "81,29",
+      "76,30",
+      "76,31",
+      "76,32",
+      "76,33",
+      "76,34",
+      "77,34",
+      "78,34",
+      "79,34",
+      "80,34",
+      "81,34",
+      "82,34",
+      "82,33",
+      "82,32",
+      "82,31",
+      "82,30",
       "82,29",
       "82,28",
-      "82,27",
-      "82,26",
-      "82,25",
-      "82,24",
-      "82,23",
-      "81,23",
-      "80,23",
-      "79,23",
-      "78,23",
-      "77,23",
-      "77,24",
-      "77,25",
-      "77,26",
-      "77,27",
-      "77,28",
-      "78,28",
-      "79,28",
       "81,28",
-      "81,27",
-      "81,26",
-      "81,25",
-      "81,24",
-      "80,24",
-      "79,24",
-      "78,24",
-      "78,25",
-      "78,26",
-      "78,27",
-      "79,27",
       "80,28",
-      "80,27",
-      "80,26",
-      "80,25",
-      "79,25",
-      "79,26",
-      "71,23",
-      "72,23",
-      "73,23",
-      "74,23",
-      "75,23",
-      "75,24",
-      "74,24",
-      "73,24",
-      "72,24",
-      "71,24",
-      "71,25",
-      "71,26",
-      "72,27",
+      "79,28",
+      "78,28",
+      "77,28",
+      "77,29",
+      "77,30",
+      "77,31",
+      "77,32",
+      "77,33",
+      "78,33",
+      "79,33",
+      "81,33",
+      "81,32",
+      "81,31",
+      "81,30",
+      "81,29",
+      "80,29",
+      "79,29",
+      "78,29",
+      "78,30",
+      "78,31",
+      "78,32",
+      "79,32",
+      "80,33",
+      "80,32",
+      "80,31",
+      "80,30",
+      "79,30",
+      "79,31",
+      "71,28",
       "72,28",
       "73,28",
       "74,28",
       "75,28",
-      "75,27",
-      "75,26",
-      "75,25",
-      "74,25",
-      "73,25",
-      "72,25",
-      "72,26",
-      "73,26",
-      "73,27",
-      "74,27",
-      "74,26",
-      "71,27",
-      "71,28",
-      "71,29",
-      "72,29",
-      "73,29",
-      "74,29",
       "75,29",
+      "74,29",
+      "73,29",
+      "72,29",
+      "71,29",
+      "71,30",
+      "71,31",
+      "72,32",
+      "72,33",
+      "73,33",
+      "74,33",
+      "75,33",
+      "75,32",
+      "75,31",
       "75,30",
       "74,30",
       "73,30",
       "72,30",
-      "71,30",
-      "71,31",
       "72,31",
+      "73,31",
       "73,32",
       "74,32",
-      "75,32",
-      "74,33",
-      "75,31",
       "74,31",
-      "73,31",
-      "72,32",
       "71,32",
       "71,33",
-      "72,33",
+      "71,34",
       "72,34",
+      "73,34",
       "74,34",
       "75,34",
-      "75,33",
-      "73,33",
-      "73,34",
+      "75,35",
+      "74,35",
       "73,35",
       "72,35",
-      "71,34",
       "71,35",
       "71,36",
       "72,36",
-      "73,36",
-      "74,36",
-      "74,35",
-      "75,35",
-      "75,36",
-      "75,37",
-      "74,37",
-      "73,38",
       "73,37",
+      "74,37",
+      "75,37",
+      "74,38",
+      "75,36",
+      "74,36",
+      "73,36",
       "72,37",
       "71,37",
       "71,38",
-      "71,39",
-      "72,39",
-      "73,40",
       "72,38",
-      "73,39",
+      "72,39",
       "74,39",
-      "74,38",
-      "75,38",
       "75,39",
-      "75,40",
-      "75,41",
-      "74,41",
-      "74,40",
+      "75,38",
+      "73,38",
+      "73,39",
+      "73,40",
       "72,40",
+      "71,39",
       "71,40",
       "71,41",
-      "71,42",
-      "72,42",
-      "73,42",
-      "73,41",
       "72,41",
+      "73,41",
+      "74,41",
+      "74,40",
+      "75,40",
+      "75,41",
+      "75,42",
+      "74,42",
+      "73,43",
+      "73,42",
+      "72,42",
+      "71,42",
       "71,43",
       "71,44",
       "72,44",
+      "72,43",
       "73,44",
       "74,44",
-      "75,43",
-      "75,42",
-      "74,42",
       "74,43",
-      "73,43",
-      "72,43",
+      "75,43",
       "75,44",
-      "75,45",
-      "74,45",
-      "73,45",
-      "72,45",
-      "71,45",
-      "71,46",
-      "72,46",
-      "73,46",
-      "74,46",
-      "75,46",
-      "75,47",
-      "74,47",
-      "73,47",
-      "72,47",
-      "71,47",
       "71,48",
-      "72,48",
-      "73,48",
-      "74,48",
-      "75,48",
-      "75,49",
-      "74,49",
-      "73,49",
-      "72,49",
       "71,49",
-      "71,50",
-      "72,50",
-      "73,50",
-      "74,50",
-      "75,51",
-      "74,51",
-      "73,51",
-      "72,51",
-      "71,51",
-      "71,52",
-      "72,52",
-      "73,52",
+      "72,49",
+      "73,49",
+      "74,49",
+      "75,48",
+      "74,48",
+      "73,48",
+      "72,48",
+      "75,49",
       "75,50",
+      "74,50",
+      "73,50",
+      "72,50",
+      "71,50",
+      "71,51",
+      "72,51",
+      "73,51",
+      "74,51",
+      "75,51",
       "75,52",
+      "74,52",
+      "73,52",
+      "72,52",
+      "71,52",
+      "71,53",
+      "72,53",
+      "73,53",
+      "74,53",
       "75,53",
+      "75,54",
+      "74,54",
+      "73,54",
+      "72,54",
+      "71,54",
+      "71,55",
+      "72,55",
+      "73,55",
+      "74,55",
       "75,56",
       "74,56",
       "73,56",
       "72,56",
       "71,56",
-      "71,53",
-      "72,53",
-      "72,54",
-      "71,55",
-      "71,54",
-      "74,52",
-      "74,53",
-      "74,54",
-      "74,55",
+      "71,57",
+      "72,57",
+      "73,57",
       "75,55",
-      "75,54",
-      "73,53",
-      "73,54",
-      "73,55",
-      "72,55",
+      "75,57",
+      "75,58",
+      "75,61",
+      "74,61",
+      "73,61",
+      "72,61",
+      "71,61",
+      "71,58",
+      "72,58",
+      "72,59",
+      "71,60",
+      "71,59",
+      "74,57",
+      "74,58",
+      "74,59",
+      "74,60",
+      "75,60",
+      "75,59",
+      "73,58",
+      "73,59",
+      "73,60",
+      "72,60",
+      "71,19",
+      "71,18",
+      "71,17",
+      "71,16",
+      "71,15",
       "71,14",
       "71,13",
-      "71,12",
-      "71,11",
-      "71,10",
-      "71,9",
-      "71,8",
-      "72,8",
-      "73,8",
-      "73,7",
-      "72,7",
-      "71,7",
-      "73,9",
-      "72,9",
-      "72,10",
-      "72,11",
-      "72,12",
       "72,13",
       "73,13",
+      "73,12",
+      "72,12",
+      "71,12",
       "73,14",
+      "72,14",
+      "72,15",
+      "72,16",
+      "72,17",
+      "72,18",
+      "73,18",
+      "73,19",
+      "74,19",
+      "74,18",
+      "74,17",
+      "74,16",
+      "73,16",
+      "73,15",
+      "74,15",
       "74,14",
       "74,13",
       "74,12",
-      "74,11",
-      "73,11",
-      "73,10",
-      "74,10",
-      "74,9",
-      "74,8",
-      "74,7",
-      "73,12",
-      "72,14",
-      "75,14",
-      "76,14",
-      "77,14",
-      "78,14",
-      "79,14",
+      "73,17",
+      "72,19",
+      "75,19",
+      "76,19",
+      "77,19",
+      "78,19",
+      "79,19",
+      "80,19",
+      "81,18",
+      "81,17",
+      "81,16",
+      "81,15",
       "80,14",
-      "81,13",
-      "81,12",
-      "81,11",
-      "81,10",
-      "80,9",
-      "79,8",
-      "78,8",
-      "77,8",
-      "76,7",
-      "75,7",
-      "75,8",
-      "75,13",
-      "76,13",
-      "77,13",
-      "78,13",
       "79,13",
-      "80,13",
-      "80,12",
-      "80,11",
-      "80,10",
-      "79,9",
-      "78,9",
-      "77,9",
-      "76,8",
-      "75,9",
-      "75,10",
-      "75,11",
-      "75,12",
+      "78,13",
+      "77,13",
       "76,12",
-      "77,12",
-      "78,12",
-      "82,13",
-      "83,13",
-      "84,13",
-      "85,13",
-      "86,13",
-      "87,13",
-      "84,14",
-      "83,14",
-      "82,14",
-      "81,14",
-      "86,14",
-      "87,14",
-      "88,14",
+      "75,12",
+      "75,13",
+      "75,18",
+      "76,18",
+      "77,18",
+      "78,18",
+      "79,18",
+      "80,18",
+      "80,17",
+      "80,16",
+      "80,15",
+      "79,14",
+      "78,14",
+      "77,14",
+      "76,13",
+      "75,14",
+      "75,15",
+      "75,16",
+      "75,17",
+      "76,17",
+      "77,17",
+      "78,17",
+      "82,18",
+      "83,18",
+      "84,18",
+      "85,18",
+      "86,18",
+      "87,18",
+      "84,19",
+      "83,19",
+      "82,19",
+      "81,19",
+      "86,19",
+      "87,19",
+      "88,19",
+      "89,19",
+      "90,19",
+      "90,18",
+      "90,17",
+      "90,16",
+      "89,15",
       "89,14",
-      "90,14",
-      "90,13",
-      "90,12",
-      "90,11",
-      "89,10",
-      "89,9",
-      "88,9",
-      "88,8",
-      "86,8",
-      "84,8",
-      "83,8",
-      "81,8",
-      "80,8",
-      "76,9",
-      "76,10",
-      "76,11",
-      "77,11",
-      "78,11",
-      "79,11",
-      "79,12",
-      "79,10",
-      "78,10",
-      "77,10",
-      "106,8",
-      "106,9",
-      "106,10",
-      "106,11",
-      "106,12",
+      "81,13",
+      "80,13",
+      "76,14",
+      "76,15",
+      "76,16",
+      "77,16",
+      "78,16",
+      "79,16",
+      "79,17",
+      "79,15",
+      "78,15",
+      "77,15",
       "106,13",
       "106,14",
+      "106,15",
+      "106,16",
+      "106,17",
+      "106,18",
+      "106,19",
+      "105,19",
+      "104,19",
+      "103,19",
+      "102,19",
+      "101,19",
+      "100,19",
+      "99,19",
+      "98,19",
+      "97,19",
+      "96,19",
+      "95,19",
+      "94,19",
+      "93,19",
+      "92,19",
+      "91,19",
+      "85,19",
+      "81,14",
+      "82,14",
+      "82,13",
+      "82,15",
+      "82,16",
+      "82,17",
+      "83,17",
+      "84,17",
+      "85,17",
+      "86,17",
+      "87,17",
+      "88,17",
+      "91,17",
+      "92,17",
+      "94,17",
+      "96,17",
+      "98,17",
+      "99,17",
+      "100,17",
+      "101,17",
+      "102,17",
+      "103,17",
+      "104,17",
+      "105,17",
+      "105,18",
+      "105,16",
+      "105,15",
       "105,14",
-      "104,14",
-      "103,14",
-      "102,14",
-      "101,14",
-      "100,14",
-      "99,14",
-      "98,14",
-      "97,14",
-      "96,14",
-      "95,14",
-      "94,14",
-      "93,14",
-      "92,14",
-      "91,14",
-      "85,14",
-      "81,9",
-      "82,9",
-      "82,8",
-      "82,10",
-      "82,11",
+      "105,13",
+      "104,13",
+      "102,13",
+      "100,13",
+      "99,13",
+      "98,13",
+      "96,13",
+      "95,13",
+      "94,13",
+      "92,13",
+      "91,13",
+      "89,13",
+      "77,12",
+      "78,12",
+      "79,12",
+      "80,12",
+      "81,12",
       "82,12",
-      "83,12",
-      "84,12",
-      "85,12",
-      "86,12",
-      "87,12",
-      "88,12",
+      "90,12",
       "91,12",
       "92,12",
+      "93,12",
       "94,12",
+      "95,12",
       "96,12",
-      "98,12",
       "99,12",
       "100,12",
       "101,12",
@@ -213249,141 +215043,92 @@ const BATTLE_MAPS = [
       "103,12",
       "104,12",
       "105,12",
-      "105,13",
-      "105,11",
-      "105,10",
-      "105,9",
-      "105,8",
-      "104,8",
-      "102,8",
-      "100,8",
-      "99,8",
-      "98,8",
-      "96,8",
-      "95,8",
-      "94,8",
-      "92,8",
-      "91,8",
-      "89,8",
-      "87,8",
-      "85,8",
-      "77,7",
-      "78,7",
-      "79,7",
-      "80,7",
-      "81,7",
-      "82,7",
-      "84,7",
-      "85,7",
-      "86,7",
-      "87,7",
-      "88,7",
-      "90,7",
-      "91,7",
-      "92,7",
-      "93,7",
-      "94,7",
-      "95,7",
-      "96,7",
-      "99,7",
-      "100,7",
-      "101,7",
-      "102,7",
-      "103,7",
-      "104,7",
-      "105,7",
-      "106,7",
-      "98,7",
-      "97,7",
-      "89,7",
-      "83,7",
-      "83,9",
-      "84,9",
-      "85,9",
-      "86,9",
-      "87,9",
-      "87,10",
-      "86,10",
-      "85,10",
-      "84,10",
-      "83,10",
-      "83,11",
-      "84,11",
-      "85,11",
-      "86,11",
-      "87,11",
-      "88,11",
-      "89,11",
-      "88,10",
+      "106,12",
+      "98,12",
+      "97,12",
       "89,12",
-      "89,13",
-      "88,13",
-      "90,8",
-      "90,9",
-      "90,10",
-      "91,10",
-      "92,10",
-      "92,9",
-      "93,9",
-      "93,8",
-      "94,9",
-      "91,9",
-      "91,11",
-      "92,11",
-      "93,11",
-      "94,11",
-      "95,11",
-      "96,11",
-      "97,11",
-      "98,11",
-      "99,11",
-      "100,11",
-      "101,11",
-      "102,11",
-      "103,11",
-      "104,11",
-      "104,10",
-      "104,9",
-      "103,9",
-      "103,8",
-      "103,10",
-      "102,10",
-      "101,10",
-      "100,10",
-      "98,10",
-      "97,10",
-      "96,10",
-      "95,10",
-      "94,10",
-      "93,10",
-      "95,9",
-      "96,9",
-      "97,9",
-      "98,9",
-      "99,9",
-      "100,9",
-      "101,9",
-      "102,9",
-      "101,8",
-      "97,8",
-      "99,10",
-      "93,12",
-      "92,13",
-      "91,13",
+      "87,15",
+      "86,15",
+      "85,15",
+      "84,15",
+      "83,15",
+      "83,16",
+      "84,16",
+      "85,16",
+      "86,16",
+      "87,16",
+      "88,16",
+      "89,16",
+      "88,15",
+      "89,17",
+      "89,18",
+      "88,18",
+      "90,13",
+      "90,14",
+      "90,15",
+      "91,15",
+      "92,15",
+      "92,14",
+      "93,14",
       "93,13",
-      "94,13",
-      "96,13",
-      "97,13",
-      "99,13",
-      "100,13",
-      "101,13",
-      "102,13",
+      "94,14",
+      "91,14",
+      "91,16",
+      "92,16",
+      "93,16",
+      "94,16",
+      "95,16",
+      "96,16",
+      "97,16",
+      "98,16",
+      "99,16",
+      "100,16",
+      "101,16",
+      "102,16",
+      "103,16",
+      "104,16",
+      "104,15",
+      "104,14",
+      "103,14",
       "103,13",
-      "104,13",
-      "98,13",
-      "95,13",
-      "95,12",
-      "97,12"
+      "103,15",
+      "102,15",
+      "101,15",
+      "100,15",
+      "98,15",
+      "97,15",
+      "96,15",
+      "95,15",
+      "94,15",
+      "93,15",
+      "95,14",
+      "96,14",
+      "97,14",
+      "98,14",
+      "99,14",
+      "100,14",
+      "101,14",
+      "102,14",
+      "101,13",
+      "97,13",
+      "99,15",
+      "93,17",
+      "92,18",
+      "91,18",
+      "93,18",
+      "94,18",
+      "96,18",
+      "97,18",
+      "99,18",
+      "100,18",
+      "101,18",
+      "102,18",
+      "103,18",
+      "104,18",
+      "98,18",
+      "95,18",
+      "95,17",
+      "97,17"
     ]
   }
 ];

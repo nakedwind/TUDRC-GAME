@@ -61,7 +61,9 @@ function wadeInfo(a, kind) {
   if (!a || a.sitting || a.eatenBy || a.grabbed || a.grabFall) return null;
   if (kind === 'core') return typeof poolCoreWade === 'function' ? poolCoreWade(a) : null;   // 異質核心：只有泡在深水區裡才算（js/pool-tide.js）
   if (kind === 'enemy') {
-    if (a.poolBoss && typeof poolBossWade === 'function') { const r = poolBossWade(a); if (r !== undefined) return r; }   // 池核 BOSS 在深水區：露出上半身（js/pool-boss.js）
+    if (a.poolBoss && typeof poolBossWade === 'function') { const r = poolBossWade(a); if (r !== undefined) return r; }
+    if (a.fishKing && typeof fishKingWade === 'function') { const r = fishKingWade(a); if (r !== undefined) return r; }   // 魚頭王在水裡：露出上半身（js/fish-king.js）
+    if (a.aqua && typeof aquaWade === 'function') { const r = aquaWade(a); if (r !== undefined) return r; }   // 生在深水裡的怪物：泡在水裡游（js/water-monsters.js）   // 池核 BOSS 在深水區：露出上半身（js/pool-boss.js）
     if ((a.slimeLift || 0) > 4 || a.dead) return null;   // 浮在空中、跳起來的時候不算
     const w = waterAt(a.x, a.y + WATER.enemyFootDy); if (!w) return null;
     return { w, bottom: a.y + 13, height: (a.drawHeight || 33) * (a.sizeMul || 1), width: (a.drawWidth || 42) * (a.sizeMul || 1) };

@@ -305,6 +305,7 @@ function elementHitMul(e, kind) {
 }
 // 雷電打到水系怪物：麻痺 shockStunWater 秒（shockStunT：BOSS 的程式看到會打斷正在出的招，例如 js/milkfish-king.js）
 function waterShockStun(e) {
+  if (typeof fishKingShocked === 'function') fishKingShocked(e);   // 魚頭王泡在水裡被電：電流傳遍整池水（js/fish-king.js）
   if (!e || monsterElement(e) !== 'water' || e.noStun || e.shockResist != null || e.dead || e.hp <= 0) return;
   const s = ELEMENT_RULES.shockStunWater;
   e.stunT = Math.max(e.stunT || 0, s); e.shockT = Math.max(e.shockT || 0, s); e.shockStunT = s;

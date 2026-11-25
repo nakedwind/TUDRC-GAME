@@ -1079,6 +1079,8 @@ function draw() {
   drawMapGround(ctx);
   if (typeof drawPoolCaustics === 'function') drawPoolCaustics(ctx);   // 深水區水底的網狀光紋，慢慢流動（js/pool-caustics.js；在人物下面）
   if (typeof drawPoolBossUnderwater === 'function') drawPoolBossUnderwater(ctx);   // 池核 BOSS 潛在水裡的影子（js/pool-boss.js）
+  if (typeof drawFishKingGround === 'function') drawFishKingGround(ctx);   // 魚頭王：潛水的影子、水柱衝天預警、水砲預警（js/fish-king.js）
+  if (typeof drawWaterMonstersGround === 'function') drawWaterMonstersGround(ctx);   // 下潛的小虱目魚小子的影子、撞上來前的泡泡（js/water-monsters.js）
   if (typeof drawPoolSurge === 'function') drawPoolSurge(ctx);   // 大型怪物落水：水面上的浪頭（js/pool-surge.js；在人物下面）
   // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
@@ -1112,6 +1114,7 @@ function draw() {
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);
   if (typeof ratKingSortables === 'function') ratKingSortables(sortables);   // 花蓮老鼠王的手、被撞飛的本體（js/rat-king.js）   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof loofahQueenSortables === 'function') loofahQueenSortables(sortables);   // 絲瓜女王頭上吊著的核心（js/loofah-queen.js）
+  if (typeof fishKingSortables === 'function') fishKingSortables(sortables);   // 魚頭王開戰前冒頭偷看（不在怪物清單裡，js/fish-king.js）
   if (typeof milkfishKingSortables === 'function') milkfishKingSortables(sortables);   // 虱目魚王從水池竄出來、在空中的樣子＋水浪（js/milkfish-king.js）
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
   if (typeof escalatorSortables === 'function') escalatorSortables(sortables);   // 側面手扶梯前面的扶手外殼：蓋在站在上面的人身上（js/escalators.js）
@@ -1183,6 +1186,7 @@ function draw() {
   if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
   if (typeof drawFishSprays === 'function') drawFishSprays(ctx);
   if (typeof drawPoolSplash === 'function') drawPoolSplash(ctx);   // 池核 BOSS 出水、跳水的水花（js/pool-boss.js）
+  if (typeof drawFishKingFx === 'function') drawFishKingFx(ctx);   // 魚頭王：水砲、衝天水柱、導電電弧（js/fish-king.js）
   if (typeof drawWaterV2 === 'function') drawWaterV2(ctx);   // 水柱 V2：水流白線、甩出的水珠、漣漪（js/water-fx-v2.js）
   if (typeof drawLoofahVines === 'function') drawLoofahVines(ctx);
   if (typeof drawGourdTop === 'function') drawGourdTop(ctx);   // 葫蘆猴落地：撞擊白光、飛起來的石礫、灰塵團（js/gourd-monkey.js）   // 冒出地面、纏住人的絲瓜藤（js/loofah-lady.js）   // 魚頭君噴出的水柱（js/fish-head.js）
@@ -1237,6 +1241,7 @@ function draw() {
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (typeof ladderNearPlayer === 'function' && ladderNearPlayer()) { const l = ladderNearPlayer(); drawInteractPrompt(l.x, l.topY - 6, LADDER.prompt); }   // 坐救生圈到梯子底下：「爬梯子」（js/swim-ring.js）
     else if (typeof poolPlatformNearPlayer === 'function' && poolPlatformNearPlayer()) { const q = poolPlatformNearPlayer(); drawInteractPrompt(q.x, q.y - 6, POOL_PLATFORM.prompt); }   // 坐救生圈到抽水機平台旁邊：「上岸」（js/pool-platform.js）
+    else if (typeof trackJumpSpot === 'function' && trackJumpSpot()) drawInteractPrompt(G.player.x, G.player.y - 40, trackJumpSpot().label);   // 捷運軌道邊：【跳下】【跳上】（js/mrt-track.js）
     else if (typeof poolPlatformJumpSpot === 'function' && poolPlatformJumpSpot()) { const q = poolPlatformJumpSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.jump.prompt); }   // 站在抽乾的平台邊上：跳下去（js/pool-platform.js）
     else if (typeof swimRingShoreSpot === 'function' && swimRingShoreSpot()) { const q = swimRingShoreSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, SWIM_RING.shorePrompt); }   // 坐救生圈划到深水區邊上：收起泳圈（js/swim-ring.js）
     else if (typeof poolPlatformLeaveSpot === 'function' && poolPlatformLeaveSpot()) { const q = poolPlatformLeaveSpot(); drawInteractPrompt(q.x, q.y - CELL / 2, POOL_PLATFORM.leavePrompt); }
@@ -1330,6 +1335,7 @@ function draw() {
   if (typeof drawPearlElderTelegraphs === 'function') drawPearlElderTelegraphs(ctx);   // 珍珠落點的陰影圈、大童暈眩的星星：畫在黑幕上面（js/pearl-elder.js）
   if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
   if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
+  if (typeof drawFishKingAboveDark === 'function') drawFishKingAboveDark(ctx);   // 魚頭王在暗處冒頭偷看：黑暗中的紅眼睛（js/fish-king.js）
   if (typeof drawMilkfishKingFx === 'function') drawMilkfishKingFx(ctx);   // 虱目魚王吐東西的落點紅圈、飛在空中的東西（js/milkfish-king.js）
   if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
   if (typeof drawGrabBuildingTarget === 'function') drawGrabBuildingTarget(ctx);   // 抓著建築：要放下的位置（js/grab.js）

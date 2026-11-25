@@ -320,7 +320,7 @@ function vineLand(a, cap) {
   G.vineCaps = G.vineCaps.filter(c => c !== cap); a.vineCap = false;
   a.vineDazeT = VINES.dazeTime;
   a.vineSafeT = VINES.safeTime;   // 剛摔下來：一陣子不會又被抓
-  const dmg = Math.min(cap.mode === 'ferry' ? VINES.ferryFallDamage : VINES.fallDamage, Math.max(0, a.hp - 1));
+  const dmg = Math.min(cap.landDamage ?? (cap.mode === 'ferry' ? VINES.ferryFallDamage : VINES.fallDamage), Math.max(0, a.hp - 1));   // landDamage：被魚頭王的水柱噴飛摔下來（js/fish-king.js）
   if (dmg > 0 && !(typeof practiceOn === 'function' && practiceOn())) {
     a.hp -= dmg;   // 不閃紅
     flashDmg('-' + dmg, a.x, a.y - 46, '#ff6b6b');

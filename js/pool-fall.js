@@ -287,7 +287,7 @@ function poolFallStep(a, dt) {
   //   溫特：玩家自己用方向鍵（WASD／方向鍵）控制往哪游（POOL_FALL.playerSwim 關掉的話，改回自動游到最近的岸邊）
   //   隊員：自動往岸上游（js/sentry.js）
   //   漲潮溺水那套（js/pool-tide.js）會把 drowning 打開、每秒扣血
-  if (f.t >= POOL_FALL.panicSecs && typeof G !== 'undefined' && G && a === G.player && a.drowning) {
+  if (f.t >= (f.panic ?? POOL_FALL.panicSecs) && typeof G !== 'undefined' && G && a === G.player && a.drowning) {   // f.panic：被水柱噴飛掉進水裡，慌張比較久（js/fish-king.js）
     if (POOL_FALL.playerSwim) poolFallPlayerSwim(a, dt);
     else if (typeof poolDrownFlee === 'function') poolDrownFlee(a, dt);
   }
@@ -356,7 +356,7 @@ function poolFallTick(dt) {
       }
       if (!isPlayer) {
         f.t += dt;   // 溫特的在 poolFallStep 算
-        if (a.ownRing && f.t >= POOL_FALL.ringDelay) {   // 隊員有自己的游泳圈：掙扎一下就戴上
+        if (a.ownRing && f.t >= Math.max(POOL_FALL.ringDelay, f.panic || 0)) {   // 隊員有自己的游泳圈：掙扎一下就戴上（被水柱噴飛落水的：慌張完才戴）
           a.swimRing = true; a.drowning = false; poolFallEnd(a);
           if (typeof sentryStatus === 'function') sentryStatus(a, '戴上游泳圈', '#9ff0c0');
           continue;
@@ -371,7 +371,21 @@ function poolFallTick(dt) {
 }
 
 // 隊員剛落水還在原地慌張（js/sentry.js 問：是的話這一幀不往岸上游）
-const poolFallPanicking = t => !!(t && t.poolFall && t.poolFall.phase === 'struggle' && t.poolFall.t < POOL_FALL.panicSecs);
+const poolFallPanicking = t => !!(t && t.poolFall && t.poolFall.phase === 'struggle' && t.poolFall.t < (t.poolFall.panic ?? POOL_FALL.panicSecs));
+// 還在慌張、戴不上泳圈（溫特按互動鍵時 js/swim-ring.js 問）：只有被水柱噴飛落水的（f.panic）才會
+const poolFallRingLocked = a => !!(a && a.poolFall && a.poolFall.phase === 'struggle' && a.poolFall.panic && a.poolFall.t < a.poolFall.panic);
+// 從空中直接掉進水裡（魚頭王的水柱衝天把人噴飛、落在水裡，js/fish-king.js）：大水花、落水聲，慌張 panic 秒（這段時間不能游、不能戴泳圈）再開始掙扎往岸邊游
+function poolFallSplashIn(a, panic) {
+  if (!a || a.hp <= 0 || !poolFallOn()) return false;
+  a.poolFall = { phase: 'struggle', t: 0, dir: 'front', splashAt: poolFallRand(...POOL_FALL.splashGap), panic };
+  a.dir = 'front'; a.drownPath = null; a.moving = false; a.swimRing = false; a.knockT = 0;
+  poolFallSplash(a.x, a.y + 10, true);
+  poolFallSounds(a, 1, 'pool-splashin-');
+  if (typeof nearbyImpact === 'function') nearbyImpact(a.x, a.y, 2, 0);
+  if (typeof G !== 'undefined' && G && a === G.player) a.poolSay = { text: '咕嚕……救、救命！', until: performance.now() + panic * 1000 };
+  else if (!a.berserk) a.say = { text: '咕嚕咕嚕……！', life: Math.min(2.5, panic) };
+  return true;
+}
 
 // 如果掙扎在這裡結束（變回普通走路的人），(x, y) 這個位置會不會被判定卡住（身體碰到深水、牆）
 function poolFallStuckIfEnded(a, x, y) {

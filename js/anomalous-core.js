@@ -134,6 +134,8 @@ function spawnCoreGroup(core) {
     const [x, y] = center(c, r);
     let spec = chooseMonster(MAP, ACTIVE_MONSTERS);
     if (typeof poolBossSpawnSpec === 'function') spec = poolBossSpawnSpec(spec, x, y);   // 池核 BOSS 開戰後：牠附近 8 成生小丑魚幼體（js/pool-boss.js）
+    const wet = typeof aquaSpawnSpot === 'function' ? aquaSpawnSpot(spec) : null;   // 魚頭君、虱目魚小子、小虱目魚小子、比基尼小丑魚：有機會改生在深水裡、在水裡游（js/water-monsters.js）
+    if (wet) { const m = createMonster(spec, wet.x, wet.y); aquaSpawned(m); G.enemies.push(m); continue; }
     const spot = spec.behavior === 'burrow' ? burrowMouseSpawnPosition(x, y) : { x, y };
     if (!spot) continue;
     const m = createMonster(spec, spot.x, spot.y);
@@ -199,6 +201,7 @@ function updateCores(dt) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;
     if (core.hp < core.lastHp) {
+      core.struck = true;   // 被打過（泡在水裡、沉睡中沒扣到血也算）：魚頭王看這個決定要不要登場（js/fish-king.js）
       if (core.awake && !core.hidden && !core.carried && !(typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(core))) core.hitT = .16;   // 泡在深水裡（js/pool-tide.js）：也不會受傷
       else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）；躲在順順宮帽裡、抱在珍珠大童身上也不會（js/elite-cap-king.js、js/pearl-elder.js 自己扣）
     }

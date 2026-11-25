@@ -3257,7 +3257,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/convenience-store/cvs-sign-twelve.png",
     "w": 8,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_street_ubike",

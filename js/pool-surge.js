@@ -129,7 +129,7 @@ function poolSurgeTick(dt) {
     };
     pushAt(G.player, true);
     for (const t of G.towers || []) if (t.hp > 0 && !t.eatenBy && !t.mrtRide) pushAt(t, true);
-    for (const e of G.enemies || []) if (!e.poolBoss && !e.unpushable && !e.dead && e.hp > 0 && e.behavior !== 'moth' && !e.airborne) pushAt(e, false);
+    for (const e of G.enemies || []) if (!e.poolBoss && !e.fishKing && !e.unpushable && !e.dead && e.hp > 0 && e.behavior !== 'moth' && !e.airborne) pushAt(e, false);
     for (const g of G.groundItems || []) {   // 地上的道具：被水沖著滑一段
       if (s.hit.has(g)) continue;
       const [c, r] = cellAt(g.x, g.y), L = s.landAt.get(c + ',' + r);

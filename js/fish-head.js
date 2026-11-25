@@ -366,7 +366,7 @@ function fishHeadArmor() {
     if (lost > 0) {
       if (e.fh) { if (!(e.fh.flee > 0) && now - (e.fhScaredAt || 0) > 1.5) { e.fhScaredAt = now; flash('！', e.x, e.y - (e.drawHeight || 80) - 22, '#bfe6ff', .6); } if (!(e.fh.flee > 0)) { e.fh.fleeDir = null; e.fh.hop = 0; } e.fh.flee = C.fleeTime; }   // 剛嚇到：彈一下   // 膽小：被打就逃
       const back = !!e.showBack, f = Math.min(lost, fire), sh = Math.min(lost - f, shock), other = lost - f - sh;
-      e.hp = e.fhHp - (f * C.fireMul + sh * C.shockMul + other) * (back ? C.backMul : C.frontMul);
+      e.hp = e.fhHp - (f * C.fireMul + sh * C.shockMul + other) * (back ? C.backMul : C.frontMul) * (e.dmgTakenMul || 1);   // dmgTakenMul：魚頭王擱淺時被打比較痛（js/fish-king.js）
     }
     e.fhHp = e.hp;
   }
