@@ -44,6 +44,9 @@ const TYPES = Object.fromEntries(Object.values(CHARACTERS)
 const TEAM_SIZE = 4;
 const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'colyn', 'eldrin', 'chris', 'taana', 'tino', 'ball'];
 const DEFAULT_TEAM = ['eldrin', 'avaren', 'theonie', 'red'];   // 艾德林、阿瓦倫、希奧妮、雷德
+// 暴走、混亂（人面蝶的混亂鱗粉）時也不會攻擊的人：{ 誰: [不打誰…] }（js/game.js 的 updateChaosSentry、js/human-face-butterfly.js 的 mothConfusedSentry 都讀這裡）
+const CHAOS_SPARE = { avaren: ['eldrin'] };   // 阿瓦倫暴走、混亂時都不打艾德林
+const chaosSpares = (t, o) => !!(t && o && (CHAOS_SPARE[t.type] || []).includes(o.type));
 const RESCUE_DOG_HANDLERS = ['eldrin', 'avaren'];
 
 // 新手區專用開場配置，不覆蓋其他地圖的玩家編隊。

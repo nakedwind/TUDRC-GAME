@@ -139,7 +139,37 @@ function underVoidPath() { return underVoidData().path; }
 // 做法：底圖畫上去之前先拍快照（underSnap）；底圖畫完後，把飛行的東西畫在空白畫布上當「剪影」（underMask），
 // 剪影的範圍從快照貼回來 → 飛行的東西在空格上方看起來跟沒有底圖時一樣（被照到的地方亮、在暗處的地方照樣被黑幕蓋著）。
 const underFlying = w => !!w && w.x != null && ((w.slimeLift || 0) > 0 || w.behavior === 'moth');
-let underSnap = null, underMask = null, underSnapFresh = false;
+let underSnap = null, underMask = null, underSnapFresh = false, underSnapRect = null;
+// 飛行的東西在畫面上大概佔多大（世界座標）：跟 redrawOverUnderMap 補畫地上東西用的範圍一樣，再多留一格（抓著的人、核心、翅膀）
+function underFlyBox(w) {
+  const lift = w.slimeLift || 0, size = w.sizeMul || 1;
+  const halfW = Math.max(CELL, (w.drawWidth || 40) * size / 2) + CELL, up = Math.max(2.5 * CELL, lift + (w.drawHeight || 33) * size + 13) + CELL;
+  return [w.x - halfW, w.y - up, w.x + halfW, w.y + 1.6 * CELL];
+}
+// 這一幀要補的範圍（畫布上的像素方框）：只算碰到空格的飛行東西；都沒碰到＝null（不用拍快照）
+// 以前每一幀把「整個畫面」拍快照、清空、合成好幾次，畫面越大越吃效能（人面蝶后幾乎整場都在飛）
+function underFlyRect(ctx) {
+  const { mask } = underVoidData(), m = ctx.getTransform(), W = ctx.canvas.width, H = ctx.canvas.height;
+  const voidIn = (x0, y0, x1, y1) => {
+    const c0 = Math.max(0, Math.floor((x0 - OX) / CELL)), c1 = Math.min(COLS - 1, Math.floor((x1 - OX) / CELL));
+    const r0 = Math.max(0, Math.floor((y0 - OY) / CELL)), r1 = Math.min(ROWS - 1, Math.floor((y1 - OY) / CELL));
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (mask[r * COLS + c] === 1) return true;
+    return false;
+  };
+  let L = Infinity, T = Infinity, R = -Infinity, B = -Infinity;
+  for (const w of [...(G.enemies || []), ...(G.towers || []), G.player, ...(G.cores || [])]) {
+    if (!w || w.dead || !underFlying(w)) continue;
+    const [x0, y0, x1, y1] = underFlyBox(w);
+    if (!voidIn(x0, y0, x1, y1)) continue;
+    for (const [x, y] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1]]) {
+      const p = m.transformPoint(new DOMPoint(x, y));
+      L = Math.min(L, p.x); R = Math.max(R, p.x); T = Math.min(T, p.y); B = Math.max(B, p.y);
+    }
+  }
+  if (L === Infinity) return null;
+  const x = Math.max(0, Math.floor(L) - 2), y = Math.max(0, Math.floor(T) - 2), x2 = Math.min(W, Math.ceil(R) + 2), y2 = Math.min(H, Math.ceil(B) + 2);
+  return x2 > x && y2 > y ? { x, y, w: x2 - x, h: y2 - y } : null;
+}
 function underLayerFor(c, cvs) {   // 跟遊戲畫布一樣大的空白畫布（大小變了才重做）
   if (!c) c = document.createElement('canvas');
   if (c.width !== cvs.width || c.height !== cvs.height) { c.width = cvs.width; c.height = cvs.height; }
@@ -167,12 +197,15 @@ function drawUnderMap(ctx, pass = 'below') {
   if (!cv) return;
   const { dx, dy, ucols, urows } = underMapOffset(cfg, under, COLS, ROWS);
   // 有東西飛在空中：底圖蓋上去之前，先把現在的畫面（已經蓋好黑幕）拍一張快照，等一下 redrawOverUnderMap 用它把飛行的東西貼回來
-  if (aboveDark && G.enemies.some(e => !e.dead && underFlying(e))) {
+  // 只拍飛行的東西附近、碰到空格的那一塊（underFlyRect），不是整個畫面
+  const flyRect = aboveDark ? underFlyRect(ctx) : null;
+  if (flyRect) {
+    const r = flyRect;
     underSnap = underLayerFor(underSnap, ctx.canvas);
     const s = underSnap.getContext('2d');
-    s.setTransform(1, 0, 0, 1, 0, 0); s.globalAlpha = 1; s.filter = 'none';
-    s.globalCompositeOperation = 'copy'; s.drawImage(ctx.canvas, 0, 0); s.globalCompositeOperation = 'source-over';
-    underSnapFresh = true;
+    s.setTransform(1, 0, 0, 1, 0, 0); s.globalAlpha = 1; s.filter = 'none'; s.globalCompositeOperation = 'source-over';
+    s.clearRect(r.x, r.y, r.w, r.h); s.drawImage(ctx.canvas, r.x, r.y, r.w, r.h, r.x, r.y, r.w, r.h);
+    underSnapRect = r; underSnapFresh = true;
   }
   ctx.save();
   if (aboveDark) ctx.clip(underVoidPath());   // 黑幕上面：只畫在沒鋪東西的格子
@@ -206,19 +239,24 @@ function redrawOverUnderMap(ctx, items) {
   // 飛在空中的東西：不管亮不亮，剪影範圍都從快照貼回來（亮的部分照樣亮、暗的部分照樣被黑幕蓋著，只是不會被底圖蓋掉）。
   // 體型大、飛向鏡頭時還會放大，所以不先算碰不碰到空格，直接整批做（只有地圖上真的有飛行的東西時才會跑）
   const flying = items.filter(isFlying);
-  if (underSnapFresh && underSnap && flying.length) {
-    const cvs = ctx.canvas, m = ctx.getTransform();
+  if (underSnapFresh && underSnap && underSnapRect && flying.length) {
+    const cvs = ctx.canvas, m = ctx.getTransform(), R = underSnapRect;   // 全部只在這一塊裡做（underFlyRect）
     underMask = underLayerFor(underMask, cvs);
     const g = underMask.getContext('2d');
+    g.save();
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none'; g.globalCompositeOperation = 'source-over';
-    g.clearRect(0, 0, cvs.width, cvs.height);
+    g.beginPath(); g.rect(R.x, R.y, R.w, R.h); g.clip();
+    g.clearRect(R.x, R.y, R.w, R.h);
     g.setTransform(m); g.imageSmoothingEnabled = ctx.imageSmoothingEnabled;
     underDrawOnLayer(g, flying);   // ① 飛行的東西畫在空白畫布上＝剪影
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none';
-    g.globalCompositeOperation = 'source-in'; g.drawImage(underSnap, 0, 0); g.globalCompositeOperation = 'source-over';   // ② 剪影裡面換成快照的畫面
-    ctx.save(); ctx.clip(path);   // ③ 只貼在空格範圍（其他地方本來就沒被底圖蓋到）
+    g.globalCompositeOperation = 'source-in'; g.drawImage(underSnap, R.x, R.y, R.w, R.h, R.x, R.y, R.w, R.h); g.globalCompositeOperation = 'source-over';   // ② 剪影裡面換成快照的畫面
+    g.restore();
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    ctx.setTransform(m); ctx.clip(path);   // ③ 只貼在空格範圍（其他地方本來就沒被底圖蓋到）
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
-    ctx.drawImage(underMask, 0, 0);
+    ctx.drawImage(underMask, R.x, R.y, R.w, R.h, R.x, R.y, R.w, R.h);
     ctx.restore();
   }
   underSnapFresh = false;

@@ -180,10 +180,20 @@ function burrowMouseDigSpot(e, target) {
   const avoid = e.bm?.avoid, far = p => !avoid || Math.hypot(p.x - avoid.x, p.y - avoid.y) >= CELL * 1.5;
   // 已經在伸手範圍內、腳下也能站：原地出土，不必繞。
   if (far(e) && burrowMouseInReach(e, target) && burrowMouseCanStand(e.x, e.y, e) && hasLineOfSight(e.x, e.y, target.x, target.y)) return { x: e.x, y: e.y };
-  const spots = burrowMousePolarSpots(target, [64, 84, 44, 112, 32], e).filter(p =>
-    far(p) && burrowMouseInReach(p, target) && hasLineOfSight(p.x, p.y, target.x, target.y));
-  spots.sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y));
-  return spots[0] || null;
+  // 候選點跟以前一樣（目標周圍 5 圈、每圈 40 個點），結果也一樣（離老鼠最近、站得下、伸手碰得到、看得到目標的那一點）；
+  // 只是先照離老鼠的距離排好，再從近到遠一個一個檢查，找到第一個就停（以前 200 個點全部檢查完才挑，一次要 6～11 毫秒）
+  const cands = [];
+  for (const radius of [64, 84, 44, 112, 32]) for (let i = 0; i < 40; i++) {
+    const angle = (i + .37) / 40 * Math.PI * 2;
+    cands.push({ x: target.x + Math.cos(angle) * radius, y: target.y + Math.sin(angle) * radius });
+  }
+  cands.sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y));   // 距離一樣時照原本的順序（sort 不會打亂）
+  for (const p of cands) {
+    if (!far(p) || !burrowMouseInReach(p, target)) continue;
+    if (!onFloorDo(e, () => burrowMouseCanStand(p.x, p.y, e))) continue;   // 照老鼠的樓層（跟 burrowMousePolarSpots 一樣）
+    if (hasLineOfSight(p.x, p.y, target.x, target.y)) return p;
+  }
+  return null;
 }
 function burrowMouseSurface(e, stun = 0) {
   const b = e.bm;

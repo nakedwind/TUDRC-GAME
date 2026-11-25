@@ -676,6 +676,16 @@ function sentryFleeSpot(t, threat, maxSteps = 6) {
   }
   return best;
 }
+// 每一幀幫隊員走路重新找路，最多花 SENTRY_PATH_BUDGET 毫秒（有 2 樓、手扶梯的大地圖找一次要 5～15 毫秒，
+// 好幾個人同一幀一起重找，畫面會突然頓一下）。超過的人這一幀先照舊路走，下一幀再找。用遊戲時間（G.navClock）分辨是不是同一幀
+const SENTRY_PATH_BUDGET = 6;
+let sentryPathFrame = -1, sentryPathAt = 0, sentryPathSpent = 0;
+function sentryPathBusy() {
+  const f = (typeof G !== 'undefined' && G && G.navClock) || 0, now = performance.now();
+  if (f !== sentryPathFrame || now - sentryPathAt > 40) { sentryPathFrame = f; sentryPathAt = now; sentryPathSpent = 0; }   // 換了一幀（或遊戲時間沒在走的畫面，例如劇情）就重新計算
+  return sentryPathSpent >= SENTRY_PATH_BUDGET;
+}
+function sentryPathSpend(ms) { sentryPathBusy(); sentryPathSpent += ms; }
 // goalFloor：目的地在幾樓（跟著溫特時＝溫特在的那層；沒給＝照目的地那一格，js/pathfinding.js 的 placeFloorAt）
 function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   t.navTimer = (t.navTimer || 0) - dt;
@@ -692,10 +702,18 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   const goalMoved = t.navGoal !== goalKey && !midEscalator && (!hasFloors || (t.navReplanT || 0) <= 0 || (!t.navFailed && (!t.navPath || !t.navPath.length)));
   if (hasFloors) t.navReplanT = (t.navReplanT || 0) - dt;
   if (goalMoved || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || !nextOk) {
-    if (hasFloors) t.navReplanT = .3;
-    t.navPath = buildSentryPath(t, targetX, targetY, dark, goalFloor); t.navGoal = goalKey; t.navTimer = .75;
-    if (!t.navPath && t.navFallback) t.navPath = buildSentryPath(t, t.navFallback.x, t.navFallback.y, dark, goalFloor);   // 找不到：改找去跟隨對象站的地方
-    t.navStall = 0;
+    // 這一幀幫隊員找路的時間已經用完（好幾個人同一幀都要重找，例如被人面蝶后抓起來丟下、撒睡眠粉之後）：
+    // 先沿著原本的路走，下一幀再找；連原本的路都沒有、或下一格走不了，就先站著等一幀（不算找不到路）
+    if (sentryPathBusy()) {
+      if (!t.navPath || !t.navPath.length || !nextOk) { t.moving = false; return false; }
+    } else {
+      const t0 = performance.now();
+      if (hasFloors) t.navReplanT = .3;
+      t.navPath = buildSentryPath(t, targetX, targetY, dark, goalFloor); t.navGoal = goalKey; t.navTimer = .75;
+      if (!t.navPath && t.navFallback) t.navPath = buildSentryPath(t, t.navFallback.x, t.navFallback.y, dark, goalFloor);   // 找不到：改找去跟隨對象站的地方
+      t.navStall = 0;
+      sentryPathSpend(performance.now() - t0);
+    }
   }
   if (!t.navPath) { t.navFailed = true; if (hasFloors) t.navReplanT = .75; unwedgeSentry(t); return false; }
   t.navFailed = false;

@@ -34,7 +34,7 @@ const MOTH = {
   doseDecay: .45,       // 離開霧之後，量表每秒退多少（滿＝1）
   immune: 2,            // 發作後幾秒內同一種鱗粉不再累積
   poison: { time: 8, tick: 1, dmg: 3 },      // 中毒：持續幾秒、每幾秒扣一次、每次扣多少
-  confuse: { time: 6, playerMiss: .8, lineGap: 5 },   // 混亂：持續幾秒、溫特開槍打偏的機率、打到自己人的台詞至少隔幾秒
+  confuse: { time: 6, playerMiss: .8, lineGap: 5 },   // 混亂：持續幾秒、溫特開槍打偏的機率、打到自己人的台詞至少隔幾秒（混亂時也不打的人：data/balance.js 的 CHAOS_SPARE）
   sleep: { time: 20 },                       // 睡眠：睡幾秒（被打到就醒）
   meleeMiss: .95,       // 近戰隊員打牠打不到的機率（飛得高，只有 5% 打得到）
   // ---- 粉塵爆炸 ----
@@ -584,7 +584,7 @@ function mothWildShot(p, aimAng) {
 function mothConfusedSentry(t, spec, dt) {
   let best = null, bestD = Infinity;
   const consider = o => { const d = Math.hypot(o.x - t.x, o.y - t.y); if (d < bestD) { bestD = d; best = { o, x: o.x, y: o.y }; } };
-  for (const o of G.towers) if (o !== t && o.hp > 0 && !o.eatenBy && !o.grabbed) consider(o);
+  for (const o of G.towers) if (o !== t && o.hp > 0 && !o.eatenBy && !o.grabbed && !chaosSpares(t, o)) consider(o);   // chaosSpares：混亂時也捨不得打的人（data/balance.js 的 CHAOS_SPARE，例如阿瓦倫不打艾德林）
   if (G.player && G.player.hp > 0) consider(G.player);
   if (!best) { animateSentry(t, 0, 0, dt); return; }
   const range = spec.range * CELL;

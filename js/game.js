@@ -1189,7 +1189,7 @@ function updateChaosSentry(t, spec, dt) {
   let best = null, bestD = Infinity;   // t.cd 已在呼叫前扣過
   const consider = (o, x, y) => { const d = Math.hypot(x - t.x, y - t.y); if (d < bestD) { bestD = d; best = { o, x, y }; } };
   for (const e of G.enemies) if (!e.dead) consider(e, e.x, e.y);
-  for (const o of G.towers) if (o !== t && o.hp > 0) consider(o, o.x, o.y);
+  for (const o of G.towers) if (o !== t && o.hp > 0 && !chaosSpares(t, o)) consider(o, o.x, o.y);   // chaosSpares：暴走時也不打的人（data/balance.js 的 CHAOS_SPARE，例如阿瓦倫不打艾德林）
   if (G.player && G.player.hp > 0) consider(G.player, G.player.x, G.player.y);
   for (const o of G.obstacles) if (o.isBase && o.hp > 0) consider(o, (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2);
   for (const c of G.cores) if (!c.dead && c.awake && !c.hidden && !c.carried && !(typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(c))) consider(c, c.x, c.y);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
