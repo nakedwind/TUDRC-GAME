@@ -167,9 +167,11 @@ function drawColynSword(t) {   // 柯林：一般攻擊沿弧線揮；大招突�
   ctx.drawImage(colynSwordImg, -4.5, -40, 9, 46);
   ctx.restore();
 }
+// 在深水裡掙扎、溺水中（js/pool-fall.js）：被打到（例如黑暗中被 Smiler 咬）不閃紅、不抖，不然跟掙扎的浮沉疊在一起像在抽搐（血照扣）
+const hitFxOffInWater = a => !!(a && (a.poolFall || a.drowning));
 function sentryRedFlash(t) {   // 回傳紅閃強度 0~1：受擊閃一下、瀕臨暴走慢脈動、暴走快脈動
   if (t.hp <= 0) return 0;
-  const hit = t.hitT > 0 ? Math.min(1, t.hitT / .2) * 0.9 : 0;   // 受擊閃紅
+  const hit = t.hitT > 0 && !hitFxOffInWater(t) ? Math.min(1, t.hitT / .2) * 0.9 : 0;   // 受擊閃紅（在水裡不閃）
   if (MAP_SAFE) return hit;
   const now = performance.now() / 1000;
   if (t.berserk) return Math.max(hit, (Math.sin(now * Math.PI * 2 * 3) + 1) / 2);                                       // 暴走：快閃（約 3Hz）
@@ -208,7 +210,7 @@ function drawTower(t) {
     visualTop = t.y - size + 18 + (set && img === set.fail ? 14 : 0);   // 倒地圖：人躺著比較矮，名字和血條往下貼近身體
     const shX = t.hp <= 0 ? 0   // 失去戰鬥能力：躺著不動（倒地圖，js/game.js 的 pickCharacterFrame）
       : t.berserk ? (Math.random() * 2 - 1) * 1.5   // 暴走：微微發抖
-      : (t.hitT > .12 ? (Math.random() * 2 - 1) * 2.5 : 0);    // 受擊：短暫抖一下
+      : (t.hitT > .12 && !hitFxOffInWater(t) ? (Math.random() * 2 - 1) * 2.5 : 0);    // 受擊：短暫抖一下（在水裡不抖）
     if (t.berserk) {   // 暴走：腳下紅光
       ctx.fillStyle = 'rgba(255,60,60,0.45)';
       ctx.beginPath(); ctx.ellipse(t.x, t.y + 14, 20, 7, 0, 0, Math.PI * 2); ctx.fill();
@@ -978,7 +980,7 @@ function drawPlayer(p) {
     if (typeof applyPoolJumpTransform === 'function') applyPoolJumpTransform(ctx, p);   // 從抽水機平台跳下去、摔在地上（js/pool-platform.js）
     if (typeof applyMothSleepTransform === 'function') applyMothSleepTransform(ctx, p);   // 人面蝶的睡眠鱗粉：搖晃、倒在地上（js/human-face-butterfly.js）
     ctx.imageSmoothingEnabled = false;
-    const hitK = p.hitT > 0 ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出
+    const hitK = p.hitT > 0 && !hitFxOffInWater(p) ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出（在水裡不閃）
     if (p.sitting?.rotation) {
       ctx.translate(p.x, p.y - size / 2 + 18);
       ctx.rotate(p.sitting.rotation * Math.PI / 180);
@@ -1304,6 +1306,7 @@ function draw() {
   // 人面蝶后體型大、飛得高，身體常常一半在亮處一半在暗處：看牠正下方的影子亮不亮，亮就整隻畫在黑幕上面，暗就整隻留在黑幕裡（js/moth-boss.js）
   for (const it of mothItems) if (it.who.mothBoss && (isVisible(it.who.x, it.who.y) || (it.who.mb && it.who.mb.intro))) it.draw();   // 出場演出中（mb.intro）：不管亮暗都整隻畫在黑幕上面
   if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
+  if (typeof drawMrtBoardGlow === 'function') drawMrtBoardGlow(ctx);   // 捷運時間牌的 LED 字：畫在黑幕上面，暗處也發光（js/mrt-time-board.js）
   for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);
   drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）

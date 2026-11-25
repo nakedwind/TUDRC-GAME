@@ -65,6 +65,7 @@ const MILKFISH_KING_FX = {
   chaseEatNear: 2.5,      // 追人模式：建築在幾格內（而且比要追的人近）才先停下來吃
   chaseStick: 3,          // 追人時：新的人要比現在追的人近幾格以上才換目標
   chaseReplan: .5,        // 每隔幾秒重新判斷「走得到還是要跳」
+  trainWaitMax: 1.5,      // 走到起跳點時列車擋在中間：最多等幾秒就重新想辦法（車不會開走時才不會一直站著）
   chargeBiteAt: .25,      // 衝撞剩下幾成距離時換成張嘴的攻擊圖（前面是正面跑步）
   chargeEndHold: .35,     // 衝完張嘴撲咬的樣子停幾秒
   // 從水池登場的細節（秒數、高度、震動大小在怪物編輯器）
@@ -1113,10 +1114,18 @@ function mkWideCellNear(x, y) {
     const c = c0 + dc, r = r0 + dr;
     if (!inGrid(c, r) || isWall(c, r) || G.grid[c + ',' + r] || (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r))) continue;
     if (typeof enemyWideAt === 'function' && !enemyWideAt(c, r)) continue;
+    if (mkEdgeTight(c, r)) continue;   // 格子邊上有薄牆（月台邊）：牠的身體站上去會卡住
     const [cx, cy] = center(c, r);
     if (!enemyBlocked(cx, cy)) return [c, r];
   }
   return null;
+}
+// 這一格牠站上去，身體會不會碰到格子邊上的薄牆（月台邊、地圖編輯器畫的邊緣碰撞）：跟大體型怪物找路的規則一樣（js/enemy-ai.js 的 wideEnemyRoute）
+let mkBodyTightV = null;
+function mkEdgeTight(c, r) {
+  if (typeof cellHasEdgeWall !== 'function') return false;
+  if (mkBodyTightV === null) { const spec = ACTIVE_MONSTERS.find(m => m.id === 'milkfish_king'); mkBodyTightV = enemyBodyTouchesEdges({ drawWidth: (spec && spec.width) || 220 }); }
+  return mkBodyTightV && cellHasEdgeWall(c, r);
 }
 // 溫特開槍打中核心（js/game.js 呼叫）：還躲在水裡就開始登場
 function milkfishKingCoreShot(core) {
@@ -1364,7 +1373,8 @@ function mkFlood(c0, r0) {
   const memo = mkOpenMemo.cells;
   const open = (c, r) => { const k = c * 4096 + r; let v = memo.get(k); if (v === undefined) {
     v = inGrid(c, r) && !enemyWallCell(c, r) && enemyWideAt(c, r) && !(typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(c, r)) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r))
-      && !(typeof mrtTrackCell === 'function' && mrtTrackCell(c, r));   // 軌道（含停著的列車車廂）：牠太大隻，不能把列車當路走，要等車開走再跳過去
+      && !(typeof mrtTrackCell === 'function' && mrtTrackCell(c, r))   // 軌道（含停著的列車車廂）：牠太大隻，不能把列車當路走，要等車開走再跳過去
+      && !mkEdgeTight(c, r);   // 格子邊上有薄牆（月台邊）：身體會卡住，不算走得到（不然會選月台邊當路、當起跳點，走過去就撞在邊上不動）
     memo.set(k, v); } return v; };
   const k0 = c0 + ',' + r0, set = new Set([k0]), q = [[c0, r0]], edge = [];
   for (let i = 0; i < q.length && set.size < 8000; i++) {
@@ -1381,7 +1391,8 @@ function mkFlood(c0, r0) {
   return { set, edge };
 }
 // 地形有沒有變：建築數量、被打掉的地圖物件數量、開著的門數量（有變才重算走得到的範圍，不然要掃上千格，會讓遊戲每秒卡一下）
-const mkWorldKey = () => (G.obstacles ? G.obstacles.length : 0) + ':' + (G.mapDestroyed ? G.mapDestroyed.size : 0) + ':' + (typeof mapDoors !== 'undefined' ? mapDoors.reduce((n, d) => n + (d.open ? 1 : 0), 0) : 0);
+const mkWorldKey = () => (G.obstacles ? G.obstacles.length : 0) + ':' + (G.mapDestroyed ? G.mapDestroyed.size : 0) + ':' + (typeof mapDoors !== 'undefined' ? mapDoors.reduce((n, d) => n + (d.open ? 1 : 0), 0) : 0)
+  + ':' + (G.mrtTrains ? G.mrtTrains.map(tr => tr.state === 'away' || tr.state === 'tunnel' ? 0 : 1).join('') : '');   // 列車進站／開走：月台邊的薄牆會變
 // 牠現在走得到的那一區：地形沒變、牠還在同一區就沿用（最多 8 秒重算一次保險）
 function mkReachInfo(e) {
   const mk = e.mk, now = mkClock(), [c0, r0] = cellAt(e.x, e.y), k0 = c0 + ',' + r0, wk = mkWorldKey();
@@ -1408,6 +1419,9 @@ function mkJumpPlan(e, goal) {
   // 落點大概在哪一塊：起跳點離這一塊太遠就整個略過
   let bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
   for (const [lx, ly] of lands) { bx0 = Math.min(bx0, lx); bx1 = Math.max(bx1, lx); by0 = Math.min(by0, ly); by1 = Math.max(by1, ly); }
+  // 停在月台的列車（沒電時每一台都停著、通道列車永遠停著）：跳的路線不能穿過車廂，當成牆。
+  // 以前會挑一條穿過列車的跳法，走到月台邊就站著等車開走；車不會開走時，牠就永遠站在捷運門旁邊不動
+  const rects = mkTrainRects(), pad = (e.drawWidth || 220) * .18;
   let best = null, bs = Infinity;
   for (const [tc, tr] of me.edge) {
     const [tx, ty] = center(tc, tr);
@@ -1419,7 +1433,7 @@ function mkJumpPlan(e, goal) {
       const dx = L[0] - tx, dy = L[1] - ty; if (dx > R || dx < -R || dy > R || dy < -R) continue;
       const d2 = dx * dx + dy * dy; if (d2 > R2 || d2 < minD2) continue;
       const sc = L[2] + Math.sqrt(d2) * .3;   // 落地後還要走多遠＋跳多遠
-      if (sc < bsl) { bsl = sc; bl = L; }
+      if (sc < bsl && !(rects.length && mkTrainOnPath(tx, ty, L[0], L[1], rects, pad))) { bsl = sc; bl = L; }   // 中間有列車：這條跳不過去
     }
     if (!bl || walk + bsl >= bs || enemyBlocked(tx, ty, e)) continue;   // 走過去＋落地後還要走多遠＋跳多遠，挑最短的
     bs = walk + bsl; best = { from: { c: tc, r: tr, x: tx, y: ty }, land: { x: bl[0], y: bl[1] } };
@@ -1446,7 +1460,13 @@ function mkChaseStep(e, dt) {
   }
   const f = plan.from;   // 要跳：先走到起跳點（月台邊緣）
   if (Math.hypot(f.x - e.x, f.y - e.y) <= CELL * .6) {
-    if (mkTrainBlocksJump(e, plan.land)) { mfPose(e, null); if (tg) e.faceRight = tg.x > e.x; return true; }   // 列車停在中間：牠太大隻穿不過車廂，站在月台邊等車開走
+    if (mkTrainBlocksFrom(e, f, plan.land)) {   // 走過來的路上列車進站擋住了：牠太大隻穿不過車廂，站在月台邊等一下（跟想跳法時一樣從起跳點那格算，不然會差一點點：想的時候說可以、到了又說不行，一直重想）
+      mfPose(e, null); if (tg) e.faceRight = tg.x > e.x;
+      mk.trainWait = (mk.trainWait || 0) + dt;
+      if (mk.trainWait >= F.trainWaitMax) { mk.trainWait = 0; mk.plan = null; }   // 等太久（車沒有要開走，例如沒電、通道列車）：重新想辦法（避開列車的跳法；沒有就先不理這個人）
+      return true;
+    }
+    mk.trainWait = 0;
     mkStartJump(e, tg, plan); return true;
   }
   const nav = enemyNavigate(e, f.c, f.r, dt, 'mk-jumpfrom:' + f.c + ',' + f.r, true);
@@ -1456,7 +1476,7 @@ function mkChaseStep(e, dt) {
 }
 function mkStartJump(e, tg, plan) {
   const mk = e.mk, C = mkCfg(e);
-  mk.jump = { target: tg, to: { x: plan.land.x, y: plan.land.y } };
+  mk.jump = { target: tg, to: { x: plan.land.x, y: plan.land.y }, from0: { x: plan.from.x, y: plan.from.y } };   // from0：起跳點那格（判斷列車擋不擋都從這裡算）
   e.faceRight = plan.land.x > e.x;
   mkSet(e, 'jumpWind', C.jumpWindup);
 }
@@ -1467,11 +1487,11 @@ function mkJumpWindStep(e) {
   e.slimeLift = -4;   // 蹲低一點
   if (J && J.target && J.target.hp > 0) {
     const land = mkWideCellNear(J.target.x, J.target.y);
-    if (land) { const [lx, ly] = center(land[0], land[1]); if (Math.hypot(lx - e.x, ly - e.y) <= C.jumpRange * CELL && mkInChase(e, { x: lx, y: ly })) J.to = { x: lx, y: ly }; }
+    if (land) { const [lx, ly] = center(land[0], land[1]); if (Math.hypot(lx - e.x, ly - e.y) <= C.jumpRange * CELL && mkInChase(e, { x: lx, y: ly }) && !mkTrainBlocksFrom(e, J.from0 || e, { x: lx, y: ly })) J.to = { x: lx, y: ly }; }   // 跟著目標換落點：中間有列車的落點不換過去
     e.faceRight = J.to.x > e.x;
   }
   if (mk.t > 0) return;
-  if (mkTrainBlocksJump(e, J.to)) { mk.jump = null; e.slimeLift = 0; mkSet(e, 'hunt'); return; }   // 蓄力時列車進站擋住了：先不跳，回去等
+  if (mkTrainBlocksFrom(e, J.from0 || e, J.to)) { mk.jump = null; mk.plan = null; e.slimeLift = 0; mkSet(e, 'hunt'); return; }   // 蓄力時列車進站擋住了：先不跳，重新想辦法
   J.from = { x: e.x, y: e.y }; J.t = 0;
   e.airborne = true;
   mkSet(e, 'jump');
@@ -1548,12 +1568,24 @@ function mkTrainRects() {
   return out;
 }
 // 從牠現在的位置跳到 to，中間有沒有列車擋著（牠身體寬，左右多算一點）
-function mkTrainBlocksJump(e, to) {
+function mkTrainBlocksJump(e, to) { return mkTrainBlocksFrom(e, e, to); }
+// 從 from 跳到 to（from 不一定是牠現在站的位置，例如起跳點那格的正中間）
+function mkTrainBlocksFrom(e, from, to) {
   const rects = mkTrainRects(); if (!rects.length) return false;
-  const pad = (e.drawWidth || 220) * .18, n = Math.max(2, Math.ceil(Math.hypot(to.x - e.x, to.y - e.y) / 8));
-  for (let i = 0; i <= n; i++) {
-    const x = e.x + (to.x - e.x) * i / n, y = e.y + (to.y - e.y) * i / n;
-    if (rects.some(R => x >= R.x0 - pad && x <= R.x1 + pad && y >= R.y0 && y <= R.y1)) return true;
+  return mkTrainOnPath(from.x, from.y, to.x, to.y, rects, (e.drawWidth || 220) * .18);
+}
+// 從 (ax, ay) 直直跳到 (bx, by)，會不會穿過某一節車廂（車廂左右各放寬 pad）：線段跟方框有沒有交集
+function mkTrainOnPath(ax, ay, bx, by, rects, pad) {
+  const dx = bx - ax, dy = by - ay;
+  for (const R of rects) {
+    let t0 = 0, t1 = 1, ok = true;
+    for (const [p, q] of [[-dx, ax - (R.x0 - pad)], [dx, (R.x1 + pad) - ax], [-dy, ay - R.y0], [dy, R.y1 - ay]]) {
+      if (p === 0) { if (q < 0) { ok = false; break; } continue; }
+      const r = q / p;
+      if (p < 0) { if (r > t1) { ok = false; break; } if (r > t0) t0 = r; }
+      else { if (r < t0) { ok = false; break; } if (r < t1) t1 = r; }
+    }
+    if (ok && t0 <= t1) return true;
   }
   return false;
 }

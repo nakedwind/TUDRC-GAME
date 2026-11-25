@@ -8,6 +8,7 @@
    ・在應變中心：溫特和每位隊員每秒回 VITALS.baseRegen（1）HP；溫特、嚮導每秒回 1 SP。負荷不會自己降（雷德的自癒照舊）。
    ・1F醫院：住院的隊員躺在病床上睡覺，每分鐘回最大 HP 的 VITALS.hospitalPerMin（10%），回滿 100% 才出院（下次回來待在平常的位置）；
        住院期間不能出勤（js/team.js），在戰鬥地圖的時候也照樣在恢復。溫特自己躺上去每秒回 VITALS.bedRegen（10）HP。
+   ・溫特 HP 很低（低於 VITALS.lowBedBelow，30%）時，在應變中心躺任何一張床（不只病床），回血速度 ×VITALS.lowBedMul（2 倍）；回到 30% 以上就恢復原本速度。
        病床滿了（VITALS.hospitalBeds 張）：後來的傷員還是住院，先在醫院走動等空床，等床期間回血只有 VITALS.noBedRate（一半）；先住院的先有床。
        從戰鬥地圖回來時，有人住院會跳出通知，列出誰在住院、大約還要幾分鐘。
        HP 沒滿、但沒有低於 30% 的隊員：跟他對話按「🏥 去醫院休息」，他就會走去醫院（js/game.js 的對話框按鈕）。
@@ -23,6 +24,8 @@ const VITALS = {
   hospitalBelow: .3,      // HP 低於最大值的幾成：回應變中心時自動住院
   baseRegen: 1,           // 在應變中心：每秒回幾 HP／SP
   bedRegen: 10,           // 病床上（溫特自己躺、沒住院的隊員躺）：每秒回幾 HP
+  lowBedBelow: .3,        // 溫特 HP 低於最大值的幾成算「很低」
+  lowBedMul: 2,           // HP 很低時躺在應變中心任何一張床上：回血速度乘幾倍
   hospitalPerMin: .1,     // 住院的隊員：每分鐘回最大 HP 的幾成（.1＝10%：倒下的人大約 10 分鐘才回滿）；回滿 100% 才出院，住院期間不能出勤
   hospitalPerMinBy: { red: .2 },   // 個別隊員的住院速度（雷德 .2＝20%：倒下也只要 5 分鐘就回滿）
   hospitalBeds: 5,        // 1F醫院有幾張病床：不在醫院地圖時用來算誰有床（基地編輯器增減病床要一起改）
@@ -184,7 +187,8 @@ function updateVitals(dt) {
     return;
   }
   const p = G.player;
-  p.hp = Math.min(p.maxhp, p.hp + (inBed(p) ? VITALS.bedRegen : VITALS.baseRegen) * dt);
+  const lowInBed = !!(p.sitting && p.sitting.bed) && p.hp < p.maxhp * VITALS.lowBedBelow;   // HP 很低又躺在床上（任何一張床都算）
+  p.hp = Math.min(p.maxhp, p.hp + (inBed(p) ? VITALS.bedRegen : VITALS.baseRegen) * (lowInBed ? VITALS.lowBedMul : 1) * dt);
   G.guide = Math.min(G.guideMax, G.guide + VITALS.baseRegen * dt);   // 溫特的 SP
   storePlayerHp(p.hp);
   const here = new Set();

@@ -18,6 +18,7 @@ const MRT_BOARD = {
   pageSec: 3,    // 停靠中幾秒換一頁
   font: 'Consolas, "Microsoft JhengHei", monospace',
   fontPlus: 2,   // 字再加大幾 px（照看板原圖 40px 高算，看板有縮放時跟著縮放）
+  glow: 6,       // LED 字的光暈有多大（照看板原圖 40px 高算，0＝不發光）；字也會畫在黑幕上面，暗處一樣看得到
 };
 
 // ---- 畫螢幕上的字（遊戲、地圖編輯器共用）----
@@ -41,6 +42,7 @@ function drawMrtBoardFace(ctx, x, y, w, h, v) {
     cx += bw + gap;
   }
   const col = v.color || MRT_BOARD.amber;
+  if (MRT_BOARD.glow) { ctx.shadowColor = col; ctx.shadowBlur = MRT_BOARD.glow * h / 40; }   // LED 發光：字的顏色暈開
   if (v.left) {
     ctx.globalAlpha = v.blink === 'left' && off ? .2 : 1;
     ctx.font = 'bold ' + big + 'px ' + MRT_BOARD.font; ctx.fillStyle = col; ctx.fillText(v.left, cx, cy + sh * .03);
@@ -112,8 +114,17 @@ function mrtBoardView(s) {
   return { badge, left: to, right: '出發', small: true };   // 關門、開走
 }
 // js/maploader.js 畫完一張地圖物件後呼叫：是時間牌就把字畫上去（沒有列車的地圖照原本的看板）
+// 這一幀畫了哪些時間牌：黑幕蓋上去之後再把字畫一次（drawMrtBoardGlow），字才會在暗處發光
+// 用 Map 記（同一塊牌子同一幀被畫好幾次只算一次）；也記下當時的畫布位移，黑幕上面才畫得回同一個位置
+let mrtBoardLit = new Map();
 function drawMrtTimeBoard(ctx, s, x, y, w, h) {
   if (s.id !== MRT_BOARD.tile) return;
   const v = mrtBoardView(s); if (!v) return;
   drawMrtBoardFace(ctx, x, y, w, h, v);
+  if (MRT_BOARD.glow && mrtBoardLit.size < 200) mrtBoardLit.set(s, { x, y, w, h, v, m: ctx.getTransform() });
+}
+// js/render.js 蓋完黑幕後呼叫：把這一幀的時間牌字畫在黑幕上面（只畫字和線色標籤，看板本體照樣被黑幕蓋）
+function drawMrtBoardGlow(ctx) {
+  const list = mrtBoardLit; mrtBoardLit = new Map();
+  for (const b of list.values()) { ctx.save(); ctx.setTransform(b.m); drawMrtBoardFace(ctx, b.x, b.y, b.w, b.h, b.v); ctx.restore(); }
 }

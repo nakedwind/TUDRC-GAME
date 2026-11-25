@@ -1,7 +1,7 @@
 // ============================================================
 //  營地物資箱：放醫療包、杏仁水、急救包（溫特也可以拿、可以補；嚮導拿杏仁水和急救包）
 //  ・箱子是地圖上放的「物資箱」物件（地圖編輯器的素材 tile_field_supply_box）；同一張地圖放幾個都共用同一份物資。第一次在這張地圖出任務時補滿 start 的數量，
-//    之後用掉就少了；每次從應變中心出勤時，急救包、杏仁水各補到 sortie 的數量（自己放進去多的會留著，不會越積越多；醫療包不補，要自己帶）。
+//    之後用掉就少了；第一次出勤只給 start 的數量，之後每次從應變中心出勤，急救包、杏仁水各「多給」sortie 的數量（箱子放不下就只給放得下的；醫療包不補，要自己帶）。
 //    直接「重新開始」不算出勤，不會補。
 //  ・嚮導身上最多帶 carry 個急救包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血（隊友和自己）花急救包。
 //    其中一樣用完就自己走回物資箱拿；沒用完但沒帶滿，手上沒事時也會回去補滿（地上有溫特放的就先撿地上的，js/ground-items.js）；
@@ -13,7 +13,7 @@ const CAMP_SUPPLY = {
   stack: 20,                                   // 一格放幾個（同種物品每 20 個佔一格，跟背包一樣）：12 格最多 240 個
   items: ['medkit', 'almond-water', 'firstaid'],             // 能放什麼
   start: { medkit: 7, 'almond-water': 6, firstaid: 7 },      // 第一次出任務時箱子裡有多少
-  sortie: { 'almond-water': 6, firstaid: 7 },                 // 每次從應變中心出勤，箱子裡補到至少這麼多（應變中心配發）
+  sortie: { 'almond-water': 2, firstaid: 2 },                 // 第二次出勤起，每次從應變中心出勤多給幾個（應變中心配發；第一次只有 start 的數量）
   guideItems: ['firstaid', 'almond-water'],                   // 嚮導身上帶的（醫療包是給溫特自己用的）
   carry: 5,                                    // 嚮導每樣最多帶幾個
   minTaint: 30,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
@@ -54,11 +54,16 @@ function campBoxRoom(k) {
   const n = campBox()[k] || 0, st = CAMP_SUPPLY.stack;
   return Math.max(0, CAMP_SUPPLY.slots - campBoxUsed()) * st + (n % st ? st - n % st : 0);
 }
-// 出勤（js/sortie-supply.js 的 onSortieNewGame 呼叫）：急救包、杏仁水補到 CAMP_SUPPLY.sortie；回傳補了哪些
+// 出勤（js/sortie-supply.js 的 onSortieNewGame 呼叫）：第一次出勤到這張地圖只有 start 的數量（箱子記 sortied）；
+// 之後每次出勤，急救包、杏仁水各多給 CAMP_SUPPLY.sortie 個（箱子放不下就只給放得下的）；回傳給了哪些
 function stockCampSupplyForSortie() {
   if (MAP_SAFE || !supplyBoxSpots().length) return [];
   const box = campBox(), got = [];
-  for (const [k, n] of Object.entries(CAMP_SUPPLY.sortie)) if ((box[k] || 0) < n) { box[k] = n; got.push(itemById(k)?.name || k); }
+  if (!box.sortied) { box.sortied = true; saveCampSupply(); return got; }   // 第一次：start 的數量已經在箱子裡了，不另外給
+  for (const [k, n] of Object.entries(CAMP_SUPPLY.sortie)) {
+    const add = Math.min(n, campBoxRoom(k));
+    if (add > 0) { box[k] = (box[k] || 0) + add; got.push((itemById(k)?.name || k) + '×' + add); }
+  }
   if (got.length) saveCampSupply();
   return got;
 }

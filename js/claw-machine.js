@@ -241,9 +241,11 @@ function clawCollect(p) {   // 掉進出口：真的拿到了
   else if (p.def.costume) { isNew = costumeGrant(p.id); note = '收進衣櫃了，到衣櫃就能換上'; cw.pending.push({ name: info.name, image: info.image }); }
   else {
     isNew = !(typeof itemIntroSeen !== 'undefined' && itemIntroSeen.has('item:' + p.id));
-    if (supplyGain(p.id, 1, true)) note = '已經放進背包';
-    else { const pl = G.player; (G.groundItems = G.groundItems || []).push({ id: p.id, qty: 1, x: pl.x, y: pl.y + 6 }); note = '背包滿了，放在你腳邊'; }
-    cw.pending.push({ id: p.id });
+    if (supplyGain(p.id, 1, true)) { note = '已經放進背包'; cw.pending.push({ id: p.id }); }
+    else {   // 背包滿了：先寄放在機台的取物口（有存檔，不會消失），背包有空位時再打開任何一台夾娃娃機就會自動拿到
+      clawSave.held = clawSave.held || {}; clawSave.held[p.id] = (clawSave.held[p.id] || 0) + 1;
+      note = '背包滿了，先寄放在取物口；背包有空位時再打開夾娃娃機就會拿到';
+    }
   }
   clawSave.won = clawSave.won || {}; clawSave.won[p.id] = (clawSave.won[p.id] || 0) + 1;
   clawPersist();
@@ -570,6 +572,23 @@ function clawMusicTick() {
 }
 setInterval(clawMusicTick, 100);
 
+// ---- 取物口寄放：之前背包滿了拿不下的獎品（存在 clawSave.held＝{ 物品 id: 個數 }），打開機台時背包拿得下多少就拿多少 ----
+function clawClaimHeld() {
+  const held = clawSave.held; if (!held) return false;
+  let got = 0, left = 0;
+  for (const id of Object.keys(held)) {
+    const n = supplyGain(id, held[id], true);
+    if (n > 0) { got += n; cw.pending.push({ id, qty: n }); }
+    held[id] -= n; if (held[id] <= 0) delete held[id]; else left += held[id];
+  }
+  if (!Object.keys(held).length) delete clawSave.held;
+  if (!got && !left) return false;
+  clawPersist();
+  if (got) { if (typeof updateHUD === 'function') updateHUD(); if (typeof saveGame === 'function') saveGame(); }
+  clawSay(got ? '從取物口拿回 ' + got + ' 個獎品' + (left ? '，還有 ' + left + ' 個背包放不下' : '') : '取物口還有 ' + left + ' 個獎品，背包空出位置再來拿', left ? 'warn' : '');
+  return true;
+}
+
 // ---- 開關 ----
 function openClawMachine(spot) {
   if (clawOpen) return;
@@ -581,7 +600,7 @@ function openClawMachine(spot) {
   Object.assign(cw, { phase: 'idle', x: CW.AIM_MIN, vx: 0, _pv: 0, rope: CW.ROPE_MIN, swing: 0, swingV: 0, open: 1, held: null, target: null, timer: 0, keysHeld: {}, btnDir: 0, hover: null, tipId: null, wins: [], pending: [], reveal: null, refund: 0, flash: 0, acc: 0, last: performance.now() });
   cw.el.classList.remove('hidden'); cw.el.querySelector('.cw-reveal').classList.add('hidden'); cw.el.querySelector('.cw-tip').classList.add('hidden');
   clawRefundIfEmpty();
-  clawSay(cw.m.credits > 0 ? '還有 ' + cw.m.credits + ' 次，按空白鍵開始' : '投幣開始，指著膠囊可以看獎品');
+  if (!clawClaimHeld()) clawSay(cw.m.credits > 0 ? '還有 ' + cw.m.credits + ' 次，按空白鍵開始' : '投幣開始，指著膠囊可以看獎品');   // 取物口有東西時先講取物口
   renderClaw();
   clawFitWindow();   // 要等視窗顯示、文字都填好才量得準大小
   clawFillMachine();
@@ -595,7 +614,7 @@ function closeClawMachine() {
   cw.el.classList.add('hidden');
   sfx('switch');
   // 拿到的東西關掉才跳提示（第一次拿到的說明視窗也在這時候才跳，不會蓋住機台）
-  for (const p of cw.pending) { if (typeof showItemPickupNotice !== 'function') break; if (p.name) showItemPickupNotice({ name: p.name, image: p.image }, p.qty || 1); else showItemPickupNotice(p.id, 1); }
+  for (const p of cw.pending) { if (typeof showItemPickupNotice !== 'function') break; if (p.name) showItemPickupNotice({ name: p.name, image: p.image }, p.qty || 1); else showItemPickupNotice(p.id, p.qty || 1); }
   cw.pending = [];
 }
 // 開著的時候：鍵盤都給機台，不要傳給遊戲

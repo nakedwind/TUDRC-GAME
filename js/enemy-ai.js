@@ -241,6 +241,12 @@ function enemyWideAt(c, r) {
     if (enemyWideOpen(c + dc, r + dr) && enemyWideOpen(c + dc + 1, r + dr) && enemyWideOpen(c + dc, r + dr + 1) && enemyWideOpen(c + dc + 1, r + dr + 1)) return true;
   return false;
 }
+// 身體（enemyBodyR 的方塊）站在格子正中間時，四個角離格子邊不到薄牆的厚度：格子邊上有薄牆就會撞到（大隻的怪物才會這樣）
+const enemyBodyTouchesEdges = e => !!e && enemyBodyR(e) + (typeof EDGE_WALL !== 'undefined' ? EDGE_WALL.half : 0) >= CELL / 2;
+// 這一格的上下左右四條邊，有沒有任何一條是薄牆（地圖編輯器的「📏 邊緣碰撞」、停著的列車）
+function cellHasEdgeWall(c, r) {
+  return typeof edgeBetween === 'function' && (edgeBetween(c, r, c, r - 1) || edgeBetween(c, r, c, r + 1) || edgeBetween(c, r, c - 1, r) || edgeBetween(c, r, c + 1, r));
+}
 // 大體型的路線：走得到目標就走過去，走不到（目標躲在窄道裡）就走到離目標最近、走得到的那一格，被擋在門口。
 // 剛好卡在窄格裡（例如生在窄道）時，可以先走窄格出去，進到寬的地方之後就不再走窄格。
 // canBreakBuildings＝false 時繞過建築；回傳 { path, reached }
@@ -248,7 +254,8 @@ function wideEnemyRoute(e, goalC, goalR, canBreakBuildings = true, maxSteps = In
   // 這次找路裡，每一格「是不是空地」「夠不夠寬」都只算一次記起來。
   // 不記的話，同一格會被旁邊的格子重複問幾十次；目標走不到時要把整張地圖搜完，一次要幾十毫秒，好幾隻大體型怪一起找就會卡。
   const openMemo = new Map(), wideMemo = new Map();
-  const isOpen = (c, r) => { const k = c + ',' + r; let v = openMemo.get(k); if (v === undefined) { v = enemyWideOpen(c, r) && !(typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(e, c, r)); openMemo.set(k, v); } return v; };   // 大型怪物：停著的捷運車廂不能走
+  const bodyTight = enemyBodyTouchesEdges(e);   // 身體大到站在格子中間就會碰到格子邊上的薄牆（例如月台邊）
+  const isOpen = (c, r) => { const k = c + ',' + r; let v = openMemo.get(k); if (v === undefined) { v = enemyWideOpen(c, r) && !(typeof mrtBigBlockedCell === 'function' && mrtBigBlockedCell(e, c, r)) && !(bodyTight && cellHasEdgeWall(c, r)); openMemo.set(k, v); } return v; };   // 大型怪物：停著的捷運車廂不能走；格子邊上有薄牆的格子也不走（身體會卡在薄牆上，以前虱目魚王會沿著月台邊走、一直撞在月台邊不動）
   const isWide = (c, r) => {   // 跟 enemyWideAt 一樣的判斷，只是用記起來的結果
     const k = c + ',' + r; let v = wideMemo.get(k);
     if (v !== undefined) return v;
