@@ -32,7 +32,7 @@ const MRT_TRACK = {
   sentrySpeedMul: 1.25,   // 隊友走去跳點時腳步快一點
   crossCheck: 1,     // 隊友隔著軌道：每幾秒檢查一次「走得過去嗎？要不要穿過軌道」
   crossNear: 2.5,    // 隊友隔著軌道：離要跟的人幾格內就不穿過去
-  crossExit: 6,      // 隊友隔著軌道：對面離要跟的人最近的跳點要在幾格內，才穿過去（太遠表示人不在軌道對面，不跳）
+  crossExit: 10,     // 隊友隔著軌道：對面離要跟的人最近的跳點要在幾格內，才穿過去（太遠表示人不在軌道對面，不跳）
   promptDown: '跳下', promptUp: '跳上',
 };
 const inTrackNow = a => !!(a && a.inTrack && a.inTrackMap === MAP);
