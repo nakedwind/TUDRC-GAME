@@ -8,6 +8,7 @@
      列車來了不會自己逃（照使用者的設定）：要玩家自己帶出來，或用右鍵把隊友從軌道裡拉出來（js/grab.js 放下時照落點決定在不在軌道裡）。
    ・怪物：附近（MRT_TRACK.chaseRange 格內、看得到）的溫特或隊員在軌道裡，就走到最近的月台邊跳進去追；
      自己在軌道裡、要追的人不在軌道裡（或沒有目標），就走到最近的月台邊跳上來。
+     要追的人在軌道對面的月台上（月台走不過去）：從自己這邊跳進軌道、穿過去，在那個人附近跳上來（trackEnemyCross）。
    ・列車進站、開走時，車身經過的地方：軌道裡的溫特、隊員、怪物被撞飛到月台上（離開軌道），
      落地後溫特、隊員失去戰鬥能力、怪物死亡；蓋在軌道上的建築被撞破。
      撞到時有放大版的鳥頭人撞擊特效、畫面震動；溫特、隊員被撞播 trainHit（slime-hit＋小撞擊）。
@@ -32,7 +33,7 @@ const MRT_TRACK = {
   sentrySpeedMul: 1.25,   // 隊友走去跳點時腳步快一點
   crossCheck: 1,     // 隊友隔著軌道：每幾秒檢查一次「走得過去嗎？要不要穿過軌道」
   crossNear: 2.5,    // 隊友隔著軌道：離要跟的人幾格內就不穿過去
-  crossExit: 10,     // 隊友隔著軌道：對面離要跟的人最近的跳點要在幾格內，才穿過去（太遠表示人不在軌道對面，不跳）
+  crossExit: 16,     // 隊友隔著軌道：對面離要跟的人最近的跳點要在幾格內，才穿過去（太遠表示人不在軌道對面，不跳）
   promptDown: '跳下', promptUp: '跳上',
 };
 const inTrackNow = a => !!(a && a.inTrack && a.inTrackMap === MAP);
@@ -233,6 +234,18 @@ function trackEnemyStep(e, dt) {
     if (d < bd && d <= R && hasLineOfSight(e.x, e.y, a.x, a.y)) { bd = d; target = a; }
   }
   const tin = target && inTrackNow(target), coming = boss && trainComingSoon();
+  if (!ein) e.trackCrossTo = null;
+  if (!ein && target && !tin) return trackEnemyCross(e, target, dt, coming);   // 都在月台上：看是不是隔著軌道、要穿過去
+  e.trackCross = null;
+  const to = e.trackCrossTo;   // 為了穿過軌道才跳進來的：還沒走到對面就先不要跳回原本那邊
+  if (ein && to && !coming && to.hp > 0 && !inTrackNow(to) && (to === G.player || (G.towers || []).includes(to)) && Math.hypot(to.x - e.x, to.y - e.y) <= R * 1.5) {
+    const ed = trackPickEdge(ed => Math.hypot(e.x - ed.dx, e.y - ed.dy) + Math.hypot(to.x - ed.ux, to.y - ed.uy));
+    if (ed) {
+      if (Math.hypot(e.x - ed.dx, e.y - ed.dy) <= MRT_TRACK.jumpAt) startTrackJump(e, ed.ux, ed.uy, false);
+      else trackEnemyGo(e, ed.dx, ed.dy, dt);
+      return true;
+    }
+  }
   if (!ein && tin && !coming) {   // 目標在軌道裡：走到離目標最近的月台邊、跳進去
     const ed = trackPickEdge(ed => Math.hypot(e.x - ed.ux, e.y - ed.uy) + Math.hypot(target.x - ed.dx, target.y - ed.dy));
     if (!ed) return false;
@@ -248,6 +261,35 @@ function trackEnemyStep(e, dt) {
     return true;
   }
   return false;   // 跟目標在同一邊：照平常的追法（在軌道裡就照軌道的規則走）
+}
+// 隔著軌道：自己和要追的人都在月台上，但月台上走不過去 → 從自己這邊的月台邊跳進軌道（之後由上面那段走到對面跳上去）
+// coming＝BOSS 而且列車快來了：不跳
+function trackEnemyCross(e, target, dt, coming) {
+  if (coming || Math.hypot(target.x - e.x, target.y - e.y) <= MRT_TRACK.crossNear * CELL) { e.trackCross = null; return false; }
+  if ((e.trackCrossT = (e.trackCrossT == null ? Math.random() * MRT_TRACK.crossCheck : e.trackCrossT) - dt) <= 0) {   // 不要每一幀都找路；一開始錯開，免得一群怪同一幀一起找
+    e.trackCrossT = MRT_TRACK.crossCheck;
+    const [gc, gr] = cellAt(target.x, target.y);
+    e.trackCross = buildEnemyRoute(e, gc, gr, true) === null ? trackEnemyCrossPick(e, target) : null;   // true：建築打得穿，不算擋路
+  }
+  const ed = e.trackCross;
+  if (!ed || trackStopped(ed.dk)) return false;
+  if (Math.hypot(e.x - ed.ux, e.y - ed.uy) <= MRT_TRACK.jumpAt) {
+    e.trackCross = null; startTrackJump(e, ed.dx, ed.dy, true);
+    e.trackCrossTo = target;   // 跳進去之後要到誰附近跳上來
+  } else trackEnemyGo(e, ed.ux, ed.uy, dt);
+  return true;
+}
+// 挑穿過軌道的跳點（跟隊友的 trackCrossPick 一樣，只是用怪物的找路）
+function trackEnemyCrossPick(e, target) {
+  const out = trackPickEdge(ed => Math.hypot(target.x - ed.ux, target.y - ed.uy));
+  if (!out || Math.hypot(target.x - out.ux, target.y - out.uy) > MRT_TRACK.crossExit * CELL) return null;
+  const list = trackEdges().filter(ed => !trackStopped(ed.dk))
+    .map(ed => ({ ed, v: Math.hypot(e.x - ed.ux, e.y - ed.uy) * 2 + Math.hypot(out.dx - ed.dx, out.dy - ed.dy) }))
+    .sort((a, b) => a.v - b.v);
+  for (const { ed } of list.slice(0, 6)) {
+    if (Math.hypot(e.x - ed.ux, e.y - ed.uy) <= CELL || buildEnemyRoute(e, ...cellAt(ed.ux, ed.uy), true) !== null) return ed;
+  }
+  return null;
 }
 
 // ---- 被列車撞飛：往列車開的方向、飛到最近的月台上（落在月台邊再往裡面 flingFar 格，有牆就近一點）----
