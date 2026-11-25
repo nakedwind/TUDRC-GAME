@@ -150414,7 +150414,7 @@ const BATTLE_MAPS = [
     ],
     "camp": [],
     "rules": {
-      "money": 5000,
+      "money": 3000,
       "guide": 100,
       "guideRegen": 9,
       "speed": 44,
@@ -169203,7 +169203,7 @@ const BATTLE_MAPS = [
     ],
     "camp": [],
     "rules": {
-      "money": 5000,
+      "money": 3000,
       "guide": 100,
       "guideRegen": 9,
       "speed": 44,
@@ -180843,7 +180843,7 @@ const BATTLE_MAPS = [
     ],
     "camp": [],
     "rules": {
-      "money": 5000,
+      "money": 3000,
       "guide": 100,
       "guideRegen": 9,
       "speed": 44,
