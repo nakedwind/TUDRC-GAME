@@ -260,9 +260,9 @@ function powerSwitchTileFor(id,on){
   const pair=powerSwitchSwap.get(id);return (on?pair.on:pair.off)||null;
 }
 // ---- 發電機（dynamo-close＝關、dynamo-open＝開）----
-// 能互動的地圖（地圖 id）：池核，加上捷運站（data/mrt-train.js 的 stations，全部打開捷運才會開，js/mrt-train.js 的 mrtPowered）；
+// 能互動的地圖（地圖 id）：池核、W118區 地下水池，加上捷運站（data/mrt-train.js 的 stations，全部打開捷運才會開，js/mrt-train.js 的 mrtPowered）；
 // 其他地圖放的發電機只是裝飾。要加地圖就把 id 加進來
-const DYNAMO_MAPS = ['map_mv1bzur4'];   // 04. 池核
+const DYNAMO_MAPS = ['map_mv1bzur4', 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf'];   // 04. 池核、W118區 地下水池（全部打開＝抽水機通電，js/pool-tide.js）
 const dynamoStationMap=m=>!!(m&&typeof mrtStationOf==='function'&&mrtStationOf(m.id));
 const dynamoInteractiveMap=m=>!!(m&&(DYNAMO_MAPS.includes(m.id)||dynamoStationMap(m)));
 // 每一台各自開關（不分電路）。一進地圖全部是關的（地圖上放的是 open 圖也一樣當關的），玩家要自己去把它們打開。
