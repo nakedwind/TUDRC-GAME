@@ -463,53 +463,64 @@ function drawFishSprays(ctx) {
     if (!list.some(d => isVisible(d.x, d.y))) continue;
     const pts = list.map(d => ({ x: d.x, y: d.y - d.z, gx: d.x, gy: d.y + 6 }));
     if (e && e.fh && e.fh.spray === s && !e.dead) { const m = fishMouth(e); pts.push({ x: m.x, y: m.y - m.z, gx: m.x, gy: m.y + 6 }); }   // 還在噴：接到嘴巴
-    if (pts.length < 2) continue;
-    const n = pts.length, attached = e && e.fh && e.fh.spray === s;
-    // 每個點的寬度：前端（第 0 點）最粗，往嘴巴越來越細；已經離開嘴巴的水柱尾端也收細
-    const width = i => { const k = i / (n - 1); return Math.max(1, W * Math.pow(1 - k, .8) * (attached ? 1 : Math.min(1, (n - 1 - i) / 3 + .3))); };
-    const L = [], R = [];
-    for (let i = 0; i < n; i++) {
-      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
-      let nx = -(b.y - a.y), ny = b.x - a.x; const len = Math.hypot(nx, ny) || 1; nx /= len; ny /= len;
-      if (ny > 0) { nx = -nx; ny = -ny; }   // L 永遠是上緣
-      const w = width(i) / 2;
-      L.push({ x: pts[i].x + nx * w, y: pts[i].y + ny * w }); R.push({ x: pts[i].x - nx * w, y: pts[i].y - ny * w });
-    }
-    const smooth = (arr, first) => {   // 用中點做二次曲線，邊緣才會圓滑
-      if (first) ctx.moveTo(arr[0].x, arr[0].y); else ctx.lineTo(arr[0].x, arr[0].y);
-      for (let i = 1; i < arr.length - 1; i++) ctx.quadraticCurveTo(arr[i].x, arr[i].y, (arr[i].x + arr[i + 1].x) / 2, (arr[i].y + arr[i + 1].y) / 2);
-      ctx.lineTo(arr[arr.length - 1].x, arr[arr.length - 1].y);
-    };
-    // 地上的影子
-    ctx.globalAlpha = .13; ctx.strokeStyle = '#071015'; ctx.lineCap = 'round'; ctx.lineWidth = W * .7;
-    ctx.beginPath(); ctx.moveTo(pts[0].gx, pts[0].gy); for (const q of pts) ctx.lineTo(q.gx, q.gy); ctx.stroke();
-    // 水柱本體
-    ctx.globalAlpha = .95; ctx.fillStyle = C.streamColor;
-    ctx.beginPath(); smooth(L, true); smooth(R.slice().reverse(), false); ctx.closePath(); ctx.fill();
-    // 前端圓頭
-    ctx.beginPath(); ctx.arc(pts[0].x, pts[0].y, width(0) / 2, 0, Math.PI * 2); ctx.fill();
-    // 白色反光：沿著上緣內側兩條（一長一短）
-    const inner = (f, from, to) => { const arr = []; for (let i = Math.floor(n * from); i <= Math.min(n - 1, Math.ceil(n * to)); i++) arr.push({ x: pts[i].x + (L[i].x - pts[i].x) * f, y: pts[i].y + (L[i].y - pts[i].y) * f }); return arr; };
-    ctx.strokeStyle = '#ffffff'; ctx.lineCap = 'round';
-    const h1 = inner(.5, .08, .7), h2 = inner(.15, .05, .3);
-    if (h1.length > 1) { ctx.globalAlpha = .95; ctx.lineWidth = Math.max(1.2, W * .14); ctx.beginPath(); smooth(h1, true); ctx.stroke(); }
-    if (h2.length > 1) { ctx.globalAlpha = .8; ctx.lineWidth = Math.max(1, W * .1); ctx.beginPath(); smooth(h2, true); ctx.stroke(); }
+    drawFishStream(ctx, pts, W, !!(e && e.fh && e.fh.spray === s), C.streamColor);
   }
   // 打到的地方：白邊水花＋往外噴的白色小水珠
-  for (const q of G.fishSplashes || []) {
-    if (!isVisible(q.x, q.y)) continue;
-    const a = Math.min(1, q.t / .15), base = q.y - Math.max(4, q.z * .5), wob = t => Math.sin(now * 14 + q.seed + t) * 1.2;
-    const S = C.splashSize, blobs = [[0, 0, 7], [-7 * q.ux, -3, 5], [6, -4, 4.5], [-5, 2, 4], [4, 3, 4.2], [0, -7, 3.5]].map(([x, y, r]) => [x * S, y * S, r * S]);
-    ctx.globalAlpha = a;
-    ctx.fillStyle = '#ffffff';   // 白邊
-    for (const [dx, dy, r] of blobs) { ctx.beginPath(); ctx.arc(q.x + dx + wob(dx), base + dy, r + 2, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = C.streamColor;
-    for (const [dx, dy, r] of blobs) { ctx.beginPath(); ctx.arc(q.x + dx + wob(dx), base + dy, r, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = '#ffffff';
-    for (let k = 0; k < 5; k++) {   // 噴出去的小水珠
-      const ang = q.seed + k * 1.3, r = (10 + ((q.age * 40 + k * 5) % 10)) * S;
-      ctx.beginPath(); ctx.arc(q.x + Math.cos(ang) * r, base + Math.sin(ang) * r * .6 - 2, (k % 2 ? 1.6 : 2.4) * Math.sqrt(S), 0, Math.PI * 2); ctx.fill();
-    }
+  for (const q of G.fishSplashes || []) { if (isVisible(q.x, q.y)) drawFishSplash(ctx, q, C.splashSize, C.streamColor, now); }
+  ctx.restore();
+}
+// 畫一條水柱（魚頭君噴水、魚頭王的高壓水砲共用這一套畫法，js/fish-king.js）
+//   pts：水柱上的點，第 0 點是前端（最粗），最後一點接在嘴巴（最細）；x, y＝畫面上的位置、gx, gy＝地上影子的位置
+//   W：最粗的地方幾像素；attached：還接在嘴巴上（尾端不收細）；color：水柱顏色
+function drawFishStream(ctx, pts, W, attached, color) {
+  if (pts.length < 2) return;
+  const n = pts.length;
+  // 每個點的寬度：前端（第 0 點）最粗，往嘴巴越來越細；已經離開嘴巴的水柱尾端也收細
+  const width = i => { const k = i / (n - 1); return Math.max(1, W * Math.pow(1 - k, .8) * (attached ? 1 : Math.min(1, (n - 1 - i) / 3 + .3))); };
+  const L = [], R = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
+    let nx = -(b.y - a.y), ny = b.x - a.x; const len = Math.hypot(nx, ny) || 1; nx /= len; ny /= len;
+    if (ny > 0) { nx = -nx; ny = -ny; }   // L 永遠是上緣
+    const w = width(i) / 2;
+    L.push({ x: pts[i].x + nx * w, y: pts[i].y + ny * w }); R.push({ x: pts[i].x - nx * w, y: pts[i].y - ny * w });
+  }
+  const smooth = (arr, first) => {   // 用中點做二次曲線，邊緣才會圓滑
+    if (first) ctx.moveTo(arr[0].x, arr[0].y); else ctx.lineTo(arr[0].x, arr[0].y);
+    for (let i = 1; i < arr.length - 1; i++) ctx.quadraticCurveTo(arr[i].x, arr[i].y, (arr[i].x + arr[i + 1].x) / 2, (arr[i].y + arr[i + 1].y) / 2);
+    ctx.lineTo(arr[arr.length - 1].x, arr[arr.length - 1].y);
+  };
+  ctx.save();
+  // 地上的影子
+  ctx.globalAlpha = .13; ctx.strokeStyle = '#071015'; ctx.lineCap = 'round'; ctx.lineWidth = W * .7;
+  ctx.beginPath(); ctx.moveTo(pts[0].gx, pts[0].gy); for (const q of pts) ctx.lineTo(q.gx, q.gy); ctx.stroke();
+  // 水柱本體
+  ctx.globalAlpha = .95; ctx.fillStyle = color;
+  ctx.beginPath(); smooth(L, true); smooth(R.slice().reverse(), false); ctx.closePath(); ctx.fill();
+  // 前端圓頭
+  ctx.beginPath(); ctx.arc(pts[0].x, pts[0].y, width(0) / 2, 0, Math.PI * 2); ctx.fill();
+  // 白色反光：沿著上緣內側兩條（一長一短）
+  const inner = (f, from, to) => { const arr = []; for (let i = Math.floor(n * from); i <= Math.min(n - 1, Math.ceil(n * to)); i++) arr.push({ x: pts[i].x + (L[i].x - pts[i].x) * f, y: pts[i].y + (L[i].y - pts[i].y) * f }); return arr; };
+  ctx.strokeStyle = '#ffffff'; ctx.lineCap = 'round';
+  const h1 = inner(.5, .08, .7), h2 = inner(.15, .05, .3);
+  if (h1.length > 1) { ctx.globalAlpha = .95; ctx.lineWidth = Math.max(1.2, W * .14); ctx.beginPath(); smooth(h1, true); ctx.stroke(); }
+  if (h2.length > 1) { ctx.globalAlpha = .8; ctx.lineWidth = Math.max(1, W * .1); ctx.beginPath(); smooth(h2, true); ctx.stroke(); }
+  ctx.restore();
+}
+// 水柱打到的地方：白邊水花＋往外噴的白色小水珠（q：x, y＝位置、z＝高度、t＝剩幾秒、ux＝水柱方向、seed、age；S＝放大幾倍）
+function drawFishSplash(ctx, q, S, color, now) {
+  const a = Math.min(1, q.t / .15), base = q.y - Math.max(4, q.z * .5), wob = t => Math.sin(now * 14 + q.seed + t) * 1.2;
+  const blobs = [[0, 0, 7], [-7 * q.ux, -3, 5], [6, -4, 4.5], [-5, 2, 4], [4, 3, 4.2], [0, -7, 3.5]].map(([x, y, r]) => [x * S, y * S, r * S]);
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.fillStyle = '#ffffff';   // 白邊
+  for (const [dx, dy, r] of blobs) { ctx.beginPath(); ctx.arc(q.x + dx + wob(dx), base + dy, r + 2, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = color;
+  for (const [dx, dy, r] of blobs) { ctx.beginPath(); ctx.arc(q.x + dx + wob(dx), base + dy, r, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = '#ffffff';
+  for (let k = 0; k < 5; k++) {   // 噴出去的小水珠
+    const ang = q.seed + k * 1.3, r = (10 + ((q.age * 40 + k * 5) % 10)) * S;
+    ctx.beginPath(); ctx.arc(q.x + Math.cos(ang) * r, base + Math.sin(ang) * r * .6 - 2, (k % 2 ? 1.6 : 2.4) * Math.sqrt(S), 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
 }

@@ -1881,6 +1881,7 @@ function pickSentryTarget(t, R) {
   for (const e of G.enemies) {
     if (e.dead || !sameFloor(e, t)) continue;   // 不同樓層的打不到（js/pathfinding.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：等溫特先開槍（js/elite-bird-head.js）
+    if (e.fkPeek && TYPES[t.type]?.ability !== '雷電') continue;   // 魚頭王開戰前冒頭偷看：隊員不打（只有安柏的雷電會電牠，js/fish-king.js）
     const distance = Math.hypot(e.x - t.x, e.y - t.y);
     if (distance > R) continue;
     if (!hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 隔著牆看不到就不能打
