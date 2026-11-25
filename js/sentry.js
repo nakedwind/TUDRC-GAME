@@ -290,13 +290,37 @@ function spawnSentries(only = null) {   // only：只生這幾位（接續戰場
 // 出勤隊員全部回到營地裡重新出現（不然會站在上次倒下、或離開時的位置），跟剛出勤時一樣的擺法
 function regroupSquadAtCamp() {
   const ok = squadSpawnCells();
+  const floor = campFloor();
   for (const t of G.towers) {
     if (!TYPES[t.type] || t.type === PLAYER_CHARACTER) continue;
+    releaseFromCaptors(t);
+    // 上次留下的指令和狀態全部清掉，跟剛出勤一樣：
+    // 不然被派去巡邏（守點）、「前往」某處、護送的人，在營地出現後又會馬上走回上次那個地方；
+    // 躺在行軍床上、走手扶梯、掉進水池、在 2 樓的人也會被拉回原本的位置或樓層
+    Object.assign(t, {
+      mode: 'free', anchor: null, guardSummoned: false, guardBase: null, summonDark: false, darkResumeTarget: null,
+      cot: null, sitting: null, seatGoal: null, bedRetryT: 0, calmT: 0,
+      escSide: null, poolFall: null, drownPath: null, swimRing: false, drowning: false,
+      grabbed: false, grabFall: null, vineCap: false, rkTossed: false, knockT: 0, dashT: 0, rootT: 0,
+      navGoal: null, navStall: 0,
+    });
+    if (hasFloors) t.floor = floor; else delete t.floor;
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : null;
     if (cell) [t.x, t.y] = center(cell[0], cell[1]);
     if (!placeAtConfiguredSpawn(t, t.type)) placeInHomeArea(t, t.type);
     Object.assign(t, { target: null, navPath: null, moving: false, meleeSwing: null, gunSwing: null, waitT: 0.4 + Math.random() });
   }
+}
+
+// 被怪物吞在嘴裡、被藤蔓吊著的隊員：先讓怪物那邊放手（不然怪物每一幀會把他拉回嘴裡／藤蔓上）
+function releaseFromCaptors(t) {
+  const e = t.eatenBy;
+  if (e) {
+    if (e.mf && e.mf.prey === t) e.mf.prey = null;                                  // 虱目魚小子（js/milkfish-kid.js）
+    if (e.mk && Array.isArray(e.mk.prey)) e.mk.prey = e.mk.prey.filter(pr => pr.t !== t);   // 虱目魚王（js/milkfish-king.js）
+    t.eatenBy = null;
+  }
+  if (Array.isArray(G.vineCaps)) G.vineCaps = G.vineCaps.filter(c => c.actor !== t);   // 藤蔓吊著的（js/vines.js 等）
 }
 
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
