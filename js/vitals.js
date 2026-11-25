@@ -3,6 +3,8 @@
    ・回到應變中心時：
        暴走中的隊員：解除暴走，負荷降到暴走邊緣（VITALS.berserkEdge）；其他人保留原本的負荷。
        HP 低於 VITALS.hospitalBelow（30%）的隊員：自動住院（待在 1F醫院、躺在病床上）。
+       例外：溫特陣亡（或營地被毀）戰敗撤退回來的這一次，隊員不自動住院，跟溫特一樣 HP 至少留 1、在應變中心慢慢回，
+       這樣再次出擊時全隊（包括剛剛倒下的人）會一起在營地重新站起來（vitals.fromDefeat，js/combat-progress.js 的 suspendDefeatedBattle 設定）。
        HP 歸零的隊員回來時至少剩 1。
    ・戰鬥地圖之間走入口：倒下的隊員到了下一區還是倒著（異質急救包救得起來，不然要回應變中心住院）。
    ・在應變中心：溫特和每位隊員每秒回 VITALS.baseRegen（1）HP；溫特、嚮導每秒回 1 SP。負荷不會自己降（雷德的自癒照舊）。
@@ -67,7 +69,8 @@ function showHospitalNotice() {
   else if (typeof systemNotice === 'function') systemNotice('🏥 ' + info.name + '（' + info.stat + '）');
 }
 // player：{ hp }；mates：隊員 → { hp, taint, berserk, hospital }；fromBattle：上一張地圖是戰鬥區（回應變中心時套用規則用）；sortie：出勤時的紀錄（重新挑戰時用）
-let vitals = { player: null, mates: {}, fromBattle: false, sortie: null };
+// fromDefeat：這次是戰敗撤退回來的（隊員不自動住院，再次出擊全隊一起重生在營地）
+let vitals = { player: null, mates: {}, fromBattle: false, fromDefeat: false, sortie: null };
 try { const saved = JSON.parse(localStorage.getItem(VITALS_STORE) || 'null'); if (saved && typeof saved === 'object') vitals = { ...vitals, ...saved, mates: saved.mates || {} }; } catch (_) {}
 let vitalsSavedAt = 0;
 function saveVitals() { vitalsSavedAt = performance.now(); try { localStorage.setItem(VITALS_STORE, JSON.stringify(vitals)); } catch (_) {} }
@@ -114,10 +117,10 @@ function arriveVitals() {
       if (!TYPES[id] || id === vitals.lastLeader) continue;   // 剛帶隊回來的艾德林：跟溫特一樣不會自動住院（HP 留著，在基地慢慢回）
       if (m.berserk || m.taint >= 100) { m.taint = Math.min(m.taint, VITALS.berserkEdge); m.berserk = false; }
       m.hp = Math.max(1, Math.min(vitalsMax(id), m.hp));
-      if (m.hp < vitalsMax(id) * VITALS.hospitalBelow) admitHospital(m);   // 重傷：自動住院
+      if (!vitals.fromDefeat && m.hp < vitalsMax(id) * VITALS.hospitalBelow) admitHospital(m);   // 重傷：自動住院（戰敗撤退的不住院，再次出擊要跟溫特一起出發）
     }
     if (vitals.player) vitals.player.hp = Math.max(1, vitals.player.hp);
-    vitals.fromBattle = false; vitals.sortie = null;
+    vitals.fromBattle = false; vitals.fromDefeat = false; vitals.sortie = null;
     vitalsHospitalNotice = Object.keys(vitals.mates).some(isHospitalized);   // 有人住院：地圖載好後跳通知（afterVitalsSpawn）
     saveVitals();
   }
