@@ -288,7 +288,7 @@ function drawFishKingAboveDark(ctx) {
   const e = K.e, k = e.fkRise ?? 1; if (k <= .05) return;
   if (typeof isLit === 'function' && isLit(e.x, e.y - (e.drawHeight || 190) * .6)) return;   // 照得到：看得到整隻，不用另外畫眼睛
   const w = e.drawWidth || 190, h = e.drawHeight || 190, side = e.faceRight ? 1 : -1;
-  const x = e.x + side * w * .11, y = e.y + 13 - h * (1 - 30 / 80) + (1 - k) * h * .3, t = performance.now() / 1000;
+  const x = e.x + side * w * .11, y = e.y + 13 - h * (1 - 30 / 80) + (1 - k) * h * (1 - FISH_KING.surfaceDepth), t = performance.now() / 1000;
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const a = k * (.75 + .25 * Math.sin(t * 3));
   const g = ctx.createRadialGradient(x, y, 0, x, y, 16);
@@ -618,9 +618,10 @@ function fishKingWade(a) {
   const K = fishKingState(); if (!K || K.e !== a) return undefined;
   if (K.phase === 'strand' || K.phase === 'hop' || !deepWaterAtPoint(a.x, a.y)) return null;
   const h = a.drawHeight || 190, lift = Math.max(0, a.slimeLift || 0), H = h + lift;
-  const rise = a.fkRise ?? 1, depth = 1 - (1 - FISH_KING.surfaceDepth) * rise;   // 冒頭偷看：從全部泡在水裡慢慢浮上來
+  // 浮上來／沉下去（fkRise：0＝整隻沉在水面下、1＝浮出來）：水面高度不動，是魚的身體往下沉（js/water.js 的 drawWaded 照 sinkDy 把身體往下挪）
+  const rise = a.fkRise ?? 1, depth = FISH_KING.surfaceDepth, sinkDy = (1 - rise) * h * (1 - FISH_KING.surfaceDepth);
   const O = FISH_KING.oval || { wide: .7, flat: .55 };   // 水面那圈橢圓的寬度、扁度（js/water.js 的 drawWaded／drawWaterRipple 照這個畫和切）
-  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * O.wide, flat: O.flat };
+  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * O.wide, flat: O.flat, sinkDy };
 }
 function fkSee(a) {
   const w = typeof waterAt === 'function' ? waterAt(a.x, a.y + 10) : null;

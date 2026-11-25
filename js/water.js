@@ -125,6 +125,10 @@ function drawWaded(a, kind, drawFn) {
   }   // 坐進救生圈：腳藏起來（js/swim-ring.js）
   if (!info) { drawFn(); return; }
   if (kind === 'enemy' && !info.noBase) info = { ...info, noBase: true };   // 怪物泡水：不畫貼著身體那圈白色橢圓外框（游動時往外擴散的水波照畫）
+  if (info.sinkDy > 0) {   // 正在浮上來／沉下去（魚頭王，js/fish-king.js）：水面不動，身體往下挪
+    const inner = drawFn, sdy = info.sinkDy;
+    drawFn = () => { ctx.save(); ctx.translate(0, sdy); try { inner(); } finally { ctx.restore(); } };
+  }
   // 在水裡游的怪物：身體載浮載沉（只有身體動，水面那條線和波紋留在原地，看起來就像在水裡一浮一沉）
   if (kind === 'enemy' && !fall && (a.aqua || a.waterSwim)) {
     const B = WATER.bob, t = performance.now() / 1000, seed = a.bobSeed || (a.bobSeed = Math.random() * 20);
@@ -143,7 +147,7 @@ function drawWaded(a, kind, drawFn) {
   const toX = x => m.a * x + m.e, toY = y => m.d * y + m.f;
   const pad = Math.max(info.width, 48) + 24;
   const sx = Math.max(0, Math.floor(toX(a.x - pad))), ex = Math.min(cvs.width, Math.ceil(toX(a.x + pad)));
-  const sy = Math.max(0, Math.floor(toY(info.bottom - info.height - 60))), ey = Math.min(cvs.height, Math.ceil(toY(info.bottom + 16)));
+  const sy = Math.max(0, Math.floor(toY(info.bottom - info.height - 60))), ey = Math.min(cvs.height, Math.ceil(toY(info.bottom + 16 + (info.sinkDy > 0 ? info.sinkDy : 0))));   // 身體往下沉時，處理範圍跟著往下加
   if (ex <= sx || ey <= sy) { drawFn(); return; }
   wctx.setTransform(1, 0, 0, 1, 0, 0); wctx.clearRect(sx, sy, ex - sx, ey - sy);
   wctx.setTransform(m); wctx.imageSmoothingEnabled = main.imageSmoothingEnabled; wctx.globalAlpha = main.globalAlpha; wctx.filter = main.filter;
