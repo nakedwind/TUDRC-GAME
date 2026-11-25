@@ -4,7 +4,8 @@
    ・在軌道裡的人只能在軌道格裡走（月台、停著的列車都是牆）；不在軌道裡的人走不進軌道（停著的列車車廂照樣可以上車）。
      走路、找路的規則在 js/pathfinding.js 的 trackCtx（照每個人的 a.inTrack 設），這裡只管「跳」和「誰要跳」。
    ・隊友：跟著溫特的隊友（自由行動、護衛），溫特跳進軌道就走到最近的月台邊跟著跳進去；溫特跳上去就跟著跳上來。
-     隔著軌道（自己和要跟的人都在月台上、但月台走不過去）：從自己這邊跳進軌道、走到對面再跳上去（列車快來時不跳）。
+     隔著軌道（自己和要跟的人都在月台上、但月台走不過去）：從自己這邊跳進軌道、走到對面再跳上去
+     （那條軌道的列車 MRT_TRACK.crossWarn 秒內要到、或正在進站／開走時不跳；別條軌道的車不管）。
      「前往」巡邏點、部隊長身邊也一樣：目的地在軌道對面就穿過去；下指令時也把這條路算進去（js/sentry-blocked.js）。
      列車來了不會自己逃（照使用者的設定）：要玩家自己帶出來，或用右鍵把隊友從軌道裡拉出來（js/grab.js 放下時照落點決定在不在軌道裡）。
    ・怪物：附近（MRT_TRACK.chaseRange 格內、看得到）的溫特或隊員在軌道裡，就走到最近的月台邊跳進去追；
@@ -32,6 +33,7 @@ const MRT_TRACK = {
   reach: 30,          // 溫特離月台邊（或軌道邊）多近才出現【跳下】【跳上】（像素，從那一格的中間算）
   jumpAt: 8,          // 隊友、怪物走到離跳點多近就跳（像素）
   chaseRange: 9,      // 怪物追進軌道：目標在幾格內才追
+  crossWarn: 3,      // 隊友穿過軌道：那條軌道的列車還有幾秒就到（或正在進站、開走）時，先不跳進去
   bossWarn: 10,       // BOSS：列車還有幾秒就到（或正在進站、開走）時，不跳進軌道、在裡面的先跳出來
   fallHeight: 12,    // 被擊退彈推進軌道：掉下去時先往上彈多高（像素，比一般跳低）
   sentrySpeedMul: 1.25,   // 隊友走去跳點時腳步快一點
@@ -177,11 +179,12 @@ function trackCrossStep(t, a, dt) {
   // 就算還在跟隨範圍內也要過去：隔著軌道時治療、照顧人都走不到對面（例如艾德林問「有人受傷嗎」卻過不去）
   if ((t.trackCrossT = (t.trackCrossT || 0) - dt) <= 0) {   // 不要每一幀都找路：隔一下才重新判斷
     t.trackCrossT = MRT_TRACK.crossCheck;
-    t.trackCross = !trainComingSoon() && buildSentryPath(t, a.x, a.y, true) === null ? trackCrossPick(t, a.x, a.y) : null;
+    t.trackCross = buildSentryPath(t, a.x, a.y, true) === null ? trackCrossPick(t, a.x, a.y, true) : null;   // true：要經過的那條軌道列車快來了就先不跳
   }
   const e = t.trackCross;
   if (!e || trackStopped(e.dk)) return false;
   if (Math.hypot(t.x - e.ux, t.y - e.uy) <= MRT_TRACK.jumpAt) {
+    if (trainComingSoon(e.dx, e.dy, MRT_TRACK.crossWarn)) { t.trackCross = null; t.moving = false; return true; }   // 走到跳點時列車剛好快來了：站在月台邊等
     t.trackCross = null; startTrackJump(t, e.dx, e.dy, true);
     t.trackCrossTo = a;   // 跳進去之後要到誰旁邊跳上來（落地時 setInTrack 不會清掉這個）
   } else {
@@ -193,12 +196,14 @@ function trackCrossStep(t, a, dt) {
   return true;
 }
 // 挑穿過軌道的跳點：自己這邊走得到的月台邊，而且對面有跳點離 (gx, gy) 夠近、從那裡走得到 (gx, gy)（不然表示目的地根本不在軌道對面）
-function trackCrossPick(t, gx, gy) {
-  const outs = trackEdges().filter(e => !trackStopped(e.dk) && Math.hypot(gx - e.ux, gy - e.uy) <= MRT_TRACK.crossExit * CELL)
+// avoidTrain：列車快經過的軌道不挑（下指令時檢查走不走得到不用管這個，等車過去就會走）
+function trackCrossPick(t, gx, gy, avoidTrain = false) {
+  const ok = e => !trackStopped(e.dk) && !(avoidTrain && trainComingSoon(e.dx, e.dy, MRT_TRACK.crossWarn));
+  const outs = trackEdges().filter(e => ok(e) && Math.hypot(gx - e.ux, gy - e.uy) <= MRT_TRACK.crossExit * CELL)
     .sort((x, y) => Math.hypot(gx - x.ux, gy - x.uy) - Math.hypot(gx - y.ux, gy - y.uy));
   const out = outs.slice(0, 3).find(e => trackProbePath(t, e.ux, e.uy, gx, gy));   // 最多試 3 個
   if (!out) return null;
-  const list = trackEdges().filter(e => !trackStopped(e.dk))
+  const list = trackEdges().filter(ok)
     .map(e => ({ e, v: Math.hypot(t.x - e.ux, t.y - e.uy) * 2 + Math.hypot(out.dx - e.dx, out.dy - e.dy) }))   // 自己走到跳點的路程算重一點（優先挑自己這邊的）
     .sort((x, y) => x.v - y.v);
   for (const { e } of list.slice(0, 6)) {   // 最多試 6 個，免得一直找路卡頓
@@ -223,11 +228,15 @@ const trackIsBoss = e => !!(e && (e.eliteName || e.milkfishKing || e.ratKing || 
 // 自己有特殊走法的 BOSS：不跳進軌道（只是被列車撞不倒）
 const trackBossCustom = e => !!(e && (e.milkfishKing || e.ratKing || e.poolBoss || e.gourdKing || e.bananaEmperor || e.pearlBoss || e.loofahQueen || e.mothBoss || e.elite || e.behavior === 'burrow' || e.behavior === 'milkfishKing'));
 const trackFlying = e => !!(e && (e.behavior === 'moth' || e.flying || (e.slimeLift || 0) > 4));
-// 列車快來了嗎（BOSS 用）：有車在 bossWarn 秒內到站、或正在進站／開走／載著溫特在隧道裡
-function trainComingSoon() {
+// 列車快來了嗎：有車在 bossWarn 秒內到站、或正在進站／開走／載著溫特在隧道裡
+// 給 (x, y)＝只看會經過那個點的列車（那一條軌道上的車）。不給＝整張地圖任何一班（BOSS 用）
+// （G11 這種好幾條軌道的站，幾乎隨時都有某一班快到，只看整張地圖的話隊員永遠不敢穿過軌道）
+// warn＝幾秒內到站算「快來了」（不給＝BOSS 用的 bossWarn）
+function trainComingSoon(x, y, warn = MRT_TRACK.bossWarn) {
   for (const tr of (G && G.mrtTrains) || []) {
+    if (x != null && !(y >= tr.top && y <= tr.bottom && x >= tr.clipL - CELL && x <= tr.clipR + CELL)) continue;
     if (tr.state === 'arrive' || tr.state === 'depart' || tr.state === 'tunnel') return true;
-    if (tr.state === 'away' && tr.t <= MRT_TRACK.bossWarn) return true;
+    if (tr.state === 'away' && tr.t <= warn) return true;
   }
   return false;
 }
@@ -256,7 +265,7 @@ function trackEnemyStep(e, dt) {
     const d = Math.hypot(a.x - e.x, a.y - e.y);
     if (d < bd && d <= R && hasLineOfSight(e.x, e.y, a.x, a.y)) { bd = d; target = a; }
   }
-  const tin = target && inTrackNow(target), coming = boss && trainComingSoon();
+  const tin = target && inTrackNow(target), coming = boss && (ein ? trainComingSoon(e.x, e.y) : tin ? trainComingSoon(target.x, target.y) : false);   // 只看自己（或目標）那條軌道的車
   if (!ein) e.trackCrossTo = null;
   if (!ein && target && !tin) return trackEnemyCross(e, target, dt, coming);   // 都在月台上：看是不是隔著軌道、要穿過去
   e.trackCross = null;
@@ -304,10 +313,11 @@ function trackKnockFall(e, k, x, y) {
 // coming＝BOSS 而且列車快來了：不跳
 function trackEnemyCross(e, target, dt, coming) {
   if (coming || Math.hypot(target.x - e.x, target.y - e.y) <= MRT_TRACK.crossNear * CELL) { e.trackCross = null; return false; }
+  const boss = trackIsBoss(e);
   if ((e.trackCrossT = (e.trackCrossT == null ? Math.random() * MRT_TRACK.crossCheck : e.trackCrossT) - dt) <= 0) {   // 不要每一幀都找路；一開始錯開，免得一群怪同一幀一起找
     e.trackCrossT = MRT_TRACK.crossCheck;
     const [gc, gr] = cellAt(target.x, target.y);
-    e.trackCross = buildEnemyRoute(e, gc, gr, true) === null ? trackEnemyCrossPick(e, target) : null;   // true：建築打得穿，不算擋路
+    e.trackCross = buildEnemyRoute(e, gc, gr, true) === null ? trackEnemyCrossPick(e, target, boss) : null;   // BOSS：列車快經過的軌道不挑   // true：建築打得穿，不算擋路
   }
   const ed = e.trackCross;
   if (!ed || trackStopped(ed.dk)) return false;
@@ -318,10 +328,10 @@ function trackEnemyCross(e, target, dt, coming) {
   return true;
 }
 // 挑穿過軌道的跳點（跟隊友的 trackCrossPick 一樣，只是用怪物的找路）
-function trackEnemyCrossPick(e, target) {
+function trackEnemyCrossPick(e, target, avoidTrain = false) {
   const out = trackPickEdge(ed => Math.hypot(target.x - ed.ux, target.y - ed.uy));
   if (!out || Math.hypot(target.x - out.ux, target.y - out.uy) > MRT_TRACK.crossExit * CELL) return null;
-  const list = trackEdges().filter(ed => !trackStopped(ed.dk))
+  const list = trackEdges().filter(ed => !trackStopped(ed.dk) && !(avoidTrain && trainComingSoon(ed.dx, ed.dy)))
     .map(ed => ({ ed, v: Math.hypot(e.x - ed.ux, e.y - ed.uy) * 2 + Math.hypot(out.dx - ed.dx, out.dy - ed.dy) }))
     .sort((a, b) => a.v - b.v);
   for (const { ed } of list.slice(0, 6)) {
