@@ -1060,7 +1060,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "rootTime": 4,
       "safeTime": 2,
       "fireR": 20,
-      "burnTime": 25
+      "burnTime": 40
     }
   },
   "PEARL_ELDER": {

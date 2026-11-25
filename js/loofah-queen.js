@@ -99,7 +99,7 @@ const LOOFAH_QUEEN = applyBossSettings('LOOFAH_QUEEN', {
     rootTime: 4,                 // 被纏住幾秒（可以掙扎、開槍幫隊友射斷）
     safeTime: 2,                 // 掙脫後幾秒內不會又被同一片農田纏住（讓人走得出來）
     fireR: 20,                   // 火海離藤蔓多近算燒到（像素）
-    burnTime: 25,                // 燒掉後幾秒再長出來
+    burnTime: 40,                // 燒掉後幾秒再長出來（11-26 從 25 秒改慢）
   },
 });
 
