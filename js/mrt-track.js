@@ -4,6 +4,7 @@
    ・在軌道裡的人只能在軌道格裡走（月台、停著的列車都是牆）；不在軌道裡的人走不進軌道（停著的列車車廂照樣可以上車）。
      走路、找路的規則在 js/pathfinding.js 的 trackCtx（照每個人的 a.inTrack 設），這裡只管「跳」和「誰要跳」。
    ・隊友：跟著溫特的隊友（自由行動、護衛），溫特跳進軌道就走到最近的月台邊跟著跳進去；溫特跳上去就跟著跳上來。
+     隔著軌道（自己和要跟的人都在月台上、但月台走不過去）：從自己這邊跳進軌道、走到對面再跳上去（列車快來時不跳）。
      列車來了不會自己逃（照使用者的設定）：要玩家自己帶出來，或用右鍵把隊友從軌道裡拉出來（js/grab.js 放下時照落點決定在不在軌道裡）。
    ・怪物：附近（MRT_TRACK.chaseRange 格內、看得到）的溫特或隊員在軌道裡，就走到最近的月台邊跳進去追；
      自己在軌道裡、要追的人不在軌道裡（或沒有目標），就走到最近的月台邊跳上來。
@@ -29,6 +30,9 @@ const MRT_TRACK = {
   chaseRange: 9,      // 怪物追進軌道：目標在幾格內才追
   bossWarn: 10,       // BOSS：列車還有幾秒就到（或正在進站、開走）時，不跳進軌道、在裡面的先跳出來
   sentrySpeedMul: 1.25,   // 隊友走去跳點時腳步快一點
+  crossCheck: 1,     // 隊友隔著軌道：每幾秒檢查一次「走得過去嗎？要不要穿過軌道」
+  crossNear: 2.5,    // 隊友隔著軌道：離要跟的人幾格內就不穿過去
+  crossExit: 6,      // 隊友隔著軌道：對面離要跟的人最近的跳點要在幾格內，才穿過去（太遠表示人不在軌道對面，不跳）
   promptDown: '跳下', promptUp: '跳上',
 };
 const inTrackNow = a => !!(a && a.inTrack && a.inTrackMap === MAP);
@@ -119,24 +123,75 @@ function trackJumpUpdate(p, dt) { return stepTrackJump(p, dt); }
 // ---- 隊友：跟著溫特跳進跳出 ----
 function trackSentryStep(t, dt) {
   if (stepTrackJump(t, dt)) return true;
-  if (!trackCells.size || t.hp <= 0 || t.grabbed || t.grabFall || t.mrtRide || t.eatenBy || t.berserk) return false;
+  if (!trackCells.size || t.hp <= 0 || t.grabbed || t.grabFall || t.mrtRide || t.eatenBy || t.berserk) { t.trackCross = null; return false; }
   const p = G.player; if (!p || p.hp <= 0) return false;
-  if (!(t.mode === 'free' || t.mode === 'escort')) return false;   // 叫他守在某處（巡邏、前往）的不跟
+  if (!(t.mode === 'free' || t.mode === 'escort')) { t.trackCross = t.trackCrossTo = null; return false; }   // 叫他守在某處（巡邏、前往）的不跟
   const pin = inTrackNow(p), tin = inTrackNow(t);
+  if (!tin) t.trackCrossTo = null;
+  if (!pin && !tin) return trackCrossStep(t, dt);   // 都在月台上：看是不是隔著軌道、要穿過去
+  t.trackCross = null;
+  // 為了穿過軌道才跳進來的：要跟的人（不一定是溫特，例如阿瓦倫跟艾德林）還在月台上，就到他附近的月台邊跳上去
+  const to = t.trackCrossTo;
+  if (tin && to && to !== p && to.hp > 0 && !inTrackNow(to) && (G.towers || []).includes(to)) return trackSentryExit(t, to, dt);
   if (pin === tin || p.trackJump) return false;   // 跟溫特在同一邊：照平常的跟隨
   const sp = ((TYPES[t.type] && TYPES[t.type].walkSpeed) || 80) * MRT_TRACK.sentrySpeedMul;
   if (pin) {   // 溫特在軌道裡：走到離溫特最近的月台邊、跳進去
     const e = trackPickEdge(e => Math.hypot(t.x - e.ux, t.y - e.uy) + Math.hypot(p.x - e.dx, p.y - e.dy));
     if (!e) return false;
     if (Math.hypot(t.x - e.ux, t.y - e.uy) <= MRT_TRACK.jumpAt) startTrackJump(t, e.dx, e.dy, true);
-    else moveSentryWithPath(t, e.ux, e.uy, sp, dt, 1);
-  } else {     // 自己在軌道裡、溫特上去了：走到離溫特最近的軌道邊、跳上去
-    const e = trackPickEdge(e => Math.hypot(t.x - e.dx, t.y - e.dy) + Math.hypot(p.x - e.ux, p.y - e.uy));
-    if (!e) return false;
-    if (Math.hypot(t.x - e.dx, t.y - e.dy) <= MRT_TRACK.jumpAt) startTrackJump(t, e.ux, e.uy, false);
-    else moveSentryWithPath(t, e.dx, e.dy, sp, dt, 1);
+    else trackSentryWalk(t, e.ux, e.uy, sp, dt);
+    return true;
+  }
+  return trackSentryExit(t, p, dt);   // 自己在軌道裡、溫特上去了：走到離溫特最近的軌道邊、跳上去
+}
+// 隊友走去跳點：跟著人走，暗的地方也照走（跟平常跟著溫特一樣，見 js/sentry.js 的 followDark）
+function trackSentryWalk(t, x, y, sp, dt) {
+  t.followDark = true;
+  return moveSentryWithPath(t, x, y, sp, dt, 1);
+}
+// 在軌道裡：走到離 a 最近的軌道邊、跳上月台
+function trackSentryExit(t, a, dt) {
+  const sp = ((TYPES[t.type] && TYPES[t.type].walkSpeed) || 80) * MRT_TRACK.sentrySpeedMul;
+  const e = trackPickEdge(e => Math.hypot(t.x - e.dx, t.y - e.dy) + Math.hypot(a.x - e.ux, a.y - e.uy));
+  if (!e) return false;
+  if (Math.hypot(t.x - e.dx, t.y - e.dy) <= MRT_TRACK.jumpAt) startTrackJump(t, e.ux, e.uy, false);
+  else trackSentryWalk(t, e.dx, e.dy, sp, dt);
+  return true;
+}
+// 隔著軌道：自己和要跟的人都在月台上，但月台上走不過去（中間隔著軌道）
+// → 從自己這邊的月台邊跳進軌道（之後由上面的 trackSentryExit 走到對面跳上去）
+function trackCrossStep(t, dt) {
+  const rule = typeof sentryCompanionRule === 'function' ? sentryCompanionRule(t) : null, a = rule && rule.anchor;
+  if (!a || a.hp <= 0 || a.trackJump || inTrackNow(a) || Math.hypot(a.x - t.x, a.y - t.y) <= MRT_TRACK.crossNear * CELL) { t.trackCross = null; return false; }   // 已經在旁邊：照平常的跟隨
+  // 就算還在跟隨範圍內也要過去：隔著軌道時治療、照顧人都走不到對面（例如艾德林問「有人受傷嗎」卻過不去）
+  if ((t.trackCrossT = (t.trackCrossT || 0) - dt) <= 0) {   // 不要每一幀都找路：隔一下才重新判斷
+    t.trackCrossT = MRT_TRACK.crossCheck;
+    t.trackCross = !trainComingSoon() && buildSentryPath(t, a.x, a.y, true) === null ? trackCrossPick(t, a) : null;
+  }
+  const e = t.trackCross;
+  if (!e || trackStopped(e.dk)) return false;
+  if (Math.hypot(t.x - e.ux, t.y - e.uy) <= MRT_TRACK.jumpAt) {
+    t.trackCross = null; startTrackJump(t, e.dx, e.dy, true);
+    t.trackCrossTo = a;   // 跳進去之後要到誰旁邊跳上來（落地時 setInTrack 不會清掉這個）
+  } else {
+    const sp = ((TYPES[t.type] && TYPES[t.type].walkSpeed) || 80) * MRT_TRACK.sentrySpeedMul;
+    t.navFailed = false;   // 先清掉之前留下的「找不到路」記號，下面才看得出這次是不是真的走不到
+    trackSentryWalk(t, e.ux, e.uy, sp, dt);
+    if (t.navFailed) t.trackCross = null;   // 走不到那個跳點：下次再重挑
   }
   return true;
+}
+// 挑穿過軌道的跳點：自己這邊走得到的月台邊，而且對面有跳點離要跟的人夠近（不然表示人根本不在軌道對面）
+function trackCrossPick(t, a) {
+  const out = trackPickEdge(e => Math.hypot(a.x - e.ux, a.y - e.uy));
+  if (!out || Math.hypot(a.x - out.ux, a.y - out.uy) > MRT_TRACK.crossExit * CELL) return null;
+  const list = trackEdges().filter(e => !trackStopped(e.dk))
+    .map(e => ({ e, v: Math.hypot(t.x - e.ux, t.y - e.uy) * 2 + Math.hypot(out.dx - e.dx, out.dy - e.dy) }))   // 自己走到跳點的路程算重一點（優先挑自己這邊的）
+    .sort((x, y) => x.v - y.v);
+  for (const { e } of list.slice(0, 6)) {   // 最多試 6 個，免得一直找路卡頓
+    if (Math.hypot(t.x - e.ux, t.y - e.uy) <= CELL || buildSentryPath(t, e.ux, e.uy, true) !== null) return e;
+  }
+  return null;
 }
 
 // ---- 怪物：追進軌道、跳出軌道 ----
