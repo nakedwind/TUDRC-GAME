@@ -160,7 +160,8 @@ function drawWaded(a, kind, drawFn) {
   // 貼回遊戲畫面：水面以上照常、水面以下半透明
   const line = Math.round(toY(info.bottom - info.height * info.w.depth)), cut = Math.max(sy, Math.min(ey, line));
   drawWaterRipple(a, info, 'back');   // 波紋後半圈（離鏡頭遠的上半弧）：先畫，角色會蓋在它上面，才不會壓到頭
-  main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.globalAlpha = 1; main.filter = 'none';
+  const fade = info.fade == null ? 1 : info.fade;   // 整隻淡入淡出（魚頭王浮上來／沉下去，js/fish-king.js）
+  main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.globalAlpha = fade; main.filter = 'none';
   if (kind === 'enemy' && WATER_OVAL_ENEMY) {
     // 怪物：水面跟身體的交界照波紋前半圈的橢圓弧走（中間往下彎），不是一條直線
     const rx = Math.abs(m.a) * info.width * .5, ry = Math.abs(m.d) * Math.max(2.5, info.width * .5 * (info.flat || WATER.rippleFlat)), cx = toX(a.x);
@@ -170,14 +171,14 @@ function drawWaded(a, kind, drawFn) {
     main.drawImage(waterLayer, sx, sy, ex - sx, ey - sy, sx, sy, ex - sx, ey - sy);
     main.restore();
     if (ey > cut && info.w.see > 0) {   // 水面下：直線以下、扣掉那半個橢圓 → 半透明
-      main.save(); main.globalAlpha = info.w.see;
+      main.save(); main.globalAlpha = info.w.see * fade;
       main.beginPath(); main.rect(sx, cut, ex - sx, ey - cut); main.moveTo(cx + rx, cut); oval(main); main.closePath(); main.clip('evenodd');
       main.drawImage(waterLayer, sx, cut, ex - sx, ey - cut, sx, cut, ex - sx, ey - cut);
       main.restore();
     }
   } else {
     if (cut > sy) main.drawImage(waterLayer, sx, sy, ex - sx, cut - sy, sx, sy, ex - sx, cut - sy);
-    if (ey > cut && info.w.see > 0) { main.globalAlpha = info.w.see; main.drawImage(waterLayer, sx, cut, ex - sx, ey - cut, sx, cut, ex - sx, ey - cut); }
+    if (ey > cut && info.w.see > 0) { main.globalAlpha = info.w.see * fade; main.drawImage(waterLayer, sx, cut, ex - sx, ey - cut, sx, cut, ex - sx, ey - cut); }
   }
   main.restore();
   drawWaterRipple(a, info, 'front');   // 波紋前半圈（靠鏡頭的下半弧）：最後畫，在角色前面
@@ -190,6 +191,7 @@ function drawWaterRipple(a, info, part) {
   const t = performance.now() / 1000;
   ctx.save();
   ctx.lineWidth = 1.2;
+  if (info.fade != null) ctx.globalAlpha *= info.fade;   // 跟著身體一起淡入淡出
   if (!info.noBase && !(info.ripple && info.ripple.noBase)) {   // 貼著身體、一直在的那一圈（info.noBase／info.ripple.noBase＝不要這圈，只有往外擴散的）
     ctx.strokeStyle = WATER.rippleColor + '.55)';
     ctx.beginPath(); ctx.ellipse(a.x, y, rx, ry, 0, a0, a1); ctx.stroke();

@@ -32,6 +32,7 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   // 開戰前冒頭偷看：每隔幾秒（隨機）一次、盯著看幾秒、慢慢浮出來要幾秒、慢慢沉下去要幾秒、離溫特幾格（最近～最遠）的深水才冒
   peek: { every: [14, 26], stay: 4.5, rise: 2.2, sink: 2.4, distMin: 4, distMax: 10, splashRise: .5, splashSink: .7 },   // splashRise／splashSink＝浮出來、沉下去時，水花散開的寬度大約是身體寬的幾倍
   surfaceRise: 1.2,           // 開戰後：從水裡浮上來要幾秒（慢慢浮出來，不是一下子跳出來）
+  fadeAt: .7,                 // 淡入淡出：浮到幾成高之前身體是半透明的（沉下去時反過來慢慢淡掉；0＝不淡入淡出）
   // 泡在水裡時，水面那一圈橢圓：wide＝寬度是身體寬的幾倍、flat＝扁度（高÷寬，越小越扁）
   oval: { wide: 1, flat: .3 },
   introSecs: 1.1,             // 正式登場：從水裡躍出來到落回水面要幾秒
@@ -629,7 +630,9 @@ function fishKingWade(a) {
   // 浮上來／沉下去（fkRise：0＝整隻沉在水面下、1＝浮出來）：水面高度不動，是魚的身體往下沉（js/water.js 的 drawWaded 照 sinkDy 把身體往下挪）
   const rise = a.fkRise ?? 1, depth = FISH_KING.surfaceDepth, sinkDy = (1 - rise) * h * (1 - FISH_KING.surfaceDepth);
   const O = FISH_KING.oval || { wide: .7, flat: .55 };   // 水面那圈橢圓的寬度、扁度（js/water.js 的 drawWaded／drawWaterRipple 照這個畫和切）
-  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * O.wide, flat: O.flat, sinkDy };
+  // 淡入淡出：浮上來時慢慢顯現、沉下去時慢慢消失（fade＝整隻的透明度，js/water.js 的 drawWaded 照這個畫）
+  const fade = Math.max(0, Math.min(1, rise / (FISH_KING.fadeAt || .01)));
+  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * O.wide, flat: O.flat, sinkDy, fade };
 }
 function fkSee(a) {
   const w = typeof waterAt === 'function' ? waterAt(a.x, a.y + 10) : null;

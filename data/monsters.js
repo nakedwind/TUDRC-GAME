@@ -1790,6 +1790,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "splashSink": 0.7
     },
     "surfaceRise": 1.2,
+    "fadeAt": 0.7,
     "oval": {
       "wide": 1,
       "flat": 0.3

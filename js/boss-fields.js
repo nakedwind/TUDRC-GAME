@@ -511,6 +511,7 @@ const BOSS_FIELD_ROWS = {"ELITE_BIRD":[{"d":0,"t":"以原型鳥頭人（data/mon
 {"d":0,"t":"","k":[["rewardMul","rewardMul"],["crystalMul","crystalMul"]]},
 {"d":0,"t":"splashRise／splashSink＝浮出來、沉下去時，水花散開的寬度大約是身體寬的幾倍","k":[["peek.every","peek．every"],["peek.stay","peek．stay"],["peek.rise","peek．rise"],["peek.sink","peek．sink"],["peek.distMin","peek．distMin"],["peek.distMax","peek．distMax"],["peek.splashRise","peek．splashRise"],["peek.splashSink","peek．splashSink"]]},
 {"d":0,"t":"開戰後：從水裡浮上來要幾秒（慢慢浮出來，不是一下子跳出來）","k":[["surfaceRise","surfaceRise"]]},
+{"d":0,"t":"淡入淡出：浮到幾成高之前身體是半透明的（沉下去時反過來慢慢淡掉；0＝不淡入淡出）","k":[["fadeAt","fadeAt"]]},
 {"d":0,"t":"泡在水裡時，水面那一圈橢圓：wide＝寬度是身體寬的幾倍、flat＝扁度（高÷寬，越小越扁）","k":[["oval.wide","oval．wide"],["oval.flat","oval．flat"]]},
 {"d":0,"t":"正式登場：從水裡躍出來到落回水面要幾秒","k":[["introSecs","introSecs"]]},
 {"d":0,"t":"正式登場：跳多高（像素）","k":[["introHeight","introHeight"]]},
