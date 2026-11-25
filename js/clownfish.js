@@ -18,6 +18,9 @@ const CLOWNFISH = {
   chaseRestMul: .4,    // 追人時休息時間的倍率（跳得比較急）
   hopHeight: 38,       // 跳多高（像素）
   hatchlingHopMul: .5, // 幼體身體小：整套動作的時間倍率（比較輕快）
+  // ---- 在水裡：不跳了，改成慢慢游、身體載浮載沉（浮沉的樣子在 js/water.js 的 WATER.bob）----
+  swimMul: .45,        // 在水裡游的速度＝走路速度的幾倍（約等於跳著走的平均速度）
+  swimPulse: 2,        // 在水裡每隔幾秒算一次「撞到人」和生魚卵（取代落地那一下）
   // ---- 追擊 ----
   noticeRange: 9,      // 看到玩家／哨兵的距離（格）
   loseRange: 14,       // 追多遠就放棄（格）
@@ -74,6 +77,8 @@ const CF_ART_SMALL = {   // 幼體自己的兩張圖（站著、跳起來）
 };
 const cfIsHatchling = e => e.type === CLOWNFISH.hatchlingId;   // 幼體：不會再產卵
 const cfArt = e => cfIsHatchling(e) ? CF_ART_SMALL : CF_ART;   // 幼體用自己的兩張圖
+// 腳下是不是水（js/water.js；站在池核救生台上不算）
+const cfInWater = e => typeof waterAt === 'function' && !(typeof onPoolPlatform === 'function' && onPoolPlatform(e.x, e.y)) && !!waterAt(e.x, e.y + WATER.enemyFootDy);
 const cfState = e => e.cf || (e.cf = { phase: 'rest', t: Math.random() * CLOWNFISH.hopRest, hops: 0, hp0: e.hp, startleT: 0, fleeHops: 0 });
 
 // ---- 目標：玩家與看得到的哨兵 ----
@@ -93,8 +98,18 @@ function cfPickTarget(e) {
 function updateClownfishHop(e, dt) {
   const C = CLOWNFISH, cf = cfState(e), k = cfIsHatchling(e) ? C.hatchlingHopMul : 1;
   if (e.stunT > 0 || e.knockT > 0) {   // 被電暈／被擊退：先停住
-    cf.phase = 'rest'; cf.t = C.hopRest * .5 * k; e.forceFrame = null; e.slimeLift = 0; return 0;
+    cf.phase = cfInWater(e) ? 'swim' : 'rest'; cf.t = C.hopRest * .5 * k; e.forceFrame = null; e.slimeLift = 0; e.waterSwim = cf.phase === 'swim'; return 0;
   }
+  // 腳下是水（而且不是跳到一半）：不跳了，改成在水裡慢慢游，身體載浮載沉（js/water.js 畫）
+  if (cf.phase !== 'air' && cfInWater(e)) {
+    if (cf.phase !== 'swim') { cf.phase = 'swim'; cf.pulse = C.swimPulse * .5; }
+    e.forceFrame = null; e.slimeLift = 0; e.waterSwim = true;
+    cf.pulse -= dt;
+    if (cf.pulse <= 0) { cf.pulse = C.swimPulse * k; clownfishLand(e, true); }   // 每隔一陣子：撞到旁邊的人、生魚卵
+    return dt * C.swimMul;
+  }
+  e.waterSwim = false;
+  if (cf.phase === 'swim') { cf.phase = 'rest'; cf.t = C.hopRest * .3 * k; }   // 游上岸了：休息一下再開始跳
   cf.t -= dt;
   if (cf.phase === 'rest') {
     e.forceFrame = null; e.slimeLift = 0;
@@ -119,12 +134,15 @@ function updateClownfishHop(e, dt) {
 }
 
 // ---- 落地：撞擊傷害＋（每幾跳）生一窩魚卵 ----
-function clownfishLand(e) {
+// swim＝在水裡游的時候（不是真的落地）：不播跳躍聲、不濺水漬，只留撞人和生魚卵
+function clownfishLand(e, swim) {
   const C = CLOWNFISH, cf = cfState(e);
-  cf.hopSfx = !cf.hopSfx;   // 兩種跳躍聲輪流播
-  if (typeof sfxAt === 'function') sfxAt(cf.hopSfx ? 'clownfishHop1' : 'clownfishHop2', e.x, e.y, .5, 'cf-land');
-  G.effects.push({ ring: true, x: e.x, y: e.y + 10, r: 4, r2: 26, life: .22, life0: .22, color: '#9fd4ff' });
-  if (typeof addPuddle === 'function') addPuddle(e.x + (Math.random() - .5) * 12, e.y + 11 + Math.random() * 3, 5 + Math.random() * 3.5, C.trailLife);   // 落地濺出水漬
+  if (!swim) {
+    cf.hopSfx = !cf.hopSfx;   // 兩種跳躍聲輪流播
+    if (typeof sfxAt === 'function') sfxAt(cf.hopSfx ? 'clownfishHop1' : 'clownfishHop2', e.x, e.y, .5, 'cf-land');
+    G.effects.push({ ring: true, x: e.x, y: e.y + 10, r: 4, r2: 26, life: .22, life0: .22, color: '#9fd4ff' });
+    if (typeof addPuddle === 'function') addPuddle(e.x + (Math.random() - .5) * 12, e.y + 11 + Math.random() * 3, 5 + Math.random() * 3.5, C.trailLife);   // 落地濺出水漬
+  }
   const p = G.player;
   if (p && p.hp > 0 && Math.hypot(p.x - e.x, p.y - e.y) <= C.hitRadius) enemyAttackPlayer(e, 0);
   for (const t of G.towers) {   // 落地範圍內的隊友各算一次
@@ -356,7 +374,7 @@ function drawFishEgg(ctx, egg) {
 function clownfishWater(e, dt) {
   const C = CLOWNFISH, cf = cfState(e);
   if (typeof addPuddle !== 'function') return;
-  if (cf.phase === 'air') {   // 騰空移動中：腳下那攤開始乾
+  if (cf.phase === 'air' || cf.phase === 'swim') {   // 騰空移動中、在水裡游：腳下那攤開始乾（水裡不積水灘）
     cf.still = 0;
     if (cf.pool) { cf.pool.grow = false; cf.pool = null; }
     return;

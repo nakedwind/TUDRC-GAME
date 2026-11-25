@@ -13,7 +13,17 @@ const WATER = {
   enemyFootDy: 10,   // 怪物的腳
   rippleColor: 'rgba(205,238,255,',   // 水面波紋的顏色（後面接透明度）
   rippleFlat: .55,   // 波紋的扁度＝高÷寬（1＝正圓、越小越扁；原本 .22 太扁，俯視角看起來怪）
+  // 在水裡游的怪物（深水裡的魚、在水裡的小丑魚）：身體跟著水慢慢上下浮、微微前後晃，水面位置不動
+  bob: {
+    amp: .045,       // 上下浮多少＝身高的幾倍
+    ampMin: 1.5,     // 最少浮幾像素（太小的怪物也看得出來）
+    speed: 2.1,      // 停著時浮沉多快（越大越快）
+    moveSpeed: 2.8,  // 游動時浮沉多快
+    tilt: .05,       // 前後晃多少（弧度）
+  },
 };
+// 怪物泡水時，水面跟身體交界改成橢圓（跟水面波紋的前半圈一樣），不是一條直線
+const WATER_OVAL_ENEMY = true;
 const WATER_DEFAULT = { depth: 25, speed: 70, see: 45 };   // 沒填的數字用這個
 
 // 素材的水設定（沒有＝不是水）；數字超出範圍會被拉回來
@@ -94,6 +104,16 @@ function drawWaded(a, kind, drawFn) {
     return;
   }   // 坐進救生圈：腳藏起來（js/swim-ring.js）
   if (!info) { drawFn(); return; }
+  // 在水裡游的怪物：身體載浮載沉（只有身體動，水面那條線和波紋留在原地，看起來就像在水裡一浮一沉）
+  if (kind === 'enemy' && !fall && (a.aqua || a.waterSwim)) {
+    const B = WATER.bob, t = performance.now() / 1000, seed = a.bobSeed || (a.bobSeed = Math.random() * 20);
+    a.bobPhase = (a.bobPhase == null ? seed : a.bobPhase) + (a.moving ? B.moveSpeed : B.speed) * (t - (a.bobT || t));   // 用累加的相位：游／停切換時不會突然跳一下
+    a.bobT = t;
+    const ph = a.bobPhase, amp = Math.max(B.ampMin, info.height * B.amp);
+    const dy = Math.sin(ph) * amp, rot = Math.sin(ph * .5 + seed) * B.tilt * (a.faceRight ? -1 : 1);
+    const inner = drawFn, py = info.bottom - info.height * info.w.depth;
+    drawFn = () => { ctx.save(); ctx.translate(a.x, py + dy); ctx.rotate(rot); ctx.translate(-a.x, -py); try { inner(); } finally { ctx.restore(); } };
+  }
   const main = ctx, cvs = main.canvas, m = main.getTransform();
   if (!waterLayer) waterLayer = document.createElement('canvas');
   if (waterLayer.width !== cvs.width || waterLayer.height !== cvs.height) { waterLayer.width = cvs.width; waterLayer.height = cvs.height; }
@@ -112,8 +132,24 @@ function drawWaded(a, kind, drawFn) {
   const line = Math.round(toY(info.bottom - info.height * info.w.depth)), cut = Math.max(sy, Math.min(ey, line));
   drawWaterRipple(a, info, 'back');   // 波紋後半圈（離鏡頭遠的上半弧）：先畫，角色會蓋在它上面，才不會壓到頭
   main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.globalAlpha = 1; main.filter = 'none';
-  if (cut > sy) main.drawImage(waterLayer, sx, sy, ex - sx, cut - sy, sx, sy, ex - sx, cut - sy);
-  if (ey > cut && info.w.see > 0) { main.globalAlpha = info.w.see; main.drawImage(waterLayer, sx, cut, ex - sx, ey - cut, sx, cut, ex - sx, ey - cut); }
+  if (kind === 'enemy' && WATER_OVAL_ENEMY) {
+    // 怪物：水面跟身體的交界照波紋前半圈的橢圓弧走（中間往下彎），不是一條直線
+    const rx = Math.abs(m.a) * info.width * .5, ry = Math.abs(m.d) * Math.max(2.5, info.width * .5 * WATER.rippleFlat), cx = toX(a.x);
+    const oval = c => c.ellipse(cx, cut, rx, ry, 0, 0, Math.PI);   // 下半個橢圓（靠鏡頭那一半）
+    main.save();   // 水面上：直線以上＋下半個橢圓裡面 → 照常畫
+    main.beginPath(); main.rect(sx, sy, ex - sx, cut - sy); main.moveTo(cx + rx, cut); oval(main); main.closePath(); main.clip();
+    main.drawImage(waterLayer, sx, sy, ex - sx, ey - sy, sx, sy, ex - sx, ey - sy);
+    main.restore();
+    if (ey > cut && info.w.see > 0) {   // 水面下：直線以下、扣掉那半個橢圓 → 半透明
+      main.save(); main.globalAlpha = info.w.see;
+      main.beginPath(); main.rect(sx, cut, ex - sx, ey - cut); main.moveTo(cx + rx, cut); oval(main); main.closePath(); main.clip('evenodd');
+      main.drawImage(waterLayer, sx, cut, ex - sx, ey - cut, sx, cut, ex - sx, ey - cut);
+      main.restore();
+    }
+  } else {
+    if (cut > sy) main.drawImage(waterLayer, sx, sy, ex - sx, cut - sy, sx, sy, ex - sx, cut - sy);
+    if (ey > cut && info.w.see > 0) { main.globalAlpha = info.w.see; main.drawImage(waterLayer, sx, cut, ex - sx, ey - cut, sx, cut, ex - sx, ey - cut); }
+  }
   main.restore();
   drawWaterRipple(a, info, 'front');   // 波紋前半圈（靠鏡頭的下半弧）：最後畫，在角色前面
 }
