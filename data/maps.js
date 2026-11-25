@@ -91945,7 +91945,7 @@ const BATTLE_MAPS = [
         "id": "tile_bg_road_signs",
         "c": 61,
         "r": 70,
-        "layer": "overlay",
+        "layer": "object10",
         "oy": 31.33333300000004,
         "ox": 28
       },
