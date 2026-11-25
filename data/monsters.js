@@ -1785,7 +1785,9 @@ const BOSS_SETTINGS_DEFAULT = {
       "rise": 2.2,
       "sink": 2.4,
       "distMin": 4,
-      "distMax": 10
+      "distMax": 10,
+      "splashRise": 0.5,
+      "splashSink": 0.7
     },
     "surfaceRise": 1.2,
     "oval": {
@@ -1818,7 +1820,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "surfaceDepth": 0.57,
     "silhouette": 0.4,
     "defaultSee": 0.45,
-    "splashSize": 2.2,
+    "splashSize": 2.4,
     "cannon": {
       "every": [
         2.5,

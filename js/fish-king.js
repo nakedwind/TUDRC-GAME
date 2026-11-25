@@ -30,7 +30,7 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   hp: 4200,                   // 血量（再乘整體難度）
   rewardMul: 6, crystalMul: 6,
   // 開戰前冒頭偷看：每隔幾秒（隨機）一次、盯著看幾秒、慢慢浮出來要幾秒、慢慢沉下去要幾秒、離溫特幾格（最近～最遠）的深水才冒
-  peek: { every: [14, 26], stay: 4.5, rise: 2.2, sink: 2.4, distMin: 4, distMax: 10 },
+  peek: { every: [14, 26], stay: 4.5, rise: 2.2, sink: 2.4, distMin: 4, distMax: 10, splashRise: .5, splashSink: .7 },   // splashRise／splashSink＝浮出來、沉下去時，水花散開的寬度大約是身體寬的幾倍
   surfaceRise: 1.2,           // 開戰後：從水裡浮上來要幾秒（慢慢浮出來，不是一下子跳出來）
   // 泡在水裡時，水面那一圈橢圓：wide＝寬度是身體寬的幾倍、flat＝扁度（高÷寬，越小越扁）
   oval: { wide: 1, flat: .3 },
@@ -51,7 +51,7 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   surfaceDepth: .57,          // 浮上來時水面在身體的哪裡（0＝腳底、1＝頭頂；.57＝水面在眼睛下面一點，只露出頭和背）
   silhouette: .4,             // 潛水時的影子多濃（再乘水的能見度）
   defaultSee: .45,            // 水的能見度（沒有水素材時用）
-  splashSize: 2.2,            // 浮上來、潛下去的水花大小（皇冠水花放大幾倍）
+  splashSize: 2.4,            // 浮上來、潛下去的水花大小（皇冠水花放大幾倍；2.4 散開時大約跟身體一樣寬）
   // 高壓水砲：每隔幾秒（隨機）一次、預警幾秒、掃多久（秒）、掃的角度（弧度）、射程（格）、水柱多粗（像素）、扣多少血、把人沖開幾格
   cannon: { every: [2.5, 4], windup: 1.1, sweep: 1.4, arc: 1.1, range: 11, width: 30, damage: 14, push: 2.4 },
   // 水柱衝天：每隔幾秒（隨機）一次、預警幾秒、水柱噴多久（秒）、範圍半徑（格）、一次最多幾個人、
@@ -220,7 +220,7 @@ function fkPeekStart(K) {
   e.x = x; e.y = y; e.faceRight = p.x > x; e.slimeLift = 0; e.fkRise = 0; fkFace(e, 'front');
   e.hideBar = true;   // 偷看時頭上不畫血條（還沒開戰）
   K.phase = 'peek'; K.peek = { t: 0 };
-  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), x, y + 8, .5);   // 冒頭：小小的水花，慢慢浮上來比較詭異
+  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), x, fkWaterY(e), fkSplashSc(e, FISH_KING.peek.splashRise));   // 冒頭：水面那裡冒一圈水花（照牠的體型），慢慢浮上來
   if (typeof sfxAt === 'function') sfxAt('poolWaterDrop', x, y, .8, 'fish-king-peek');
 }
 function fkPeekStep(K, dt) {
@@ -234,7 +234,7 @@ function fkPeekStep(K, dt) {
   e.fkRise = Pk.t < P.rise ? ease(Pk.t / P.rise)
     : Pk.t < sinkAt ? 1 - .04 * (1 - Math.cos((Pk.t - P.rise) * 1.6))
     : Math.max(0, 1 - ease(Math.min(1, (Pk.t - sinkAt) / sink)));
-  if (Pk.t >= sinkAt && !Pk.sank) { Pk.sank = true; if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, e.y + 8, .6); }   // 沉下去：只冒一點點水花，安安靜靜的
+  if (Pk.t >= sinkAt && !Pk.sank) { Pk.sank = true; if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, fkWaterY(e), fkSplashSc(e, FISH_KING.peek.splashSink)); }   // 沉下去：在水面那裡、跟身體差不多寬的水花
   if (Pk.t >= sinkAt + sink) { K.phase = 'hidden'; K.peek = null; e.fkRise = null; }
 }
 // ---- 正式登場：核心被打到 → 從離那顆核心最近的右邊深水躍出來 ----
@@ -305,8 +305,16 @@ function fkShow(K, show) {
     for (const t of G.towers || []) if (t.target === e) t.target = null;
   }
 }
+// 水面在畫面上的高度（牠身體泡在水裡的那條線，不是腳底）：水花要在這裡冒出來才對
+const fkWaterY = e => e.y + 13 - (e.drawHeight || 190) * FISH_KING.surfaceDepth;
+// 水花大小：k＝水花散開到最大時，寬度大約是身體寬的幾倍
+// （皇冠水花原本寬 POOL_FALL.crownV2.width 像素，散開時會再擴到 1＋spread 倍；高度跟寬度一起放大，所以 k 不要太大）
+function fkSplashSc(e, k) {
+  const V = (typeof POOL_FALL !== 'undefined' && POOL_FALL.crownV2) || { width: 46, spread: .9 };
+  return (e.drawWidth || 190) * (k || .6) / (V.width * (1 + (V.spread || 0)));
+}
 function fkSplash(e, size, surge) {
-  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, e.y + 8, size);
+  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, fkWaterY(e), size);   // 在水面那條線冒水花
   if (typeof sfxAt === 'function') sfxAt('poolBossSplash', e.x, e.y, .8, 'fish-king-splash');
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 4, 0);
   if (surge && typeof poolSurgeStart === 'function') poolSurgeStart(e.x, e.y, 'land');   // 水溢上岸、把人推開一點（js/pool-surge.js）
