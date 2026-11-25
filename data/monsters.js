@@ -1818,7 +1818,7 @@ const BOSS_SETTINGS_DEFAULT = {
     ],
     "approachMax": 4,
     "diveTurn": 1.4,
-    "surfaceDepth": 0.785,
+    "surfaceDepth": 0.57,
     "silhouette": 0.4,
     "defaultSee": 0.45,
     "splashSize": 2.4,
@@ -1885,6 +1885,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "swimMul": 1,
     "noticeRange": 10,
     "sink": 0.45,
+    "fishHeadSink": 0.725,
     "see": 0.35,
     "shoreGap": 1,
     "milkfish": {

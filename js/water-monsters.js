@@ -27,6 +27,7 @@ const WATER_MONSTERS = applyBossSettings('WATER_MONSTERS', {
   swimMul: 1,           // 游泳速度＝自己走路速度的幾倍
   noticeRange: 10,      // 幾格內看到人就游過去
   sink: .45,            // 水面在身體的哪裡（0＝腳底、1＝頭頂）
+  fishHeadSink: .725,   // 魚頭君另外算：水面在身體的哪裡（.725＝只露出上面不到三成；其他水中怪物照上面的 sink）
   see: .35,             // 水面下的身體看得多清楚（0～1）
   shoreGap: 1,          // 身體邊緣離岸邊至少幾格（越大隻的怪物，中心自然離得越遠；整池都太窄的話就直接跳上岸）
   // 虱目魚小子：岸上的隊友在幾格內就跳上岸撲過去、跳多久（秒）、跳多高（像素）
@@ -400,7 +401,7 @@ function aquaWade(a) {
   if (!a.aqua) return undefined;
   if ((a.slimeLift || 0) > 4 || !deepWaterAtPoint(a.x, a.y)) return null;
   const W = WATER_MONSTERS, w = typeof waterAt === 'function' ? waterAt(a.x, a.y + 10) : null;
-  return { w: { depth: W.sink, see: w && Number.isFinite(w.see) ? Math.min(w.see, W.see) : W.see }, bottom: a.y + 13, height: (a.drawHeight || 33) * (a.sizeMul || 1), width: (a.drawWidth || 42) * (a.sizeMul || 1) };
+  return { w: { depth: a.type === 'fish_head' && Number.isFinite(W.fishHeadSink) ? W.fishHeadSink : W.sink, see: w && Number.isFinite(w.see) ? Math.min(w.see, W.see) : W.see }, bottom: a.y + 13, height: (a.drawHeight || 33) * (a.sizeMul || 1), width: (a.drawWidth || 42) * (a.sizeMul || 1) };
 }
 // js/render.js 畫地面時呼叫：潛在水裡的小虱目魚小子的影子、要撞上來前的泡泡
 function drawWaterMonstersGround(ctx) {
