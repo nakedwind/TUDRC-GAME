@@ -96539,10 +96539,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mwfznsic",
-        "c": 58,
+        "c": 59,
         "r": 116,
         "layer": "object",
-        "oy": 10
+        "oy": 10,
+        "ox": 20
       },
       {
         "id": "tile_mrt_wall_sign_platform_red",
@@ -96971,6 +96972,20 @@ const BATTLE_MAPS = [
         "r": 18,
         "layer": "object13",
         "ox": 20
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 77,
+        "r": 82,
+        "layer": "object3",
+        "oy": 10
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 57,
+        "r": 114,
+        "layer": "object3",
+        "oy": 30
       }
     ],
     "solid": [
@@ -121772,7 +121787,12 @@ const BATTLE_MAPS = [
         "c": 47,
         "r": 63,
         "layer": "object3",
-        "oy": 20
+        "oy": 20,
+        "lockerLoot": {
+          "kind": "bullet",
+          "id": "incendiary",
+          "qty": 1
+        }
       },
       {
         "id": "tile_field_ammo_crate",
@@ -121794,7 +121814,12 @@ const BATTLE_MAPS = [
         "r": 58,
         "layer": "object3",
         "ox": 30,
-        "oy": 10
+        "oy": 10,
+        "lockerLoot": {
+          "kind": "bullet",
+          "id": "incendiary",
+          "qty": 1
+        }
       },
       {
         "id": "tile_field_ammo_crate",
@@ -122738,15 +122763,26 @@ const BATTLE_MAPS = [
         "r": 43,
         "layer": "object3",
         "oy": 20,
-        "fx": true
+        "fx": true,
+        "lockerLoot": {
+          "kind": "bullet",
+          "id": "incendiary",
+          "qty": 1
+        }
       },
       {
         "id": "tile_field_ammo_crate",
-        "c": 117,
-        "r": 20,
+        "c": 116,
+        "r": 19,
         "layer": "object3",
         "fx": true,
-        "ox": -2
+        "ox": 38,
+        "oy": 20,
+        "lockerLoot": {
+          "kind": "bullet",
+          "id": "incendiary",
+          "qty": 1
+        }
       },
       {
         "id": "tile_mr4cyy36",
