@@ -454,6 +454,7 @@ function lineOfSightRaw(x0, y0, x1, y1) {
       const k = i / n, x = ax + (bx - ax) * k, y = ay + (by - ay) * k;
       // 捷運軌道上的碰撞格不擋視線、子彈（算光照時照舊擋，不改燈光；js/mrt-train.js 的 mrtSeeThroughCell）
       if (!losNoFloors && typeof mrtSeeThroughCell === 'function' && mrtSeeThroughCell(...cellAt(x, y))) continue;
+      if (!losNoFloors && typeof tileSeeThroughCell === 'function' && tileSeeThroughCell(...cellAt(x, y))) continue;   // 玻璃月台門這類看得穿的素材（data/tiles.js 的 seeThrough，js/tile-collisions.js）
       if (solidBlocksPoint(x, y)) return false;
     }
     return true;

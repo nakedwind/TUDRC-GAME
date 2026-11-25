@@ -98,6 +98,8 @@ const SFX = (() => {
     shotKnock: '戰鬥/槍械/開槍.mp3',
     hitKnock: '戰鬥/近戰/classic-punch.mp3',     // 打中怪物（怪物沒有專屬「被打」音效時）
     knockWall: '戰鬥/命中/小撞擊.mp3',           // 被推去撞牆
+    trackJump: '玩家/jumping.mp3',               // 跳下、跳上捷運軌道（js/mrt-track.js；溫特、隊友、怪物都會）
+    trainHit: ['玩家/slime-hit.mp3', '戰鬥/命中/小撞擊.mp3'],   // 溫特、隊員被捷運列車撞飛（slime-hit＋小撞擊一起播，小撞擊比較大聲：LAYER_GAIN）
     reload: '戰鬥/槍械/reload.mp3',
     ammoRefill: '戰鬥/槍械/reload02.mp3',   // 營地的彈藥箱補子彈（js/camp-supply.js 的 campBoxMove）
     boxLand: '介面/放進格子.wav',           // 物資箱、彈藥箱：搬過去的東西落進格子（js/camp-supply.js 的 campBoxFly）
@@ -302,7 +304,7 @@ const SFX = (() => {
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
   const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 }, capKingDeath: { delay: .22, feedback: .5, wet: .65 }, pearlElderDeath: { delay: .22, feedback: .5, wet: .65 }, milkfishKingRoar: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
   // 好幾個音檔一起播的音效：每一層各自的音量倍率（照 files 裡的順序；沒寫＝1）
-  const LAYER_GAIN = { storySandbagBreak: [1, 1.8] };   // 沙包被打破：小撞擊大聲一點
+  const LAYER_GAIN = { storySandbagBreak: [1, 1.8], trainHit: [1, 2.2] };   // 沙包被打破、被列車撞：小撞擊大聲一點
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer

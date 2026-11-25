@@ -7,15 +7,23 @@
      列車來了不會自己逃（照使用者的設定）：要玩家自己帶出來，或用右鍵把隊友從軌道裡拉出來（js/grab.js 放下時照落點決定在不在軌道裡）。
    ・怪物：附近（MRT_TRACK.chaseRange 格內、看得到）的溫特或隊員在軌道裡，就走到最近的月台邊跳進去追；
      自己在軌道裡、要追的人不在軌道裡（或沒有目標），就走到最近的月台邊跳上來。
-   ・列車進站、開走時，車身經過的地方：軌道裡的溫特、隊員失去戰鬥能力，怪物直接死亡，蓋在軌道上的建築被撞破。
+   ・列車進站、開走時，車身經過的地方：軌道裡的溫特、隊員、怪物被撞飛到月台上（離開軌道），
+     落地後溫特、隊員失去戰鬥能力、怪物死亡；蓋在軌道上的建築被撞破。
+     撞到時有放大版的鳥頭人撞擊特效、畫面震動；溫特、隊員被撞播 trainHit（slime-hit＋小撞擊）。
      BOSS、飛在空中的怪物（人面蝶）不會被撞。
    ・BOSS：只在列車沒有要來的時候才會跳進軌道；在軌道裡發現列車要來了，就先跳上月台。
      自己有特殊走法的 BOSS（人面蝶后、老鼠王、虱目魚王、池核 BOSS…）不會跳進軌道。
    數值都在下面的 MRT_TRACK。
 */
 const MRT_TRACK = {
-  jumpTime: .42,      // 跳一次幾秒
-  jumpHeight: 18,     // 跳起來多高（像素）
+  jumpTime: .5,       // 跳一次幾秒
+  jumpHeight: 32,     // 跳起來多高（像素）
+  jumpSound: .6,      // 跳的聲音大小（音效 trackJump，音效編輯器可再調倍率）
+  landSound: .9,      // 落地聲大小（音效 place「放置」，跟蓋建築共用，所以在這裡調、不要改音效編輯器的倍率）
+  flingTime: .75,     // 被列車撞飛：在空中飛幾秒
+  flingHeight: 78,    // 被列車撞飛：飛多高（像素）
+  flingFar: 1.5,      // 被列車撞飛：落在月台邊再往月台裡面幾格（前面有牆就近一點）
+  impactScale: 2.2,   // 撞擊特效放大幾倍（鳥頭人撞人的特效是 1 倍）
   reach: 30,          // 溫特離月台邊（或軌道邊）多近才出現【跳下】【跳上】（像素，從那一格的中間算）
   jumpAt: 8,          // 隊友、怪物走到離跳點多近就跳（像素）
   chaseRange: 9,      // 怪物追進軌道：目標在幾格內才追
@@ -63,21 +71,31 @@ function trackPickEdge(cost) {
 }
 
 // ---- 跳：從現在的位置跳到 (x1, y1)，落地後換成在／不在軌道裡 ----
-function startTrackJump(a, x1, y1, toTrack) {
-  a.trackJump = { t: 0, x0: a.x, y0: a.y, x1, y1, toTrack };
+// fling＝被列車撞飛（飛得高、飛得久，落地時呼叫 fling.onLand）
+function startTrackJump(a, x1, y1, toTrack, fling = null) {
+  a.trackJump = { t: 0, x0: a.x, y0: a.y, x1, y1, toTrack, fling };
   a.moving = false;
-  if (typeof sfxAt === 'function') sfxAt('place', a.x, a.y, .35, 'track-jump');
+  if (!fling && typeof sfxAt === 'function') sfxAt('trackJump', a.x, a.y, MRT_TRACK.jumpSound, 'track-jump');
 }
 // 每一幀：跳在空中的時候由這裡管位置，回傳 true＝這一幀不能自己動
 function stepTrackJump(a, dt) {
   const s = a && a.trackJump; if (!s) return false;
-  const u = Math.min(1, (s.t += dt) / MRT_TRACK.jumpTime);
+  const fl = s.fling, T = fl ? MRT_TRACK.flingTime : MRT_TRACK.jumpTime, H = fl ? MRT_TRACK.flingHeight : MRT_TRACK.jumpHeight;
+  const u = Math.min(1, (s.t += dt) / T);
   a.x = s.x0 + (s.x1 - s.x0) * u;
-  a.y = s.y0 + (s.y1 - s.y0) * u - 4 * MRT_TRACK.jumpHeight * u * (1 - u);   // 往上拋一點再落下
+  a.y = s.y0 + (s.y1 - s.y0) * u - 4 * H * u * (1 - u);   // 往上拋再落下
+  a.knockT = 0; a.moving = false;
+  if (fl && G && G.effects && Math.random() < .6) G.effects.push({ particle: true, kind: 'spark', x: a.x, y: a.y, vx: (Math.random() - .5) * 40, vy: 10, r: 2 + Math.random() * 2, life: .3, life0: .3, color: '#d8cfbd' });   // 飛在空中拖出的灰塵
   if (u >= 1) {
     a.x = s.x1; a.y = s.y1; a.trackJump = null;
     setInTrack(a, s.toTrack);
-    if (G && G.effects) G.effects.push({ ring: true, x: a.x, y: a.y + 14, r: 4, r2: 18, life: .22, life0: .22, color: '#cfc6b2' });   // 落地揚起一點灰
+    if (G && G.effects) G.effects.push({ ring: true, x: a.x, y: a.y + 14, r: 4, r2: fl ? 34 : 18, life: fl ? .35 : .22, life0: fl ? .35 : .22, color: '#cfc6b2' });   // 落地揚起灰
+    if (!fl && typeof sfxAt === 'function') sfxAt('place', a.x, a.y, MRT_TRACK.landSound, 'track-land');   // 一般跳：落地聲（起跳播 trackJump）
+    if (fl) {   // 被撞飛的人重重摔在月台上
+      if (typeof addShake === 'function') addShake(5);
+      if (typeof sfxAt === 'function') sfxAt('knock2', a.x, a.y, .6, 'train-fling-land');
+      if (typeof fl.onLand === 'function') fl.onLand(a);
+    }
   }
   return true;
 }
@@ -177,6 +195,56 @@ function trackEnemyStep(e, dt) {
   return false;   // 跟目標在同一邊：照平常的追法（在軌道裡就照軌道的規則走）
 }
 
+// ---- 被列車撞飛：往列車開的方向、飛到最近的月台上（落在月台邊再往裡面 flingFar 格，有牆就近一點）----
+function trainFlingSpot(a, tr) {
+  const dir = tr.dir || 1, aheadX = a.x + dir * CELL * 1.5;
+  // 優先挑軌道上下兩邊的月台（往旁邊飛）；沒有才挑軌道頭尾的
+  let best = null, bestV = Infinity;
+  for (const e of trackEdges()) {
+    const v = Math.hypot(e.ux - aheadX, e.uy - a.y) + (e.ux === e.dx ? 0 : CELL * 3);
+    if (v < bestV) { bestV = v; best = e; }
+  }
+  if (!best) return null;
+  const ox = Math.sign(best.ux - best.dx), oy = Math.sign(best.uy - best.dy), keep = trackCtx;
+  trackCtx = false;   // 月台上的規則
+  try {
+    for (let k = MRT_TRACK.flingFar; k > 0; k -= .5) {
+      const x = best.ux + ox * k * CELL + (oy ? dir * k * CELL * .5 : 0), y = best.uy + oy * k * CELL;
+      const [c, r] = cellAt(x, y);
+      if (inGrid(c, r) && !trackCells.has(c + ',' + r) && !wallAt(1, c, r)) return [x, y];
+    }
+  } finally { trackCtx = keep; }
+  return [best.ux, best.uy];
+}
+function trainFling(a, tr, onLand) {
+  const spot = trainFlingSpot(a, tr) || [a.x, a.y];
+  a.navPath = null; a.navGoal = null; a.aiPath = null; a.trackRoute = null;
+  startTrackJump(a, spot[0], spot[1], false, { onLand });
+}
+// 撞擊特效：放大版的鳥頭人撞擊圖＋星芒火花、衝擊波、頓格、畫面震動；loud＝溫特、隊員（播 slime-hit＋小撞擊）
+function trainImpactFx(a, tr, text, loud) {
+  const dir = tr.dir || 1, ang = dir > 0 ? 0 : Math.PI, x = a.x - dir * 6, y = a.y - 18, S = MRT_TRACK.impactScale;
+  if (typeof flash === 'function') flash(text, a.x, a.y - 52, '#ff6b5b', 1);
+  if (typeof playAttackSprite === 'function') playAttackSprite('charge-impact', x, y, .5, ang, loud ? S : S * .75);
+  if (typeof mfxOn === 'function' && mfxOn('monster') && typeof birdChargeImpactV2 === 'function') {
+    birdChargeImpactV2(x, y, ang);
+    if (typeof mfxSparks === 'function') mfxSparks(x, y, 14, ang, .8, 260, 480, ['#fff4dc', '#ffb066', '#ff7a3c']);
+    if (typeof meleeV2Shockwave === 'function') meleeV2Shockwave(x, a.y + 10, loud ? 56 : 40, '#ffd2a0');
+  } else if (G.effects) {
+    for (let i = 0; i < 12; i++) {   // 往列車開的方向噴火花
+      const an = ang + (Math.random() * 2 - 1) * .8, sp = 200 + Math.random() * 240;
+      G.effects.push({ particle: true, kind: 'spark', x, y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp - 40, r: 2 + Math.random() * 3, life: .2 + Math.random() * .2, life0: .4, color: i % 2 ? '#fff0c8' : '#ffb066' });
+    }
+  }
+  if (G.effects) G.effects.push({ ring: true, x: a.x, y: a.y, r: 8, r2: loud ? 60 : 44, life: .35, life0: .35, color: '#ffd2a0' });
+  if (typeof addHitstop === 'function') addHitstop(.09);
+  if (typeof addShake === 'function') addShake(loud ? 10 : 6);
+  if (typeof sfxAt === 'function') {
+    if (loud) sfxAt('trainHit', a.x, a.y, 1, 'train-hit');
+    else sfxAt('knock2', a.x, a.y, .8, 'train-hit-monster');
+  }
+}
+
 // ---- 列車撞人：進站、開走時，車身經過的地方（js/mrt-train.js 呼叫）----
 function trackTrainHits(tr) {
   if (!trackCells.size || !tr.cars || !tr.cars.length) return;
@@ -189,27 +257,27 @@ function trackTrainHits(tr) {
   const inBody = a => a.x >= x0 - pad && a.x <= x1 + pad && a.y >= y0 - pad && a.y <= y1 + pad;
   const onTrack = a => inTrackNow(a) || trackCells.has(cellAt(a.x, a.y).join(','));
   const sameF = a => !hasFloors || actorFloor(a) === floor;
-  const hitFx = (a, text) => {
-    if (typeof flash === 'function') flash(text, a.x, a.y - 52, '#ff6b5b', 1);
-    if (G.effects) G.effects.push({ ring: true, x: a.x, y: a.y, r: 6, r2: 34, life: .3, life0: .3, color: '#ffd2a0' });
-    if (typeof addShake === 'function') addShake(4);
-  };
+  const flyingNow = e => !!(e && (e.behavior === 'moth' || e.flying));   // 真的飛在空中的（史萊姆跳一下不算，照樣撞飛）
   const p = G.player;
   if (p && p.hp > 0 && !p.mrtRide && !p.trackJump && onTrack(p) && sameF(p) && inBody(p)) {
-    p.hp = 0; G.damageVignetteT = Math.max(G.damageVignetteT || 0, .6);
-    hitFx(p, '被列車撞到了！');
-    if (!G.over) { if (typeof flash === 'function') flash('部隊長失去戰鬥能力', p.x, p.y - 74, '#ff5b6e', 1.4); if (typeof lose === 'function') lose('player', '被捷運列車撞到'); }   // 跟其他死法一樣：這場戰鬥失敗
+    G.damageVignetteT = Math.max(G.damageVignetteT || 0, .8);
+    trainImpactFx(p, tr, '被列車撞到了！', true);
+    trainFling(p, tr, a => {   // 落地才倒下、輸掉這場戰鬥（跟其他死法一樣）
+      a.hp = 0;
+      if (!G.over) { if (typeof flash === 'function') flash('部隊長失去戰鬥能力', a.x, a.y - 74, '#ff5b6e', 1.4); if (typeof lose === 'function') lose('player', '被捷運列車撞到'); }
+    });
   }
   for (const t of G.towers || []) {
     if (t.hp <= 0 || t.mrtRide || t.trackJump || !onTrack(t) || !sameF(t) || !inBody(t)) continue;
-    t.hp = 0; t.target = null; t.meleeSwing = null;
-    hitFx(t, '被列車撞到了！');
-    if (typeof sentryStatus === 'function') sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true);
+    t.hp = 0; t.target = null; t.meleeSwing = null; t.gunSwing = null;   // 倒下的隊員照樣會被 updateSentry 帶著飛（js/game.js）
+    trainImpactFx(t, tr, '被列車撞到了！', true);
+    trainFling(t, tr, a => { if (typeof sentryStatus === 'function') sentryStatus(a, '失去戰鬥能力', '#ff5b6e', true); });
   }
   for (const e of G.enemies || []) {
-    if (e.dead || e.hp <= 0 || e.mrtRide || e.trackJump || trackIsBoss(e) || trackFlying(e) || !onTrack(e) || !sameF(e) || !inBody(e)) continue;
-    e.hp = 0; e.hitT = .2; e.hitColor = '#ff9a3c';
-    hitFx(e, '撞飛！');
+    if (e.dead || e.hp <= 0 || e.mrtRide || e.trackJump || trackIsBoss(e) || flyingNow(e) || !onTrack(e) || !sameF(e) || !inBody(e)) continue;
+    e.stunT = 0; e.knockT = 0; e.slimeLift = 0; e.target = null;
+    trainImpactFx(e, tr, '撞飛！', false);
+    trainFling(e, tr, a => { if (a.hp > 0) { a.hp = 0; a.hitT = .2; a.hitColor = '#ff9a3c'; } });   // 落地才死
   }
   // 蓋在軌道上的建築：撞破（車廂裡跟著列車走的不算）
   for (const o of [...(G.obstacles || [])]) {

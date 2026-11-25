@@ -749,6 +749,7 @@ function stepEnemy(e, dt) {
   if (e.dummy) { updateEnemyEffects(e, dt); return; }   // 訓練室的沙包：不會動、不會打人（js/practice.js）
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
+  if (e.trackJump && typeof stepTrackJump === 'function' && stepTrackJump(e, dt)) return;   // 跳進跳出捷運軌道、被列車撞飛在空中（js/mrt-track.js）：不受擊退、硬直影響
   if (e.ratKing) { stepRatKing(e, dt); return; }   // 花蓮老鼠王：卡在鐵軌上、手由 updateRatKing 出（js/rat-king.js）
   if (e.ratKingHand) { e.moving = false; e.target = null; e.knockT = 0; return; }   // 老鼠王抓人的手：不動，打掉就放人
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信

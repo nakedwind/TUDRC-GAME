@@ -2650,7 +2650,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/捷運車站/mrt-platform-screen-doors.png",
     "w": 6,
-    "h": 2
+    "h": 2,
+    "seeThrough": true
   },
   {
     "id": "tile_mrt_glass_railing",

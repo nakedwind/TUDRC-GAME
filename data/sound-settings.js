@@ -174,6 +174,10 @@ const SOUND_SETTINGS = {
     "TryingToOpenDoor": {
       "from": 113,
       "to": 732
+    },
+    "trackJump": {
+      "from": 1330,
+      "to": 1700
     }
   }
 };

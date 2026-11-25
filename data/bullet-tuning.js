@@ -12,12 +12,12 @@ const BULLET_TUNING = {
     "incendiary": { "gap": 0.6, "range": 8, "r": 1.5, "burn": 8, "fireDps": 15, "ignite": 0, "burnDmg": 4 },
     "tranq": { "gap": 0.35, "range": 12, "sleep": 40, "mist": 0.5 },
     "paint": { "gap": 0.3 },
-    "split": { "gap": 0.5, "pellets": 8, "spread": 0.7, "dmg": 8, "range": 6, "near": 1, "farMul": 0.4 },
-    "flash": { "gap": 0.7, "r": 4, "stun": 5, "range": 12 },
+    "split": { "gap": 0.5, "pellets": 8, "spread": 0.7, "dmg": 10, "range": 6, "near": 1, "farMul": 0.4 },
+    "flash": { "gap": 0.7, "r": 5, "stun": 5, "range": 12 },
     "shock": { "gap": 0.5, "dmg": 20, "chain": 4, "chainR": 3, "stun": 5 },
     "heal": { "gap": 0.8, "heal": 40 },
     "sticky": { "gap": 0.6, "r": 2, "stick": 30, "slow": 0.2, "range": 10, "speed": 700 },
-    "knock": { "gap": 0.5, "dmg": 15, "push": 3, "slide": 0.2, "wallStun": 1.5, "wallDmg": 8, "range": 10 },
+    "knock": { "gap": 0.5, "dmg": 20, "push": 4, "slide": 0.2, "wallStun": 1.5, "wallDmg": 8, "range": 10 },
     "confuse": { "gap": 0.5, "confuse": 15, "brawl": 3, "range": 9 }
   }
 };

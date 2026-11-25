@@ -13,7 +13,8 @@ const TILE_COLLISIONS = {
   "tile_mvzbolt4": [[20,0,40,80]],
   "tile_mvzbvnsy": [[40,13,40,94]],
   "tile_mvzc5x73": [[40,0,40,80]],
-  "tile_poolcore_pillar": [[23,52,36,48],[21,114,40,65]]
+  "tile_poolcore_pillar": [[23,52,36,48],[21,114,40,65]],
+  "tile_mrt_platform_screen_doors": [[10,40,220,40]]
 };
 /* 人物遮擋線（同一頁的「人物遮擋線」）：{ 素材 id: 離圖片頂端幾像素 }。有設的素材優先用這個，沒設才用碰撞方框的中間。 */
 const TILE_DEPTHS = {

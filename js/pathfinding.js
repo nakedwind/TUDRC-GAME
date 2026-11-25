@@ -130,7 +130,8 @@ function wallNow(c, r, raw = false) {
 // 找路用：這格能不能站人（照微調後的紅格和橘框算，見上面 wall1F）
 const isWall = (c, r) => hasFloors ? wallNow(c, r) : wall1F(c + ',' + r, c, r);
 // 撞牆用：原始的紅格（微調後的方塊、橘框由 solidBlocksPoint／nudgedWallAt 另外算）
-const isWallRaw = (c, r) => hasFloors ? wallNow(c, r, true) : mapWalls.has(c + ',' + r);
+// 沒有樓層的地圖也要照捷運軌道的規則（wall1FRaw）：不在軌道裡的人走不進軌道格，要按【跳下】（以前只看紅格，軌道上沒畫 🧱 就會直接走進去）
+const isWallRaw = (c, r) => hasFloors ? wallNow(c, r, true) : wall1FRaw(c + ',' + r);
 // 處理某個角色之前先呼叫：設好「他在幾樓、是不是站在樓層出入口上」（算完用 clearFloorCtx 還原）
 function setFloorCtx(a) {
   floorScoped = true;

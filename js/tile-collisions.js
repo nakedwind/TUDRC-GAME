@@ -9,6 +9,7 @@
    每張地圖也可以有自己的方框（地圖編輯器的 🟧 橘框工具，存在地圖資料 m.tileBoxes）：那張地圖上就照地圖自己的，不用共用的。
    物件編輯器裡還沒存到專案的修改，會先存在這個瀏覽器（TILE_COLLISION_DRAFT，只記改過的素材），遊戲和編輯器都會疊上去，方便邊調邊試。 */
 const TILE_COLLISION_DRAFT = 'tudrc_tile_collisions_draft_v1';
+
 const TILE_COLLISION_CELL = 40;
 // ---- 同一張圖片的素材共用一份 ----
 // 素材庫裡有時同一張圖片登記了兩次以上（id 不一樣、圖片檔一樣），看起來是同一張，碰撞和人物遮擋線就該一樣。
@@ -211,6 +212,27 @@ function tileBoxBlocksPoint(x, y) {
   const C = CELL, list = grid.get(Math.floor((x - OX) / C) + ',' + Math.floor((y - OY) / C)); if (!list) return false;
   for (const b of list) if (x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1 && !tileBoxInHole(b, x, y) && tileBoxActive(b)) return true;
   return false;
+}
+// ---- 看得穿的素材（data/tiles.js 標了 "seeThrough": true，例如玻璃的月台門）----
+// 這種素材的方框蓋到的格子：照樣擋走路（方框、或地圖上手畫的 🧱 都一樣），但不擋視線、子彈
+// （js/maploader.js 的 lineOfSightRaw 呼叫；怪物才看得到軌道裡的人、跳下去追，隊友也能隔著月台門開槍）
+let tileSeeCache = { map: null, n: -1, raw: null, set: new Set() };
+function tileSeeThroughCell(c, r) {
+  if (typeof MAP === 'undefined' || !MAP) return false;
+  const stamps = MAP.stamps || [];
+  tileCollisionData();
+  if (tileSeeCache.map !== MAP || tileSeeCache.n !== stamps.length || tileSeeCache.raw !== tileCollisionCache.raw) {
+    const set = new Set(), C = typeof CELL !== 'undefined' ? CELL : TILE_COLLISION_CELL;
+    for (const s of stamps) {
+      const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null;
+      if (!t || !t.seeThrough) continue;
+      const boxes = tileStampBoxes(s); if (!boxes) continue;
+      for (const [x0, y0, x1, y1] of tileCollisionPlace(boxes, s, mapTileW(t) * C, mapTileH(t) * C, OX + s.c * C + (s.ox || 0), OY + s.r * C + (s.oy || 0)))
+        for (let cc = Math.floor((x0 - OX) / C); cc * C + OX < x1; cc++) for (let rr = Math.floor((y0 - OY) / C); rr * C + OY < y1; rr++) set.add(cc + ',' + rr);
+    }
+    tileSeeCache = { map: MAP, n: stamps.length, raw: tileCollisionCache.raw, set };
+  }
+  return tileSeeCache.set.has(c + ',' + r);
 }
 // 這一格能不能蓋建築：格子中心在方框裡就不行
 function tileBoxCoversCell(c, r) { return tileBoxBlocksPoint(OX + c * CELL + CELL / 2, OY + r * CELL + CELL / 2); }

@@ -227,9 +227,9 @@ function sfxMonsterHit(e, gain, sourceId, fallback = 'monsterHit') {
     sfxAt(e.hitSound, e.x, e.y, gain, sourceId);
   } else sfxAt(fallback, e.x, e.y, gain, sourceId);
 }
-function playAttackSprite(kind, x, y, duration = .32, angle = 0) {
+function playAttackSprite(kind, x, y, duration = .32, angle = 0, scale = 1) {   // scale＝放大倍數（列車撞人用 2 倍多）
   if (!G || !attackEffectFrames[kind]) return;
-  G.effects.push({ spriteEffect: kind, x, y, angle, life: duration, life0: duration });
+  G.effects.push({ spriteEffect: kind, x, y, angle, scale, life: duration, life0: duration });
 }
 let lastSlimeLandSound = 0;
 function playSlimeAudio(kind, slime = null) {

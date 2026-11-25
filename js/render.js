@@ -1106,6 +1106,7 @@ function draw() {
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   // 角色畫在幾樓、哪一層、前後：一般照腳底 Y；坐著照椅子；在側面手扶梯上由 js/escalators.js 決定（快到 2 樓時畫在 2 樓地板上）
   const actorDrawKey = (a, y, seatY) => seatY != null ? { floor: visualFloor(a), band: DRAW_BAND.obj, y: seatY }
+    : a.trackJump ? { floor: visualFloor(a), band: DRAW_BAND.obj, y: Math.max(a.trackJump.y0, a.trackJump.y1) + (y - a.y) + (a.trackJump.fling ? 40 : 0) }   // 跳進跳出捷運軌道、被列車撞飛在空中：照起跳和落地點比較前面的那個排，被撞飛的再更前面（不會被車廂蓋住；js/mrt-track.js）
     : typeof escalatorRiderKey === 'function' ? escalatorRiderKey(a, y) : { floor: visualFloor(a), band: DRAW_BAND.obj, y };
   for (const t of G.towers) sortables.push({ who: t, ...actorDrawKey(t, t.y + 17, t.sitting ? seatDrawY(t.sitting) : null), draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
   for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ who: npc, ...actorDrawKey(npc, npc.y + 17, npc.sitting ? seatDrawY(npc.sitting) : bedY), draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
@@ -1492,7 +1493,7 @@ function drawWorldEffects() {
       const frames = attackEffectFrames[f.spriteEffect];
       const age = 1 - Math.max(0, f.life) / f.life0;
       const frame = frames[Math.min(frames.length - 1, Math.floor(age * frames.length))];
-      const size = ATTACK_EFFECT_SIZE[f.spriteEffect] || 64;
+      const size = (ATTACK_EFFECT_SIZE[f.spriteEffect] || 64) * (f.scale || 1);
       if (frame && frame.complete && frame.naturalWidth) {
         ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.angle || 0);
         ctx.imageSmoothingEnabled = false;
