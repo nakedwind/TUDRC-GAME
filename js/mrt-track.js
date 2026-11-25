@@ -13,6 +13,8 @@
      落地後溫特、隊員失去戰鬥能力、怪物死亡；蓋在軌道上的建築被撞破。
      撞到時有放大版的鳥頭人撞擊特效、畫面震動；溫特、隊員被撞播 trainHit（slime-hit＋小撞擊）。
      BOSS、飛在空中的怪物（人面蝶）不會被撞。
+   ・擊退彈：月台上的怪物被推到軌道邊，會掉進軌道裡（不算撞牆、不會撞暈）；在軌道裡被推照樣撞月台邊（trackKnockFall，js/special-guns.js 的 updateKnocks 呼叫）。
+     會飛的、自己有特殊走法的 BOSS 不會掉進去（照樣撞牆）。
    ・BOSS：只在列車沒有要來的時候才會跳進軌道；在軌道裡發現列車要來了，就先跳上月台。
      自己有特殊走法的 BOSS（人面蝶后、老鼠王、虱目魚王、池核 BOSS…）不會跳進軌道。
    數值都在下面的 MRT_TRACK。
@@ -30,6 +32,7 @@ const MRT_TRACK = {
   jumpAt: 8,          // 隊友、怪物走到離跳點多近就跳（像素）
   chaseRange: 9,      // 怪物追進軌道：目標在幾格內才追
   bossWarn: 10,       // BOSS：列車還有幾秒就到（或正在進站、開走）時，不跳進軌道、在裡面的先跳出來
+  fallHeight: 12,    // 被擊退彈推進軌道：掉下去時先往上彈多高（像素，比一般跳低）
   sentrySpeedMul: 1.25,   // 隊友走去跳點時腳步快一點
   crossCheck: 1,     // 隊友隔著軌道：每幾秒檢查一次「走得過去嗎？要不要穿過軌道」
   crossNear: 2.5,    // 隊友隔著軌道：離要跟的人幾格內就不穿過去
@@ -77,15 +80,16 @@ function trackPickEdge(cost) {
 
 // ---- 跳：從現在的位置跳到 (x1, y1)，落地後換成在／不在軌道裡 ----
 // fling＝被列車撞飛（飛得高、飛得久，落地時呼叫 fling.onLand）
-function startTrackJump(a, x1, y1, toTrack, fling = null) {
-  a.trackJump = { t: 0, x0: a.x, y0: a.y, x1, y1, toTrack, fling };
+// fall＝被擊退彈推下去（彈得低，不播起跳聲，落地照樣有落地聲）
+function startTrackJump(a, x1, y1, toTrack, fling = null, fall = false) {
+  a.trackJump = { t: 0, x0: a.x, y0: a.y, x1, y1, toTrack, fling, fall };
   a.moving = false;
-  if (!fling && typeof sfxAt === 'function') sfxAt('trackJump', a.x, a.y, MRT_TRACK.jumpSound, 'track-jump');
+  if (!fling && !fall && typeof sfxAt === 'function') sfxAt('trackJump', a.x, a.y, MRT_TRACK.jumpSound, 'track-jump');
 }
 // 每一幀：跳在空中的時候由這裡管位置，回傳 true＝這一幀不能自己動
 function stepTrackJump(a, dt) {
   const s = a && a.trackJump; if (!s) return false;
-  const fl = s.fling, T = fl ? MRT_TRACK.flingTime : MRT_TRACK.jumpTime, H = fl ? MRT_TRACK.flingHeight : MRT_TRACK.jumpHeight;
+  const fl = s.fling, T = fl ? MRT_TRACK.flingTime : MRT_TRACK.jumpTime, H = fl ? MRT_TRACK.flingHeight : s.fall ? MRT_TRACK.fallHeight : MRT_TRACK.jumpHeight;
   const u = Math.min(1, (s.t += dt) / T);
   a.x = s.x0 + (s.x1 - s.x0) * u;
   a.y = s.y0 + (s.y1 - s.y0) * u - 4 * H * u * (1 - u);   // 往上拋再落下
@@ -262,6 +266,21 @@ function trackEnemyStep(e, dt) {
   }
   return false;   // 跟目標在同一邊：照平常的追法（在軌道裡就照軌道的規則走）
 }
+// 被擊退彈推到軌道邊：(x, y)＝下一步要被推到的點。那裡是軌道格就掉進去，回傳 true（js/special-guns.js 的 updateKnocks 呼叫）
+function trackKnockFall(e, k, x, y) {
+  if (!trackCells.size || k.air || inTrackNow(e) || e.trackJump || trackFlying(e) || trackBossCustom(e)) return false;
+  const [c, r] = cellAt(x, y), key = c + ',' + r;
+  if (!trackCells.has(key) || trackStopped(key)) return false;   // 停著列車的地方：撞到車廂，照樣算撞牆
+  // 落點：那格軌道的中間，再順著推的方向往裡面一格（裡面還是軌道才往裡）
+  let [fx, fy] = center(c, r);
+  const c2 = Math.floor((fx + k.dx * CELL) / CELL), r2 = Math.floor((fy + k.dy * CELL) / CELL), k2 = c2 + ',' + r2;
+  if (trackCells.has(k2) && !trackStopped(k2) && (c2 !== c || r2 !== r)) [fx, fy] = center(c2, r2);
+  e.knock = null;
+  startTrackJump(e, fx, fy, true, null, true);
+  flash('掉進軌道！', e.x, e.y - 44, '#fff2a0', 1);
+  return true;
+}
+
 // 隔著軌道：自己和要追的人都在月台上，但月台上走不過去 → 從自己這邊的月台邊跳進軌道（之後由上面那段走到對面跳上去）
 // coming＝BOSS 而且列車快來了：不跳
 function trackEnemyCross(e, target, dt, coming) {

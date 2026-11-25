@@ -11,6 +11,7 @@
    - 黏著彈：直線打出去，落地（打中怪物就落在牠腳下）噴出一灘黏膠，留在地上 BULLETS.sticky.stick 秒。
      踩進去的都會變很慢：怪物、溫特、隊員都一樣（js/build.js 的 slowFactorAt 問 glueSlowAt）。飛在空中的人面蝶、珍珠小童，鑽在地底的版權老鼠不受影響。
    - 擊退彈：直線打中的怪物被往後推開；推去撞到牆壁或建築：暈一下、再受一點傷。
+     推到捷運軌道邊：掉進軌道裡（js/mrt-track.js 的 trackKnockFall），不算撞牆。
      推不動：鳥頭大隊長、葫蘆猴（unpushable）、躲在洞裡的版權老鼠（knockMul 0）；生命體、虱目魚小子比較重，推得比較近；
      人面蝶飛在空中：推得開，但會飛過牆，不會撞牆；生命體撞牆不會暈（noStun）。
    - 混亂彈：直線打中的怪物陷入混亂 BULLETS.confuse.confuse 秒：不理溫特和隊員，改打身邊其他怪物（js/enemy-ai.js 的 stepConfusedEnemy）；
@@ -412,7 +413,7 @@ function fireKnock(p, aim, b) {
   if (!e.noStun) e.stunT = Math.max(e.stunT || 0, b.slide);   // 被推的時候不能動
 }
 function knockFree(e, k, x, y) {
-  if (!k.air) return !enemyBlocked(x, y);
+  if (!k.air) return onFloorDo(e, () => !enemyBlocked(x, y));   // 照這隻怪物自己的規則判斷（在不在捷運軌道裡、在幾樓）
   const [c, r] = cellAt(x, y), floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null;
   return inGrid(c, r) && (!floor || !floor.size || floor.has(c + ',' + r));   // 人面蝶：飛得過牆，只是不能飛出地圖
 }
@@ -421,12 +422,16 @@ function updateKnocks(dt) {
   for (const e of G.enemies) {
     const k = e.knock; if (!k) continue;
     if (e.dead || e.hp <= 0) { e.knock = null; continue; }
+    if (e.trackJump) continue;   // 正在跳進／掉進捷運軌道
     let move = Math.min(k.left, k.speed * dt), wall = false;
     k.left -= move;
     while (move > 0) {
       const s = Math.min(4, move); move -= s;
       const nx = e.x + k.dx * s, ny = e.y + k.dy * s;
-      if (!knockFree(e, k, nx, ny)) { wall = true; k.left = 0; break; }
+      if (!knockFree(e, k, nx, ny)) {
+        if (typeof trackKnockFall === 'function' && trackKnockFall(e, k, nx, ny)) { k.left = 0; break; }   // 推到捷運軌道邊：掉進軌道（不算撞牆）
+        wall = true; k.left = 0; break;
+      }
       e.x = nx; e.y = ny;
     }
     if (!k.air && Math.random() < .6) G.effects.push({ ember: true, x: e.x + (Math.random() - .5) * 14, y: e.y + 6, vx: -k.dx * 40, vy: -k.dy * 40 - 10, r: 2 + Math.random() * 2, life: .3, life0: .3, color: '#b9b2a2' });   // 地上擦出的灰
@@ -446,7 +451,7 @@ function updateKnocks(dt) {
       if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 2, .05);
       if (typeof sfxAt === 'function') sfxAt('knockWall', e.x, e.y, .6, 'knock-wall');
     }
-    if (k.left <= 0) { e.knock = null; resetEnemyNavigation(e); }
+    if (k.left <= 0) { e.knock = null; if (!e.trackJump) resetEnemyNavigation(e); }
   }
 }
 
