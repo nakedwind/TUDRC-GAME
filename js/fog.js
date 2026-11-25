@@ -182,7 +182,7 @@ function fogTreeLights() {
       const fade = Math.max(0, 1 - (now - (t.burnAt || now)) / 3);   // 碎掉後殘光很快熄掉
       if (fade > .02) out.push({ x: cp.x, y: cp.y, r: 120, life: 1, life0: 1, power: .5 * fade, color: [200, 150, 255] });
     } else if (t.fireT > 0) out.push({ x: t.x, y: t.y - 30, r: 160, life: 1, life0: 1, power: .6 + .1 * Math.sin(now * 9 + t.seed), color: [255, 150, 60] });
-    else if (FOG_TREE.glowR > 0) out.push({ x: cp.x, y: cp.y, r: FOG_TREE.glowR * fogCrystalScale(t), life: 1, life0: 1, power: .34 + .08 * Math.sin(now * 1.6 + t.seed), color: [170, 120, 220] });
+    else if (FOG_TREE.glowR > 0) out.push({ x: cp.x, y: cp.y, r: FOG_TREE.glowR * fogCrystalScale(t), life: 1, life0: 1, power: (.34 + .08 * Math.sin(now * 1.6 + t.seed)) * (FOG_TREE.crystalGlow ?? 1), color: [170, 120, 220] });
   }
   return out;
 }
@@ -208,9 +208,9 @@ function drawFogTree(t) {
     const cp = fogCrystalPos(t);
     // 水晶一明一暗地發光（被打中時閃白），讓玩家知道要打這裡
     ctx.globalCompositeOperation = 'lighter';
-    const k = t.hitT > 0 ? 1 : .45 + .25 * Math.sin(now * 2.2 + t.seed), R = 22 * sc;
+    const k = t.hitT > 0 ? 1 : .45 + .25 * Math.sin(now * 2.2 + t.seed), R = 22 * sc * Math.sqrt(FOG_TREE.crystalGlow ?? 1);   // 亮度倍數（data/balance.js 的 FOG_TREE.crystalGlow）也讓光暈大一點點
     const g = ctx.createRadialGradient(cp.x + shake, cp.y, 0, cp.x + shake, cp.y, R);
-    g.addColorStop(0, t.hitT > 0 ? 'rgba(255,240,255,' + (.7 * k).toFixed(3) + ')' : 'rgba(200,140,255,' + (.45 * k).toFixed(3) + ')');
+    g.addColorStop(0, t.hitT > 0 ? 'rgba(255,240,255,' + (.7 * k).toFixed(3) + ')' : 'rgba(200,140,255,' + Math.min(1, .45 * k * (FOG_TREE.crystalGlow ?? 1)).toFixed(3) + ')');
     g.addColorStop(1, 'rgba(150,90,230,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cp.x + shake, cp.y, R, 0, Math.PI * 2); ctx.fill();
     ctx.globalCompositeOperation = 'source-over';
