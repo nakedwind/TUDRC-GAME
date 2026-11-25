@@ -159305,14 +159305,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 17,
-        "r": 50,
-        "layer": "object2",
-        "ox": 30,
-        "oy": 20
-      },
-      {
-        "id": "tile_bg_electric_light",
         "c": 24,
         "r": 50,
         "layer": "object2",
@@ -160801,6 +160793,13 @@ const BATTLE_MAPS = [
         "layer": "object3",
         "ox": 10,
         "oy": 20
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 13,
+        "r": 54,
+        "layer": "object3",
+        "ox": 10
       },
       {
         "id": "tile_mwayj4gp",
@@ -163091,16 +163090,19 @@ const BATTLE_MAPS = [
         "layer": "object2",
         "ox": 20,
         "oy": 20,
-        "circuit": 2
+        "circuit": 2,
+        "glow": true,
+        "glowR": 200
       },
       {
         "id": "tile_interactive_electric_light_02",
-        "c": 20,
+        "c": 19,
         "r": 50,
         "layer": "object2",
-        "ox": 20,
         "oy": 20,
-        "circuit": 2
+        "circuit": 2,
+        "glow": true,
+        "glowR": 190
       },
       {
         "id": "tile_interactive_electric_light_02",
@@ -168706,7 +168708,8 @@ const BATTLE_MAPS = [
       "52,90",
       "52,91",
       "51,90",
-      "51,91"
+      "51,91",
+      "17,49"
     ],
     "breakable": [],
     "coreSpots": [
@@ -170010,6 +170013,9 @@ const BATTLE_MAPS = [
       "47,7",
       "48,7",
       "49,7"
+    ],
+    "edges": [
+      "26,64,B"
     ]
   },
   {
