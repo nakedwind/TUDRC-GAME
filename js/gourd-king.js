@@ -95,7 +95,7 @@ const GOURD_KING = applyBossSettings('GOURD_KING', {
     playerDamage: 14, sentryDamage: 18,
     monsterDamage: 60,           // 不分敵我：砸到怪物也會扣血（葫蘆猴王自己不會被砸）
     hitKing: false,              // true＝葫蘆猴王自己也會被落石砸到
-    quick: 2,                    // 暴怒連跳的小壓頂：每下掉幾顆
+    quick: 3,                    // 暴怒連跳的小壓頂：每下掉幾顆
     big: {                       // 大顆落石（2026-11-21）：只有沒瞄準人的那幾顆會是大顆；落地後變成擋路的大石頭
       chance: .5,                // 沒瞄準的落石有幾成是大顆
       radius: 46,                // 大顆砸到的範圍（像素）
