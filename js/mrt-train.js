@@ -453,10 +453,15 @@ function mrtTrainUnstick(tr, toPlatform, type) {
   }
 }
 // 車門關上：站在門檻上（車殼底邊那條線附近）的人，腳已經跨進去的推進車裡，還沒跨進去的推回月台（不然會卡在牆上）
+// 溫特站在門口那一格（車門 D 那格）：算還沒上車，推回月台；要整個走進車廂裡才會被載走（不然站在門口會被硬拉進車裡）
 function mrtTrainClearSill(tr, type) {
   const sill = OY + (tr.bottomRow + 1) * CELL, gap = 20;   // 車廂下緣（薄牆）
   for (const a of mrtTrainActors()) {
     const [c, r] = cellAt(a.x, a.y);
+    if (a === G.player && r === tr.bottomRow && type.get(c + ',' + r) === 'D') {
+      const out = [1, 2].find(d => inGrid(c, r + d) && !isWall(c, r + d));   // 門外第一格可能是月台門（關上了），就再往外一格
+      if (out) { a.y = OY + (r + out + .5) * CELL; a.navPath = null; a.navGoal = null; continue; }
+    }
     if (type.get(c + ',' + tr.bottomRow) !== 'D' || r < tr.bottomRow || r > tr.bottomRow + 1 || Math.abs(a.y - sill) >= gap) continue;
     a.y = a.y < sill ? sill - gap : OY + (tr.bottomRow + 1) * CELL + gap;
     a.navPath = null; a.navGoal = null;
