@@ -115,7 +115,7 @@ function drawWaded(a, kind, drawFn) {
     const inner = drawFn, py = a.y + fall.pivot;
     drawFn = () => { ctx.save(); ctx.translate(a.x, py); ctx.rotate(fall.rot); ctx.translate(-a.x, -py + fall.dy); try { inner(); } finally { ctx.restore(); } };
   }
-  const info = a && a.swimRing ? null : (fall && fall.wade) || wadeInfo(a, kind);   // 坐在救生圈上：整個人照常畫，不會被水遮住
+  let info = a && a.swimRing ? null : (fall && fall.wade) || wadeInfo(a, kind);   // 坐在救生圈上：整個人照常畫，不會被水遮住
   if (a && a.swimRing && typeof drawSwimRinged === 'function') {   // 坐進救生圈：腳藏起來（js/swim-ring.js），救生圈外面一圈水波紋
     const ri = typeof swimRingRippleInfo === 'function' ? swimRingRippleInfo(a) : null;
     if (ri) drawWaterRipple(a, ri, 'back');
@@ -124,6 +124,7 @@ function drawWaded(a, kind, drawFn) {
     return;
   }   // 坐進救生圈：腳藏起來（js/swim-ring.js）
   if (!info) { drawFn(); return; }
+  if (kind === 'enemy' && !info.noBase) info = { ...info, noBase: true };   // 怪物泡水：不畫貼著身體那圈白色橢圓外框（游動時往外擴散的水波照畫）
   // 在水裡游的怪物：身體載浮載沉（只有身體動，水面那條線和波紋留在原地，看起來就像在水裡一浮一沉）
   if (kind === 'enemy' && !fall && (a.aqua || a.waterSwim)) {
     const B = WATER.bob, t = performance.now() / 1000, seed = a.bobSeed || (a.bobSeed = Math.random() * 20);
@@ -181,7 +182,7 @@ function drawWaterRipple(a, info, part) {
   const t = performance.now() / 1000;
   ctx.save();
   ctx.lineWidth = 1.2;
-  if (!(info.ripple && info.ripple.noBase)) {   // 貼著身體、一直在的那一圈（info.ripple.noBase＝不要這圈，只有往外擴散的）
+  if (!info.noBase && !(info.ripple && info.ripple.noBase)) {   // 貼著身體、一直在的那一圈（info.noBase／info.ripple.noBase＝不要這圈，只有往外擴散的）
     ctx.strokeStyle = WATER.rippleColor + '.55)';
     ctx.beginPath(); ctx.ellipse(a.x, y, rx, ry, 0, a0, a1); ctx.stroke();
   }
