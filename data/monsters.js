@@ -1781,10 +1781,16 @@ const BOSS_SETTINGS_DEFAULT = {
         14,
         26
       ],
-      "stay": 3.2,
-      "rise": 0.6,
+      "stay": 4.5,
+      "rise": 2.2,
+      "sink": 2.4,
       "distMin": 4,
       "distMax": 10
+    },
+    "surfaceRise": 1.2,
+    "oval": {
+      "wide": 1,
+      "flat": 0.3
     },
     "introSecs": 1.1,
     "introHeight": 150,
@@ -1808,7 +1814,7 @@ const BOSS_SETTINGS_DEFAULT = {
       6
     ],
     "approachMax": 4,
-    "diveTurn": 0.9,
+    "diveTurn": 1.4,
     "surfaceDepth": 0.45,
     "silhouette": 0.4,
     "defaultSee": 0.45,

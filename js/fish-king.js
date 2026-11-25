@@ -29,8 +29,11 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   scale: 2.64,                // 放大幾倍
   hp: 4200,                   // 血量（再乘整體難度）
   rewardMul: 6, crystalMul: 6,
-  // 開戰前冒頭偷看：每隔幾秒（隨機）一次、盯著看幾秒、冒出來／沉下去要幾秒、離溫特幾格（最近～最遠）的深水才冒
-  peek: { every: [14, 26], stay: 3.2, rise: .6, distMin: 4, distMax: 10 },
+  // 開戰前冒頭偷看：每隔幾秒（隨機）一次、盯著看幾秒、慢慢浮出來要幾秒、慢慢沉下去要幾秒、離溫特幾格（最近～最遠）的深水才冒
+  peek: { every: [14, 26], stay: 4.5, rise: 2.2, sink: 2.4, distMin: 4, distMax: 10 },
+  surfaceRise: 1.2,           // 開戰後：從水裡浮上來要幾秒（慢慢浮出來，不是一下子跳出來）
+  // 泡在水裡時，水面那一圈橢圓：wide＝寬度是身體寬的幾倍、flat＝扁度（高÷寬，越小越扁）
+  oval: { wide: 1, flat: .3 },
   introSecs: 1.1,             // 正式登場：從水裡躍出來到落回水面要幾秒
   introHeight: 150,           // 正式登場：跳多高（像素）
   introSplash: 3.2,           // 正式登場：落水水花多大（皇冠水花放大幾倍）
@@ -44,7 +47,7 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   dive: [3, 5],               // 潛水幾秒（隨機）；時間到就游去岸邊浮上來
   surface: [4, 6],            // 浮上來幾秒（隨機）
   approachMax: 4,             // 潛水時間到之後，最多花幾秒游到岸邊才浮上來
-  diveTurn: .9,               // 潛下去之前轉身露出背面幾秒（打得到、背面比較痛）
+  diveTurn: 1.4,              // 潛下去之前轉身露出背面幾秒（打得到、背面比較痛；這段時間身體慢慢沉下去）
   surfaceDepth: .45,          // 浮上來時水面在身體的哪裡（.45＝露出一半多一點）
   silhouette: .4,             // 潛水時的影子多濃（再乘水的能見度）
   defaultSee: .45,            // 水的能見度（沒有水素材時用）
@@ -163,6 +166,12 @@ function updateFishKing(dt) {
   if (K.phase === 'swim' && !K.sub && !deepWaterAtPoint(e.x, e.y)) fkStrand(K);
   if (K.phase === 'strand') { fkStrandStep(K, dt); return; }
   if (K.phase === 'hop') { fkHopStep(K, dt); return; }
+  // 開戰後浮上來：慢慢浮出水面（越接近水面越慢）
+  if (K.riseT != null && !K.sub) {
+    K.riseT += dt; const k = Math.min(1, K.riseT / (P.surfaceRise || .01));
+    e.fkRise = 1 - (1 - k) * (1 - k);
+    if (k >= 1) { K.riseT = null; e.fkRise = null; }
+  }
   // 水柱衝天：醒著就會（潛水時也會）
   if ((K.geyserT -= dt) <= 0) { K.geyserT = fkRand(P.geyser.every); fkStartGeysers(K); }
   // 躲起來（叫小弟的時候）：潛在水裡往遠處游
@@ -180,6 +189,7 @@ function updateFishKing(dt) {
     if (K.approach && (K.t <= 0 || (K.goal && Math.hypot(K.goal.x - e.x, K.goal.y - e.y) < 24))) fkSurface(K);
   } else if (K.turnT > 0) {   // 轉身露出背面，等一下就潛下去
     K.turnT -= dt; fkFace(e, 'back');
+    const k = Math.max(0, K.turnT / FISH_KING.diveTurn); e.fkRise = k * k * (3 - 2 * k);   // 轉身時慢慢沉下去
     if (K.turnT <= 0) fkDive(K);
     return;
   } else {
@@ -210,7 +220,7 @@ function fkPeekStart(K) {
   e.x = x; e.y = y; e.faceRight = p.x > x; e.slimeLift = 0; e.fkRise = 0; fkFace(e, 'front');
   e.hideBar = true;   // 偷看時頭上不畫血條（還沒開戰）
   K.phase = 'peek'; K.peek = { t: 0 };
-  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), x, y + 8, 1.2);
+  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), x, y + 8, .5);   // 冒頭：小小的水花，慢慢浮上來比較詭異
   if (typeof sfxAt === 'function') sfxAt('poolWaterDrop', x, y, .8, 'fish-king-peek');
 }
 function fkPeekStep(K, dt) {
@@ -218,10 +228,14 @@ function fkPeekStep(K, dt) {
   Pk.t += dt;
   if (p) e.faceRight = p.x > e.x;   // 一直盯著溫特
   fkFace(e, 'front');
-  const sinkAt = P.rise + P.stay;
-  e.fkRise = Pk.t < P.rise ? Pk.t / P.rise : Pk.t < sinkAt ? 1 : Math.max(0, 1 - (Pk.t - sinkAt) / P.rise);   // 慢慢冒出來、盯著看、慢慢沉下去
-  if (Pk.t >= sinkAt && !Pk.sank) { Pk.sank = true; if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, e.y + 8, 1); }
-  if (Pk.t >= sinkAt + P.rise) { K.phase = 'hidden'; K.peek = null; e.fkRise = null; }
+  const sinkAt = P.rise + P.stay, sink = P.sink || P.rise;
+  // 慢慢浮出來（越接近水面越慢）→ 盯著溫特看（身體隨水微微起伏）→ 慢慢沉下去（一開始很慢，像是捨不得移開視線）
+  const ease = k => k * k * (3 - 2 * k);
+  e.fkRise = Pk.t < P.rise ? ease(Pk.t / P.rise)
+    : Pk.t < sinkAt ? 1 - .04 * (1 - Math.cos((Pk.t - P.rise) * 1.6))
+    : Math.max(0, 1 - ease(Math.min(1, (Pk.t - sinkAt) / sink)));
+  if (Pk.t >= sinkAt && !Pk.sank) { Pk.sank = true; if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, e.y + 8, .6); }   // 沉下去：只冒一點點水花，安安靜靜的
+  if (Pk.t >= sinkAt + sink) { K.phase = 'hidden'; K.peek = null; e.fkRise = null; }
 }
 // ---- 正式登場：核心被打到 → 從離那顆核心最近的右邊深水躍出來 ----
 function fkIntroStart(K, core) {
@@ -298,11 +312,12 @@ function fkSplash(e, size, surge) {
   if (surge && typeof poolSurgeStart === 'function') poolSurgeStart(e.x, e.y, 'land');   // 水溢上岸、把人推開一點（js/pool-surge.js）
 }
 function fkSurface(K) {
-  const e = K.e; K.sub = false; K.approach = false; K.t = fkRand(FISH_KING.surface); K.cannonT = Math.min(K.cannonT, .8);
-  fkShow(K, true); fkSplash(e, FISH_KING.splashSize, false);
+  const e = K.e; K.sub = false; K.approach = false; K.t = fkRand(FISH_KING.surface); K.cannonT = Math.max(K.cannonT, FISH_KING.surfaceRise || 0);   // 浮出來之前不會開水砲
+  K.riseT = 0; e.fkRise = 0;   // 從水裡慢慢浮上來（updateFishKing 一幀一幀推）
+  fkShow(K, true); fkSplash(e, FISH_KING.splashSize * .6, false);
 }
 function fkDive(K) {
-  const e = K.e; K.sub = true; K.t = fkRand(FISH_KING.dive); K.goal = null; K.turnT = 0;
+  const e = K.e; K.sub = true; K.t = fkRand(FISH_KING.dive); K.goal = null; K.turnT = 0; K.riseT = null; e.fkRise = null;
   fkSplash(e, FISH_KING.splashSize * 1.1, true); fkShow(K, false);
 }
 // 面向（front＝正面、back＝背面魚肉）：原圖正面朝左、背面朝右；e.showBack 給 js/fish-head.js 算背面傷害
@@ -604,7 +619,8 @@ function fishKingWade(a) {
   if (K.phase === 'strand' || K.phase === 'hop' || !deepWaterAtPoint(a.x, a.y)) return null;
   const h = a.drawHeight || 190, lift = Math.max(0, a.slimeLift || 0), H = h + lift;
   const rise = a.fkRise ?? 1, depth = 1 - (1 - FISH_KING.surfaceDepth) * rise;   // 冒頭偷看：從全部泡在水裡慢慢浮上來
-  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * .7 };
+  const O = FISH_KING.oval || { wide: .7, flat: .55 };   // 水面那圈橢圓的寬度、扁度（js/water.js 的 drawWaded／drawWaterRipple 照這個畫和切）
+  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * O.wide, flat: O.flat };
 }
 function fkSee(a) {
   const w = typeof waterAt === 'function' ? waterAt(a.x, a.y + 10) : null;

@@ -154,7 +154,7 @@ function drawWaded(a, kind, drawFn) {
   main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.globalAlpha = 1; main.filter = 'none';
   if (kind === 'enemy' && WATER_OVAL_ENEMY) {
     // 怪物：水面跟身體的交界照波紋前半圈的橢圓弧走（中間往下彎），不是一條直線
-    const rx = Math.abs(m.a) * info.width * .5, ry = Math.abs(m.d) * Math.max(2.5, info.width * .5 * WATER.rippleFlat), cx = toX(a.x);
+    const rx = Math.abs(m.a) * info.width * .5, ry = Math.abs(m.d) * Math.max(2.5, info.width * .5 * (info.flat || WATER.rippleFlat)), cx = toX(a.x);
     const oval = c => c.ellipse(cx, cut, rx, ry, 0, 0, Math.PI);   // 下半個橢圓（靠鏡頭那一半）
     main.save();   // 水面上：直線以上＋下半個橢圓裡面 → 照常畫
     main.beginPath(); main.rect(sx, sy, ex - sx, cut - sy); main.moveTo(cx + rx, cut); oval(main); main.closePath(); main.clip();
@@ -177,7 +177,7 @@ function drawWaded(a, kind, drawFn) {
 // part：'back'＝只畫上半弧（在角色後面）、'front'＝只畫下半弧（在角色前面）、沒給＝整圈
 function drawWaterRipple(a, info, part) {
   const a0 = part === 'front' ? 0 : Math.PI, a1 = part === 'back' ? Math.PI * 2 : part === 'front' ? Math.PI : Math.PI * 3;   // canvas 角度：0～π＝下半、π～2π＝上半
-  const y = info.bottom - info.height * info.w.depth, rx = info.width * .5, ry = Math.max(2.5, rx * WATER.rippleFlat);
+  const y = info.bottom - info.height * info.w.depth, rx = info.width * .5, ry = Math.max(2.5, rx * (info.flat || WATER.rippleFlat));   // info.flat：這隻自己的扁度（魚頭王，js/fish-king.js 的 FISH_KING.oval）
   const t = performance.now() / 1000;
   ctx.save();
   ctx.lineWidth = 1.2;
