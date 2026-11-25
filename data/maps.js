@@ -118757,10 +118757,10 @@ const BATTLE_MAPS = [
       {
         "id": "tile_forest_wood_bridge_short",
         "c": 83,
-        "r": 37,
+        "r": 38,
         "layer": "ground4",
-        "sortDepth": 4,
-        "oy": 30
+        "sortDepth": 0.25,
+        "oy": 3.333333
       },
       {
         "id": "tile_mvcsj5eh",
@@ -121660,9 +121660,9 @@ const BATTLE_MAPS = [
         "c": 51,
         "r": 23,
         "layer": "object9",
-        "ox": 30,
-        "oy": 10,
-        "fx": true
+        "ox": 16,
+        "fx": true,
+        "sortDepth": 3.75
       },
       {
         "id": "tile_forest_bg_outside_tree02",
@@ -136350,7 +136350,8 @@ const BATTLE_MAPS = [
       "63,83",
       "62,83",
       "115,52",
-      "69,94"
+      "69,94",
+      "54,27"
     ],
     "breakable": [],
     "coreSpots": [
@@ -194618,16 +194619,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mw4d9qnu",
-        "c": 58,
-        "r": 40,
+        "c": 56,
+        "r": 42,
         "layer": "object26",
         "ox": 20,
-        "oy": 20
+        "oy": 10
       },
       {
         "id": "tile_mw4d9qnu",
-        "c": 54,
-        "r": 38,
+        "c": 52,
+        "r": 35,
         "layer": "object26",
         "ox": 30,
         "oy": 20
