@@ -47,6 +47,7 @@ function sentryBlockReason(t, x, y, { dark = true, floor = null, where = '那裡
   if (!t.swimRing && typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(x, y)) return where + '在深水區，沒有救生圈不能下水';
   const find = () => buildSentryPath(t, x, y, dark, floor);
   if (find() !== null) return null;   // 找得到路
+  if (typeof trackSentryCanCross === 'function' && trackSentryCanCross(t, x, y)) return null;   // 隔著捷運軌道：可以跳進軌道穿過去（js/mrt-track.js）
   if (!dark && typeof personnelInLight === 'function' && !personnelInLight(x, y)) return where + '太暗了，隊員不敢過去';
   if (withoutBuildings(find) !== null) return '路被建築（路障、防禦設施等）擋住了';
   if (withoutHazards(find) !== null) return '路上有火海或酸液，等它消失才過得去';
