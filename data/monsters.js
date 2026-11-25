@@ -1787,8 +1787,12 @@ const BOSS_SETTINGS_DEFAULT = {
       "distMin": 4,
       "distMax": 10,
       "splashRise": 0.5,
-      "splashSink": 0.7
+      "splashSink": 0.7,
+      "deepChance": 0.75,
+      "deepDistMax": 16,
+      "drift": 22
     },
+    "shoreGap": 0,
     "surfaceRise": 1.2,
     "fadeAt": 0.7,
     "oval": {
@@ -1849,7 +1853,37 @@ const BOSS_SETTINGS_DEFAULT = {
       "distMin": 2,
       "distMax": 4.5,
       "landDamage": 14,
-      "panic": 3
+      "panic": 3,
+      "panicPlayer": 1
+    },
+    "leap": {
+      "every": [
+        6,
+        10
+      ],
+      "hops": [
+        1,
+        3
+      ],
+      "secs": 1.1,
+      "height": 150,
+      "distMin": 4,
+      "distMax": 14,
+      "tilt": 0.6,
+      "otherPool": 0.7
+    },
+    "flinch": {
+      "turn": 0.5
+    },
+    "shocked": {
+      "shake": 0.8,
+      "tilt": 30,
+      "fall": 1600,
+      "sink": 1.1,
+      "gone": [
+        2.5,
+        4
+      ]
     },
     "strandSecs": 6,
     "strandMul": 2,
