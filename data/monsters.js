@@ -1320,7 +1320,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "playerDamage": 14,
       "sentryDamage": 18,
       "monsterDamage": 60,
-      "quick": 2,
+      "quick": 3,
       "big": {
         "chance": 0.5,
         "radius": 46,
