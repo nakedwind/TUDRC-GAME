@@ -130,7 +130,10 @@ function mrtMakeStaticTrain(cars, head, variant, top, bottom) {
   order.forEach((car, i) => { car.closed = closed.has(i + 1); car.farClosed = car.closed || farClosed.has(i + 1); });
   return { cars: order, variant, bothDoors: cars.some(c => c.stamp.bothDoors), top, bottom, stamp: head.stamp };
 }
-function drawMrtStaticTrain(ctx, st) {
+// 跟真的列車一樣分三層排前後（part）：'back'＝對面的門＋車廂內部（排在車廂上緣，車裡的人畫在它上面）、
+//   'front'＝外殼＋外側的門，門口那幾欄除外（排在車廂底邊往下 frontSortDy）、'frontDoor'＝只畫門口那幾欄（排在底邊往下 doorSortDy）
+// 這樣遮擋線就在門口：站在車裡、門口的人不會被整張圖蓋掉
+function drawMrtStaticTrain(ctx, st, part) {
   const T = MRT_TRAIN, V = st.variant || {}, inside = mrtTrainImg(T.inside), outer = mrtTrainImg(V.outerDoor || T.outerDoor.file), far = mrtTrainImg(V.farDoor || T.farDoor.file);
   for (const car of st.cars) {
     const shell = tileImage(car.tile); if (!shell) continue;
@@ -138,11 +141,19 @@ function drawMrtStaticTrain(ctx, st) {
     ctx.translate(car.x, car.y);
     if (car.stamp.fx) { ctx.translate(car.w, 0); ctx.scale(-1, 1); }
     ctx.scale(car.w / shell.naturalWidth, car.h / shell.naturalHeight);
-    const open = car.closed ? 0 : 1;
-    if (far) drawMrtDoors(ctx, far, T.farDoor, st.bothDoors && !car.farClosed ? 1 : 0);   // 對面（後方）的門
-    if (inside) ctx.drawImage(inside, 0, 0);                                 // 車廂內部
-    if (outer) drawMrtDoors(ctx, outer, T.outerDoor, open);                  // 靠月台這側的門
-    ctx.drawImage(shell, 0, 0);                                              // 外殼
+    if (part === 'back') {
+      if (far) drawMrtDoors(ctx, far, T.farDoor, st.bothDoors && !car.farClosed ? 1 : 0);   // 對面（後方）的門
+      if (inside) ctx.drawImage(inside, 0, 0);                                                // 車廂內部
+    } else {
+      // 外側門口那幾欄（格子圖最下面一排的 D）：'frontDoor' 只畫這幾欄、'front' 畫其他部分
+      const L = mrtCarLayout(car.kind), bottom = L[L.length - 1] || '', colW = shell.naturalWidth / bottom.length;
+      ctx.beginPath();
+      if (part === 'front') ctx.rect(0, 0, shell.naturalWidth, shell.naturalHeight);
+      for (let c = 0; c < bottom.length; c++) if (bottom[c] === 'D') ctx.rect(c * colW, 0, colW, shell.naturalHeight);
+      ctx.clip(part === 'front' ? 'evenodd' : 'nonzero');
+      if (outer) drawMrtDoors(ctx, outer, T.outerDoor, car.closed ? 0 : 1);   // 靠月台這側的門
+      ctx.drawImage(shell, 0, 0);                                             // 外殼
+    }
     ctx.restore();
   }
 }
@@ -1159,10 +1170,13 @@ function updateMrtTrainsNow(dt) {
 // 車內走道上的人（腳底最多到車廂下緣）會畫在兩層中間，月台上的人畫在最前面
 function mrtTrainSortables(list) {
   const v = typeof mapDrawFull !== 'undefined' && !mapDrawFull && typeof mapDrawRect !== 'undefined' ? mapDrawRect : null;   // 這一幀畫面看得到的範圍（js/maploader.js）
-  // 只是圖片的列車：整張圖跟一般物件一樣，照底邊排前後
+  // 只是圖片的列車：跟真的列車一樣分三層排前後（遮擋線在門口，見 drawMrtStaticTrain）
   for (const st of mrtStaticTrains) {
-    if (v && (st.bottom < v.y0 || st.top > v.y1)) continue;
-    list.push({ floor: typeof stampDrawFloor === 'function' ? stampDrawFloor(st.stamp) : 1, y: st.bottom, draw: () => drawMrtStaticTrain(ctx, st) });
+    if (v && (st.bottom + 3 * CELL < v.y0 || st.top - 3 * CELL > v.y1)) continue;
+    const floor = typeof stampDrawFloor === 'function' ? stampDrawFloor(st.stamp) : 1;
+    list.push({ floor, y: st.top, draw: () => drawMrtStaticTrain(ctx, st, 'back') });
+    list.push({ floor, y: st.bottom + MRT_TRAIN.frontSortDy, draw: () => drawMrtStaticTrain(ctx, st, 'front') });
+    list.push({ floor, y: st.bottom + MRT_TRAIN.doorSortDy, draw: () => drawMrtStaticTrain(ctx, st, 'frontDoor') });
   }
   for (const tr of G.mrtTrains || []) {
     if (tr.state === 'away') continue;
@@ -1186,6 +1200,13 @@ function mrtMapItemSortY(it, y) {
     const lo = tr.bottom + Math.min(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy), hi = tr.bottom + Math.max(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy);
     if (y < lo || y > hi) continue;
     if (OX + it.x1 <= tr.clipL || OX + it.x0 >= tr.clipR || OY + it.y0 >= tr.bottom) continue;   // 不在軌道範圍、或整個在列車下面
+    return hi + 0.5;
+  }
+  for (const st of mrtStaticTrains) {   // 只是圖片的列車也一樣（左右看整張圖的範圍）
+    const lo = st.bottom + Math.min(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy), hi = st.bottom + Math.max(MRT_TRAIN.doorSortDy, MRT_TRAIN.frontSortDy);
+    if (y < lo || y > hi) continue;
+    const L = Math.min(...st.cars.map(c => c.x)), R = Math.max(...st.cars.map(c => c.x + c.w));
+    if (OX + it.x1 <= L || OX + it.x0 >= R || OY + it.y0 >= st.bottom) continue;
     return hi + 0.5;
   }
   return y;
