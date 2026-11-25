@@ -7,7 +7,7 @@
    ・藤蔓抓過人會縮上去，VINES.regrowTime 秒後再慢慢垂下來
    ・倒吊藤蔓（地圖編輯器「🪢 倒吊藤蔓」）：抓到隊友不丟下來，而是把他倒吊在半空中晃來晃去；
      溫特要開槍把藤蔓打斷（VINES.hangHits 發）才能救下來；沒人救的話吊 VINES.hangRelease 秒後藤蔓自己放開。溫特碰到倒吊藤蔓照樣被捲走、丟回來
-   ・三種藤蔓用同一張圖：倒吊藤蔓偏藍、傳送藤蔓偏黃（VINES.tint 疊一層淡淡的顏色；身上的纏繞也跟著換色 VINES.wrapColKind）
+   ・三種藤蔓用同一張圖：倒吊藤蔓偏藍、傳送藤蔓偏紅（VINES.tint 疊一層淡淡的顏色；身上的纏繞也跟著換色 VINES.wrapColKind）
    ・藤蔓怕火：被火海（燃燒彈、油桶）或希奧妮的火燒到就縮回去，VINES.fireRegrow 秒後才重新垂下來；
      正在纏人、倒吊隊友的藤蔓被燒到會放開（倒吊的隊友會掉下來）
    ・藤蔓尖端正下方的地上有影子，看得出藤蔓垂在哪裡
@@ -33,6 +33,7 @@ const VINES = {
   lieTime: .15,      // 摔到地上、倒下去要幾秒
   safeTime: 3,       // 落地後幾秒內不會又被藤蔓抓
   regrowTime: 30,    // 抓過人縮上去後，幾秒再垂下來（冷卻 30 秒才回到原位）
+  ferryRegrow: 10,   // 傳送藤蔓抓過人後，幾秒再垂下來（傳送藤蔓是必經的路，冷卻比較短）
   descendTime: 1.6,  // 重新垂下來要幾秒
   sway: 9,           // 尖端左右晃多大（像素）
   gravity: 1700,     // 被丟下來的重力
@@ -47,10 +48,10 @@ const VINES = {
   // 被抓時身上纏繞的顏色（絲瓜藤的畫法，但改成橄欖綠，跟藤蔓圖搭）
   wrapCol: { line: '#1e220c', fill: '#7a8432', light: '#a6ae52', back: '#555c22' },   // 橄欖綠
   // 三種藤蔓的顏色差別：藤蔓圖上疊一層淡淡的顏色（越不透明越明顯）；沒寫的（一般藤蔓）照原圖
-  tint: { hang: 'rgba(70,140,255,.30)', ferry: 'rgba(255,210,40,.30)' },   // hang＝倒吊藤蔓偏藍、ferry＝傳送藤蔓偏黃
-  wrapColKind: {   // 被抓時身上纏繞的顏色（跟藤蔓一樣偏藍、偏黃）
+  tint: { hang: 'rgba(70,140,255,.30)', ferry: 'rgba(255,40,40,.38)' },   // hang＝倒吊藤蔓偏藍、ferry＝傳送藤蔓偏紅
+  wrapColKind: {   // 被抓時身上纏繞的顏色（跟藤蔓一樣偏藍、偏紅）
     hang: { line: '#141c26', fill: '#5f7f80', light: '#8fb0b4', back: '#3f5a60' },
-    ferry: { line: '#262010', fill: '#958a32', light: '#c4b852', back: '#6a6122' },
+    ferry: { line: '#2a0e0c', fill: '#a03a2e', light: '#d0645a', back: '#6e2620' },
   },
   starDx: -10,       // 暈眩星星：往頭那一邊的反方向挪幾像素（往右倒＝往左挪，往左倒自動鏡射）
   starDy: -10,       //           往上挪幾像素（負的＝往上）
@@ -162,7 +163,7 @@ function stepVineCap(cap, a, dt) {
     const k = Math.min(1, cap.t / VINES.liftTime);
     cap.topH = Math.max(cap.topH, (a.y - cam.y) + 110);   // 鏡頭跟著溫特動：隊友要拉到「現在」的畫面上緣外面
     cap.h = cap.topH * k * k * (1.4 - .4 * k);   // 一開始慢、越拉越快
-    if (k >= 1) { cap.phase = 'away'; cap.t = 0; cap.v.state = 'gone'; cap.v.t = VINES.regrowTime; if (cap.mode === 'ferry') pickFerryDrop(cap); else pickVineDrop(cap); }
+    if (k >= 1) { cap.phase = 'away'; cap.t = 0; cap.v.state = 'gone'; cap.v.t = cap.v.kind === 'ferry' ? VINES.ferryRegrow : VINES.regrowTime; if (cap.mode === 'ferry') pickFerryDrop(cap); else pickVineDrop(cap); }
   } else if (cap.phase === 'away') {
     if (cap.t >= (cap.awayT ?? (cap.isPlayer ? VINES.awayTime : VINES.mateAwayTime))) {
       cap.phase = 'fall'; cap.t = 0; cap.fallV = 0;
@@ -561,7 +562,7 @@ function drawVineActor(a, baseDraw, overlay = false) {
     const grow = cap.phase === 'wrap' ? Math.min(1, cap.t / (VINES.wrapTime * .8)) : 1;
     cap.wrapSeed = cap.wrapSeed || (1 + Math.random() * 6);
     const C = typeof TENDRIL_COL !== 'undefined' ? TENDRIL_COL : null, keep = C && { ...C };
-    if (C) Object.assign(C, (VINES.wrapColKind && VINES.wrapColKind[cap.v && cap.v.kind]) || VINES.wrapCol);   // 暫時換成藤蔓的顏色（橄欖綠／偏藍／偏黃），畫完換回去（絲瓜小姐的藤照舊）
+    if (C) Object.assign(C, (VINES.wrapColKind && VINES.wrapColKind[cap.v && cap.v.kind]) || VINES.wrapCol);   // 暫時換成藤蔓的顏色（橄欖綠／偏藍／偏紅），畫完換回去（絲瓜小姐的藤照舊）
     try { drawWrap(ctx, { x: a.x, y: a.y, rootT: 0, struggleT: 0 }, grow, now, cap.wrapSeed); } finally { if (C) Object.assign(C, keep); }
   }
   ctx.restore();
