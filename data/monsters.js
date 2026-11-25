@@ -1818,7 +1818,7 @@ const BOSS_SETTINGS_DEFAULT = {
     ],
     "approachMax": 4,
     "diveTurn": 1.4,
-    "surfaceDepth": 0.57,
+    "surfaceDepth": 0.785,
     "silhouette": 0.4,
     "defaultSee": 0.45,
     "splashSize": 2.4,
