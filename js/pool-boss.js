@@ -13,7 +13,7 @@
 // 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
 const POOL_BOSS = applyBossSettings('POOL_BOSS', {
   name: '巨大比基尼小丑魚',
-  maps: ['map_mv1bzur4'],     // 04. 池核
+  maps: ['map_mv1bzur4', 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf'],     // 04. 池核、W118區 地下水池（W118 是池核往下移 5 列再擴大，BOSS 一樣守中間深水區那顆核心）
   of: 'clownfish',            // 以哪隻怪物為基準（怪物編輯器的比基尼小丑魚）
   scale: 2.2,                 // 放大幾倍
   hp: 4800,                   // 血量（再乘整體難度）
