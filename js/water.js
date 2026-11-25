@@ -22,6 +22,26 @@ const WATER = {
     tilt: .05,       // 前後晃多少（弧度）
   },
 };
+// 在水裡游的怪物：每張圖的眼睛在圖裡的高度（像素，從圖片最上面往下數）。
+// 有些動作圖（例如小丑魚跳起來那張）整隻畫得比較高，直接換圖的話泡在水裡會忽高忽低；
+// 這裡記下眼睛的位置，泡在水裡時每張圖都把眼睛對齊到「站姿圖（front）」的眼睛高度，水面就永遠在眼睛下面同一個地方。
+// 新增會在水裡游、而且動作圖高低不一樣的怪物時，把牠每張圖的眼睛高度加進來（沒列的圖不調整）。
+const WATER_EYE_Y = {
+  'images/monster/clownfish/clownfish-front.png': 52,
+  'images/monster/clownfish/clownfish-front-02.png': 54,
+  'images/monster/clownfish/clownfish-blink.png': 54,
+  'images/monster/clownfish/clownfish-hop-crouch.png': 57,
+  'images/monster/clownfish/clownfish-hop-air.png': 26,
+  'images/monster/clownfish/clownfish-small-front.png': 32,
+  'images/monster/clownfish/clownfish-small-hop.png': 13,
+};
+// js/render.js 的 drawEnemy 呼叫：這張圖要往下（正數）或往上挪幾像素，眼睛才會跟站姿圖對齊（只有在水裡游的時候）
+function waterEyeShift(e, file, drawH, naturalH) {
+  if (!e || !(e.aqua || e.waterSwim) || (e.slimeLift || 0) > 4 || !file || !naturalH || !e.frames) return 0;
+  const ref = WATER_EYE_Y[e.frames.front], cur = WATER_EYE_Y[file];
+  if (ref == null || cur == null) return 0;
+  return (ref - cur) * drawH / naturalH;
+}
 // 怪物泡水時，水面跟身體交界改成橢圓（跟水面波紋的前半圈一樣），不是一條直線
 const WATER_OVAL_ENEMY = true;
 const WATER_DEFAULT = { depth: 25, speed: 70, see: 45 };   // 沒填的數字用這個

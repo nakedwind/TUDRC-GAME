@@ -474,7 +474,8 @@ function drawEnemy(e) {
       const base = monsterImage(e.frames.front);
       if (base.naturalWidth) { fw = baseSprite.naturalWidth * slimeW / base.naturalWidth; fh = baseSprite.naturalHeight * slimeH / base.naturalHeight; }
     }
-    const dx = Math.round(e.x - fw / 2), dy = Math.round(bottomY - fh), dw = Math.round(fw), dh = Math.round(fh);
+    const eyeDy = typeof waterEyeShift === 'function' ? waterEyeShift(e, walkFrame && walkFrame.file, fh, baseSprite.naturalHeight) : 0;   // 在水裡游：每張圖的眼睛對齊站姿圖（js/water.js 的 WATER_EYE_Y）
+    const dx = Math.round(e.x - fw / 2), dy = Math.round(bottomY - fh + eyeDy), dw = Math.round(fw), dh = Math.round(fh);
     ctx.drawImage(sprite, dx, dy, dw, dh);
     // 受擊閃紅；自爆引信點燃時越閃越快
     const fuseP = e.fuseT > 0 ? 1 - e.fuseT / SLIME_BOMB.fuse : 0;

@@ -1772,7 +1772,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "hatchlingChance": 0.8
   },
   "FISH_KING": {
-    "scale": 2.4,
+    "scale": 2.64,
     "hp": 4200,
     "rewardMul": 6,
     "crystalMul": 6,
@@ -1790,9 +1790,15 @@ const BOSS_SETTINGS_DEFAULT = {
     "introHeight": 150,
     "introSplash": 3.2,
     "knockMul": 0.6,
-    "swimSpeed": 150,
+    "swimSpeed": 90,
     "surfacedSpeedMul": 0.35,
-    "turnRate": 3.5,
+    "turnRate": 1.6,
+    "accel": 0.9,
+    "weave": {
+      "amp": 0.2,
+      "freq": 1.5
+    },
+    "strokeSecs": 0.55,
     "dive": [
       3,
       5
@@ -1871,6 +1877,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "noticeRange": 10,
     "sink": 0.45,
     "see": 0.35,
+    "shoreGap": 1,
     "milkfish": {
       "lunge": 2.5,
       "leapSecs": 0.55,
@@ -1882,6 +1889,7 @@ const BOSS_SETTINGS_DEFAULT = {
         7
       ],
       "range": 9,
+      "reach": 1.8,
       "swimMul": 1.8,
       "diveMax": 4,
       "warn": 0.7,

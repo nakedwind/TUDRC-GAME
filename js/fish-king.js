@@ -26,7 +26,7 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   maps: { 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { home: [95, 16], area: [64, 0, 115, 89] } },
   of: 'fish_head',            // 以哪隻怪物為基準（怪物編輯器的魚頭君）
   artDir: 'images/monster/fish-king/',
-  scale: 2.4,                 // 放大幾倍
+  scale: 2.64,                // 放大幾倍
   hp: 4200,                   // 血量（再乘整體難度）
   rewardMul: 6, crystalMul: 6,
   // 開戰前冒頭偷看：每隔幾秒（隨機）一次、盯著看幾秒、冒出來／沉下去要幾秒、離溫特幾格（最近～最遠）的深水才冒
@@ -35,9 +35,12 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   introHeight: 150,           // 正式登場：跳多高（像素）
   introSplash: 3.2,           // 正式登場：落水水花多大（皇冠水花放大幾倍）
   knockMul: .6,               // 被打時的擊退倍率（被推上岸才會擱淺；0＝推不動）
-  swimSpeed: 150,             // 潛在水裡游的速度（像素／秒）
+  swimSpeed: 90,              // 潛在水裡游的速度（像素／秒）
   surfacedSpeedMul: .35,      // 浮上來時游的速度倍率
-  turnRate: 3.5,              // 轉彎多快（每秒最多轉幾弧度）
+  turnRate: 1.6,              // 轉彎多快（每秒最多轉幾弧度；小一點＝大身體轉得慢）
+  accel: .9,                  // 加速／減速多快（每秒追上目標速度的幾成；小一點＝起步、停下都慢慢的，比較有重量）
+  weave: { amp: .2, freq: 1.5 },   // 游的時候左右擺（amp＝擺多大，弧度；freq＝擺多快）
+  strokeSecs: .55,            // 游泳時換一張動作圖要幾秒（大一點＝擺尾慢、比較沉重）
   dive: [3, 5],               // 潛水幾秒（隨機）；時間到就游去岸邊浮上來
   surface: [4, 6],            // 浮上來幾秒（隨機）
   approachMax: 4,             // 潛水時間到之後，最多花幾秒游到岸邊才浮上來
@@ -272,7 +275,7 @@ function fkDive(K) {
 }
 // 面向（front＝正面、back＝背面魚肉）：原圖正面朝左、背面朝右；e.showBack 給 js/fish-head.js 算背面傷害
 function fkFace(e, side, walk) {
-  const f = e.frames || {}, step = Math.floor(performance.now() / 260) % 2;
+  const f = e.frames || {}, step = Math.floor(performance.now() / 1000 / (FISH_KING.strokeSecs || .26)) % 2;
   e.showBack = side === 'back';
   if (side === 'back') { e.forceFrame = walk && f.walkBack && f.walkBack.length ? f.walkBack[step] : f.back; e.forceFlip = !e.faceRight; }
   else { e.forceFrame = walk && f.walkFront && f.walkFront.length ? f.walkFront[step] : f.front; e.forceFlip = !!e.faceRight; }
@@ -287,10 +290,13 @@ function fkSwim(K, dt, mul) {
   const want = Math.atan2(K.goal.y - e.y, K.goal.x - e.x);
   let turn = Math.atan2(Math.sin(want - K.ang), Math.cos(want - K.ang));
   turn = Math.max(-P.turnRate * dt, Math.min(P.turnRate * dt, turn)); K.ang += turn;
-  const a = K.ang + Math.sin(K.age * 3) * .35;
-  const step = P.swimSpeed * (K.sub ? 1 : P.surfacedSpeedMul) * mul * dt, nx = e.x + Math.cos(a) * step, ny = e.y + Math.sin(a) * step;
+  const W = P.weave || { amp: .35, freq: 3 }, a = K.ang + Math.sin(K.age * W.freq) * W.amp;
+  // 速度慢慢追上目標（起步慢慢加速、轉大彎時放慢）：大身體有重量，不會一下子衝出去
+  const want0 = P.swimSpeed * (K.sub ? 1 : P.surfacedSpeedMul) * mul * (1 - .5 * Math.min(1, Math.abs(turn) / (P.turnRate * dt || 1)));
+  K.spd = (K.spd ?? 0) + (want0 - (K.spd ?? 0)) * Math.min(1, (P.accel || 99) * dt);
+  const step = K.spd * dt, nx = e.x + Math.cos(a) * step, ny = e.y + Math.sin(a) * step;
   if (K.region.has(fkCellKey(nx, ny)) && deepWaterAtPoint(nx, ny)) { e.x = nx; e.y = ny; }
-  else { K.goal = nearShore ? fkShoreGoal(K) : fkPickGoal(K); if (K.goal) K.ang = Math.atan2(K.goal.y - e.y, K.goal.x - e.x); }
+  else { K.spd = (K.spd || 0) * .4; K.goal = nearShore ? fkShoreGoal(K) : fkPickGoal(K); if (K.goal) K.ang = Math.atan2(K.goal.y - e.y, K.goal.x - e.x); }
   if (Math.abs(Math.cos(a)) > .15) e.faceRight = Math.cos(a) > 0;
   e.moving = true;
   fkFace(e, Math.sin(a) < -.5 ? 'back' : 'front', true);

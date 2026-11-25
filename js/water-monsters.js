@@ -28,6 +28,7 @@ const WATER_MONSTERS = applyBossSettings('WATER_MONSTERS', {
   noticeRange: 10,      // 幾格內看到人就游過去
   sink: .45,            // 水面在身體的哪裡（0＝腳底、1＝頭頂）
   see: .35,             // 水面下的身體看得多清楚（0～1）
+  shoreGap: 1,          // 身體邊緣離岸邊至少幾格（越大隻的怪物，中心自然離得越遠；整池都太窄的話就直接跳上岸）
   // 虱目魚小子：岸上的隊友在幾格內就跳上岸撲過去、跳多久（秒）、跳多高（像素）
   milkfish: { lunge: 2.5, leapSecs: .55, leapHeight: 50 },
   // 小虱目魚小子：每隔幾秒（隨機）下潛一次、幾格內的人會被盯上、潛水時游多快（倍率）、最多潛幾秒、冒泡泡預警幾秒、
@@ -65,27 +66,54 @@ function aquaLabels() {
     }
     sizes[id++] = n;
   }
-  return aquaLabelCache = { deep, size: deep.size, label, sizes };
+  // 每一格深水離岸邊幾格：緊貼岸邊（旁邊 8 格有一格不是深水）＝1，再往裡面一格＝2…
+  const shore = new Map(), q = [];
+  for (const k of deep) {
+    const [c, r] = k.split(',').map(Number);
+    let edge = false;
+    for (let dc = -1; dc <= 1 && !edge; dc++) for (let dr = -1; dr <= 1; dr++) if ((dc || dr) && !deep.has((c + dc) + ',' + (r + dr))) { edge = true; break; }
+    if (edge) { shore.set(k, 1); q.push(k); }
+  }
+  for (let i = 0; i < q.length; i++) {
+    const [c, r] = q[i].split(',').map(Number), d = shore.get(q[i]) + 1;
+    for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) { const kk = (c + dc) + ',' + (r + dr); if ((dc || dr) && deep.has(kk) && !shore.has(kk)) { shore.set(kk, d); q.push(kk); } }
+  }
+  return aquaLabelCache = { deep, size: deep.size, label, sizes, shore, room: new Map() };
 }
-// 同一池水裡，離 (tx, ty) 最近的那一格
-function aquaNearestCell(e, tx, ty) {
+// 這隻怪物的中心至少要離岸邊幾格（看身體寬度：身體邊緣到岸邊至少留 shoreGap 格）；小虱目魚小子潛水時不限
+function aquaMarginOf(width) {
+  return Math.ceil(.5 + WATER_MONSTERS.shoreGap + width / 2 / CELL);
+}
+const aquaMargin = e => e.aq && e.aq.diving ? 0 : aquaMarginOf((e.drawWidth || 42) * (e.sizeMul || 1));
+const aquaRoomy = (L, k, m) => !m || (L.shore.get(k) || 0) >= m;   // 這一格離岸邊夠不夠遠
+// 這一池水裡有沒有夠寬的地方讓這麼大的怪物游（記起來，不用每一幀重算）
+function aquaPoolHasRoom(e) {
+  const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)), m = aquaMargin(e);
+  if (id == null || !m) return true;
+  const key = id + ':' + m;
+  if (!L.room.has(key)) { let ok = false; for (const [k, v] of L.label) if (v === id && aquaRoomy(L, k, m)) { ok = true; break; } L.room.set(key, ok); }
+  return L.room.get(key);
+}
+// 同一池水裡，離 (tx, ty) 最近的那一格（m＝離岸邊至少幾格，沒給就照這隻怪物的大小；0＝不限）
+function aquaNearestCell(e, tx, ty, m = aquaMargin(e)) {
   const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)); if (id == null) return null;
   let best = null, bd = Infinity;
   for (const [k, v] of L.label) {
-    if (v !== id) continue;
+    if (v !== id || !aquaRoomy(L, k, m)) continue;
     const [c, r] = k.split(',').map(Number), [x, y] = center(c, r), d = Math.hypot(x - tx, y - ty);
     if (d < bd) { bd = d; best = k; }
   }
   return best;
 }
 // 沿著水裡的格子找路（只在同一池裡）：回傳一串格子中心 [[x, y], …]
-function aquaPath(fromKey, toKey) {
+// m＝離岸邊至少幾格：已經在夠遠的地方就不會再游回岸邊；現在太靠岸（被推過去、剛浮上來）的話先游出來
+function aquaPath(fromKey, toKey, m = 0) {
   const L = aquaLabels(); if (!L.label.has(fromKey) || L.label.get(fromKey) !== L.label.get(toKey)) return null;
   const prev = new Map([[fromKey, null]]), q = [fromKey];
   for (let i = 0; i < q.length && i < 4000; i++) {
     const cur = q[i]; if (cur === toKey) break;
-    const [c, r] = cur.split(',').map(Number);
-    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (c + dc) + ',' + (r + dr); if (L.deep.has(k) && !prev.has(k)) { prev.set(k, cur); q.push(k); } }
+    const [c, r] = cur.split(',').map(Number), curOk = aquaRoomy(L, cur, m);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (c + dc) + ',' + (r + dr); if (L.deep.has(k) && !prev.has(k) && (!curOk || aquaRoomy(L, k, m))) { prev.set(k, cur); q.push(k); } }
   }
   if (!prev.has(toKey)) return null;
   const out = []; for (let k = toKey; k && k !== fromKey; k = prev.get(k)) out.unshift(center(...k.split(',').map(Number)));
@@ -96,7 +124,7 @@ function aquaGo(e, tx, ty, dt, mul = 1) {
   const A = e.aq, W = WATER_MONSTERS;
   A.repath = (A.repath || 0) - dt;
   const goal = A.repath <= 0 || !A.path ? aquaNearestCell(e, tx, ty) : A.goalKey;
-  if (goal && (goal !== A.goalKey || !A.path || A.repath <= 0)) { A.goalKey = goal; A.path = aquaPath(aquaKey(e.x, e.y), goal) || []; A.repath = .6; }
+  if (goal && (goal !== A.goalKey || !A.path || A.repath <= 0)) { A.goalKey = goal; A.path = aquaPath(aquaKey(e.x, e.y), goal, aquaMargin(e)) || []; A.repath = .6; }
   const pt = A.path && A.path[0], end = !pt && A.goalKey ? center(...A.goalKey.split(',').map(Number)) : null;   // 走完了：停在水裡最接近目標的那一格
   const gx = pt ? pt[0] : end ? end[0] : tx, gy = pt ? pt[1] : end ? end[1] : ty;
   const dx = gx - e.x, dy = gy - e.y, d = Math.hypot(dx, dy), step = Math.min(d, (e.speed || 60) * W.swimMul * mul * dt);
@@ -113,8 +141,8 @@ function aquaGo(e, tx, ty, dt, mul = 1) {
 function aquaWander(e, dt) {
   const A = e.aq;
   if (!A.spot || Math.hypot(A.spot[0] - e.x, A.spot[1] - e.y) < 8 || (A.spotT -= dt) <= 0) {
-    const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)), cand = [];
-    for (const [k, v] of L.label) { if (v !== id) continue; const [x, y] = center(...k.split(',').map(Number)); if (Math.hypot(x - e.x, y - e.y) < 6 * CELL) cand.push([x, y]); }
+    const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)), cand = [], m = aquaMargin(e);
+    for (const [k, v] of L.label) { if (v !== id || !aquaRoomy(L, k, m)) continue; const [x, y] = center(...k.split(',').map(Number)); if (Math.hypot(x - e.x, y - e.y) < 6 * CELL) cand.push([x, y]); }
     A.spot = cand.length ? cand[Math.floor(Math.random() * cand.length)] : [e.x, e.y]; A.spotT = 4 + Math.random() * 3; A.path = null;
   }
   aquaGo(e, A.spot[0], A.spot[1], dt, .5);
@@ -124,8 +152,8 @@ function aquaAway(e, dt, mul) {
   const p = G.player; if (!p) return aquaWander(e, dt);
   const A = e.aq;
   if (!A.away || (A.awayT -= dt) <= 0) {
-    const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)); let best = null, bd = -1, n = 0;
-    for (const [k, v] of L.label) { if (v !== id || Math.random() > .25) continue; const [x, y] = center(...k.split(',').map(Number)), d = Math.hypot(x - p.x, y - p.y); if (d > bd) { bd = d; best = [x, y]; } if (++n > 200) break; }
+    const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)), m = aquaMargin(e); let best = null, bd = -1, n = 0;
+    for (const [k, v] of L.label) { if (v !== id || !aquaRoomy(L, k, m) || Math.random() > .25) continue; const [x, y] = center(...k.split(',').map(Number)), d = Math.hypot(x - p.x, y - p.y); if (d > bd) { bd = d; best = [x, y]; } if (++n > 200) break; }
     A.away = best || [e.x, e.y]; A.awayT = 2; A.path = null;
   }
   aquaGo(e, A.away[0], A.away[1], dt, mul);
@@ -142,9 +170,9 @@ const aquaPersonInWater = a => !!(a.swimRing || a.drowning || a.poolFall || deep
 function aquaSpawnSpot(spec) {
   const W = WATER_MONSTERS;
   if (!spec || !WATER_MONSTER_IDS.includes(spec.id) || !aquaOn() || Math.random() >= W.spawnChance) return null;
-  const p = G.player, L = aquaLabels(), out = [];
+  const p = G.player, L = aquaLabels(), out = [], m = aquaMarginOf(spec.width || 42);
   for (const k of L.deep) {
-    if (L.sizes[L.label.get(k)] < W.minPool) continue;
+    if (L.sizes[L.label.get(k)] < W.minPool || !aquaRoomy(L, k, m)) continue;   // 離岸邊太近（身體會穿到岸上）不生
     const [x, y] = center(...k.split(',').map(Number));
     if (!deepWaterAtPoint(x, y)) continue;
     if (p) { const d = Math.hypot(x - p.x, y - p.y) / CELL; if (d < W.spawnMin || d > W.spawnMax) continue; }
@@ -180,6 +208,9 @@ function stepAquaMonster(e, dt) {
   if (!aquaOn() || !deepWaterAtPoint(e.x, e.y)) { aquaLeave(e); return false; }
   e.moving = false;
   if (e.stunT > 0) return true;
+  if (!aquaPoolHasRoom(e)) { aquaGoAshore(e); return true; }   // 這一池太窄、游哪裡身體都會穿到岸上：直接跳上岸
+  const busy = (e.fh && (e.fh.windup > 0 || e.fh.spray)) || (e.mf && (e.mf.windup > 0 || e.mf.pwindup > 0));   // 噴水、咬人到一半不打斷
+  if (!busy && !aquaRoomy(aquaLabels(), aquaKey(e.x, e.y), aquaMargin(e))) { aquaGo(e, e.x, e.y, dt); return true; }   // 太靠岸邊（被推過來、剛浮上來）：先游回離岸夠遠的地方
   if (e.behavior === 'fishhead') aquaFish(e, dt);
   else if (e.behavior === 'milkfish') aquaMilkfish(e, dt);
   else if (e.behavior === 'milkfishSmall') aquaSmall(e, dt);
@@ -223,7 +254,7 @@ function aquaMilkfish(e, dt) {
   if (pd <= C.playerReach && mf.patk <= 0 && !(mate && md <= C.eatReach)) { mf.pwindup = C.playerWindup; e.faceRight = p.x > e.x; return; }   // 溫特太靠近：咬一口
   if (!mate) { aquaWander(e, dt); return; }
   if (mf.cd <= 0 && md <= C.eatReach + 8) { mf.windup = C.windup; mf.aim = mate; e.faceRight = mate.x > e.x; return; }
-  if (mf.cd <= 0 && !aquaPersonInWater(mate) && md <= WATER_MONSTERS.milkfish.lunge * CELL) { aquaLeapAt(e, mate); return; }   // 隊友在岸上：跳上岸撲過去
+  if (mf.cd <= 0 && !aquaPersonInWater(mate) && md <= (WATER_MONSTERS.milkfish.lunge + aquaMargin(e) - 1) * CELL) { aquaLeapAt(e, mate); return; }   // 隊友在岸上：跳上岸撲過去（牠現在離岸邊比較遠，撲的距離跟著加長）
   aquaGo(e, mate.x, mate.y, dt, 1.3);
 }
 // 跳上岸：往目標旁邊跳過去，落地後變回陸地怪物
@@ -231,6 +262,26 @@ function aquaLeapAt(e, t) {
   const dx = t.x - e.x, dy = t.y - e.y, d = Math.hypot(dx, dy) || 1, stop = Math.max(0, d - 26);
   e.aq.leap = { t: 0, from: { x: e.x, y: e.y }, to: { x: e.x + dx / d * stop, y: e.y + dy / d * stop } };
   e.faceRight = dx > 0;
+  if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, e.y + 8, .9);
+  if (typeof sfxAt === 'function') sfxAt('poolBossSplash', e.x, e.y, .4, 'aqua-leap');
+}
+// 跳上離自己最近的岸（水池太窄時用）：挑旁邊是這一池深水、怪物站得住的地面格
+function aquaGoAshore(e) {
+  const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y));
+  let best = null, bd = Infinity;
+  for (const [k, v] of L.label) {
+    if (v !== id) continue;
+    const [c, r] = k.split(',').map(Number);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const kk = (c + dc) + ',' + (r + dr); if (L.deep.has(kk) || !inGrid(c + dc, r + dr)) continue;
+      const [x, y] = center(c + dc, r + dr);
+      if (typeof enemyBlocked === 'function' && enemyBlocked(x, y)) continue;
+      const d = Math.hypot(x - e.x, y - e.y); if (d < bd) { bd = d; best = { x, y }; }
+    }
+  }
+  if (!best) { aquaWander(e, 0); return; }   // 找不到能站的岸：留在水裡
+  e.aq.leap = { t: 0, from: { x: e.x, y: e.y }, to: best };
+  e.faceRight = best.x > e.x;
   if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, e.y + 8, .9);
   if (typeof sfxAt === 'function') sfxAt('poolBossSplash', e.x, e.y, .4, 'aqua-leap');
 }
@@ -254,7 +305,7 @@ function aquaSmall(e, dt) {
 }
 // 岸上的人離這一池水夠不夠近（reach 格內）
 function aquaNearShore(e, a, reach) {
-  const k = aquaNearestCell(e, a.x, a.y); if (!k) return false;
+  const k = aquaNearestCell(e, a.x, a.y, 0); if (!k) return false;   // 量的是「離水邊多遠」，不管怪物自己能不能游到那裡
   const [x, y] = center(...k.split(',').map(Number));
   return Math.hypot(x - a.x, y - a.y) <= reach * CELL;
 }
@@ -262,6 +313,7 @@ function aquaDive(e, t) {
   const i = G.enemies.indexOf(e); if (i < 0) return;
   G.enemies.splice(i, 1);
   for (const o of G.towers || []) if (o.target === e) o.target = null;
+  e.aq.diving = true; e.aq.path = null;   // 潛在水裡（只看得到影子）：可以游到岸邊撞人，不用離岸
   (G.aquaUnder = G.aquaUnder || []).push({ e, target: t, t: 0, phase: 'swim' });
   if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, e.y + 8, .7);
 }
@@ -270,7 +322,7 @@ function updateAquaUnder(dt) {
   const S = WATER_MONSTERS.small;
   for (const u of [...list]) {
     const e = u.e;
-    const done = () => { list.splice(list.indexOf(u), 1); if (e.hp > 0 && !e.dead && !G.enemies.includes(e)) G.enemies.push(e); };
+    const done = () => { list.splice(list.indexOf(u), 1); if (e.aq) { e.aq.diving = false; e.aq.path = null; } if (e.hp > 0 && !e.dead && !G.enemies.includes(e)) G.enemies.push(e); };
     if (e.hp <= 0 || e.dead || !aquaOn()) { done(); continue; }
     u.t += dt;
     if (u.phase === 'swim') {
