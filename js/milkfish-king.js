@@ -25,7 +25,7 @@
    ・水系：火焰、爆炸傷害 ×0.75，雷電傷害 ×1.25，被雷電打到會麻痺 1.5 秒、打斷正在出的招（數值在 data/balance.js 的 ELEMENT_RULES，所有水系怪物共用）。踩到地雷會爆。
    ・從水池登場（地圖設定 intro: 'pool'，G11 有開）：一開始不在場上，躲在旁邊的深水區裡。溫特開槍打到核心 →
        畫面越震越大、水池冒泡（introRumble 秒）→ 從水池最靠近原位的那格竄出來，水花炸開、一道水浪跟著牠衝上來，
-       在空中一路滴水 → 重重落在原位（大震動、水花、地上留一攤水）→ 吼叫，走去把核心吞進肚子。
+       在空中一路滴水 → 重重落在原位（大震動、地上留一攤水，落地沒有水花）→ 吼叫，走去把核心吞進肚子。
        在空中的時候還不算在場上（打不到、不會被瞄準）。數值在怪物編輯器「虱目魚王」的「登場」那幾格。
    數值：怪物編輯器的「虱目魚王」（data/monsters.js 的 milkfish_king；行為欄位表在 js/monster-data.js 的 MILKFISH_KING_FIELDS）。
    哪張地圖有牠：下面的 MILKFISH_KING_MAPS。
@@ -1253,10 +1253,9 @@ function mkIntroLand(I) {
   e.mk.home = { x: e.x, y: e.y };
   G.enemies.push(e);
   if (!G.mkKings.includes(e)) G.mkKings.push(e);
-  // 重重落地：大震動、塵土、裂痕，身上的水濺開、地上留一攤水
+  // 重重落地：大震動、塵土、裂痕、地上留一攤水（落地不放水花）
   mkRumble(C.introLandShake, .6);
   if (typeof addHitstop === 'function') addHitstop(.06);
-  if (typeof poolBossSplash === 'function') poolBossSplash({ x: e.x, y: e.y + 6, drawWidth: w }, 'land');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y + 14, r: 10 + i * 8, r2: 90 + i * 40, life: .45 + i * .12, life0: .45 + i * .12, color: i ? '#b9b2a2' : '#ffffff' });
   if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
   const cracks = G.eliteCracks = G.eliteCracks || [];   // 跟鳥頭大隊長共用的小裂痕
