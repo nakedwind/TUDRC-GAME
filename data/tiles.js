@@ -5454,6 +5454,22 @@ const SHARED_TILES = [
     "h": 2
   },
   {
+    "id": "tile_poolcore_valve_switch_off",
+    "name": "Poolcore_valve-switch-off",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_valve-switch-off.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_poolcore_valve_switch_on",
+    "name": "Poolcore_valve-switch-on",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_valve-switch-on.png",
+    "w": 1,
+    "h": 2
+  },
+  {
     "id": "tile_mvyw7lrk",
     "name": "mrt-room-wall-straight",
     "role": "floor",

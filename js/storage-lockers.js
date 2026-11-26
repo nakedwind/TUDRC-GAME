@@ -272,6 +272,17 @@ function powerSwitchTileFor(id,on){
   }
   const pair=powerSwitchSwap.get(id);return (on?pair.on:pair.off)||null;
 }
+// 抽水閥的開關圖：紅色的 valve-switch-on／off（跟電燈開關分開，一眼看得出是抽水閥）。
+// 找同一個資料夾裡的 valve-switch 圖（例如池核的 Poolcore_valve-switch-on.png）；那個資料夾沒有紅色版就照一般電源開關的圖
+// 地圖編輯器也用這個換圖（js/map-editor.js 的 drawStampRaw），兩邊看起來一樣
+const valveSwitchSwap=new Map();   // 素材 id → { on, off }
+function valveSwitchTileFor(id,on){
+  if(!valveSwitchSwap.has(id)){
+    const t=mapTileById(id)||{},file=String(t.file||'').replaceAll('\\','/'),find=f=>Object.values(TILE_REGISTRY).find(x=>String(x.file||'').replaceAll('\\','/')===f);
+    valveSwitchSwap.set(id,{on:find(file.replace(/power-switch-(on|off)\.png$/,'valve-switch-on.png')),off:find(file.replace(/power-switch-(on|off)\.png$/,'valve-switch-off.png'))});
+  }
+  const pair=valveSwitchSwap.get(id);return (on?pair.on:pair.off)||powerSwitchTileFor(id,on);
+}
 // ---- 發電機（dynamo-close＝關、dynamo-open＝開）----
 // 能互動的地圖（地圖 id）：池核、W118區 地下水池，加上捷運站（data/mrt-train.js 的 stations，全部打開捷運才會開，js/mrt-train.js 的 mrtPowered）；
 // 其他地圖放的發電機只是裝飾。要加地圖就把 id 加進來
@@ -319,7 +330,7 @@ function storagePropDisplayTile(id,c,r,layer,stamp=null){
   if(typeof isPoolcoreLed==='function'&&isPoolcoreLed(mapTileById(id)))return null;
   const kind=storagePropKindCached(id);   // 畫地圖時每一格都會問：用記起來的結果
   if(!kind)return null;
-  if(kind==='power'&&(typeof poolIsValve==='function'?poolIsValve(stamp):!!(stamp&&stamp.valve)))return powerSwitchTileFor(id,typeof poolValveShowsOn==='function'&&poolValveShowsOn());   // 抽水閥：水抽掉時是「開」
+  if(kind==='power'&&(typeof poolIsValve==='function'?poolIsValve(stamp):!!(stamp&&stamp.valve)))return valveSwitchTileFor(id,typeof poolValveShowsOn==='function'&&poolValveShowsOn());   // 抽水閥：紅色的開關圖，水抽掉時是「開」
   if(kind==='power')return powerSwitchTileFor(id,mapPowerIsOn(circuitOf(stamp)));
   const token=storagePropToken(id,c,r,layer,stamp?.ox||0,stamp?.oy||0);
   if(kind==='dynamo')return dynamoTileFor(id,dynamoIsOn(token));

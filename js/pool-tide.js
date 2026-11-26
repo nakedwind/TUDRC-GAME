@@ -30,7 +30,7 @@ const POOL_TIDE = {
   winterText: '一定有開關可以把這些水抽走。',
   winterSecs: 3.5,      // 溫特的泡泡停多久
   pumpedText: '抽水機已經在運轉了。',   // 抽水機打開後再按
-  valveNoPowerText: '沒有什麼反應……',   // 兩台抽水機（發電機）還沒都啟動時按抽水閥
+  valveNoPowerText: '需要先開啟所有發電機',   // 抽水機（發電機）還沒全部啟動時按抽水閥，溫特頭上泡泡的字（11-27 從「沒有什麼反應……」改成直接講要做什麼）
   valveSaySecs: 2.2,   // 上面那句在溫特頭上的泡泡停幾秒
   valveLowText: '水已經抽掉了。',
   valveBusyText: '抽水閥已經打開了。',   // 倒數中、正在退水時再按
@@ -253,7 +253,7 @@ function poolCoreWade(core) {
 // ---- 畫面：溫特頭上的泡泡（js/render.js 的 drawInteractionPrompts 呼叫）----
 function drawPoolTideBubble() {
   const s = poolTideActive() ? poolTide() : null, p = G && G.player;
-  if (p && p.poolSay) {   // 抽水閥還沒反應：「沒有什麼反應……」（usePoolValve）
+  if (p && p.poolSay) {   // 抽水閥還沒反應：「需要先開啟所有發電機」（usePoolValve）
     if (performance.now() < p.poolSay.until) { if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, p.poolSay.text); return; }
     p.poolSay = null;
   }
