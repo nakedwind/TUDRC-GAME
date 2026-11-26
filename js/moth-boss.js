@@ -549,6 +549,7 @@ function drawMothShadowPass(ctx, e, k, dir, scale, alpha, yFrac, flap, om) {
 // 出場前的預兆（js/moth-boss.js 的 updateMothBossAway 在蝶后還沒出場時呼叫）：倒數到了就讓影子從畫面飛過去、播拍翅聲
 function mbOmenTick(e, dt) {
   const O = MOTH_BOSS.omen, mb = e.mb, p = G.player;
+  if (typeof bossDownBefore === 'function' && bossDownBefore('mothBoss')) { mb.omen = null; return; }   // 人面蝶后打倒過了：不再出現預兆影子
   if (mb.omen) {
     const om = mb.omen;
     om.t += dt;
@@ -1068,6 +1069,7 @@ function mbBurstSpots(home, R, n) {
 
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）：抱著的核心掉在原地 ----
 function mothBossDown(e) {
+  if (typeof recordBossDown === 'function') recordBossDown('mothBoss');   // 記住打倒過了：之後再來 B56 不會再有預兆影子飛過去（js/missions.js）
   mbRelease(e);   // 抓著人：丟下來
   const c = e.carryCore;
   if (c && !c.dead && c.carried) {

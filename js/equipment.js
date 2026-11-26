@@ -1,7 +1,7 @@
 // ============================================================
 //  部隊長（溫特）的裝備
 //  ・背包左邊「部隊長裝備」：換裝（頭部、上身、下身、隨身物品 ×3），看武器等級、手電筒電量。
-//  ・照明：照明頭盔（頭部，身邊一小圈光）、高亮度手電筒（隨身物品，朝滑鼠方向的扇形光，要電池）。
+//  ・照明：照明頭盔（頭部，身邊一小圈光，要電池）、高亮度手電筒（隨身物品，朝滑鼠方向的扇形光，要電池）。兩樣各有自己的電量，沒電都從背包自動換電池。
 //  ・道具：急救包（H）、腎上腺素是背包裡的消耗品（data/supplies.js），下方資訊條也有按鈕（腎上腺素沒有快捷鍵，用快捷欄 1～0 或背包）。
 //  ・找諾亞對話 →「🔧 開發工坊」：用異質碎片開發新裝備、升級裝備和武器。
 //  ・特殊裝備（異質探測器）只能在戰鬥區域拿到。
@@ -50,6 +50,7 @@ try {
   if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field || equipState.scrapped[k] ? 0 : 1, Math.min(WEAPON_UPGRADES[k].levels.length, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
   if (s.gunAmmo) for (const [k, a] of Object.entries(s.gunAmmo)) if (WEAPON_UPGRADES[k] && a) equipState.gunAmmo[k] = { mag: Math.max(0, a.mag | 0), reserve: Math.max(0, a.reserve | 0) };
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
+  if (Number.isFinite(s.helmetBattery)) equipState.helmetBattery = Math.max(0, Math.min(100, s.helmetBattery));   // 照明頭盔的電量（舊存檔沒有＝滿電）
   if (s.bag && typeof s.bag === 'object') equipState.bag = { items: s.bag.items | 0 || 1, ammo: s.bag.ammo | 0 || 1 };   // 背包格數等級（js/backpack.js）
   if (s.magazine && typeof s.magazine === 'object') equipState.magazine = { lv: s.magazine.lv | 0 || 1, load: Array.isArray(s.magazine.load) ? s.magazine.load.filter(id => id === null || BULLETS[id]) : [] };   // 彈匣（js/magazine.js）
   if (s.builds && typeof s.builds === 'object') for (const id of Object.keys(s.builds)) if (s.builds[id]) equipState.builds[id] = true;
@@ -139,8 +140,18 @@ const equipAtkMul = () => { if (leaderSpec()) return 1; const v = equipLv('glove
 const equipHpRegen = () => { if (leaderSpec()) return 0; const v = equipLv('pouch'); return (v && v.hpRegen) || 0; };
 const equipSpeedMul = () => { const ls = leaderSpec(); if (ls) { const base = (CHARACTERS[PLAYER_CHARACTER].combat || {}).walkSpeed || ls.walkSpeed || 1; return (ls.walkSpeed || base) / base * adrenalineSpeedMul() * (typeof foodSpeedMul === 'function' ? foodSpeedMul() : 1); } const v = equipLv('sneakers'), b = equipVest(); return (v ? 1 + v.speed : 1) * (b && b.speed ? 1 + b.speed : 1) * adrenalineSpeedMul() * (typeof foodSpeedMul === 'function' ? foodSpeedMul() : 1); };   // 輕量跑鞋、輕型／重型防護背心、腎上腺素（道具）、香蕉／烤香蕉、鬧肚子（js/food.js）
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
-const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && MAP_FIELD ? h.fear : 0)); };   // 照明頭盔也算
+const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = helmetOn() ? equipLv('lamphelmet') : null; return Math.min(.9, (v ? v.calm : 0) + f + (h ? h.fear : 0)); };   // 照明頭盔也算（沒電就不算）
 const flashlightOn = () => !!(equipLv('headlamp') && MAP_FIELD && equipState.battery > 0);   // 劇情地圖也有黑幕：手電筒照樣亮
+// 照明頭盔（溫特戴的）：有電才亮。電量存在 equipState.helmetBattery（0～100，跟手電筒分開）
+if (!Number.isFinite(equipState.helmetBattery)) equipState.helmetBattery = 100;
+const helmetOn = () => !!(equipLv('lamphelmet') && MAP_FIELD && equipState.helmetBattery > 0);
+// 溫特的照明頭盔一顆電池能用幾秒：同等級高亮度手電筒一顆電池的秒數 × 照明頭盔的 squadBattery%（預設 150；跟隊員同一個設定，開發工坊編輯器改）
+function helmetBatterySeconds() {
+  const key = equipState.equipped.head, lv = (key && gearKeyLv(key)) || 1;
+  const f = equipDef('headlamp'), fl = f && (f.levels[lv - 1] || f.levels[0]);
+  const h = equipDef('lamphelmet'), pct = h && typeof h.squadBattery === 'number' && h.squadBattery > 0 ? h.squadBattery : 150;
+  return Math.max(1, ((fl && fl.battery) || 90) * pct / 100);
+}
 // 無線電：疏導距離（js/game.js）、急救距離（下面的 firstAid）、指派時隊員跑更快（js/sentry.js）；跟慣性導航記錄器一起帶：地圖上看得到隊員（js/tpad-map.js）
 const equipTalkReach = () => { const v = equipLv('radio'); return v && !MAP_SAFE ? 1 + v.reach : 1; };
 const equipAidReach = () => FIRST_AID.reach * CELL * equipTalkReach();   // 急救要站多近（px）
@@ -151,7 +162,7 @@ function equipLight() {
   if (!MAP_FIELD || !G || !G.player) return [];
   const p = G.player, L = [], h = equipLv('lamphelmet'), v = equipLv('headlamp');
   // smooth：畫面上用平滑的形狀挖開黑幕（js/lighting.js），遊戲判定照樣用格子
-  if (h) L.push({ x: p.x, y: p.y - 10, r: h.light, smooth: true, helmet: true });
+  if (h && equipState.helmetBattery > 0) L.push({ x: p.x, y: p.y - 10, r: h.light, smooth: true, helmet: true });   // 頭盔沒電：不亮
   if (v && equipState.battery > 0) L.push({ x: p.x, y: p.y + FLASH_BEAM.dy, r: v.light, smooth: true, cone: { ang: flashlightAngle(), half: v.spread * Math.PI / 180 } });
   return L;
 }
@@ -581,27 +592,32 @@ window.addEventListener('keydown', e => {
 });
 
 // ---- 每幀（game.js 的 update 呼叫）：手電筒耗電、急救進度、資訊條按鈕 ----
-let batteryWarned = false;
+const batteryWarned = { battery: false, helmetBattery: false };   // 沒電的提示：每樣只跳一次，換上新電池才重新算
 function updateEquipment(dt) {
   if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || aidKits() <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
   renderGearQuick();
   if (typeof updateSquadBattery === 'function') updateSquadBattery(dt);   // 戴照明頭盔的隊友耗電、換電池（js/squad-battery.js）
+  if (!MAP_FIELD) return;
   const v = equipLv('headlamp');
-  if (!v || !MAP_FIELD) return;
-  if (equipState.battery > 0) {
-    equipState.battery = Math.max(0, equipState.battery - dt * 100 / v.battery);
-    if (equipState.battery > 0) return;
+  if (v) drainWinterBattery('battery', v.battery, dt, '手電筒');
+  if (equipLv('lamphelmet')) drainWinterBattery('helmetBattery', helmetBatterySeconds(), dt, '照明頭盔');
+}
+// 溫特的手電筒／照明頭盔耗電：field＝equipState 裡存電量的欄位；secs＝一顆電池撐幾秒。沒電就自動換上背包裡的電池（兩樣共用背包的電池）
+function drainWinterBattery(field, secs, dt, name) {
+  if (equipState[field] > 0) {
+    equipState[field] = Math.max(0, equipState[field] - dt * 100 / secs);
+    if (equipState[field] > 0) return;
   }
   if ((supplyInventory.get('battery') || 0) > 0) {   // 沒電：自動換上背包裡的電池
     const n = supplyInventory.get('battery'); if (n <= 1) supplyInventory.delete('battery'); else supplyInventory.set('battery', n - 1);
-    equipState.battery = 100; batteryWarned = false; saveEquipment();
-    systemNotice('🔋 手電筒換上新電池（剩 ' + (n - 1) + ' 顆）');
-  } else if (!batteryWarned) {
-    batteryWarned = true; saveEquipment();
-    systemNotice('手電筒沒電了，在地圖上找找電池吧', true);
+    equipState[field] = 100; batteryWarned[field] = false; saveEquipment();
+    systemNotice('🔋 ' + name + '換上新電池（剩 ' + (n - 1) + ' 顆）');
+  } else if (!batteryWarned[field]) {
+    batteryWarned[field] = true; saveEquipment();
+    systemNotice(name + '沒電了，在地圖上找找電池吧', true);
   }
 }
-setInterval(() => { if (equipLv('headlamp') && MAP_FIELD) saveEquipment(); }, 3000);   // 電量每 3 秒存一次
+setInterval(() => { if ((equipLv('headlamp') || equipLv('lamphelmet')) && MAP_FIELD) saveEquipment(); }, 3000);   // 電量每 3 秒存一次
 
 // ---- 異質探測器：附近黑暗中的礦物、核心微微發光（怪物：上面的 drawRadioMarks）（render.js 在黑幕上面畫）----
 function drawDetector(ctx) {
@@ -699,7 +715,8 @@ function renderEquipmentDoll(box) {
       '<span>' + (def ? equipIcon(def) + '<em>Lv' + gearKeyLv(id) + '</em>' : '＋') + '</span><small>' + (def ? def.name : s.name) + '</small></button>';   // 右上角是等級（跟開發工坊一樣）
   }).join('');
   const art = '<img class="doll-art" src="' + EQUIP_PORTRAIT.image + '" alt="溫特" onerror="this.onerror=null;this.src=\'' + EQUIP_PORTRAIT.fallback + '\';this.classList.add(\'sprite\')">';
-  const lamp = equipLv('headlamp') ? '<div class="equip-battery"><span>🔋 手電筒電量</span><b>' + Math.round(equipState.battery) + '%</b><i><u style="width:' + equipState.battery + '%"></u></i><small>背包裡的電池：' + (supplyInventory.get('battery') || 0) + ' 顆</small></div>' : '';
+  const lamp = (equipLv('headlamp') ? '<div class="equip-battery"><span>🔋 手電筒電量</span><b>' + Math.round(equipState.battery) + '%</b><i><u style="width:' + equipState.battery + '%"></u></i><small>背包裡的電池：' + (supplyInventory.get('battery') || 0) + ' 顆</small></div>' : '')
+    + (equipLv('lamphelmet') ? '<div class="equip-battery helmet"><span>🔋 頭盔電量</span><b>' + Math.round(equipState.helmetBattery) + '%</b><i><u style="width:' + equipState.helmetBattery + '%"></u></i>' + (equipLv('headlamp') ? '' : '<small>背包裡的電池：' + (supplyInventory.get('battery') || 0) + ' 顆</small>') + '</div>' : '');   // 照明頭盔的電量（兩樣都戴時電池數只寫一次）
   const oldArt = box.querySelector('.doll-art'), scroll = box.scrollTop;
   box.classList.add('no-anim');   // 重畫的這一瞬間不要播格子的浮起／變色動畫
   box.innerHTML = '<h3>部隊長裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + slots + '</div></div>' +

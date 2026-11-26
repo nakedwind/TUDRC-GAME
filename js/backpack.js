@@ -269,7 +269,43 @@ function renderGearDetail(g) {
     <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? BAG_ICON.weapon + '武器' : BAG_ICON.equip + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}${g.extraTags || ''}</div></div>
     ${(d.bagDesc || d.ownedDesc || d.desc) ? `<p class="bag-desc">${d.bagDesc || d.ownedDesc || d.desc}</p>` : ''}<!-- 說明：跟開發工坊連通（js/backpack-layout.js 的 applyWorkshopTexts） -->
     <div class="bag-gear-stats"><div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}</b></div></div>
-    <div class="bag-actions">${gearButtons(g)}<p class="bag-note gear-hint">升級找諾亞</p></div>`;
+    <div class="bag-actions">${gearButtons(g)}<p class="bag-note gear-hint">升級找諾亞</p>${g.weapon || g.worn ? '' : armorScrapHTML(d.id)}</div>`;
+}
+// ---- 防具箱的「分解」：跟諾亞的開發工坊同一套規則、退回一樣多（js/gear-v2.js 的 wsScrapInfo、gearScrapNow）----
+// 穿在身上的要先卸下、每種的最後一件不能分解（說明欄寫原因）。按「分解」會跳出確認視窗，裡面寫會返還什麼，按視窗裡的「分解」才真的分解
+// 確認視窗跟扭蛋機、衣櫃的分解確認用同一個樣子（css/style.css 的 .gc-confirm）
+// 只有防具視窗（防具箱）才有，一般背包沒有；溫特的防具、隊員的裝備都可以
+function armorScrapHTML(key) {
+  if (!campArmorOpen || typeof gearScrapNow !== 'function' || typeof wsScrapInfo !== 'function') return '';
+  const info = wsScrapInfo(key); if (!info || !info.gear) return '';
+  if (info.keep) return `<p class="bag-note scrap-hint">${info.keepWhy}</p>`;   // 為什麼不能分解（穿著、最後一件）
+  return `<div class="bag-scrap-box"><button type="button" class="bag-scrap" data-armor-scrap="${key}">分解</button></div>`;
+}
+// 確認視窗開著時按 Esc：只關確認視窗（js/game.js 的 Esc 會先問這個）
+function armorScrapCloseConfirm() { const box = backpackEl.querySelector('.armor-scrap-confirm'); if (!box) return false; box.remove(); sfx('switch'); return true; }
+function armorScrapClick(key) {
+  const info = typeof wsScrapInfo === 'function' && wsScrapInfo(key); if (!info || info.keep) return;
+  backpackEl.querySelector('.armor-scrap-confirm')?.remove();
+  const r = info.refund, box = document.createElement('div');
+  box.className = 'gc-confirm armor-scrap-confirm';
+  box.innerHTML = '<div class="gc-confirm-box" role="alertdialog" aria-label="確認分解"><h3>分解「' + info.name + ' Lv' + info.lv + '」？</h3>'
+    + '<p>分解後這件裝備就沒有了，返還一半的材料：</p>'
+    + '<p class="gc-confirm-gain"><img src="images/碎片鑰匙/anomalous-shard.png" alt="">' + r.shards + ' 個異質碎片' + (r.money ? '、$' + r.money.toLocaleString('en-US') + ' 經費' : '') + '</p>'
+    + '<div class="gc-confirm-btns"><button type="button" data-confirm-no>取消</button><button type="button" data-confirm-yes class="primary">分解</button></div></div>';
+  box.addEventListener('click', e => {
+    e.stopPropagation();   // 不要被背包當成「點背包外面＝關掉」
+    if (e.target.closest('[data-confirm-yes]')) { box.remove(); armorScrapDo(key); }
+    else if (e.target.closest('[data-confirm-no]') || e.target === box) { box.remove(); sfx('switch'); }
+  });
+  backpackEl.appendChild(box);
+  sfx('button');
+  box.querySelector('[data-confirm-no]').focus();   // 預設停在「取消」：不小心按 Enter 不會直接分解
+}
+function armorScrapDo(key) {
+  const info = gearScrapNow(key);
+  if (!info) { sfx('error'); renderBackpack(); return; }
+  backpackSel = null; renderBackpack();
+  if (typeof systemNotice === 'function') systemNotice('分解了一件「' + info.name + ' Lv' + info.lv + '」，返還 ' + info.refund.shards + ' 個異質碎片' + (info.refund.money ? '、$' + info.refund.money.toLocaleString('en-US') + ' 經費' : ''));
 }
 // ---- 防具視窗：借用背包視窗，只顯示「防具」分頁（排版、外觀跟背包的防具分頁一樣）----
 // 只能靠近裝備箱按互動鍵開（基地、戰鬥地圖都一樣；裝備箱放在哪張地圖都可以）
@@ -364,6 +400,7 @@ function openBackpack(options = {}) {
 }
 function closeBackpack(silent = false) {
   if (!backpackOpen) return; backpackOpen = false; bagDropQty = 1; backpackEl.classList.add('hidden'); if (!silent) sfx('switch');
+  backpackEl.querySelector('.armor-scrap-confirm')?.remove();   // 防具箱的分解確認視窗：跟著背包一起關
   if (campArmorOpen) { campArmorOpen = false; backpackTab = 'consumable'; backpackSel = null; }
   // 防具視窗關掉：下次按 B 是一般背包
   if (armorRemote) { const r = armorRemote; armorRemote = null; setTimeout(() => { if (typeof openSquadPageOf === 'function') openSquadPageOf(r.member, r.solo); }, 0); }   // 從 T-Pad 打開的：回到那位隊員的頁面
@@ -374,6 +411,8 @@ backpackEl.addEventListener('click', e => {
   if (e.target === backpackEl) { closeBackpack(); return; }
   const tab = e.target.closest('[data-bag-tab]');
   if (tab) { if (!bagTabVisible(tab.dataset.bagTab)) return; backpackTab = tab.dataset.bagTab; backpackSel = null; bagDropQty = 1; renderBackpack(); sfx('switch'); return; }
+  const scrap = e.target.closest('[data-armor-scrap]');
+  if (scrap) { armorScrapClick(scrap.dataset.armorScrap); return; }   // 防具箱的「分解」（上面 armorScrapClick）
   if (handleSquadArmorClick(e)) return;   // 防具視窗：選人、隊員的格子、穿上／卸下
   const cell = e.target.closest('#backpackGrid [data-bag-item]');   // 只認格子：右邊說明欄身上也有 data-bag-item（js/backpack-layout.js 寫的），不能把說明欄的按鈕當成點格子
   if (cell) { if (backpackSel !== cell.dataset.bagItem) selectBackpackItem(cell.dataset.bagItem); backpackGrid.querySelector('.bag-cell.sel')?.focus(); return; }
@@ -552,7 +591,7 @@ function renderSquadArmorDetail() {
     <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags">${typeof squadGearLv === 'function' && squadGearLv(g.id) ? `<span class="bag-tag effect">Lv${squadGearLv(g.id)}</span>` : ''}<span class="bag-tag">🎽 隊員裝備</span>${worn ? `<span class="bag-tag worn">${name}・${squadGearSlotName(slot)}</span>` : ''}</div></div>
     ${g.desc ? `<p class="bag-desc">${g.desc}</p>` : ''}
     <div class="bag-gear-stats"><div class="bag-gear-stat"><small>效果</small><b>${squadGearEffect(g) || '—'}</b></div></div>
-    <div class="bag-actions">${btn}</div>`;
+    <div class="bag-actions">${btn}${worn ? '' : armorScrapHTML(g.id)}</div>`;
 }
 // 穿上：slot 沒指定就放剛剛點的空格，再不然放第一個空格；都滿了就請玩家拖到要換掉的那格
 function wearSquadArmor(id, slot) {

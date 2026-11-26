@@ -55,7 +55,7 @@ const WORKSHOP_CONFIG = {
       }
     },
     "lamphelmet": {
-      "ownedDesc": "持續照亮周圍，無須電池。",
+      "ownedDesc": "照亮周圍，要耗電池（比手電筒省電）。",
       "levels": [
         "照明半徑 1.8 格",
         "照明半徑 2.1 格",

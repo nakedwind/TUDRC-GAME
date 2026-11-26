@@ -476,7 +476,7 @@ function gearV2LampFields(key, o) {
   const box = (f, label) => '<div class="field">' + label + '<input type="text" inputmode="numeric" data-g2="' + f + '" value="' + esc(typeof o[f] === 'number' ? o[f] : '') + '" placeholder="' + (base[f] ?? 100) + '"' + (typeof o[f] === 'number' ? ' class="is-edited"' : '') + '></div>';
   return '<div class="row2">' + box('squadRange', '隊員戴時的照明半徑（溫特的 %）') + box('squadBright', '隊員戴時的亮度（溫特的 %）') + '</div>' +
     '<span class="hint">100＝跟溫特戴的一樣；數字越小，隊員的光圈越小、越暗（亮度最多 100）。空白＝原本的（灰字）。</span>' +
-    (typeof base.squadBattery === 'number' ? '<div class="row2">' + box('squadBattery', '隊員一顆電池能用多久（手電筒的 %）') + '<div></div></div>' +
+    (typeof base.squadBattery === 'number' ? '<div class="row2">' + box('squadBattery', '一顆電池能用多久（手電筒的 %，溫特、隊員都一樣）') + '<div></div></div>' +
       '<span class="hint">隊員戴照明頭盔要耗電（身上最多帶 20 顆，溫特丟在地上的電池會去撿）。150＝同等級高亮度手電筒一顆電池秒數的 1.5 倍。</span>' : '');
 }
 function onGearV2Input(e) {

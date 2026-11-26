@@ -44,9 +44,9 @@ const EQUIPMENT = [
     levels: [{ light: 220, spread: 26, battery: 90, fear: .15 }, { light: 280, spread: 28, battery: 140, fear: .25 }, { light: 340, spread: 36, battery: 200, fear: .35 }, { light: 400, spread: 40, battery: 260, fear: .4 }, { light: 460, spread: 44, battery: 320, fear: .45 }] },
   { id: 'lamphelmet', name: '照明頭盔', kind: 'head', who: 'all',
     squadRange: 80, squadBright: 75,   // 隊員戴的時候比溫特弱一點：照明半徑、亮度是溫特的幾 %（100＝一樣）。開發工坊編輯器可改（存在 data/workshop.js）
-    squadBattery: 150,   // 隊員戴的時候要耗電：一顆電池能用多久＝同等級手電筒一顆電池的秒數的幾 %（150＝1.5 倍；js/squad-battery.js）
+    squadBattery: 150,   // 戴的時候要耗電（溫特、隊員都一樣）：一顆電池能用多久＝同等級手電筒一顆電池的秒數的幾 %（150＝1.5 倍；溫特：js/equipment.js 的 helmetBatterySeconds，隊員：js/squad-battery.js）
     icon: '💡', image: 'images/裝備/lamp-helmet.png', source: 'develop', cost: [50, 100, 180, 270, 370],
-    ownedDesc: '持續照亮周圍並減輕黑暗恐懼，無須電池。',
+    ownedDesc: '照亮周圍並減輕黑暗恐懼，要耗電池（比手電筒省電）。',
     stat: lv => '照明半徑 ' + (lv.light / 40).toFixed(1) + ' 格・黑暗恐懼 −' + Math.round(lv.fear * 100) + '%',
     levels: [{ light: 70, fear: .08 }, { light: 85, fear: .12 }, { light: 100, fear: .16 }, { light: 115, fear: .2 }, { light: 130, fear: .24 }] },
   { id: 'mask', name: '防毒面具', kind: 'head', icon: '😷', image: 'images/裝備/gas-mask.png', source: 'develop', cost: [60, 120, 200, 290, 390],

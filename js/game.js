@@ -602,7 +602,7 @@ window.addEventListener('keydown', e => {
   if (typeof missionBoardOpen !== 'undefined' && missionBoardOpen) return;
   if (typeof workshopOpen !== 'undefined' && workshopOpen) return;   // 開發工坊打開時，按鍵不控制角色   // 作戰桌打開時，按鍵不控制角色（Esc／Enter 在 js/missions.js）
   if (supplyShopOpen || backpackOpen || settingsOpen) {   // 商店、背包、設定打開時：Esc 關閉，其他按鍵不控制角色
-    if (k === 'escape') { e.preventDefault(); if (supplyShopOpen) closeSupplyShop(); else closeBackpack(); }
+    if (k === 'escape') { e.preventDefault(); if (supplyShopOpen) closeSupplyShop(); else if (!(typeof armorScrapCloseConfirm === 'function' && armorScrapCloseConfirm())) closeBackpack(); }   // 防具箱的分解確認視窗開著：先只關它（js/backpack.js）
     else if (k.startsWith('arrow') || ((k === ' ' || k === 'enter') && !(e.target instanceof HTMLButtonElement))) e.preventDefault();   // 按鈕上按 Enter／空白鍵照常可以按
     return;
   }
@@ -2979,7 +2979,7 @@ if (PREVIEW) {                 // 從地圖編輯器來的預覽：直接進場�
   if (typeof equipState !== 'undefined' && equipState.equipped) {
     equipState.owned.headlamp = Math.max(1, equipState.owned.headlamp | 0);
     if (!isEquipped('headlamp')) equipState.equipped[['acc1', 'acc2', 'acc3'].find(k => !equipState.equipped[k]) || 'acc1'] = 'headlamp';
-    equipState.battery = 100;
+    equipState.battery = 100; equipState.helmetBattery = 100;
     saveEquipment = () => {};
   }
   begin();

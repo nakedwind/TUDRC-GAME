@@ -407,11 +407,30 @@ function tmapRadarLayer(vx, vy, vw, vh, u) {
 // 無線電＋慣性導航記錄器都帶著：地圖上（T-Pad、右下小地圖）看得到隊員在哪（被虱目魚小子吃掉的畫成紫色，位置就是那隻魚）
 const tmapSquadOn = () => typeof equipLv === 'function' && !!equipLv('radio') && !!equipLv('navrecorder');
 const tmapSquad = () => (G.towers || []).filter(t => TYPES[t.type]);
+// 戰鬥地圖上的隊員標記：圓形頭像（跟名單一樣用 memberPortraitPath，裁法照 css/tpad-map.css 的 .tm-face）＋底下的名字
+// 外框顏色：平常橘色、倒下紅色（頭像變灰）、被虱目魚小子吃掉紫色
+const TMAP_MATE_R = 1.7;   // 頭像半徑（跟其他標記一樣乘 mk，不管地圖多大畫面上一樣大）
+function tmapMateMark(t, mk) {
+  const [c, r] = tmapCellOf(t), spec = TYPES[t.type] || {}, name = spec.name || '';
+  const src = typeof memberPortraitPath === 'function' ? memberPortraitPath(spec) : '';
+  const R = TMAP_MATE_R, ball = t.type === 'ball';
+  // 頭像裁切：Q 版角色頭很大，圖寬 1.4 倍直徑、從頂端開始＝整張臉；球球是狗、臉朝左，裁左邊的狗頭（跟 .tm-face 一樣）
+  const w = 2 * R * (ball ? 2.31 : 1.4), x = ball ? -R : -w / 2, y = ball ? -R - 2 * R * .76 : -R;
+  const state = t.eatenBy ? ' eaten' : t.hp <= 0 ? ' down' : '';
+  return '<g class="tm-mate' + state + '" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>' + tmapEsc(name + (t.eatenBy ? '（被虱目魚小子吃掉）' : t.hp <= 0 ? '（倒下）' : '')) + '</title>' +
+    '<circle class="tm-mate-bg" r="' + R + '"/>' +
+    (src ? '<image href="' + src + '" x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + w.toFixed(2) + '" height="' + w.toFixed(2) + '" preserveAspectRatio="none" clip-path="url(#tmMateClip)"/>' : '') +
+    '<circle class="tm-mate-ring" r="' + R + '"/>' +
+    '<text class="tm-mate-name" y="' + (R + 1.5).toFixed(2) + '">' + tmapEsc(name) + '</text></g>';
+}
+const TMAP_MATE_CLIP = '<defs><clipPath id="tmMateClip"><circle r="' + TMAP_MATE_R + '"/></clipPath></defs>';   // 頭像裁成圓形（每個隊員標記共用）
 // T-Pad「地圖」在戰鬥區域：只畫記過的格子，加上自己的位置、記過的出入口、還沒打碎的異質核心
 function renderFieldMapApp(el) {
   tmapExploreTick();
   const m = MAP, st = tmapExploreState(m), pct = st.total ? Math.floor(st.seen / st.total * 100) : 0;
-  const pad = 1.5, vx = -pad, vy = -pad, vw = m.cols + pad * 2, vh = m.rows + pad * 2;
+  // 四周留白：平常 1.5 格；看得到隊員時加大到放得下頭像＋名字（隊員走到地圖最邊邊，名字才不會被切掉）
+  const u0 = Math.max(m.cols + 3, (m.rows + 3) * 2.1) / 98;
+  const pad = tmapSquadOn() ? Math.max(1.5, (TMAP_MATE_R + 3) * TMAP_MARK * u0) : 1.5, vx = -pad, vy = -pad, vw = m.cols + pad * 2, vh = m.rows + pad * 2;
   const u = Math.max(vw, vh * 2.1) / 98, mk = TMAP_MARK * u;
   let open = '', wall = '';
   for (let r = 0; r < m.rows; r++) for (let c = 0; c < m.cols; c++) {
@@ -432,10 +451,7 @@ function renderFieldMapApp(el) {
     marks.push('<g class="tm-core" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>異質核心</title><path d="M0 -1.2 1 0 0 1.2 -1 0Z"/></g>');
   }
   const squad = tmapSquadOn();
-  if (squad) for (const t of tmapSquad()) {   // 無線電＋導航：隊員的位置（沒走過的地方也看得到）
-    const [c, r] = tmapCellOf(t), name = (TYPES[t.type] && TYPES[t.type].name) || '';
-    marks.push('<g class="tm-mate' + (t.eatenBy ? ' eaten' : t.hp <= 0 ? ' down' : '') + '" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>' + tmapEsc(name + (t.eatenBy ? '（被虱目魚小子吃掉）' : t.hp <= 0 ? '（倒下）' : '')) + '</title><circle r=".85"/></g>');
-  }
+  if (squad) for (const t of tmapSquad()) marks.push(tmapMateMark(t, mk));   // 無線電＋導航：隊員的位置（沒走過的地方也看得到）：頭像＋名字
   const [pc, pr] = tmapCellOf(G.player);
   const me = '<g class="tm-me" transform="translate(' + pc + ' ' + pr + ') scale(' + mk + ')"><title>你的位置</title><circle class="tm-ping" r="1.8"/><circle r="1.05"/></g>';
   const side = '<nav class="aa-side tm-side tmf-side"><div class="tm-sec">慣性導航記錄器</div>' +
@@ -443,7 +459,7 @@ function renderFieldMapApp(el) {
     '<p class="tmf-note">' + (st.done ? '地圖已完整記錄。' : '走過的地方會自動記錄。') + '</p></nav>';
   const main = '<main class="tm-main"><div class="tm-head"><h2 class="aa-title">' + tmapEsc(m.name) + '</h2><p class="aa-sub">離線模式・導航記錄中</p></div>' +
     '<svg class="tm-svg" style="--u:' + u.toFixed(3) + '" viewBox="' + [vx, vy, vw, vh].join(' ') + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + tmapEsc(m.name) + ' 已探索的地圖">' +
-    tmapRadarLayer(vx, vy, vw, vh, u) + (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '') + marks.join('') + me + '</svg>' +
+    tmapRadarLayer(vx, vy, vw, vh, u) + (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '') + (squad ? TMAP_MATE_CLIP : '') + marks.join('') + me + '</svg>' +
     '<div class="tm-legend"><span><i class="lg-me"></i>你</span><span><i class="lg-door"></i>出入口</span><span><i class="lg-core"></i>異質核心</span>' + (squad ? '<span><i class="lg-mate"></i>隊員</span>' : '') + '<span><i class="lg-fog"></i>還沒走過</span></div></main>';
   el.innerHTML = '<div class="aa tm tmf">' + side + main + '</div>';
 }

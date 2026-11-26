@@ -4,9 +4,16 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [], zonePaid: [] };   // zonePaid：領過控制獎勵的區域（'all'＝全區控制獎勵）   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
-try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps', 'zonePaid']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
+const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [], zonePaid: [], bossDown: [] };   // bossDown：打倒過的 BOSS（例如人面蝶后打倒後，B56 不再出現預兆影子）   // zonePaid：領過控制獎勵的區域（'all'＝全區控制獎勵）   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
+try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps', 'zonePaid', 'bossDown']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
+// 打倒過的 BOSS：一般模式記進存檔；測試模式只記到重新整理頁面為止（不改到存檔）
+const bossDownTest = new Set();
+function recordBossDown(id) {
+  if (window.TEST_MODE) { bossDownTest.add(id); return; }
+  if (!missionState.bossDown.includes(id)) { missionState.bossDown.push(id); saveMissions(); }
+}
+const bossDownBefore = id => bossDownTest.has(id) || missionState.bossDown.includes(id);
 
 const missionById = id => MISSIONS.find(m => m.id === id) || null;
 // 地圖 id 不分大小寫（存過的地圖可能是 y1、資料裡寫 Y1）

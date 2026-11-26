@@ -335,12 +335,19 @@ if (GEAR_V2) {
       return;
     }
     clearTimeout(wsScrapArmTimer); wsScrapArmed = false; wsScrapSel = null;
+    gearScrapNow(key);
+    showWorkshopToast('分解了一件「' + info.name + ' Lv' + info.lv + '」，返還 ' + workshopScrapGot(info.refund), true);
+    renderWorkshop();
+  };
+  // 真的分解這一件（開發工坊、防具箱共用：規則和退回多少都看 wsScrapInfo）。不能分解＝回傳 null；分解了＝回傳 info（名稱、等級、退回多少）
+  window.gearScrapNow = function (key) {
+    const info = wsScrapInfo(key);
+    if (!info || !info.gear || info.keep) return null;
     gearDropInst(key);
     refundWorkshop(info.refund);
     gearSaveIfDirty();
     afterLoadoutChange(); SFX.play('achievement', .5, 'equip-up');
-    showWorkshopToast('分解了一件「' + info.name + ' Lv' + info.lv + '」，返還 ' + workshopScrapGot(info.refund), true);
-    renderWorkshop();
+    return info;
   };
 
   // ---- 讀檔之後：舊存檔轉換一次、補齊每種至少 1 件、重新算隊員數值 ----
@@ -359,7 +366,7 @@ function gearSquadNote(d) {
   const w = gearWho(d);
   if (w === 'winter') return '（部隊長專用）';
   if ((d.levels[0] || {}).boost != null) return '（嚮導、哨兵都能戴，兩邊都戴效果疊加）';   // 共感手環（js/equipment.js 的 equipSootheMul）
-  if (d.id === 'lamphelmet') { const k = typeof squadLampMul === 'function' ? squadLampMul() : { range: 1, bright: 1 }; return '（隊員戴了身邊也會亮，可以走進暗處、看見光圈裡的怪物；照明半徑 ' + Math.round(k.range * 100) + '%、亮度 ' + Math.round(k.bright * 100) + '%；隊員戴要耗電，把電池丟在地上給他們撿）'; }   // js/equipment.js 的 squadEquipLights、js/sentry.js 的 personnelCarriesLight
+  if (d.id === 'lamphelmet') { const k = typeof squadLampMul === 'function' ? squadLampMul() : { range: 1, bright: 1 }; return '（隊員戴了身邊也會亮，可以走進暗處、看見光圈裡的怪物；照明半徑 ' + Math.round(k.range * 100) + '%、亮度 ' + Math.round(k.bright * 100) + '%；溫特、隊員戴都要耗電，隊員的電池要丟在地上給他們撿）'; }   // js/equipment.js 的 squadEquipLights、js/sentry.js 的 personnelCarriesLight
   const keys = Object.keys(d.levels[0] || {}).filter(k => GEAR_SQUAD_MODS[k]);
   return keys.length ? (w === 'squad' ? '（隊員專用）' : '（隊員也能穿，效果相同）') : '（隊員穿了沒有效果）';
 }
