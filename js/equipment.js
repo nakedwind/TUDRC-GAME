@@ -52,7 +52,8 @@ try {
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
   if (Number.isFinite(s.helmetBattery)) equipState.helmetBattery = Math.max(0, Math.min(100, s.helmetBattery));   // 照明頭盔的電量（舊存檔沒有＝滿電）
   if (s.bag && typeof s.bag === 'object') equipState.bag = { items: s.bag.items | 0 || 1, ammo: s.bag.ammo | 0 || 1 };   // 背包格數等級（js/backpack.js）
-  if (s.magazine && typeof s.magazine === 'object') equipState.magazine = { lv: s.magazine.lv | 0 || 1, load: Array.isArray(s.magazine.load) ? s.magazine.load.filter(id => id === null || BULLETS[id]) : [] };   // 彈匣（js/magazine.js）
+  if (s.magazine && typeof s.magazine === 'object') equipState.magazine = { lv: s.magazine.lv | 0 || 1, load: Array.isArray(s.magazine.load) ? s.magazine.load.filter(id => id === null || BULLETS[id]) : [],
+    emptied: Array.isArray(s.magazine.emptied) ? s.magazine.emptied.filter(id => BULLETS[id]) : [] };   // 彈匣（js/magazine.js；emptied＝打完才拿掉、補回來要自動裝回的子彈）
   if (s.builds && typeof s.builds === 'object') for (const id of Object.keys(s.builds)) if (s.builds[id]) equipState.builds[id] = true;
   if (s.buildLv && typeof s.buildLv === 'object') for (const [id, lv] of Object.entries(s.buildLv)) if (lv > 1) equipState.buildLv[id] = lv | 0;   // 建築等級（js/build.js，開發工坊「開發建築物」升級）   // 開發好的建築（js/build.js）
   if (s.buildQuick && Array.isArray(s.buildQuick.ids)) equipState.buildQuick = { n: s.buildQuick.n | 0, ids: s.buildQuick.ids.map(id => typeof id === 'string' ? id : null) };
@@ -907,6 +908,7 @@ function spendCrystals(n) {
 }
 // 開發／升級要花的：異質碎片＋經費（經費見 js/workshop-config.js 的 workshopMoney）。兩樣都夠才一起扣，不會只扣一半
 function spendWorkshop(shards, money) {
+  if (typeof wsTutorialTakeFree === 'function' && wsTutorialTakeFree()) return true;   // 開發工坊新手教學：諾亞送的第一件，不花錢（js/workshop-tutorial.js）
   money = Math.max(0, Math.round(Number(money) || 0));
   const cash = Math.floor(G.money || 0);
   if (money > cash) {
@@ -1106,6 +1108,7 @@ function openWorkshop(page) {
 }
 function closeWorkshop(silent = false) {
   if (!workshopOpen) return;
+  if (typeof wsTutorialBusy === 'function' && wsTutorialBusy()) return;   // 新手教學還在帶（結尾那張卡片之前）：先不能關（js/workshop-tutorial.js）
   workshopOpen = false; workshopEl.classList.add('hidden');
   const box = wsDialogueBox();
   if (wsBackToDialogue && typeof dialogueState !== 'undefined' && dialogueState && box) box.classList.remove('hidden');   // 回到跟諾亞的對話
@@ -1116,6 +1119,7 @@ window.addEventListener('keydown', e => { if (workshopOpen && e.key === 'Escape'
 // 和諾亞對話時，對話框多四個選項：製作裝備、升級裝備、彈藥、開發建築物（.dialogue-ws，game.js 的 openDialogue／closeDialogue 呼叫）
 function onDialogueOpenedWorkshop(actor) {
   for (const btn of document.querySelectorAll('.dialogue-ws')) btn.classList.toggle('hidden', !(actor && actor.id === 'noah' && MAP_SAFE));
+  if (actor && actor.id === 'noah' && MAP_SAFE && typeof wsTutorialMaybeStart === 'function') wsTutorialMaybeStart();   // 第一次跟諾亞說話：開發工坊新手教學（js/workshop-tutorial.js）
 }
 for (const btn of document.querySelectorAll('.dialogue-ws')) btn.addEventListener('click', () => openWorkshop(btn.dataset.wsOpen));
 // 這一頁放哪些格子

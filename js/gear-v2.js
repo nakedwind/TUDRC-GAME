@@ -205,7 +205,7 @@ if (GEAR_V2) {
     const def = equipDef(id); if (!def || equipState.owned[def.id]) return false;
     equipState.owned[def.id] = 1;
     const key = gearNewInst(def.id, 1);
-    const free = gearWinterCan(def) && !isEquipped(def.id) && EQUIP_SLOTS.find(s => s.kinds.includes(def.kind) && !equipState.equipped[s.id]);
+    const free = !window.wsTutorialGiftToBag && gearWinterCan(def) && !isEquipped(def.id) && EQUIP_SLOTS.find(s => s.kinds.includes(def.kind) && !equipState.equipped[s.id]);   // wsTutorialGiftToBag：開發工坊教學送的那件先放背包、不自動穿（才能示範給隊友穿，js/workshop-tutorial.js）
     if (free) equipState.equipped[free.id] = key; else gearBagPut(key);
     gearSaveIfDirty();
     systemNotice('🎁 ' + how + '「' + def.name + '」' + (free ? '，已經裝備上了' : gearWinterCan(def) ? '，到裝備箱換裝' : '，放進背包了（隊員專用）'));

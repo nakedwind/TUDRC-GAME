@@ -2222,6 +2222,14 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   border: 1px solid rgba(255,212,121,.55); border-radius: 14px; background: rgba(6,9,14,.95); box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 24px rgba(255,212,121,.14);
   color: #e8eef3; font-size: 15px; font-weight: 700; line-height: 1.55; text-align: center; animation: tf-card-in .3s cubic-bezier(.2,1.4,.4,1); }
 #tutFocus .tf-card p { margin: 0; }
+#tutFocus.tf-paused { display: none; }   /* 「獲得新東西」說明視窗開著時，教學遮罩先收起來（js/tutorial.js 的 drawTutFocus） */
+#tutFocus .tf-who { align-self: flex-start; margin: -4px 0 -6px; color: #ffd479; font-size: 12px; letter-spacing: 1px; }   /* 卡片最上面：誰說的（例如諾亞） */
+#tutFocus .tf-choices { display: flex; gap: 8px; pointer-events: auto; }   /* 卡片裡的選擇按鈕（開發工坊教學：要不要聽介紹） */
+#tutFocus .tf-choices button { padding: 6px 12px; border: 1px solid rgba(255,212,121,.6); border-radius: 8px; background: #2a2416; color: #ffe7b0; font: 700 13px "Microsoft JhengHei", sans-serif; cursor: pointer; }
+#tutFocus .tf-choices button:hover { background: #3a311c; }
+#tutFocus .tf-choices button.tf-no { border-color: rgba(232,238,243,.35); background: #1b222c; color: #c9d3dc; }
+#workshop .ws-btn .ws-tut-free { font-size: 15px; color: #6b3b00; }   /* 開發工坊教學：諾亞送的那件，按鈕上的價錢換成「免費」（js/workshop-tutorial.js） */
+#tutFocus .tf-choices kbd { margin-left: 4px; font: 800 10px Consolas, monospace; opacity: .7; }
 #tutFocus .tf-card p b { color: #ffd479; }
 #tutFocus .tf-card p small { display: inline-block; margin-top: 2px; color: #aab6c2; font-size: 12px; font-weight: 600; }
 #tutFocus .tf-ack { color: #ffd479; font-size: 12px; animation: tf-blink 1.4s ease-in-out infinite; }

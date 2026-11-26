@@ -383,7 +383,7 @@ function openDialogue(actor) {
   if (actor.kind === 'tower' && typeof isHospitalized === 'function' && isHospitalized(actor.type)) { openHospitalDialogue(actor); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
   let lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
-    || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」
+    || (hasSpecialTalk(actor) ? specialTalkLines(actor) : [pickDialogueLine(key, talkKeyOf(actor))].filter(Boolean));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或「找他說話（基地）」：每次隨機抽一句
   if ((!lines || !lines.length) && typeof mealInviteOffered === 'function' && mealInviteOffered(actor)) lines = ['……'];   // 沒台詞、但可以邀請吃飯：照樣打開對話框（說「……」），右邊有「一起去吃飯」
   if (!lines || !lines.length) return;   // 這一格沒填：不說話
   if (typeof achieveRemember === 'function') achieveRemember('talked', key, 'talkedAll');   // 成就：跟每一位角色說過話

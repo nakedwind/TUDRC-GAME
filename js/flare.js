@@ -1,6 +1,7 @@
 /* ===== 溫特的手槍＋子彈切換＋照明彈＋彈藥箱 =====
    - 溫特從頭到尾只有一把手槍，差別只在子彈：一般子彈（無限）、照明彈、燃燒彈、麻醉彈、漆彈（data/equipment.js 的 BULLETS）。
-   - 滾輪（滑鼠在遊戲畫面上）換子彈，只會換到拿到過、而且出勤前裝進彈匣的子彈（js/magazine.js）；特殊子彈打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的。
+   - 滾輪（滑鼠在遊戲畫面上）換子彈，只會換到拿到過、而且出勤前裝進彈匣的子彈（js/magazine.js）；特殊子彈打完就從彈匣拿掉（空出那一格），自動換回一般子彈；
+     之後又補到這種子彈（營地彈藥箱、撿到、買到），彈匣有空格就自動裝回去（js/magazine.js 的 magSyncEmpty）。
    - 照明彈：朝滑鼠方向打出去（最遠 FLARE.range 格，碰到牆會停在牆前），落地燃燒一段時間。
      是「真的光」：照亮的地方哨兵看得到怪、可以蓋建築、溫特的槍也能瞄準。怪物不會被它吸引。
    - 子彈打完：走到營地的彈藥箱按 Space 打開，補子彈、放子彈（AMMO_REFILL；介面在 js/camp-supply.js）。能打開的彈藥箱（ammo-crate）是另一種，開一次拿裡面的東西。
@@ -40,7 +41,8 @@ function bulletState() {
 }
 function bulletOwned(id) { if (id === 'pistol') return true; const b = BULLETS[id]; return !!b && !b.removed && !!bulletState().owned[id]; }
 function bulletCount(id) { return id === 'pistol' ? Infinity : (bulletState().n[id] || 0); }
-function bulletSave() { if (typeof saveEquipment === 'function') saveEquipment(); if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) updateAmmoHud(); }
+function bulletSave() { if (typeof magSyncEmpty === 'function') magSyncEmpty(true); if (typeof saveEquipment === 'function') saveEquipment();   // magSyncEmpty：打完的從彈匣拿掉、補回來的自動裝回（js/magazine.js）
+  if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) updateAmmoHud(); }
 // 彈藥包：每種子彈一組（max 發）佔一格，超過一組再佔下一格；用光（0 發）的不佔格子，背包裡也不顯示
 function bulletStacks(id, n = bulletCount(id)) { const b = BULLETS[id]; return !b || id === 'pistol' ? 0 : Math.ceil(Math.max(0, n) / b.max); }
 // 彈藥包還放得下幾發這種子彈（extraSlots：另外先預留掉的格數，例如商店購物車裡別的子彈）

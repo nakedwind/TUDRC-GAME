@@ -5,13 +5,15 @@
 //  ・電池全部用完：頭盔不亮（又會怕黑），頭上冒思考泡泡顯示電池（沒戴照明頭盔就不會有這個泡泡）。
 //  ・補電池：溫特把背包裡的電池丟在地上（背包「放在地上」或從快捷欄拖到地圖上，js/ground-items.js），
 //    戴著照明頭盔、身上沒帶滿的隊友會走去撿（地上的在畫面內才去）。打仗時先不撿，等沒有敵人再去；全部沒電了就馬上去撿。
+//  ・營地物資箱：也可以放電池（js/camp-supply.js 的 CAMP_SUPPLY）。身上的備用電池用完（頭盔裡那顆還在用）、地上又沒有時，
+//    自己走回物資箱拿，一次拿到 SQUAD_BATTERY.boxTake（3）顆；頭盔還亮著時打仗先不去，全部沒電了就馬上去。箱子也沒有就不去。
 //  ・出勤：從應變中心出勤時，戴著照明頭盔的隊友身上不到 SQUAD_BATTERY.sortie（3）顆的，補到 3 顆（應變中心配發，不扣背包）；頭盔沒電的也先裝好一顆新的。
 //  ・左邊隊員欄：戴照明頭盔的隊友，血量條下面顯示身上還有幾顆電池（js/team.js 的 guideKitHudHtml）。
 //  ・存檔：localStorage 的 tudrc_squad_battery_v1：{ 隊員: { n: 身上幾顆, charge: 現在這顆還剩多少 %（0～100） } }。
 //    換地圖、回基地都帶著；開始新遊戲會清掉（js/new-game.js）。
 //  必須在 js/equipment.js、js/gear-v2.js、js/ground-items.js、js/camp-supply.js 之後載入。
 // ============================================================
-const SQUAD_BATTERY = { carry: 20, sortie: 3, reach: 30, saveEvery: 3 };   // carry：每人最多帶幾顆；sortie：從應變中心出勤時，戴照明頭盔的隊友身上至少有幾顆（不夠的補到這個數）；reach：離地上的電池多近算撿到（px）；saveEvery：耗電每幾秒存一次
+const SQUAD_BATTERY = { carry: 20, sortie: 3, boxTake: 3, reach: 30, saveEvery: 3 };   // carry：每人最多帶幾顆；sortie：從應變中心出勤時，戴照明頭盔的隊友身上至少有幾顆（不夠的補到這個數）；boxTake：回物資箱一次拿到身上有幾顆；reach：離地上的電池多近算撿到（px）；saveEvery：耗電每幾秒存一次
 const SQUAD_BATTERY_KEY = 'tudrc_squad_battery_v1';
 let squadBatteryData = {};
 try { const d = JSON.parse(localStorage.getItem(SQUAD_BATTERY_KEY) || '{}'); if (d && typeof d === 'object') squadBatteryData = d; } catch (_) {}
@@ -61,6 +63,11 @@ function updateSquadBattery(dt) {
 
 // ---- 撿地上的電池（js/sentry.js 的 updateSentryMain 呼叫；回傳 true＝這一幀在走去撿，不做別的）----
 function squadBatteryGroundStep(t, dt) {
+  if (squadBatteryPickStep(t, dt)) { t.batteryBoxTrip = null; return true; }   // 地上有電池：先撿地上的
+  return squadBatteryBoxStep(t, dt);   // 地上沒有：身上的備用電池用完了，回營地物資箱拿
+}
+// 撿地上的電池（回傳 true＝這一幀在走去撿）
+function squadBatteryPickStep(t, dt) {
   if (MAP_SAFE || !MAP_FIELD || t.mode === 'goto' || t.berserk || !squadHelmetLight(t)) { t.batteryTrip = null; return false; }
   const b = squadBattery(t), list = G.groundItems || [];
   if (b.n >= SQUAD_BATTERY.carry || !list.length) { t.batteryTrip = null; return false; }
@@ -88,6 +95,38 @@ function squadBatteryGroundStep(t, dt) {
   t.followDark = true;   // 路上可能經過暗處：照樣走過去（js/sentry.js 的 moveSentryWithPath）
   if (moveSentryWithPath(t, trip.g.x, trip.g.y, (TYPES[t.type].walkSpeed || 80) * 1.3, dt)) { squadTakeBattery(t, trip.g); t.batteryTrip = null; t.navPath = null; return true; }
   if (t.navFailed) { t.batteryTrip = null; t.navFailed = false; t.batteryTripCd = 3; return false; }   // 走不到：等 3 秒再找
+  t.target = null;
+  return true;
+}
+// ---- 回營地物資箱拿電池（回傳 true＝這一幀在走去拿，不做別的；跟嚮導回去拿急救包同一套，js/camp-supply.js 的 guideSupplyStep）----
+function squadBatteryBoxStep(t, dt) {
+  if (MAP_SAFE || !MAP_FIELD || t.mode === 'goto' || t.berserk || !squadHelmetLight(t) || typeof campBox !== 'function') { t.batteryBoxTrip = null; return false; }
+  const b = squadBattery(t), lit = squadHelmetLit(t), box = campBox();
+  // 身上還有備用電池、或箱子裡也沒有：不用去
+  if (b.n > 0 || !((box.battery || 0) > 0)) { t.batteryBoxTrip = null; return false; }
+  // 頭盔還亮著時：打仗、嚮導忙著照顧人就先不去（全部沒電了才馬上去）
+  const busy = lit && ((typeof hasAggroTarget === 'function' && hasAggroTarget(t)) || (TYPES[t.type].guide && typeof guideIdle === 'function' && !guideIdle(t)));
+  if (busy) { t.batteryBoxTrip = null; return false; }
+  const spot = campSupplySpot(); if (!spot) { t.batteryBoxTrip = null; return false; }
+  if (!t.batteryBoxTrip) {
+    if ((t.batteryBoxRetryT = (t.batteryBoxRetryT || 0) - dt) > 0) return false;   // 剛剛找不到路：等一下再找（找路很花時間）
+    t.batteryBoxTrip = { goal: campSupplyStand(t, spot) };
+    if (!t.batteryBoxTrip.goal) { t.batteryBoxTrip = null; t.batteryBoxRetryT = 1.5; return false; }
+    if (typeof sentryStatus === 'function') sentryStatus(t, '回營地拿電池', '#8fd3ff');
+  }
+  t.followDark = true;   // 頭盔沒電、路上又暗：照樣往營地走
+  const g = t.batteryBoxTrip.goal;
+  if (Math.hypot(t.x - spot.x, t.y - spot.y) < CELL * 1.6 || moveSentryWithPath(t, g.x, g.y, (TYPES[t.type].walkSpeed || 80) * 1.3, dt)) {
+    const n = Math.min(SQUAD_BATTERY.boxTake - b.n, box.battery || 0);
+    if (n > 0) {
+      box.battery -= n; b.n += n; b.warned = false; saveCampSupply(); saveSquadBattery();
+      if (typeof sentryStatus === 'function') sentryStatus(t, '拿了 電池×' + n, '#9ff0c0');
+      if (typeof campSupplyOpen !== 'undefined' && campSupplyOpen && typeof renderCampSupply === 'function') renderCampSupply();
+    }
+    t.batteryBoxTrip = null; t.target = null; t.navPath = null; t.waitT = .4;
+    return true;
+  }
+  if (t.navFailed) { t.batteryBoxTrip = null; t.navFailed = false; t.batteryBoxRetryT = 1.5; }
   t.target = null;
   return true;
 }

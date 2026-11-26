@@ -448,6 +448,7 @@ function abortTutorialLesson() { tutLesson = null; hideTutFocus(); }   // 沒教
 for (const type of ['keydown', 'mousedown', 'click', 'dblclick', 'contextmenu', 'wheel', 'dragstart']) {
   window.addEventListener(type, e => {
     if (tutStory && !dialogueState) { e.preventDefault(); e.stopImmediatePropagation(); return; }   // 開場劇情演出中（還沒跳對話框）：什麼都不能按
+    if (typeof itemIntroOpen !== 'undefined' && itemIntroOpen) return;   // 「獲得新東西」的說明視窗開著：讓玩家先把它關掉（js/item-intro.js），教學等一下
     const L = tutLesson, s = L && L.step; if (!s) return;
     if (type === 'keydown' && s.ack && (e.code === 'Space' || e.key === 'Enter')) {
       e.preventDefault(); e.stopImmediatePropagation();
@@ -476,11 +477,13 @@ function renderTutCard(L) {
   const el = ensureTutFocusEl(), s = L.step;
   el.classList.remove('hidden');
   const card = el.querySelector('.tf-card');
-  card.innerHTML = (s.demo ? '<div class="tf-demo">' + s.demo + '</div>' : '') + '<p>' + (s.text || '') + '</p>' + (s.ack ? '<span class="tf-ack">' + tutCard('ack') + '</span>' : '');
+  card.innerHTML = (s.who ? '<b class="tf-who">' + s.who + '</b>' : '') +   // who：誰說的（例如「諾亞」），寫在卡片最上面
+    (s.demo ? '<div class="tf-demo">' + s.demo + '</div>' : '') + '<p>' + (s.text || '') + '</p>' + (s.after || '') + (s.ack ? '<span class="tf-ack">' + tutCard('ack') + '</span>' : '');   // after：文字下面再放的東西（例如兩個選擇按鈕）
   card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';   // 換步驟：卡片重新彈出來
 }
 function drawTutFocus() {
   const L = tutLesson; if (!L || !L.step || !tutFocusEl) return;
+  tutFocusEl.classList.toggle('tf-paused', typeof itemIntroOpen !== 'undefined' && !!itemIntroOpen);   // 說明視窗開著：遮罩先收起來
   const pad = 8, spots = (L.step.spots ? L.step.spots(L) : []).filter(Boolean);
   // 整個畫面一個大方框，發光的東西是挖掉的圓角方框（evenodd：重疊的地方變成洞）
   const hole = r => { const x = r.x - pad, y = r.y - pad, w = r.w + pad * 2, h = r.h + pad * 2, k = Math.min(r.round ? Math.max(w, h) / 2 : 12, w / 2, h / 2);
@@ -501,6 +504,18 @@ function drawTutFocus() {
   if (a) {
     x = a.x + a.w / 2 - cw / 2;
     y = a.y + a.h / 2 > H / 2 ? a.y - pad - 16 - ch : a.y + a.h + pad + 16;
+    // 好幾個發光的東西：卡片盡量不要蓋到任何一個——放在全部的上面或下面，放不下再放左右兩邊，都放不下才照上面的位置
+    if (spots.length > 1) {
+      const top = Math.min(...spots.map(r => r.y)) - pad, bottom = Math.max(...spots.map(r => r.y + r.h)) + pad;
+      const left = Math.min(...spots.map(r => r.x)) - pad, right = Math.max(...spots.map(r => r.x + r.w)) + pad;
+      const above = top - 16 - ch, below = bottom + 16, lowerHalf = (top + bottom) / 2 > H / 2;
+      const fitsY = v => v >= 12 && v + ch <= H - 12;
+      const order = lowerHalf ? [above, below] : [below, above];
+      const pickY = order.find(fitsY);
+      if (pickY != null) y = pickY;
+      else if (right + 16 + cw <= W - 12) { x = right + 16; y = top; }
+      else if (left - 16 - cw >= 12) { x = left - 16 - cw; y = top; }
+    }
   }
   card.style.left = Math.round(Math.max(12, Math.min(W - cw - 12, x))) + 'px';
   card.style.top = Math.round(Math.max(12, Math.min(H - ch - 12, y))) + 'px';
@@ -604,7 +619,8 @@ function tutorialOpeningScene() {
 // ---- 每幀（js/game.js 的 frame 呼叫，暫停中也會跑）：檢查教學步驟、畫遮罩和提示 ----
 function tutorialFrame(dt) {
   const ok = typeof isNewbieMap === 'function' && isNewbieMap() && G && G.running && !G.over && G.player && G.player.hp > 0;
-  if (tutLesson && !ok) abortTutorialLesson();
+  if (tutLesson && !ok && !tutLesson.data.anyMap) abortTutorialLesson();   // anyMap：不在新手區也能教（例如開發工坊教學，js/workshop-tutorial.js）
+  if (tutLesson && tutLesson.data.alive && !tutLesson.data.alive(tutLesson)) abortTutorialLesson();   // alive：教學要的畫面被關掉了（例如工坊關了）→ 沒教完，下次再教
   if (!ok) { tutGuide = null; tutQueued = null; }
   if (ok && !tutStory && !tutorialSeen('story') && !(typeof mapTransitioning !== 'undefined' && mapTransitioning) && tutorialOpeningScene()) return;   // 最最開始：先播 Y25區地下街的開場（演完回來才接下面的爆炸、無線電）
   if (ok && !tutStory && !tutorialSeen('story') && !(typeof mapTransitioning !== 'undefined' && mapTransitioning)) tutStory = { i: 0, t: 0, started: false, shakeT: 0, power: 0 };   // 第一次進新手區：先演開場劇情

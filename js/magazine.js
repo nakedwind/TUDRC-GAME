@@ -1,6 +1,7 @@
 /* ===== 彈匣：出勤前選這次帶哪幾種特殊子彈（設定在 data/equipment.js 的 MAGAZINE、BULLETS）=====
    ・背包「武器」分頁：手槍右邊是彈匣格，把下面的子彈拖上去就換（js/backpack.js；隨時都能換）。只有一般子彈不佔格子；照明彈需裝進彈匣。
    ・戰鬥中滾輪只會換到彈匣裡的子彈（js/flare.js 的 weaponUsable）。
+   ・特殊子彈打完（0 發）就從彈匣拿掉、空出那一格；之後又補到這種子彈，彈匣有空格就自動裝回去（magSyncEmpty）。
    ・彈匣一開始 2 格，開發工坊可以升級（最多 6 格）；開發工坊也能開發 source: 'develop' 的子彈。
    ・出勤時（基地 → 戰鬥）：照明彈和開發的子彈（develop）在營地的彈藥箱各放一組（js/camp-supply.js），要自己去箱子補；後室撿的（field）打完就沒了。
    ・存在 equipState.magazine（跟裝備一起存，js/equipment.js 的 saveEquipment）：{ lv: 彈匣等級, load: [子彈 id…] }
@@ -27,6 +28,31 @@ function setMagSlot(i, id) {
   if (id) { const j = load.indexOf(id); if (j >= 0 && j !== i) load[j] = load[i]; }   // 已經在別格：兩格對調
   load[i] = id || null;
   m.load = load; saveEquipment();
+}
+// 子彈打完（0 發）：從彈匣拿掉、空出那一格（記在 emptied：因為打完才拿掉的）；之後又補到這種子彈（彈藥箱、撿到、買到），
+// 彈匣有空格就自動裝回去，滿了就不裝（要自己到背包拖進彈匣）。notify＝要不要跳提示（讀檔時整理舊存檔不跳）。回傳有沒有改到
+function magSyncEmpty(notify) {
+  if (typeof equipState === 'undefined' || !equipState || typeof BULLETS === 'undefined') return false;
+  const m = magState(), n = magSlotCount(), out = [], back = [];
+  if (!Array.isArray(m.emptied)) m.emptied = [];
+  m.load = m.load.map(id => {
+    if (!id || !BULLETS[id] || magIsFree(id) || bulletCount(id) > 0) return id;
+    if (!m.emptied.includes(id)) m.emptied.push(id);
+    out.push(BULLETS[id].name); return null;
+  });
+  m.emptied = m.emptied.filter(id => {
+    if (!BULLETS[id] || BULLETS[id].removed || !bulletOwned(id)) return false;
+    if (bulletCount(id) <= 0) return true;   // 還是空的：繼續等
+    if (m.load.slice(0, n).includes(id)) return false;   // 自己已經裝回去了
+    const i = Array.from({ length: n }, (_, k) => k).find(k => !m.load[k]);
+    if (i == null) return false;   // 彈匣滿了：不自動裝，要自己到背包拖
+    m.load[i] = id; back.push(BULLETS[id].name); return false;
+  });
+  if (notify && typeof systemNotice === 'function') {
+    if (out.length) systemNotice(out.join('、') + '打完了，從彈匣拿掉');
+    if (back.length) systemNotice('🔫 ' + back.join('、') + '補到了，自動裝回彈匣');
+  }
+  return out.length > 0 || back.length > 0;
 }
 const bulletSourceTag = b => b.source === 'develop' ? '開發' : b.source === 'field' ? '後室' : b.source === 'supply' ? '補給' : '';
 
@@ -119,3 +145,4 @@ function magazineWorkshopBuy(kind, id) {
   }
   return false;
 }
+magSyncEmpty(false);   // 舊存檔：彈匣裡已經打完（0 發）的子彈先拿掉

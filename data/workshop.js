@@ -12,7 +12,8 @@
    added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）
    removed：刪除的原本裝備 id（武器前面加 w:）
    order：開發工坊裡的排列順序（gear 裝備 id、weapons 武器 w:id；沒列到的接在後面）
-   style：開發工坊的外觀（沒寫的就用預設值，見 js/workshop-config.js 的 WORKSHOP_STYLE_DEFAULT） */
+   style：開發工坊的外觀（沒寫的就用預設值，見 js/workshop-config.js 的 WORKSHOP_STYLE_DEFAULT）
+   tutorial：開發工坊新手教學改過的台詞（沒寫的就用預設，見 js/workshop-config.js 的 WORKSHOP_TUTORIAL_LINES） */
 const WORKSHOP_CONFIG = {
   "items": {
     "headlamp": {
@@ -230,23 +231,6 @@ const WORKSHOP_CONFIG = {
       }
     },
     "bracelet": {
-      "values": [
-        {
-          "boost": 0.15
-        },
-        {
-          "boost": 0.2
-        },
-        {
-          "boost": 0.25
-        },
-        {
-          "boost": 0.3
-        },
-        {
-          "boost": 0.4
-        }
-      ],
       "infoImgY": -12,
       "infoParts": {
         "name": {
@@ -790,5 +774,16 @@ const WORKSHOP_CONFIG = {
       "w:incendiary",
       "w:tranq"
     ]
+  },
+  "tutorial": {
+    "ask": "隊長，需要用開發工坊製作裝備嗎？",
+    "intro": "開發工坊可以使用 <br><b>異質碎片</b> 和  <b>經費</b> <br>製作和升級裝備和建築物",
+    "freeDev": "第一件是中心分配下來的，可以免費製作。",
+    "made": "做好了，已經放進<b>防具箱</b>了。<br>之後隨時可以按「<b>製作一件</b>」再做。",
+    "squad": "這件背心<b>全隊都能穿</b>！<br>到基地的<b>防具箱</b>點隊員的頭像，就能幫他換上。",
+    "upgrade": "製作過的每一件裝備都列在這裡，<b>每個裝備最多能升到Lv5</b>。",
+    "ammo": "子彈可以用<b>經費</b>買<br><small>買來的子彈要到背包的彈藥包裝進彈匣</small>",
+    "build": "建築可以在這裡<b>開發</b>，開發好可以拖入下方建築的快捷鍵使用。<br>建築最高可以升到 <b>Lv5</b>，血量和威力都會變強。",
+    "armorWho": "幫隊友換裝備：先點左邊<b>隊員的頭像</b>"
   }
 };

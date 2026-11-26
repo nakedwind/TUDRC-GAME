@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>開發工坊編輯器｜Y102 應變中心</title>
-<link rel="stylesheet" href="css/style.css?v=helmetbat-20261126">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/style.css?v=wstut-20261126">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
@@ -36,6 +36,22 @@
   .color input[type=text] { flex: 1; }
   .style-group { border-top: 1px solid #2c3c4c; padding-top: 10px; margin-top: 4px; }
   .right-col { min-width: 0; }
+  #tutForm { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 18px; }   /* 新手教學台詞：排成好幾欄 */
+  /* 新手教學台詞：上面工具列＋預覽（捲動時黏在上面），每一句一個可以直接打字的框 */
+  .tut-tools { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; align-items: start; margin: 8px 0 10px; padding: 8px; border-radius: 8px; background: #11161d; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+  .tut-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .tut-bar-label { width: 100%; font-size: 12px; color: #8a96a3; }
+  .tut-pv-label { font-size: 12px; color: #8a96a3; margin-bottom: 4px; }
+  .tut-preview #tutFocus { position: static; inset: auto; z-index: auto; pointer-events: auto; }   /* 遊戲裡是蓋在畫面上的，這裡改成放在原地 */
+  .tut-preview #tutFocus .tf-card { position: static; width: 300px; animation: none; }
+  .tut-field-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .tut-field-head .ed-btn { padding: 1px 8px; font-size: 11px; }
+  .tut-edit { min-height: 40px; margin-top: 4px; padding: 6px 8px; border: 1px solid #39424e; border-radius: 6px; background: #0b0f14; color: #e8eef3; font-size: 13px; line-height: 1.6; white-space: pre-wrap; outline: none; }
+  .tut-edit:focus { border-color: #ffd479; }
+  .tut-edit:empty::before { content: attr(data-ph); color: #5d6874; }   /* 沒打字：灰色顯示預設的字 */
+  .tut-edit b, .tut-edit strong { color: #ffd479; }
+  .tut-edit small { color: #aab6c2; font-size: 11px; }
+  .tut-edit .tut-tok { display: inline-block; margin: 0 2px; padding: 0 6px; border-radius: 10px; background: #2f3d52; color: #9fd0ff; font-size: 12px; user-select: all; }   /* 會自動換成名字的字 */
   #styleForm { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 18px; }   /* 外觀：在預覽下面排成好幾欄 */
   .style-group > b { display: block; color: #ffe3a1; font-size: 12px; margin-bottom: 6px; }
   #itemList { display: grid; gap: 5px; max-height: 300px; overflow: auto; margin-bottom: 12px; scrollbar-width: thin; }
@@ -193,6 +209,31 @@
         <div id="styleForm"></div>
         <button type="button" class="ed-btn" id="styleReset">外觀恢復預設</button>
       </section>
+      <section class="panel tut-panel">   <!-- 第一次跟諾亞說話時的開發工坊教學（js/workshop-editor.js 的 renderTutForm） -->
+        <h2>🎓 新手教學台詞</h2>
+        <p class="hint">第一次在基地跟諾亞說話時，諾亞會帶玩家看一遍開發工坊（送一件標準防護背心）。<br>
+          直接在框裡打字就好，按 Enter 換行。框裡是灰色的字＝現在用預設台詞；想改預設的某幾個字，按「從預設開始改」。</p>
+        <div class="tut-tools">
+          <div class="tut-bar" id="tutBar">   <!-- 作用在目前在改的那一句 -->
+            <span class="tut-bar-label">反白一段字再按：</span>
+            <button type="button" class="ed-btn" data-tb="bold" title="反白的字變成金色粗體"><b style="color:#ffd479">粗體（金色）</b></button>
+            <button type="button" class="ed-btn" data-tb="small" title="反白的字變成灰色小字（適合補充說明）"><small style="color:#aab6c2">小字（灰色）</small></button>
+            <button type="button" class="ed-btn" data-tb="clear" title="反白的字變回普通的字">變回普通字</button>
+            <span class="tut-bar-label">在游標的位置插入（會自動換成名字）：</span>
+            <button type="button" class="ed-btn" data-tb="tok:gift">送的裝備名字</button>
+            <button type="button" class="ed-btn" data-tb="tok:make">製作裝備分頁</button>
+            <button type="button" class="ed-btn" data-tb="tok:up">升級裝備分頁</button>
+            <button type="button" class="ed-btn" data-tb="tok:ammo">補充彈藥分頁</button>
+            <button type="button" class="ed-btn" data-tb="tok:build">開發建築物分頁</button>
+          </div>
+          <div class="tut-preview" id="tutPreview">   <!-- 遊戲裡的卡片長這樣（用 css/style.css 同一份樣式） -->
+            <div class="tut-pv-label"></div>
+            <div id="tutFocus"><div class="tf-card"></div></div>
+          </div>
+        </div>
+        <div id="tutForm"></div>
+        <button type="button" class="ed-btn" id="tutReset">全部台詞恢復預設</button>
+      </section>
     </div>
   </div>
 
@@ -209,11 +250,11 @@
   <script src="js/squad-gear.js?v=range5-20261122"></script>
   <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 目前存在檔案裡的工坊設定；每次都讀最新的（背包編輯器改的說明也存在這裡） -->
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/workshop-config.js?v=sqbat-20261126"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="js/workshop-config.js?v=wstut-20261126"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-file.js?v=bldabout-20261109"></script>   <!-- data/workshop.js 的存檔文字（跟背包編輯器共用） -->
-  <script src="js/workshop-editor.js?v=helmetbat-20261126"></script>
+  <script src="js/workshop-file.js?v=wstut-20261126"></script>   <!-- data/workshop.js 的存檔文字（跟背包編輯器共用） -->
+  <script src="js/workshop-editor.js?v=wstut2-20261126"></script>
   <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

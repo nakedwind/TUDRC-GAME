@@ -321,6 +321,7 @@ function openArmorPanel(selection) {
   openBackpack({ camp: true });
   if (!backpackOpen) { campArmorOpen = false; backpackTab = 'consumable'; return; }
   if (selection) { backpackSel = selection; renderBackpack(); backpackGrid.querySelector('.bag-cell.sel')?.focus(); }
+  if (typeof wsTutorialArmorMaybeStart === 'function') wsTutorialArmorMaybeStart();   // 開發工坊教學後第一次開防具箱：教怎麼幫隊友穿裝備（js/workshop-tutorial.js）
 }
 // 只換選取的格子：不重畫整個背包（重畫會讓格子、溫特立繪重新建立而閃一下）
 function selectBackpackItem(id) {

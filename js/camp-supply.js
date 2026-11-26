@@ -1,7 +1,7 @@
 // ============================================================
 //  營地物資箱：放醫療包、杏仁水、急救包（溫特也可以拿、可以補；嚮導拿杏仁水和急救包）
 //  ・箱子是地圖上放的「物資箱」物件（地圖編輯器的素材 tile_field_supply_box）；同一張地圖放幾個都共用同一份物資。第一次在這張地圖出任務時補滿 start 的數量，
-//    之後用掉就少了；第一次出勤只給 start 的數量，之後每次從應變中心出勤，急救包、杏仁水各「多給」sortie 的數量（箱子放不下就只給放得下的；醫療包不補，要自己帶）。
+//    之後用掉就少了；第一次出勤只給 start 的數量，之後每次從應變中心出勤，急救包、杏仁水、電池各「多給」sortie 的數量（箱子放不下就只給放得下的；醫療包不補，要自己帶）。
 //    直接「重新開始」不算出勤，不會補。
 //  ・嚮導身上最多帶 carry 個急救包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血（隊友和自己）花急救包。
 //    其中一樣用完就自己走回物資箱拿；沒用完但沒帶滿，手上沒事時也會回去補滿（地上有溫特放的就先撿地上的，js/ground-items.js）；
@@ -11,9 +11,9 @@
 const CAMP_SUPPLY = {
   slots: 12,                                   // 箱子幾格
   stack: 20,                                   // 一格放幾個（同種物品每 20 個佔一格，跟背包一樣）：12 格最多 240 個
-  items: ['medkit', 'almond-water', 'firstaid'],             // 能放什麼
-  start: { medkit: 7, 'almond-water': 6, firstaid: 7 },      // 第一次出任務時箱子裡有多少
-  sortie: { 'almond-water': 2, firstaid: 2 },                 // 第二次出勤起，每次從應變中心出勤多給幾個（應變中心配發；第一次只有 start 的數量）
+  items: ['medkit', 'almond-water', 'firstaid', 'battery'],  // 能放什麼（電池：戴照明頭盔的隊友沒有備用電池時回來拿，js/squad-battery.js）
+  start: { medkit: 7, 'almond-water': 6, firstaid: 7, battery: 2 },   // 第一次出任務時箱子裡有多少
+  sortie: { 'almond-water': 2, firstaid: 2, battery: 2 },                 // 第二次出勤起，每次從應變中心出勤多給幾個（應變中心配發；第一次只有 start 的數量）
   guideItems: ['firstaid', 'almond-water'],                   // 嚮導身上帶的（醫療包是給溫特自己用的）
   carry: 5,                                    // 嚮導每樣最多帶幾個
   minTaint: 30,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
@@ -250,7 +250,7 @@ function stockCampAmmoForMapStart() {
 const ammoIdsOf = () => WEAPONS.map(w => w.id).filter(id => id !== 'pistol' && BULLETS[id] && !BULLETS[id].removed);
 const CAMP_BOXES = {
   supply: {
-    title: '營地物資箱', sub: '嚮導的急救包、杏仁水用完會自己回來拿', icon: () => CAMP_SUPPLY.box.art.full, bagName: () => playerName() + '的背包', unit: '個',
+    title: '營地物資箱', sub: '嚮導的急救包、杏仁水，戴照明頭盔的隊友的電池，用完會自己回來拿', icon: () => CAMP_SUPPLY.box.art.full, bagName: () => playerName() + '的背包', unit: '個',
     ids: () => CAMP_SUPPLY.items,
     box: k => campBox()[k] || 0, bag: k => supplyInventory.get(k) || 0, bagRoom: () => Infinity,
     boxRoom: k => campBoxRoom(k), boxCount: () => '', minCells: () => CAMP_SUPPLY.slots, stack: CAMP_SUPPLY.stack,   // stack：同種物品每幾個分一格顯示
@@ -262,7 +262,9 @@ const CAMP_BOXES = {
       if (bag - n <= 0) supplyInventory.delete(k); else supplyInventory.set(k, bag - n); box[k] = (box[k] || 0) + n; return n; },
     save: () => saveCampSupply(),
     footer: () => { const guides = (G.towers || []).filter(t => TYPES[t.type].guide && t.kit);
-      return guides.map(t => TYPES[t.type].name + '身上：急救包 ' + (t.kit.firstaid || 0) + '・杏仁水 ' + (t.kit['almond-water'] || 0)).join('　'); },
+      const lamps = typeof squadHelmetLight === 'function' && typeof squadBattery === 'function' ? (G.towers || []).filter(t => squadHelmetLight(t)) : [];   // 戴照明頭盔的隊友身上幾顆電池（js/squad-battery.js）
+      return guides.map(t => TYPES[t.type].name + '身上：急救包 ' + (t.kit.firstaid || 0) + '・杏仁水 ' + (t.kit['almond-water'] || 0) + (lamps.includes(t) ? '・電池 ' + squadBattery(t).n : ''))
+        .concat(lamps.filter(t => !guides.includes(t)).map(t => TYPES[t.type].name + '身上：電池 ' + squadBattery(t).n)).join('　'); },
   },
   ammo: {
     title: '營地彈藥箱', sub: '每次出勤，照明彈和開發好的子彈會各放一組（' + BULLET_SET + ' 發）進來', icon: () => AMMO_BOX.image, bagName: () => playerName() + '的彈藥包', unit: '發',

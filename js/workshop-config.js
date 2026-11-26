@@ -46,6 +46,43 @@ const WORKSHOP_STYLE_VARS = {
 function workshopStyle(cfg) {   // 預設值＋設定檔裡改過的
   return { ...WORKSHOP_STYLE_DEFAULT, ...((cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {})).style || {}) };
 }
+// ---- 開發工坊新手教學的台詞（第一次跟諾亞說話時跳；js/workshop-tutorial.js）----
+// 這裡是預設的字；開發工坊編輯器「🎓 新手教學台詞」改過的存在 data/workshop.js 的 tutorial，遊戲先讀那邊，沒寫才用這裡的。
+// 可以用 <b>粗體</b>、<small>小字</small>、<br> 換行；{make}{up}{ammo}{build}＝四個分頁現在的名字、{gift}＝送的那件裝備的名字
+// 每一格：[代號, 編輯器上的說明, 預設的字]（順序＝教學裡出現的順序）
+const WORKSHOP_TUTORIAL_LINES = [
+  ['ask',      '對話框：諾亞問要不要介紹', '第一次來開發工坊吧？要我帶你看一下這裡能做什麼嗎？'],
+  ['askCard',  '詢問卡片上的字', '要聽諾亞介紹開發工坊嗎？'],
+  ['askYes',   '按鈕：要聽', '好，介紹一下'],
+  ['askNo',    '按鈕：跳過', '我自己看就好'],
+  ['intro',    '開場說明', '這裡是我的開發工坊，用<b>異質碎片</b>和<b>經費</b>就能開發裝備、建築，也能幫你升級。<br><small>異質碎片在戰鬥區域打怪、挖礦、打倒 BOSS 都拿得到</small>'],
+  ['clickMake','請玩家點「製作裝備」', '先來做一件裝備吧！點「<b>{make}</b>」'],
+  ['pickGift', '介紹送的裝備', '這件是<b>{gift}</b>，穿上可以減少受到的傷害。'],
+  ['freeDev',  '請玩家按免費按鈕', '第一件我送你！按下面的按鈕，免費做一件'],
+  ['freeBtn',  '按鈕上取代價錢的字', '免費'],
+  ['made',     '做好了', '做好了，放進你的背包了。<br>開發過的裝備就算學會了，之後隨時可以按「<b>製作一件</b>」再做。'],
+  ['squad',    '隊友也能穿', '這件背心<b>全隊都能穿</b>！<br>隊員身上有頭部、上身、隨身物品 3 格，到基地的<b>防具箱</b>點隊員的頭像，就能幫他換上。'],
+  ['clickUp',  '請玩家點「升級裝備」', '接著點「<b>{up}</b>」'],
+  ['upgrade',  '升級說明', '手上的每一件裝備都列在這裡，<b>每一件各升各的等級</b>。<br>升得越高，格子的顏色越亮：綠、藍、紫，Lv5 是金色。'],
+  ['scrap',    '分解說明', '用不到的裝備，在右邊點一下就能<b>分解</b>，會退回一半的碎片和經費。'],
+  ['clickAmmo','請玩家點「補充彈藥」', '再來點「<b>{ammo}</b>」'],
+  ['ammo',     '彈藥說明', '特殊子彈用<b>經費</b>買，放進購物車再結帳。<br><small>買來的子彈要到背包的彈藥包裝進彈匣</small>'],
+  ['clickBuild','請玩家點「開發建築物」', '最後點「<b>{build}</b>」'],
+  ['build',    '建築說明', '新手區以外的建築都要在這裡<b>開發</b>，開發好會放進建築快捷欄。<br>建築最高可以升到 <b>Lv5</b>，血量和威力都會變強。'],
+  ['end',      '結尾', '介紹完了！以後想做什麼再來找我。<br><small>按 × 或 Esc 關掉工坊，會回到跟我的對話</small>'],
+  ['armorWho', '防具箱：請玩家點隊員頭像', '要幫隊友換裝備：先點左邊<b>隊員的頭像</b>'],
+  ['armorItem','防具箱：請玩家點裝備', '點一下背包裡的裝備'],
+  ['armorWear','防具箱：請玩家按穿上', '按「<b>穿上</b>」'],
+  ['armorDone','防具箱：穿好了', '穿好了！之後在防具箱點頭像，就能幫每位隊員換裝備。'],
+];
+const WORKSHOP_TUTORIAL_GIFT = 'vest';   // 教學送的裝備（data/equipment.js 的 id；標準防護背心）
+// 讀一句台詞：設定檔（或編輯器正在改的 cfg）有寫就用它，沒寫用預設
+function workshopTutorialText(key, cfg) {
+  const own = ((cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {})).tutorial || {})[key];
+  if (typeof own === 'string' && own.trim()) return own;
+  const row = WORKSHOP_TUTORIAL_LINES.find(r => r[0] === key);
+  return row ? row[2] : '';
+}
 // 開發工坊的四個頁面（跟諾亞對話時的四個選項，也是工坊上面的四個分頁）：[代號, 圖示, 外觀設定裡文字的欄位]
 //   make 製作裝備（開發新裝備、再做一件）／up 升級裝備（裝備研發等級、手槍、彈匣、背包擴充）／ammo 彈藥（用經費買子彈）／build 開發建築物（開發、升級建築）
 const WORKSHOP_PAGES = [['make', '🛠️', 'pageMake'], ['up', null, 'pageUp'], ['ammo', '🔫', 'pageAmmo'], ['build', '🧱', 'pageBuild']];

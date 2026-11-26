@@ -171,20 +171,20 @@ const SOUND_SETTINGS = {
       "from": 2763,
       "to": 3361
     },
-    "TryingToOpenDoor": {
-      "from": 113,
-      "to": 732
-    },
     "trackJump": {
       "from": 1330,
       "to": 1700
+    },
+    "TryingToOpenDoor": {
+      "from": 113,
+      "to": 732
     }
   },
   "bossVoice": {
-    "pitch": 0.78,
+    "pitch": 0.75,
     "gain": 1.6,
     "delay": 0.22,
     "feedback": 0.5,
-    "wet": 0.65
+    "wet": 0.15
   }
 };

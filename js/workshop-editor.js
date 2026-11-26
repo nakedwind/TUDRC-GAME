@@ -18,11 +18,11 @@ function setStatus(msg, err = false) { statusEl.textContent = msg; statusEl.clas
 
 // ---- 目前編輯中的設定：{ items: { key: {name,image,desc,where} }, added: [新裝備], removed: [刪掉的 id], style: {...} } ----
 const SG_FILE = clone(SQUAD_GEAR);   // data/squad-gear.js 檔案裡的隊員裝備（編輯中的在 cfg.sgear）
-const fromFile = () => ({ items: clone(WORKSHOP_CONFIG.items || {}), added: clone(WORKSHOP_CONFIG.added || []), removed: clone(WORKSHOP_CONFIG.removed || []), style: clone(WORKSHOP_CONFIG.style || {}), order: clone(WORKSHOP_CONFIG.order || {}), sgear: clone(SG_FILE) });
+const fromFile = () => ({ items: clone(WORKSHOP_CONFIG.items || {}), added: clone(WORKSHOP_CONFIG.added || []), removed: clone(WORKSHOP_CONFIG.removed || []), style: clone(WORKSHOP_CONFIG.style || {}), order: clone(WORKSHOP_CONFIG.order || {}), sgear: clone(SG_FILE), tutorial: clone(WORKSHOP_CONFIG.tutorial || {}) });   // tutorial：新手教學改過的台詞
 let cfg = (() => {
   try {
     const d = (typeof DraftSync !== 'undefined' ? DraftSync.load(WS_DRAFT_KEY, fromFile(), { label: '開發工坊' }) : JSON.parse(localStorage.getItem(WS_DRAFT_KEY) || 'null'));   // 暫存和專案檔三方合併（js/draft-sync.js）
-    if (d && d.items && d.style) return { items: d.items, added: d.added || [], removed: d.removed || [], style: d.style, order: d.order || {}, sgear: Array.isArray(d.sgear) ? d.sgear : clone(SG_FILE) };
+    if (d && d.items && d.style) return { items: d.items, added: d.added || [], removed: d.removed || [], style: d.style, order: d.order || {}, sgear: Array.isArray(d.sgear) ? d.sgear : clone(SG_FILE), tutorial: d.tutorial || {} };
   } catch (_) {}
   return fromFile();
 })();
@@ -854,6 +854,102 @@ document.getElementById('styleForm').addEventListener('input', e => {
   document.querySelectorAll('#styleForm [data-s="' + k + '"]').forEach(el => { if (el !== e.target) el.value = isNum ? val : String(val).toLowerCase(); });   // 滑桿和數字框、色盤和色碼同步
   saveDraft(); renderPreview();
 });
+// ---- 🎓 新手教學台詞（第一次跟諾亞說話時的開發工坊教學，js/workshop-tutorial.js）----
+// 像打字軟體一樣：直接打字、按 Enter 換行；反白一段字再按上面的「粗體」「小字」按鈕；「插入」按鈕放自動換成名字的字。
+// 看不到標籤：存檔時才換成遊戲讀的格式（<b> <small> <br> 和 {gift} 這類代號），讀進來時再換回看得懂的樣子。
+// 框裡沒打字＝用預設的字（灰色）；「從預設開始改」＝把預設的字放進框裡再改。
+const TUT_TOKENS = [['gift', '送的裝備名字'], ['make', '製作裝備分頁'], ['up', '升級裝備分頁'], ['ammo', '補充彈藥分頁'], ['build', '開發建築物分頁']];
+const TUT_PLAIN = new Set(['ask', 'askYes', 'askNo', 'freeBtn']);   // 這幾句是對話框或按鈕上的字：不能粗體、小字、換行
+const TUT_ACK = new Set(['intro', 'pickGift', 'made', 'squad', 'upgrade', 'scrap', 'ammo', 'build', 'end', 'armorDone']);   // 遊戲裡卡片下面會有「按 Space 知道了」
+let tutFocusKey = null;   // 目前在改哪一句（工具列、預覽用）
+const tutTokHtml = k => { const t = TUT_TOKENS.find(x => x[0] === k); return t ? '<span class="tut-tok" contenteditable="false" data-tok="' + k + '">' + t[1] + '</span>' : '{' + k + '}'; };
+// 存的格式 → 框裡顯示的樣子
+const tutToEdit = s => String(s || '').replace(/\{(\w+)\}/g, (m, k) => tutTokHtml(k));
+// 框裡的內容 → 存的格式：只留粗體、小字、換行和代號，其他排版都拿掉
+function tutFromEdit(el, plain) {
+  const walk = node => [...node.childNodes].map(n => {
+    if (n.nodeType === 3) return n.textContent.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(/ /g, ' ').replace(/\r?\n/g, plain ? ' ' : '<br>');   // 框裡按 Enter 的換行＝遊戲的 <br>
+    if (n.nodeType !== 1) return '';
+    if (n.dataset && n.dataset.tok) return '{' + n.dataset.tok + '}';
+    const tag = n.tagName, inner = walk(n);
+    if (tag === 'BR') return plain ? ' ' : '<br>';
+    if (plain) return inner;
+    if (tag === 'B' || tag === 'STRONG') return inner ? '<b>' + inner + '</b>' : '';
+    if (tag === 'SMALL') return inner ? '<small>' + inner + '</small>' : '';
+    if (tag === 'DIV' || tag === 'P') return '<br>' + inner;   // 有些瀏覽器換行會包成一段 div
+    return inner;
+  }).join('');
+  return walk(el).replace(/^(<br>)+|(<br>)+$/g, '').trim();
+}
+const tutPlainText = s => String(s || '').replace(/<br>/g, ' ／ ').replace(/<[^>]+>/g, '').replace(/\{(\w+)\}/g, (m, k) => '［' + ((TUT_TOKENS.find(x => x[0] === k) || [])[1] || k) + '］');
+function renderTutForm() {
+  const box = document.getElementById('tutForm'); if (!box) return;
+  box.innerHTML = WORKSHOP_TUTORIAL_LINES.map(([k, label, def]) => '<div class="field tut-field">' +
+    '<div class="tut-field-head"><span>' + esc(label) + '</span><button type="button" class="ed-btn tut-from-def" data-tut-def="' + k + '" title="把預設的字放進框裡，再照自己的意思改">從預設開始改</button></div>' +
+    '<div class="tut-edit' + (TUT_PLAIN.has(k) ? ' plain' : '') + '" contenteditable="true" data-tut="' + k + '" data-ph="' + esc(tutPlainText(def)) + '">' + tutToEdit((cfg.tutorial || {})[k] || '') + '</div></div>').join('');
+  renderTutPreview();
+}
+// 預覽：用遊戲同一份樣式（css/style.css 的 #tutFocus .tf-card）畫出目前在改的那一句
+function renderTutPreview() {
+  const pv = document.getElementById('tutPreview'); if (!pv) return;
+  const k = tutFocusKey || 'intro', row = WORKSHOP_TUTORIAL_LINES.find(r => r[0] === k) || WORKSHOP_TUTORIAL_LINES[0];
+  const st = workshopStyle(cfg), gift = (EQUIPMENT.find(d => d.id === WORKSHOP_TUTORIAL_GIFT) || {}).name || '';
+  const names = { make: st.pageMake, up: st.pageUp, ammo: st.pageAmmo, build: st.pageBuild, gift };
+  const text = workshopTutorialText(k, cfg).replace(/\{(\w+)\}/g, (m, x) => x in names ? esc(names[x]) : m);
+  const who = k.startsWith('armor') ? '' : '<b class="tf-who">諾亞</b>';
+  pv.querySelector('.tut-pv-label').textContent = '預覽：' + row[1];
+  pv.querySelector('.tf-card').innerHTML = TUT_PLAIN.has(k) ? '<p>' + text + '</p><small style="color:#8a96a3;font-weight:600">（這句顯示在' + (k === 'ask' ? '諾亞的對話框' : '按鈕') + '上）</small>'
+    : who + '<p>' + text + '</p>' + (TUT_ACK.has(k) ? '<span class="tf-ack">按 <kbd>Space</kbd> 知道了</span>' : '');
+}
+function tutSaveField(el) {
+  const k = el.dataset.tut; cfg.tutorial = cfg.tutorial || {};
+  const v = tutFromEdit(el, TUT_PLAIN.has(k));
+  if (v) cfg.tutorial[k] = v; else { delete cfg.tutorial[k]; if (!el.textContent.trim()) el.innerHTML = ''; }   // 清空：顯示灰色的預設字
+  saveDraft(); renderTutPreview();
+}
+const tutForm = document.getElementById('tutForm');
+tutForm?.addEventListener('input', e => { const el = e.target.closest('[data-tut]'); if (el) tutSaveField(el); });
+tutForm?.addEventListener('focusin', e => { const el = e.target.closest('[data-tut]'); if (el) { tutFocusKey = el.dataset.tut; renderTutPreview(); } });
+tutForm?.addEventListener('keydown', e => {
+  const el = e.target.closest('[data-tut]'); if (!el || e.key !== 'Enter') return;
+  e.preventDefault();   // Enter＝換行（只插一個換行，不要變成一段新的 div）；按鈕、對話框那幾句不能換行
+  if (!TUT_PLAIN.has(el.dataset.tut)) { document.execCommand('insertLineBreak'); tutSaveField(el); }
+});
+tutForm?.addEventListener('paste', e => {   // 貼上：只貼純文字（不要把別的地方的顏色、字型一起貼進來）
+  const el = e.target.closest('[data-tut]'); if (!el) return;
+  e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain'));
+});
+tutForm?.addEventListener('click', e => {
+  const b = e.target.closest('[data-tut-def]'); if (!b) return;
+  const k = b.dataset.tutDef, el = tutForm.querySelector('[data-tut="' + k + '"]'), def = (WORKSHOP_TUTORIAL_LINES.find(r => r[0] === k) || [])[2] || '';
+  el.innerHTML = tutToEdit(def); tutFocusKey = k; tutSaveField(el); el.focus();
+});
+// 工具列：作用在目前在改的那一句、反白的那段字（mousedown 先擋掉，按按鈕時反白才不會消失）
+const tutBar = document.getElementById('tutBar');
+tutBar?.addEventListener('mousedown', e => { if (e.target.closest('button')) e.preventDefault(); });
+tutBar?.addEventListener('click', e => {
+  const b = e.target.closest('button[data-tb]'); if (!b) return;
+  const sel = getSelection(), node = sel.rangeCount ? sel.anchorNode : null;
+  const el = node && (node.nodeType === 1 ? node : node.parentElement)?.closest('#tutForm [data-tut]');
+  if (!el) { setStatus('先在下面的框裡點一下（要改格式的話先反白一段字），再按這個按鈕', true); return; }
+  const plain = TUT_PLAIN.has(el.dataset.tut), act = b.dataset.tb, range = sel.getRangeAt(0);
+  if ((act === 'bold' || act === 'small') && plain) { setStatus('這句是對話框或按鈕上的字，不能加粗體或小字', true); return; }
+  if ((act === 'bold' || act === 'small') && range.collapsed) { setStatus('先用滑鼠反白要改的那段字，再按「' + b.textContent.trim() + '」', true); return; }
+  if (act === 'bold') document.execCommand('bold');
+  else if (act === 'small') { const s = document.createElement('small'); s.appendChild(range.extractContents()); range.insertNode(s); }
+  else if (act === 'clear') { const t = range.toString(); if (t) { range.deleteContents(); range.insertNode(document.createTextNode(t)); } }
+  else if (act.startsWith('tok:')) {
+    range.deleteContents();
+    const tmp = document.createElement('span'); tmp.innerHTML = tutTokHtml(act.slice(4));
+    const tok = tmp.firstChild; range.insertNode(tok); range.setStartAfter(tok); range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
+  }
+  tutSaveField(el); setStatus('');
+});
+document.getElementById('tutReset')?.addEventListener('click', () => {
+  if (!confirm('所有新手教學台詞都改回預設？')) return;
+  cfg.tutorial = {}; saveDraft(); renderTutForm(); setStatus('新手教學台詞已恢復預設（還沒存到專案）');
+});
+renderTutForm();
 document.getElementById('styleReset').addEventListener('click', () => {
   cfg.style = {}; saveDraft(); renderStyleForm(); renderPreview(); setStatus('外觀已恢復預設（還沒存到專案）');
 });
@@ -1353,7 +1449,9 @@ function exportText() {
   if (orderCustom('weapons')) order.weapons = cfg.order.weapons;   // 清單只列手槍，這裡照原本的寫，存檔才不會動到舊槍的順序
   const style = {};
   for (const k of Object.keys(WORKSHOP_STYLE_DEFAULT)) if (k in cfg.style && cfg.style[k] !== WORKSHOP_STYLE_DEFAULT[k]) style[k] = cfg.style[k];
-  return workshopConfigText({ items, added, removed, style, ...(Object.keys(order).length ? { order } : {}) });   // js/workshop-file.js（背包編輯器也用同一段開頭說明）
+  const tutorial = {};   // 新手教學台詞：只寫改過的（空白或跟預設一樣＝不寫，遊戲用預設）
+  for (const [k, , def] of WORKSHOP_TUTORIAL_LINES) { const t = (cfg.tutorial || {})[k]; if (typeof t === 'string' && t.trim() && t !== def) tutorial[k] = t; }
+  return workshopConfigText({ items, added, removed, style, ...(Object.keys(order).length ? { order } : {}), ...(Object.keys(tutorial).length ? { tutorial } : {}) });   // js/workshop-file.js（背包編輯器也用同一段開頭說明）
 }
 document.getElementById('downloadFile').addEventListener('click', () => {
   const blob = new Blob([exportText()], { type: 'text/javascript' });
@@ -1377,7 +1475,7 @@ ProjectSave.attach({
   status: (m, err) => setStatus(m, err),
 });
 
-function renderAll() { renderList(); renderItemForm(); renderStyleForm(); renderPreview(); }
+function renderAll() { renderList(); renderItemForm(); renderStyleForm(); if (typeof renderTutForm === 'function') renderTutForm(); renderPreview(); }
 if (!gearKeys().includes(selKey)) selKey = gearKeys()[0];
 renderAll();
 // 暫存跟檔案不一樣＝上次有改了還沒存（存過的就不提醒）

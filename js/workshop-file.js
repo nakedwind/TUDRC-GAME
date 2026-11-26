@@ -18,7 +18,8 @@ function workshopConfigText(obj) {
     '   added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）\n' +
     '   removed：刪除的原本裝備 id（武器前面加 w:）\n' +
     '   order：開發工坊裡的排列順序（gear 裝備 id、weapons 武器 w:id；沒列到的接在後面）\n' +
-    '   style：開發工坊的外觀（沒寫的就用預設值，見 js/workshop-config.js 的 WORKSHOP_STYLE_DEFAULT） */\n' +
+    '   style：開發工坊的外觀（沒寫的就用預設值，見 js/workshop-config.js 的 WORKSHOP_STYLE_DEFAULT）\n' +
+    '   tutorial：開發工坊新手教學改過的台詞（沒寫的就用預設，見 js/workshop-config.js 的 WORKSHOP_TUTORIAL_LINES） */\n' +
     'const WORKSHOP_CONFIG = ' + JSON.stringify(obj, null, 2) + ';\n';
 }
 // 拿掉換行（兩邊的說明比對、同步時用：換行只算背包那邊的排版）
