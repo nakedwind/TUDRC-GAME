@@ -1702,7 +1702,7 @@ const SHARED_TILES = [
     "id": "color_mufvoh5q",
     "name": "色塊",
     "role": "floor",
-    "color": "#86cafe",
+    "color": "#002b54",
     "w": 1,
     "h": 1,
     "systemColor": true,
@@ -3572,8 +3572,8 @@ const SHARED_TILES = [
     "name": "池核｜深色水面",
     "role": "floor",
     "file": "images/Poolcore/poolcore-deep-water.png",
-    "w": 1,
-    "h": 1,
+    "w": 3,
+    "h": 3,
     "flat": true
   },
   {
@@ -7681,6 +7681,15 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_pool_3 -02.png",
     "w": 3,
     "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_mwxvauz0",
+    "name": "poolcore-deep-water-gradientx5",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore-deep-water-gradientx5.png",
+    "w": 5,
+    "h": 7,
     "flat": true
   }
 ];

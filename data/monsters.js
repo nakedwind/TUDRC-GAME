@@ -2088,8 +2088,8 @@ const BOSS_SETTINGS_DEFAULT = {
   },
   "BOSS_CORE_LINK": {
     "minHp": 1,
-    "shield": 0.25,
-    "defMax": 0.3,
+    "shield": 0.2,
+    "defMax": 0.2,
     "noteEvery": 2.5
   }
 };
