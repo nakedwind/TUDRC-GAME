@@ -958,7 +958,7 @@ function fishKingShocked(e) {
   // 發抖、掉下去：冒頭偷看時（不扣血、沒有血條）、浮在水面上、跳在空中被電到都會
   const pre = K.phase === 'peek';
   if (K.phase === 'land' || K.phase === 'strand') { fkParalyze(K); return; }   // 在岸上被電：麻痺（岸上不導電）
-  if (pre || K.phase === 'leap' || (K.phase === 'swim' && !K.sub)) {
+  if (pre || K.phase === 'leap' || K.phase === 'landJump' || (K.phase === 'swim' && !K.sub)) {
     const inWater = (e.slimeLift || 0) < 5 && deepWaterAtPoint(e.x, e.y);
     fkShockStart(K, pre);
     if (pre || !inWater) return;   // 開戰前、在空中：不導電
@@ -991,10 +991,11 @@ function fishKingShocked(e) {
 }
 
 // ---- 在岸上被雷電打到：麻痺（FISH_KING.landShock）----
-function fkParalyze(K) {
+function fkParalyze(K, force) {
   const e = K.e, L = FISH_KING.landShock || { secs: 3, cd: 1.5 };
-  if (K.paraT > 0 || K.paraCd > 0) return;   // 已經在麻痺、或剛麻痺完：不重來
+  if (K.paraT > 0 || (K.paraCd > 0 && !force)) return;   // force＝從空中被電摔下來：一定麻痺   // 已經在麻痺、或剛麻痺完：不重來
   K.paraT = L.secs; K.cannon = null;   // 正在預警／噴的水砲中斷
+  fkFace(e, 'back');
   e.tremble = true; e.moving = false; e.knockT = 0;
   flash('麻痺！', e.x, e.y - (e.drawHeight || 190) - 10, '#fff27a', 1.2);
   if (typeof sfxAt === 'function') bossSfxAt('fishHurt', e.x, e.y, 1, 'fish-king-paralyzed');
@@ -1010,7 +1011,8 @@ function fkParaSparks(K, n) {   // 身上竄來竄去的小電花
 function fkParaStep(K, dt) {
   const e = K.e;
   e.dmgTakenMul = K.phase === 'strand' ? FISH_KING.strandMul : 1;
-  e.tremble = true; e.moving = false; e.knockT = 0;
+  e.tremble = true; e.moving = false; e.knockT = 0; e.slimeLift = 0;
+  fkFace(e, 'back');   // 麻痺時翻過來露出背面的魚肉（打背面比較痛）
   if (Math.random() < dt * 8) fkParaSparks(K, 1);
   if ((K.paraT -= dt) > 0) return;
   K.paraT = 0; e.tremble = false; K.paraCd = (FISH_KING.landShock || {}).cd || 0;   // 麻痺完：接著原本的事（在岸上就待一下跳回水裡、擱淺就繼續翻）
@@ -1151,7 +1153,8 @@ function fkPushToWater(a, ux, uy, dist, maxDeg) {
 function fkShockStart(K, pre) {
   const e = K.e;
   K.shock = { stage: 'shake', t: 0, pre, x: e.x, y: e.y, lift: Math.max(0, e.slimeLift || 0), vy: 0 };
-  K.phase = 'shocked'; K.cannon = null; K.turnT = 0; K.leap = null; K.riseT = null; K.approach = false;
+  K.shock.air = !pre && K.shock.lift > 20;   // 在空中被電：掉下來之後先麻痺（FISH_KING.landShock.secs）
+  K.phase = 'shocked'; K.cannon = null; K.turnT = 0; K.leap = null; K.landJump = null; K.riseT = null; K.approach = false;
   if (K.peek) { e.fkRise = e.fkRise ?? 1; K.peek = null; }
   e.tremble = true; e.moving = false; e.knockT = 0;
   flash('觸電！', e.x, e.y - (e.drawHeight || 190) - (e.slimeLift || 0) - 10, '#bfe9ff', 1);
@@ -1176,8 +1179,9 @@ function fkShockStep(K, dt) {
     Sh.vy += S.fall * dt; Sh.lift = Math.max(0, Sh.lift - Sh.vy * dt); e.slimeLift = Sh.lift;
     if (Sh.lift > 0) return;
     e.airborne = false; e.slimeLift = 0;
-    if (deepWaterAtPoint(e.x, e.y)) {   // 掉在水裡：沉下去
-      Sh.stage = 'sink'; Sh.t = 0; Sh.rise0 = e.fkRise ?? 1;
+    if (deepWaterAtPoint(e.x, e.y)) {   // 掉在水裡：沉下去（空中被電的先浮在水面麻痺）
+      Sh.stage = Sh.air ? 'para' : 'sink'; Sh.t = 0; Sh.rise0 = e.fkRise ?? 1;
+      if (Sh.air) { e.tremble = true; flash('麻痺！', e.x, e.y - (e.drawHeight || 190) - 10, '#fff27a', 1.2); fkParaSparks(K, 5); }
       fkSplash(e, FISH_KING.splashSize * (Sh.vy > 300 ? 1.2 : .6), Sh.vy > 300);
       if (!Sh.pre) fkWaterImpact(e, Sh.vy > 300 ? 1 : .4);   // 從高處掉下來震比較大（開戰前冒頭被電不震）
       return;
@@ -1188,6 +1192,14 @@ function fkShockStep(K, dt) {
     K.phase = 'swim'; K.sub = false;
     fkLandImpact(e);   // 摔在地上：重重落地（震動、裂痕、落地聲）
     fkStrand(K);
+    if (Sh.air) fkParalyze(K, true);   // 從空中被電摔到地上：擱淺＋麻痺
+    return;
+  }
+  if (Sh.stage === 'para') {   // 浮在水面上麻痺：發抖、冒電花、露出背面，時間到才沉下去
+    e.tremble = true; e.slimeLift = 0;
+    if (Math.random() < dt * 8) fkParaSparks(K, 1);
+    if (Sh.t < ((FISH_KING.landShock || {}).secs ?? 3)) return;
+    Sh.stage = 'sink'; Sh.t = 0; e.tremble = false;
     return;
   }
   // 沉下去、慢慢淡掉（fishKingWade 照 fkRise 淡出）
