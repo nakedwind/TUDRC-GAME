@@ -17,7 +17,7 @@ const BOSS_FOOD_DROPS = [
   { flag: 'loofahQueen',   id: 'loofah', qty: 5 },   // 絲瓜女王 → 5 條絲瓜（js/loofah-queen.js）
   { flag: 'bananaEmperor', id: 'banana', qty: 5, icon: '🍌' },   // 金蕉大王 → 5 根香蕉（js/banana-emperor.js；一般金蕉王的香蕉在 js/golden-banana-king.js）
   { flag: 'fishKing',      id: 'sashimi', qty: 5 },   // 魚頭王 → 5 片生魚片（js/fish-king.js；死在深水裡的話會漂在水面上）
-  { flag: 'mk',            id: 'sashimi', qty: 5 },   // 虱目魚王 → 5 片生魚片（e.mk：虱目魚王才有，js/milkfish-king.js）
+  { flag: 'mk',            id: 'milkfish-belly', qty: 5 },   // 虱目魚王 → 5 個虱目魚肚（e.mk：虱目魚王才有，js/milkfish-king.js）
 ];
 const FOOD_COOK = { time: 1.2 };   // 待在火海裡幾秒會烤熟
 const FOOD_SICK = { dur: 6, slow: .25 };   // 生吃鬧肚子：幾秒、走慢多少
