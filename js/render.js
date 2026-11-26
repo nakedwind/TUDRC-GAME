@@ -18,7 +18,8 @@ function drawObstacle(o) {
   const hit = o.hitT > 0 ? o.hitT / HIT_DUR : 0;
   const shX = hit ? (Math.random() * 2 - 1) * 4 * hit : 0;
   const shY = hit ? (Math.random() * 2 - 1) * 4 * hit : 0;
-  const x = OX + o.c * CELL + shX + (o.mrtShift || 0), y = OY + o.r * CELL + shY;   // mrtShift：蓋在捷運車廂裡、跟著列車移動
+  const slide = typeof obstacleSurgeOffset === 'function' ? obstacleSurgeOffset(o) : null;   // 被溢出來的水推走：從原位置滑過去（js/pool-surge.js）
+  const x = OX + o.c * CELL + shX + (o.mrtShift || 0) + (slide ? slide[0] : 0), y = OY + o.r * CELL + shY + (slide ? slide[1] : 0);   // mrtShift：蓋在捷運車廂裡、跟著列車移動
   // 放置動畫：位移＋以「底部中央」為錨點的壓扁/回彈縮放
   const a = dropAnim(o.spawnT);
   if (a) {

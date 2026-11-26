@@ -5,11 +5,22 @@
      ① 水波從落水點沿著深水區一格一格往外擴散（照水池的形狀走，不會穿牆），最遠 range 格，越遠越弱
      ② 水波碰到岸邊：水溢上岸，最多往岸上漫 spill 格（離落水點越遠，漫得越少）
      ③ 溢上岸的水經過誰，就把誰往遠離水池的方向推開（越靠近水邊推越遠）：
-        溫特、隊員、地面怪物（BOSS 自己、推不動的怪物、會飛的人面蝶不算）、地上的道具
+        溫特、隊員、地面怪物（BOSS 自己、推不動的怪物、會飛的人面蝶不算）、地上的道具（杏仁水、急救包…）、
+        玩家蓋的部分建築（POOL_SURGE_BUILD.types：露營燈、地雷、油箱、鐵絲網、爐具、探照燈〔只推 1 格〕）——建築是一格一格對齊的，
+        所以照被推的力道推 1～maxCells 格，畫面上從原位置滑過去；前面是牆、深水、別的建築就停在那裡
         坐救生圈的人在水上被水波經過時，也會被往外推一點（ringPush 倍）
      ④ 岸上的水 linger 秒後慢慢退掉
    數值：怪物編輯器「👑 BOSS 數值」→ 巨大比基尼小丑魚 → surge（存在 data/monsters.js；程式裡的預設在 js/pool-boss.js 的 POOL_BOSS.surge）
    畫法：js/render.js 畫完地板之後呼叫 drawPoolSurge（在人物下面）；每一幀由 js/pool-tide.js 的 updatePoolTide 呼叫 poolSurgeTick */
+
+// 會被溢出來的水推走的建築（物件編輯器／裝飾的代號）：只推玩家蓋的，地圖上原本就畫好的不推
+const POOL_SURGE_BUILD = {
+  types: new Set(['camping_lights', 'landmine', 'deco_oil_tank', 'wirecloth', 'deco_gasstove', 'deco_gasstove2', 'searchlight']),   // 露營燈、地雷、油箱、鐵絲網、爐具（新舊兩種圖）、探照燈
+  maxCellsOf: { searchlight: 1 },   // 個別建築最多被推幾格（比較重的只微微推動）；沒寫的照下面的 maxCells
+  minPush: .4,      // 被推的力道（像素）至少要有幾格那麼大才會動（.4＝16 像素）；太小就留在原地
+  maxCells: 3,      // 最多被推幾格
+  slideSecs: .45,   // 畫面上從原位置滑到新位置要幾秒
+};
 
 const POOL_SURGE_LOOK = {
   crestSecs: .3,          // 水面上的白色浪頭經過一格要多久淡掉（秒）
@@ -104,6 +115,7 @@ function poolSurgeStart(x, y, kind) {
 function poolSurgeTick(dt) {
   if (typeof G === 'undefined' || !G) return;
   poolSurgeItemsStep(dt);
+  poolSurgeBuildSlideStep(dt);
   poolDecoTick(dt);   // 人物碰到小鴨、游泳圈：推開、晃一下、漂回原位
   const list = G.poolSurges; if (!list || !list.length) return;
   const S = POOL_BOSS.surge, W = POOL_SURGE_LOOK;
@@ -135,6 +147,19 @@ function poolSurgeTick(dt) {
       const [c, r] = cellAt(g.x, g.y), L = s.landAt.get(c + ',' + r);
       if (L && s.t >= L.t && s.t <= L.t + W.hitWindow) { s.hit.add(g); const v = 2 * s.K.push * L.k / S.pushTime; g.surge = { vx: L.dx * v, vy: L.dy * v, t: S.pushTime, t0: S.pushTime }; }
     }
+    let movedBuild = false;
+    for (const o of [...(G.obstacles || [])]) {   // 玩家蓋的部分建築：佔的格子被水經過，就往外推幾格
+      if (s.hit.has(o) || !poolSurgeBuildPushable(o)) continue;
+      let L = null;
+      for (const [c, r] of poolSurgeBuildCells(o, o.c, o.r)) { const q = s.landAt.get(c + ',' + r); if (q && s.t >= q.t && s.t <= q.t + W.hitWindow) { L = q; break; } }
+      if (!L) continue;
+      s.hit.add(o);
+      if (poolSurgePushBuilding(o, L.dx, L.dy, s.K.push * L.k)) movedBuild = true;
+    }
+    if (movedBuild) {   // 擋路的建築換了位置：怪物重新找路、隊員重新找路
+      if (typeof computeFlow === 'function') computeFlow();
+      for (const t of G.towers || []) { t.navPath = null; t.navGoal = null; }
+    }
   }
   G.poolSurges = list.filter(s => s.t < s.end + (S.linger || 1.4) + .2);
 }
@@ -151,6 +176,61 @@ function poolSurgePush(a, dx, dy, dist, isPlayerLike) {
     a.knockT = time / 2; a.knockVX = dx * v; a.knockVY = dy * v;
   }
 }
+// ---- 建築被水推走 ----
+function poolSurgeBuildPushable(o) {
+  return !!o && POOL_SURGE_BUILD.types.has(o.type) && o.hp > 0 && !o.isBase && !o.mapSource && !o.mrtHidden && !o.mrtShift && o.floor !== 2;
+}
+// 建築佔哪幾格（放在 c, r 的話）：會擋路的看擋路格，不擋路的（露營燈、地雷、鐵絲網）看整個佔地
+function poolSurgeBuildCells(o, c, r) {
+  const own = Array.isArray(o.solid) && o.solid.length ? o.solid : null, out = [];
+  if (own) for (const [dc, dr] of own) out.push([c + dc, r + dr]);
+  else for (let dc = 0; dc < (o.w || 1); dc++) for (let dr = 0; dr < (o.h || 1); dr++) out.push([c + dc, r + dr]);
+  return out;
+}
+// 建築放到 c, r 放不放得下：不能是地圖外、牆、深水，也不能跟別的建築疊在一起
+function poolSurgeBuildFits(o, c, r) {
+  const want = poolSurgeBuildCells(o, c, r);
+  for (const [cc, rr] of want) {
+    if (!inGrid(cc, rr) || isWall(cc, rr)) return false;
+    if (typeof deepWaterBlocksCell === 'function' && deepWaterBlocksCell(cc, rr)) return false;
+    const g = G.grid[cc + ',' + rr]; if (g && g !== o) return false;
+  }
+  const keys = new Set(want.map(([cc, rr]) => cc + ',' + rr));
+  for (const b of G.obstacles || []) {   // 不擋路的建築不在 G.grid 裡：另外看有沒有疊到
+    if (b === o || b.hp <= 0) continue;
+    if (poolSurgeBuildCells(b, b.c, b.r).some(([cc, rr]) => keys.has(cc + ',' + rr))) return false;
+  }
+  return true;
+}
+// 往 (dx, dy) 的方向推 dist 像素：換算成 1～maxCells 格，一格一格試，前面放不下就停；回傳 true＝有動
+function poolSurgePushBuilding(o, dx, dy, dist) {
+  const B = POOL_SURGE_BUILD;
+  if (!(dist >= CELL * B.minPush)) return false;
+  const sx = Math.abs(dx) > .38 ? Math.sign(dx) : 0, sy = Math.abs(dy) > .38 ? Math.sign(dy) : 0;   // 斜著推＝斜著移一格
+  if (!sx && !sy) return false;
+  const n = Math.max(1, Math.min(B.maxCellsOf[o.type] ?? B.maxCells, Math.round(dist / CELL))), c0 = o.c, r0 = o.r;
+  if (o.lightPhase == null) o.lightPhase = o.c * 7 + o.r * 13;   // 燈的呼吸光暈節奏：照原本的位置固定下來，移動後才不會跳一下（js/lighting.js）
+  for (let i = 0; i < n; i++) {
+    if (!poolSurgeBuildFits(o, o.c + sx, o.r + sy)) break;
+    for (const [dc, dr] of o.solid || []) { const k = (o.c + dc) + ',' + (o.r + dr); if (G.grid[k] === o) delete G.grid[k]; }
+    o.c += sx; o.r += sy;
+    for (const [dc, dr] of o.solid || []) G.grid[(o.c + dc) + ',' + (o.r + dr)] = o;
+  }
+  if (o.c === c0 && o.r === r0) return false;
+  const old = obstacleSurgeOffset(o) || [0, 0];   // 還在滑的時候又被推：從現在畫的位置接著滑
+  o.surgeSlide = { fx: (c0 - o.c) * CELL + old[0], fy: (r0 - o.r) * CELL + old[1], t: B.slideSecs, t0: B.slideSecs };
+  return true;
+}
+// 畫面上的滑動位移（js/render.js 的 drawObstacle、js/landmine.js 的 drawLandmine、js/lighting.js 的建築燈光都加上這個）：一開始在原位置，越滑越慢、停在新位置
+function obstacleSurgeOffset(o) {
+  const m = o && o.surgeSlide; if (!m) return null;
+  const k = Math.max(0, m.t / m.t0), e = k * k;
+  return [m.fx * e, m.fy * e];
+}
+function poolSurgeBuildSlideStep(dt) {
+  for (const o of G.obstacles || []) { const m = o.surgeSlide; if (m && (m.t -= dt) <= 0) o.surgeSlide = null; }
+}
+
 // 地上的道具被沖著滑：越滑越慢，碰到牆或深水就停
 function poolSurgeItemsStep(dt) {
   for (const g of G.groundItems || []) {

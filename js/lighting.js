@@ -397,13 +397,14 @@ function getLights() {
     const nObs = L.length;   // 這個建築加的燈
     const lr = o.type && LIGHT.buildings[o.type];
     if (lr && !o.mrtHidden) {   // mrtHidden：跟著捷運開進隧道了（js/mrt-train.js）
-      const [dx, dy] = obstacleOff(o);   // 地圖上微調過位置的燈：光跟著圖走（js/maploader.js）
+      const [ox0, oy0] = obstacleOff(o), slide = typeof obstacleSurgeOffset === 'function' ? obstacleSurgeOffset(o) : null;   // 地圖上微調過位置的燈：光跟著圖走（js/maploader.js）
+      const dx = ox0 + (slide ? slide[0] : 0), dy = oy0 + (slide ? slide[1] : 0);   // 被溢出來的水推走、正在滑：光也跟著滑（js/pool-surge.js）
       const x = OX + (o.c + (o.w || 1) / 2) * CELL + dx + (o.mrtShift || 0);   // mrtShift：蓋在捷運車廂裡、跟著列車移動
       const y = OY + (o.r + (o.h || 1) / 2) * CELL + dy;
       // 燈頭在 1×2 圖片的上方；visualY 只影響光暈位置，不改遊戲照明判定。
       const visualY = OY + (o.r + Math.min(0.38, (o.h || 1) * 0.3)) * CELL + 10 + dy;
       L.push({ x, y, visualX: x, visualY, r: lr, warm: true, cool: lightCoolBuilding(o.type),   // cool＝這張地圖的這種燈改成藍白光（LIGHT_COOL）
-        single: o.type === 'camping_lights', phase: o.c * 7 + o.r * 13 });
+        single: o.type === 'camping_lights', phase: o.lightPhase ?? o.c * 7 + o.r * 13 });   // lightPhase：被水推走過的燈，呼吸節奏照原本的位置（js/pool-surge.js）
     }
     for (let k = nObs; k < L.length; k++) if (L[k].floor == null) L[k].floor = o.floor === 2 ? 2 : 1;   // 建築的燈：蓋在哪一層就照哪一層（js/build.js 的 o.floor）
   }

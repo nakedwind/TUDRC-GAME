@@ -125,7 +125,8 @@ function drawLandmine(ctx, o) {
   const now = performance.now() / 1000;
   {
     const img = obstacleImgs[o.type] && obstacleImgs[o.type].h;
-    const x = OX + o.c * CELL + (o.mrtShift || 0), y = OY + o.r * CELL;
+    const slide = typeof obstacleSurgeOffset === 'function' ? obstacleSurgeOffset(o) : null;   // 被溢出來的水推走：從原位置滑過去（js/pool-surge.js）
+    const x = OX + o.c * CELL + (o.mrtShift || 0) + (slide ? slide[0] : 0), y = OY + o.r * CELL + (slide ? slide[1] : 0);
     if (img && img.complete && img.naturalWidth) {
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, x, y, CELL, CELL);
