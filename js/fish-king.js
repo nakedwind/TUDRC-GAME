@@ -82,7 +82,8 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   //   stay＝噴完在岸上多待幾秒才跳回水裡
   //   fromDive＝潛水游到岸邊時，有幾成直接從水裡跳上岸噴水砲（不先浮上來；浮上來常常被溫特一打就縮回去）
   //   retry＝浮在水面上要噴、但附近找不到岸可以跳時，幾秒後再找一次
-  cannon: { every: [1.5, 2.5], fromDive: .6, retry: .6, windup: 1.1, sweep: 1.4, arc: 2.094, range: 14.2, width: 60, damage: 14, push: 2.4,
+  //   times＝一次連噴幾下（來回掃：第一下從左掃到右，第二下就從右掃回左）、gap＝兩下中間停幾秒（這段時間地上會先畫出回掃的預警扇形）
+  cannon: { every: [1.5, 2.5], fromDive: .6, retry: .6, times: 2, gap: .45, windup: 1.1, sweep: 1.4, arc: 2.094, range: 14.2, width: 60, damage: 14, push: 2.4,
     reach: 8, shore: 2.5, jumpSecs: .8, jumpHeight: 120, stay: .6,
     // 沖下水：被水砲沖開時，旁邊 push 格內有深水的話，往水池那邊偏過去（最多偏幾度；0＝照水柱方向直直沖開、不偏）
     //   魚頭王是站在走道上噴的，水柱常常沿著走道掃，不偏的話人只會在走道上滑，很少掉下水
@@ -654,7 +655,7 @@ function fkAimCannon(K, t) {
   const e = K.e, P = FISH_KING.cannon;
   e.faceRight = t.x > e.x; fkFace(e, 'front');
   const m = fkMouth(e), aim = Math.atan2(t.y - m.y, t.x - m.x), dir = Math.random() < .5 ? 1 : -1;
-  K.cannon = { t: 0, a0: aim - dir * P.arc / 2, a1: aim + dir * P.arc / 2, hit: new Set(), firing: false, seed: Math.random() * 9 };
+  K.cannon = { t: 0, a0: aim - dir * P.arc / 2, a1: aim + dir * P.arc / 2, hit: new Set(), firing: false, seed: Math.random() * 9, round: 1 };
 }
 // 跳上岸：拋物線跳過去，落地震一下，接著對準目標開始預警
 function fkLandJumpStep(K, dt) {
@@ -720,7 +721,15 @@ function fkCannonStep(K, dt) {
   if (Math.random() < dt * 14 && typeof poolFallSplash === 'function') poolFallSplash(end.x, end.y + 4, false);
   fkCannonDrops(K, m, end, dt);
   fkImpactSpawn(K, end.x, end.y, c.ang || 0, dt);   // 打到地上：一直冒出新的白色水花團
-  if (k >= 1) K.cannon = null;
+  if (k < 1) return;
+  if ((c.round || 1) < (P.times || 1)) {   // 還要再噴：反方向掃回來（左到右 → 右到左）
+    c.round = (c.round || 1) + 1;
+    [c.a0, c.a1] = [c.a1, c.a0];
+    c.hit = new Set();   // 回掃時被掃到的人會再被打一次
+    c.firing = false; c.t = Math.max(0, P.windup - (P.gap ?? .45));   // 停一下（地上畫出回掃的預警扇形）再噴
+    return;
+  }
+  K.cannon = null;
 }
 // 水柱兩邊甩出去的水滴、打到的地方往上噴的水花（畫在 G.poolSplash，跟池核 BOSS 的水花同一套：js/pool-boss.js 的 drawPoolSplash）
 function fkCannonDrops(K, m, end, dt) {

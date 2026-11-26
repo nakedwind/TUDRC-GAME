@@ -1870,6 +1870,8 @@ const BOSS_SETTINGS_DEFAULT = {
       ],
       "fromDive": 0.6,
       "retry": 0.6,
+      "times": 2,
+      "gap": 0.45,
       "windup": 1.1,
       "sweep": 1.4,
       "arc": 2.094,
