@@ -454,7 +454,7 @@ function swimRingRippleInfo(a) {
 
 // ---- 爬梯子：坐救生圈划到梯子底下（梯子下端泡在深水裡）→ 出現「爬梯子」，按空白鍵（或 Enter）收起救生圈、爬到梯子上面 ----
 // 梯子＝地圖上的 poolcore_ladder 素材（例如救生員台的梯子）；爬上去的位置＝梯子上端附近、不是深水、站得住的地方
-const LADDER = { file: /\/poolcore_ladder\.png$/i, reach: 40, prompt: '爬梯子' };
+const LADDER = { file: /\/poolcore_ladder\.png$/i, reach: CELL * .5, prompt: '爬梯子' };   // reach：溫特（中心點）離梯子下端中間幾點內才出現「爬梯子」（11-27 從 1 格改成半格）
 let ladderCache = { map: null, n: -1, list: [] };
 function ladderSpots() {
   if (typeof MAP === 'undefined' || !MAP) return [];

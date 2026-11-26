@@ -6,7 +6,8 @@
      站在平台上時把水抽乾了：往平台邊上走 → 出現「跳下去」，按空白鍵小跳到地板上，摔在地上頭暈 1 秒（下面的 POOL_PLATFORM.jump）
    ・用走的永遠上不去（只能從救生圈上岸）；只有溫特能上來——隊員（坐救生圈也一樣）、怪物都碰不到整塊平台的圖片範圍
    平台上可以站的格子＝方塊範圍裡、不是深水區、也不是牆的格子（照地圖編輯器畫的深水區和紅格）。 */
-const POOL_PLATFORM = { layerMark: '抽水機', tile: /^Poolcore_block_/, reach: 22, prompt: '上岸', leavePrompt: '下水', leaveReach: 12, propPad: CELL };
+const POOL_PLATFORM = { layerMark: '抽水機', tile: /^Poolcore_block_/, reach: CELL * .5, prompt: '上岸', leavePrompt: '下水', leaveReach: 12, propPad: CELL };
+// reach：溫特（中心點）離平台圖片邊緣幾點內才出現「上岸」（11-27 改成半格；原本是救生圈邊緣 22 點內，太遠就跳出來）
 // leavePrompt：站在平台上靠近深水時的提示；leaveReach：站在平台上時，離深水多幾點也算「在岸邊」（平台四周有邊緣碰撞，人走不到最邊邊）
 let poolPlatformCache = { map: null, n: -1, list: [] };
 // 這張地圖上的平台：[{ cells: Set('c,r'), x0, y0, x1, y1 }]（x、y＝方塊圖片範圍，世界座標）
@@ -72,7 +73,7 @@ function poolPlatformNearPlayer() {
   const rectD = (pl, x0, y0, x1, y1) => Math.hypot(Math.max(x0 - p.x, 0, p.x - x1), Math.max(y0 - p.y, 0, p.y - y1));
   let best = null, bd = Infinity;
   for (const pl of poolPlatforms()) {
-    if (rectD(pl, pl.x0, pl.y0, pl.x1, pl.y1) > PLAYER.r + POOL_PLATFORM.reach) continue;
+    if (rectD(pl, pl.x0, pl.y0, pl.x1, pl.y1) > POOL_PLATFORM.reach) continue;   // 從溫特中心點量
     for (const k of pl.cells) {   // 提示畫在最近那格站得住的地方上面
       const [c, r] = k.split(',').map(Number), x0 = OX + c * CELL, y0 = OY + r * CELL;
       const d = rectD(pl, x0, y0, x0 + CELL, y0 + CELL);
