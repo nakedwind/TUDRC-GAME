@@ -301,7 +301,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=corelink-20261126"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=corelink2-20261126"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=bosscfg-20261122"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -474,7 +474,7 @@
   <script src="js/fund-card.js?v=fundcard2-20261115"></script>   <!-- 作戰經費提示卡：第一次到達戰鬥地圖時右邊跳卡 -->
   <script src="js/ui-layout.js?v=fundcard2-20261115"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/save-restore.js?v=restore2-20261114"></script>   <!-- 設定→存檔：匯出／匯入存檔、找回進度 -->
-  <script src="js/boss-core-link.js?v=corelink-20261126"></script>   <!-- BOSS 守護的核心：BOSS 活著打不破、核心護盾、核心血越低 BOSS 越脆（在各 BOSS 之後、game.js 之前） -->
+  <script src="js/boss-core-link.js?v=corelink2-20261126"></script>   <!-- BOSS 守護的核心：BOSS 活著打不破、核心護盾、核心血越低 BOSS 越脆（在各 BOSS 之後、game.js 之前） -->
   <script src="js/game.js?v=npcrandom-20261126"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
