@@ -3647,6 +3647,33 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_poolcore_kelp_curved",
+    "name": "Poolcore | Curved Kelp",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore-kelp-curved.png",
+    "w": 2,
+    "h": 6,
+    "flat": true
+  },
+  {
+    "id": "tile_poolcore_kelp_tall",
+    "name": "Poolcore | Tall Kelp",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore-kelp-tall.png",
+    "w": 2,
+    "h": 9,
+    "flat": true
+  },
+  {
+    "id": "tile_poolcore_kelp_slender",
+    "name": "Poolcore | Slender Kelp",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore-kelp-slender.png",
+    "w": 2,
+    "h": 7,
+    "flat": true
+  },
+  {
     "id": "tile_poolcore_waterline_wall",
     "name": "池核｜條紋水線牆",
     "role": "floor",
@@ -4504,6 +4531,51 @@ const SHARED_TILES = [
     "file": "images/裝備/adrenaline-injector.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_interactive_water_pickup_almond",
+    "name": "水上拾取（杏仁水）",
+    "role": "floor",
+    "file": "images/items/almond-water-small.png",
+    "w": 1,
+    "h": 1,
+    "waterFloat": true
+  },
+  {
+    "id": "tile_interactive_water_pickup_medkit",
+    "name": "水上拾取（醫療包）",
+    "role": "floor",
+    "file": "images/items/medical-kit-small.png",
+    "w": 1,
+    "h": 1,
+    "waterFloat": true
+  },
+  {
+    "id": "tile_interactive_water_pickup_firstaid",
+    "name": "水上拾取（急救包）",
+    "role": "floor",
+    "file": "images/裝備/first-aid-kit.png",
+    "w": 1,
+    "h": 1,
+    "waterFloat": true
+  },
+  {
+    "id": "tile_interactive_water_pickup_anomaly_firstaid",
+    "name": "水上拾取（異質急救包）",
+    "role": "floor",
+    "file": "images/裝備/first-aid-kit02.png",
+    "w": 1,
+    "h": 1,
+    "waterFloat": true
+  },
+  {
+    "id": "tile_interactive_water_pickup_locker_key",
+    "name": "水上拾取（置物櫃鑰匙）",
+    "role": "floor",
+    "file": "images/items/storage-locker-key-small.png",
+    "w": 1,
+    "h": 1,
+    "waterFloat": true
   },
   {
     "id": "tile_mvfjt47h",

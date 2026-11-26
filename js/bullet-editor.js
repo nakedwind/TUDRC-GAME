@@ -75,6 +75,8 @@ let data = (typeof DraftSync !== 'undefined' ? DraftSync.load(BULLET_DRAFT_KEY, 
 function normalize() {
   if (!Number.isFinite(data.foeMul)) data.foeMul = fileData.foeMul;
   if (!Number.isFinite(data.bigHp)) data.bigHp = fileData.bigHp;
+  if (!Array.isArray(data.off)) data.off = Array.isArray(fileData.off) ? fileData.off.slice() : [];   // 停用的子彈
+  if (!Array.isArray(fileData.off)) fileData.off = [];
   data.bullets = data.bullets || {};
   for (const id in fileData.bullets) {
     data.bullets[id] = data.bullets[id] || {};
@@ -91,10 +93,12 @@ function exportSource() {
     '   遊戲載入時，下面 bullets 裡每種子彈的數字會蓋進 BULLETS（data/equipment.js 最後面）。\n' +
     '   foeMul：打「怪物」時，傷害、睡／暈／麻痺／混亂秒數、擊退距離、黏膠減速都乘上這個數（打到溫特、隊員照原本的數字）\n' +
     '   bigHp：血量多少以上算大型怪物（麻醉、閃光、混亂、撞牆暈的秒數減半）\n' +
+    '   off：停用的子彈（遊戲裡當作沒有這種子彈：背包、商店、置物櫃、彈藥箱都不會出現；數值留著，取消停用就回來）\n' +
     '   整段貼回 data/bullet-tuning.js 覆蓋即可。 */\n' +
     'const BULLET_TUNING = {\n' +
     '  "foeMul": ' + JSON.stringify(data.foeMul) + ',\n' +
     '  "bigHp": ' + JSON.stringify(data.bigHp) + ',\n' +
+    (data.off.length ? '  "off": ' + JSON.stringify(data.off).replace(/,/g, ', ') + ',\n' : '') +
     '  "bullets": {\n' +
     ids.map(id => '    ' + JSON.stringify(id) + ': { ' + Object.keys(data.bullets[id]).map(k => JSON.stringify(k) + ': ' + JSON.stringify(data.bullets[id][k])).join(', ') + ' }').join(',\n') + '\n' +
     '  }\n' +
@@ -112,6 +116,7 @@ function saveDraft() {
 }
 function changedCount() {
   let n = (data.foeMul !== fileData.foeMul) + (data.bigHp !== fileData.bigHp);
+  for (const id in data.bullets) if (isOff(id) !== fileData.off.includes(id)) n++;   // 停用／取消停用也算一個修改
   for (const id in data.bullets) for (const k in data.bullets[id]) if (data.bullets[id][k] !== (fileData.bullets[id] || {})[k]) n++;
   return n;
 }
@@ -154,6 +159,8 @@ function renderGlobal() {
   $('pistolRef').innerHTML = lv.length ? '<b>參考：一般子彈（手槍）每發傷害</b> ' + lv.map((l, i) => 'Lv' + (i + 1) + '＝' + l.dmg).join('、') + '（一般子彈不乘倍率）' : '';
 }
 
+// 這種子彈有沒有停用（停用＝遊戲裡拿不到、看不到）
+const isOff = id => data.off.includes(id);
 function renderBullets() {
   const box = $('bulletList'); box.innerHTML = '';
   for (const id in data.bullets) {
@@ -161,22 +168,29 @@ function renderBullets() {
     const card = document.createElement('section');
     card.className = 'bullet'; card.id = 'b-' + id;
     card.style.setProperty('--c', meta.color || '#8fd3ff');
-    const changed = Object.keys(b).some(k => b[k] !== f[k]);
+    const off = isOff(id), changed = Object.keys(b).some(k => b[k] !== f[k]) || off !== fileData.off.includes(id);
+    if (off) card.classList.add('off');
     card.innerHTML = '<header><span class="b-icon">' + (meta.image ? '<img src="' + esc(meta.image) + '" alt="">' : esc(meta.icon || '')) + '</span>' +
       '<h2>' + esc(meta.name) + '</h2><code>' + esc(id) + '</code>' +
+      '<label class="off-toggle" title="停用＝遊戲裡當作沒有這種子彈：背包、商店、置物櫃、彈藥箱都不會出現；數值會留著，取消勾選就回來"><input type="checkbox"' + (off ? ' checked' : '') + '> 🚫 停用</label>' +
       (changed ? '<button type="button" class="small revert">還原成專案檔</button>' : '') + '</header>' +
+      (off ? '<p class="off-note">已停用：遊戲裡拿不到、背包和商店都看不到這種子彈。</p>' : '') +
       '<div class="fields"></div><p class="summary"><b>對怪物實際：</b>' + esc(bulletSummary(id, b, data.foeMul)) + '</p>';
     const fields = card.querySelector('.fields');
     for (const k in b) fields.appendChild(numInput(b[k], f[k], fieldInfo(id, k), v => { b[k] = v; saveDraft(); render(); }));
+    card.querySelector('.off-toggle input').addEventListener('change', e => {
+      data.off = data.off.filter(x => x !== id); if (e.target.checked) data.off.push(id);
+      saveDraft(); render(); setStatus(meta.name + (e.target.checked ? '已停用' : '已取消停用') + '（按「💾 存到專案」後遊戲才會套用）');
+    });
     const rv = card.querySelector('.revert');
-    if (rv) rv.addEventListener('click', () => { data.bullets[id] = JSON.parse(JSON.stringify(f)); saveDraft(); render(); setStatus(meta.name + '已還原成專案檔的數值'); });
+    if (rv) rv.addEventListener('click', () => { data.bullets[id] = JSON.parse(JSON.stringify(f)); data.off = data.off.filter(x => x !== id); if (fileData.off.includes(id)) data.off.push(id); saveDraft(); render(); setStatus(meta.name + '已還原成專案檔的數值'); });
     box.appendChild(card);
   }
   // 左邊的目錄
   $('toc').innerHTML = Object.keys(data.bullets).map(id => {
     const meta = (typeof BULLETS !== 'undefined' && BULLETS[id]) || { name: id };
-    const changed = Object.keys(data.bullets[id]).some(k => data.bullets[id][k] !== (fileData.bullets[id] || {})[k]);
-    return '<a href="#b-' + id + '"' + (changed ? ' class="changed"' : '') + '>' + esc(meta.name) + '</a>';
+    const changed = Object.keys(data.bullets[id]).some(k => data.bullets[id][k] !== (fileData.bullets[id] || {})[k]) || isOff(id) !== fileData.off.includes(id);
+    return '<a href="#b-' + id + '"' + (changed ? ' class="changed"' : '') + '>' + esc(meta.name) + (isOff(id) ? '（停用）' : '') + '</a>';
   }).join('');
 }
 

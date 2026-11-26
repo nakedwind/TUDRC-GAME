@@ -382,6 +382,8 @@ function sentryBlocked(x, y) {
 // 設成 0＝舊的嚴格判定：身體中心和四個角都要在光內，一點點黑就不過去。
 const CORE_GLOW_WALK = 4;   // 醒著的異質核心會發光：周圍幾格內隊員也能走進去（才打得到核心）
 const PERSONNEL_DARK_CELLS = 1;
+// 戴著照明頭盔（而且還有電池）的隊員自己會發光：不怕黑，可以走進暗處、不會逃回燈下（js/squad-battery.js 的 squadHelmetLit）
+const personnelCarriesLight = t => !!t && typeof squadHelmetLit === 'function' && squadHelmetLit(t);
 function personnelInLight(x, y) {
   if (MAP_SAFE || !LIGHT.enabled) return true;
   if (G && G.cores && G.cores.some(c => c.awake && !c.dead && !c.hidden && Math.hypot(c.x - x, c.y - y) <= CORE_GLOW_WALK * CELL)) return true;
@@ -447,7 +449,7 @@ function escapeDarkness(actor, dt) {
     if (actor.escortRouteOk) return false;
     if (actor.mode === 'escort' && typeof watchSentryProgress === 'function' && !personnelInLight(actor.x, actor.y)) watchSentryProgress(actor, dt, leaderLabel(), () => sentryLeaderBlockReason(actor));   // 過不去又待在暗處：一樣說出原因（js/sentry-blocked.js）
   }
-  if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
+  if (MAP_SAFE || !LIGHT.enabled || personnelCarriesLight(actor) || personnelInLight(actor.x, actor.y)) {
     if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
     if (actor.escapePath) {
       actor.navPath = null;
@@ -715,7 +717,7 @@ function sentryPathSpend(ms) { sentryPathBusy(); sentryPathSpent += ms; }
 function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
-  const dark = !!(t.summonDark || t.followDark);   // 被召喚、跟著溫特走、去撿地上的東西：可以穿過黑暗
+  const dark = !!(t.summonDark || t.followDark || personnelCarriesLight(t));   // 被召喚、跟著溫特走、去撿地上的東西、戴著照明頭盔：可以穿過黑暗
   if (typeof swimRingShoreGoal === 'function') {   // 想走進深水區（沒坐救生圈）：先走到最靠近的岸邊；溫特在水裡時會拿救生圈下水（js/swim-ring.js）
     const shore = swimRingShoreGoal(t, targetX, targetY, dark); if (shore) [targetX, targetY] = shore;
   }
@@ -932,6 +934,7 @@ function updateSentryMain(t, dt) {
   // 地上有溫特丟的游泳圈：離它最近、還沒有游泳圈的隊員走去撿（js/swim-ring.js）。游泳圈在溫特腳邊，站在暗處的隊員也照樣走過去
   if (typeof swimRingGroundStep === 'function' && swimRingGroundStep(t, dt)) return;
   if (escapeDarkness(t, dt)) return;
+  if (typeof squadBatteryGroundStep === 'function' && squadBatteryGroundStep(t, dt)) return;   // 戴照明頭盔的隊友：去撿地上的電池（js/squad-battery.js）
   const ownSpec = TYPES[t.type];
   // 召回營地的哨兵抵達後，優先攔截正在破壞營地的怪物。
   if (t.mode !== 'goto' && !ownSpec.guide) {

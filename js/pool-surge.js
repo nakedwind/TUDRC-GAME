@@ -9,8 +9,10 @@
         玩家蓋的部分建築（POOL_SURGE_BUILD.types：露營燈、地雷、油箱、鐵絲網、爐具、探照燈〔只推 1 格〕）——建築是一格一格對齊的，
         所以照被推的力道推 1～maxCells 格，畫面上從原位置滑過去；前面是牆、深水、別的建築就停在那裡
         坐救生圈的人在水上被水波經過時，也會被往外推一點（ringPush 倍）
-     ④ 岸上的水 linger 秒後慢慢退掉
-   數值：怪物編輯器「👑 BOSS 數值」→ 巨大比基尼小丑魚 → surge（存在 data/monsters.js；程式裡的預設在 js/pool-boss.js 的 POOL_BOSS.surge）
+     ④ 岸上的水 linger 秒後慢慢退掉；退的時候，還站在濕地上的人被水往水池方向拉回來 pull 像素
+        （站在水邊的人會被拖進水裡，js/pool-fall.js 的 poolFallKnockIn；pull 是 0 就不拉）
+   數值（擴散 range、溢上岸 spill、推開 push、拉回 pull）：怪物編輯器「👑 BOSS 數值」→ 巨大比基尼小丑魚 → surge（存在 data/monsters.js；程式裡的預設在 js/pool-boss.js 的 POOL_BOSS.surge）
+        魚頭王有自己的一組大小：怪物編輯器 → 魚頭王 → surge（js/fish-king.js 的 FISH_KING.surge，poolSurgeStart 的第 4 個參數）
    畫法：js/render.js 畫完地板之後呼叫 drawPoolSurge（在人物下面）；每一幀由 js/pool-tide.js 的 updatePoolTide 呼叫 poolSurgeTick */
 
 // 會被溢出來的水推走的建築（物件編輯器／裝飾的代號）：只推玩家蓋的，地圖上原本就畫好的不推
@@ -43,9 +45,11 @@ const POOL_SURGE_LOOK = {
 };
 
 // ---- 開始溢水（kind：up＝躍出水面、dive＝一頭栽進水裡、land＝落回水面）----
-function poolSurgeStart(x, y, kind) {
+// own＝這隻怪物自己的溢水大小 { range, spill, push, pull }（例如魚頭王的 FISH_KING.surge）；沒給＝照巨大比基尼小丑魚 surge 裡 kind 那一組
+// （擴散速度、推開滑多久、多久退掉這些共用的照巨大比基尼小丑魚的）
+function poolSurgeStart(x, y, kind, own) {
   if (typeof G === 'undefined' || !G || typeof POOL_BOSS === 'undefined' || !POOL_BOSS.surge) return;
-  const S = POOL_BOSS.surge, K = S[kind]; if (!K || !(K.range > 0)) return;
+  const S = POOL_BOSS.surge, K = own || S[kind]; if (!K || !(K.range > 0)) return;
   const deep = typeof deepWaterCells === 'function' ? deepWaterCells() : null; if (!deep || !deep.size) return;
   // 起點：落水點那一格（不是深水就找附近最近的深水格）
   let [c0, r0] = cellAt(x, y);
@@ -129,7 +133,7 @@ function poolSurgeTick(dt) {
     const pushAt = (a, isPlayerLike) => {
       if (!a || s.hit.has(a)) return;
       const [c, r] = cellAt(a.x, a.y), L = s.landAt.get(c + ',' + r);
-      if (L && s.t >= L.t && s.t <= L.t + W.hitWindow) { s.hit.add(a); poolSurgePush(a, L.dx, L.dy, s.K.push * L.k, isPlayerLike); return; }
+      if (L && s.t >= L.t && s.t <= L.t + W.hitWindow) { s.hit.add(a); (s.pushedBy || (s.pushedBy = new Map())).set(a, L); poolSurgePush(a, L.dx, L.dy, s.K.push * L.k, isPlayerLike); return; }   // pushedBy：記下是哪一格的水推的，退水時照那一格拉回來
       // 坐救生圈、在水上：浪頭經過時往外推一點
       if (isPlayerLike && a.swimRing) {
         const e = s.deep.find(o => o.c === c && o.r === r);
@@ -139,9 +143,20 @@ function poolSurgeTick(dt) {
         }
       }
     };
-    pushAt(G.player, true);
-    for (const t of G.towers || []) if (t.hp > 0 && !t.eatenBy && !t.mrtRide) pushAt(t, true);
-    for (const e of G.enemies || []) if (!e.poolBoss && !e.fishKing && !e.unpushable && !e.dead && e.hp > 0 && e.behavior !== 'moth' && !e.airborne) pushAt(e, false);
+    // 水退回去：開始退的那一刻起一小段時間內，被這次的水推出去的人、還站在濕地上的人，被拉回水池（往溢出來的反方向，越靠近水邊拉越遠）
+    const pullAt = (a, isPlayerLike) => {
+      if (!a || !(s.K.pull > 0) || (s.pulled || (s.pulled = new Set())).has(a)) return;
+      const [c, r] = cellAt(a.x, a.y), L = (s.pushedBy && s.pushedBy.get(a)) || s.landAt.get(c + ',' + r); if (!L) return;
+      const age = s.t - L.t, back = W.holdSecs;   // 漲滿、停 holdSecs 秒之後開始退（跟 poolSurgeBlobWeight 一樣）
+      if (age < back || age > back + (S.linger || 1.4) * .5) return;
+      s.pulled.add(a); poolSurgePush(a, -L.dx, -L.dy, s.K.pull * L.k, isPlayerLike);
+    };
+    const each = fn => {
+      fn(G.player, true);
+      for (const t of G.towers || []) if (t.hp > 0 && !t.eatenBy && !t.mrtRide) fn(t, true);
+      for (const e of G.enemies || []) if (!e.poolBoss && !e.fishKing && !e.unpushable && !e.dead && e.hp > 0 && e.behavior !== 'moth' && !e.airborne) fn(e, false);
+    };
+    each(pushAt); each(pullAt);
     for (const g of G.groundItems || []) {   // 地上的道具：被水沖著滑一段
       if (s.hit.has(g)) continue;
       const [c, r] = cellAt(g.x, g.y), L = s.landAt.get(c + ',' + r);

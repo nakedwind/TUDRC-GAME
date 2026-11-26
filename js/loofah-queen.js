@@ -803,7 +803,7 @@ function loofahQueenDown(e) {
   if (G.lqGround) G.lqGround = G.lqGround.filter(g => g.state !== 'gone');
   if (rec && rec.state === 'move' && rec.mv) { if (rec.mv.phase !== 'down') { rec.core.x = rec.mv.to.x; rec.core.y = rec.mv.to.y; } rec.mv.phase = 'down'; rec.mv.t = 0; }   // 正在換位置時她倒下：直接放到新位置吊著（之後一樣開槍打下來）
   for (const v of G.vines || []) if (v.lqTemp && v.lqOwner === e && (v.state === 'hang' || v.state === 'descend')) { v.state = 'retract'; v.regrowAfter = 1e9; }
-  if (typeof sfxAt === 'function') sfxAt('loofahDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著播的那聲會被去重吃掉
+  if (typeof sfxAt === 'function') bossSfxAt('loofahDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著播的那聲會被去重吃掉
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#d9f5b8');   // 不提示要用火燒
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 4, .04);   // 斷氣時只輕震；大震動留到巨物倒下碰到地面那一刻（js/bird-head.js 的 GIANT_FALL）

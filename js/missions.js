@@ -4,8 +4,8 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [] };   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
-try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
+const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [], zonePaid: [] };   // zonePaid：領過控制獎勵的區域（'all'＝全區控制獎勵）   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
+try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps', 'zonePaid']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
 
 const missionById = id => MISSIONS.find(m => m.id === id) || null;
@@ -38,6 +38,35 @@ const missionMoneyGiven = mapId => { const m = missionOfMap(mapId); return m ? m
 function markMissionMapCleared(mapId) {
   const m = missionOfMap(mapId); if (!m || missionState.cleared.includes(m.id)) return;
   missionState.cleared.push(m.id); saveMissions();
+  const got = payZoneRewards(m);   // 第一次控制：區域控制獎勵（＋全區控制獎勵）
+  if (got.length) systemNotice('🏅 ' + got.join('　'));
+}
+
+// ---- 區域控制獎勵、全區控制獎勵（金額在 data/rewards.js，「🏅 獎勵編輯器」改）----
+// 每一區第一次控制時給一次；經費加進這次的作戰經費（G.money，回基地存進錢包，js/progression.js 的 settleSortieMoney），碎片直接入帳
+// 回傳要顯示的文字（沒有獎勵＝空陣列）；測試模式不給
+const rewardText = (money, crystals) => [money > 0 ? '經費 +$' + money.toLocaleString() : '', crystals > 0 ? '異質碎片 +' + crystals : ''].filter(Boolean).join('、');
+function payReward(r) {
+  const money = Math.max(0, Math.floor(Number(r && r.money) || 0)), crystals = Math.max(0, Math.floor(Number(r && r.crystals) || 0));
+  if (money > 0 && typeof G !== 'undefined' && G) { G.money = (G.money || 0) + money; if (MAP_SAFE && typeof walletSet === 'function') walletSet(G.money); }
+  if (crystals > 0 && typeof earnCrystals === 'function') earnCrystals(crystals);
+  if (money > 0 || crystals > 0) { if (typeof updateHUD === 'function') updateHUD(); return rewardText(money, crystals); }
+  return '';
+}
+function payZoneRewards(m) {
+  if (window.TEST_MODE || typeof REWARDS_DATA === 'undefined' || !m) return [];
+  const out = [];
+  if (!missionState.zonePaid.includes(m.id)) {
+    missionState.zonePaid.push(m.id);
+    const t = payReward((REWARDS_DATA.zones || {})[m.id]); if (t) out.push('控制獎勵：' + t);
+  }
+  const all = MISSIONS.filter(x => x.map);   // 作戰桌上的區域都控制了：全區控制獎勵（只給一次）
+  if (!missionState.zonePaid.includes('all') && all.length && all.every(missionCleared)) {
+    missionState.zonePaid.push('all');
+    const t = payReward(REWARDS_DATA.allZones); if (t) out.push('全區控制獎勵：' + t);
+  }
+  saveMissions();
+  return out;
 }
 function missionStatus(m) {
   if (missionCleared(m)) return 'cleared';
@@ -64,26 +93,30 @@ const brieferHospitalized = () => typeof isHospitalized === 'function' && isHosp
 const isBriefStandIn = actor => brieferHospitalized() && onBaseMap() && !BRIEF_STAND_IN_EXCLUDE.includes(actorId(actor))
   && !actor.dead && !!(CHARACTERS[actorId(actor)] || TYPES[actorId(actor)]);
 const isBriefer = actor => !!actor && (actorId(actor) === brieferId() || isBriefStandIn(actor));
-// ---- BOSS 特別獎金（名單、金額在 data/missions.js 的 BOSS_BOUNTIES）----
+// ---- BOSS 特別獎金（名單、經費、異質碎片在 data/rewards.js 的 BOSS_BOUNTIES，「🏅 獎勵編輯器」改）----
 // 打倒就記下來（combat-feel.js 的 onEnemyDeath 呼叫），之後戰敗撤退也算數；測試模式、不是任務的地圖（測試地圖 y1）不算
 function recordBossBounty(e) {
   const b = BOSS_BOUNTIES.find(x => e[x.flag]);
-  if (!b || window.TEST_MODE || !missionOfMap(MAP && MAP.id)) return;
+  if (!b || !(b.money > 0 || b.crystals > 0) || window.TEST_MODE || !missionOfMap(MAP && MAP.id)) return;   // 經費、碎片都是 0：沒有獎金
   missionState.bossBounty.push(b.id); saveMissions();
 }
 // 還沒領的獎金：同一隻打倒好幾次，金額加起來、台詞只說一次
 const bossBountiesPending = () => window.TEST_MODE ? [] : BOSS_BOUNTIES.filter(b => missionState.bossBounty.includes(b.id))
-  .map(b => ({ ...b, money: b.money * missionState.bossBounty.filter(id => id === b.id).length }));
+  .map(b => { const n = missionState.bossBounty.filter(id => id === b.id).length; return { ...b, money: (b.money || 0) * n, crystals: (b.crystals || 0) * n }; })
+  .filter(b => b.money > 0 || b.crystals > 0);
 const bossBountyReady = () => MAP_SAFE && !MAP_STORY && bossBountiesPending().length > 0;   // 基地裡才入帳（戰鬥地圖的錢是作戰經費，劇情地圖不動錢包）
 // 通訊員開口報告：獎金馬上入帳，回傳要說的台詞（這格台詞被清空也要交代錢是哪來的）
 function payBossBounties() {
-  const list = bossBountiesPending(), total = list.reduce((sum, b) => sum + b.money, 0);
+  const list = bossBountiesPending(), total = list.reduce((sum, b) => sum + b.money, 0), shards = list.reduce((sum, b) => sum + b.crystals, 0);
   G.money += total; walletSet(G.money);
+  if (shards > 0) earnCrystals(shards);   // 異質碎片
   missionState.bossBounty = []; saveMissions();
-  updateHUD(); sfx('blip'); systemNotice('💰 特別獎金 +$' + total);
+  updateHUD(); sfx('blip'); systemNotice('💰 特別獎金 ' + rewardText(total, shards));
   return list.flatMap(b => {
     const lines = dialogueLines(brieferId(), 'bounty_' + b.id);
-    return (lines && lines.length ? lines : [(brieferId() === 'winter' ? '艾德林，' : '部隊長，') + '討伐' + b.name + '的特別獎金撥下來了，{money} 元。']).map(s => s.replace(/\{money\}/g, b.money));
+    const said = [b.money > 0 ? b.money + ' 元' : '', b.crystals > 0 ? '異質碎片 ' + b.crystals + ' 個' : ''].filter(Boolean).join('，還有');
+    return (lines && lines.length ? lines : [(brieferId() === 'winter' ? '艾德林，' : '部隊長，') + '討伐' + b.name + '的特別獎金撥下來了，' + said + '。'])
+      .map(s => s.replace(/\{money\}/g, b.money).replace(/\{crystals\}/g, b.crystals));   // {money}＝經費、{crystals}＝異質碎片
   });
 }
 const missionBriefReady = actor => isBriefer(actor) && (!!briefPending() || bossBountyReady());
@@ -274,9 +307,11 @@ function missionWinOverlay() {
   const m = missionOfMap(MAP && MAP.id); if (!m) return false;
   const first = !missionCleared(m);
   if (first) { missionState.cleared.push(m.id); saveMissions(); }
+  const got = first ? payZoneRewards(m) : [];   // 第一次控制：區域控制獎勵（＋全區控制獎勵，data/rewards.js）
   const next = nextMission();
   showOverlay('✅ ' + m.name + ' 已控制',
     (first ? '所有異質核心與殘存異質體已清除！' : '再次清除了這一區的異質體！') + '異質結晶已儲存，可用於哨兵培養。' +
+    got.map(t => '<br>🏅 <b>' + t + '</b>').join('') +
     (first && next ? '<br>新區域開放：<b>' + next.name + '</b>' : ''), '返回應變中心');
   return true;
 }

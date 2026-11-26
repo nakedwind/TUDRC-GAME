@@ -42,7 +42,10 @@ const EQUIPMENT = [
     ownedDesc: '朝游標方向照明、耗電後自動換電池。',
     stat: lv => '照明距離 ' + (lv.light / 40).toFixed(1) + ' 格・扇形 ' + lv.spread * 2 + '°・一顆電池撐 ' + lv.battery + ' 秒・黑暗恐懼 −' + Math.round(lv.fear * 100) + '%',
     levels: [{ light: 220, spread: 26, battery: 90, fear: .15 }, { light: 280, spread: 28, battery: 140, fear: .25 }, { light: 340, spread: 36, battery: 200, fear: .35 }, { light: 400, spread: 40, battery: 260, fear: .4 }, { light: 460, spread: 44, battery: 320, fear: .45 }] },
-  { id: 'lamphelmet', name: '照明頭盔', kind: 'head', icon: '💡', image: 'images/裝備/lamp-helmet.png', source: 'develop', cost: [50, 100, 180, 270, 370],
+  { id: 'lamphelmet', name: '照明頭盔', kind: 'head', who: 'all',
+    squadRange: 80, squadBright: 75,   // 隊員戴的時候比溫特弱一點：照明半徑、亮度是溫特的幾 %（100＝一樣）。開發工坊編輯器可改（存在 data/workshop.js）
+    squadBattery: 150,   // 隊員戴的時候要耗電：一顆電池能用多久＝同等級手電筒一顆電池的秒數的幾 %（150＝1.5 倍；js/squad-battery.js）
+    icon: '💡', image: 'images/裝備/lamp-helmet.png', source: 'develop', cost: [50, 100, 180, 270, 370],
     ownedDesc: '持續照亮周圍並減輕黑暗恐懼，無須電池。',
     stat: lv => '照明半徑 ' + (lv.light / 40).toFixed(1) + ' 格・黑暗恐懼 −' + Math.round(lv.fear * 100) + '%',
     levels: [{ light: 70, fear: .08 }, { light: 85, fear: .12 }, { light: 100, fear: .16 }, { light: 115, fear: .2 }, { light: 130, fear: .24 }] },
@@ -220,6 +223,8 @@ const BULLETS = {
 };
 // 每種子彈的數值（射擊間隔、傷害、範圍、秒數…）在 data/bullet-tuning.js（🔫 彈藥編輯器改），這裡蓋進上面的 BULLETS
 for (const id in BULLET_TUNING.bullets) if (BULLETS[id]) Object.assign(BULLETS[id], BULLET_TUNING.bullets[id]);
+// 停用的子彈（彈藥編輯器勾「停用」的，例如黏著彈）：標成 removed，遊戲裡各處都當作沒有這種子彈（背包、商店、置物櫃、彈藥箱、彈匣…都會跳過）
+for (const id of Array.isArray(BULLET_TUNING.off) ? BULLET_TUNING.off : []) if (BULLETS[id] && id !== 'pistol') BULLETS[id].removed = true;
 // 在置物箱裡找到特殊子彈（只有後室才找得到的 field 子彈）：ammo 找到子彈的機率；kinds 會找到哪幾種；ammoFind 一次給幾發；start 第一次拿到（設定好的置物櫃）給幾發
 // 沒指定內容物的彈藥箱（js/flare.js）：empty＝整箱是空的機率；ammo＝開出特殊子彈的機率（比置物櫃的 GUN_FINDS.ammo 高）；ammoCount＝開到特殊子彈時給幾發（一組＝BULLET_SET 發；置物櫃照下面 GUN_FINDS.ammoFind）；其他物品跟置物櫃一樣照 ITEM_DROPS
 const AMMO_CRATE_LOOT = { empty: .05, ammo: .8, ammoCount: BULLET_SET };

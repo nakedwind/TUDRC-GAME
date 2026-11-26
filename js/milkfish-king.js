@@ -348,7 +348,7 @@ function mkStep(e, dt) {
       if (tg && mk.t > .2 && tg.hp > 0) { const dx = tg.x - e.x, dy = tg.y - e.y, d = Math.hypot(dx, dy) || 1; mk.charge.dir = { x: dx / d, y: dy / d }; }
       e.faceRight = mk.charge.dir.x > 0;
       mfPose(e, Math.floor(mk.t * 10) % 2 ? 'smile-01' : 'smile-02');
-      if (mk.t <= 0) { mk.charge.left = C.chargeDist * CELL; mk.charge.hit = new Set(); mkSet(e, 'charge'); if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-charge'); }
+      if (mk.t <= 0) { mk.charge.left = C.chargeDist * CELL; mk.charge.hit = new Set(); mkSet(e, 'charge'); if (typeof sfxAt === 'function') bossSfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-charge'); }
       return;
     }
     case 'return': {   // 被引開太遠：走回原位
@@ -529,7 +529,7 @@ function mkRoar(e) {
   flash('咕嚕嚕——！！', e.x, e.y - e.drawHeight - 10, '#8fd3ff');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#8fd3ff' : '#ffffff' });
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 9, .06); else addShake(6);
-  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-roar');
+  if (typeof sfxAt === 'function') bossSfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-roar');
 }
 
 // ---- 衝撞（跟鳥頭大隊長類似，但撞到牆不會暈）----
@@ -615,7 +615,7 @@ function mkEnrage(e) {
   flash('咕嚕嚕嚕——！！', e.x, e.y - e.drawHeight - 10, '#ff6b5b');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .55, r: 8 + i * 6, r2: 120 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ff6b5b' : '#ffffff' });
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 9, .06); else addShake(6);
-  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-enrage');
+  if (typeof sfxAt === 'function') bossSfxAt('milkfishKingRoar', e.x, e.y, 2, 'milkfish-king-enrage');
 }
 // ---- 核心護盾：牠活著時，核心（吐在地上那段時間）少受 coreShield 的傷害；在肚子裡一滴都不扣 ----
 // （js/game.js 判定核心破掉前、js/anomalous-core.js 的核心更新前都會呼叫，跟其他 BOSS 的核心護盾一樣）
@@ -1134,7 +1134,7 @@ function milkfishKingCoreShot(core) {
   I.phase = 'rumble'; I.t = 0;
   G.mkGlow = { x: I.from.x, y: I.from.y, k: 0, target: .3 };   // 水面的藍光（沒燈照也看得清楚）：越接近竄出越亮
   if (typeof systemNotice === 'function') systemNotice('水池裡好像有什麼東西……！', true);
-  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', I.from.x, I.from.y, 1.2, 'milkfish-king-intro-rumble');   // 水底傳來低沉的吼聲
+  if (typeof sfxAt === 'function') bossSfxAt('milkfishKingRoar', I.from.x, I.from.y, 1.2, 'milkfish-king-intro-rumble');   // 水底傳來低沉的吼聲
   // BOSS 出場演出（js/boss-cinema.js）：整個戰場時間停住、鏡頭移到核心，看牠從水池竄出、落地、把核心吞進肚子才結束
   const king = I.e, kc = king.mk.core || core;
   if (typeof startBossCinema === 'function') startBossCinema({
@@ -1496,7 +1496,7 @@ function mkJumpWindStep(e) {
   mkSet(e, 'jump');
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 60, life: .35, life0: .35, color: '#d9d2c0' });
   if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(e.x, e.y + 14, ELITE_BIRD.runDust);
-  if (typeof sfxAt === 'function') sfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-jump');
+  if (typeof sfxAt === 'function') bossSfxAt('milkfishKingRoar', e.x, e.y, 1.2, 'milkfish-king-jump');
   mkRumble(mkCfg(e).stepShake, .25);
 }
 // 在空中：照拋物線飛到落點（正面）

@@ -1749,19 +1749,22 @@ const BOSS_SETTINGS_DEFAULT = {
       "linger": 1.4,
       "ringPush": 0.6,
       "up": {
-        "range": 11,
-        "spill": 2.2,
-        "push": 90
+        "range": 14,
+        "spill": 4,
+        "push": 90,
+        "pull": 30
       },
       "dive": {
         "range": 15.4,
         "spill": 3.3,
-        "push": 140
+        "push": 140,
+        "pull": 140
       },
       "land": {
         "range": 7.7,
         "spill": 1.1,
-        "push": 55
+        "push": 55,
+        "pull": 55
       }
     },
     "body": {
@@ -1779,17 +1782,17 @@ const BOSS_SETTINGS_DEFAULT = {
     "crystalMul": 6,
     "peek": {
       "every": [
-        14,
-        26
+        0.5,
+        1.5
       ],
-      "stay": 4.5,
+      "stay": 9,
       "rise": 2.2,
       "sink": 2.4,
       "distMin": 4,
       "distMax": 10,
       "splashRise": 0.5,
       "splashSink": 0.7,
-      "deepChance": 0.75,
+      "deepChance": 0.9,
       "deepDistMax": 16,
       "drift": 22
     },
@@ -1799,6 +1802,15 @@ const BOSS_SETTINGS_DEFAULT = {
     "oval": {
       "wide": 1,
       "flat": 0.3
+    },
+    "ripple": {
+      "every": 0.35,
+      "life": 1.6,
+      "size": 0.45,
+      "grow": 2.2,
+      "alpha": 0.5,
+      "subAlpha": 0.7,
+      "minMove": 12
     },
     "introSecs": 1.1,
     "introHeight": 150,
@@ -1824,9 +1836,15 @@ const BOSS_SETTINGS_DEFAULT = {
     "approachMax": 4,
     "diveTurn": 1.4,
     "surfaceDepth": 0.57,
-    "silhouette": 0.4,
+    "silhouette": 0.6,
     "defaultSee": 0.45,
     "splashSize": 2.4,
+    "surge": {
+      "range": 12,
+      "spill": 4,
+      "push": 60,
+      "pull": 20
+    },
     "cannon": {
       "every": [
         2.5,
@@ -1844,6 +1862,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "jumpSecs": 0.8,
       "jumpHeight": 120,
       "stay": 0.6,
+      "toWater": 90,
       "impact": {
         "rate": 26,
         "size": 0.8,
@@ -1884,8 +1903,10 @@ const BOSS_SETTINGS_DEFAULT = {
       "distMax": 14,
       "tilt": 0.6,
       "otherPool": 0.7,
-      "waveRadius": 6,
-      "wavePush": 2.2
+      "routeArrive": 0.8,
+      "routeMaxSwim": 8,
+      "routeSwimMul": 1.3,
+      "splashMul": 1.2
     },
     "flinch": {
       "turn": 0.5
@@ -1899,6 +1920,19 @@ const BOSS_SETTINGS_DEFAULT = {
         2.5,
         4
       ]
+    },
+    "impact": {
+      "landShake": 10,
+      "landSecs": 0.6,
+      "crack": 1,
+      "landVol": 2,
+      "waterShake": 7,
+      "waterSecs": 0.45
+    },
+    "grudge": {
+      "secs": 8,
+      "enrageAt": 0.5,
+      "enrageMul": 0.6
     },
     "strandSecs": 6,
     "strandMul": 2,
@@ -1974,7 +2008,7 @@ const BOSS_SETTINGS_DEFAULT = {
   "WATER_COMBAT": {
     "rateMul": 0.5,
     "hitMul": 0.7,
-    "recoil": 18,
+    "recoil": 30,
     "recoilSecs": 0.35
   },
   "BOSS_CINEMA": {
@@ -2025,5 +2059,11 @@ const BOSS_SETTINGS_DEFAULT = {
     "splashScale": 1.2,
     "splashGap": 0.35,
     "swimmerMul": 0.7
+  },
+  "BOSS_CORE_LINK": {
+    "minHp": 1,
+    "shield": 0.5,
+    "defMax": 0.6,
+    "noteEvery": 2.5
   }
 };

@@ -30,6 +30,7 @@ BOSSES = [
     ('WATER_COMBAT', 'js/water-monsters.js', '🛟 泳圈上戰鬥（共用）', 'fish_head'),   # 不是一隻 BOSS：坐泳圈攻擊的攻速、命中率、後座力
     ('BOSS_CINEMA', 'js/boss-cinema.js', '🎬 BOSS 出場演出（共用）', 'milkfish_king'),   # 不是一隻 BOSS：出場時停住時間、移鏡頭的共用數字
     ('POOL_MONSTER_FALL', 'js/pool-monster-fall.js', '🌊 怪物掉進深水（共用）', 'bird_head'),   # 不是一隻 BOSS：地面怪物被推下深水後掙扎、扣血、爬回岸的共用數字
+    ('BOSS_CORE_LINK', 'js/boss-core-link.js', '🛡️ BOSS 守護的核心（共用）', 'bird_head'),   # 不是一隻 BOSS：BOSS 活著核心打不破、核心護盾、核心血越低 BOSS 越脆的共用數字
 ]
 SKIP_KEYS = {'maps', 'color', 'eyeFlash'}   # 地圖位置在地圖相關的地方改；顏色不放進編輯器
 

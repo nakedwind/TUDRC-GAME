@@ -48,10 +48,30 @@ let fileConfig=cleanFiles(loadJson(SFX.FILE_KEY,FILE_SOUNDS));
 // 剪輯：{ 音效名稱: { from, to（只播這一段，毫秒）, speed（播放速度，變快變慢但音高不變）} }，存在 data/sound-settings.js 的 clips；遊戲的 js/sfx.js 照這個播
 function cleanClips(map){const out={};for(const[k,v]of Object.entries(map||{})){if(!v||typeof v!=='object')continue;const c={},from=Math.round(Math.max(0,Number(v.from)||0)),to=Math.round(Math.max(0,Number(v.to)||0)),speed=Math.round(Math.min(4,Math.max(.25,Number(v.speed)||1))*100)/100;if(from)c.from=from;if(to>from)c.to=to;if(speed!==1)c.speed=speed;if(Object.keys(c).length)out[k]=c;}return out;}
 const FILE_CLIPS=typeof SOUND_SETTINGS!=='undefined'?(SOUND_SETTINGS.clips||{}):{};
+// ---- 👑 BOSS 嗓音：BOSS 借用一般怪物的配音（被打、死掉、吼叫…）時，變低沉、大聲、有回音；存在 data/sound-settings.js 的 bossVoice，遊戲的 js/sfx.js 照這個播 ----
+const BOSS_VOICE_FIELDS=[['pitch','低沉（播放速度）',.3,1.5,.01],['gain','音量倍率',0,4,.05],['delay','回音間隔（秒）',.02,.8,.01],['feedback','回音每次剩幾成',0,.9,.05],['wet','回音大小（0＝沒有回音）',0,1.5,.05]];
+function cleanBossVoice(v){const out={...SFX.BOSS_VOICE_FALLBACK};for(const[k,,min,max]of BOSS_VOICE_FIELDS){const n=Number((v||{})[k]);if(Number.isFinite(n))out[k]=Math.round(Math.max(min,Math.min(max,n))*100)/100;}return out;}
+const FILE_BOSS_VOICE=typeof SOUND_SETTINGS!=='undefined'?(SOUND_SETTINGS.bossVoice||{}):{};
 let clips=cleanClips(loadJson(SFX.CLIP_KEY,FILE_CLIPS));
+let bossVoice=cleanBossVoice(loadJson(SFX.BOSS_VOICE_KEY,FILE_BOSS_VOICE));
 function status(text,error=false){const el=document.getElementById('status');el.textContent=text;el.style.color=error?'#ffb4b4':'#84ddbd';}
 function saveGains(){gains=cleanGains(gains);SFX.setGains(gains);try{localStorage.setItem(SFX.GAIN_KEY,JSON.stringify(gains));status('音量已自動儲存到這台瀏覽器。');}catch(_){status('儲存失敗：瀏覽器暫存空間不足。',true);}}
 function saveClips(){clips=cleanClips(clips);SFX.setClips(clips);try{localStorage.setItem(SFX.CLIP_KEY,JSON.stringify(clips));status('剪輯設定已自動儲存到這台瀏覽器。');}catch(_){status('儲存失敗：瀏覽器暫存空間不足。',true);}}
+function saveBossVoice(){bossVoice=cleanBossVoice(bossVoice);SFX.setBossVoice(bossVoice);try{localStorage.setItem(SFX.BOSS_VOICE_KEY,JSON.stringify(bossVoice));status('BOSS 嗓音已自動儲存到這台瀏覽器。');}catch(_){status('儲存失敗：瀏覽器暫存空間不足。',true);}}
+// 畫「👑 BOSS 嗓音」那一塊：每個數字一個輸入框；試聽＝同一個音效先用一般怪物、再用 BOSS 的嗓音播（用遊戲的 SFX.play，聽到的就是遊戲裡的效果）
+function renderBossVoice(){
+  const box=document.getElementById('bossVoiceFields');if(!box)return;box.replaceChildren();
+  for(const[k,label,min,max,step]of BOSS_VOICE_FIELDS){
+    const l=document.createElement('label'),inp=document.createElement('input');
+    inp.type='number';inp.min=min;inp.max=max;inp.step=step;inp.value=bossVoice[k];inp.style.width='80px';
+    inp.onchange=()=>{bossVoice[k]=inp.value;saveBossVoice();inp.value=bossVoice[k];};
+    l.append(label+' ',inp);box.append(l);
+  }
+}
+function previewBossVoice(boss){
+  if(!SFX.enabled)SFX.enabled=true;const name=document.getElementById('bossVoiceSample').value;
+  SFX.play(name,1,'editor-bossvoice-'+(boss?'boss':'normal'),boss);
+}
 function saveFiles(){fileConfig=cleanFiles(fileConfig);SFX.setFiles(fileConfig);try{localStorage.setItem(SFX.FILE_KEY,JSON.stringify(fileConfig));status('音效檔設定已自動儲存到這台瀏覽器。');}catch(_){status('儲存失敗：瀏覽器暫存空間不足。',true);}}
 function assignedFile(name){return fileConfig.extras[name]||fileConfig.overrides[name]||defaultFiles[name]||null;}
 function allSounds(){const names=new Set([...SFX.list().map(s=>s.name),...Object.keys(fileConfig.extras)]);names.add('footsteps');return[...names].map(name=>{const custom=fileConfig.meta[name],info=SOUND_INFO[name],file=name==='footsteps'?['環境/腳步/footsteps01.mp3','環境/腳步/footsteps02.mp3']:assignedFile(name),random=!!(file&&file.mode==='random');return{name,file,fileLabel:random?'隨機：'+soundFiles(file).join(' ／ '):soundFiles(file).join(' ＋ '),group:custom?.group||info?.[0]||'其他',label:custom?.label||info?.[1]||name,custom:!!fileConfig.extras[name]};});}
@@ -132,15 +152,18 @@ const range=document.createElement('input');range.type='range';range.min=0;range
 function setSoundFile(sound,file){if(!file||file==='程式合成')return;if(sound.custom)fileConfig.extras[sound.name]=file;else if(file===defaultFiles[sound.name])delete fileConfig.overrides[sound.name];else fileConfig.overrides[sound.name]=file;saveFiles();render();preview({...sound,file});}
 function addSoundLayer(sound,file){if(!file)return;const next=[...new Set([...soundFiles(assignedFile(sound.name)),file])];if(sound.custom)fileConfig.extras[sound.name]=next;else fileConfig.overrides[sound.name]=next;saveFiles();render();preview({...sound,file:next});}
 function download(name,content){const url=URL.createObjectURL(new Blob([content],{type:'text/javascript'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function settingsExport(){const sorted=Object.fromEntries(Object.entries(cleanGains(gains)).sort(([a],[b])=>a.localeCompare(b))),settings={gains:sorted,files:cleanFiles(fileConfig),clips:Object.fromEntries(Object.entries(cleanClips(clips)).sort(([a],[b])=>a.localeCompare(b)))};return'/* 音效設定（由音效編輯器匯出）。音檔可放在 Sound effects 的分類子資料夾。 */\nconst SOUND_SETTINGS = '+JSON.stringify(settings,null,2)+';\n';}
+function settingsExport(){const sorted=Object.fromEntries(Object.entries(cleanGains(gains)).sort(([a],[b])=>a.localeCompare(b))),settings={gains:sorted,files:cleanFiles(fileConfig),clips:Object.fromEntries(Object.entries(cleanClips(clips)).sort(([a],[b])=>a.localeCompare(b))),bossVoice:cleanBossVoice(bossVoice)};return'/* 音效設定（由音效編輯器匯出）。音檔可放在 Sound effects 的分類子資料夾。 */\nconst SOUND_SETTINGS = '+JSON.stringify(settings,null,2)+';\n';}
 document.getElementById('search').addEventListener('input',render);
 document.getElementById('loadLibrary').addEventListener('click',()=>document.getElementById('libraryFolder').click());
 document.getElementById('libraryFolder').addEventListener('change',e=>{library.clear();[...e.target.files].filter(f=>f.type.startsWith('audio/')||/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(f.name)).forEach(f=>library.set(libraryPath(f),f));document.getElementById('libraryStatus').textContent=`已載入 ${library.size} 個音效檔（包含分類子資料夾），可在每一列的選單中直接改選。`;render();status('音效素材清單已載入。');});
 document.getElementById('addSound').addEventListener('click',()=>{const id=document.getElementById('newSoundId').value.trim(),label=document.getElementById('newSoundLabel').value.trim(),group=document.getElementById('newSoundGroup').value,file=document.getElementById('newSoundFile').files[0];if(!/^[A-Za-z][A-Za-z0-9_-]*$/.test(id)){status('程式名稱請用英文字母開頭，只能包含英數字、- 或 _。',true);return;}if(!label||!file){status('請填顯示名稱並選擇音效檔。',true);return;}if(defaultFiles[id]||fileConfig.extras[id]){status('這個程式名稱已經存在。',true);return;}library.set(file.name,file);fileConfig.extras[id]=file.name;fileConfig.meta[id]={label,group};saveFiles();document.getElementById('newSoundId').value='';document.getElementById('newSoundLabel').value='';document.getElementById('newSoundFile').value='';render();status(`已加入「${label}」。記得把 ${file.name} 放入 Sound effects 資料夾。`);});
 document.getElementById('exportSettings').addEventListener('click',()=>{const c=settingsExport();document.getElementById('exportOut').value=c;download('sound-settings.js',c);status('已下載 sound-settings.js；請放進 data，並把使用到的音檔放進 Sound effects。');});
-document.getElementById('previewGame').addEventListener('click',()=>{saveGains();saveFiles();saveClips();window.open('塔防原型.html?previewSounds=1','sound_preview');status('已開啟使用暫存設定的遊戲預覽。');});
+document.getElementById('previewGame').addEventListener('click',()=>{saveGains();saveFiles();saveClips();saveBossVoice();window.open('塔防原型.html?previewSounds=1','sound_preview');status('已開啟使用暫存設定的遊戲預覽。');});
 document.getElementById('resetAll').addEventListener('click',()=>{if(!confirm('把所有音量恢復成 100%，並清除替換、自訂音效和剪輯？'))return;gains={};fileConfig={overrides:{},extras:{},meta:{}};clips={};saveGains();saveFiles();saveClips();render();});
-document.getElementById('reloadFile').addEventListener('click',()=>{if(!confirm('丟棄瀏覽器裡尚未匯出的設定，重新載入 data/sound-settings.js？'))return;localStorage.removeItem(SFX.GAIN_KEY);localStorage.removeItem(SFX.FILE_KEY);localStorage.removeItem(SFX.CLIP_KEY);gains=cleanGains(FILE_GAINS);fileConfig=cleanFiles(FILE_SOUNDS);clips=cleanClips(FILE_CLIPS);SFX.setGains(gains);SFX.setFiles(fileConfig);SFX.setClips(clips);render();status('已從 sound-settings.js 重新載入。');});
-SFX.setGains(gains);SFX.setFiles(fileConfig);SFX.setClips(clips);render();
+document.getElementById('bossVoiceReset').addEventListener('click',()=>{bossVoice=cleanBossVoice(FILE_BOSS_VOICE);saveBossVoice();renderBossVoice();status('BOSS 嗓音已恢復成 sound-settings.js 裡的數字。');});
+document.getElementById('bossVoiceNormal').addEventListener('click',()=>previewBossVoice(false));
+document.getElementById('bossVoiceBoss').addEventListener('click',()=>previewBossVoice(true));
+document.getElementById('reloadFile').addEventListener('click',()=>{if(!confirm('丟棄瀏覽器裡尚未匯出的設定，重新載入 data/sound-settings.js？'))return;localStorage.removeItem(SFX.GAIN_KEY);localStorage.removeItem(SFX.FILE_KEY);localStorage.removeItem(SFX.CLIP_KEY);localStorage.removeItem(SFX.BOSS_VOICE_KEY);gains=cleanGains(FILE_GAINS);fileConfig=cleanFiles(FILE_SOUNDS);clips=cleanClips(FILE_CLIPS);bossVoice=cleanBossVoice(FILE_BOSS_VOICE);SFX.setGains(gains);SFX.setFiles(fileConfig);SFX.setClips(clips);SFX.setBossVoice(bossVoice);render();renderBossVoice();status('已從 sound-settings.js 重新載入。');});
+SFX.setGains(gains);SFX.setFiles(fileConfig);SFX.setClips(clips);SFX.setBossVoice(bossVoice);render();renderBossVoice();
 // 索引好之後：已經設定好、但只有檔名的音效自動補上資料夾
 if(location.protocol.startsWith('http'))indexSoundFolder().then(()=>indexMusicFolder()).then(()=>{const before=JSON.stringify(fileConfig);fileConfig=cleanFiles(fileConfig);if(JSON.stringify(fileConfig)!==before){saveFiles();render();status('有音效只寫了檔名、沒有資料夾，已自動補上完整路徑（例如 獎勵/成就.mp3）。記得存檔／匯出。');}}).catch(()=>{});

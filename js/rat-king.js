@@ -260,8 +260,8 @@ function rkStartCinema(K) {
     zoom: BOSS_CINEMA.rat.zoom, bars: BOSS_CINEMA.rat.bars,   // 不拉遠、不要上下黑邊（怪物編輯器可改）
   });
 }
-// 場上還沒打破的核心有幾顆（躲在地底的也算）
-const rkCoresAlive = () => (G.cores || []).filter(c => !c.dead).length;
+// 場上還沒打破的核心有幾顆（躲在地底的也算）；照剩下的血量算：滿血的算 1 顆、剩最後一滴血的算 0 顆（js/boss-core-link.js：核心血越低，BOSS 防禦越低）
+const rkCoresAlive = () => (G.cores || []).filter(c => !c.dead).reduce((s, c) => s + (typeof bossCoreHpRatio === 'function' ? bossCoreHpRatio([c]) : 1), 0);
 // 老鼠王現在受到的傷害倍率：核心越多越硬，暈倒時加倍
 function ratKingDamageMul(e) {
   if (e.rkStunT > 0) return RAT_KING.stun.dmgMul;

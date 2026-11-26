@@ -13,6 +13,9 @@ const WATER = {
   enemyFootDy: 10,   // 怪物的腳
   rippleColor: 'rgba(205,238,255,',   // 水面波紋的顏色（後面接透明度）
   rippleFlat: .55,   // 波紋的扁度＝高÷寬（1＝正圓、越小越扁；原本 .22 太扁，俯視角看起來怪）
+  // 怪物下潛時壓一層藍黑色（魚頭王、巨大比基尼小丑魚、小虱目魚小子潛水的影子；魚頭王沉下去的過程越沉越黑）
+  //   color＝壓上去的顏色（紅, 綠, 藍）、amount＝整個潛到水裡時壓多濃（0～1，1＝整隻變成這個顏色）
+  dive: { color: [8, 18, 42], amount: .78 },
   // 在水裡游的怪物（深水裡的魚、在水裡的小丑魚）：身體跟著水慢慢上下浮、微微前後晃，水面位置不動
   bob: {
     amp: .045,       // 上下浮多少＝身高的幾倍
@@ -157,6 +160,12 @@ function drawWaded(a, kind, drawFn) {
   wctx.setTransform(m); wctx.imageSmoothingEnabled = main.imageSmoothingEnabled; wctx.globalAlpha = main.globalAlpha; wctx.filter = main.filter;
   ctx = wctx;   // 角色先畫在空白畫布上（js/game.js 的 ctx 是 let，畫完一定換回來）
   try { drawFn(); } finally { ctx = main; }
+  if (info.dive > 0) {   // 正在下潛（魚頭王沉下去）：在身體上壓一層藍黑色，越沉越黑（WATER.dive）
+    const D = WATER.dive;
+    wctx.save(); wctx.setTransform(1, 0, 0, 1, 0, 0); wctx.filter = 'none'; wctx.globalAlpha = 1; wctx.globalCompositeOperation = 'source-atop';   // 只壓在畫出來的身體上
+    wctx.fillStyle = 'rgba(' + D.color.join(',') + ',' + Math.min(1, info.dive * D.amount).toFixed(3) + ')';
+    wctx.fillRect(sx, sy, ex - sx, ey - sy); wctx.restore();
+  }
   // 貼回遊戲畫面：水面以上照常、水面以下半透明
   const line = Math.round(toY(info.bottom - info.height * info.w.depth)), cut = Math.max(sy, Math.min(ey, line));
   drawWaterRipple(a, info, 'back');   // 波紋後半圈（離鏡頭遠的上半弧）：先畫，角色會蓋在它上面，才不會壓到頭
@@ -182,6 +191,20 @@ function drawWaded(a, kind, drawFn) {
   }
   main.restore();
   drawWaterRipple(a, info, 'front');   // 波紋前半圈（靠鏡頭的下半弧）：最後畫，在角色前面
+}
+// 潛在水裡的影子：把怪物圖壓上藍黑色（WATER.dive）後畫出來。k＝壓多深（0～1，1＝整個潛下去）
+// 用法跟 drawImage 一樣：畫在 (dx, dy)、寬 w、高 h（呼叫的地方自己處理位置、翻面、透明度）
+let diveTintCanvas = null;
+function drawDiveTinted(c, img, dx, dy, w, h, k = 1) {
+  const W = Math.max(1, Math.round(w)), H = Math.max(1, Math.round(h));
+  if (!diveTintCanvas) diveTintCanvas = document.createElement('canvas');
+  const cv = diveTintCanvas; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const t = cv.getContext('2d'); t.imageSmoothingEnabled = false;
+  t.globalCompositeOperation = 'source-over'; t.clearRect(0, 0, W, H); t.drawImage(img, 0, 0, W, H);
+  const D = WATER.dive; t.globalCompositeOperation = 'source-atop';
+  t.fillStyle = 'rgba(' + D.color.join(',') + ',' + Math.min(1, k * D.amount).toFixed(3) + ')'; t.fillRect(0, 0, W, H);
+  t.globalCompositeOperation = 'source-over';
+  c.drawImage(cv, dx, dy, w, h);
 }
 // 水面那一圈波紋：站著時淡淡一圈，走動時再往外擴散
 // part：'back'＝只畫上半弧（在角色後面）、'front'＝只畫下半弧（在角色前面）、沒給＝整圈

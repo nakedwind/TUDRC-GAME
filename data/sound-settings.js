@@ -179,5 +179,12 @@ const SOUND_SETTINGS = {
       "from": 1330,
       "to": 1700
     }
+  },
+  "bossVoice": {
+    "pitch": 0.78,
+    "gain": 1.6,
+    "delay": 0.22,
+    "feedback": 0.5,
+    "wet": 0.65
   }
 };

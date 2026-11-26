@@ -148,7 +148,7 @@ function pearlBossWake(e) {
   const top = e.y - e.slimeLift - e.drawHeight * .6;
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: top, r: 8 + i * 6, r2: 100 + i * 36, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#f1dcff' : '#ffffff' });
   bossImpact(e.x, e.y, 7, .05);
-  if (typeof sfxAt === 'function') sfxAt('pearlHurt', e.x, e.y, 1.8, 'pearl-elder-wake');
+  if (typeof sfxAt === 'function') bossSfxAt('pearlHurt', e.x, e.y, 1.8, 'pearl-elder-wake');
 }
 // ---- 閉殼：掉到地上、開始降珍珠 ----
 function pearlBossClose(e) {
@@ -169,7 +169,7 @@ function pearlBossRammed(e, bp, speed) {
   flashCrit('-' + dmg, e.x, e.y - e.drawHeight * .6, true);
   flash('撞開貝殼！', e.x, e.y - e.drawHeight - 10, '#fff2b0');
   bossImpact(e.x, e.y, 10, .08);
-  if (typeof sfxAt === 'function') { sfxAt('knock2', e.x, e.y, 1.3, 'pearl-elder-ram'); sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-ram2'); }
+  if (typeof sfxAt === 'function') { sfxAt('knock2', e.x, e.y, 1.3, 'pearl-elder-ram'); bossSfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-ram2'); }
   shatterBigPearl(bp);
 }
 // ---- 被爆炸炸到：閉著的貝殼被炸開（油桶、地雷、自爆史萊姆、希奧妮大招…呼叫 blastWalls 的地方一起呼叫）----
@@ -179,7 +179,7 @@ function pearlBossBlast(x, y, R) {
     if (!e.pk || e.pk.state !== 'shell' || Math.hypot(e.x - x, e.y - y) > R + e.drawWidth * .3) continue;
     pearlBossSet(e, 'open'); e.pk.grace = PEARL_ELDER.shell.grace; e.pk.cd = Math.min(e.pk.cd, .6);
     flash('炸開貝殼！', e.x, e.y - e.drawHeight - 10, '#fff2b0');
-    if (typeof sfxAt === 'function') sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-blast');
+    if (typeof sfxAt === 'function') bossSfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-blast');
   }
 }
 // 核心腳下的腐蝕痕跡：抱在身上時收掉（不然會留在甦醒的地方），掉到地上時在落點重新鋪上（js/anomalous-core.js 的 wakeCore 做的那一攤）
@@ -792,7 +792,7 @@ function pearlBossDown(e) {
   }
   for (const bp of [...(G.bigPearls || [])]) shatterBigPearl(bp);
   G.pearlFalls = [];
-  if (typeof sfxAt === 'function') sfxAt('pearlElderDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著用同一個來源播的那聲會被 70ms 去重吃掉
+  if (typeof sfxAt === 'function') bossSfxAt('pearlElderDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著用同一個來源播的那聲會被 70ms 去重吃掉
   systemNotice(e.eliteName + '倒下了！', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#f4d9ff');   // 不提示核心可以打了
   bossImpact(e.x, e.y, 10, .08);

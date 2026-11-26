@@ -224,7 +224,7 @@ function sfxMonsterHit(e, gain, sourceId, fallback = 'monsterHit') {
     const now = performance.now();
     if (now < (e.hitSoundAt || -Infinity) + MONSTER_HIT_SOUND_CD * 1000) return;
     e.hitSoundAt = now;
-    sfxAt(e.hitSound, e.x, e.y, gain, sourceId);
+    sfxAt(e.hitSound, e.x, e.y, gain, sourceId, typeof isBossVoice === 'function' && isBossVoice(e));   // BOSS：低沉、大聲、有回音（js/sfx.js 的 BOSS_VOICE）
   } else sfxAt(fallback, e.x, e.y, gain, sourceId);
 }
 function playAttackSprite(kind, x, y, duration = .32, angle = 0, scale = 1) {   // scale＝放大倍數（列車撞人用 2 倍多）
@@ -2153,6 +2153,7 @@ function updatePlayerAttack(dt) {
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
     const critMul = rollCrit('player'), shotDmg = Math.round(playerGun().dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
+    best.lastHitBy = p; best.lastHitAt = performance.now() / 1000;   // 誰打的：魚頭王會記仇（js/fish-king.js 的 fkGrudgeStep）
     if (typeof milkfishKingCoreShot === 'function') milkfishKingCoreShot(best);   // 虱目魚王還躲在水池裡：開始登場表演（js/milkfish-king.js）
     best.hp -= shotDmg; markHit(critMul);
     if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
@@ -2734,13 +2735,15 @@ function update(dt) {
     if (e.breakT > 0) { e.breakT -= dt; if (e.prevHp != null && e.hp < e.prevHp) e.hp = e.prevHp - (e.prevHp - e.hp) * ULTIMATES.colyn.breakMul; }
     e.prevHp = e.hp;
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if ((e.ratKing || e.ratKingHand) && typeof ratKingHoldDeath === 'function' && ratKingHoldDeath(e)) continue;   /* 花蓮老鼠王：先照核心護甲算、沒血了等列車撞飛；抓人的手被打掉只放人（js/rat-king.js） */ if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  if (typeof bossCoreDefense === 'function') bossCoreDefense();   // 核心血越多，守它的 BOSS 受到的傷害越少（js/boss-core-link.js）
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if ((e.ratKing || e.ratKingHand) && typeof ratKingHoldDeath === 'function' && ratKingHoldDeath(e)) continue;   /* 花蓮老鼠王：先照核心護甲算、沒血了等列車撞飛；抓人的手被打掉只放人（js/rat-king.js） */ if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death', typeof isBossVoice === 'function' && isBossVoice(e));   /* BOSS 死掉：低沉、大聲、有回音（js/sfx.js 的 BOSS_VOICE） */ else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
   if (typeof mothBossShieldCore === 'function') mothBossShieldCore();   // 人面蝶后活著：牠的核心少受傷（js/moth-boss.js）
   if (typeof lqShieldCore === 'function') lqShieldCore();   // 絲瓜女王活著：掉在地上的核心少受傷（js/loofah-queen.js）
   if (typeof mkShieldCore === 'function') mkShieldCore();   // 虱目魚王活著：吐出來的核心少受傷（js/milkfish-king.js）
   if (typeof ratKingShieldCore === 'function') ratKingShieldCore();   // 花蓮老鼠王：核心每露出來一次最多被打掉幾成、被打到就震動叫手來搬（js/rat-king.js）
+  if (typeof bossCoreShieldCores === 'function') bossCoreShieldCores();   // 有 BOSS 守的核心：補護盾、BOSS 活著就最少留 1 滴血打不破（js/boss-core-link.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起

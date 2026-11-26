@@ -3,10 +3,12 @@
    遊戲載入時，下面 bullets 裡每種子彈的數字會蓋進 BULLETS（data/equipment.js 最後面）。
    foeMul：打「怪物」時，傷害、睡／暈／麻痺／混亂秒數、擊退距離、黏膠減速都乘上這個數（打到溫特、隊員照原本的數字）
    bigHp：血量多少以上算大型怪物（麻醉、閃光、混亂、撞牆暈的秒數減半）
+   off：停用的子彈（遊戲裡當作沒有這種子彈：背包、商店、置物櫃、彈藥箱都不會出現；數值留著，取消停用就回來）
    整段貼回 data/bullet-tuning.js 覆蓋即可。 */
 const BULLET_TUNING = {
   "foeMul": 2,
   "bigHp": 150,
+  "off": ["sticky"],
   "bullets": {
     "flare": { "gap": 0.8, "shine": 30 },
     "incendiary": { "gap": 0.6, "range": 8, "r": 1.5, "burn": 8, "fireDps": 15, "ignite": 0, "burnDmg": 4 },

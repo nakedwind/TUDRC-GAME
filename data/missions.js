@@ -40,18 +40,7 @@ const SQUADS = {
   eldrin: { name: '艾德林隊', leader: 'eldrin', briefer: 'winter' },
 };
 
-// BOSS 特別獎金：在任務地圖討伐後，回應變中心由通訊員報告並入帳（每次討伐都給，重新出擊再打倒可以再領；js/missions.js）
-// flag＝怪物身上用來認出這隻 BOSS 的標記；台詞在對話編輯器的「報告任務」那一區（data/dialogues.js 的 bounty_id，{money}＝金額）
-const BOSS_BOUNTIES = [
-  { id: 'bird', name: '鳥頭大隊長', flag: 'elite', money: 2000 },         // js/elite-bird-head.js
-  { id: 'capKing', name: '順順宮主', flag: 'capKingLord', money: 3000 },   // js/elite-cap-king.js（只算跟核心躲在一起的宮主本人，大夯吉寶不算）
-  { id: 'pearl', name: '珍珠大童', flag: 'pearlBoss', money: 3000 },       // js/pearl-elder.js
-  // 下面 4 隻是捷運站的 BOSS（R89、B56、G11、O666），獎金都是 5000
-  { id: 'gourdKing', name: '葫蘆猴王', flag: 'gourdKing', money: 5000 },   // js/gourd-king.js（R89）
-  { id: 'mothBoss', name: '人面蝶后', flag: 'mothBoss', money: 5000 },     // js/moth-boss.js（B56）
-  { id: 'milkfishKing', name: '虱目魚王', flag: 'milkfishKing', money: 5000 },   // js/milkfish-king.js（G11）
-  { id: 'ratKing', name: '花蓮老鼠王', flag: 'ratKing', money: 5000 },     // js/rat-king.js（O666）
-];
+// BOSS 特別獎金、區域控制獎勵、全區控制獎勵：搬到 data/rewards.js（用「🏅 獎勵編輯器」改）
 
 const MISSIONS = [
   {
@@ -77,11 +66,13 @@ const MISSIONS = [
     desc: 'Z62區地下街連過去的捷運站，月台和軌道深處有異質體出沒。',
   },
   {
-    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 44, y: 67, after: ['y1', 'r89'],   // Y25區地下街、R89區捷運站任一個控制了就開放（兩條路都通往池核）
-    desc: '大廳更深處的異質反應源，核心的反應特別強烈。',
+    // 原本是「池核」（地圖 04. 池核 map_mv1bzur4），2026-11-26 換成 W118區 地下水池（池核擴大、加了魚頭王的版本）。
+    //   id 維持 'pool'：存檔的進度、通訊員的報告台詞 brief_pool 都用這個
+    id: 'pool', map: 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf', name: 'W118區地下水池', x: 44, y: 67, after: ['y1', 'r89'],   // Y25區地下街、R89區捷運站任一個控制了就開放（兩條路都通往這裡）
+    desc: '池水底下的異質反應源，核心的反應特別強烈。深水裡有巨大的異質體出沒，比基尼小丑魚和魚頭王各守著一顆核心。',
   },
   {
-    id: 'zone4', map: null, name: '？？？', x: 65, y: 60, after: ['pool'], off: true,   // 池核右邊的區域：地圖做好後填上 map 和名稱；先藏起來（off），要顯示時拿掉
+    id: 'zone4', map: null, name: '？？？', x: 65, y: 60, after: ['pool'], off: true,   // W118區地下水池（原本的池核）右邊的區域：地圖做好後填上 map 和名稱；先藏起來（off），要顯示時拿掉
     desc: '池核更深處的區域。應變中心還在收集情報。',
   },
   {

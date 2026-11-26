@@ -169,7 +169,7 @@ function campSupplyStand(t, spot) {
   return best;
 }
 
-// ---- 頭上的思考泡泡：身上用完、箱子也沒有（或正在走回去拿）時顯示缺的東西 ----
+// ---- 頭上的思考泡泡：身上用完時顯示缺的東西（只畫圖示；以前箱子也沒了會多畫一條紅色斜線，已經拿掉）----
 const supplyIconImgs = {};
 function supplyIcon(k) {
   if (!supplyIconImgs[k]) { const img = new Image(); img.src = itemById(k).image; supplyIconImgs[k] = img; }
@@ -193,7 +193,6 @@ function drawGuideSupplyBubbles(ctx) {
     missing.forEach((k, i) => {
       const img = supplyIcon(k), ix = x + 8 + i * 22, iy = y + 3;
       if (img.complete && img.naturalWidth) ctx.drawImage(img, ix, iy, 20, 20);
-      if ((campBox()[k] || 0) <= 0) { ctx.strokeStyle = '#e04848'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(ix + 2, iy + 18); ctx.lineTo(ix + 18, iy + 2); ctx.stroke(); }   // 箱子也沒了：紅色斜線
     });
     ctx.restore();
   }

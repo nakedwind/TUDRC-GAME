@@ -8,6 +8,18 @@ const WORLD_PICKUPS = {
   adrenaline: { item: 'adrenaline', name: '腎上腺素' },
   doorKey: { item: 'backroom-door-key', name: '後室門鑰匙' },
   pen: { item: 'graffiti', name: '塗鴉筆' },
+  medkit: { item: 'medkit', name: '醫療包' },
+  firstaid: { item: 'firstaid', name: '急救包' },
+  anomalyFirstaid: { item: 'anomaly-firstaid', name: '異質急救包' },
+};
+// 水上拾取物（地圖編輯器「互動與道具」裡的「水上拾取（…）」，data/tiles.js 標了 waterFloat）：
+// 擺在深水裡時畫成小圖、浮在水面上載浮載沉（不是藏起來只剩亮點）；水被抽乾就躺在地上。撿的方式跟拾取亮點一樣（靠近按空白鍵）
+const WATER_PICKUP_TILES = {
+  tile_interactive_water_pickup_almond: 'almond',
+  tile_interactive_water_pickup_medkit: 'medkit',
+  tile_interactive_water_pickup_firstaid: 'firstaid',
+  tile_interactive_water_pickup_anomaly_firstaid: 'anomalyFirstaid',
+  tile_interactive_water_pickup_locker_key: 'key',
 };
 // 地上的塗鴉筆：現在只有一種素材；以前紅／藍／黑三種素材的 id 也認得（撿到的都是同一支筆）
 const GRAFFITI_PICKUP_TILES = { tile_interactive_pickup_graffiti: 'pen', tile_interactive_pickup_graffiti_red: 'pen', tile_interactive_pickup_graffiti_blue: 'pen', tile_interactive_pickup_graffiti_black: 'pen' };
@@ -19,6 +31,7 @@ function storagePropKind(id){
   const name=String(tile?.name||'').trim().toLowerCase();
   // 編輯器上傳會把圖片轉成 data URL，需同時認素材 ID 與名稱。
   if(GRAFFITI_PICKUP_TILES[id])return GRAFFITI_PICKUP_TILES[id];
+  if(WATER_PICKUP_TILES[id])return WATER_PICKUP_TILES[id];   // 水上拾取物
   if(id==='tile_interactive_pickup_backroom_door_key')return 'doorKey';
   if(id==='tile_interactive_pickup_adrenaline')return 'adrenaline';
   if(id===STORAGE_LOCKER_KEY_TILE||/storage-locker-key|置物[箱櫃]鑰匙/.test(name))return 'key';
@@ -70,7 +83,7 @@ function storagePropEntries(){
     if(isWorldPickup(kind)&&collectedStorageKeys.has(token))return;
     const x0=OX+c*CELL+ox,y0=OY+r*CELL+oy;
     const hidden=isWorldPickup(kind)&&(MAP.hiddenPickups||[]).includes(layer+':'+c+','+r);   // 隱藏的拾取物：沒有亮點，靠近才有提示（地圖編輯器「🙈 隱藏拾取」）
-    entries.push({id,kind,token,stamp,hidden,x:x0+mapTileW(t)*CELL/2,y:y0+mapTileH(t)*CELL-CELL/2,top:y0,
+    entries.push({id,kind,token,stamp,hidden,float:!!t.waterFloat,x:x0+mapTileW(t)*CELL/2,y:y0+mapTileH(t)*CELL-CELL/2,top:y0,
       open:kind==='open'||unlockedStorageLockers.has(token)});
   };
   for(const s of storagePropSpots()) add(s.id,s.c,s.r,s.layer,s.stamp);   // 順序跟以前一樣：先大圖章、再各圖層的格子
@@ -333,6 +346,40 @@ function drawWorldPickupSparkles(ctx){
     ctx.globalAlpha=1;
   }
   ctx.restore();
+}
+
+// ---- 水上拾取物：畫成小圖浮在水上（render.js 放進 sortables，跟人物、物件一起依 y 排前後）----
+// 在深水裡：跟丟進深水的道具同一套載浮載沉（js/pool-fall.js 的 poolFloatPose、js/water.js 的 drawWaded）；水被抽乾：躺在地上、底下一點影子
+// 圖多大：素材的 floatSize（像素，圖最長的那一邊；沒寫＝WATER_PICKUP_SIZE）；隱藏的（🙈 隱藏拾取）不畫，靠近才有提示
+const WATER_PICKUP_SIZE = 24;
+const waterPickupPose = new Map();   // 每一個的浮沉節奏（token → 物件），才不會每一幀重新亂跳
+const waterPickupImgs = {};
+function waterPickupImg(file) {
+  if (!file) return null;
+  if (!waterPickupImgs[file]) { const img = new Image(); img.src = file; waterPickupImgs[file] = img; }
+  const img = waterPickupImgs[file]; return img.complete && img.naturalWidth ? img : null;
+}
+function waterPickupSortables(sortables) {
+  if (!MAP || !G) return;
+  for (const prop of storagePropEntries()) {
+    if (!prop.float || prop.hidden || !isWorldPickup(prop.kind)) continue;
+    const t = mapTileById(prop.id), img = waterPickupImg(t && t.file); if (!img) continue;
+    let o = waterPickupPose.get(prop.token); if (!o) { o = { x: prop.x, y: prop.y }; waterPickupPose.set(prop.token, o); }
+    const S = (t && t.floatSize) || WATER_PICKUP_SIZE, sc = S / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * sc, h = img.naturalHeight * sc;
+    const x = prop.x, y = prop.y;
+    sortables.push({ floor: 1, y: y + 2, draw: () => {
+      const drawImg = (dy = 0) => { ctx.imageSmoothingEnabled = false; ctx.drawImage(img, x - w / 2, y - h + 2 + dy, w, h); };
+      if (typeof poolFloatsAt === 'function' && typeof drawWaded === 'function' && poolFloatsAt(x, y)) {   // 漂在深水裡：載浮載沉、下面泡在水裡、四周水波紋
+        const F = POOL_FALL.float;
+        o.floatPose = poolFloatPose(o, { bottom: y + 2, height: h, width: Math.max(w, h) * 1.3, sink: F.itemSink, bob: F.itemBob, pivot: 0 });
+        drawWaded(o, 'float', () => drawImg());
+        return;
+      }
+      ctx.save();   // 水被抽乾：躺在地上
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y + 2, w * .4, Math.max(2, h * .14), 0, 0, Math.PI * 2); ctx.fill();
+      drawImg(); ctx.restore();
+    } });
+  }
 }
 
 // 固定在遊戲畫面中間偏右：拾取後才揭曉圖片與名稱，顯示三秒。

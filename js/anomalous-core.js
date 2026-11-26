@@ -197,6 +197,7 @@ function updateCores(dt) {
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
   if (typeof lqShieldCore === 'function') lqShieldCore();   // 絲瓜女王活著：掉在地上的核心少受傷（js/loofah-queen.js）
   if (typeof mkShieldCore === 'function') mkShieldCore();   // 虱目魚王活著：吐出來的核心少受傷（js/milkfish-king.js）
+  if (typeof bossCoreShieldCores === 'function') bossCoreShieldCores();   // 有 BOSS 守的核心：補護盾、BOSS 活著就打不破（js/boss-core-link.js）
   for (const core of G.cores) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;

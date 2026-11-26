@@ -89,7 +89,10 @@ function fireIncendiary(p, aim, lv) {
   addLightFlash('muzzle', mx, my, 1.4);
   sfx('shotIncendiary');
 }
-function incendiaryLand(s) { withBlastFloor(s.floor, () => incendiaryLandNow(s)); }   // 燃燒彈在溫特那一層起火（js/pathfinding.js）
+function incendiaryLand(s) {
+  if (typeof shotLandsInWater === 'function' && shotLandsInWater(s.x1, s.y1, s.floor, true)) return;   // 落在深水裡：立刻熄掉，不起火（js/swim-ring.js）
+  withBlastFloor(s.floor, () => incendiaryLandNow(s));
+}   // 燃燒彈在溫特那一層起火（js/pathfinding.js）
 function incendiaryLandNow(s) {
   const x = s.x1, y = s.y1, R = s.lv.r * CELL, S = SPECIAL_GUN.incendiary;
   addOilFire(x, y, R, s.lv.burn, S.fireDps, foeMul(S.fireDps));   // 火海燙隊員照原本，燒怪物乘倍率
@@ -332,6 +335,7 @@ function fireSticky(p, aim, b) {
 }
 function glueLand(s) {
   const b = s.lv, x = s.x1, y = s.y1;
+  if (typeof shotLandsInWater === 'function' && shotLandsInWater(x, y, s.floor, false)) return;   // 落在深水裡：黏膠被水沖散，沒有效果（js/swim-ring.js）
   (G.gluePools = G.gluePools || []).push({ x, y, floor: s.floor || floorAtPoint(x, y), R: b.r * CELL, t: b.stick, T: b.stick, seed: Math.random() * 1000 });
   if (s.hit && !s.hit.dead && s.hit.hp > 0) { s.hit.hitT = Math.max(s.hit.hitT || 0, .15); s.hit.hitColor = b.color; }
   for (let i = 0; i < 12; i++) { const a = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 90;

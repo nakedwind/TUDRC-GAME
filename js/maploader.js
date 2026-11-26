@@ -276,6 +276,8 @@ function initMap() {
   // 規則覆蓋數值（沒填的沿用 balance.js 預設）
   const R = MAP.rules || {};
   if (R.money != null) START.money = R.money;
+  const fund = typeof REWARDS_DATA !== 'undefined' && REWARDS_DATA.entryFunds ? REWARDS_DATA.entryFunds[MAP.id] : null;
+  if (fund != null) START.money = fund;   // 第一次進入的作戰經費：以 data/rewards.js 為準（🏅 獎勵編輯器）；沒寫的地圖才用上面地圖規則裡的
   if (R.guide != null) { START.guide = R.guide; START.guideMax = Math.max(START.guideMax, R.guide); }
   if (R.guideRegen != null) START.guideRegen = R.guideRegen;
 
@@ -779,7 +781,7 @@ function drawMapStampPlain(ctx, s) {
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
       ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
-      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawMrtCardGate==='function'&&drawMrtCardGate(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawEscalatorAnimation==='function'&&drawEscalatorAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
+      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawMrtCardGate==='function'&&drawMrtCardGate(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawEscalatorAnimation==='function'&&drawEscalatorAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawKelpSway==='function'&&drawKelpSway(ctx,s,t,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);   // drawKelpSway：水草微微晃動（js/kelp-sway.js）
       ctx.restore();
     } else if(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,x,y,w,h)) {
       // 閘門的靜態機台與滑動門翼由專用繪製處理。
@@ -787,6 +789,8 @@ function drawMapStampPlain(ctx, s) {
       // 月台閘門（閘門讀卡機）：兩片門板跟著捷運車門往左右滑開（js/mrt-train.js）
     } else if (typeof drawEscalatorAnimation === 'function' && drawEscalatorAnimation(ctx, s, img, x, y, w, h)) {
       // 手扶梯：階梯循環捲動（js/escalators.js）
+    } else if (typeof drawKelpSway === 'function' && drawKelpSway(ctx, s, t, img, x, y, w, h)) {
+      // 水草：根部固定、上面跟著水流微微左右擺（js/kelp-sway.js）
     } else {
       const hole = typeof mrtStampHole === 'function' ? mrtStampHole(s) : null;   // 打開的捷運閘門：門板那塊不畫（js/mrt-locks.js）
       if (hole) { ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.rect(x + hole[0] * w, y + hole[1] * h, hole[2] * w, hole[3] * h); ctx.clip('evenodd'); }

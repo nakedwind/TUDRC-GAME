@@ -51,6 +51,7 @@
               <button class="tool" data-mode="vineferry" title="傳送藤蔓：先點一格放藤蔓，再點一格當落點。碰到的人會被捲走、丟到落點（過不去的地方靠它過去）；溫特被抓時，跟在旁邊的隊友也會一起被丟過去。點已經放好的藤蔓＝拿掉">🌿➡ 傳送藤蔓</button>
               </div>
             </div>
+            <button class="tool" data-mode="fkleap" title="魚頭王的海豚躍路線：先點起跳那一格、再點落水那一格（都要在深水裡），可以畫很多條。魚頭王要跳時會先潛水游到某條路線的起點，再照路線跳到落水點；點已經畫好的起跳點或落水點＝拿掉那條。沒畫路線的地圖照原本的隨機跳">🐬 魚頭王海豚躍</button>
             <button class="tool" data-mode="bossdrop" title="BOSS 丟人落點：點一格放一個、再點一次拿掉。會抓人往上飛的 BOSS（人面蝶后）只會把人丟在這些格子，選最近的一個。請放在空地中間、離牆遠一點，才不會卡住">🦋 BOSS 丟人落點</button>
             <button class="tool" data-mode="capking" title="菁英 BOSS「順順宮主」：點空格放一頂大宮帽、再點一次拿掉。核心會躲在其中一頂裡（至少 2 頂）；虛線框是帽子蓋著時擋住的範圍">🎩 順順宮主帽子</button>
             <button class="tool" data-mode="level" title="把格子畫成哪一種樓層（滑鼠移上來，旁邊會展開子選單選種類）：只有 2 樓（藍）＝底下沒有 1 樓；陸橋（青色斜線）＝上下都有地面，1 樓的人從底下走過去；樓層出入口（橘）＝樓梯、手扶梯；只有 1 樓＝擦掉。拖曳畫一片；在已經是這種的格子上按下去＝擦掉">🏢 樓層種類筆刷 ＞</button>
@@ -212,7 +213,7 @@
         </div>
 
         <div class="subhead">作戰經費</div>
-        <div class="field"><label>作戰經費（出勤時給的錢，剩下的會帶回基地）</label><input id="f_money" type="number"></div>
+        <div class="field"><label>作戰經費（第一次進入時給的錢；在 <a href="獎勵編輯器.html">🏅 獎勵編輯器</a> 改）</label><input id="f_money" type="number" readonly title="在 🏅 獎勵編輯器改（data/rewards.js）" style="opacity:.6"></div>
         <div class="field"><label>起始嚮導能量</label><input id="f_guide" type="number"></div>
         <div class="field"><label>嚮導能量/秒</label><input id="f_guideRegen" type="number"></div>
         <div class="subhead">異質核心</div>
@@ -232,19 +233,20 @@
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
-  <script src="data/monsters.js?v=leapzone-20261126"></script>  <!-- 怪物種類與數值 -->
+  <script src="data/monsters.js?v=corelink-20261126"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=bosscfg-20261122"></script>
-  <script src="data/tiles.js?v=seeglass-20261125"></script>        <!-- 素材庫（兩個編輯器共用） -->
-  <script src="data/maps.js?v=deeptest2-20261126"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
+  <script src="data/tiles.js?v=waterpick-20261126"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/maps.js?v=funds-20261126"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
+  <script src="data/rewards.js?v=funds-20261126"></script>   <!-- 第一次進入的作戰經費（規則面板顯示用，在 🏅 獎勵編輯器改） -->
   <script src="data/supplies.js?v=merge-20261115c"></script>
   <script src="data/items.js?v=swimring-20261113"></script>
-  <script src="data/bullet-tuning.js?v=bulleted-20261121"></script>   <!-- 特殊子彈的數值（🔫 彈藥編輯器；必須在 data/equipment.js 之前） -->
-  <script src="data/equipment.js?v=slots4-20261123"></script>
+  <script src="data/bullet-tuning.js?v=nosticky-20261126"></script>   <!-- 特殊子彈的數值（🔫 彈藥編輯器；必須在 data/equipment.js 之前） -->
+  <script src="data/equipment.js?v=merge-20261126"></script>
   <script src="data/doors.js?v=mrtkey-20261115"></script>        <!-- 可開關的門 -->
   <script src="data/story-scenes.js?v=tanabags-20261118"></script>   <!-- 記憶之門可以選的劇情 -->
   <script src="data/story-kai.js?v=colynfx14-20261106"></script>   <!-- 記憶之門也可以選「劇情編輯器（改）」做的劇情 -->
   <script src="js/memory-door-editor.js?v=kai-20261103"></script>   <!-- 記憶之門：鑰匙、劇情選單 -->
-  <script src="js/sfx.js?v=fling-20261125"></script><script src="js/map-ambient.js?v=deeptest-20261126"></script><script src="js/wet-floor.js?v=deeptest-20261126"></script>
+  <script src="js/sfx.js?v=bossvoice2-20261126"></script><script src="js/map-ambient.js?v=deeptest-20261126"></script><script src="js/wet-floor.js?v=deeptest-20261126"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/map-picker.js?v=mappicker-20261024"></script>   <!-- 設出入口時選地圖的清單（取代 prompt，地圖多也不會被截斷） -->
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
@@ -252,8 +254,8 @@
   <script src="js/surface-tags.js?v=walltop2-20261118"></script>
   <script src="js/map-levels.js?v=no1fauto-20261118"></script>   <!-- 地圖的樓層資料規則（遊戲共用） -->
   <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=merge4-20261115", "js/under-map.js?v=bosslag-20261125", "data/tile-collisions.js?v=screendoor-20261125", "js/tile-collisions.js?v=seeglass2-20261125", "js/mrt-time-board.js?v=misc-20261125", "js/map-editor.js?v=farclose-20261125", "js/map-editor-hidezone.js?v=merge4-20261115", "js/map-editor-levels.js?v=levelmenu-20261118", "js/map-editor-transform.js?v=merge4-20261115", "js/map-editor-save.js?v=merge4-20261115", "js/map-editor-tilebox.js?v=mapbox-20261120", "js/map-editor-copy.js?v=merge4-20261115", "js/map-editor-occlusion.js?v=pillarbox-20261120", "js/asset-finder.js?v=merge4-20261115"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/stamp-transform.js?v=merge4-20261115", "js/under-map.js?v=bosslag-20261125", "data/tile-collisions.js?v=screendoor-20261125", "js/tile-collisions.js?v=seeglass2-20261125", "js/mrt-time-board.js?v=misc-20261125", "js/map-editor.js?v=funds-20261126", "js/map-editor-hidezone.js?v=merge4-20261115", "js/map-editor-levels.js?v=levelmenu-20261118", "js/map-editor-transform.js?v=merge4-20261115", "js/map-editor-save.js?v=merge4-20261115", "js/map-editor-tilebox.js?v=mapbox-20261120", "js/map-editor-copy.js?v=merge4-20261115", "js/map-editor-occlusion.js?v=pillarbox-20261120", "js/asset-finder.js?v=merge4-20261115"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
-  <script src="js/editor-nav.js?v=caustics-20261125"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+  <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

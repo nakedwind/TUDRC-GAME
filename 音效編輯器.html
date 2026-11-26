@@ -61,6 +61,24 @@
     <div class="folder-note" id="libraryStatus">尚未載入素材資料夾；仍可逐項選擇電腦裡的音效檔。</div>
     <div id="status" role="status"></div>
   </section>
+  <!-- 👑 BOSS 嗓音：存在 data/sound-settings.js 的 bossVoice（js/sound-editor.js 的 renderBossVoice；遊戲 js/sfx.js 的 BOSS_VOICE） -->
+  <section class="panel"><h2>👑 BOSS 嗓音</h2>
+    <small>BOSS 借用一般怪物的配音（被打、死掉、吼叫、尖叫）時，會照這裡變低沉、大聲、有回音；一般怪物用同一個音效不受影響。腳步、水花、撞擊不算嗓音。<br>
+      低沉：1＝原本、越小越低沉（0.78 大約低 4 個半音）。音量倍率：再乘上下面那一列的音量 %。回音大小設 0＝沒有回音。</small>
+    <div class="toolbar" id="bossVoiceFields" style="margin-top:10px"></div>
+    <div class="toolbar" style="margin-top:10px">
+      <label>試聽音效 <select id="bossVoiceSample" style="width:auto">
+        <option value="fishHurt">魚頭君被打（魚頭王）</option><option value="fishDeath">魚頭君死掉（魚頭王）</option>
+        <option value="birdHurt">鳥頭人被打（鳥頭大隊長）</option><option value="mothHurt">人面蝶被打（人面蝶后）</option>
+        <option value="pearlHurt">珍珠小童被打（珍珠大童）</option><option value="loofahDeath">絲瓜小姐死掉（絲瓜女王）</option>
+        <option value="mouseHurt">版權老鼠被打（花蓮老鼠王）</option><option value="bananaHurt">金蕉王被打（金蕉皇帝）</option>
+        <option value="gourdLandCry">葫蘆猴落地叫聲（葫蘆猴王）</option><option value="clownfishHurt">小丑魚被打（池核 BOSS）</option>
+      </select></label>
+      <button id="bossVoiceNormal" data-ui-sound="none">▶ 一般怪物</button>
+      <button id="bossVoiceBoss" class="primary" data-ui-sound="none">▶ BOSS 嗓音</button>
+      <button id="bossVoiceReset">恢復成檔案裡的數字</button>
+    </div>
+  </section>
   <section class="panel"><h2>＋ 加入更多音效</h2>
     <div class="new-sound">
       <label>程式名稱<input id="newSoundId" placeholder="例如 radioAlert"></label>
@@ -92,14 +110,14 @@
     <div class="acts"><button type="button" id="trimClear" style="margin-right:auto">清除剪輯</button><button type="button" id="trimCancel">取消</button><button type="button" class="primary" id="trimOk">確定</button></div>
   </dialog>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
-  <script src="data/sound-settings.js?v=fling-20261125"></script>
+  <script src="data/sound-settings.js?v=bossvoice2-20261126"></script>
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/sfx.js?v=fling-20261125"></script>
+  <script src="js/sfx.js?v=bossvoice2-20261126"></script>
   <script src="js/ui-feedback.js?v=k56merge-20261101"></script>
   <script src="js/sound-trim.js?v=soundclip-20261115"></script>   <!-- 剪輯的波形視窗（跟劇情編輯器（改）共用） -->
-  <script src="js/sound-editor.js?v=fling-20261125"></script>
+  <script src="js/sound-editor.js?v=bossvoice2-20261126"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportSettings'], files: [{ path: 'data/sound-settings.js', label: '音效設定', text: () => settingsExport() }], status: (m, e) => status(m, e) });</script>
-  <script src="js/editor-nav.js?v=caustics-20261125"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+  <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

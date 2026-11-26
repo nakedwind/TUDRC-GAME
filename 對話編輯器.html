@@ -112,14 +112,15 @@
   </main>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script src="data/characters.js?v=colynparry-20261023"></script>
-  <script src="data/dialogues.js?v=poolfall-20261124"></script>
-  <script src="data/missions.js?v=mrtrotate-20261123"></script>   <!-- 任務清單：亞許的「報告任務」每個任務一格 -->
+  <script src="data/dialogues.js?v=w118brief-20261126"></script>
+  <script src="data/missions.js?v=rewards-20261126"></script>   <!-- 任務清單：亞許的「報告任務」每個任務一格 -->
+  <script src="data/rewards.js?v=funds-20261126"></script>   <!-- 獎勵：BOSS 特別獎金、區域控制獎勵、全區控制獎勵（🏅 獎勵編輯器） -->
   <script src="data/gifts.js?v=devotion-20261103"></script>   <!-- 誰可以收禮：那些人有「送禮與委託」的台詞格子 -->
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/sfx.js?v=fling-20261125"></script><script src="js/ui-feedback.js"></script>
-  <script src="js/dialogue-editor.js?v=poolfall-20261124"></script>
+  <script src="js/sfx.js?v=bossvoice2-20261126"></script><script src="js/ui-feedback.js"></script>
+  <script src="js/dialogue-editor.js?v=rewards-20261126"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['download'], files: [{ path: 'data/dialogues.js', label: '對話', text: () => exportSource() }], status: (m, e) => setStatus(m, e) });</script>
-  <script src="js/editor-nav.js?v=caustics-20261125"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+  <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

@@ -308,6 +308,8 @@ function workshopGearV2Fields(def, o) {
   if (typeof o.who === 'string' && ['winter', 'all', 'squad'].includes(o.who)) def.who = o.who;
   if (typeof o.make === 'number' && Number.isFinite(o.make) && o.make >= 0) def.make = Math.round(o.make);
   if (typeof o.makeMoney === 'number' && Number.isFinite(o.makeMoney) && o.makeMoney >= 0) def.makeMoney = Math.round(o.makeMoney);
+  // 照明頭盔：隊員戴的時候照明半徑、亮度是溫特的幾 %（js/equipment.js 的 squadLampMul）
+  for (const k of ['squadRange', 'squadBright', 'squadBattery']) if (typeof o[k] === 'number' && Number.isFinite(o[k]) && o[k] >= 0) def[k] = Math.round(o[k]);   // squadBattery：隊員一顆電池能用多久（手電筒的幾 %）
   return def;
 }
 // ---- 武器的數值：每一把都用同一張表（所有武器用到的數值合起來）----
@@ -382,6 +384,7 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
     WORKSHOP_BASE[key].def = def;
     WORKSHOP_BASE[key].cost = Array.isArray(def.cost) ? def.cost.slice() : [];   // 原本的費用（編輯器比對、恢復用）
     WORKSHOP_BASE[key].who = def.who || 'winter';   // 原本誰能穿（新版裝備，編輯器比對、恢復用）
+    for (const k of ['squadRange', 'squadBright', 'squadBattery']) if (typeof def[k] === 'number') WORKSHOP_BASE[key][k] = def[k];   // 照明頭盔原本的隊員倍率（編輯器比對、恢復用）
     const o = items[key]; if (!o) continue;
     if (typeof o.iconScale === 'number' && o.iconScale > 0) def.iconScale = o.iconScale;   // 開發工坊裡圖片的大小（%）
     for (const k of ['iconX', 'iconY', 'infoImgX', 'infoImgY']) if (Number.isFinite(o[k])) def[k] = o[k];   // 圖片位移（px）：開發工坊格子裡、下方說明欄裡

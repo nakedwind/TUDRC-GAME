@@ -439,12 +439,16 @@ function fieldAwayCard(m) {
     '<div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + '</b><p class="field-away-note">' + line1 + '<br><em>' + line2 + '</em></p></div></article>';
 }
 // 嚮導身上還有幾個急救包、杏仁水：顯示在 SP 條下面、置中（基地裡用不到，不顯示；js/camp-supply.js 的 guideKit）
+// 戴照明頭盔的隊友（嚮導、哨兵都算）：同一排再加身上還有幾顆電池（js/squad-battery.js）
 function guideKitHudHtml(member, spec) {
-  if (!spec.guide || (typeof MAP_SAFE !== 'undefined' && MAP_SAFE)) return '';
+  if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) return '';
+  const bat = typeof squadHelmetLight === 'function' && typeof squadBattery === 'function' && squadHelmetLight(member)
+    ? '<span class="field-kit-item" title="電池"><img src="images/ui/hud-battery.png?v=1" alt="電池">' + squadBattery(member).n + '</span>' : '';
+  if (!spec.guide) return bat ? '<div class="field-kit">' + bat + '</div>' : '';
   // 嚮導本來要到第一次需要才去箱子拿，數字會一直是 0：開局就先拿好，顯示的才是真的（箱子還沒放好、還沒開局時先不拿）
   const kit = member.kit || (G.running && campSupplySpot() ? guideKit(member) : {});
   return '<div class="field-kit"><span class="field-kit-item" title="急救包"><img src="images/ui/hud-firstaid.png?v=2" alt="急救包">' + (kit.firstaid || 0) + '</span>' +
-    '<span class="field-kit-item" title="杏仁水"><img src="images/ui/hud-almond-water.png?v=2" alt="杏仁水">' + (kit['almond-water'] || 0) + '</span></div>';
+    '<span class="field-kit-item" title="杏仁水"><img src="images/ui/hud-almond-water.png?v=2" alt="杏仁水">' + (kit['almond-water'] || 0) + '</span>' + bat + '</div>';
 }
 // 隊員欄收起／展開：只切 class，CSS 負責滑順的動畫
 function applySquadCollapse() {

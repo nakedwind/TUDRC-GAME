@@ -44,9 +44,9 @@ const POOL_BOSS = applyBossSettings('POOL_BOSS', {
     land: { drops: 36, column: 0,  mist: 6,  up: 200, spread: 200, shake: 4 } },
   // 落水時水滿溢出來（js/pool-surge.js）：水波沿著深水區往外擴散，碰到岸邊就溢到地上，把岸上的人、怪物、地上的道具往遠離水池的方向推開
   surge: { speed: 9, pushTime: .35, linger: 1.4, ringPush: .6,   // 水波擴散多快（格／秒）、被推開滑多久（秒）、溢上岸的水多久退掉（秒）、坐救生圈的人被推的距離倍率
-    up:   { range: 11, spill: 2.2, push: 90 },   // 躍出水面：水波沿著水面最遠擴散幾格、最多溢上岸幾格、最靠近水邊的人被推開幾像素（越往岸上越小）
-    dive: { range: 15.4, spill: 3.3, push: 140 },   // 一頭栽進水裡（最大）：同上
-    land: { range: 7.7, spill: 1.1, push: 55 } },   // 落回水面（最小）：同上
+    up:   { range: 11, spill: 2.2, push: 90, pull: 90 },   // 躍出水面：水波沿著水面最遠擴散幾格、最多溢上岸幾格、最靠近水邊的人被推開幾像素（越往岸上越小）、水退回去時把還站在濕地上的人往水池拉回幾像素（0＝不拉）
+    dive: { range: 15.4, spill: 3.3, push: 140, pull: 140 },   // 一頭栽進水裡（最大）：同上
+    land: { range: 7.7, spill: 1.1, push: 55, pull: 55 } },   // 落回水面（最小）：同上
   body: { rx: .3, ry: .14 },  // 身體擋路的範圍：以腳底為中心的橢圓，左右半徑＝畫出來的寬 × rx、前後半徑＝寬 × ry
   touchDamage: 18,            // 被牠撞到扣多少血（再經過防護背心減傷）
   nearSpawn: 14,              // 開戰後，牠幾格內生出來的怪物
@@ -708,8 +708,8 @@ function drawPoolBossUnderwater(ctx) {
   const w = e.drawWidth, h = e.drawHeight, a = POOL_BOSS.silhouette * poolBossSee(e) * (.85 + .15 * Math.sin(performance.now() / 600));
   ctx.save(); ctx.globalAlpha = a; ctx.imageSmoothingEnabled = false;
   ctx.translate(e.x, e.y + 13 + h * .12); if (e.forceFlip) ctx.scale(-1, 1);
-  ctx.filter = 'brightness(.55) saturate(.6)';   // 水裡看起來暗暗的
-  ctx.drawImage(img, -w / 2, -h, w, h);
+  if (typeof drawDiveTinted === 'function') drawDiveTinted(ctx, img, -w / 2, -h, w, h);   // 潛在水裡：壓藍黑色（js/water.js 的 WATER.dive）
+  else { ctx.filter = 'brightness(.55) saturate(.6)'; ctx.drawImage(img, -w / 2, -h, w, h); }
   ctx.restore();
 }
 // js/anomalous-core.js 的 spawnCoreGroup：開戰後，牠附近生出來的怪物 8 成換成小丑魚幼體

@@ -7,7 +7,8 @@
    ④ 第一次抽乾後過 30 秒（firstHoldSecs）水漲回來（2 秒），深水區又變回深水；再打開抽水閥 → 抽乾，之後每 45 秒漲一次
    ・水要漲、要退之前 3 秒（POOL_TIDE.notice）：畫面中上方出現「水位即將上升……」「水位即將下降……」，開始漲／退就消失。
      所以打開抽水機、抽水閥之後，會先倒數 3 秒才開始退水（phase 'drainSoon'）
-   ⑤ 水漲起來時還在深水區的隊友（沒坐救生圈）會溺水：每秒扣 1 HP，畫面上方中間跳「快打開抽水閥！」
+   ⑤ 水漲起來時還在深水區的隊友（沒坐救生圈）會溺水：每秒扣 1 HP
+     （打巨大比基尼小丑魚 BOSS 時，抽乾過的水又漲回來，畫面上方中間跳「快點再次打開抽水閥」，再打開抽水閥就消失）
       溫特也一樣：原地溺水（位置不變）、每秒扣 1 HP，頭上喊「溺水了！需要救生圈！」、腳下出現「空白鍵／使用救生圈」；
       可以自己走回岸上（走上岸就下不去了），或按空白鍵原地坐上救生圈（js/swim-ring.js）
       深水區裡沒有隊友：溫特頭上冒泡泡「一定有開關可以把這些水抽走。」
@@ -25,7 +26,7 @@ const POOL_TIDE = {
   drownSay: '溺水了！需要救生圈！',   // 溫特開始溺水的那一刻說的話（頭上的泡泡）
   drownSaySecs: 2.6,   // 上面那句在頭上停幾秒
   ringPrompt: '空白鍵／使用救生圈',   // 溫特溺水時腳下的互動提示（js/render.js）
-  warnText: '快打開抽水閥！',
+  warnText: '快點再次打開抽水閥',   // 只在打巨大比基尼小丑魚 BOSS 時、水又漲回來的時候出現（溺水不會跳）
   winterText: '一定有開關可以把這些水抽走。',
   winterSecs: 3.5,      // 溫特的泡泡停多久
   pumpedText: '抽水機已經在運轉了。',   // 抽水機打開後再按
@@ -147,7 +148,7 @@ function updatePoolTide(dt) {
     if (t.hp <= 0) { t.target = null; if (typeof sentryStatus === 'function') sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
   updateWinterDrown(dt, deepNow && s.drained);
-  poolWarnShow(drowning.length > 0 && G.running && !G.over);
+  poolWarnShow(poolWarnWanted(s) && G.running && !G.over);
 }
 // 溫特溺水：跟隊友一樣，水漲起來時還在深水區、沒坐救生圈就原地溺水，每秒扣 drownDps
 function updateWinterDrown(dt, deep) {
@@ -259,7 +260,14 @@ function drawPoolTideBubble() {
   if (!s || !p || performance.now() > s.winterUntil) return;
   if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, POOL_TIDE.winterText);
 }
-// 畫面上方中間的警告「快打開抽水閥！」（蓋在遊戲畫面上的一行字，跟著畫面位置走）
+// 要不要跳「快點再次打開抽水閥」：正在打巨大比基尼小丑魚 BOSS（被叫醒了、還活著），而且抽乾過的水又漲回來（正在漲、或已經漲滿）
+// 溺水不會跳；打開抽水閥（開始倒數退水）就消失
+function poolWarnWanted(s) {
+  if (!s || !s.drained || (s.phase !== 'rising' && s.phase !== 'high')) return false;
+  const pb = typeof poolBossState === 'function' ? poolBossState() : null;
+  return !!(pb && typeof poolBossAlive === 'function' && poolBossAlive(pb) && pb.e.eliteAwake);
+}
+// 畫面上方中間的警告「快點再次打開抽水閥」（蓋在遊戲畫面上的一行字，跟著畫面位置走）
 let poolWarnEl = null;
 function poolWarnShow(on) {
   if (!on) { if (poolWarnEl) poolWarnEl.style.display = 'none'; return; }

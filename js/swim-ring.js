@@ -74,6 +74,20 @@ function deepCellsHavePoint(cells, x, y) {
   return false;
 }
 const deepWaterAtPoint = (x, y) => deepCellsHavePoint(deepWaterCells(), x, y);
+// 燃燒彈、照明彈、黏著彈落在深水裡：沒有效果（燒不起來、不會亮、黏膠被水沖散），只濺起水花
+// fire＝會燒的子彈（燃燒彈、照明彈）：一碰到水就熄掉，多冒幾團白色水蒸氣
+// 回傳 true＝落在水裡了（呼叫的地方就不要再做原本的效果）；在 2 樓（陸橋上）的不算
+function shotLandsInWater(x, y, floor, fire) {
+  if ((floor || 1) === 2 || !deepWaterAtPoint(x, y)) return false;
+  if (typeof poolFallSplash === 'function') poolFallSplash(x, y, false);
+  if (fire) for (let i = 0; i < 6; i++) {   // 白色水蒸氣（跟黑煙同一套畫法，shade 調大就變白）
+    const L = .9 + Math.random() * .6;
+    G.effects.push({ smoke: true, x: x + (Math.random() - .5) * 14, y: y - 4, vx: (Math.random() * 2 - 1) * 10, vy: -(30 + Math.random() * 20),
+      r0: 4 + Math.random() * 3, r1: 14 + Math.random() * 8, ph: Math.random() * 6.28, shade: 12 + Math.random(), life: L, life0: L });
+  }
+  if (typeof sfxAt === 'function') sfxAt('poolWaterDrop', x, y, .7, 'shot-in-water');
+  return true;
+}
 const riding = () => !!(typeof G !== 'undefined' && G && G.player && G.player.swimRing);
 // 現在在更新哪個隊員（js/sentry.js 的 updateSentry 設定）：隊員坐救生圈時深水不擋、划水變慢
 let swimCurActor = null;

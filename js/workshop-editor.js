@@ -135,7 +135,7 @@ const baseCost = key => (WORKSHOP_BASE[key] || {}).cost || [];
 const effCost = (key, i) => { if (isCustom(key)) return getDef(key).cost[i]; const n = costEdits(key)[i]; return typeof n === 'number' ? n : baseCost(key)[i]; };
 const costChanged = key => costEdits(key).some((n, i) => typeof n === 'number' && n !== baseCost(key)[i]);
 const levelsChanged = key => levelEdits(key).some(t => typeof t === 'string' && t !== '');
-const itemChanged = key => { if (isSgear(key)) return sgChanged(key); if (isExtra(key)) return EXTRA_LOOK_KEYS.some(k => typeof (cfg.items[key] || {})[k] === 'number') || (key.startsWith('bld:') && buildUpChanged(key)); if (isAmmo(key)) return ammoChanged(key); const o = cfg.items[key]; return !!o && (!!o.infoParts || o.money != null || o.who != null || o.make != null || o.makeMoney != null || WORKSHOP_TEXT_FIELDS.some(f => typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]) || levelsChanged(key) || valuesChanged(key) || costChanged(key) || typeof o.iconScale === 'number' || ['iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize'].some(k => typeof o[k] === 'number')); };
+const itemChanged = key => { if (isSgear(key)) return sgChanged(key); if (isExtra(key)) return EXTRA_LOOK_KEYS.some(k => typeof (cfg.items[key] || {})[k] === 'number') || (key.startsWith('bld:') && buildUpChanged(key)); if (isAmmo(key)) return ammoChanged(key); const o = cfg.items[key]; return !!o && (!!o.infoParts || o.money != null || o.who != null || o.make != null || o.makeMoney != null || o.squadRange != null || o.squadBright != null || o.squadBattery != null || WORKSHOP_TEXT_FIELDS.some(f => typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]) || levelsChanged(key) || valuesChanged(key) || costChanged(key) || typeof o.iconScale === 'number' || ['iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize'].some(k => typeof o[k] === 'number')); };
 // 開發工坊裡圖片的大小（%）：新增的裝備存在 added 裡；原本的存在 items[key].iconScale（沒改＝原本的）
 const iconScaleOf = key => { if (isCustom(key)) return customEntry(key).iconScale || 100; const o = cfg.items[key]; return o && typeof o.iconScale === 'number' ? o.iconScale : ((WORKSHOP_BASE[key] || {}).iconScale || 100); };
 const iconScaleField = key => { const n = iconScaleOf(key);
@@ -462,11 +462,22 @@ function gearV2Fields(key) {
   const keys = Object.keys(((WORKSHOP_BASE[key] || {}).levels || [])[0] || {});
   const squadKeys = keys.filter(k => GEAR_SQUAD_MODS[k]).map(k => valueInfo(k).label || k);
   return '<div class="row2"><div class="field">誰能穿<select data-g2="who">' + Object.entries(GEAR_WHO_NAME).map(([k, n]) => '<option value="' + k + '"' + (who === k ? ' selected' : '') + '>' + n + '</option>').join('') + '</select></div><div></div></div>' +
-    '<span class="hint">隊員穿上時有效果的數值：' + (squadKeys.length ? squadKeys.join('、') : '（沒有，這件的數值只對溫特有用）') + '（換算表在 data/equipment.js 的 GEAR_SQUAD_MODS）。' +
+    '<span class="hint">隊員穿上時有效果的數值：' + (squadKeys.length ? squadKeys.join('、') : typeof (WORKSHOP_BASE[key] || {}).squadRange === 'number' ? '照明（隊員的光比溫特弱多少，在下面兩格調）' : '（沒有，這件的數值只對溫特有用）') + '（換算表在 data/equipment.js 的 GEAR_SQUAD_MODS）。' +
     '溫特身上的效果是程式寫好的：本來不是溫特的裝備改成溫特能穿，要另外寫程式才有效果。</span>' +
     '<div class="row2"><div class="field">製作一件要幾個異質碎片<input type="text" inputmode="numeric" data-g2="make" value="' + esc(typeof o.make === 'number' ? o.make : '') + '" placeholder="' + mk.autoShards + '"></div>' +
     '<div class="field">製作一件的經費（$）<input type="text" inputmode="numeric" data-g2="makeMoney" value="' + esc(typeof o.makeMoney === 'number' ? o.makeMoney : '') + '" placeholder="' + workshopMoneyAuto(mk.shards) + '"></div></div>' +
-    '<span class="hint">開發好之後，在開發工坊按「製作一件」再做一件（一件只能給一個人穿）。空白＝自動算（開發費的 1/3，經費＝碎片 × 2）。</span>';
+    '<span class="hint">開發好之後，在開發工坊按「製作一件」再做一件（一件只能給一個人穿）。空白＝自動算（開發費的 1/3，經費＝碎片 × 2）。</span>' +
+    gearV2LampFields(key, o);
+}
+// 照明頭盔：隊員戴的時候光比溫特弱多少（存在 data/workshop.js 的 items.lamphelmet.squadRange／squadBright；遊戲 js/equipment.js 的 squadLampMul 讀）
+function gearV2LampFields(key, o) {
+  const base = WORKSHOP_BASE[key] || {};
+  if (typeof base.squadRange !== 'number' && typeof base.squadBright !== 'number') return '';
+  const box = (f, label) => '<div class="field">' + label + '<input type="text" inputmode="numeric" data-g2="' + f + '" value="' + esc(typeof o[f] === 'number' ? o[f] : '') + '" placeholder="' + (base[f] ?? 100) + '"' + (typeof o[f] === 'number' ? ' class="is-edited"' : '') + '></div>';
+  return '<div class="row2">' + box('squadRange', '隊員戴時的照明半徑（溫特的 %）') + box('squadBright', '隊員戴時的亮度（溫特的 %）') + '</div>' +
+    '<span class="hint">100＝跟溫特戴的一樣；數字越小，隊員的光圈越小、越暗（亮度最多 100）。空白＝原本的（灰字）。</span>' +
+    (typeof base.squadBattery === 'number' ? '<div class="row2">' + box('squadBattery', '隊員一顆電池能用多久（手電筒的 %）') + '<div></div></div>' +
+      '<span class="hint">隊員戴照明頭盔要耗電（身上最多帶 20 顆，溫特丟在地上的電池會去撿）。150＝同等級高亮度手電筒一顆電池秒數的 1.5 倍。</span>' : '');
 }
 function onGearV2Input(e) {
   const key = selKey, f = e.target.dataset.g2, txt = e.target.value.trim(), custom = isCustom(key);
@@ -1303,6 +1314,9 @@ function exportText() {
     if (costChanged(key)) keep.cost = baseCost(key).map((b, i) => { const n = costEdits(key)[i]; return typeof n === 'number' && n !== b ? n : null; });   // 改過的費用（null＝原本的）
     if (o.infoParts && Object.keys(o.infoParts).length) keep.infoParts = o.infoParts;   // 下方說明欄四塊的位置、大小、字級
     if (o.money != null) keep.money = o.money;   // 自己填的經費（null＝自動）
+    // 新版裝備：誰能穿、製作一件的費用、照明頭盔隊員戴時的光（以前漏存，改了存到專案會不見）
+    if (typeof o.who === 'string' && o.who !== gearV2BaseWho(key)) keep.who = o.who;
+    for (const k of ['make', 'makeMoney', 'squadRange', 'squadBright', 'squadBattery']) if (typeof o[k] === 'number') keep[k] = o[k];
     if (Object.keys(keep).length) items[key] = keep;
   }
   for (const key of AMMO_KEYS) {   // 子彈、彈匣：只寫改過的（陣列裡 null＝原本的）

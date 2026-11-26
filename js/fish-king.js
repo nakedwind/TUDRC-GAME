@@ -30,14 +30,14 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   // W118區 地下水池：home＝原位（格子座標）、area＝冒頭偷看、登場的範圍 [左邊第幾欄, 上面第幾列, 右邊第幾欄, 下面第幾列]（地圖右邊那些深水）
   //   deep＝右邊的超深水區（最右邊那一長條水池），冒頭偷看比較常挑這裡（機率 peek.deepChance）
 //   core＝牠守哪一顆核心（離這格最近的那顆）：只有這顆被打到才會登場；沒寫＝任何一顆被打到都登場
-//     （W118 中間深水區那顆 57,19 給池核 BOSS 巨大比基尼小丑魚守，js/pool-boss.js；魚頭王守右邊那顆 86,21）
+//     （W118 中間深水區那顆 57,19 給池核 BOSS 巨大比基尼小丑魚守，js/pool-boss.js；魚頭王守右邊那顆 87,28，測試地圖是 87,29）
 //   peek＝開戰前冒頭偷看只在這幾塊水域（[左欄, 上列, 右欄, 下列]，好幾塊；沒寫＝area 裡的深水都可以）：
 //     右上大水池、走道下面左邊那池、右邊大池＋往下那一長條、中間水池上半、右下那池、最下面中間窄的那池、最下面右邊那池
 //   leap＝開戰後海豚跳只跳到這幾塊水域（沒寫＝area 裡的深水都可以）：跟 peek 一樣，但不含最下面那兩池
-  maps: { 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { home: [95, 16], area: [64, 0, 115, 89], deep: [97, 26, 106, 61], core: [86, 21],
+  maps: { 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { home: [95, 16], area: [64, 0, 115, 89], deep: [97, 26, 106, 61], core: [87, 28],
       peek: [[68, 12, 106, 19], [69, 26, 85, 35], [89, 26, 106, 32], [97, 33, 106, 47], [78, 38, 92, 50], [97, 51, 106, 61], [77, 65, 84, 79], [87, 65, 106, 79]],
       leap: [[68, 12, 106, 19], [69, 26, 85, 35], [89, 26, 106, 32], [97, 33, 106, 47], [78, 38, 92, 50], [97, 51, 106, 61]] },
-    'map_w118_deep_test': { home: [95, 16], area: [64, 0, 115, 89], deep: [97, 26, 106, 61], core: [86, 21],
+    'map_w118_deep_test': { home: [95, 16], area: [64, 0, 115, 89], deep: [97, 26, 106, 61], core: [87, 29],
       peek: [[68, 12, 106, 19], [69, 26, 85, 35], [89, 26, 106, 32], [97, 33, 106, 47], [78, 38, 92, 50], [97, 51, 106, 61], [77, 65, 84, 79], [87, 65, 106, 79]],
       leap: [[68, 12, 106, 19], [69, 26, 85, 35], [89, 26, 106, 32], [97, 33, 106, 47], [78, 38, 92, 50], [97, 51, 106, 61]] } },   // W118區 超深水區（魚頭王測試）：跟 W118 一樣   // W118區 超深水區（魚頭王測試）：跟 W118 一樣
   of: 'fish_head',            // 以哪隻怪物為基準（怪物編輯器的魚頭君）
@@ -46,12 +46,16 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   hp: 4200,                   // 血量（再乘整體難度）
   rewardMul: 6, crystalMul: 6,
   // 開戰前冒頭偷看：每隔幾秒（隨機）一次、盯著看幾秒、慢慢浮出來要幾秒、慢慢沉下去要幾秒、離溫特幾格（最近～最遠）的深水才冒
-  peek: { every: [14, 26], stay: 4.5, rise: 2.2, sink: 2.4, distMin: 4, distMax: 10, splashRise: .5, splashSink: .7, deepChance: .75, deepDistMax: 16, drift: 22 },   // splashRise／splashSink＝浮出來、沉下去時，水花散開的寬度大約是身體寬的幾倍；deepChance＝有幾成挑右邊的超深水區冒頭；deepDistMax＝超深水區離溫特幾格內都可以冒；drift＝冒頭時慢慢游的速度（像素／秒，0＝不動）
+  peek: { every: [.5, 1.5], stay: 9, rise: 2.2, sink: 2.4, distMin: 4, distMax: 10, splashRise: .5, splashSink: .7, deepChance: .9, deepDistMax: 16, drift: 22 },   // splashRise／splashSink＝浮出來、沉下去時，水花散開的寬度大約是身體寬的幾倍；deepChance＝有幾成挑右邊的超深水區冒頭；deepDistMax＝超深水區離溫特幾格內都可以冒；drift＝冒頭時慢慢游的速度（像素／秒，0＝不動）
   shoreGap: 0,                // 身體邊緣離岸邊至少幾格（其他水中怪物是 1；0＝可以游到身體快碰到岸邊）
   surfaceRise: 1.2,           // 開戰後：從水裡浮上來要幾秒（慢慢浮出來，不是一下子跳出來）
   fadeAt: .7,                 // 淡入淡出：浮到幾成高之前身體是半透明的（沉下去時反過來慢慢淡掉；0＝不淡入淡出）
   // 泡在水裡時，水面那一圈橢圓：wide＝寬度是身體寬的幾倍、flat＝扁度（高÷寬，越小越扁）
   oval: { wide: 1, flat: .3 },
+  // 游泳時的水波紋：在水裡游（潛水、浮上來、開戰前冒頭慢慢游都算）時，每隔 every 秒在牠的位置冒出一圈，往外擴散、慢慢淡掉，游過的路上留下一圈一圈的波紋
+  //   every＝幾秒冒一圈、life＝一圈播幾秒、size＝一開始多大（身體寬的幾倍）、grow＝最後擴到一開始的幾倍、alpha＝最濃多濃（0～1）、
+  //   subAlpha＝潛在水裡時再乘幾倍（淡一點）、minMove＝每秒至少游幾像素才算在游（停著不冒）
+  ripple: { every: .35, life: 1.6, size: .45, grow: 2.2, alpha: .5, subAlpha: .7, minMove: 12 },
   introSecs: 1.1,             // 正式登場：從水裡躍出來到落回水面要幾秒
   introHeight: 150,           // 正式登場：跳多高（像素）
   introSplash: 3.2,           // 正式登場：落水水花多大（皇冠水花放大幾倍）
@@ -70,11 +74,17 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   silhouette: .4,             // 潛水時的影子多濃（再乘水的能見度）
   defaultSee: .45,            // 水的能見度（沒有水素材時用）
   splashSize: 2.4,            // 浮上來、潛下去的水花大小（皇冠水花放大幾倍；2.4 散開時大約跟身體一樣寬）
+  // 潛下水、落回水面（包括海豚跳落水）時溢上岸的水（js/pool-surge.js）：水波沿著水面最遠擴散幾格、最多溢上岸幾格、
+  //   最靠近水邊的人被推開幾像素（越往岸上越小）、水退回去時把還站在濕地上的人往水池拉回幾像素（0＝不拉；站在水邊的會被拖進水裡）
+  surge: { range: 9.24, spill: 1.32, push: 55, pull: 85 },   // pull 比 push 大：站在水邊 1 格內的人會被退水拖進水裡
   // 高壓水砲：每隔幾秒（隨機）一次、預警幾秒、掃多久（秒）、掃的角度（弧度）、射程（格）、水柱多粗（像素）、扣多少血、把人沖開幾格
   //   先跳上岸才噴：reach＝離牠幾格內找岸上的落腳處、shore＝落腳處離水最多幾格、jumpSecs／jumpHeight＝跳上岸要幾秒、跳多高（像素）、
   //   stay＝噴完在岸上多待幾秒才跳回水裡
   cannon: { every: [2.5, 4], windup: 1.1, sweep: 1.4, arc: 2.094, range: 14.2, width: 60, damage: 14, push: 2.4,
     reach: 8, shore: 2.5, jumpSecs: .8, jumpHeight: 120, stay: .6,
+    // 沖下水：被水砲沖開時，旁邊 push 格內有深水的話，往水池那邊偏過去（最多偏幾度；0＝照水柱方向直直沖開、不偏）
+    //   魚頭王是站在走道上噴的，水柱常常沿著走道掃，不偏的話人只會在走道上滑，很少掉下水
+    toWater: 90,
     // 打到地上的白色水花：rate＝每秒冒幾團、size＝一團多大（水柱粗細的幾倍）、life＝一團播幾秒、wobble＝邊緣變形多劇烈（0～1）、spread＝往兩旁散開多寬（水柱粗細的幾倍）
     impact: { rate: 26, size: .8, life: .45, wobble: .45, spread: 2.2 } },
   // 水柱衝天：每隔幾秒（隨機）一次、預警幾秒、水柱噴多久（秒）、範圍半徑（格）、一次最多幾個人、
@@ -85,13 +95,23 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   //   身體最多斜幾度（弧度：起跳頭朝上、落下頭朝下）、有幾成跳去別的水池（不然就在同一池裡跳）
   //   （secs、height 是跳 6 格的樣子；跳得更遠會飛久一點、高一點）
   leap: { every: [6, 10], hops: [1, 3], secs: 1.1, height: 150, distMin: 4, distMax: 14, tilt: .6, otherPool: .7,
-    // 落水激起浪花：落點幾格內、站在岸上的人被浪往水裡推幾格（離落點越遠推越少；站在水邊的人會被推下水）
-    waveRadius: 6, wavePush: 2.2 },
+    // 地圖編輯器畫的海豚躍路線：離起點幾格內就算到了（直接起跳）、游去起點最多游幾秒（游不到就從現在的位置直接跳）、游去起點的速度倍率
+    routeArrive: .8, routeMaxSwim: 8, routeSwimMul: 1.3,
+    // 海豚跳起跳、落水時激起的水花，是一般水花（splashSize）的幾倍大
+    splashMul: 1.2 },
   // 被溫特的一般子彈打到：閃白、轉身往下潛（turn＝轉身沉下去要幾秒；開戰前冒頭時也一樣）
   flinch: { turn: .5 },
   // 被雷電打到（雷電彈、安柏）：原地發抖幾秒 → 轉 tilt 度、露出背面魚肉（像趴著）垂直掉下來（fall＝往下掉的加速度）
   //   → 掉在地上就擱淺、掉在水裡就沉下去（sink＝沉下去要幾秒）消失 gone 秒（隨機）再從靠近人的岸邊浮出來
   shocked: { shake: .8, tilt: 30, fall: 1600, sink: 1.1, gone: [2.5, 4] },
+  // 巨物的重量感（跟虱目魚王落地同一套做法）：
+  //   落地（跳上岸噴水砲、被電掉在地上）＝畫面大震 landShake 像素、慢慢減弱 landSecs 秒，地上裂開（crack＝中間那片裂痕多大）、揚起塵土、落地聲（音量 landVol）
+  //   落水（登場、海豚跳、跳回水裡、被電掉進水裡）＝畫面震 waterShake 像素、慢慢減弱 waterSecs 秒
+  //   離溫特越遠震得越小（30 格外不震）
+  impact: { landShake: 10, landSecs: .6, crack: 1, landVol: 2, waterShake: 7, waterSecs: .45 },
+  // 記仇：誰打牠守的核心，水砲、水柱衝天就優先瞄準誰（記 secs 秒；溫特開槍打的、正在打核心的隊員都算）
+  //   核心血量剩 enrageAt 成以下：暴怒，水砲、水柱衝天的間隔變成 enrageMul 倍（0.6＝快很多）
+  grudge: { secs: 8, enrageAt: .5, enrageMul: .6 },
   strandSecs: 6,              // 被推上岸擱淺幾秒才跳回水裡
   strandMul: 2,               // 擱淺時被打的傷害倍率
   hopSecs: .75,               // 擱淺後跳回水裡要幾秒
@@ -179,7 +199,9 @@ const fkRoomyAt = (K, x, y) => !K.swimSet || K.swimSet.has(fkCellKey(x, y));
 // ---- 每一幀（js/pool-tide.js 的 updatePoolTide 呼叫；潛水時牠不在 G.enemies 裡，所以由這裡自己動）----
 function updateFishKing(dt) {
   const K = fishKingState(); if (!K) return;
+  fkRumbleStep(dt);   // 落地／落水的持續搖晃
   updateFkGeysers(K, dt);
+  fkRippleStep(K, dt);   // 游泳時的水波紋
   K.sparks = K.sparks.filter(s => (s.t += dt) < s.life);
   fkImpactAge(K, dt);   // 水砲打到地上的白色水花：慢慢長大、變形、淡掉（水砲停了也會播完）
   if (K.shockCd > 0) K.shockCd -= dt;
@@ -200,6 +222,7 @@ function updateFishKing(dt) {
     if ((K.peekT -= dt) <= 0) { K.peekT = fkRand(P.peek.every); fkPeekStart(K); }
     return;
   }
+  fkGrudgeStep(K);   // 記仇：誰在打牠守的核心；核心剩一半暴怒
   if (K.phase === 'intro') { fkIntroStep(K, dt); return; }
   if (K.phase === 'leap') { fkLeapStep(K, dt); return; }
   if (K.phase === 'landJump') { fkLandJumpStep(K, dt); return; }   // 跳上岸準備噴水砲
@@ -212,7 +235,7 @@ function updateFishKing(dt) {
   if (K.phase === 'hop') { fkHopStep(K, dt); return; }
   // 被電到沉下去消失：過一下再從靠近人的岸邊浮出來
   if (K.goneT > 0) {
-    if ((K.geyserT -= dt) <= 0) { K.geyserT = fkRand(P.geyser.every); fkStartGeysers(K); }
+    if ((K.geyserT -= dt * fkRage(K)) <= 0) { K.geyserT = fkRand(P.geyser.every); fkStartGeysers(K); }
     if ((K.goneT -= dt) <= 0) fkReappear(K);
     return;
   }
@@ -224,8 +247,8 @@ function updateFishKing(dt) {
     e.fkRise = 1 - (1 - k) * (1 - k);
     if (k >= 1) { K.riseT = null; e.fkRise = null; }
   }
-  // 水柱衝天：醒著就會（潛水時也會）
-  if ((K.geyserT -= dt) <= 0) { K.geyserT = fkRand(P.geyser.every); fkStartGeysers(K); }
+  // 水柱衝天：醒著就會（潛水時也會）；暴怒時比較常噴
+  if ((K.geyserT -= dt * fkRage(K)) <= 0) { K.geyserT = fkRand(P.geyser.every); fkStartGeysers(K); }
   // 躲起來（叫小弟的時候）：潛在水裡往遠處游
   if (K.hideT > 0) {
     K.hideT -= dt;
@@ -237,7 +260,8 @@ function updateFishKing(dt) {
   // 潛水 ↔ 浮上來
   K.t -= dt;
   if (K.sub) {
-    if ((K.leapT -= dt) <= 0) { if (fkLeapStart(K, Math.round(fkRand(P.leap.hops)) - 1)) return; K.leapT = 1.5; }   // 海豚跳換區（找不到地方跳：等一下再試）
+    if (K.leapRoute) { if (fkLeapRouteStep(K, dt)) return; }   // 正在游去海豚躍路線的起點（地圖編輯器畫的）：游到就跳
+    else if ((K.leapT -= dt) <= 0) { if (fkLeapStart(K, Math.round(fkRand(P.leap.hops)) - 1)) return; K.leapT = 1.5; }   // 海豚跳換區（找不到地方跳：等一下再試）
     if (K.t <= 0 && !K.approach) { K.approach = true; K.goal = fkShoreGoal(K); K.t = P.approachMax; }   // 潛水時間到：游去岸邊（靠近人的地方）
     if (K.approach && (K.t <= 0 || (K.goal && Math.hypot(K.goal.x - e.x, K.goal.y - e.y) < 24))) fkSurface(K);
   } else if (K.turnT > 0) {   // 轉身露出背面，等一下就潛下去
@@ -247,10 +271,38 @@ function updateFishKing(dt) {
     return;
   } else {
     if (K.t <= 0) { K.turnT = K.turnT0 = P.diveTurn; K.turnRise = e.fkRise ?? 1; return; }
-    if ((K.cannonT -= dt) <= 0) { K.cannonT = fkRand(P.cannon.every); if (fkStartCannon(K)) return; }
+    if ((K.cannonT -= dt * fkRage(K)) <= 0) { K.cannonT = fkRand(P.cannon.every); if (fkStartCannon(K)) return; }   // 暴怒時比較常噴
   }
   fkSwim(K, dt, 1);
 }
+// ---- 記仇、暴怒（FISH_KING.grudge）----
+// 每一幀：牠守的核心掉血了 → 記下是誰打的（溫特開槍打的：js/game.js 記在核心的 lastHitBy；隊員：正在瞄準這顆核心的）
+function fkGrudgeStep(K) {
+  const core = K.core, Gd = FISH_KING.grudge; if (!core || !Gd) return;
+  const now = performance.now() / 1000, hp = core.dead ? 0 : core.hp;
+  if (K.coreSeen == null) K.coreSeen = hp;
+  if (hp < K.coreSeen - .01) {
+    const who = (G.towers || []).filter(t => t.hp > 0 && t.target === core);
+    if (core.lastHitBy === G.player && now - (core.lastHitAt || -9) < .6) who.push(G.player);
+    if (!who.length && G.player && G.player.hp > 0) who.push(G.player);   // 炸彈、火海這類算不出是誰的：算溫特
+    K.grudge = K.grudge || new Map();
+    for (const a of who) {
+      if (!K.grudge.has(a) || K.grudge.get(a) < now) flash(a === G.player ? FISH_KING.name + '盯上你了！' : '被' + FISH_KING.name + '盯上了！', a.x, a.y - 64, '#ff8a7a', 1.2);
+      K.grudge.set(a, now + Gd.secs);
+    }
+  }
+  K.coreSeen = hp;
+  if (!K.enraged && core.maxhp && hp <= core.maxhp * Gd.enrageAt) {   // 核心剩一半：暴怒
+    K.enraged = true;
+    if (typeof coreBanner === 'function') coreBanner(FISH_KING.name + '暴怒了', '水砲、水柱衝天變得更頻繁！', '#ff6a4a');
+    if (typeof bossSfxAt === 'function') bossSfxAt('fishHurt', K.e.x, K.e.y, 1.4, 'fish-king-enrage');
+    fkRumble(K.e.x, K.e.y, FISH_KING.impact.waterShake, FISH_KING.impact.waterSecs);
+  }
+}
+// 暴怒時計時器跑得比較快（間隔變成 enrageMul 倍）
+const fkRage = K => K.enraged && FISH_KING.grudge.enrageMul > 0 ? 1 / FISH_KING.grudge.enrageMul : 1;
+// 這個人是不是正被記仇（打過牠守的核心、還在記仇時間內）
+const fkGrudged = (K, a) => !!(K.grudge && K.grudge.get(a) > performance.now() / 1000);
 // ---- 開戰前：冒頭偷看 ----
 // 地圖上有沒有核心被打到（扣了血）：回傳那顆核心
 // （泡在深水裡、沉睡中的核心被打不會扣血，所以看 js/anomalous-core.js 記下的 struck＝被打過，或血量少了）
@@ -390,7 +442,8 @@ function fkIntroStep(K, dt) {
   if (k < 1) return;
   e.airborne = false; e.slimeLift = 0; K.intro = null;
   fkSplash(e, P.introSplash, true);
-  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 8, .05);
+  fkWaterImpact(e, 1.2);   // 登場落水：比平常震更大
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 0, .05);   // 很近才頓一下
   K.phase = 'swim'; K.sub = false; K.t = fkRand(P.surface) * .6; K.cannonT = 1;
 }
 // js/render.js：開戰前冒頭偷看時（不在怪物清單裡）也要畫出來，跟人物一起排前後
@@ -434,7 +487,44 @@ function fkSplash(e, size, surge) {
   if (typeof poolCrownSplash === 'function') poolCrownSplash(G.poolSplash || (G.poolSplash = []), e.x, fkWaterY(e), size);   // 在水面那條線冒水花
   if (typeof sfxAt === 'function') sfxAt('poolBossSplash', e.x, e.y, .8, 'fish-king-splash');
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 4, 0);
-  if (surge && typeof poolSurgeStart === 'function') poolSurgeStart(e.x, e.y, 'land');   // 水溢上岸、把人推開一點（js/pool-surge.js）
+  if (surge && typeof poolSurgeStart === 'function') poolSurgeStart(e.x, e.y, 'land', FISH_KING.surge);   // 用魚頭王自己的溢水大小（FISH_KING.surge）   // 水溢上岸、把人推開一點（js/pool-surge.js）
+}
+// ---- 巨物落地／落水：畫面搖晃、裂痕、落地聲（FISH_KING.impact）----
+// 震一下並持續 dur 秒慢慢減弱（一般的 addShake 一瞬間就衰減完，巨物要震久一點才感覺得到；做法跟虱目魚王的 mkRumble 一樣）
+function fkRumble(x, y, amt, dur) {
+  const p = G.player; if (!p) return;
+  const R = (typeof BOSS_SHAKE !== 'undefined' && BOSS_SHAKE.range) || 30, d = Math.hypot(p.x - x, p.y - y) / CELL;
+  if (d > R) return;
+  const a = amt * (.25 + .75 * Math.pow(1 - d / R, 2));   // 平方衰減：貼身最大，越遠越小
+  const Rb = G.fkRumble;
+  if (Rb && Rb.t > 0 && Rb.amt * Rb.t / Rb.dur > a) return;   // 正在震更大的：不要蓋掉
+  G.fkRumble = { amt: a, t: dur, dur };
+  addShake(a);
+}
+function fkRumbleStep(dt) {
+  const Rb = G.fkRumble; if (!Rb || Rb.t <= 0) return;
+  Rb.t -= dt; const k = Math.max(0, Rb.t / Rb.dur);
+  if (k > 0 && typeof shakeAmt !== 'undefined') shakeAmt = Math.max(shakeAmt, Rb.amt * (.35 + .65 * k));
+}
+// 重重摔在地上：大震動、裂痕、塵土、白色衝擊圈、落地聲；power＝強度倍率
+function fkLandImpact(e, power = 1) {
+  const I = FISH_KING.impact, x = e.x, y = e.y + 14, now = performance.now() / 1000, w = e.drawWidth || 200;
+  fkRumble(e.x, e.y, I.landShake * power, I.landSecs);
+  if (typeof addHitstop === 'function' && G.player && Math.hypot(G.player.x - e.x, G.player.y - e.y) < CELL * 6) addHitstop(.05);   // 很近才頓一下
+  for (let i = 0; i < 2; i++) G.effects.push({ ring: true, x, y, r: 10 + i * 8, r2: w * (.45 + i * .25), life: .4 + i * .12, life0: .4 + i * .12, color: i ? '#b9b2a2' : '#ffffff' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(x, y, ELITE_BIRD.runDust);   // 揚起塵土（js/gourd-monkey.js）
+  if (I.crack > 0) {   // 地上裂開（跟鳥頭大隊長、虱目魚王共用的裂痕，js/elite-bird-head.js 的 drawEliteGround 畫）
+    const cracks = G.eliteCracks = G.eliteCracks || [];
+    cracks.push({ size: I.crack * power, power: 1, life: 6, x, y, at: now });
+    for (let i = 0; i < 4; i++) cracks.push({ size: I.crack * power * .5, life: 6, x: x + (Math.random() * 2 - 1) * w * .22, y: y - 2 + (Math.random() * 2 - 1) * 10, at: now, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
+    if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
+  }
+  if (typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, I.landVol * power, 'fish-king-land');   // 落地聲（跟虱目魚王落地同一個）
+}
+// 重重摔進水裡：畫面搖晃（水花、溢水另外處理）
+function fkWaterImpact(e, power = 1) {
+  const I = FISH_KING.impact;
+  fkRumble(e.x, e.y, I.waterShake * power, I.waterSecs);
 }
 function fkSurface(K) {
   const e = K.e; K.sub = false; K.approach = false; K.t = fkRand(FISH_KING.surface); K.cannonT = Math.max(K.cannonT, FISH_KING.surfaceRise || 0);   // 浮出來之前不會開水砲
@@ -442,6 +532,7 @@ function fkSurface(K) {
   fkShow(K, true); fkSplash(e, FISH_KING.splashSize * .6, false);
 }
 function fkDive(K) {
+  K.leapRoute = null;   // 還沒跳的海豚躍路線：不跳了
   const e = K.e; K.sub = true; K.t = fkRand(FISH_KING.dive); K.goal = null; K.turnT = 0; K.turnT0 = 0; K.turnRise = null; K.riseT = null; e.fkRise = null; e.mbTilt = 0;
   fkSplash(e, FISH_KING.splashSize * 1.1, true); fkShow(K, false);
 }
@@ -468,7 +559,7 @@ function fkSwim(K, dt, mul) {
   K.spd = (K.spd ?? 0) + (want0 - (K.spd ?? 0)) * Math.min(1, (P.accel || 99) * dt);
   const step = K.spd * dt, nx = e.x + Math.cos(a) * step, ny = e.y + Math.sin(a) * step;
   // 離岸夠遠的地方不再游回岸邊；現在太靠岸（被推過來）就讓牠游出來
-  const canGo = (x, y) => K.region.has(fkCellKey(x, y)) && deepWaterAtPoint(x, y) && (fkRoomyAt(K, x, y) || !fkRoomyAt(K, e.x, e.y));
+  const canGo = (x, y) => K.region.has(fkCellKey(x, y)) && deepWaterAtPoint(x, y) && (K.leapRoute || fkRoomyAt(K, x, y) || !fkRoomyAt(K, e.x, e.y));   // 游去海豚躍路線的起點：照編輯器指定的位置，靠岸也游過去
   const slid = () => { if ((K.slideT = (K.slideT || 0) + dt) > 1.5) { K.slideT = 0; K.goal = null; } };   // 沿著邊滑太久（目標在轉角後面）：下次換個目標
   if (canGo(nx, ny)) { e.x = nx; e.y = ny; K.slideT = 0; }
   else if (canGo(nx, e.y) && Math.abs(nx - e.x) > step * .3) { e.x = nx; slid(); }   // 斜斜撞到邊：沿著邊滑過去（才游得進窄的水道）
@@ -519,7 +610,8 @@ function fkMouth(e) {
 function fkStartCannon(K) {
   const e = K.e, P = FISH_KING.cannon, list = fkTargets(K, false);
   if (!list.length) return false;
-  const t = list[Math.floor(Math.random() * list.length)];
+  const mad = list.filter(a => fkGrudged(K, a));   // 記仇：打過核心的人優先
+  const pool = mad.length ? mad : list, t = pool[Math.floor(Math.random() * pool.length)];
   const spot = fkLandSpot(K, t); if (!spot) return false;   // 附近找不到能跳上去的岸：這次不噴
   K.phase = 'landJump'; K.landJump = { t: 0, from: { x: e.x, y: e.y }, to: spot, target: t };
   K.sub = false; K.approach = false; K.goal = null; K.riseT = null; K.turnT = 0; e.fkRise = null; e.airborne = true; e.moving = false;
@@ -565,8 +657,7 @@ function fkLandJumpStep(K, dt) {
   fkFace(e, 'front');
   if (k < 1) return;
   e.airborne = false; e.slimeLift = 0; e.mbTilt = 0;
-  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 7, .05);
-  G.effects.push({ ring: true, x: e.x, y: e.y + 10, r: 10, r2: (e.drawWidth || 200) * .6, life: .4, life0: .4, color: '#d8eef8' });
+  fkLandImpact(e);   // 跳上岸：重重落地（震動、裂痕、落地聲）
   const t = J.target && J.target.hp > 0 ? J.target : fkTargets(K, false)[0];
   K.landJump = null; K.phase = 'land'; K.landT = P.stay;
   if (t) fkAimCannon(K, t);
@@ -612,7 +703,7 @@ function fkCannonStep(K, dt) {
     const side = Math.abs((a.x - m.x) * uy - (a.y - m.y) * ux); if (side > P.width / 2 + 12) continue;
     c.hit.add(a);
     fkHurt(a, P.damage, '被' + FISH_KING.name + '的水砲沖倒');
-    if (!fkInWater(a) && a.hp > 0) { knockActor(a, ux, uy, P.push * CELL, .4); if (a !== G.player) { a.navPath = null; a.navGoal = null; } }   // 往遠離牠的方向沖開（被沖下水就掉進水裡）
+    if (!fkInWater(a) && a.hp > 0) { const [px, py] = fkPushToWater(a, ux, uy, P.push * CELL, P.toWater); knockActor(a, px, py, P.push * CELL, .4); if (a !== G.player) { a.navPath = null; a.navGoal = null; } }   // 往遠離牠的方向沖開（被沖下水就掉進水裡）
   }
   // 水柱經過的地方把火澆熄（魚頭君本來就會滅火，js/fish-head.js）
   if (typeof firesAt === 'function' && typeof douseFire === 'function') for (const f of firesAt(end.x, end.y, 20)) douseFire(f, 1);
@@ -719,7 +810,7 @@ function fkHurt(a, dmg, why) {
 
 // ---- 水柱衝天 ----
 function fkStartGeysers(K) {
-  const list = fkTargets(K, true).sort(() => Math.random() - .5).slice(0, FISH_KING.geyser.count);
+  const list = fkTargets(K, true).sort(() => Math.random() - .5).sort((a, b) => fkGrudged(K, b) - fkGrudged(K, a)).slice(0, FISH_KING.geyser.count);   // 記仇的人排前面
   for (const a of list) {
     K.geysers.push({ x: a.x, y: a.y, t: 0, phase: 'warn', seed: Math.random() * 10 });
     if (typeof sfxAt === 'function') sfxAt('poolWaterDrop', a.x, a.y, .7, 'fish-king-bubble');
@@ -799,7 +890,7 @@ function fkStrand(K) {
   e.knockT = 0; e.moving = false;
   flash('擱淺了！', e.x, e.y - (e.drawHeight || 190) - 10, '#c9bfff', 1.4);
   if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 5, .04);
-  if (typeof sfxAt === 'function') sfxAt('fishHurt', e.x, e.y, 1, 'fish-king-strand');
+  if (typeof sfxAt === 'function') bossSfxAt('fishHurt', e.x, e.y, 1, 'fish-king-strand');
 }
 function fkStrandStep(K, dt) {
   const e = K.e, P = FISH_KING;
@@ -822,6 +913,7 @@ function fkHopStep(K, dt) {
   e.airborne = false; e.slimeLift = 0; K.hop = null; K.phase = 'swim';
   if (H.to.k && deepWaterCells().has(H.to.k)) Object.assign(K, fkRegionFrom(H.to.k, e.drawWidth));   // 之後在跳進去的那一池
   fkSplash(e, P.splashSize * 1.2, true);
+  fkWaterImpact(e);   // 跳回水裡：畫面搖晃
   fkDive(K);   // 一跳回水裡就潛下去
 }
 
@@ -902,8 +994,52 @@ function fkLeapClear(x1, y1, x2, y2) {
   for (let d = 10; d < L; d += 10) if (solidBlocksPoint(x1 + (x2 - x1) * d / L, y1 + (y2 - y1) * d / L)) return false;
   return true;
 }
-// hops＝跳完這一下之後還要再連跳幾下
-function fkLeapStart(K, hops) {
+// ---- 地圖編輯器畫的海豚躍路線（地圖編輯器「🐬 魚頭王海豚躍」，MAP.fkLeaps：[{ at: '起跳那一格 欄,列', to: '落水那一格 欄,列' }]）----
+// 有畫路線的地圖：要跳的時候，先潛水游到某條路線的起點，再照路線跳到終點；沒畫路線的地圖照原本的隨機跳
+// 起點要在牠現在這一池裡（游得到），終點要是深水；這一池裡沒有任何路線的起點 → 這一池就不跳（要回來的話，記得也畫一條從那一池跳回來的路線）
+const fkLeapRoutes = () => (typeof MAP !== 'undefined' && MAP && Array.isArray(MAP.fkLeaps)) ? MAP.fkLeaps.filter(r => r && typeof r.at === 'string' && typeof r.to === 'string') : [];
+const fkKeyPoint = k => { const [x, y] = center(...k.split(',').map(Number)); return { x, y, k }; };
+// 挑一條起點在這一池（或離牠 near 格內）、終點是深水的路線；偏向終點靠近人的那幾條
+function fkPickRoute(K, near) {
+  const e = K.e, list = [];
+  for (const r of fkLeapRoutes()) {
+    const a = fkKeyPoint(r.at), b = fkKeyPoint(r.to);
+    if (!deepWaterAtPoint(b.x, b.y)) continue;   // 終點不是深水（畫錯、或水被抽乾）：不跳
+    const d = Math.hypot(a.x - e.x, a.y - e.y) / CELL;
+    if (near != null ? d > near : !(K.region.has(r.at) || d <= 2)) continue;
+    list.push({ a, b, d });
+  }
+  if (!list.length) return null;
+  const who = [G.player, ...(G.towers || [])].filter(t => t && t.hp > 0);
+  let pool = list;
+  if (who.length && pool.length > 1) {   // 偏向終點靠近人的路線：從比較近的那一半裡隨便挑
+    const dist = q => Math.min(...who.map(t => Math.hypot(t.x - q.b.x, t.y - q.b.y)));
+    pool = pool.sort((x, y) => dist(x) - dist(y)).slice(0, Math.ceil(pool.length / 2));
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+// 照路線跳：起點就在旁邊（arrive 格內）就直接跳；不然先記下來，潛水游過去（fkLeapRouteStep）
+// chain＝剛落水、要連跳：只看起點就在落點旁邊的路線，沒有就不連跳
+function fkLeapRouteStart(K, hops, chain) {
+  const R = fkPickRoute(K, chain ? Math.max(2, FISH_KING.leap.routeArrive) : null);   // 連跳：起點在落點 2 格內的路線
+  if (!R) return null;   // 這一池沒有路線起點
+  if (R.d <= FISH_KING.leap.routeArrive) return fkLeapGo(K, R.b, hops);
+  K.leapRoute = { a: R.a, b: R.b, hops, t: 0 };
+  return true;
+}
+// 正在游去路線的起點（潛在水裡）：到了就跳；游太久（起點太靠岸、身體過不去）就從現在的位置直接跳過去
+function fkLeapRouteStep(K, dt) {
+  const e = K.e, J = K.leapRoute, L = FISH_KING.leap;
+  J.t += dt;
+  if (!deepWaterAtPoint(J.b.x, J.b.y)) { K.leapRoute = null; K.leapT = fkRand(L.every); return false; }   // 終點的水被抽乾了：不跳了
+  if (Math.hypot(J.a.x - e.x, J.a.y - e.y) <= L.routeArrive * CELL || J.t >= L.routeMaxSwim) return fkLeapGo(K, J.b, J.hops);
+  K.goal = { x: J.a.x, y: J.a.y };   // 一直朝起點游（fkSwim 撞到邊時會換目標，這裡每一幀改回來）
+  fkSwim(K, dt, L.routeSwimMul);
+  return true;
+}
+// hops＝跳完這一下之後還要再連跳幾下；chain＝剛落水的連跳
+function fkLeapStart(K, hops, chain) {
+  if (fkLeapRoutes().length) return !!fkLeapRouteStart(K, hops, chain);   // 有畫路線：只照路線跳（這一池沒有路線起點就不跳）
   const e = K.e, L = FISH_KING.leap, m = fkMargin(e.drawWidth), other = [], same = [];
   for (const k of deepWaterCells()) {
     const [c, r] = k.split(',').map(Number); if (!fkInArea(K, c, r) || !fkInLeapZone(K, c, r) || fkShoreDist(k) < m) continue;   // 落點要在指定的水域裡、離岸夠遠
@@ -919,14 +1055,19 @@ function fkLeapStart(K, hops) {
     const near = q => Math.min(...who.map(a => Math.hypot(a.x - q.x, a.y - q.y)));
     pool = pool.sort((a, b) => near(a) - near(b)).slice(0, Math.max(1, Math.ceil(pool.length / 2)));
   }
-  const to = pool[Math.floor(Math.random() * pool.length)];
+  return fkLeapGo(K, pool[Math.floor(Math.random() * pool.length)], hops);
+}
+// 從現在的位置跳到 to（{ x, y, k＝落點那一格 '欄,列' }）；hops＝跳完還要再連跳幾下
+function fkLeapGo(K, to, hops) {
+  const e = K.e, L = FISH_KING.leap;
+  K.leapRoute = null;
   const far = Math.max(1, Math.sqrt(Math.hypot(to.x - e.x, to.y - e.y) / (6 * CELL)));   // 跳得比 6 格遠：飛久一點、高一點
   K.phase = 'leap'; K.leap = { t: 0, from: { x: e.x, y: e.y }, to, hops, secs: L.secs * far, height: L.height * far };
   K.sub = false; K.approach = false; K.goal = null; K.riseT = null; K.cannon = null; K.turnT = 0;
   e.fkRise = null; e.airborne = true; e.moving = false;
   if (Math.abs(to.x - e.x) > 4) e.faceRight = to.x > e.x;   // 直直往上下跳：照原本的方向
   fkShow(K, true);   // 在空中打得到
-  fkSplash(e, FISH_KING.splashSize * .8, false);
+  fkSplash(e, FISH_KING.splashSize * .8 * (FISH_KING.leap.splashMul ?? 1), false);   // 起跳的水花
   return true;
 }
 function fkLeapStep(K, dt) {
@@ -942,28 +1083,33 @@ function fkLeapStep(K, dt) {
   e.airborne = false; e.slimeLift = 0; e.mbTilt = 0;
   Object.assign(K, fkRegionFrom(H.to.k, e.drawWidth));   // 換到落下去的那一池
   K.leap = null; K.phase = 'swim';
-  fkSplash(e, FISH_KING.splashSize, false);
-  fkWave(e.x, e.y);   // 激起浪花：岸上的人被往水裡推
-  if (H.hops > 0 && fkLeapStart(K, H.hops - 1)) return;   // 連跳
+  fkSplash(e, FISH_KING.splashSize * (FISH_KING.leap.splashMul ?? 1), false);   // 落水的水花
+  fkWaterImpact(e);   // 海豚跳落水：畫面搖晃
+  if (H.hops > 0 && fkLeapStart(K, H.hops - 1, true)) {   // 連跳：馬上又跳起來，落水這一下也溢水（推出去、退水拉回來；js/pool-surge.js）
+    if (typeof poolSurgeStart === 'function') poolSurgeStart(H.to.x, H.to.y, 'land', FISH_KING.surge);
+    return;
+  }
+  // 不連跳：接著潛下去（fkDive），潛下去那一下會溢水
   fkDive(K); K.leapT = fkRand(L.every);
 }
 
-// ---- 海豚跳落水激起的浪花：落點 waveRadius 格內、站在岸上的人往落點（水裡）推，站在水邊的會被推下水（js/pool-fall.js 的 poolFallKnockIn）----
-function fkWave(x, y) {
-  const L = FISH_KING.leap, R = L.waveRadius * CELL;
-  G.effects.push({ ring: true, x, y: y + 8, r: 20, r2: R, life: .55, life0: .55, color: '#cfefff' });
-  G.effects.push({ ring: true, x, y: y + 8, r: 10, r2: R * .7, life: .4, life0: .4, color: '#ffffff' });
-  for (const a of [G.player, ...(G.towers || [])]) {
-    if (!a || a.hp <= 0 || a.vineCap || a.eatenBy || a.grabbed || a.grabFall || a.poolFall || a.swimRing || a.sitting) continue;
-    if (deepWaterAtPoint(a.x, a.y)) continue;   // 已經在水裡的不推
-    const dx = x - a.x, dy = y - a.y, d = Math.hypot(dx, dy); if (d > R || d < 1) continue;
-    const push = L.wavePush * CELL * (1 - .5 * d / R);   // 越靠近落點推越遠
-    knockActor(a, dx / d, dy / d, push, .45);
-    if (a !== G.player) { a.navPath = null; a.navGoal = null; }
-    if (a === G.player) flash('浪打過來了！', a.x, a.y - 60, '#cfefff', .9);
+// 被沖開的方向：照水柱方向（ux, uy），但旁邊 dist 像素內有深水的話，往水池那邊偏（最多偏 maxDeg 度，挑偏最少的那個方向）
+// 回傳 [x 方向, y 方向]；附近沒有水、或 maxDeg 是 0，就照原本的水柱方向
+function fkPushToWater(a, ux, uy, dist, maxDeg) {
+  if (!maxDeg || typeof deepWaterAtPoint !== 'function') return [ux, uy];
+  const base = Math.atan2(uy, ux), max = maxDeg * Math.PI / 180, reach = dist * .9;
+  for (let off = 0; off <= max + 1e-6; off += Math.PI / 24) {   // 從水柱方向開始，每次往左右各多偏 7.5 度試試看
+    for (const sgn of off ? [1, -1] : [1]) {
+      const ang = base + sgn * off, cx = Math.cos(ang), cy = Math.sin(ang);
+      for (let d = CELL * .5; d <= reach; d += CELL * .25) {
+        if (solidBlocksPoint(a.x + cx * d, a.y + cy * d)) break;   // 中間有牆：這個方向不行
+        if (deepWaterAtPoint(a.x + cx * d, a.y + cy * d)) return [cx, cy];
+      }
+    }
   }
-  if (typeof poolFallSplash === 'function') for (let i = 0; i < 6; i++) { const ang = i / 6 * Math.PI * 2; poolFallSplash(x + Math.cos(ang) * R * .5, y + Math.sin(ang) * R * .25, false); }
+  return [ux, uy];
 }
+
 // ---- 被雷電打到：發抖 → 轉 30 度露出背面垂直掉下來 → 擱淺或沉下去消失 ----
 function fkShockStart(K, pre) {
   const e = K.e;
@@ -972,7 +1118,7 @@ function fkShockStart(K, pre) {
   if (K.peek) { e.fkRise = e.fkRise ?? 1; K.peek = null; }
   e.tremble = true; e.moving = false; e.knockT = 0;
   flash('觸電！', e.x, e.y - (e.drawHeight || 190) - (e.slimeLift || 0) - 10, '#bfe9ff', 1);
-  if (typeof sfxAt === 'function') sfxAt('fishHurt', e.x, e.y, 1, 'fish-king-shocked');
+  if (typeof sfxAt === 'function') bossSfxAt('fishHurt', e.x, e.y, 1, 'fish-king-shocked');
 }
 function fkShockStep(K, dt) {
   const e = K.e, S = FISH_KING.shocked, Sh = K.shock;
@@ -996,13 +1142,14 @@ function fkShockStep(K, dt) {
     if (deepWaterAtPoint(e.x, e.y)) {   // 掉在水裡：沉下去
       Sh.stage = 'sink'; Sh.t = 0; Sh.rise0 = e.fkRise ?? 1;
       fkSplash(e, FISH_KING.splashSize * (Sh.vy > 300 ? 1.2 : .6), Sh.vy > 300);
+      if (!Sh.pre) fkWaterImpact(e, Sh.vy > 300 ? 1 : .4);   // 從高處掉下來震比較大（開戰前冒頭被電不震）
       return;
     }
     // 掉在地上：擱淺
     e.mbTilt = 0; K.shock = null;
     if (Sh.pre) { fkPeekEnd(K); return; }   // （開戰前一定在水裡，保險起見）
     K.phase = 'swim'; K.sub = false;
-    if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 7, .05);
+    fkLandImpact(e);   // 摔在地上：重重落地（震動、裂痕、落地聲）
     fkStrand(K);
     return;
   }
@@ -1039,7 +1186,8 @@ function fishKingWade(a) {
   const O = FISH_KING.oval || { wide: .7, flat: .55 };   // 水面那圈橢圓的寬度、扁度（js/water.js 的 drawWaded／drawWaterRipple 照這個畫和切）
   // 淡入淡出：浮上來時慢慢顯現、沉下去時慢慢消失（fade＝整隻的透明度，js/water.js 的 drawWaded 照這個畫）
   const fade = Math.max(0, Math.min(1, rise / (FISH_KING.fadeAt || .01)));
-  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * O.wide, flat: O.flat, sinkDy, fade };
+  // dive＝下潛的程度：越沉越壓藍黑色（js/water.js 的 WATER.dive；浮出來＝0、整隻沉下去＝1）
+  return { w: { depth: h * depth / H, see: fkSee(a) }, bottom: a.y + 13, height: H, width: (a.drawWidth || 190) * O.wide, flat: O.flat, sinkDy, fade, dive: 1 - rise };
 }
 function fkSee(a) {
   const w = typeof waterAt === 'function' ? waterAt(a.x, a.y + 10) : null;
@@ -1052,11 +1200,46 @@ function fishKingBars() {
 }
 const fishKingHunting = () => { const K = fishKingState(); return fishKingAlive(K) && !!K.e.eliteAwake; };
 
+// ---- 游泳時的水波紋（FISH_KING.ripple）----
+// 在水裡游的時候，每隔 every 秒在牠的位置留一圈；圈留在原地往外擴散、淡掉（所以游過的路上一圈一圈的）
+function fkRippleStep(K, dt) {
+  const R = FISH_KING.ripple, list = K.ripples || (K.ripples = []), e = K.e;
+  for (const r of list) r.t += dt;
+  K.ripples = list.filter(r => r.t < R.life);
+  if (!R || dt <= 0 || K.done || !fishKingAlive(K) || K.goneT > 0) { K.rpLast = null; return; }
+  const swimming = (K.phase === 'swim' || K.phase === 'peek') && (e.slimeLift || 0) <= 4 && deepWaterAtPoint(e.x, e.y);
+  const last = K.rpLast, speed = last ? Math.hypot(e.x - last.x, e.y - last.y) / dt : 0;
+  K.rpLast = { x: e.x, y: e.y };
+  if (!swimming || speed < R.minMove) return;
+  if ((K.rpT = (K.rpT || 0) - dt) > 0) return;
+  K.rpT = R.every;
+  // 水面那條線：跟身體四周那圈水面一樣高（js/water.js 的 drawWaterRipple：bottom − 身高 × 水面深度）。
+  // 魚頭王泡在水裡時水面在身體中間，不是腳底；潛下去時是身體往下沉，水面高度不變
+  const wade = typeof fishKingWade === 'function' ? fishKingWade(e) : null;
+  const y = wade ? wade.bottom - wade.height * wade.w.depth : e.y + 13 - (e.drawHeight || 190) * FISH_KING.surfaceDepth;
+  K.ripples.push({ x: e.x, y, w: (e.drawWidth || 190) * R.size, t: 0, a: K.sub ? R.subAlpha : 1 });
+}
+function fkDrawRipples(ctx, K) {
+  const R = FISH_KING.ripple, flat = (FISH_KING.oval && FISH_KING.oval.flat) || WATER.rippleFlat;
+  if (!K.ripples || !K.ripples.length) return;
+  ctx.save(); ctx.lineWidth = 1.6;
+  for (const r of K.ripples) {
+    const k = r.t / R.life, rx = r.w * (1 + k * (R.grow - 1)), a = R.alpha * r.a * (1 - k) * Math.min(1, r.t / .15);   // 剛冒出來淡入一下，之後越擴越淡
+    if (a <= .01) continue;
+    ctx.strokeStyle = WATER.rippleColor + a.toFixed(3) + ')';
+    ctx.beginPath(); ctx.ellipse(r.x, r.y, rx, Math.max(3, rx * flat), 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = WATER.rippleColor + (a * .45).toFixed(3) + ')';   // 裡面再一圈細的，比較像水波
+    ctx.beginPath(); ctx.ellipse(r.x, r.y, rx * .72, Math.max(2, rx * .72 * flat), 0, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
 // ---- 畫面 ----
 // 地上那一層（js/render.js 畫地面時呼叫）：潛水的影子、水柱衝天的預警泡泡、水砲的預警扇形
 function drawFishKingGround(ctx) {
   const K = fishKingState(); if (!K) return;
   const now = performance.now() / 1000;
+  fkDrawRipples(ctx, K);   // 游泳時的水波紋（畫在地面那層：在魚身體、影子下面）
   // 潛在水裡的影子
   if (!K.done && K.sub && K.phase === 'swim' && !(K.goneT > 0) && fishKingAlive(K)) {   // 開戰前躲著的時候、被電沉下去消失的時候不畫
     const e = K.e, img = monsterImage(e.forceFrame || (e.frames && e.frames.front) || e.sprite);
@@ -1064,8 +1247,8 @@ function drawFishKingGround(ctx) {
       const w = e.drawWidth, h = e.drawHeight, a = FISH_KING.silhouette * fkSee(e) * (.85 + .15 * Math.sin(now * 1.7));
       ctx.save(); ctx.globalAlpha = a; ctx.imageSmoothingEnabled = false;
       ctx.translate(e.x, e.y + 13 + h * .12); if (e.forceFlip) ctx.scale(-1, 1);
-      ctx.filter = 'brightness(.5) saturate(.6)';
-      ctx.drawImage(img, -w / 2, -h, w, h);
+      if (typeof drawDiveTinted === 'function') drawDiveTinted(ctx, img, -w / 2, -h, w, h);   // 潛在水裡：壓藍黑色（js/water.js 的 WATER.dive）
+      else { ctx.filter = 'brightness(.5) saturate(.6)'; ctx.drawImage(img, -w / 2, -h, w, h); }
       ctx.restore();
     }
   }

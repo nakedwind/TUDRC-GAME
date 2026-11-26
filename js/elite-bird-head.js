@@ -126,7 +126,7 @@ function eliteBirdAmbush(e) {
   }
   if ((e.ambush || []).length) {
     const [ac, ar] = e.ambush[0], [x, y] = center(ac, ar);
-    if (typeof sfxAt === 'function') sfxAt('birdHurt', x, y, .8, 'elite-ambush');
+    if (typeof sfxAt === 'function') bossSfxAt('birdHurt', x, y, .8, 'elite-ambush');
   }
   e.ambush = [];   // 只出現一次
 }
@@ -152,7 +152,7 @@ function stepEliteGuardPose(e, dt) {
   if (p && p.hp > 0) chargerNotice(e, p, chargerCfg(e).noticeTime + .35); else e.alertT = ENEMY_ALERT_TIME;
   flash('嘎！', e.x, e.y - (e.drawHeight || 80) - 4, '#ffe08a');
   G.effects.push({ ring: true, x: e.x, y: e.y - (e.drawHeight || 80) * .6, r: 6, r2: 46, life: .35, life0: .35, color: '#ffe08a' });
-  if (typeof sfxAt === 'function') sfxAt('birdHurt', e.x, e.y, .7, 'elite-guard-' + (e.stepKey ||= Math.random().toString(36).slice(2, 7)));
+  if (typeof sfxAt === 'function') bossSfxAt('birdHurt', e.x, e.y, .7, 'elite-guard-' + (e.stepKey ||= Math.random().toString(36).slice(2, 7)));
   return false;
 }
 
@@ -215,7 +215,7 @@ function eliteBirdScream(e) {
   flash('嘎——！！', e.x, e.y - e.drawHeight - 10, '#ffd27a');
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: e.y - e.drawHeight * .6, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ffd27a' : '#ffffff' });
   bossImpact(e.x, e.y, 9, .06);
-  if (typeof sfxAt === 'function') sfxAt('eliteScream', e.x, e.y, 2.2, 'elite-bird-scream');   // 尖叫：開大聲、有回音（js/sfx.js 的 SOUND_ECHO；音檔暫用鳥頭人被打，可在音效編輯器換）
+  if (typeof sfxAt === 'function') bossSfxAt('eliteScream', e.x, e.y, 2.2, 'elite-bird-scream');   // 尖叫：開大聲、有回音（js/sfx.js 的 SOUND_ECHO；音檔暫用鳥頭人被打，可在音效編輯器換）
 }
 
 // ---- 蓄力：地上的紅色路線 ----
@@ -529,5 +529,5 @@ function eliteBirdDown(e) {
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '核心護盾消失，趁現在打破核心！', '#ffd27a');
   bossImpact(e.x, e.y, 10, .08);
   e.deathSound = 'eliteScream';   // 死掉也是那聲有回音的尖叫：這裡先大聲播；game.js 接著用同一個來源（monster-death）播的那聲會被 70ms 去重吃掉，不會疊兩次
-  if (typeof sfxAt === 'function') sfxAt('eliteScream', e.x, e.y, 2.2, 'monster-death');
+  if (typeof sfxAt === 'function') bossSfxAt('eliteScream', e.x, e.y, 2.2, 'monster-death');
 }

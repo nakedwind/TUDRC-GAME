@@ -303,6 +303,22 @@ const SFX = (() => {
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72, milkfishKingRoar: .62, milkfishKingSpit: .7 };
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
   const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 }, capKingDeath: { delay: .22, feedback: .5, wet: .65 }, pearlElderDeath: { delay: .22, feedback: .5, wet: .65 }, milkfishKingRoar: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
+  // BOSS 的嗓音（被打、死掉、吼叫、尖叫…；BOSS 借用一般怪物的配音時用 bossSfxAt 播）：比一般怪物低沉、大聲、有回音
+  //   數值在「音效編輯器」的「👑 BOSS 嗓音」調，存在 data/sound-settings.js 的 bossVoice：
+  //   pitch＝播放速度（越小越低沉；那個音效自己在 SOUND_PITCH 有設的話照它自己的）、gain＝音量倍率、
+  //   delay／feedback／wet＝回音（同 SOUND_ECHO；那個音效自己在 SOUND_ECHO 有設的話照它自己的；wet 設 0＝沒有回音）
+  //   檔案裡沒有 bossVoice 時才用 BOSS_VOICE_FALLBACK
+  const BOSS_VOICE_KEY = 'tudrc_sound_bossvoice_v1';
+  const BOSS_VOICE_FALLBACK = { pitch: .78, gain: 1.6, delay: .22, feedback: .5, wet: .65 };
+  let BOSS_VOICE;
+  const setBossVoice = v => {
+    const c = { ...BOSS_VOICE_FALLBACK, ...(v || {}) };
+    BOSS_VOICE = { pitch: c.pitch, gain: c.gain, echo: c.wet > 0 ? { delay: c.delay, feedback: c.feedback, wet: c.wet } : null };
+  };
+  setBossVoice(typeof SOUND_SETTINGS !== 'undefined' ? SOUND_SETTINGS.bossVoice : null);
+  if (/[?&]previewSounds=1(&|$)/.test(location.search)) {   // 音效編輯器「用暫存設定預覽遊戲」
+    try { const draft = JSON.parse(localStorage.getItem(BOSS_VOICE_KEY) || 'null'); if (draft && typeof draft === 'object') setBossVoice(draft); } catch (_) {}
+  }
   // 好幾個音檔一起播的音效：每一層各自的音量倍率（照 files 裡的順序；沒寫＝1）
   const LAYER_GAIN = { storySandbagBreak: [1, 1.8], trainHit: [1, 2.2] };   // 沙包被打破、被列車撞：小撞擊大聲一點
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
@@ -322,11 +338,11 @@ const SFX = (() => {
     }
     return all.map((file, index) => ({ file, index }));
   };
-  function playFile(name, gain = 1, sourceKey = name) {
+  function playFile(name, gain = 1, sourceKey = name, boss = false) {   // boss：用 BOSS 的嗓音播（BOSS_VOICE）
     const now = performance.now();
     if (now - (lastPlayed.get(sourceKey) || -Infinity) < 70) return;
     lastPlayed.set(sourceKey, now);
-    const vary = VARIED.has(name), rate = (vary ? jitter(VARY.pitch) : 1) * (SOUND_PITCH[name] || 1);
+    const vary = VARIED.has(name), rate = (vary ? jitter(VARY.pitch) : 1) * (SOUND_PITCH[name] || (boss ? BOSS_VOICE.pitch : 1));
     if (vary) gain *= jitter(VARY.gain);
     const base = gain, clip = clipOf(name);
     playbackLayers(files[name]).forEach(({ file, index }) => {
@@ -336,7 +352,7 @@ const SFX = (() => {
         const src = ctx.createBufferSource(); src.buffer = buffers[key]; src.playbackRate.value = rate;
         const g = ctx.createGain(); g.gain.value = gain;
         src.connect(g); g.connect(master); activeSources.add(src);
-        const echo = SOUND_ECHO[name];
+        const echo = SOUND_ECHO[name] || (boss ? BOSS_VOICE.echo : null);
         if (echo) {   // 回音：延遲線接回自己，逐次變小；播完再等回音收尾才拆掉
           const d = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
           d.delayTime.value = echo.delay; fb.gain.value = echo.feedback; wet.gain.value = echo.wet;
@@ -576,11 +592,11 @@ const SFX = (() => {
     const c = SOUND_CLIP[name] || {}, from = Math.max(0, Number(c.from) || 0), to = Math.max(0, Number(c.to) || 0);
     return { from, to: to > from ? to : 0, speed: Math.min(4, Math.max(.25, Number(c.speed) || 1)) };
   }
-  function play(name, gain = 1, sourceKey = name) {
+  function play(name, gain = 1, sourceKey = name, boss = false) {   // boss：用 BOSS 的嗓音播（低沉、大聲、有回音，BOSS_VOICE）
     if (!enabled) return;
-    gain *= SOUND_GAIN[name] ?? 1;
+    gain *= (SOUND_GAIN[name] ?? 1) * (boss ? BOSS_VOICE.gain : 1);
     if (gain <= 0) return;
-    if (files[name]) { playFile(name, gain, sourceKey); return; }
+    if (files[name]) { playFile(name, gain, sourceKey, boss); return; }
     const f = sounds[name];
     if (f) { ensure(); f(gain); }   // 合成音效也吃音量（sfxAt 會依距離調小）
   }
@@ -621,6 +637,9 @@ const SFX = (() => {
     CLIP_KEY,
     clipOf,                                                // 某個音效的剪輯設定 { from, to（毫秒，0＝到尾）, speed }
     setClips(map) { SOUND_CLIP = { ...(map || {}) }; },    // 音效編輯器即時套用剪輯
+    BOSS_VOICE_KEY,
+    BOSS_VOICE_FALLBACK,
+    setBossVoice,                                          // 音效編輯器即時套用 BOSS 嗓音
     setFiles(config) {
       const next = { ...baseFiles, ...((config || {}).overrides || {}), ...((config || {}).extras || {}) };
       Object.keys(files).forEach(name => { delete files[name]; delete buffers[name]; });
@@ -646,13 +665,19 @@ function sfx(name) {
   SFX.play(name);
 }
 // 角色發出的聲音：靠近玩家最清楚，超過 16 格逐漸淡出。
-function sfxAt(name, x, y, baseGain = 0.4, sourceId = '') {
+function sfxAt(name, x, y, baseGain = 0.4, sourceId = '', boss = false) {   // boss：用 BOSS 的嗓音播（見下面的 bossSfxAt）
   const player = typeof G !== 'undefined' && G && G.player;
   if (!player) return;
   const cell = typeof CELL !== 'undefined' ? CELL : 40;
   const distance = Math.hypot(x - player.x, y - player.y) / cell;
   const distanceGain = distance <= 2 ? 1 : Math.max(0, (16 - distance) / 14);
-  if (distanceGain > 0) SFX.play(name, baseGain * distanceGain, sourceId ? name + ':' + sourceId : name);
+  if (distanceGain > 0) SFX.play(name, baseGain * distanceGain, sourceId ? name + ':' + sourceId : name, boss);
 }
+// BOSS 的嗓音：BOSS 借用一般怪物的配音（被打、死掉、吼叫…）時用這個播，會變得低沉、大聲、有回音（js/sfx.js 的 BOSS_VOICE）。
+// 腳步、水花、撞擊這類不是嗓子發出的聲音照舊用 sfxAt
+function bossSfxAt(name, x, y, baseGain = 0.4, sourceId = '') { sfxAt(name, x, y, baseGain, sourceId, true); }
+// 這隻怪物是不是 BOSS（各 BOSS 檔案給怪物加的記號；老鼠王抓人的手不算）：被打、死掉的通用音效照這個決定要不要用 BOSS 的嗓音（js/game.js）
+const isBossVoice = e => !!e && !e.ratKingHand && !!(e.elite || e.capKing || e.pearlBoss || e.mothBoss || e.loofahQueen
+  || e.bananaEmperor || e.gourdKing || e.ratKing || e.poolBoss || e.fishKing || e.behavior === 'milkfishKing');
 
 // 靜音：在設定裡的「🔇 靜音」勾選（M 鍵改成打開 T-Pad 地圖，見 js/tpad-map.js）

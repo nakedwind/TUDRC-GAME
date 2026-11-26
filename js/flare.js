@@ -144,6 +144,7 @@ function updateFlares(dt) {
   if (G.flareShots && G.flareShots.length) {
     for (const s of G.flareShots) {
       s.t += dt;
+      if (s.t >= s.T && typeof shotLandsInWater === 'function' && shotLandsInWater(s.x1, s.y1, s.floor, true)) continue;   // 落在深水裡：立刻熄掉、不會亮（js/swim-ring.js）
       if (s.t >= s.T) {   // 落地：開始燃燒
         (G.flares = G.flares || []).push({ x: s.x1, y: s.y1, floor: s.floor, t: FLARE.burn, emberT: 0, seed: Math.random() * 10 });
         if (fxV2) flareV2Land(G.flares[G.flares.length - 1]);   // V2：落地一閃、火花濺開

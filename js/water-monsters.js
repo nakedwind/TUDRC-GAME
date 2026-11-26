@@ -42,7 +42,7 @@ const WATER_MONSTERS = applyBossSettings('WATER_MONSTERS', {
 const WATER_COMBAT = applyBossSettings('WATER_COMBAT', {
   rateMul: .5,
   hitMul: .7,
-  recoil: 18,
+  recoil: 30,
   recoilSecs: .35,
 });
 // 會生在水裡的怪物（怪物編輯器的 id）
@@ -192,6 +192,7 @@ function aquaSpawned(m) {
 // 不在水裡了（被推上岸、跳上岸、水被抽乾）：變回一般的陸地怪物
 function aquaLeave(e) {
   e.aqua = false; e.aq = null; e.slimeLift = 0; e.airborne = false;
+  if (e.behavior === 'clownfish' && typeof cfSwimStride === 'function') cfSwimStride(e, false);   // 小丑魚上岸：換圖速度換回原本的
   if (typeof resetEnemyNavigation === 'function') resetEnemyNavigation(e);
 }
 
@@ -207,6 +208,7 @@ function stepAquaMonster(e, dt) {
     return true;
   }
   if (!aquaOn() || !deepWaterAtPoint(e.x, e.y)) { aquaLeave(e); return false; }
+  if (e.behavior === 'clownfish' && typeof cfSwimStride === 'function') cfSwimStride(e, true);   // 普通小丑魚在深水裡游：換圖慢一點（CLOWNFISH.swimFrameMul，js/clownfish.js）
   e.moving = false;
   if (e.stunT > 0) return true;
   if (!aquaPoolHasRoom(e)) { aquaGoAshore(e); return true; }   // 這一池太窄、游哪裡身體都會穿到岸上：直接跳上岸
@@ -411,9 +413,11 @@ function drawWaterMonstersGround(ctx) {
     const e = u.e, img = monsterImage((e.frames && e.frames.front) || e.sprite);
     if (img && img.complete && img.naturalWidth) {
       const w = e.drawWidth || 60, h = e.drawHeight || 60;
-      ctx.save(); ctx.globalAlpha = .3; ctx.imageSmoothingEnabled = false; ctx.filter = 'brightness(.45) saturate(.5)';
+      ctx.save(); ctx.globalAlpha = .3; ctx.imageSmoothingEnabled = false;
       ctx.translate(e.x, e.y + 13 + h * .15); if (e.faceRight) ctx.scale(-1, 1);
-      ctx.drawImage(img, -w / 2, -h, w, h); ctx.restore();
+      if (typeof drawDiveTinted === 'function') drawDiveTinted(ctx, img, -w / 2, -h, w, h);   // 潛在水裡：壓藍黑色（js/water.js 的 WATER.dive）
+      else { ctx.filter = 'brightness(.45) saturate(.5)'; ctx.drawImage(img, -w / 2, -h, w, h); }
+      ctx.restore();
     }
     if (u.phase !== 'warn') continue;
     const k = Math.max(0, Math.min(1, u.t / S.warn)), R = S.radius * CELL, x = u.spot.x, y = u.spot.y + 8;

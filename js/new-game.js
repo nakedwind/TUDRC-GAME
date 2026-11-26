@@ -31,6 +31,7 @@
     'tudrc_story_triggers_v1',   // 走進地圖時播過的劇情（js/story-triggers.js）
     'tudrc_squad_gear_v1',   // 隊員身上穿的裝備（js/squad-gear.js）：要跟背包一起重設／還原，不然測試模式穿上的裝備會留在正式存檔
     'tudrc_squad_gear_v2',   // 新版裝備：隊員身上穿的（js/gear-v2.js）
+    'tudrc_squad_battery_v1',   // 戴照明頭盔的隊友身上的電池（js/squad-battery.js）
     'tudrc_gear_v2_migrated',   // 新版裝備：舊存檔轉換過了沒（js/gear-v2.js）
     'tudrc_tunnels_found_v1',   // 球球找到的隱藏地道（js/rescue-dog.js）
     'tudrc_seen_items_v1',   // 看過說明的物品（js/item-intro.js）

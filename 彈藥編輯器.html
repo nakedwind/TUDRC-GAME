@@ -42,6 +42,10 @@
     .b-icon { width:48px; height:24px; display:flex; align-items:center; justify-content:center; font-size:18px }
     .b-icon img { max-width:48px; max-height:24px; image-rendering:pixelated }
     .bullet header code { color:#6d8ea5 } .bullet header .revert { margin-left:auto }
+    .bullet .off-toggle { margin-left:auto; display:flex; align-items:center; gap:4px; font-size:13px; color:#ffb4a8; cursor:pointer }
+    .bullet .off-toggle + .revert { margin-left:0 }
+    .bullet.off { opacity:.6; border-left-color:#666 }
+    .bullet .off-note { margin:6px 0 0; color:#ffb4a8; font-size:13px }
     .summary { margin:12px 0 0; padding:8px 11px; border-radius:8px; background:#0c1620; font-size:13px; color:#d9e8f3 } .summary b { color:var(--c) }
     .foot { border-top:1px solid #344e62; padding-top:18px; margin-top:8px }
     .actions { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:9px }
@@ -79,12 +83,12 @@
 
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script>document.write('<script src="data/bullet-tuning.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 目前存在檔案裡的子彈數值；每次都讀最新的 -->
-  <script src="data/equipment.js?v=slots4-20261123"></script>   <!-- 子彈的名字、圖、顏色；手槍傷害當參考 -->
-  <script src="data/monsters.js?v=leapzone-20261126"></script>   <!-- 怪物血量：列出哪些算大型怪物 -->
+  <script src="data/equipment.js?v=merge-20261126"></script>   <!-- 子彈的名字、圖、顏色；手槍傷害當參考 -->
+  <script src="data/monsters.js?v=corelink-20261126"></script>   <!-- 怪物血量：列出哪些算大型怪物 -->
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
-  <script src="js/bullet-editor.js?v=init-20261121"></script>
-  <script src="js/editor-nav.js?v=caustics-20261125"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+  <script src="js/bullet-editor.js?v=nosticky-20261126"></script>
+  <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

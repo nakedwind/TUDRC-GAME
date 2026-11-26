@@ -519,7 +519,9 @@ function fixMap(m) {
   if (Array.isArray(m.vines) && m.vines.length) m.vines = [...new Set(m.vines)]; else delete m.vines;   // 🌿 垂吊藤蔓：['欄,列'…]（js/vines.js）
   if (Array.isArray(m.vinesHang) && m.vinesHang.length) m.vinesHang = [...new Set(m.vinesHang)]; else delete m.vinesHang;
   if (Array.isArray(m.vinesFerry)) m.vinesFerry = m.vinesFerry.filter(f => f && typeof f.at === 'string' && typeof f.to === 'string');   // 🌿➡ 傳送藤蔓：[{ at: '欄,列', to: '落點欄,列' }]（js/vines.js）
-  if (!(m.vinesFerry && m.vinesFerry.length)) delete m.vinesFerry;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
+  if (!(m.vinesFerry && m.vinesFerry.length)) delete m.vinesFerry;
+  if (Array.isArray(m.fkLeaps)) m.fkLeaps = m.fkLeaps.filter(f => f && typeof f.at === 'string' && typeof f.to === 'string' && f.at !== f.to);   // 🐬 魚頭王海豚躍路線：[{ at: '起跳欄,列', to: '落水欄,列' }]（js/fish-king.js）
+  if (!(m.fkLeaps && m.fkLeaps.length)) delete m.fkLeaps;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
   if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   if (Array.isArray(m.bossDrops) && m.bossDrops.length) m.bossDrops = [...new Set(m.bossDrops)]; else delete m.bossDrops;   // 🦋 BOSS 丟人落點：['欄,列'…]（js/moth-boss.js 人面蝶后抓人後只丟在這些格子）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
@@ -553,6 +555,7 @@ function fixMap(m) {
 // 同地圖傳送點：出入口通往自己這張地圖，at 記著要送到哪一格（遊戲裡 js/game.js 的 teleportInMap）
 const isSameMapPortal = (p, m) => !!(p && m && p.to === m.id && Array.isArray(p.at));
 let solidSize = 1, solidPaintAdd = true;   // 🧱 不可穿透筆刷大小（1＝1×1、2＝2×2、3＝3×3，按 🧱 跳出選單選）；按下那一格決定這一筆是「畫」還是「擦」
+let fkLeapFrom = null;   // 正在畫魚頭王海豚躍路線：已點了起跳那一格、等點落水那一格 { mapId, key }
 let ferryFrom = null;   // 正在放傳送藤蔓：已點了藤蔓那一格、等點落點 { mapId, key }
 let portalLinkFrom = null;   // 正在設傳送點：已點了第一格、等第二格 { mapId, c, r, oneWay }（oneWay＝單向，不在對面放回程的傳送點）
 // ---- 遊戲畫質：畫布用跟遊戲一樣的放大倍率畫（js/config.js 的 VIEW_ZOOM，1.5 倍＝一格 60px）----
@@ -1452,9 +1455,36 @@ function drawFerryVineMarks(m) {
   if (list.length) { ctx.fillStyle = '#7fe0c8'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('🌿➡ 傳送藤蔓 ' + list.length + ' 條', OX + 6, OY + 124); }
   ctx.restore();
 }
+// 🐬 魚頭王海豚躍路線：起跳那一格（藍色框＋🐬）→ 拱起來的虛線箭頭 → 落水那一格（圈）
+function drawFkLeapMarks(m) {
+  const list = m.fkLeaps || [], cellXY = k => { const [c, r] = k.split(',').map(Number); return [OX + c * CELL, OY + r * CELL]; };
+  if (!list.length && !(fkLeapFrom && fkLeapFrom.mapId === m.id)) return;
+  ctx.save();
+  list.forEach((f, i) => {
+    const [x, y] = cellXY(f.at), [tx, ty] = cellXY(f.to);
+    const ax = x + CELL / 2, ay = y + CELL / 2, bx = tx + CELL / 2, by = ty + CELL / 2, qx = (ax + bx) / 2, qy = Math.min(ay, by) - Math.max(CELL * 2, Math.hypot(bx - ax, by - ay) * .35);
+    ctx.strokeStyle = 'rgba(120,190,255,.95)'; ctx.lineWidth = 3; ctx.setLineDash([9, 6]);
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(qx, qy, bx, by); ctx.stroke(); ctx.setLineDash([]);
+    const ang = Math.atan2(by - qy, bx - qx);   // 箭頭方向：曲線最後一段
+    ctx.fillStyle = '#78beff'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx - Math.cos(ang - .45) * 16, by - Math.sin(ang - .45) * 16); ctx.lineTo(bx - Math.cos(ang + .45) * 16, by - Math.sin(ang + .45) * 16); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#78beff'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(bx, by, CELL * .45, 0, Math.PI * 2); ctx.stroke();   // 落水點
+    ctx.strokeStyle = '#78beff'; ctx.lineWidth = 2.5; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);   // 起跳點
+    ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText('🐬', ax, ay);
+    ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#cfe8ff'; ctx.fillText(String(i + 1), qx, qy + 10);   // 路線編號（畫在弧線頂端）
+  });
+  if (fkLeapFrom && fkLeapFrom.mapId === m.id) {   // 畫到一半：起跳那一格用黃色虛線框起來，等點落水那一格
+    const [x, y] = cellXY(fkLeapFrom.key);
+    ctx.strokeStyle = '#ffe36b'; ctx.lineWidth = 3; ctx.setLineDash([5, 4]); ctx.strokeRect(x + 1, y + 1, CELL - 2, CELL - 2); ctx.setLineDash([]);
+    ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText('🐬', x + CELL / 2, y + CELL / 2);
+  }
+  ctx.textBaseline = 'alphabetic';
+  if (list.length) { ctx.fillStyle = '#78beff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('🐬 魚頭王海豚躍路線 ' + list.length + ' 條', OX + 6, OY + 142); }
+  ctx.restore();
+}
 // 🌿 垂吊藤蔓：尖端垂到的那一格
 function drawVineMarks(m) {
   drawFerryVineMarks(m);
+  drawFkLeapMarks(m);
   const hang = (m.vinesHang || []).map(k => k.split(',').map(Number));
   for (const [c, r] of hang) {   // 🪢 倒吊藤蔓
     const x = OX + c * CELL, y = OY + r * CELL;
@@ -1863,7 +1893,7 @@ function placeStamp(c, r, t, ox = 0, oy = 0) {
   checkResult = null; saveMaps(); draw();
 }
 // 這格有沒有可以拾取的東西（拾取亮點、電池、杏仁水、鑰匙、塗鴉筆…）：回傳 { layer, c, r }（大圖＝左上角那一格）
-const editorIsPickupTile = id => { const t = tileById(id) || {}; return /^tile_interactive_pickup/.test(id) || id === 'tile_interactive_storage_locker_key' || /拾取亮點|鑰匙|電池|杏仁水|腎上腺素|塗鴉筆/.test(String(t.name || '')); };
+const editorIsPickupTile = id => { const t = tileById(id) || {}; return /^tile_interactive_(water_)?pickup/.test(id) || id === 'tile_interactive_storage_locker_key' || /拾取亮點|鑰匙|電池|杏仁水|腎上腺素|塗鴉筆/.test(String(t.name || '')); };
 function editorPickupAt(m, c, r) {
   const si = stampIndexAt(m, c, r);
   if (si >= 0 && editorIsPickupTile(m.stamps[si].id)) { const s = m.stamps[si]; return { layer: s.layer || 'top', c: s.c, r: s.r }; }
@@ -2077,6 +2107,25 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (list.length) m.bossDrops = list; else delete m.bossDrops;
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這個落點（剩 ' + list.length + ' 個）' : '已放上第 ' + list.length + ' 個 BOSS 丟人落點：人面蝶后抓人後會飛到最近的落點丟下來。請放在空地中間、離牆遠一點', '#ff9fd0');
+    return;
+  } else if (brush.mode === 'fkleap') {   // 🐬 魚頭王海豚躍路線：先點起跳那一格、再點落水那一格；點已經畫好的起跳點或落水點＝拿掉那條
+    if (!isDown) return;
+    const list = m.fkLeaps || [];
+    if (fkLeapFrom && fkLeapFrom.mapId === m.id) {
+      const from = fkLeapFrom.key;
+      if (key === from) { fkLeapFrom = null; draw(); setStatus('已取消畫海豚躍路線', '#8fd3ff'); return; }
+      if (m.solid.includes(key)) { setStatus('落水點要在深水裡（不能是紅格）', '#ff8f8f'); return; }
+      fkLeapFrom = null;
+      list.push({ at: from, to: key }); m.fkLeaps = list;
+      saveMaps(); draw();
+      setStatus('已畫好第 ' + list.length + ' 條海豚躍路線：魚頭王要跳時會先潛水游到起點，再跳到落水點（兩格都要在深水裡）', '#78beff');
+      return;
+    }
+    let i = list.findIndex(f => f.at === key); if (i < 0) i = list.findIndex(f => f.to === key);
+    if (i >= 0) { list.splice(i, 1); if (list.length) m.fkLeaps = list; else delete m.fkLeaps; saveMaps(); draw(); setStatus('已拿掉這條海豚躍路線（剩 ' + list.length + ' 條）', '#78beff'); return; }
+    if (m.solid.includes(key)) { setStatus('起跳點要在深水裡（不能是紅格）', '#ff8f8f'); return; }
+    fkLeapFrom = { mapId: m.id, key }; draw();
+    setStatus('起跳點在這一格了，再點一下落水的那一格（點同一格＝取消）', '#78beff');
     return;
   } else if (brush.mode === 'vineferry') {   // 🌿➡ 傳送藤蔓：點一格放藤蔓、再點落點；點已經放好的藤蔓＝拿掉
     if (!isDown) return;
@@ -3243,7 +3292,7 @@ document.querySelectorAll('#mapbar .tool-more').forEach(more => {
   more.addEventListener('toggle', fit); window.addEventListener('resize', fit);
 });
 document.querySelectorAll('.tool').forEach(btn => {
-  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn);
+  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; fkLeapFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn);
     // 選了要畫紅格、綠格、邊緣碰撞的筆刷，但「紅綠格」顯示關著：自動打開（不然畫上去看不到，像是畫不了）
     if (['solid', 'solidnudge', 'edge', 'spawn'].includes(btn.dataset.mode) && !showSolid) document.getElementById('solidToggle')?.click();
   });
@@ -4311,6 +4360,8 @@ function loadRules() {
   document.getElementById('f_coreCount').value = m.coreCount;
   if (document.getElementById('f_difficulty')) document.getElementById('f_difficulty').value = Math.max(1, Math.min(5, Math.floor(Number(m.difficulty) || 1)));   // 核心難度：沒設定過＝1
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
+  const fund = typeof REWARDS_DATA !== 'undefined' && REWARDS_DATA.entryFunds ? REWARDS_DATA.entryFunds[m.id] : null;
+  if (fund != null) document.getElementById('f_money').value = fund;   // 經費以 🏅 獎勵編輯器（data/rewards.js）為準，這裡只顯示
   renderMonsterMix();
 }
 window.addEventListener('focus', renderMonsterMix);
@@ -4344,6 +4395,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.vines) m.vines = m.vines.map(shiftKey);
   if (m.vinesHang) m.vinesHang = m.vinesHang.map(shiftKey);
   if (m.vinesFerry) m.vinesFerry = m.vinesFerry.map(f => ({ ...f, at: shiftKey(f.at), to: shiftKey(f.to) }));
+  if (m.fkLeaps) m.fkLeaps = m.fkLeaps.map(f => ({ ...f, at: shiftKey(f.at), to: shiftKey(f.to) }));
   if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
   if (m.bossDrops) m.bossDrops = m.bossDrops.map(shiftKey);
   if (m.deck) m.deck = m.deck.map(shiftKey);
@@ -4390,6 +4442,7 @@ function dropOutsideContent(m) {
   if (m.vines) { const n = m.vines.length; m.vines = m.vines.filter(insideKey); removed += n - m.vines.length; if (!m.vines.length) delete m.vines; }
   if (m.vinesHang) { const n = m.vinesHang.length; m.vinesHang = m.vinesHang.filter(insideKey); removed += n - m.vinesHang.length; if (!m.vinesHang.length) delete m.vinesHang; }
   if (m.vinesFerry) { const n = m.vinesFerry.length; m.vinesFerry = m.vinesFerry.filter(f => insideKey(f.at) && insideKey(f.to)); removed += n - m.vinesFerry.length; if (!m.vinesFerry.length) delete m.vinesFerry; }
+  if (m.fkLeaps) { const n = m.fkLeaps.length; m.fkLeaps = m.fkLeaps.filter(f => insideKey(f.at) && insideKey(f.to)); removed += n - m.fkLeaps.length; if (!m.fkLeaps.length) delete m.fkLeaps; }
   if (m.deck) { m.deck = m.deck.filter(insideKey); if (!m.deck.length) delete m.deck; }
   for (const f of ['deckAdd', 'deckDel']) if (m[f]) { m[f] = m[f].filter(insideKey); if (!m[f].length) delete m[f]; }   // 2 樓地面自動模式的例外
   if (m.ramps) { m.ramps = m.ramps.filter(insideKey); if (!m.ramps.length) delete m.ramps; }
@@ -4549,7 +4602,7 @@ if (fogField) fogField.addEventListener('change', e => {
   pushUndo(); if (e.target.value) curMap().fog = e.target.value; else delete curMap().fog; saveMaps();
   setStatus(e.target.value === 'heavy' ? '這張地圖會起濃霧' : e.target.value === 'light' ? '這張地圖會起薄霧' : '這張地圖沒有霧了', '#8fd3ff');
 });
-RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).addEventListener('input', e => { const v = parseFloat(e.target.value); curMap().rules[k] = isNaN(v) ? 0 : v; saveMaps(); }); });
+RULE_FIELDS.filter(k => k !== 'money').forEach(k => { document.getElementById('f_' + k).addEventListener('input', e => { const v = parseFloat(e.target.value); curMap().rules[k] = isNaN(v) ? 0 : v; saveMaps(); }); });
 document.getElementById('f_coreCount').addEventListener('change', e => {
   const count = Math.max(1, Math.min(20, Math.floor(Number(e.target.value) || 1)));
   pushUndo(); curMap().coreCount = count; e.target.value = count;

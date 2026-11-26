@@ -370,6 +370,7 @@ function getLights() {
   // 站在樓梯／手扶梯上（樓層出入口的格子、或畫面上已經算 2 樓但人還沒踏上去）：手上的燈兩層都照（floor 0）
   const onStairs = hasFloors && G && G.player && (rampCells.has(cellAt(G.player.x, G.player.y).join(',')) || visualFloor(G.player) !== pf);
   if (typeof equipLight === 'function') for (const l of equipLight()) { l.floor = onStairs ? 0 : pf; L.push(l); }   // 照明頭盔、手電筒（js/equipment.js）
+  if (typeof squadEquipLights === 'function') L.push(...squadEquipLights());   // 隊員戴的照明頭盔（js/equipment.js）：照隊員自己那一層
   // 營地常亮（沒自訂營地就用預設最下排）
   if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); const [x, y] = center(c, r); L.push({ x, y, r: LIGHT.campR, floor: 1 }); });   // 營地在 1 樓
   else for (let c = 0; c < COLS; c++) { const [x, y] = center(c, ROWS - 1); L.push({ x, y, r: LIGHT.campR, floor: 1 }); }

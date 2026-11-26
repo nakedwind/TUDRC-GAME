@@ -219,7 +219,7 @@ function mbScream(e, banner) {
   const top = e.y - (e.slimeLift || 0) - e.drawHeight * .5;
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: top, r: 8 + i * 6, r2: 110 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#e7c8ff' : '#ffffff' });
   bossImpact(e.x, e.y, 7, .05);
-  if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-scream');
+  if (typeof sfxAt === 'function') bossSfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-scream');
 }
 
 // 核心腳下的腐蝕痕跡：抱在身上時收掉，放到地上時在巢那裡重新鋪上（跟 js/pearl-elder.js 同一套）
@@ -469,7 +469,7 @@ function mbIntroTick(e, dt) {
     if (it.t >= BOSS_CINEMA.pan) { it.phase = 'shadow'; it.t = 0; }
   } else if (it.phase === 'shadow') {   // 巨大黑影掠過畫面
     if ((it.flapT -= dt) <= 0) { it.flapT = .35; if (typeof sfxAt === 'function') sfxAt('mothFlap', cam.x + viewW() / 2, cam.y + viewH() / 2, MOTH_BOSS.sound.wake, 'moth-boss-intro-flap'); }
-    if (it.t >= I.shadow) { it.phase = 'dive'; it.t = 0; if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-scream'); }
+    if (it.t >= I.shadow) { it.phase = 'dive'; it.t = 0; if (typeof sfxAt === 'function') bossSfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake, 'moth-boss-scream'); }
   } else if (it.phase === 'dive') {   // 從鏡頭方向俯衝下來：跟「飛回來」同一套（mbSkyLook 的 skyDown），一開始半透明
     const u = Math.max(0, 1 - it.t / I.dive);   // 1＝最大最近、0＝原本的樣子
     e.slimeLift = MOTH_BOSS.height + I.diveRise * u * u;
@@ -744,7 +744,7 @@ function mbBurst(e, dt, z, hasTarget, opt = {}) {
     const col = `rgb(${r},${g},${b})`;
     for (let i = 0; i < 3; i++) { const life = Math.max(.3, tele - i * .3); G.effects.push({ ring: true, x: home.x, y: home.y, r: R * (.15 + i * .25), r2: R, life, life0: life, color: col }); }
     flash(MOTH_BOSS.name + '張開翅膀…', e.x, e.y - e.slimeLift - e.drawHeight - 6, MOTH_COLORS[kind].glow);
-    if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake * .6, 'moth-boss-scream');
+    if (typeof sfxAt === 'function') bossSfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake * .6, 'moth-boss-scream');
     return true;
   }
   const s = mb.burst, home = s.home;
@@ -791,7 +791,7 @@ function mbTryGrab(e, dt, home) {
   e.mo.spray = null;
   mbSet(e, 'swoop');
   flash(a === G.player ? MOTH_BOSS.name + '盯上你了！' : MOTH_BOSS.name + '盯上了隊員！', a.x, a.y - 70, '#ff8fb0', .9);
-  if (typeof sfxAt === 'function') sfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake * .7, 'moth-boss-scream');
+  if (typeof sfxAt === 'function') bossSfxAt('mothHurt', e.x, e.y, MOTH_BOSS.sound.wake * .7, 'moth-boss-scream');
   return true;
 }
 // 預告（發抖、目標腳下紅圈）→ 俯衝：碰到就抓起來，時間到沒碰到就撲空

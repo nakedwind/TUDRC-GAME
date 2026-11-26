@@ -230,7 +230,7 @@ function gkWallHit(K, n) {
   K.jitter = C.jitter[i] || 0; K.jitterT = .4;
   // 聲音：撞擊聲越來越大；離得遠也聽得到一點（悶悶的）
   gkSound('gourdSlam', box.cx, box.bottom, .7 + .15 * n);
-  if (last) { gkSound('bigBoom', box.cx, box.bottom, .9); gkSound('gourdLandCry', box.cx, box.bottom, 1); }
+  if (last) { gkSound('bigBoom', box.cx, box.bottom, .9); gkSound('gourdLandCry', box.cx, box.bottom, 1, true); }
   if (n === 1) systemNotice('⚠ 牆後面傳來沉重的撞擊聲……', true);
   if (n === 3) systemNotice('⚠ 牆快要撐不住了！', true);
   const W = box.x1 - box.x0;
@@ -288,10 +288,10 @@ function gkShake(x, y, amt) {
   const p = G.player, d = p ? Math.hypot(p.x - x, p.y - y) / CELL : 0;
   addShake(amt * Math.max(.35, 1 - d / GOURD_KING.knock.shakeRange));
 }
-function gkSound(name, x, y, gain) {
+function gkSound(name, x, y, gain, boss = false) {   // boss：用 BOSS 的嗓音播（低沉、大聲、有回音，js/sfx.js 的 BOSS_VOICE）
   if (typeof SFX === 'undefined' || !G.player) return;
   const d = Math.hypot(x - G.player.x, y - G.player.y) / CELL;
-  SFX.play(name, gain * (d <= 4 ? 1 : Math.max(.3, 1 - (d - 4) / 30)), name + ':gourd-king');
+  SFX.play(name, gain * (d <= 4 ? 1 : Math.max(.3, 1 - (d - 4) / 30)), name + ':gourd-king', boss);
 }
 // 牆抖動（js/maploader.js 畫圖章時呼叫）：回傳 [dx, dy] 或 null
 function gourdKingWallJitter(s) {
@@ -328,7 +328,7 @@ function gkEmerge(K) {
   e.gkIntroHp = e.hp;
   G.enemies.push(e);
   K.e = e;
-  gkSound('gourdLandCry', sx, sy, 1.1);   // 衝出來時吼一聲
+  gkSound('gourdLandCry', sx, sy, 1.1, true);   // 衝出來時吼一聲
   systemNotice('⚠ ' + B.name + '撞破牆壁衝出來了！', true);
 }
 // 跳出來：飛高 → 在最高點停一下 → 砸下來（跟平常的泰山壓頂一樣的圖），落地才開始亮相

@@ -58,10 +58,10 @@ const SITUATIONS = [
     group: '報告任務（通訊員）', key: 'brief_' + m.id, label: '報告任務：' + m.name, ordered: true,
     when: '「' + m.name + '」開放後，回到應變中心時他會走過來，<b>依序</b>一句一句報告這個任務（只報告一次）。',
   })),
-  // 報告 BOSS 特別獎金（通訊員）：每隻 BOSS 一格，名單和金額在 data/missions.js
+  // 報告 BOSS 特別獎金（通訊員）：每隻 BOSS 一格，名單、經費、異質碎片在 data/rewards.js（🏅 獎勵編輯器）
   ...(typeof BOSS_BOUNTIES !== 'undefined' ? BOSS_BOUNTIES : []).map(b => ({
     group: '報告任務（通訊員）', key: 'bounty_' + b.id, label: '特別獎金：' + b.name, ordered: true,
-    when: '討伐' + b.name + '後回到應變中心，他會走過來<b>依序</b>報告（每次討伐都會報告，排在報告任務前面）。<b>{money}</b> 會換成金額（' + b.money + '）。',
+    when: '討伐' + b.name + '後回到應變中心，他會走過來<b>依序</b>報告（每次討伐都會報告，排在報告任務前面）。<b>{money}</b> 會換成經費（' + b.money + '）、<b>{crystals}</b> 會換成異質碎片（' + (b.crystals || 0) + '）。金額在 🏅 獎勵編輯器改。',
   })),
 ];
 // 狂戰士人格的台詞欄位

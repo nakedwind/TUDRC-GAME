@@ -1127,6 +1127,7 @@ function draw() {
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ floor: looseFloor(c), y: c.y + 13, draw: () => drawCorpseSorted(c) });
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
+  if (typeof waterPickupSortables === 'function') waterPickupSortables(sortables);   // 水上拾取物：小圖浮在水上（js/storage-lockers.js）
   if (typeof drawGroundItem === 'function') for (const g of G.groundItems || []) sortables.push({ floor: looseFloor(g), y: g.y + GROUND_ITEMS.sortDy, draw: () => drawGroundItem(ctx, g) });   // 溫特從背包放在地上的東西（js/ground-items.js）
   if (typeof fishEggSortables === 'function') fishEggSortables(sortables);   // 比基尼小丑魚的魚卵（js/clownfish.js）：照底部 Y 跟人、物件排前後
   if (typeof oreShardSortables === 'function') oreShardSortables(sortables);   // 炸開礦物後掉在地上的異質碎片（js/ore.js）：同上
@@ -1349,7 +1350,8 @@ function draw() {
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
   if (typeof drawCooking === 'function') drawCooking(ctx);
   if (typeof drawMealFx === 'function') drawMealFx(ctx);   // 餐廳：正在吃的餐盤冒熱氣（js/meal.js）   // 爐灶：爐火、鍋上的食物、蒸氣、進度圈（js/cooking.js）
-  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
+  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);
+  if (typeof drawSquadBatteryBubbles === 'function') drawSquadBatteryBubbles(ctx);   // 戴照明頭盔的隊友電池用完：頭上的思考泡泡（js/squad-battery.js）   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
   if (typeof sanityGrayWorld === 'function') sanityGrayWorld(ctx);   // SP 低：到這裡為止畫好的遊戲畫面變灰變暗；下面的泡泡、提示不變灰（js/sanity.js）
   // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
   drawInteractionPrompts();   // 互動提示（開門、對話、拾取…）：黑幕之上，暗處也看得到

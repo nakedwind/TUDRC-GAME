@@ -21,6 +21,7 @@ const CLOWNFISH = {
   // ---- 在水裡：不跳了，改成慢慢游、身體載浮載沉（浮沉的樣子在 js/water.js 的 WATER.bob）----
   swimMul: .45,        // 在水裡游的速度＝走路速度的幾倍（約等於跳著走的平均速度）
   swimPulse: 2,        // 在水裡每隔幾秒算一次「撞到人」和生魚卵（取代落地那一下）
+  swimFrameMul: 5,     // 普通小丑魚在水裡游的時候，換圖片的速度慢幾倍（5＝慢 5 倍；幼體不受影響）
   // ---- 追擊 ----
   noticeRange: 9,      // 看到玩家／哨兵的距離（格）
   loseRange: 14,       // 追多遠就放棄（格）
@@ -94,6 +95,14 @@ function cfPickTarget(e) {
   return best;
 }
 
+// 普通小丑魚游泳時，走路圖每「游幾像素」換一張改大（js/render.js 的 monsterWalkFrame 用 walkStride 決定換圖快慢；普通是 10）
+// on＝true 在水裡游、false 上岸了（換回原本的速度）
+function cfSwimStride(e, on) {
+  if (cfIsHatchling(e)) return;
+  if (on && !e.cfSwimStride) { e.cfSwimStride = true; e.cfStride0 = e.walkStride; e.walkStride = (e.walkStride || 10) * CLOWNFISH.swimFrameMul; }
+  else if (!on && e.cfSwimStride) { e.cfSwimStride = false; e.walkStride = e.cfStride0; }
+}
+
 // ---- 彈跳節奏：回傳「這一幀可以前進多少時間」（只有騰空時才會前進）----
 function updateClownfishHop(e, dt) {
   const C = CLOWNFISH, cf = cfState(e), k = cfIsHatchling(e) ? C.hatchlingHopMul : 1;
@@ -104,11 +113,12 @@ function updateClownfishHop(e, dt) {
   if (cf.phase !== 'air' && cfInWater(e)) {
     if (cf.phase !== 'swim') { cf.phase = 'swim'; cf.pulse = C.swimPulse * .5; }
     e.forceFrame = null; e.slimeLift = 0; e.waterSwim = true;
+    cfSwimStride(e, true);   // 游泳時換圖片慢一點
     cf.pulse -= dt;
     if (cf.pulse <= 0) { cf.pulse = C.swimPulse * k; clownfishLand(e, true); }   // 每隔一陣子：撞到旁邊的人、生魚卵
     return dt * C.swimMul;
   }
-  e.waterSwim = false;
+  e.waterSwim = false; cfSwimStride(e, false);
   if (cf.phase === 'swim') { cf.phase = 'rest'; cf.t = C.hopRest * .3 * k; }   // 游上岸了：休息一下再開始跳
   cf.t -= dt;
   if (cf.phase === 'rest') {

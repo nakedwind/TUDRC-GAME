@@ -80,6 +80,7 @@ function onSortieNewGame() {
     const restocked = typeof stockCampSupplyForSortie === 'function' ? stockCampSupplyForSortie() : [];   // 營地物資箱：第二次出勤起，急救包、杏仁水各多給 2 個（js/camp-supply.js）
     if (restocked.length) systemNotice('🧰 應變中心在營地的物資箱補了' + restocked.join('、'));
     if (typeof onMagazineSortie === 'function') onMagazineSortie();   // 彈匣：開發的子彈補滿（js/magazine.js）
+    if (typeof squadBatterySortie === 'function') squadBatterySortie();   // 戴照明頭盔的隊友：身上的電池補到 3 顆（js/squad-battery.js）
   }
   sortieLastSafe = MAP_SAFE;
 }

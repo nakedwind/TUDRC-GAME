@@ -359,6 +359,7 @@ function gearSquadNote(d) {
   const w = gearWho(d);
   if (w === 'winter') return '（部隊長專用）';
   if ((d.levels[0] || {}).boost != null) return '（嚮導、哨兵都能戴，兩邊都戴效果疊加）';   // 共感手環（js/equipment.js 的 equipSootheMul）
+  if (d.id === 'lamphelmet') { const k = typeof squadLampMul === 'function' ? squadLampMul() : { range: 1, bright: 1 }; return '（隊員戴了身邊也會亮，可以走進暗處、看見光圈裡的怪物；照明半徑 ' + Math.round(k.range * 100) + '%、亮度 ' + Math.round(k.bright * 100) + '%；隊員戴要耗電，把電池丟在地上給他們撿）'; }   // js/equipment.js 的 squadEquipLights、js/sentry.js 的 personnelCarriesLight
   const keys = Object.keys(d.levels[0] || {}).filter(k => GEAR_SQUAD_MODS[k]);
   return keys.length ? (w === 'squad' ? '（隊員專用）' : '（隊員也能穿，效果相同）') : '（隊員穿了沒有效果）';
 }

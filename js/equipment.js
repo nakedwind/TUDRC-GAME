@@ -155,6 +155,39 @@ function equipLight() {
   if (v && equipState.battery > 0) L.push({ x: p.x, y: p.y + FLASH_BEAM.dy, r: v.light, smooth: true, cone: { ang: flashlightAngle(), half: v.spread * Math.PI / 180 } });
   return L;
 }
+// 隊員戴的照明頭盔（新版裝備才有）：回傳隊員身上那一件的等級數值（照明半徑 light…），沒戴＝null。t＝地圖上的隊員
+function squadHelmetLight(t) {
+  const key = squadHelmetKey(t); if (!key) return null;
+  const d = equipDef(key); return (d && (d.levels[gearKeyLv(key) - 1] || d.levels[0])) || null;
+}
+// 隊員身上那一頂照明頭盔的代號（例如 lamphelmet#3）；沒戴＝null
+function squadHelmetKey(t) {
+  if (!t || typeof GEAR_SYSTEM === 'undefined' || GEAR_SYSTEM !== 2 || typeof squadGearState === 'undefined') return null;
+  return ((squadGearState.equip || {})[t.type] || []).find(k => k && gearTypeOf(k) === 'lamphelmet') || null;
+}
+// 隊員的頭盔光是溫特的幾倍：range 半徑、bright 亮度（照明頭盔的 squadRange、squadBright 是百分比；沒寫＝跟溫特一樣）
+function squadLampMul() {
+  const d = typeof equipDef === 'function' && equipDef('lamphelmet'), pct = v => (typeof v === 'number' && v >= 0 ? v : 100) / 100;
+  return { range: pct(d && d.squadRange), bright: Math.min(1, pct(d && d.squadBright)) };
+}
+// 戴著照明頭盔的隊員身上的光（js/lighting.js 的 getLights 呼叫，只有戰鬥區域）：
+// 跟溫特的照明頭盔一樣是一圈平滑的圓形光，跟著隊員走、照隊員所在的那一層。數值跟溫特共用 data/equipment.js 的同一份
+function squadEquipLights() {
+  if (!MAP_FIELD || !G || !G.towers) return [];
+  const L = [];
+  for (const t of G.towers) {
+    if (!(t.hp > 0) || t.eatenBy || t.hidden) continue;   // 倒下、被吃掉、藏起來的隊員不發光
+    const h = squadHelmetLight(t); if (!h) continue;
+    if (typeof squadHelmetLit === 'function' && !squadHelmetLit(t)) continue;   // 電池用完了：不亮（js/squad-battery.js）
+    // 比溫特弱一點：半徑、亮度照照明頭盔的 squadRange、squadBright（幾 %；data/equipment.js，開發工坊編輯器可改）打折
+    // intensity＝遊戲判定的亮度，bright＝畫面的亮度
+    const k = squadLampMul();
+    L.push({ x: Math.round(t.x), y: Math.round(t.y - 10), r: h.light * k.range, intensity: k.bright, bright: k.bright, smooth: true, helmet: true, squad: t, floor: typeof actorFloor === 'function' ? actorFloor(t) : 1 });
+  }
+  return L;
+}
+// 這一幀所有「平滑畫法」的裝備燈：溫特的頭燈、手電筒＋隊員的頭盔光（隊員的光從這一幀的光源清單 lightsCache 拿，不重找一次）
+const allEquipLights = () => equipLight().concat(typeof lightsCache !== 'undefined' ? lightsCache.filter(l => l.squad) : []);
 // 手電筒光束的外觀：dy＝起點在溫特腳底往上／下幾像素（手的高度）；r0＝起點離手多遠（圓弧，不是尖角）；
 // body＝溫特身體的範圍（橢圓：中心往上 cy、半寬 rx、半高 ry；soft＝柔邊往外延伸幾倍），暖黃色那層在這裡慢慢淡掉，不會壓在溫特身上
 // color＝光的顏色（偏暖黃）、alpha＝暖黃色那層多濃、reveal＝把黑幕掀開多少（1＝全亮）
@@ -195,8 +228,8 @@ function flashBeamTexture(R, half, r0) {
 // js/lighting.js 的 drawDarkness 拿它把黑幕挖開；回傳 null＝頭燈、手電筒都沒有
 const beamLayer = { cv: document.createElement('canvas'), mask: document.createElement('canvas') };
 function flashlightBeamLayer(mask) {
-  const lights = equipLight(), l = lights.find(x => x.cone), helmet = lights.find(x => x.helmet);
-  if (!l && !helmet) return null;
+  const lights = allEquipLights(), l = lights.find(x => x.cone && !x.squad), helmets = lights.filter(x => x.helmet);
+  if (!l && !helmets.length) return null;
   const p = G.player;
   const x0 = Math.floor(cam.x) - 2, y0 = Math.floor(cam.y) - 2, W = Math.ceil(viewW()) + 4, H = Math.ceil(viewH()) + 4;
   const cv2 = beamLayer.cv; if (cv2.width !== W || cv2.height !== H) { cv2.width = W; cv2.height = H; }
@@ -204,10 +237,10 @@ function flashlightBeamLayer(mask) {
   c2.setTransform(1, 0, 0, 1, 0, 0); c2.globalCompositeOperation = 'source-over'; c2.clearRect(0, 0, W, H);
   c2.translate(-x0, -y0);
   const [cr, cg, cb] = FLASH_BEAM.color, col = a => 'rgba(' + cr + ',' + cg + ',' + cb + ',' + a + ')';
-  // 頭燈：平滑的圓形光（中間全亮，外圈慢慢淡掉）
-  if (helmet) {
-    const hr = helmet.r * HELMET_LIGHT.size, g = c2.createRadialGradient(helmet.x, helmet.y, 0, helmet.x, helmet.y, hr);
-    g.addColorStop(0, col(1)); g.addColorStop(HELMET_LIGHT.core, col(.92)); g.addColorStop(.75, col(.35)); g.addColorStop(1, col(0));
+  // 頭燈（溫特和隊員的照明頭盔）：平滑的圓形光（中間全亮，外圈慢慢淡掉）
+  for (const helmet of helmets) {
+    const hr = helmet.r * HELMET_LIGHT.size, g = c2.createRadialGradient(helmet.x, helmet.y, 0, helmet.x, helmet.y, hr), b = helmet.bright ?? 1;   // b：隊員的光比較暗
+    g.addColorStop(0, col(b)); g.addColorStop(HELMET_LIGHT.core, col(.92 * b)); g.addColorStop(.75, col(.35 * b)); g.addColorStop(1, col(0));
     c2.fillStyle = g; c2.beginPath(); c2.arc(helmet.x, helmet.y, hr, 0, Math.PI * 2); c2.fill();
   }
   if (l) drawFlashlightShape(c2, l, p, col);
@@ -234,14 +267,14 @@ function drawFlashlightShape(c2, l, p, col) {
 }
 // 頭燈、手電筒在 (x, y) 的畫面亮度（0～1），跟 flashlightBeamLayer 畫出來的形狀一樣；牆後面（beamMask 沒標到的格子）是 0
 function equipLightAt(x, y) {
-  const lights = equipLight(); if (!lights.length || typeof beamMask === 'undefined') return 0;
+  const lights = allEquipLights(); if (!lights.length || typeof beamMask === 'undefined') return 0;
   const [c, r] = cellAt(x, y); if (!inGrid(c, r) || !beamMask[r * COLS + c]) return 0;
   let k = 0;
   const smooth = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
   for (const l of lights) {
     if (l.helmet) {
       const t = Math.hypot(x - l.x, y - l.y) / (l.r * HELMET_LIGHT.size);
-      k = Math.max(k, t >= 1 ? 0 : t <= HELMET_LIGHT.core ? 1 : 1 - (t - HELMET_LIGHT.core) / (1 - HELMET_LIGHT.core));
+      k = Math.max(k, (l.bright ?? 1) * (t >= 1 ? 0 : t <= HELMET_LIGHT.core ? 1 : 1 - (t - HELMET_LIGHT.core) / (1 - HELMET_LIGHT.core)));
     } else if (l.cone) {
       const p = G.player, hx = p.x, hy = p.y + FLASH_BEAM.body.cy;
       const ht = Math.hypot((x - hx) / FLASH_BEAM.halo, (y - hy) / (FLASH_BEAM.halo * FLASH_BEAM.haloTall));
@@ -552,6 +585,7 @@ let batteryWarned = false;
 function updateEquipment(dt) {
   if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || aidKits() <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
   renderGearQuick();
+  if (typeof updateSquadBattery === 'function') updateSquadBattery(dt);   // 戴照明頭盔的隊友耗電、換電池（js/squad-battery.js）
   const v = equipLv('headlamp');
   if (!v || !MAP_FIELD) return;
   if (equipState.battery > 0) {
