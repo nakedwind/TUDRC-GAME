@@ -72,7 +72,7 @@ function useBullet(id) { if (trialAmmo()) return; const s = bulletState(); s.n[i
 
 // ---- 目前裝的子彈 ----
 const UNARMED = { id: 'none', name: '空手', icon: '✋' };   // 舊的：現在一定拿著手槍
-const weaponUsable = i => !!WEAPONS[i] && (trialAmmo() ? !BULLETS[WEAPONS[i].id].removed : bulletOwned(WEAPONS[i].id) && (typeof magazineCarries !== 'function' || magazineCarries(WEAPONS[i].id)));   // 拿到過、而且這次有裝進彈匣（js/magazine.js）；訓練室試用彈藥：全部都能換
+const weaponUsable = i => !!WEAPONS[i] && (trialAmmo() ? !BULLETS[WEAPONS[i].id].removed : bulletOwned(WEAPONS[i].id) && bulletCount(WEAPONS[i].id) > 0 && (typeof magazineCarries !== 'function' || magazineCarries(WEAPONS[i].id)));   // 拿到過、還有子彈、而且有裝進彈匣（js/magazine.js）；打完的直接消失不佔位置；訓練室試用彈藥：全部都能換
 function playerWeapon(p) {
   if (p && !weaponUsable(p.weaponIndex || 0)) p.weaponIndex = 0;   // 這種子彈沒了（例如被編輯器拿掉）：換回一般子彈
   return WEAPONS[(p && p.weaponIndex) || 0];
@@ -86,7 +86,7 @@ function switchWeapon(step, toIndex) {
   if (toIndex == null && now - lastWeaponSwitch < 200) return;   // 滾一下不要連跳好幾種
   lastWeaponSwitch = now;
   let next = toIndex;
-  if (next == null) {   // 滾輪：跳過還沒拿到的子彈（拿到過但打完的照樣換得到）
+  if (next == null) {   // 滾輪：只換到彈匣裡、還有子彈的（打完的跳過）
     next = p.weaponIndex || 0;
     for (let i = 0; i < WEAPONS.length; i++) { next = (next + step + WEAPONS.length) % WEAPONS.length; if (weaponUsable(next)) break; }
   } else if (!weaponUsable(next)) return;
