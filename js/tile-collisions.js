@@ -182,9 +182,16 @@ const tileBoxInHole = (b, x, y) => !!b.holes && b.holes.some(h => x >= h[0] && x
 
 // ---- 遊戲：這張地圖上所有素材方框（照格子分好，查得快）----
 let tileBoxIndex = { map: null, n: -1, raw: undefined, grid: new Map() };
+let tileBoxCheckedAt = 0;   // 上次確認「素材碰撞有沒有改過」的時間（毫秒）
 function tileBoxGrid() {
   if (typeof MAP === 'undefined' || !MAP) return null;
   const stamps = MAP.stamps || [];
+  // 加速（只在遊戲進行中）：同一張地圖、0.25 秒內已經確認過沒改，就直接用整理好的（走路、找路一幀要問上千次，每次都去讀瀏覽器草稿太浪費）
+  // 編輯器裡照舊每次都確認，改了碰撞馬上看得到
+  const now = performance.now();
+  const inGame = typeof G !== 'undefined' && G && G.running;
+  if (inGame && tileBoxIndex.map === MAP && tileBoxIndex.n === stamps.length && now - tileBoxCheckedAt < 250) return tileBoxIndex.grid;
+  tileBoxCheckedAt = now;
   tileCollisionData();
   if (tileBoxIndex.map === MAP && tileBoxIndex.n === stamps.length && tileBoxIndex.raw === tileCollisionCache.raw) return tileBoxIndex.grid;
   const grid = new Map(), C = typeof CELL !== 'undefined' ? CELL : TILE_COLLISION_CELL;

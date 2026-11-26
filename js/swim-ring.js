@@ -60,10 +60,20 @@ function deepWaterCells() {
 function deepWaterAllList() { if (typeof MAP === 'undefined' || !MAP) return []; deepWaterCells(); return [...deepCache.cells]; }
 const isDeepWaterCell = (c, r) => deepWaterCells().has(c + ',' + r);
 // 這個點在不在深水區：有用地圖編輯器「🎯 碰撞微調」移過的深水格（MAP.deepWaterOffsets），照移過去的位置算（跟紅格的微調一樣，最多將近一格）
+// 微調過的深水格「本身和周圍 8 格」：只有這些格子要細算，其他格子直接看是不是深水格（結果一樣，但快很多：隊員找路一次要問上千次）
+let deepNudgeNear = { offs: null, set: new Set() };
+function deepNudgeNearSet(offs) {
+  if (deepNudgeNear.offs === offs) return deepNudgeNear.set;
+  const set = new Set();
+  for (const k in offs) { const [c, r] = k.split(',').map(Number); for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) set.add((c + dc) + ',' + (r + dr)); }
+  deepNudgeNear = { offs, set };
+  return set;
+}
 function deepCellsHavePoint(cells, x, y) {
   if (!cells || !cells.size) return false;
   const offs = typeof MAP !== 'undefined' && MAP && MAP.deepWaterOffsets, [c, r] = cellAt(x, y), k = c + ',' + r;
   if (!offs) return cells.has(k);
+  if (!deepNudgeNearSet(offs).has(k)) return cells.has(k);   // 附近沒有微調過的深水格
   if (cells.has(k) && !offs[k]) return true;   // 沒微調過的：整格都是
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {   // 微調過的：看旁邊移過來的格子有沒有蓋到這個點
     const kk = (c + dc) + ',' + (r + dr), o = offs[kk];

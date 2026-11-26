@@ -472,6 +472,8 @@ function solidBlocksPoint(x, y) {
   if (typeof tileBoxBlocksPoint === 'function' && tileBoxBlocksPoint(x, y)) return true;   // 素材碰撞方框（物件編輯器設定，js/tile-collisions.js）
   const [c, r] = cellAt(x, y);
   if (floorCtx === 2) return nudgedWallAt(x, y, isWallRaw, solid2OffsetAt);   // 二樓：照 2 樓的擋路格和 2 樓的像素微調（不吃一樓牆的微調）
+  // 加速：這格和周圍 8 格都沒有微調過的紅格（大部分的地方）→ 直接看這格是不是紅格，不用把 9 格一格一格算（結果一樣，隊員找路一次要問上千次）
+  if (typeof nudgeNearSet === 'function' && !nudgeNearSet().has(c + ',' + r)) return isWallRaw(c, r);
   if (isWallRaw(c, r) && !solidOffsetAt(c, r)) return true;     // 沒微調過：整格都擋（撞牆照原始紅格；找路用的 isWall 見 js/pathfinding.js）
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
     const cc = c + dc, rr = r + dr;
@@ -952,8 +954,9 @@ let mapDrawFrame = 0;   // 第幾幀（drawMapGround 每一幀最先呼叫時 +1
 // 一張大圖畫出來大概佔哪個範圍（世界座標像素，寧可大一點）：旋轉、放大過的照畫出來的範圍
 const stampBoxCache = new WeakMap();
 function stampDrawBox(s) {
+  // 先直接比對位置、大小、角度有沒有變（不用每一幀每張圖都組一串文字來比，2000 多張圖的地圖每幀省下不少時間）
+  if (MAP_FAST.bounds) { const hit = stampBoxCache.get(s); if (hit && hit.id === s.id && hit.c === s.c && hit.r === s.r && hit.ox === s.ox && hit.oy === s.oy && hit.rot === s.rot && hit.scale === s.scale && hit.angle === s.angle) return hit; }
   const key = s.id + '|' + s.c + '|' + s.r + '|' + (s.ox || 0) + '|' + (s.oy || 0) + '|' + (s.rot || 0) + '|' + (s.scale || '') + '|' + (s.angle || '');
-  if (MAP_FAST.bounds) { const hit = stampBoxCache.get(s); if (hit && hit.key === key) return hit; }
   const t = mapTileById(s.id) || {}, w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
   let box;
   if (stampHasTransform(s)) {   // 放大、轉過的物件：照畫出來的範圍算
@@ -963,7 +966,7 @@ function stampDrawBox(s) {
     const half = Math.max(w, h) / 2, cx = OX + s.c * CELL + (s.ox || 0) + w / 2, cy = OY + s.r * CELL + (s.oy || 0) + h / 2;
     box = { key, x0: cx - half, y0: cy - half, x1: cx + half, y1: cy + half };
   }
-  if (MAP_FAST.bounds) stampBoxCache.set(s, box);
+  if (MAP_FAST.bounds) { Object.assign(box, { id: s.id, c: s.c, r: s.r, ox: s.ox, oy: s.oy, rot: s.rot, scale: s.scale, angle: s.angle }); stampBoxCache.set(s, box); }
   return box;
 }
 // 一張大圖有沒有任何一部分在範圍內（旋轉過的圖用比較寬的範圍判斷，寧可多畫不要切掉）
