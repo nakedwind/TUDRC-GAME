@@ -4,7 +4,7 @@
    ・只有 FIELD_GEN.maps 裡的地圖會觸發（其他地圖放這張圖只是裝飾）
    ・音檔、音量在「音效編輯器」調整：fieldGenRadio、fieldGenPopper、fieldGenHorn（js/sfx.js）；Jumpscare＝音效編輯器裡的自訂音效「Jumpscare」（音檔、剪輯的段落都在 data/sound-settings.js） */
 const FIELD_GEN = {
-  maps: ['map_mv1bzur4', 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf'],   // 04. 池核、W118區 地下水池
+  maps: ['map_mv1bzur4', 'map_89aacb92-4b89-47ec-a76b-0908972d3fdf', 'map_w118_deep_test'],   // 04. 池核、W118區 地下水池、W118區 超深水區（魚頭王測試）
   file: /\/Poolcore_field-generator\.png$/,
   reach: 1,                 // 離產生器幾格內算「走近」（量到圖片範圍最近的地方）
   hornDelay: 400,           // 生日吹笛晚幾毫秒播

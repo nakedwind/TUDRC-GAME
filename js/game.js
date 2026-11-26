@@ -2240,6 +2240,7 @@ let last = 0;
 const MAP_FOOTSTEPS = {
   map_mv1bzur4: { walk: 'FootstepEcho', water: 'WalkOnWater' },   // 04. 池核：腳步回音、走在水中
   'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { walk: 'FootstepEcho', water: 'WalkOnWater' },   // W118區 地下水池：跟池核一樣
+  'map_w118_deep_test': { walk: 'FootstepEcho', water: 'WalkOnWater' },   // W118區 超深水區（魚頭王測試）：跟 W118 一樣
 };
 const FOOT = { audio: null, file: '', gain: 'footsteps' };
 // 音效編輯器裡某個音效的音檔路徑（只用第一個音檔；沒有就回傳空字串）

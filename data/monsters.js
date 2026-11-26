@@ -1773,7 +1773,7 @@ const BOSS_SETTINGS_DEFAULT = {
     "hatchlingChance": 0.8
   },
   "FISH_KING": {
-    "scale": 2.64,
+    "scale": 2.904,
     "hp": 4200,
     "rewardMul": 6,
     "crystalMul": 6,
@@ -1834,11 +1834,23 @@ const BOSS_SETTINGS_DEFAULT = {
       ],
       "windup": 1.1,
       "sweep": 1.4,
-      "arc": 1.1,
-      "range": 11,
-      "width": 30,
+      "arc": 2.094,
+      "range": 14.2,
+      "width": 60,
       "damage": 14,
-      "push": 2.4
+      "push": 2.4,
+      "reach": 8,
+      "shore": 2.5,
+      "jumpSecs": 0.8,
+      "jumpHeight": 120,
+      "stay": 0.6,
+      "impact": {
+        "rate": 26,
+        "size": 0.8,
+        "life": 0.45,
+        "wobble": 0.45,
+        "spread": 2.2
+      }
     },
     "geyser": {
       "every": [
@@ -1871,7 +1883,9 @@ const BOSS_SETTINGS_DEFAULT = {
       "distMin": 4,
       "distMax": 14,
       "tilt": 0.6,
-      "otherPool": 0.7
+      "otherPool": 0.7,
+      "waveRadius": 6,
+      "wavePush": 2.2
     },
     "flinch": {
       "turn": 0.5

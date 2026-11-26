@@ -15,6 +15,7 @@ const AMBIENT_SOUNDS = [
 const MAP_AMBIENT_DEFAULT = {
   map_mv1bzur4: { ambient: ['poolDrip', 'poolWaterDrop'], whiteNoise: 70 },   // 04. 池核：滴水聲＋水滴聲，白噪音 70%
   'map_89aacb92-4b89-47ec-a76b-0908972d3fdf': { ambient: ['poolDrip', 'poolWaterDrop'], whiteNoise: 70 },   // W118區 地下水池：跟池核一樣
+  'map_w118_deep_test': { ambient: ['poolDrip', 'poolWaterDrop'], whiteNoise: 70 },   // W118區 超深水區（魚頭王測試）：跟 W118 一樣
 };
 const MAP_AMBIENT_FADE = 1.5;   // 進出地圖時淡入淡出幾秒
 

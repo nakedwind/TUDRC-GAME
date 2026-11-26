@@ -30,7 +30,7 @@ let warmImg = warmCtx.createImageData(COLS, ROWS);
 
 // ---- 藍白光：指定地圖上的指定發光建築，燈光從暖黃色改成藍白色（照亮範圍、亮度都不變，只換顏色）----
 const LIGHT_COOL = {
-  maps: ['map_89aacb92-4b89-47ec-a76b-0908972d3fdf'],   // 哪些地圖：W118區 地下水池
+  maps: ['map_89aacb92-4b89-47ec-a76b-0908972d3fdf', 'map_w118_deep_test'],   // 哪些地圖：W118區 地下水池、W118區 超深水區（魚頭王測試）
   buildings: ['searchlight'],                             // 哪些發光建築（data/balance.js 的 LIGHT.buildings 裡的 id）：探照燈
   ambient: [140, 195, 255],   // 照到的範圍那層淡淡的光色（原本的暖光是 255,174,82）
   beam: [[228, 240, 255], [190, 220, 255], [150, 195, 255]],                  // 往上的光束：燈頭 → 中間 → 尾端（原本 255,239,184 → 255,216,132 → 255,190,92）

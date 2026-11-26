@@ -237,7 +237,8 @@ function campSpawnCells(n = 24) {
 function campSpawnCellsNow(n) {
   // 也要檢查站得下（sentryBlocked）：營地裡的行軍床、物資箱用像素微調擋路時，會擋到隔壁格，生在那裡就走不出來
   const free = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r));
-  const [cc, cr] = [...campCells][0].split(',').map(Number);
+  // 戰鬥地圖有寫 playerSpawn（例如測試地圖「W118區 超深水區（魚頭王測試）」）：溫特、隊員從那一格附近出發，不從營地出發
+  const [cc, cr] = (typeof MAP !== 'undefined' && MAP && !MAP_SAFE && Array.isArray(MAP.playerSpawn) && MAP.playerSpawn.length === 2 ? MAP.playerSpawn : [...campCells][0].split(',')).map(Number);
   const byDist = list => list.sort((a, b) => Math.hypot(a[0] - cc, a[1] - cr) - Math.hypot(b[0] - cc, b[1] - cr));
   const hasBase = typeof mapBases !== 'undefined' && mapBases.length > 0;
   const drawn = hasBase ? [] : [...campCells].map(k => k.split(',').map(Number)).filter(([c, r]) => free(c, r));

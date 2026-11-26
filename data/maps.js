@@ -215107,6 +215107,33861 @@ const BATTLE_MAPS = [
       "84,30",
       "83,29"
     ]
+  },
+  {
+    "id": "map_w118_deep_test",
+    "name": "W118區 超深水區（魚頭王測試）",
+    "desc": "測試用：W118區 地下水池的複製。只放魚頭王守的那顆核心（86,21），營地搬到右上角走道（超深水區旁邊），不會出現巨大比基尼小丑魚；怪物只生水中怪物四種。",
+    "playerSpawn": [
+      88,
+      23
+    ],
+    "layers": {
+      "object": {},
+      "top": {},
+      "ground4": {},
+      "object6": {},
+      "object5": {},
+      "object9": {
+        "73,22": "tile_interactive_pickup_battery",
+        "86,24": "tile_interactive_pickup_almond_water"
+      },
+      "object11": {},
+      "object12": {},
+      "object13": {},
+      "object14": {},
+      "object7": {},
+      "object10": {},
+      "object15": {},
+      "object16": {},
+      "object17": {},
+      "object18": {},
+      "object19": {},
+      "object20": {},
+      "object21": {},
+      "object22": {},
+      "object23": {},
+      "object24": {},
+      "object25": {
+        "89,70": "tile_poolcore_deep_water",
+        "90,70": "tile_poolcore_deep_water",
+        "91,70": "tile_poolcore_deep_water",
+        "93,70": "tile_poolcore_deep_water",
+        "94,70": "tile_poolcore_deep_water",
+        "95,70": "tile_poolcore_deep_water",
+        "96,70": "tile_poolcore_deep_water",
+        "96,71": "tile_poolcore_deep_water",
+        "95,71": "tile_poolcore_deep_water",
+        "94,71": "tile_poolcore_deep_water",
+        "93,71": "tile_poolcore_deep_water",
+        "92,70": "tile_poolcore_deep_water",
+        "88,70": "tile_poolcore_deep_water",
+        "88,71": "tile_poolcore_deep_water",
+        "88,72": "tile_poolcore_deep_water",
+        "88,73": "tile_poolcore_deep_water",
+        "88,74": "tile_poolcore_deep_water",
+        "88,75": "tile_poolcore_deep_water",
+        "88,76": "tile_poolcore_deep_water",
+        "88,77": "tile_poolcore_deep_water",
+        "89,77": "tile_poolcore_deep_water",
+        "89,78": "tile_poolcore_deep_water",
+        "89,79": "tile_poolcore_deep_water",
+        "89,80": "tile_poolcore_deep_water",
+        "88,80": "tile_poolcore_deep_water",
+        "88,79": "tile_poolcore_deep_water",
+        "88,78": "tile_poolcore_deep_water",
+        "89,73": "tile_poolcore_deep_water",
+        "89,72": "tile_poolcore_deep_water",
+        "90,71": "tile_poolcore_deep_water",
+        "90,72": "tile_poolcore_deep_water",
+        "90,74": "tile_poolcore_deep_water",
+        "90,75": "tile_poolcore_deep_water",
+        "90,76": "tile_poolcore_deep_water",
+        "90,77": "tile_poolcore_deep_water",
+        "90,78": "tile_poolcore_deep_water",
+        "90,79": "tile_poolcore_deep_water",
+        "90,73": "tile_poolcore_deep_water",
+        "89,71": "tile_poolcore_deep_water",
+        "91,71": "tile_poolcore_deep_water",
+        "92,71": "tile_poolcore_deep_water",
+        "93,72": "tile_poolcore_deep_water",
+        "92,73": "tile_poolcore_deep_water",
+        "91,73": "tile_poolcore_deep_water",
+        "89,74": "tile_poolcore_deep_water",
+        "89,75": "tile_poolcore_deep_water",
+        "89,76": "tile_poolcore_deep_water",
+        "91,79": "tile_poolcore_deep_water",
+        "92,79": "tile_poolcore_deep_water",
+        "92,78": "tile_poolcore_deep_water",
+        "92,77": "tile_poolcore_deep_water",
+        "92,76": "tile_poolcore_deep_water",
+        "92,75": "tile_poolcore_deep_water",
+        "92,74": "tile_poolcore_deep_water",
+        "91,74": "tile_poolcore_deep_water",
+        "91,72": "tile_poolcore_deep_water",
+        "92,72": "tile_poolcore_deep_water",
+        "94,72": "tile_poolcore_deep_water",
+        "95,72": "tile_poolcore_deep_water",
+        "96,72": "tile_poolcore_deep_water",
+        "97,73": "tile_poolcore_deep_water",
+        "97,74": "tile_poolcore_deep_water",
+        "96,75": "tile_poolcore_deep_water",
+        "96,76": "tile_poolcore_deep_water",
+        "96,77": "tile_poolcore_deep_water",
+        "96,78": "tile_poolcore_deep_water",
+        "96,79": "tile_poolcore_deep_water",
+        "96,80": "tile_poolcore_deep_water",
+        "96,81": "tile_poolcore_deep_water",
+        "88,81": "tile_poolcore_deep_water",
+        "88,82": "tile_poolcore_deep_water",
+        "88,83": "tile_poolcore_deep_water",
+        "88,84": "tile_poolcore_deep_water",
+        "88,85": "tile_poolcore_deep_water",
+        "89,85": "tile_poolcore_deep_water",
+        "90,85": "tile_poolcore_deep_water",
+        "91,85": "tile_poolcore_deep_water",
+        "92,85": "tile_poolcore_deep_water",
+        "93,85": "tile_poolcore_deep_water",
+        "94,85": "tile_poolcore_deep_water",
+        "95,85": "tile_poolcore_deep_water",
+        "96,85": "tile_poolcore_deep_water",
+        "96,84": "tile_poolcore_deep_water",
+        "97,84": "tile_poolcore_deep_water",
+        "97,83": "tile_poolcore_deep_water",
+        "97,82": "tile_poolcore_deep_water",
+        "97,81": "tile_poolcore_deep_water",
+        "97,80": "tile_poolcore_deep_water",
+        "97,79": "tile_poolcore_deep_water",
+        "97,78": "tile_poolcore_deep_water",
+        "97,77": "tile_poolcore_deep_water",
+        "96,74": "tile_poolcore_deep_water",
+        "96,73": "tile_poolcore_deep_water",
+        "95,73": "tile_poolcore_deep_water",
+        "94,73": "tile_poolcore_deep_water",
+        "93,74": "tile_poolcore_deep_water",
+        "93,75": "tile_poolcore_deep_water",
+        "93,76": "tile_poolcore_deep_water",
+        "93,77": "tile_poolcore_deep_water",
+        "93,78": "tile_poolcore_deep_water",
+        "93,79": "tile_poolcore_deep_water",
+        "93,81": "tile_poolcore_deep_water",
+        "93,83": "tile_poolcore_deep_water",
+        "92,84": "tile_poolcore_deep_water",
+        "90,84": "tile_poolcore_deep_water",
+        "89,83": "tile_poolcore_deep_water",
+        "89,82": "tile_poolcore_deep_water",
+        "89,81": "tile_poolcore_deep_water",
+        "89,84": "tile_poolcore_deep_water",
+        "91,83": "tile_poolcore_deep_water",
+        "90,82": "tile_poolcore_deep_water",
+        "90,81": "tile_poolcore_deep_water",
+        "90,80": "tile_poolcore_deep_water",
+        "91,75": "tile_poolcore_deep_water",
+        "91,76": "tile_poolcore_deep_water",
+        "91,77": "tile_poolcore_deep_water",
+        "91,78": "tile_poolcore_deep_water",
+        "91,80": "tile_poolcore_deep_water",
+        "91,81": "tile_poolcore_deep_water",
+        "92,81": "tile_poolcore_deep_water",
+        "91,82": "tile_poolcore_deep_water",
+        "91,84": "tile_poolcore_deep_water",
+        "90,83": "tile_poolcore_deep_water",
+        "92,83": "tile_poolcore_deep_water",
+        "92,82": "tile_poolcore_deep_water",
+        "93,82": "tile_poolcore_deep_water",
+        "92,80": "tile_poolcore_deep_water",
+        "93,80": "tile_poolcore_deep_water",
+        "94,80": "tile_poolcore_deep_water",
+        "95,80": "tile_poolcore_deep_water",
+        "95,81": "tile_poolcore_deep_water",
+        "95,82": "tile_poolcore_deep_water",
+        "95,83": "tile_poolcore_deep_water",
+        "94,83": "tile_poolcore_deep_water",
+        "94,84": "tile_poolcore_deep_water",
+        "93,84": "tile_poolcore_deep_water",
+        "94,81": "tile_poolcore_deep_water",
+        "94,82": "tile_poolcore_deep_water",
+        "95,84": "tile_poolcore_deep_water",
+        "96,83": "tile_poolcore_deep_water",
+        "96,82": "tile_poolcore_deep_water",
+        "97,85": "tile_poolcore_deep_water",
+        "95,79": "tile_poolcore_deep_water",
+        "94,78": "tile_poolcore_deep_water",
+        "94,77": "tile_poolcore_deep_water",
+        "94,76": "tile_poolcore_deep_water",
+        "94,75": "tile_poolcore_deep_water",
+        "94,74": "tile_poolcore_deep_water",
+        "95,74": "tile_poolcore_deep_water",
+        "95,76": "tile_poolcore_deep_water",
+        "95,77": "tile_poolcore_deep_water",
+        "95,78": "tile_poolcore_deep_water",
+        "94,79": "tile_poolcore_deep_water",
+        "93,73": "tile_poolcore_deep_water",
+        "95,75": "tile_poolcore_deep_water",
+        "97,76": "tile_poolcore_deep_water",
+        "97,72": "tile_poolcore_deep_water",
+        "97,71": "tile_poolcore_deep_water",
+        "97,70": "tile_poolcore_deep_water",
+        "97,69": "tile_poolcore_deep_water",
+        "97,68": "tile_poolcore_deep_water",
+        "93,61": "tile_poolcore_deep_water",
+        "92,61": "tile_poolcore_deep_water",
+        "91,61": "tile_poolcore_deep_water",
+        "90,61": "tile_poolcore_deep_water",
+        "89,61": "tile_poolcore_deep_water",
+        "88,61": "tile_poolcore_deep_water",
+        "87,61": "tile_poolcore_deep_water",
+        "86,61": "tile_poolcore_deep_water",
+        "84,61": "tile_poolcore_deep_water",
+        "83,61": "tile_poolcore_deep_water",
+        "82,61": "tile_poolcore_deep_water",
+        "81,61": "tile_poolcore_deep_water",
+        "80,61": "tile_poolcore_deep_water",
+        "79,61": "tile_poolcore_deep_water",
+        "85,61": "tile_poolcore_deep_water",
+        "79,43": "tile_poolcore_deep_water",
+        "79,44": "tile_poolcore_deep_water",
+        "79,45": "tile_poolcore_deep_water",
+        "79,46": "tile_poolcore_deep_water",
+        "79,47": "tile_poolcore_deep_water",
+        "79,48": "tile_poolcore_deep_water",
+        "79,49": "tile_poolcore_deep_water",
+        "79,50": "tile_poolcore_deep_water",
+        "79,51": "tile_poolcore_deep_water",
+        "79,52": "tile_poolcore_deep_water",
+        "79,53": "tile_poolcore_deep_water",
+        "79,54": "tile_poolcore_deep_water",
+        "79,55": "tile_poolcore_deep_water",
+        "79,56": "tile_poolcore_deep_water",
+        "80,56": "tile_poolcore_deep_water",
+        "80,57": "tile_poolcore_deep_water",
+        "80,58": "tile_poolcore_deep_water",
+        "81,58": "tile_poolcore_deep_water",
+        "82,59": "tile_poolcore_deep_water",
+        "83,59": "tile_poolcore_deep_water",
+        "84,59": "tile_poolcore_deep_water",
+        "85,59": "tile_poolcore_deep_water",
+        "86,58": "tile_poolcore_deep_water",
+        "87,58": "tile_poolcore_deep_water",
+        "88,57": "tile_poolcore_deep_water",
+        "89,56": "tile_poolcore_deep_water",
+        "89,55": "tile_poolcore_deep_water",
+        "90,54": "tile_poolcore_deep_water",
+        "90,53": "tile_poolcore_deep_water",
+        "90,51": "tile_poolcore_deep_water",
+        "90,50": "tile_poolcore_deep_water",
+        "89,49": "tile_poolcore_deep_water",
+        "89,48": "tile_poolcore_deep_water",
+        "89,47": "tile_poolcore_deep_water",
+        "89,46": "tile_poolcore_deep_water",
+        "88,46": "tile_poolcore_deep_water",
+        "80,43": "tile_poolcore_deep_water",
+        "81,43": "tile_poolcore_deep_water",
+        "82,43": "tile_poolcore_deep_water",
+        "84,43": "tile_poolcore_deep_water",
+        "85,43": "tile_poolcore_deep_water",
+        "86,43": "tile_poolcore_deep_water",
+        "87,43": "tile_poolcore_deep_water",
+        "88,43": "tile_poolcore_deep_water",
+        "89,43": "tile_poolcore_deep_water",
+        "90,43": "tile_poolcore_deep_water",
+        "91,43": "tile_poolcore_deep_water",
+        "92,43": "tile_poolcore_deep_water",
+        "93,43": "tile_poolcore_deep_water",
+        "93,44": "tile_poolcore_deep_water",
+        "92,44": "tile_poolcore_deep_water",
+        "91,44": "tile_poolcore_deep_water",
+        "89,44": "tile_poolcore_deep_water",
+        "83,43": "tile_poolcore_deep_water",
+        "83,44": "tile_poolcore_deep_water",
+        "82,44": "tile_poolcore_deep_water",
+        "81,45": "tile_poolcore_deep_water",
+        "81,44": "tile_poolcore_deep_water",
+        "80,44": "tile_poolcore_deep_water",
+        "80,45": "tile_poolcore_deep_water",
+        "80,46": "tile_poolcore_deep_water",
+        "81,48": "tile_poolcore_deep_water",
+        "80,48": "tile_poolcore_deep_water",
+        "80,49": "tile_poolcore_deep_water",
+        "80,50": "tile_poolcore_deep_water",
+        "80,51": "tile_poolcore_deep_water",
+        "80,52": "tile_poolcore_deep_water",
+        "80,53": "tile_poolcore_deep_water",
+        "80,54": "tile_poolcore_deep_water",
+        "80,55": "tile_poolcore_deep_water",
+        "80,59": "tile_poolcore_deep_water",
+        "80,60": "tile_poolcore_deep_water",
+        "79,60": "tile_poolcore_deep_water",
+        "79,59": "tile_poolcore_deep_water",
+        "79,58": "tile_poolcore_deep_water",
+        "79,57": "tile_poolcore_deep_water",
+        "81,60": "tile_poolcore_deep_water",
+        "82,60": "tile_poolcore_deep_water",
+        "83,60": "tile_poolcore_deep_water",
+        "84,60": "tile_poolcore_deep_water",
+        "86,60": "tile_poolcore_deep_water",
+        "87,60": "tile_poolcore_deep_water",
+        "88,60": "tile_poolcore_deep_water",
+        "89,60": "tile_poolcore_deep_water",
+        "90,60": "tile_poolcore_deep_water",
+        "91,60": "tile_poolcore_deep_water",
+        "92,60": "tile_poolcore_deep_water",
+        "93,60": "tile_poolcore_deep_water",
+        "93,59": "tile_poolcore_deep_water",
+        "93,58": "tile_poolcore_deep_water",
+        "93,57": "tile_poolcore_deep_water",
+        "93,56": "tile_poolcore_deep_water",
+        "93,55": "tile_poolcore_deep_water",
+        "93,54": "tile_poolcore_deep_water",
+        "93,53": "tile_poolcore_deep_water",
+        "92,53": "tile_poolcore_deep_water",
+        "92,52": "tile_poolcore_deep_water",
+        "92,51": "tile_poolcore_deep_water",
+        "92,50": "tile_poolcore_deep_water",
+        "92,49": "tile_poolcore_deep_water",
+        "92,48": "tile_poolcore_deep_water",
+        "92,47": "tile_poolcore_deep_water",
+        "92,46": "tile_poolcore_deep_water",
+        "92,45": "tile_poolcore_deep_water",
+        "93,45": "tile_poolcore_deep_water",
+        "93,46": "tile_poolcore_deep_water",
+        "93,47": "tile_poolcore_deep_water",
+        "93,48": "tile_poolcore_deep_water",
+        "93,49": "tile_poolcore_deep_water",
+        "93,50": "tile_poolcore_deep_water",
+        "93,51": "tile_poolcore_deep_water",
+        "93,52": "tile_poolcore_deep_water",
+        "92,55": "tile_poolcore_deep_water",
+        "92,56": "tile_poolcore_deep_water",
+        "92,57": "tile_poolcore_deep_water",
+        "92,58": "tile_poolcore_deep_water",
+        "92,59": "tile_poolcore_deep_water",
+        "91,59": "tile_poolcore_deep_water",
+        "85,60": "tile_poolcore_deep_water",
+        "81,59": "tile_poolcore_deep_water",
+        "81,57": "tile_poolcore_deep_water",
+        "81,55": "tile_poolcore_deep_water",
+        "81,53": "tile_poolcore_deep_water",
+        "81,51": "tile_poolcore_deep_water",
+        "80,47": "tile_poolcore_deep_water",
+        "81,46": "tile_poolcore_deep_water",
+        "82,45": "tile_poolcore_deep_water",
+        "84,44": "tile_poolcore_deep_water",
+        "85,44": "tile_poolcore_deep_water",
+        "86,44": "tile_poolcore_deep_water",
+        "87,44": "tile_poolcore_deep_water",
+        "88,44": "tile_poolcore_deep_water",
+        "90,44": "tile_poolcore_deep_water",
+        "91,45": "tile_poolcore_deep_water",
+        "91,46": "tile_poolcore_deep_water",
+        "91,47": "tile_poolcore_deep_water",
+        "91,48": "tile_poolcore_deep_water",
+        "91,49": "tile_poolcore_deep_water",
+        "91,50": "tile_poolcore_deep_water",
+        "92,54": "tile_poolcore_deep_water",
+        "91,56": "tile_poolcore_deep_water",
+        "91,57": "tile_poolcore_deep_water",
+        "91,58": "tile_poolcore_deep_water",
+        "90,59": "tile_poolcore_deep_water",
+        "89,59": "tile_poolcore_deep_water",
+        "88,59": "tile_poolcore_deep_water",
+        "87,59": "tile_poolcore_deep_water",
+        "86,59": "tile_poolcore_deep_water",
+        "88,58": "tile_poolcore_deep_water",
+        "89,58": "tile_poolcore_deep_water",
+        "90,58": "tile_poolcore_deep_water",
+        "90,57": "tile_poolcore_deep_water",
+        "91,55": "tile_poolcore_deep_water",
+        "91,54": "tile_poolcore_deep_water",
+        "91,53": "tile_poolcore_deep_water",
+        "91,52": "tile_poolcore_deep_water",
+        "91,51": "tile_poolcore_deep_water",
+        "90,52": "tile_poolcore_deep_water",
+        "90,55": "tile_poolcore_deep_water",
+        "90,56": "tile_poolcore_deep_water",
+        "89,57": "tile_poolcore_deep_water",
+        "85,58": "tile_poolcore_deep_water",
+        "84,58": "tile_poolcore_deep_water",
+        "83,58": "tile_poolcore_deep_water",
+        "82,58": "tile_poolcore_deep_water",
+        "82,57": "tile_poolcore_deep_water",
+        "82,56": "tile_poolcore_deep_water",
+        "81,54": "tile_poolcore_deep_water",
+        "81,47": "tile_poolcore_deep_water",
+        "82,47": "tile_poolcore_deep_water",
+        "83,46": "tile_poolcore_deep_water",
+        "83,45": "tile_poolcore_deep_water",
+        "84,45": "tile_poolcore_deep_water",
+        "85,45": "tile_poolcore_deep_water",
+        "87,45": "tile_poolcore_deep_water",
+        "89,45": "tile_poolcore_deep_water",
+        "90,45": "tile_poolcore_deep_water",
+        "90,48": "tile_poolcore_deep_water",
+        "90,49": "tile_poolcore_deep_water",
+        "90,47": "tile_poolcore_deep_water",
+        "90,46": "tile_poolcore_deep_water",
+        "88,45": "tile_poolcore_deep_water",
+        "86,45": "tile_poolcore_deep_water",
+        "82,46": "tile_poolcore_deep_water",
+        "82,48": "tile_poolcore_deep_water",
+        "82,49": "tile_poolcore_deep_water",
+        "82,50": "tile_poolcore_deep_water",
+        "82,51": "tile_poolcore_deep_water",
+        "82,52": "tile_poolcore_deep_water",
+        "82,53": "tile_poolcore_deep_water",
+        "82,54": "tile_poolcore_deep_water",
+        "81,56": "tile_poolcore_deep_water",
+        "81,52": "tile_poolcore_deep_water",
+        "81,50": "tile_poolcore_deep_water",
+        "81,49": "tile_poolcore_deep_water",
+        "82,55": "tile_poolcore_deep_water",
+        "83,56": "tile_poolcore_deep_water",
+        "83,57": "tile_poolcore_deep_water",
+        "83,55": "tile_poolcore_deep_water",
+        "84,53": "tile_poolcore_deep_water",
+        "84,51": "tile_poolcore_deep_water",
+        "84,50": "tile_poolcore_deep_water",
+        "84,49": "tile_poolcore_deep_water",
+        "83,48": "tile_poolcore_deep_water",
+        "83,47": "tile_poolcore_deep_water",
+        "86,46": "tile_poolcore_deep_water",
+        "87,46": "tile_poolcore_deep_water",
+        "85,46": "tile_poolcore_deep_water",
+        "84,46": "tile_poolcore_deep_water",
+        "83,49": "tile_poolcore_deep_water",
+        "83,50": "tile_poolcore_deep_water",
+        "83,51": "tile_poolcore_deep_water",
+        "83,52": "tile_poolcore_deep_water",
+        "83,53": "tile_poolcore_deep_water",
+        "83,54": "tile_poolcore_deep_water",
+        "84,55": "tile_poolcore_deep_water",
+        "84,56": "tile_poolcore_deep_water",
+        "84,57": "tile_poolcore_deep_water",
+        "85,57": "tile_poolcore_deep_water",
+        "86,57": "tile_poolcore_deep_water",
+        "87,56": "tile_poolcore_deep_water",
+        "87,55": "tile_poolcore_deep_water",
+        "86,53": "tile_poolcore_deep_water",
+        "85,52": "tile_poolcore_deep_water",
+        "85,51": "tile_poolcore_deep_water",
+        "84,48": "tile_poolcore_deep_water",
+        "84,47": "tile_poolcore_deep_water",
+        "85,47": "tile_poolcore_deep_water",
+        "86,47": "tile_poolcore_deep_water",
+        "87,47": "tile_poolcore_deep_water",
+        "88,47": "tile_poolcore_deep_water",
+        "88,48": "tile_poolcore_deep_water",
+        "88,49": "tile_poolcore_deep_water",
+        "87,49": "tile_poolcore_deep_water",
+        "86,48": "tile_poolcore_deep_water",
+        "85,48": "tile_poolcore_deep_water",
+        "85,49": "tile_poolcore_deep_water",
+        "85,50": "tile_poolcore_deep_water",
+        "86,49": "tile_poolcore_deep_water",
+        "87,48": "tile_poolcore_deep_water",
+        "87,50": "tile_poolcore_deep_water",
+        "86,51": "tile_poolcore_deep_water",
+        "86,52": "tile_poolcore_deep_water",
+        "86,50": "tile_poolcore_deep_water",
+        "87,51": "tile_poolcore_deep_water",
+        "87,52": "tile_poolcore_deep_water",
+        "87,53": "tile_poolcore_deep_water",
+        "87,54": "tile_poolcore_deep_water",
+        "88,56": "tile_poolcore_deep_water",
+        "88,55": "tile_poolcore_deep_water",
+        "88,54": "tile_poolcore_deep_water",
+        "88,53": "tile_poolcore_deep_water",
+        "88,52": "tile_poolcore_deep_water",
+        "88,51": "tile_poolcore_deep_water",
+        "88,50": "tile_poolcore_deep_water",
+        "89,50": "tile_poolcore_deep_water",
+        "89,51": "tile_poolcore_deep_water",
+        "89,52": "tile_poolcore_deep_water",
+        "89,53": "tile_poolcore_deep_water",
+        "89,54": "tile_poolcore_deep_water",
+        "87,57": "tile_poolcore_deep_water",
+        "86,56": "tile_poolcore_deep_water",
+        "86,55": "tile_poolcore_deep_water",
+        "85,54": "tile_poolcore_deep_water",
+        "84,54": "tile_poolcore_deep_water",
+        "84,52": "tile_poolcore_deep_water",
+        "85,53": "tile_poolcore_deep_water",
+        "86,54": "tile_poolcore_deep_water",
+        "85,56": "tile_poolcore_deep_water",
+        "85,55": "tile_poolcore_deep_water",
+        "97,75": "tile_poolcore_deep_water",
+        "98,76": "tile_poolcore_deep_water",
+        "98,77": "tile_poolcore_deep_water",
+        "98,79": "tile_poolcore_deep_water",
+        "98,80": "tile_poolcore_deep_water",
+        "98,81": "tile_poolcore_deep_water",
+        "98,82": "tile_poolcore_deep_water",
+        "98,83": "tile_poolcore_deep_water",
+        "98,84": "tile_poolcore_deep_water",
+        "98,78": "tile_poolcore_deep_water",
+        "98,70": "tile_poolcore_deep_water",
+        "98,71": "tile_poolcore_deep_water",
+        "98,72": "tile_poolcore_deep_water",
+        "98,73": "tile_poolcore_deep_water",
+        "98,74": "tile_poolcore_deep_water",
+        "98,75": "tile_poolcore_deep_water",
+        "99,70": "tile_poolcore_deep_water",
+        "99,71": "tile_poolcore_deep_water",
+        "99,72": "tile_poolcore_deep_water",
+        "99,73": "tile_poolcore_deep_water",
+        "99,74": "tile_poolcore_deep_water",
+        "99,75": "tile_poolcore_deep_water",
+        "99,76": "tile_poolcore_deep_water",
+        "99,77": "tile_poolcore_deep_water",
+        "99,78": "tile_poolcore_deep_water",
+        "99,80": "tile_poolcore_deep_water",
+        "99,81": "tile_poolcore_deep_water",
+        "99,82": "tile_poolcore_deep_water",
+        "99,79": "tile_poolcore_deep_water",
+        "100,70": "tile_poolcore_deep_water",
+        "101,70": "tile_poolcore_deep_water",
+        "103,70": "tile_poolcore_deep_water",
+        "105,70": "tile_poolcore_deep_water",
+        "106,70": "tile_poolcore_deep_water",
+        "104,70": "tile_poolcore_deep_water",
+        "102,70": "tile_poolcore_deep_water",
+        "101,71": "tile_poolcore_deep_water",
+        "100,72": "tile_poolcore_deep_water",
+        "101,72": "tile_poolcore_deep_water",
+        "101,73": "tile_poolcore_deep_water",
+        "100,74": "tile_poolcore_deep_water",
+        "100,75": "tile_poolcore_deep_water",
+        "100,77": "tile_poolcore_deep_water",
+        "100,79": "tile_poolcore_deep_water",
+        "100,80": "tile_poolcore_deep_water",
+        "100,81": "tile_poolcore_deep_water",
+        "100,82": "tile_poolcore_deep_water",
+        "101,82": "tile_poolcore_deep_water",
+        "102,82": "tile_poolcore_deep_water",
+        "103,82": "tile_poolcore_deep_water",
+        "104,82": "tile_poolcore_deep_water",
+        "105,82": "tile_poolcore_deep_water",
+        "106,82": "tile_poolcore_deep_water",
+        "106,81": "tile_poolcore_deep_water",
+        "106,77": "tile_poolcore_deep_water",
+        "106,76": "tile_poolcore_deep_water",
+        "106,75": "tile_poolcore_deep_water",
+        "106,74": "tile_poolcore_deep_water",
+        "106,73": "tile_poolcore_deep_water",
+        "106,72": "tile_poolcore_deep_water",
+        "106,71": "tile_poolcore_deep_water",
+        "105,71": "tile_poolcore_deep_water",
+        "103,71": "tile_poolcore_deep_water",
+        "102,71": "tile_poolcore_deep_water",
+        "100,71": "tile_poolcore_deep_water",
+        "101,74": "tile_poolcore_deep_water",
+        "101,77": "tile_poolcore_deep_water",
+        "101,79": "tile_poolcore_deep_water",
+        "101,80": "tile_poolcore_deep_water",
+        "101,81": "tile_poolcore_deep_water",
+        "101,78": "tile_poolcore_deep_water",
+        "100,73": "tile_poolcore_deep_water",
+        "100,76": "tile_poolcore_deep_water",
+        "100,78": "tile_poolcore_deep_water",
+        "101,76": "tile_poolcore_deep_water",
+        "102,72": "tile_poolcore_deep_water",
+        "102,73": "tile_poolcore_deep_water",
+        "102,77": "tile_poolcore_deep_water",
+        "102,79": "tile_poolcore_deep_water",
+        "102,80": "tile_poolcore_deep_water",
+        "102,81": "tile_poolcore_deep_water",
+        "103,81": "tile_poolcore_deep_water",
+        "105,79": "tile_poolcore_deep_water",
+        "104,77": "tile_poolcore_deep_water",
+        "104,76": "tile_poolcore_deep_water",
+        "103,75": "tile_poolcore_deep_water",
+        "103,74": "tile_poolcore_deep_water",
+        "103,73": "tile_poolcore_deep_water",
+        "103,72": "tile_poolcore_deep_water",
+        "102,74": "tile_poolcore_deep_water",
+        "102,76": "tile_poolcore_deep_water",
+        "102,78": "tile_poolcore_deep_water",
+        "103,79": "tile_poolcore_deep_water",
+        "103,80": "tile_poolcore_deep_water",
+        "104,81": "tile_poolcore_deep_water",
+        "104,80": "tile_poolcore_deep_water",
+        "105,78": "tile_poolcore_deep_water",
+        "104,78": "tile_poolcore_deep_water",
+        "104,79": "tile_poolcore_deep_water",
+        "105,80": "tile_poolcore_deep_water",
+        "105,81": "tile_poolcore_deep_water",
+        "106,80": "tile_poolcore_deep_water",
+        "106,79": "tile_poolcore_deep_water",
+        "106,78": "tile_poolcore_deep_water",
+        "105,73": "tile_poolcore_deep_water",
+        "105,72": "tile_poolcore_deep_water",
+        "105,74": "tile_poolcore_deep_water",
+        "105,75": "tile_poolcore_deep_water",
+        "105,76": "tile_poolcore_deep_water",
+        "105,77": "tile_poolcore_deep_water",
+        "104,71": "tile_poolcore_deep_water",
+        "104,72": "tile_poolcore_deep_water",
+        "104,73": "tile_poolcore_deep_water",
+        "104,74": "tile_poolcore_deep_water",
+        "104,75": "tile_poolcore_deep_water",
+        "103,77": "tile_poolcore_deep_water",
+        "103,78": "tile_poolcore_deep_water",
+        "103,76": "tile_poolcore_deep_water",
+        "102,75": "tile_poolcore_deep_water",
+        "101,75": "tile_poolcore_deep_water",
+        "105,83": "tile_poolcore_deep_water",
+        "104,83": "tile_poolcore_deep_water",
+        "102,83": "tile_poolcore_deep_water",
+        "101,83": "tile_poolcore_deep_water",
+        "100,83": "tile_poolcore_deep_water",
+        "99,83": "tile_poolcore_deep_water",
+        "103,83": "tile_poolcore_deep_water",
+        "99,84": "tile_poolcore_deep_water",
+        "100,84": "tile_poolcore_deep_water",
+        "102,84": "tile_poolcore_deep_water",
+        "103,84": "tile_poolcore_deep_water",
+        "104,84": "tile_poolcore_deep_water",
+        "105,84": "tile_poolcore_deep_water",
+        "101,84": "tile_poolcore_deep_water",
+        "99,85": "tile_poolcore_deep_water",
+        "100,85": "tile_poolcore_deep_water",
+        "101,85": "tile_poolcore_deep_water",
+        "102,85": "tile_poolcore_deep_water",
+        "103,85": "tile_poolcore_deep_water",
+        "104,85": "tile_poolcore_deep_water",
+        "105,85": "tile_poolcore_deep_water",
+        "106,83": "tile_poolcore_deep_water",
+        "106,84": "tile_poolcore_deep_water",
+        "106,85": "tile_poolcore_deep_water"
+      },
+      "object26": {},
+      "object27": {},
+      "object28": {},
+      "object8": {},
+      "object30": {},
+      "object31": {},
+      "object32": {},
+      "object33": {},
+      "object34": {
+        "62,32": "tile_mwdka8vr"
+      },
+      "ground5": {},
+      "ground6": {
+        "85,64": "tile_mvr2fi62"
+      },
+      "ground7": {
+        "68,70": "tile_poolcore_deep_water",
+        "69,70": "tile_poolcore_deep_water",
+        "70,70": "tile_poolcore_deep_water",
+        "71,70": "tile_poolcore_deep_water",
+        "72,70": "tile_poolcore_deep_water",
+        "73,70": "tile_poolcore_deep_water",
+        "74,70": "tile_poolcore_deep_water",
+        "75,70": "tile_poolcore_deep_water",
+        "77,70": "tile_poolcore_deep_water",
+        "78,70": "tile_poolcore_deep_water",
+        "79,70": "tile_poolcore_deep_water",
+        "80,70": "tile_poolcore_deep_water",
+        "81,70": "tile_poolcore_deep_water",
+        "82,70": "tile_poolcore_deep_water",
+        "83,70": "tile_poolcore_deep_water",
+        "84,70": "tile_poolcore_deep_water",
+        "84,71": "tile_poolcore_deep_water",
+        "83,71": "tile_poolcore_deep_water",
+        "83,72": "tile_poolcore_deep_water",
+        "84,72": "tile_poolcore_deep_water",
+        "84,73": "tile_poolcore_deep_water",
+        "84,74": "tile_poolcore_deep_water",
+        "84,75": "tile_poolcore_deep_water",
+        "84,76": "tile_poolcore_deep_water",
+        "84,77": "tile_poolcore_deep_water",
+        "84,78": "tile_poolcore_deep_water",
+        "84,79": "tile_poolcore_deep_water",
+        "83,79": "tile_poolcore_deep_water",
+        "82,79": "tile_poolcore_deep_water",
+        "79,79": "tile_poolcore_deep_water",
+        "78,79": "tile_poolcore_deep_water",
+        "77,79": "tile_poolcore_deep_water",
+        "76,79": "tile_poolcore_deep_water",
+        "75,79": "tile_poolcore_deep_water",
+        "74,79": "tile_poolcore_deep_water",
+        "73,79": "tile_poolcore_deep_water",
+        "72,79": "tile_poolcore_deep_water",
+        "71,79": "tile_poolcore_deep_water",
+        "70,79": "tile_poolcore_deep_water",
+        "69,79": "tile_poolcore_deep_water",
+        "68,79": "tile_poolcore_deep_water",
+        "67,79": "tile_poolcore_deep_water",
+        "67,71": "tile_poolcore_deep_water",
+        "67,70": "tile_poolcore_deep_water",
+        "68,71": "tile_poolcore_deep_water",
+        "67,72": "tile_poolcore_deep_water",
+        "67,73": "tile_poolcore_deep_water",
+        "68,72": "tile_poolcore_deep_water",
+        "69,72": "tile_poolcore_deep_water",
+        "70,72": "tile_poolcore_deep_water",
+        "71,72": "tile_poolcore_deep_water",
+        "72,72": "tile_poolcore_deep_water",
+        "73,72": "tile_poolcore_deep_water",
+        "73,71": "tile_poolcore_deep_water",
+        "74,71": "tile_poolcore_deep_water",
+        "72,71": "tile_poolcore_deep_water",
+        "71,71": "tile_poolcore_deep_water",
+        "70,71": "tile_poolcore_deep_water",
+        "69,71": "tile_poolcore_deep_water",
+        "76,70": "tile_poolcore_deep_water",
+        "76,71": "tile_poolcore_deep_water",
+        "76,72": "tile_poolcore_deep_water",
+        "75,72": "tile_poolcore_deep_water",
+        "74,72": "tile_poolcore_deep_water",
+        "75,71": "tile_poolcore_deep_water",
+        "77,71": "tile_poolcore_deep_water",
+        "79,71": "tile_poolcore_deep_water",
+        "80,71": "tile_poolcore_deep_water",
+        "81,71": "tile_poolcore_deep_water",
+        "82,71": "tile_poolcore_deep_water",
+        "82,72": "tile_poolcore_deep_water",
+        "81,72": "tile_poolcore_deep_water",
+        "80,72": "tile_poolcore_deep_water",
+        "79,72": "tile_poolcore_deep_water",
+        "78,72": "tile_poolcore_deep_water",
+        "77,72": "tile_poolcore_deep_water",
+        "82,73": "tile_poolcore_deep_water",
+        "83,73": "tile_poolcore_deep_water",
+        "83,74": "tile_poolcore_deep_water",
+        "83,75": "tile_poolcore_deep_water",
+        "83,76": "tile_poolcore_deep_water",
+        "83,77": "tile_poolcore_deep_water",
+        "83,78": "tile_poolcore_deep_water",
+        "82,78": "tile_poolcore_deep_water",
+        "81,79": "tile_poolcore_deep_water",
+        "80,79": "tile_poolcore_deep_water",
+        "79,78": "tile_poolcore_deep_water",
+        "79,77": "tile_poolcore_deep_water",
+        "78,77": "tile_poolcore_deep_water",
+        "76,77": "tile_poolcore_deep_water",
+        "74,77": "tile_poolcore_deep_water",
+        "72,77": "tile_poolcore_deep_water",
+        "71,77": "tile_poolcore_deep_water",
+        "70,77": "tile_poolcore_deep_water",
+        "69,77": "tile_poolcore_deep_water",
+        "68,77": "tile_poolcore_deep_water",
+        "67,78": "tile_poolcore_deep_water",
+        "67,77": "tile_poolcore_deep_water",
+        "67,76": "tile_poolcore_deep_water",
+        "69,76": "tile_poolcore_deep_water",
+        "70,76": "tile_poolcore_deep_water",
+        "71,76": "tile_poolcore_deep_water",
+        "72,76": "tile_poolcore_deep_water",
+        "74,76": "tile_poolcore_deep_water",
+        "75,76": "tile_poolcore_deep_water",
+        "76,76": "tile_poolcore_deep_water",
+        "77,76": "tile_poolcore_deep_water",
+        "78,76": "tile_poolcore_deep_water",
+        "79,76": "tile_poolcore_deep_water",
+        "80,76": "tile_poolcore_deep_water",
+        "81,76": "tile_poolcore_deep_water",
+        "82,76": "tile_poolcore_deep_water",
+        "82,77": "tile_poolcore_deep_water",
+        "81,78": "tile_poolcore_deep_water",
+        "80,78": "tile_poolcore_deep_water",
+        "80,77": "tile_poolcore_deep_water",
+        "81,77": "tile_poolcore_deep_water",
+        "78,78": "tile_poolcore_deep_water",
+        "75,78": "tile_poolcore_deep_water",
+        "73,77": "tile_poolcore_deep_water",
+        "70,78": "tile_poolcore_deep_water",
+        "68,78": "tile_poolcore_deep_water",
+        "69,78": "tile_poolcore_deep_water",
+        "71,78": "tile_poolcore_deep_water",
+        "73,78": "tile_poolcore_deep_water",
+        "74,78": "tile_poolcore_deep_water",
+        "76,78": "tile_poolcore_deep_water",
+        "77,78": "tile_poolcore_deep_water",
+        "77,77": "tile_poolcore_deep_water",
+        "72,78": "tile_poolcore_deep_water",
+        "75,77": "tile_poolcore_deep_water",
+        "73,76": "tile_poolcore_deep_water",
+        "72,75": "tile_poolcore_deep_water",
+        "73,75": "tile_poolcore_deep_water",
+        "69,75": "tile_poolcore_deep_water",
+        "68,75": "tile_poolcore_deep_water",
+        "68,76": "tile_poolcore_deep_water",
+        "68,74": "tile_poolcore_deep_water",
+        "67,74": "tile_poolcore_deep_water",
+        "67,75": "tile_poolcore_deep_water",
+        "69,74": "tile_poolcore_deep_water",
+        "69,73": "tile_poolcore_deep_water",
+        "70,74": "tile_poolcore_deep_water",
+        "70,75": "tile_poolcore_deep_water",
+        "68,73": "tile_poolcore_deep_water",
+        "70,73": "tile_poolcore_deep_water",
+        "71,73": "tile_poolcore_deep_water",
+        "72,73": "tile_poolcore_deep_water",
+        "73,73": "tile_poolcore_deep_water",
+        "74,73": "tile_poolcore_deep_water",
+        "76,73": "tile_poolcore_deep_water",
+        "77,73": "tile_poolcore_deep_water",
+        "79,73": "tile_poolcore_deep_water",
+        "80,73": "tile_poolcore_deep_water",
+        "81,73": "tile_poolcore_deep_water",
+        "82,74": "tile_poolcore_deep_water",
+        "82,75": "tile_poolcore_deep_water",
+        "81,75": "tile_poolcore_deep_water",
+        "79,75": "tile_poolcore_deep_water",
+        "78,75": "tile_poolcore_deep_water",
+        "77,75": "tile_poolcore_deep_water",
+        "76,75": "tile_poolcore_deep_water",
+        "75,75": "tile_poolcore_deep_water",
+        "74,75": "tile_poolcore_deep_water",
+        "72,74": "tile_poolcore_deep_water",
+        "71,74": "tile_poolcore_deep_water",
+        "71,75": "tile_poolcore_deep_water",
+        "73,74": "tile_poolcore_deep_water",
+        "74,74": "tile_poolcore_deep_water",
+        "75,74": "tile_poolcore_deep_water",
+        "76,74": "tile_poolcore_deep_water",
+        "77,74": "tile_poolcore_deep_water",
+        "78,74": "tile_poolcore_deep_water",
+        "79,74": "tile_poolcore_deep_water",
+        "80,74": "tile_poolcore_deep_water",
+        "81,74": "tile_poolcore_deep_water",
+        "80,75": "tile_poolcore_deep_water",
+        "78,73": "tile_poolcore_deep_water",
+        "75,73": "tile_poolcore_deep_water",
+        "78,71": "tile_poolcore_deep_water",
+        "71,31": "tile_poolcore_deep_water",
+        "72,31": "tile_poolcore_deep_water",
+        "74,31": "tile_poolcore_deep_water",
+        "75,31": "tile_poolcore_deep_water",
+        "76,31": "tile_poolcore_deep_water",
+        "77,31": "tile_poolcore_deep_water",
+        "78,31": "tile_poolcore_deep_water",
+        "79,31": "tile_poolcore_deep_water",
+        "80,31": "tile_poolcore_deep_water",
+        "81,31": "tile_poolcore_deep_water",
+        "82,31": "tile_poolcore_deep_water",
+        "73,31": "tile_poolcore_deep_water",
+        "71,32": "tile_poolcore_deep_water",
+        "72,32": "tile_poolcore_deep_water",
+        "73,32": "tile_poolcore_deep_water",
+        "74,32": "tile_poolcore_deep_water",
+        "76,32": "tile_poolcore_deep_water",
+        "77,32": "tile_poolcore_deep_water",
+        "78,32": "tile_poolcore_deep_water",
+        "79,32": "tile_poolcore_deep_water",
+        "80,32": "tile_poolcore_deep_water",
+        "81,32": "tile_poolcore_deep_water",
+        "82,32": "tile_poolcore_deep_water",
+        "82,33": "tile_poolcore_deep_water",
+        "82,34": "tile_poolcore_deep_water",
+        "81,34": "tile_poolcore_deep_water",
+        "80,34": "tile_poolcore_deep_water",
+        "79,34": "tile_poolcore_deep_water",
+        "78,34": "tile_poolcore_deep_water",
+        "77,34": "tile_poolcore_deep_water",
+        "76,34": "tile_poolcore_deep_water",
+        "75,34": "tile_poolcore_deep_water",
+        "74,34": "tile_poolcore_deep_water",
+        "73,34": "tile_poolcore_deep_water",
+        "72,34": "tile_poolcore_deep_water",
+        "71,34": "tile_poolcore_deep_water",
+        "71,33": "tile_poolcore_deep_water",
+        "72,33": "tile_poolcore_deep_water",
+        "74,33": "tile_poolcore_deep_water",
+        "75,33": "tile_poolcore_deep_water",
+        "77,33": "tile_poolcore_deep_water",
+        "78,33": "tile_poolcore_deep_water",
+        "79,33": "tile_poolcore_deep_water",
+        "80,33": "tile_poolcore_deep_water",
+        "75,32": "tile_poolcore_deep_water",
+        "76,33": "tile_poolcore_deep_water",
+        "73,33": "tile_poolcore_deep_water",
+        "81,33": "tile_poolcore_deep_water",
+        "71,35": "tile_poolcore_deep_water",
+        "72,35": "tile_poolcore_deep_water",
+        "73,35": "tile_poolcore_deep_water",
+        "74,35": "tile_poolcore_deep_water",
+        "75,35": "tile_poolcore_deep_water",
+        "75,36": "tile_poolcore_deep_water",
+        "74,37": "tile_poolcore_deep_water",
+        "73,37": "tile_poolcore_deep_water",
+        "72,38": "tile_poolcore_deep_water",
+        "72,39": "tile_poolcore_deep_water",
+        "71,39": "tile_poolcore_deep_water",
+        "71,40": "tile_poolcore_deep_water",
+        "71,41": "tile_poolcore_deep_water",
+        "71,42": "tile_poolcore_deep_water",
+        "71,43": "tile_poolcore_deep_water",
+        "72,44": "tile_poolcore_deep_water",
+        "73,43": "tile_poolcore_deep_water",
+        "73,42": "tile_poolcore_deep_water",
+        "72,42": "tile_poolcore_deep_water",
+        "72,41": "tile_poolcore_deep_water",
+        "72,40": "tile_poolcore_deep_water",
+        "71,36": "tile_poolcore_deep_water",
+        "71,37": "tile_poolcore_deep_water",
+        "71,38": "tile_poolcore_deep_water",
+        "72,36": "tile_poolcore_deep_water",
+        "72,37": "tile_poolcore_deep_water",
+        "73,36": "tile_poolcore_deep_water",
+        "74,36": "tile_poolcore_deep_water",
+        "75,37": "tile_poolcore_deep_water",
+        "75,38": "tile_poolcore_deep_water",
+        "75,39": "tile_poolcore_deep_water",
+        "75,40": "tile_poolcore_deep_water",
+        "75,41": "tile_poolcore_deep_water",
+        "75,42": "tile_poolcore_deep_water",
+        "74,42": "tile_poolcore_deep_water",
+        "74,43": "tile_poolcore_deep_water",
+        "74,44": "tile_poolcore_deep_water",
+        "75,44": "tile_poolcore_deep_water",
+        "75,48": "tile_poolcore_deep_water",
+        "74,48": "tile_poolcore_deep_water",
+        "74,49": "tile_poolcore_deep_water",
+        "72,43": "tile_poolcore_deep_water",
+        "73,44": "tile_poolcore_deep_water",
+        "75,43": "tile_poolcore_deep_water",
+        "74,41": "tile_poolcore_deep_water",
+        "74,40": "tile_poolcore_deep_water",
+        "74,39": "tile_poolcore_deep_water",
+        "74,38": "tile_poolcore_deep_water",
+        "73,38": "tile_poolcore_deep_water",
+        "73,39": "tile_poolcore_deep_water",
+        "73,40": "tile_poolcore_deep_water",
+        "73,41": "tile_poolcore_deep_water",
+        "71,44": "tile_poolcore_deep_water",
+        "71,48": "tile_poolcore_deep_water",
+        "71,49": "tile_poolcore_deep_water",
+        "71,50": "tile_poolcore_deep_water",
+        "71,51": "tile_poolcore_deep_water",
+        "71,52": "tile_poolcore_deep_water",
+        "71,53": "tile_poolcore_deep_water",
+        "71,54": "tile_poolcore_deep_water",
+        "71,55": "tile_poolcore_deep_water",
+        "71,56": "tile_poolcore_deep_water",
+        "71,57": "tile_poolcore_deep_water",
+        "71,58": "tile_poolcore_deep_water",
+        "71,59": "tile_poolcore_deep_water",
+        "72,59": "tile_poolcore_deep_water",
+        "73,57": "tile_poolcore_deep_water",
+        "74,55": "tile_poolcore_deep_water",
+        "74,53": "tile_poolcore_deep_water",
+        "73,52": "tile_poolcore_deep_water",
+        "73,51": "tile_poolcore_deep_water",
+        "73,49": "tile_poolcore_deep_water",
+        "73,48": "tile_poolcore_deep_water",
+        "72,48": "tile_poolcore_deep_water",
+        "72,49": "tile_poolcore_deep_water",
+        "72,50": "tile_poolcore_deep_water",
+        "72,51": "tile_poolcore_deep_water",
+        "72,52": "tile_poolcore_deep_water",
+        "72,53": "tile_poolcore_deep_water",
+        "72,54": "tile_poolcore_deep_water",
+        "72,55": "tile_poolcore_deep_water",
+        "72,56": "tile_poolcore_deep_water",
+        "72,57": "tile_poolcore_deep_water",
+        "72,58": "tile_poolcore_deep_water",
+        "72,60": "tile_poolcore_deep_water",
+        "72,61": "tile_poolcore_deep_water",
+        "71,61": "tile_poolcore_deep_water",
+        "71,60": "tile_poolcore_deep_water",
+        "73,61": "tile_poolcore_deep_water",
+        "74,61": "tile_poolcore_deep_water",
+        "75,61": "tile_poolcore_deep_water",
+        "75,60": "tile_poolcore_deep_water",
+        "75,59": "tile_poolcore_deep_water",
+        "75,58": "tile_poolcore_deep_water",
+        "75,57": "tile_poolcore_deep_water",
+        "74,56": "tile_poolcore_deep_water",
+        "74,54": "tile_poolcore_deep_water",
+        "74,52": "tile_poolcore_deep_water",
+        "74,51": "tile_poolcore_deep_water",
+        "74,50": "tile_poolcore_deep_water",
+        "73,50": "tile_poolcore_deep_water",
+        "73,53": "tile_poolcore_deep_water",
+        "73,54": "tile_poolcore_deep_water",
+        "73,55": "tile_poolcore_deep_water",
+        "73,56": "tile_poolcore_deep_water",
+        "73,58": "tile_poolcore_deep_water",
+        "73,59": "tile_poolcore_deep_water",
+        "73,60": "tile_poolcore_deep_water",
+        "74,60": "tile_poolcore_deep_water",
+        "74,59": "tile_poolcore_deep_water",
+        "74,58": "tile_poolcore_deep_water",
+        "74,57": "tile_poolcore_deep_water",
+        "75,49": "tile_poolcore_deep_water",
+        "75,50": "tile_poolcore_deep_water",
+        "75,51": "tile_poolcore_deep_water",
+        "75,52": "tile_poolcore_deep_water",
+        "75,53": "tile_poolcore_deep_water",
+        "75,54": "tile_poolcore_deep_water",
+        "75,55": "tile_poolcore_deep_water",
+        "75,56": "tile_poolcore_deep_water",
+        "89,31": "tile_poolcore_deep_water",
+        "90,31": "tile_poolcore_deep_water",
+        "91,31": "tile_poolcore_deep_water",
+        "93,31": "tile_poolcore_deep_water",
+        "94,31": "tile_poolcore_deep_water",
+        "95,31": "tile_poolcore_deep_water",
+        "96,31": "tile_poolcore_deep_water",
+        "97,31": "tile_poolcore_deep_water",
+        "98,31": "tile_poolcore_deep_water",
+        "99,31": "tile_poolcore_deep_water",
+        "100,31": "tile_poolcore_deep_water",
+        "101,31": "tile_poolcore_deep_water",
+        "102,31": "tile_poolcore_deep_water",
+        "103,31": "tile_poolcore_deep_water",
+        "92,31": "tile_poolcore_deep_water",
+        "89,32": "tile_poolcore_deep_water",
+        "90,32": "tile_poolcore_deep_water",
+        "92,32": "tile_poolcore_deep_water",
+        "94,32": "tile_poolcore_deep_water",
+        "95,32": "tile_poolcore_deep_water",
+        "96,32": "tile_poolcore_deep_water",
+        "97,32": "tile_poolcore_deep_water",
+        "98,32": "tile_poolcore_deep_water",
+        "99,32": "tile_poolcore_deep_water",
+        "100,32": "tile_poolcore_deep_water",
+        "101,32": "tile_poolcore_deep_water",
+        "102,32": "tile_poolcore_deep_water",
+        "103,32": "tile_poolcore_deep_water",
+        "103,33": "tile_poolcore_deep_water",
+        "102,33": "tile_poolcore_deep_water",
+        "100,33": "tile_poolcore_deep_water",
+        "99,33": "tile_poolcore_deep_water",
+        "98,33": "tile_poolcore_deep_water",
+        "97,33": "tile_poolcore_deep_water",
+        "96,33": "tile_poolcore_deep_water",
+        "95,33": "tile_poolcore_deep_water",
+        "94,33": "tile_poolcore_deep_water",
+        "93,33": "tile_poolcore_deep_water",
+        "92,33": "tile_poolcore_deep_water",
+        "91,33": "tile_poolcore_deep_water",
+        "90,33": "tile_poolcore_deep_water",
+        "89,33": "tile_poolcore_deep_water",
+        "89,34": "tile_poolcore_deep_water",
+        "90,34": "tile_poolcore_deep_water",
+        "91,34": "tile_poolcore_deep_water",
+        "92,34": "tile_poolcore_deep_water",
+        "93,34": "tile_poolcore_deep_water",
+        "94,34": "tile_poolcore_deep_water",
+        "95,34": "tile_poolcore_deep_water",
+        "96,34": "tile_poolcore_deep_water",
+        "97,34": "tile_poolcore_deep_water",
+        "98,34": "tile_poolcore_deep_water",
+        "99,34": "tile_poolcore_deep_water",
+        "100,34": "tile_poolcore_deep_water",
+        "101,34": "tile_poolcore_deep_water",
+        "103,34": "tile_poolcore_deep_water",
+        "101,33": "tile_poolcore_deep_water",
+        "91,32": "tile_poolcore_deep_water",
+        "93,32": "tile_poolcore_deep_water",
+        "102,34": "tile_poolcore_deep_water",
+        "97,35": "tile_poolcore_deep_water",
+        "97,36": "tile_poolcore_deep_water",
+        "97,37": "tile_poolcore_deep_water",
+        "97,38": "tile_poolcore_deep_water",
+        "97,39": "tile_poolcore_deep_water",
+        "97,40": "tile_poolcore_deep_water",
+        "97,41": "tile_poolcore_deep_water",
+        "97,42": "tile_poolcore_deep_water",
+        "97,43": "tile_poolcore_deep_water",
+        "97,44": "tile_poolcore_deep_water",
+        "97,45": "tile_poolcore_deep_water",
+        "97,46": "tile_poolcore_deep_water",
+        "97,47": "tile_poolcore_deep_water",
+        "98,47": "tile_poolcore_deep_water",
+        "98,48": "tile_poolcore_deep_water",
+        "98,49": "tile_poolcore_deep_water",
+        "99,49": "tile_poolcore_deep_water",
+        "99,48": "tile_poolcore_deep_water",
+        "98,46": "tile_poolcore_deep_water",
+        "98,45": "tile_poolcore_deep_water",
+        "98,44": "tile_poolcore_deep_water",
+        "98,43": "tile_poolcore_deep_water",
+        "98,42": "tile_poolcore_deep_water",
+        "98,41": "tile_poolcore_deep_water",
+        "98,39": "tile_poolcore_deep_water",
+        "98,38": "tile_poolcore_deep_water",
+        "98,37": "tile_poolcore_deep_water",
+        "98,36": "tile_poolcore_deep_water",
+        "98,35": "tile_poolcore_deep_water",
+        "99,35": "tile_poolcore_deep_water",
+        "100,35": "tile_poolcore_deep_water",
+        "101,35": "tile_poolcore_deep_water",
+        "102,35": "tile_poolcore_deep_water",
+        "103,35": "tile_poolcore_deep_water",
+        "104,36": "tile_poolcore_deep_water",
+        "103,36": "tile_poolcore_deep_water",
+        "102,36": "tile_poolcore_deep_water",
+        "101,36": "tile_poolcore_deep_water",
+        "100,36": "tile_poolcore_deep_water",
+        "100,37": "tile_poolcore_deep_water",
+        "99,37": "tile_poolcore_deep_water",
+        "99,38": "tile_poolcore_deep_water",
+        "98,40": "tile_poolcore_deep_water",
+        "98,50": "tile_poolcore_deep_water",
+        "98,51": "tile_poolcore_deep_water",
+        "97,51": "tile_poolcore_deep_water",
+        "97,50": "tile_poolcore_deep_water",
+        "97,49": "tile_poolcore_deep_water",
+        "97,48": "tile_poolcore_deep_water",
+        "97,52": "tile_poolcore_deep_water",
+        "97,53": "tile_poolcore_deep_water",
+        "97,54": "tile_poolcore_deep_water",
+        "97,55": "tile_poolcore_deep_water",
+        "97,56": "tile_poolcore_deep_water",
+        "97,57": "tile_poolcore_deep_water",
+        "97,58": "tile_poolcore_deep_water",
+        "97,59": "tile_poolcore_deep_water",
+        "97,60": "tile_poolcore_deep_water",
+        "98,60": "tile_poolcore_deep_water",
+        "98,61": "tile_poolcore_deep_water",
+        "97,61": "tile_poolcore_deep_water",
+        "100,61": "tile_poolcore_deep_water",
+        "99,61": "tile_poolcore_deep_water",
+        "101,61": "tile_poolcore_deep_water",
+        "103,61": "tile_poolcore_deep_water",
+        "104,61": "tile_poolcore_deep_water",
+        "105,61": "tile_poolcore_deep_water",
+        "106,61": "tile_poolcore_deep_water",
+        "102,61": "tile_poolcore_deep_water",
+        "103,60": "tile_poolcore_deep_water",
+        "105,60": "tile_poolcore_deep_water",
+        "105,59": "tile_poolcore_deep_water",
+        "106,59": "tile_poolcore_deep_water",
+        "106,60": "tile_poolcore_deep_water",
+        "107,60": "tile_poolcore_deep_water",
+        "104,60": "tile_poolcore_deep_water",
+        "102,60": "tile_poolcore_deep_water",
+        "101,60": "tile_poolcore_deep_water",
+        "100,60": "tile_poolcore_deep_water",
+        "99,60": "tile_poolcore_deep_water",
+        "99,59": "tile_poolcore_deep_water",
+        "98,59": "tile_poolcore_deep_water",
+        "98,58": "tile_poolcore_deep_water",
+        "98,57": "tile_poolcore_deep_water",
+        "98,56": "tile_poolcore_deep_water",
+        "98,55": "tile_poolcore_deep_water",
+        "98,54": "tile_poolcore_deep_water",
+        "98,53": "tile_poolcore_deep_water",
+        "98,52": "tile_poolcore_deep_water",
+        "99,53": "tile_poolcore_deep_water",
+        "99,54": "tile_poolcore_deep_water",
+        "99,55": "tile_poolcore_deep_water",
+        "99,56": "tile_poolcore_deep_water",
+        "99,57": "tile_poolcore_deep_water",
+        "100,57": "tile_poolcore_deep_water",
+        "100,58": "tile_poolcore_deep_water",
+        "100,59": "tile_poolcore_deep_water",
+        "101,59": "tile_poolcore_deep_water",
+        "100,55": "tile_poolcore_deep_water",
+        "100,56": "tile_poolcore_deep_water",
+        "99,58": "tile_poolcore_deep_water",
+        "101,58": "tile_poolcore_deep_water",
+        "103,59": "tile_poolcore_deep_water",
+        "104,59": "tile_poolcore_deep_water",
+        "102,59": "tile_poolcore_deep_water",
+        "102,58": "tile_poolcore_deep_water",
+        "102,57": "tile_poolcore_deep_water",
+        "102,56": "tile_poolcore_deep_water",
+        "102,55": "tile_poolcore_deep_water",
+        "102,54": "tile_poolcore_deep_water",
+        "101,52": "tile_poolcore_deep_water",
+        "101,50": "tile_poolcore_deep_water",
+        "101,48": "tile_poolcore_deep_water",
+        "100,47": "tile_poolcore_deep_water",
+        "100,46": "tile_poolcore_deep_water",
+        "100,45": "tile_poolcore_deep_water",
+        "100,48": "tile_poolcore_deep_water",
+        "100,49": "tile_poolcore_deep_water",
+        "100,51": "tile_poolcore_deep_water",
+        "100,52": "tile_poolcore_deep_water",
+        "100,54": "tile_poolcore_deep_water",
+        "101,56": "tile_poolcore_deep_water",
+        "101,57": "tile_poolcore_deep_water",
+        "101,55": "tile_poolcore_deep_water",
+        "101,54": "tile_poolcore_deep_water",
+        "101,53": "tile_poolcore_deep_water",
+        "100,53": "tile_poolcore_deep_water",
+        "99,51": "tile_poolcore_deep_water",
+        "99,52": "tile_poolcore_deep_water",
+        "99,50": "tile_poolcore_deep_water",
+        "100,50": "tile_poolcore_deep_water",
+        "102,51": "tile_poolcore_deep_water",
+        "102,52": "tile_poolcore_deep_water",
+        "102,53": "tile_poolcore_deep_water",
+        "103,55": "tile_poolcore_deep_water",
+        "103,56": "tile_poolcore_deep_water",
+        "103,57": "tile_poolcore_deep_water",
+        "103,58": "tile_poolcore_deep_water",
+        "105,58": "tile_poolcore_deep_water",
+        "107,59": "tile_poolcore_deep_water",
+        "107,58": "tile_poolcore_deep_water",
+        "106,58": "tile_poolcore_deep_water",
+        "104,58": "tile_poolcore_deep_water",
+        "104,57": "tile_poolcore_deep_water",
+        "104,55": "tile_poolcore_deep_water",
+        "105,55": "tile_poolcore_deep_water",
+        "106,55": "tile_poolcore_deep_water",
+        "107,55": "tile_poolcore_deep_water",
+        "107,56": "tile_poolcore_deep_water",
+        "107,57": "tile_poolcore_deep_water",
+        "106,57": "tile_poolcore_deep_water",
+        "105,57": "tile_poolcore_deep_water",
+        "104,56": "tile_poolcore_deep_water",
+        "106,56": "tile_poolcore_deep_water",
+        "105,56": "tile_poolcore_deep_water",
+        "107,53": "tile_poolcore_deep_water",
+        "107,54": "tile_poolcore_deep_water",
+        "107,52": "tile_poolcore_deep_water",
+        "107,50": "tile_poolcore_deep_water",
+        "106,47": "tile_poolcore_deep_water",
+        "105,44": "tile_poolcore_deep_water",
+        "104,42": "tile_poolcore_deep_water",
+        "104,40": "tile_poolcore_deep_water",
+        "103,38": "tile_poolcore_deep_water",
+        "99,36": "tile_poolcore_deep_water",
+        "99,39": "tile_poolcore_deep_water",
+        "99,41": "tile_poolcore_deep_water",
+        "99,43": "tile_poolcore_deep_water",
+        "99,44": "tile_poolcore_deep_water",
+        "99,45": "tile_poolcore_deep_water",
+        "99,47": "tile_poolcore_deep_water",
+        "99,40": "tile_poolcore_deep_water",
+        "99,46": "tile_poolcore_deep_water",
+        "99,42": "tile_poolcore_deep_water",
+        "100,41": "tile_poolcore_deep_water",
+        "101,46": "tile_poolcore_deep_water",
+        "101,41": "tile_poolcore_deep_water",
+        "101,38": "tile_poolcore_deep_water",
+        "101,37": "tile_poolcore_deep_water",
+        "101,40": "tile_poolcore_deep_water",
+        "101,45": "tile_poolcore_deep_water",
+        "102,49": "tile_poolcore_deep_water",
+        "103,54": "tile_poolcore_deep_water",
+        "103,53": "tile_poolcore_deep_water",
+        "103,52": "tile_poolcore_deep_water",
+        "103,50": "tile_poolcore_deep_water",
+        "102,50": "tile_poolcore_deep_water",
+        "103,51": "tile_poolcore_deep_water",
+        "104,54": "tile_poolcore_deep_water",
+        "104,52": "tile_poolcore_deep_water",
+        "104,50": "tile_poolcore_deep_water",
+        "104,51": "tile_poolcore_deep_water",
+        "104,53": "tile_poolcore_deep_water",
+        "105,54": "tile_poolcore_deep_water",
+        "105,52": "tile_poolcore_deep_water",
+        "105,50": "tile_poolcore_deep_water",
+        "105,51": "tile_poolcore_deep_water",
+        "105,53": "tile_poolcore_deep_water",
+        "106,54": "tile_poolcore_deep_water",
+        "106,53": "tile_poolcore_deep_water",
+        "106,50": "tile_poolcore_deep_water",
+        "106,49": "tile_poolcore_deep_water",
+        "106,51": "tile_poolcore_deep_water",
+        "107,51": "tile_poolcore_deep_water",
+        "107,49": "tile_poolcore_deep_water",
+        "107,47": "tile_poolcore_deep_water",
+        "107,48": "tile_poolcore_deep_water",
+        "106,52": "tile_poolcore_deep_water",
+        "104,17": "tile_poolcore_deep_water",
+        "103,17": "tile_poolcore_deep_water",
+        "101,17": "tile_poolcore_deep_water",
+        "100,17": "tile_poolcore_deep_water",
+        "99,17": "tile_poolcore_deep_water",
+        "98,17": "tile_poolcore_deep_water",
+        "97,17": "tile_poolcore_deep_water",
+        "96,17": "tile_poolcore_deep_water",
+        "95,17": "tile_poolcore_deep_water",
+        "94,17": "tile_poolcore_deep_water",
+        "93,17": "tile_poolcore_deep_water",
+        "92,17": "tile_poolcore_deep_water",
+        "91,17": "tile_poolcore_deep_water",
+        "90,17": "tile_poolcore_deep_water",
+        "89,17": "tile_poolcore_deep_water",
+        "88,17": "tile_poolcore_deep_water",
+        "87,17": "tile_poolcore_deep_water",
+        "86,17": "tile_poolcore_deep_water",
+        "85,17": "tile_poolcore_deep_water",
+        "84,17": "tile_poolcore_deep_water",
+        "83,16": "tile_poolcore_deep_water",
+        "82,16": "tile_poolcore_deep_water",
+        "81,16": "tile_poolcore_deep_water",
+        "80,16": "tile_poolcore_deep_water",
+        "79,16": "tile_poolcore_deep_water",
+        "78,16": "tile_poolcore_deep_water",
+        "77,16": "tile_poolcore_deep_water",
+        "76,16": "tile_poolcore_deep_water",
+        "75,16": "tile_poolcore_deep_water",
+        "75,17": "tile_poolcore_deep_water",
+        "74,17": "tile_poolcore_deep_water",
+        "73,17": "tile_poolcore_deep_water",
+        "72,17": "tile_poolcore_deep_water",
+        "71,17": "tile_poolcore_deep_water",
+        "71,18": "tile_poolcore_deep_water",
+        "71,19": "tile_poolcore_deep_water",
+        "72,19": "tile_poolcore_deep_water",
+        "73,19": "tile_poolcore_deep_water",
+        "74,19": "tile_poolcore_deep_water",
+        "73,18": "tile_poolcore_deep_water",
+        "72,18": "tile_poolcore_deep_water",
+        "74,18": "tile_poolcore_deep_water",
+        "75,18": "tile_poolcore_deep_water",
+        "76,18": "tile_poolcore_deep_water",
+        "77,18": "tile_poolcore_deep_water",
+        "77,17": "tile_poolcore_deep_water",
+        "76,17": "tile_poolcore_deep_water",
+        "78,17": "tile_poolcore_deep_water",
+        "81,17": "tile_poolcore_deep_water",
+        "82,17": "tile_poolcore_deep_water",
+        "83,17": "tile_poolcore_deep_water",
+        "83,18": "tile_poolcore_deep_water",
+        "83,19": "tile_poolcore_deep_water",
+        "82,19": "tile_poolcore_deep_water",
+        "81,19": "tile_poolcore_deep_water",
+        "80,19": "tile_poolcore_deep_water",
+        "79,19": "tile_poolcore_deep_water",
+        "78,19": "tile_poolcore_deep_water",
+        "77,19": "tile_poolcore_deep_water",
+        "76,19": "tile_poolcore_deep_water",
+        "75,19": "tile_poolcore_deep_water",
+        "79,18": "tile_poolcore_deep_water",
+        "80,18": "tile_poolcore_deep_water",
+        "78,18": "tile_poolcore_deep_water",
+        "79,17": "tile_poolcore_deep_water",
+        "80,17": "tile_poolcore_deep_water",
+        "81,18": "tile_poolcore_deep_water",
+        "82,18": "tile_poolcore_deep_water",
+        "84,18": "tile_poolcore_deep_water",
+        "85,18": "tile_poolcore_deep_water",
+        "86,18": "tile_poolcore_deep_water",
+        "87,18": "tile_poolcore_deep_water",
+        "88,18": "tile_poolcore_deep_water",
+        "89,18": "tile_poolcore_deep_water",
+        "90,18": "tile_poolcore_deep_water",
+        "91,18": "tile_poolcore_deep_water",
+        "92,18": "tile_poolcore_deep_water",
+        "94,18": "tile_poolcore_deep_water",
+        "96,18": "tile_poolcore_deep_water",
+        "97,18": "tile_poolcore_deep_water",
+        "98,18": "tile_poolcore_deep_water",
+        "99,18": "tile_poolcore_deep_water",
+        "100,18": "tile_poolcore_deep_water",
+        "101,18": "tile_poolcore_deep_water",
+        "102,18": "tile_poolcore_deep_water",
+        "103,18": "tile_poolcore_deep_water",
+        "104,18": "tile_poolcore_deep_water",
+        "104,19": "tile_poolcore_deep_water",
+        "103,19": "tile_poolcore_deep_water",
+        "102,19": "tile_poolcore_deep_water",
+        "101,19": "tile_poolcore_deep_water",
+        "100,19": "tile_poolcore_deep_water",
+        "99,19": "tile_poolcore_deep_water",
+        "98,19": "tile_poolcore_deep_water",
+        "97,19": "tile_poolcore_deep_water",
+        "96,19": "tile_poolcore_deep_water",
+        "95,19": "tile_poolcore_deep_water",
+        "94,19": "tile_poolcore_deep_water",
+        "93,19": "tile_poolcore_deep_water",
+        "92,19": "tile_poolcore_deep_water",
+        "91,19": "tile_poolcore_deep_water",
+        "90,19": "tile_poolcore_deep_water",
+        "89,19": "tile_poolcore_deep_water",
+        "88,19": "tile_poolcore_deep_water",
+        "87,19": "tile_poolcore_deep_water",
+        "86,19": "tile_poolcore_deep_water",
+        "84,19": "tile_poolcore_deep_water",
+        "93,18": "tile_poolcore_deep_water",
+        "95,18": "tile_poolcore_deep_water",
+        "102,17": "tile_poolcore_deep_water",
+        "85,19": "tile_poolcore_deep_water",
+        "104,26": "tile_poolcore_deep_water",
+        "104,27": "tile_poolcore_deep_water",
+        "104,28": "tile_poolcore_deep_water",
+        "104,29": "tile_poolcore_deep_water",
+        "104,30": "tile_poolcore_deep_water",
+        "104,31": "tile_poolcore_deep_water",
+        "104,32": "tile_poolcore_deep_water",
+        "104,33": "tile_poolcore_deep_water",
+        "104,34": "tile_poolcore_deep_water",
+        "104,35": "tile_poolcore_deep_water",
+        "104,37": "tile_poolcore_deep_water",
+        "104,38": "tile_poolcore_deep_water",
+        "100,38": "tile_poolcore_deep_water",
+        "100,39": "tile_poolcore_deep_water",
+        "100,40": "tile_poolcore_deep_water",
+        "100,42": "tile_poolcore_deep_water",
+        "101,51": "tile_poolcore_deep_water",
+        "101,49": "tile_poolcore_deep_water",
+        "101,47": "tile_poolcore_deep_water",
+        "101,44": "tile_poolcore_deep_water",
+        "100,44": "tile_poolcore_deep_water",
+        "100,43": "tile_poolcore_deep_water",
+        "101,42": "tile_poolcore_deep_water",
+        "101,43": "tile_poolcore_deep_water",
+        "102,44": "tile_poolcore_deep_water",
+        "102,45": "tile_poolcore_deep_water",
+        "102,46": "tile_poolcore_deep_water",
+        "102,47": "tile_poolcore_deep_water",
+        "102,48": "tile_poolcore_deep_water",
+        "103,48": "tile_poolcore_deep_water",
+        "103,49": "tile_poolcore_deep_water",
+        "104,49": "tile_poolcore_deep_water",
+        "105,49": "tile_poolcore_deep_water",
+        "106,48": "tile_poolcore_deep_water",
+        "105,47": "tile_poolcore_deep_water",
+        "105,46": "tile_poolcore_deep_water",
+        "105,45": "tile_poolcore_deep_water",
+        "105,43": "tile_poolcore_deep_water",
+        "105,42": "tile_poolcore_deep_water",
+        "105,41": "tile_poolcore_deep_water",
+        "104,39": "tile_poolcore_deep_water",
+        "103,37": "tile_poolcore_deep_water",
+        "102,38": "tile_poolcore_deep_water",
+        "101,39": "tile_poolcore_deep_water",
+        "103,45": "tile_poolcore_deep_water",
+        "103,44": "tile_poolcore_deep_water",
+        "102,42": "tile_poolcore_deep_water",
+        "102,41": "tile_poolcore_deep_water",
+        "102,40": "tile_poolcore_deep_water",
+        "102,39": "tile_poolcore_deep_water",
+        "102,37": "tile_poolcore_deep_water",
+        "103,41": "tile_poolcore_deep_water",
+        "102,43": "tile_poolcore_deep_water",
+        "103,39": "tile_poolcore_deep_water",
+        "103,40": "tile_poolcore_deep_water",
+        "104,41": "tile_poolcore_deep_water",
+        "104,43": "tile_poolcore_deep_water",
+        "104,44": "tile_poolcore_deep_water",
+        "104,45": "tile_poolcore_deep_water",
+        "104,46": "tile_poolcore_deep_water",
+        "104,47": "tile_poolcore_deep_water",
+        "104,48": "tile_poolcore_deep_water",
+        "103,47": "tile_poolcore_deep_water",
+        "103,43": "tile_poolcore_deep_water",
+        "103,42": "tile_poolcore_deep_water",
+        "103,46": "tile_poolcore_deep_water",
+        "105,48": "tile_poolcore_deep_water",
+        "107,46": "tile_poolcore_deep_water",
+        "107,45": "tile_poolcore_deep_water",
+        "107,44": "tile_poolcore_deep_water",
+        "107,43": "tile_poolcore_deep_water",
+        "107,42": "tile_poolcore_deep_water",
+        "107,41": "tile_poolcore_deep_water",
+        "107,40": "tile_poolcore_deep_water",
+        "107,39": "tile_poolcore_deep_water",
+        "107,38": "tile_poolcore_deep_water",
+        "106,38": "tile_poolcore_deep_water",
+        "106,39": "tile_poolcore_deep_water",
+        "106,40": "tile_poolcore_deep_water",
+        "106,41": "tile_poolcore_deep_water",
+        "106,42": "tile_poolcore_deep_water",
+        "106,43": "tile_poolcore_deep_water",
+        "106,44": "tile_poolcore_deep_water",
+        "106,45": "tile_poolcore_deep_water",
+        "106,46": "tile_poolcore_deep_water",
+        "105,40": "tile_poolcore_deep_water",
+        "105,39": "tile_poolcore_deep_water",
+        "105,38": "tile_poolcore_deep_water",
+        "105,37": "tile_poolcore_deep_water",
+        "105,36": "tile_poolcore_deep_water",
+        "105,35": "tile_poolcore_deep_water",
+        "105,34": "tile_poolcore_deep_water",
+        "105,33": "tile_poolcore_deep_water",
+        "105,32": "tile_poolcore_deep_water",
+        "105,31": "tile_poolcore_deep_water",
+        "105,30": "tile_poolcore_deep_water",
+        "105,29": "tile_poolcore_deep_water",
+        "105,26": "tile_poolcore_deep_water",
+        "106,26": "tile_poolcore_deep_water",
+        "106,27": "tile_poolcore_deep_water",
+        "106,28": "tile_poolcore_deep_water",
+        "106,29": "tile_poolcore_deep_water",
+        "106,30": "tile_poolcore_deep_water",
+        "106,31": "tile_poolcore_deep_water",
+        "106,32": "tile_poolcore_deep_water",
+        "106,33": "tile_poolcore_deep_water",
+        "106,34": "tile_poolcore_deep_water",
+        "106,35": "tile_poolcore_deep_water",
+        "106,36": "tile_poolcore_deep_water",
+        "106,37": "tile_poolcore_deep_water",
+        "107,37": "tile_poolcore_deep_water",
+        "107,36": "tile_poolcore_deep_water",
+        "107,35": "tile_poolcore_deep_water",
+        "107,34": "tile_poolcore_deep_water",
+        "107,33": "tile_poolcore_deep_water",
+        "107,32": "tile_poolcore_deep_water",
+        "107,31": "tile_poolcore_deep_water",
+        "107,30": "tile_poolcore_deep_water",
+        "107,29": "tile_poolcore_deep_water",
+        "107,28": "tile_poolcore_deep_water",
+        "107,27": "tile_poolcore_deep_water",
+        "107,26": "tile_poolcore_deep_water",
+        "107,25": "tile_poolcore_deep_water",
+        "107,24": "tile_poolcore_deep_water",
+        "105,28": "tile_poolcore_deep_water",
+        "105,27": "tile_poolcore_deep_water",
+        "107,23": "tile_poolcore_deep_water",
+        "107,22": "tile_poolcore_deep_water",
+        "107,20": "tile_poolcore_deep_water",
+        "107,21": "tile_poolcore_deep_water",
+        "105,18": "tile_poolcore_deep_water",
+        "105,19": "tile_poolcore_deep_water",
+        "106,19": "tile_poolcore_deep_water",
+        "107,19": "tile_poolcore_deep_water",
+        "106,18": "tile_poolcore_deep_water",
+        "107,18": "tile_poolcore_deep_water",
+        "107,17": "tile_poolcore_deep_water",
+        "106,17": "tile_poolcore_deep_water",
+        "105,17": "tile_poolcore_deep_water",
+        "74,45": "tile_poolcore_deep_water",
+        "74,46": "tile_poolcore_deep_water",
+        "73,47": "tile_poolcore_deep_water",
+        "73,46": "tile_poolcore_deep_water",
+        "73,45": "tile_poolcore_deep_water",
+        "72,46": "tile_poolcore_deep_water",
+        "72,47": "tile_poolcore_deep_water",
+        "71,45": "tile_poolcore_deep_water",
+        "71,46": "tile_poolcore_deep_water",
+        "71,47": "tile_poolcore_deep_water",
+        "72,45": "tile_poolcore_deep_water",
+        "74,47": "tile_poolcore_deep_water",
+        "75,47": "tile_poolcore_deep_water",
+        "75,46": "tile_poolcore_deep_water",
+        "75,45": "tile_poolcore_deep_water",
+        "83,33": "tile_poolcore_deep_water",
+        "84,33": "tile_poolcore_deep_water",
+        "85,33": "tile_poolcore_deep_water",
+        "85,34": "tile_poolcore_deep_water",
+        "84,34": "tile_poolcore_deep_water",
+        "83,34": "tile_poolcore_deep_water"
+      },
+      "ground8": {},
+      "object35": {},
+      "ground9": {}
+    },
+    "stamps": [
+      {
+        "id": "tile_mvofs5nu",
+        "c": 3,
+        "r": 73,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 51,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 54,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 63,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 3,
+        "r": 37,
+        "layer": "object19",
+        "blend": "hard-light",
+        "ox": 20,
+        "angle": -15
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 66,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 2,
+        "r": 62,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 3,
+        "r": 62,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 2,
+        "r": 63,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 3,
+        "r": 63,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 3,
+        "r": 63,
+        "layer": "object19",
+        "ox": 20,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 69,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 57,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 60,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 17,
+        "r": 65,
+        "layer": "ground4",
+        "ox": 32
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 17,
+        "r": 68,
+        "layer": "ground4",
+        "ox": 32
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 71,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 74,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 77,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 80,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 32,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 45,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 45,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 42,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 5,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 7,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 9,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 1,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": -1,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 13,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 11,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoe808h",
+        "c": 2,
+        "r": 71,
+        "layer": "object6",
+        "baseSolid": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            10,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            10,
+            3
+          ],
+          [
+            10,
+            4
+          ],
+          [
+            10,
+            5
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            10,
+            7
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            4
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            7,
+            3
+          ],
+          [
+            8,
+            3
+          ],
+          [
+            9,
+            3
+          ]
+        ],
+        "baseDepth": 4,
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_camp_bed",
+        "c": 10,
+        "r": 76,
+        "layer": "object6",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_camp_bed",
+        "c": 8,
+        "r": 76,
+        "layer": "object6",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvot2yuu",
+        "c": 90,
+        "r": 23,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvotgy7w",
+        "c": 92,
+        "r": 23,
+        "layer": "object6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvotwe6t",
+        "c": 93,
+        "r": 23,
+        "layer": "object6",
+        "ox": 22,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 23,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 17,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 19,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 21,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 15,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 22,
+        "r": 70,
+        "layer": "object10",
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 8,
+        "r": 46,
+        "layer": "object10",
+        "sortDepth": 1.5,
+        "ox": 24.666667,
+        "oy": 32
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 5,
+        "r": 37,
+        "layer": "object10",
+        "sortDepth": 0,
+        "ox": 40,
+        "oy": 28
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 15,
+        "r": 37,
+        "layer": "object10",
+        "sortDepth": 1.5,
+        "oy": 28
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 14,
+        "r": 67,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 3,
+        "r": 68,
+        "layer": "object6",
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 2,
+        "r": 67,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvxf5so7",
+        "c": 16,
+        "r": 40,
+        "layer": "object11",
+        "ox": 20,
+        "oy": 30,
+        "sortDepth": 6.25
+      },
+      {
+        "id": "tile_mvxgf9gt",
+        "c": 15,
+        "r": 40,
+        "layer": "object11",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 1.25
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 15,
+        "r": 42,
+        "layer": "object11",
+        "ox": 20,
+        "oy": 8.666667
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 15,
+        "r": 44,
+        "layer": "object11",
+        "oy": 4,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 15,
+        "r": 48,
+        "layer": "object14",
+        "oy": 14,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 15,
+        "r": 50,
+        "layer": "object11",
+        "oy": 14,
+        "ox": 19.33333300000004,
+        "sortDepth": 0.8
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 15,
+        "r": 46,
+        "layer": "object11",
+        "oy": 4,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 15,
+        "r": 48,
+        "layer": "object11",
+        "oy": 4,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 30,
+        "r": 43,
+        "layer": "object11",
+        "oy": 14,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 36,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 34,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvxf5so7",
+        "c": 52,
+        "r": 55,
+        "layer": "object13",
+        "sortDepth": 7.25,
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvxf5so7",
+        "c": 38,
+        "r": 55,
+        "layer": "object13",
+        "sortDepth": 7.25,
+        "oy": 30,
+        "ox": 31.333333
+      },
+      {
+        "id": "tile_mvxf5so7",
+        "c": 2,
+        "r": 43,
+        "layer": "object5",
+        "sortDepth": 7.25,
+        "oy": 10,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 18,
+        "r": 60,
+        "layer": "object",
+        "oy": 20,
+        "sortDepth": 2.75,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 20,
+        "r": 60,
+        "layer": "object",
+        "oy": 20,
+        "sortDepth": 2.75,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 24,
+        "r": 60,
+        "layer": "object",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 22,
+        "r": 60,
+        "layer": "object",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 28,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 34,
+        "r": 71,
+        "layer": "object",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 17,
+        "r": 59,
+        "layer": "object",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 25,
+        "r": 59,
+        "layer": "object",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 17,
+        "r": 67,
+        "layer": "object",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 17,
+        "r": 65,
+        "layer": "object",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 17,
+        "r": 63,
+        "layer": "object",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 17,
+        "r": 61,
+        "layer": "object",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 25,
+        "r": 61,
+        "layer": "object",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 19,
+        "r": 65,
+        "layer": "object",
+        "oy": 6.666667,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 20,
+        "r": 65,
+        "layer": "object",
+        "oy": 6.666667,
+        "ox": 8,
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 67,
+        "layer": "object",
+        "ox": 32,
+        "oy": 8
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 67,
+        "layer": "object",
+        "ox": 32,
+        "oy": 8
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 10,
+        "r": 69,
+        "layer": "object19",
+        "oy": 20,
+        "blend": "hard-light",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvpj1fdy",
+        "c": 20,
+        "r": 12,
+        "layer": "object24",
+        "oy": 7.333333,
+        "angle": 10,
+        "ox": 2
+      },
+      {
+        "id": "tile_mvpj53ld",
+        "c": 19,
+        "r": 13,
+        "layer": "object24",
+        "ox": 20,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_poolcore_life_ring_blue",
+        "c": 51,
+        "r": 60,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_life_ring_red",
+        "c": 52,
+        "r": 59,
+        "layer": "object15",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvqv5agz",
+        "c": 32,
+        "r": 64,
+        "layer": "object16",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 55,
+        "r": 67,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20,
+        "fx": false
+      },
+      {
+        "id": "tile_mvr11zmd",
+        "c": 39,
+        "r": 59,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 22.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 18,
+        "r": 64,
+        "layer": "object",
+        "oy": 10,
+        "ox": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 19,
+        "r": 64,
+        "layer": "object",
+        "oy": 10,
+        "ox": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 18,
+        "r": 65,
+        "layer": "object",
+        "ox": 16,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 23,
+        "r": 65,
+        "layer": "object",
+        "ox": 2,
+        "oy": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 21,
+        "r": 64,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 21,
+        "r": 66,
+        "layer": "object",
+        "oy": 30,
+        "ox": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 23,
+        "r": 64,
+        "layer": "object",
+        "oy": 10,
+        "sortDepth": 0,
+        "ox": 6
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 19,
+        "r": 66,
+        "layer": "object",
+        "oy": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 18,
+        "r": 66,
+        "layer": "object",
+        "ox": 20,
+        "oy": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 21,
+        "r": 66,
+        "layer": "object",
+        "oy": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 19,
+        "r": 63,
+        "layer": "object",
+        "ox": 20,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 23,
+        "r": 66,
+        "layer": "object",
+        "oy": 30,
+        "sortDepth": 0,
+        "ox": 6
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 18,
+        "r": 64,
+        "layer": "object",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_poolcore_life_ring_blue",
+        "c": 23,
+        "r": 62,
+        "layer": "object16",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_life_ring_red",
+        "c": 21,
+        "r": 62,
+        "layer": "object16",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 21,
+        "r": 75,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 56,
+        "r": 70,
+        "layer": "object7",
+        "ox": 6,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 58,
+        "r": 69,
+        "layer": "object7",
+        "ox": 3.3333330000000387,
+        "sortDepth": 0,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 23,
+        "r": 75,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 58,
+        "r": 69,
+        "layer": "object7",
+        "ox": 6,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 21,
+        "r": 77,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 58,
+        "r": 71,
+        "layer": "object7",
+        "ox": 3.3333330000000387,
+        "sortDepth": 0,
+        "fx": true
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 56,
+        "r": 72,
+        "layer": "object7",
+        "ox": 6,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 23,
+        "r": 77,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 58,
+        "r": 71,
+        "layer": "object7",
+        "ox": 6,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 58,
+        "r": 72,
+        "layer": "object7",
+        "ox": 6,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 24,
+        "r": 67,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 37,
+        "r": 62,
+        "layer": "object",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 44,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 52,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 46,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 50,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 60,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 58,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 56,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 48,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 54,
+        "r": 47,
+        "layer": "object31",
+        "oy": 16,
+        "ox": 20,
+        "sortDepth": 2.35
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 49,
+        "layer": "object31",
+        "oy": 14,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 47,
+        "layer": "object31",
+        "oy": 14,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 46,
+        "layer": "object31",
+        "oy": 24,
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 37,
+        "r": 50,
+        "layer": "object31",
+        "ox": 20,
+        "oy": 16.66666699999996
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 37,
+        "r": 67,
+        "layer": "object",
+        "ox": 19.333333,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 24,
+        "r": 69,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 24,
+        "r": 71,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 24,
+        "r": 73,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 24,
+        "r": 75,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 36,
+        "r": 77,
+        "layer": "object6",
+        "ox": 8,
+        "oy": 16
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 28,
+        "r": 77,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 26,
+        "r": 77,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 24,
+        "r": 76,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 20,
+        "sortDepth": 4
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 21,
+        "r": 78,
+        "layer": "object6",
+        "oy": 10,
+        "ox": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 40,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 47,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 31,
+        "r": 71,
+        "layer": "object6",
+        "ox": 20,
+        "boxes": [
+          [
+            21,
+            114,
+            40,
+            65
+          ]
+        ],
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 42,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 49,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 38,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 45,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 31,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 31,
+        "r": 74,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 20,
+        "sortDepth": 1.25
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 31,
+        "r": 73,
+        "layer": "object6",
+        "oy": 10,
+        "ox": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "sortDepth": 0,
+        "c": 36,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 12
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 30,
+        "r": 77,
+        "layer": "object6",
+        "sortDepth": 2.55
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 30,
+        "r": 78,
+        "layer": "object10",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 53,
+        "r": 61,
+        "layer": "object10",
+        "oy": 8,
+        "doorMode": "picture"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 31,
+        "r": 76,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 20,
+        "sortDepth": 4
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 62,
+        "r": 76,
+        "layer": "object6",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvquvyy8",
+        "c": 12,
+        "r": 69,
+        "layer": "object17",
+        "oy": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "c": 33,
+        "r": 79,
+        "layer": "object6",
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 45,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 48,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 8,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 38,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 2,
+        "r": 39,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 2,
+        "r": 42,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 2,
+        "r": 35,
+        "layer": "ground4",
+        "oy": 32
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 33,
+        "layer": "ground4",
+        "ox": 8
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 11,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 11,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 11,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 11,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 29,
+        "layer": "ground4",
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 28,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 43,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 45,
+        "r": 15,
+        "layer": "ground4",
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 46,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 49,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 17,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 8,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 11,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 14,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 62,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mvqv5agz",
+        "c": 4,
+        "r": 47,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr11rba",
+        "c": 17,
+        "r": 44,
+        "layer": "object11",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 18,
+        "r": 47,
+        "layer": "object11",
+        "ox": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 13,
+        "r": 46,
+        "layer": "object19",
+        "blend": "hard-light",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 22,
+        "r": 42,
+        "layer": "object19",
+        "blend": "hard-light",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 19,
+        "r": 45,
+        "layer": "object10",
+        "oy": 10,
+        "doorMode": "picture"
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 28,
+        "r": 46,
+        "layer": "object10",
+        "oy": 7.333333000000039
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 33,
+        "r": 47,
+        "layer": "object10",
+        "doorMode": "key"
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 63,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 58,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 2,
+        "r": 58,
+        "layer": "object5",
+        "ox": 16,
+        "oy": 34
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 20,
+        "r": 61,
+        "layer": "object19",
+        "blend": "hard-light",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 10,
+        "r": 60,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 11,
+        "r": 60,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 2,
+        "r": 60,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 8,
+        "r": 60,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "sortDepth": 0,
+        "c": 4,
+        "r": 60,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 58,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 13,
+        "r": 60,
+        "layer": "object5",
+        "ox": 10,
+        "sortDepth": 0,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 56,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 53,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 13,
+        "r": 54,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 2,
+        "r": 53,
+        "layer": "object5",
+        "ox": 16,
+        "oy": 24,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 2,
+        "r": 55,
+        "layer": "object5",
+        "ox": 16,
+        "oy": 14,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 2,
+        "r": 59,
+        "layer": "object5",
+        "ox": 16,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 2,
+        "r": 60,
+        "layer": "object5",
+        "ox": 20,
+        "sortDepth": 0,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 3,
+        "r": 53,
+        "layer": "object5",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 4,
+        "r": 53,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 11,
+        "r": 53,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 10,
+        "r": 53,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 6,
+        "r": 53,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "sortDepth": 0,
+        "c": 8,
+        "r": 53,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 13,
+        "r": 53,
+        "layer": "object5",
+        "ox": 10,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 2,
+        "r": 53,
+        "layer": "object5",
+        "ox": 20,
+        "sortDepth": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_cvs_sign_twelve",
+        "c": 2,
+        "r": 53,
+        "layer": "object5",
+        "ox": 4,
+        "sortDepth": 1,
+        "angle": -15
+      },
+      {
+        "id": "tile_cvs_back_counter",
+        "c": 5,
+        "r": 53,
+        "layer": "object5",
+        "fx": true,
+        "sortDepth": 2.5,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_cvs_drink_cooler",
+        "c": 3,
+        "r": 53,
+        "layer": "object5",
+        "sortDepth": 2.5,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_cvs_checkout_counter_backroom",
+        "c": 5,
+        "r": 55,
+        "layer": "object5",
+        "oy": 20,
+        "sortDepth": 2.5,
+        "ox": 20
+      },
+      {
+        "id": "tile_cvs_counter_extension",
+        "c": 3,
+        "r": 56,
+        "layer": "object5",
+        "oy": 20,
+        "sortDepth": 1.5,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 27,
+        "r": 78,
+        "layer": "object19",
+        "blend": "hard-light",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 57,
+        "r": 72,
+        "layer": "object19",
+        "blend": "hard-light",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 26,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 32,
+        "r": 71,
+        "layer": "object",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 24,
+        "r": 62,
+        "layer": "object10",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 23,
+        "r": 75,
+        "layer": "object9",
+        "ox": 10,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "eye-drops",
+          "qty": 1
+        },
+        "sortDepth": 1.25,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 8,
+        "r": 86,
+        "layer": "object9",
+        "ox": 20,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "swim-ring",
+          "qty": 1
+        },
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 21,
+        "r": 28,
+        "layer": "object9",
+        "ox": 20,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "swim-ring",
+          "qty": 1
+        },
+        "oy": 10
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 10,
+        "r": 10,
+        "layer": "object9",
+        "ox": 22,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "swim-ring",
+          "qty": 1
+        },
+        "oy": -4,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 56,
+        "r": 69,
+        "layer": "object9",
+        "lockerLoot": {
+          "kind": "item",
+          "id": "swim-ring",
+          "qty": 1
+        }
+      },
+      {
+        "id": "tile_mvyo15bc",
+        "c": 23,
+        "r": 69,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvyo15bc",
+        "c": 59,
+        "r": 71,
+        "layer": "object9",
+        "oy": 30.66666699999996,
+        "circuit": 2
+      },
+      {
+        "id": "tile_mvyo15bc",
+        "c": 35,
+        "r": 12,
+        "layer": "object33",
+        "oy": 0.6666669999999613,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvyo15bc",
+        "c": 46,
+        "r": 48,
+        "layer": "object33",
+        "oy": 30.66666699999996,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 69,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 71,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 73,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 75,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 77,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 81,
+        "layer": "object6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 55,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 57,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 61,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 59,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 65,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 63,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 67,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 5,
+        "r": 70,
+        "layer": "object10",
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 51,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 53,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvxgf9gt",
+        "c": 0,
+        "r": 48,
+        "layer": "object5",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvxgf9gt",
+        "c": 0,
+        "r": 42,
+        "layer": "object5",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 50,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 2,
+        "r": 32,
+        "layer": "object22",
+        "oy": 10
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 2,
+        "r": 28,
+        "layer": "object22",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 35,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": 6.666666999999961
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 33,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": 36.66666699999996
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 35,
+        "r": 16,
+        "layer": "object22",
+        "ox": 37.333333,
+        "sortDepth": 4
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 35,
+        "r": 16,
+        "layer": "object22",
+        "ox": 37.333333,
+        "sortDepth": 4
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 10,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333332999999982
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 7,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 8,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333332999999982
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": -1,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333332999999982
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 5,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 6,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.33333300000001
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 4,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.33333300000001
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 18,
+        "r": 21,
+        "layer": "object22",
+        "ox": 9.333333000000039,
+        "oy": 16
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 30,
+        "r": 21,
+        "layer": "object22",
+        "ox": 9.333333000000039,
+        "oy": 16
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 20,
+        "r": 21,
+        "layer": "object22",
+        "ox": 9.333333000000039,
+        "oy": 16
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 34,
+        "r": 21,
+        "layer": "object22",
+        "ox": 9.333333000000039,
+        "oy": 16
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 12,
+        "r": 21,
+        "layer": "object22",
+        "ox": 9.333332999999982,
+        "oy": 16
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 6,
+        "r": 8,
+        "layer": "object23",
+        "ox": 29.333333,
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 5,
+        "r": 7,
+        "layer": "object23",
+        "ox": 10,
+        "oy": 37.33333300000001
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 18,
+        "r": 7,
+        "layer": "object23",
+        "ox": 6,
+        "oy": 37.333333
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 36,
+        "r": 5,
+        "layer": "object23",
+        "ox": 6.666667,
+        "oy": 7.333333
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 3,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 14,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 26,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 16,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 28,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 35,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 32,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 22,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 24,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 2,
+        "r": 21,
+        "layer": "object22",
+        "oy": 16,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 1,
+        "r": 16,
+        "layer": "object22",
+        "ox": 36.66666699999996,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": -1,
+        "r": 16,
+        "layer": "object22",
+        "ox": 36.66666699999996,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 36,
+        "r": 18,
+        "layer": "object22",
+        "ox": -2
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 36,
+        "r": 7,
+        "layer": "object23",
+        "ox": 6.666667,
+        "oy": 6.666667
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 36,
+        "r": 20,
+        "layer": "object22",
+        "ox": -2
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 36,
+        "r": 9,
+        "layer": "object23",
+        "ox": 6.666667,
+        "oy": 6.666667
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 0,
+        "r": 16,
+        "layer": "object22",
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 35,
+        "r": 20,
+        "layer": "object22",
+        "oy": 25.33333300000001,
+        "ox": 38
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 35,
+        "r": 20,
+        "layer": "object22",
+        "oy": 25.33333300000001,
+        "ox": 38,
+        "sortDepth": 4
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 18,
+        "layer": "object22",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 5,
+        "r": 10,
+        "layer": "object23",
+        "ox": 10,
+        "oy": -2.666667
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 18,
+        "r": 9,
+        "layer": "object23",
+        "oy": 37.333333,
+        "ox": 6
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 18,
+        "r": 10,
+        "layer": "object23",
+        "ox": 6,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 20,
+        "layer": "object22",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 5,
+        "r": 11,
+        "layer": "object23",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 0,
+        "r": 20,
+        "layer": "object22",
+        "oy": 35.33333300000004,
+        "ox": 29.33333300000004
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 40,
+        "r": 71,
+        "layer": "object13",
+        "sortDepth": 0,
+        "rot": 3,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 20,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 40,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 42,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 30,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 40,
+        "r": 69,
+        "layer": "object13",
+        "sortDepth": 0,
+        "rot": 3,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 18,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 38,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 28,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 37,
+        "r": 55,
+        "layer": "object13",
+        "ox": 19.33333300000004,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 40,
+        "r": 67,
+        "layer": "object13",
+        "sortDepth": 0,
+        "rot": 3,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 16,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 36,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 26,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 40,
+        "r": 63,
+        "layer": "object13",
+        "sortDepth": 0,
+        "rot": 3,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 40,
+        "r": 65,
+        "layer": "object13",
+        "sortDepth": 0,
+        "rot": 3,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 14,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 34,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 24,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 12,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3,
+        "fx": false
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 32,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 41,
+        "r": 22,
+        "layer": "object25",
+        "sortDepth": 0,
+        "rot": 3
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 30,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 36,
+        "r": 71,
+        "layer": "object",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 26,
+        "r": 68,
+        "layer": "object",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 28,
+        "r": 68,
+        "layer": "object",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 36,
+        "r": 68,
+        "layer": "object",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 30,
+        "r": 68,
+        "layer": "object",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 26,
+        "r": 73,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 32,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 32,
+        "r": 68,
+        "layer": "object",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 35,
+        "r": 68,
+        "layer": "object",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 28,
+        "r": 73,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 30,
+        "r": 73,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 48,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 46,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 11,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 13,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 15,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 10,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 6.666667000000018
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 8,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 7,
+        "r": 63,
+        "layer": "object",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 6,
+        "r": 66,
+        "layer": "object",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 23,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 30,
+        "r": 10,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 10,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.333332999999982
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 8,
+        "r": 44,
+        "layer": "object18",
+        "oy": 40.666667,
+        "ox": 39.333333
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 28,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 36
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 32,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 35.333333
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 34,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 35.33333300000004
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 11,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": -10.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 5,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18.66666699999996,
+        "ox": 10.66666699999999
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 34,
+        "r": 45,
+        "layer": "object11",
+        "oy": 6,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 21,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 28,
+        "r": 10,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 51,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667,
+        "ox": 26
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 61,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 8,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.333332999999982
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 6,
+        "r": 44,
+        "layer": "object18",
+        "oy": 40.666667,
+        "ox": 39.333333
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 26,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 36
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 3,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18.66666699999996,
+        "ox": 10.66666699999999
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": -1,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.333332999999982
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 32,
+        "r": 45,
+        "layer": "object11",
+        "oy": 6,
+        "ox": 20,
+        "sortDepth": 2.6
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 19,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 26,
+        "r": 10,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 49,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667,
+        "ox": 26
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 59,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 6,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.33333300000001,
+        "sortDepth": 1.8
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 24,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 36
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 1,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18.66666699999996,
+        "ox": 10.666667000000004
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 13,
+        "r": 45,
+        "layer": "object18",
+        "oy": 0.6666669999999613,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 14,
+        "r": 45,
+        "layer": "object18",
+        "oy": 0.6666669999999613,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 30,
+        "r": 45,
+        "layer": "object11",
+        "oy": 6,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 17,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 24,
+        "r": 10,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 16,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": 29.33333300000004
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 18,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": 29.33333300000004
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 18,
+        "r": 42,
+        "layer": "object18",
+        "oy": 28.666667,
+        "ox": 10.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 17,
+        "r": 42,
+        "layer": "object18",
+        "oy": 28.66666699999996,
+        "ox": 10.666666999999961
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 16,
+        "r": 42,
+        "layer": "object18",
+        "oy": 28.666667,
+        "ox": 10.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 25,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": 29.33333300000004
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 14,
+        "r": 45,
+        "layer": "object18",
+        "ox": 38.666667,
+        "oy": 0.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 31,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": 29.33333300000004
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 20,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 4,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.33333300000001,
+        "sortDepth": 1.8
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 11,
+        "r": 45,
+        "layer": "object18",
+        "oy": 0.6666669999999613,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 17,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 4,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 25,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": 36.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 19,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 6,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 21,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 8,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 0,
+        "r": 12,
+        "layer": "object23",
+        "oy": 20,
+        "ox": 31.333333
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 14,
+        "r": 8,
+        "layer": "object23",
+        "oy": 20,
+        "ox": 26.66666699999996,
+        "sortDepth": 2.25
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 22,
+        "r": 10,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 33,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 20,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 32,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333,
+        "sortDepth": 1.8
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 31,
+        "r": 51,
+        "layer": "object14",
+        "ox": 10,
+        "oy": -4
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 18,
+        "r": 35,
+        "layer": "object18",
+        "ox": 9.333333000000039,
+        "oy": 36
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 30,
+        "r": 35,
+        "layer": "object18",
+        "ox": 35.333333,
+        "oy": 36
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 36,
+        "r": 45,
+        "layer": "object11",
+        "ox": 15.333333000000039,
+        "oy": 6
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 27,
+        "r": 41,
+        "layer": "object18",
+        "ox": 29.333333,
+        "oy": 18
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 25,
+        "r": 42,
+        "layer": "object18",
+        "ox": 18.666667,
+        "oy": 30.666667
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 47,
+        "r": 57,
+        "layer": "object31",
+        "ox": 28.66666699999996,
+        "oy": 20.66666699999996
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 61,
+        "r": 57,
+        "layer": "object31",
+        "ox": 28.66666699999996,
+        "oy": 20.66666699999996
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 33,
+        "r": 41,
+        "layer": "object18",
+        "ox": 29.33333300000004,
+        "oy": 18
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 23,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 10,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 2,
+        "r": 12,
+        "layer": "object23",
+        "oy": 20,
+        "ox": 31.333333
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 16,
+        "r": 8,
+        "layer": "object23",
+        "oy": 20,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 31,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 18,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 12,
+        "r": 8,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 20,
+        "r": 10,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 20,
+        "r": 35,
+        "layer": "object18",
+        "ox": 9.333333000000039,
+        "oy": 36
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 29,
+        "r": 41,
+        "layer": "object18",
+        "ox": 29.333333,
+        "oy": 18
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 35,
+        "r": 41,
+        "layer": "object18",
+        "ox": 29.33333300000004,
+        "oy": 18
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 36,
+        "r": 41,
+        "layer": "object18",
+        "ox": 29.33333300000004,
+        "oy": 18
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 25,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 12,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 4,
+        "r": 12,
+        "layer": "object23",
+        "oy": 20,
+        "ox": 31.333333
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": -1,
+        "r": 12,
+        "layer": "object23",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 27,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": 36.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 21,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": 36.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 27,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 14,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 8,
+        "r": 8,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 20,
+        "sortDepth": 1.25
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 29,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": 36.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 23,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": 36.66666699999996,
+        "sortDepth": 1.8
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 29,
+        "r": 56,
+        "layer": "object14",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 16,
+        "r": 16,
+        "layer": "object22",
+        "oy": 30,
+        "ox": -3.333333
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 10,
+        "r": 8,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 20,
+        "sortDepth": 1.25
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 18,
+        "r": 10,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 8,
+        "r": 7,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 37.33333300000001
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 9,
+        "r": 7,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 37.33333300000001
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 0,
+        "r": 12,
+        "layer": "object23",
+        "ox": 29.333332999999996,
+        "oy": 7.333332999999982
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 15,
+        "r": 56,
+        "layer": "object14",
+        "ox": 36.66666699999996
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 14,
+        "r": 55,
+        "layer": "object14",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 14,
+        "r": 57,
+        "layer": "object14",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 57,
+        "layer": "object13",
+        "oy": 34,
+        "ox": 19.33333300000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 57,
+        "layer": "object13",
+        "oy": 20.666667,
+        "ox": 19.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 69,
+        "layer": "object",
+        "oy": 24,
+        "ox": 19.33333300000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 14,
+        "r": 60,
+        "layer": "object14",
+        "oy": 4,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 14,
+        "r": 61,
+        "layer": "object14",
+        "oy": 24,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 25,
+        "r": 50,
+        "layer": "object14",
+        "ox": 10,
+        "oy": 36
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 32,
+        "r": 10,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 37,
+        "r": 5,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 41,
+        "r": 5,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 45,
+        "r": 5,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 55,
+        "r": 5,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 62,
+        "r": 5,
+        "layer": "object23",
+        "ox": 6.666666999999961,
+        "oy": 30.666667000000018
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 19,
+        "r": 42,
+        "layer": "object18",
+        "ox": 10.666667,
+        "oy": 28.666667
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 41,
+        "r": 57,
+        "layer": "object31",
+        "ox": 20.66666699999996,
+        "oy": 18.66666699999996
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 55,
+        "r": 57,
+        "layer": "object31",
+        "ox": 20.66666699999996,
+        "oy": 18.66666699999996
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 12,
+        "r": 35,
+        "layer": "object18",
+        "ox": 9.333332999999982,
+        "oy": 36
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 13,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": -10.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 27,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 32,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 34,
+        "r": 10,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 39,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 43,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 53,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 47,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 57,
+        "r": 5,
+        "layer": "object23",
+        "oy": 30.666667000000018,
+        "ox": 26.66666699999996
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 14,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 15,
+        "r": 41,
+        "layer": "object18",
+        "oy": 18,
+        "ox": -10.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 29,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 16,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.333333000000039
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 22,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.333333000000039,
+        "sortDepth": 1.8
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 22,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 36,
+        "sortDepth": 1.8
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 6,
+        "r": 64,
+        "layer": "object",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvzbgmzf",
+        "c": 6,
+        "r": 63,
+        "layer": "object",
+        "oy": 24,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvzbolt4",
+        "c": 25,
+        "r": 62,
+        "layer": "object",
+        "ox": 30,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 2,
+        "r": 57,
+        "layer": "object5",
+        "ox": 16,
+        "oy": 14,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvzbvnsy",
+        "c": 16,
+        "r": 62,
+        "layer": "object11",
+        "rot": 0,
+        "ox": 21.33333300000004,
+        "oy": 22.66666699999996
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 14,
+        "r": 62,
+        "layer": "object",
+        "ox": 10,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 16,
+        "r": 67,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 21.33333300000004
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 6,
+        "r": 67,
+        "layer": "object6",
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 49,
+        "r": 70,
+        "layer": "object15",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 51,
+        "r": 70,
+        "layer": "object15",
+        "ox": 20
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 52,
+        "r": 67,
+        "layer": "object13",
+        "ox": 32.666667,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 50,
+        "r": 67,
+        "layer": "object13",
+        "oy": 39.333333,
+        "ox": 1.333333
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 55,
+        "r": 67,
+        "layer": "object13",
+        "ox": 24,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 56,
+        "r": 70,
+        "layer": "object13",
+        "ox": 12,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 53,
+        "r": 70,
+        "layer": "object13",
+        "ox": 8.666667,
+        "oy": 18
+      },
+      {
+        "id": "tile_mwdlevxi",
+        "c": 50,
+        "r": 70,
+        "layer": "object13",
+        "oy": 18,
+        "ox": 1.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 47,
+        "r": 64,
+        "layer": "object13",
+        "oy": 39.33333300000004,
+        "ox": 16.66666699999996
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 49,
+        "r": 64,
+        "layer": "object13",
+        "oy": 39.333333,
+        "ox": 40.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 53,
+        "r": 64,
+        "layer": "object13",
+        "ox": 8,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 64,
+        "layer": "object13",
+        "oy": 39.333333,
+        "ox": 22.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 64,
+        "layer": "object13",
+        "ox": 26.666667,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 53,
+        "r": 72,
+        "layer": "object13",
+        "ox": 8.666667,
+        "oy": 8.666667
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 50,
+        "r": 72,
+        "layer": "object13",
+        "oy": 8.666667,
+        "ox": 1.333333
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 58,
+        "r": 67,
+        "layer": "object13",
+        "fx": true,
+        "oy": 39.333333,
+        "ox": 12
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 58,
+        "r": 69,
+        "layer": "object13",
+        "fx": true,
+        "oy": 44,
+        "ox": 12
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 56,
+        "r": 72,
+        "layer": "object13",
+        "ox": 16.666667,
+        "oy": 8.666667
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 58,
+        "r": 72,
+        "layer": "object13",
+        "fx": true,
+        "oy": 8.666667,
+        "ox": 12
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 44,
+        "layer": "object5",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 2,
+        "r": 35,
+        "layer": "object18",
+        "oy": 36,
+        "ox": 9.333332999999996
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 1,
+        "r": 35,
+        "layer": "object18",
+        "ox": 20,
+        "oy": 7.333333
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 0,
+        "r": 35,
+        "layer": "object18",
+        "oy": 15.333333000000039,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 14,
+        "r": 59,
+        "layer": "object14",
+        "oy": 4,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 59,
+        "layer": "object13",
+        "oy": 34,
+        "ox": 19.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 52,
+        "layer": "object31",
+        "oy": 14,
+        "ox": 19.33333300000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 46,
+        "r": 53,
+        "layer": "object31",
+        "oy": 15.333333000000039,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 60,
+        "r": 53,
+        "layer": "object31",
+        "oy": 15.333333000000039,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 60,
+        "r": 51,
+        "layer": "object31",
+        "oy": 15.333333000000039,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 60,
+        "r": 49,
+        "layer": "object31",
+        "oy": 25.33333300000004,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 53,
+        "layer": "object31",
+        "oy": 15.333333000000039
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 51,
+        "layer": "object31",
+        "oy": 15.333333000000039,
+        "sortDepth": 0.4
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 49,
+        "layer": "object31",
+        "oy": 25.33333300000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 72,
+        "layer": "object",
+        "oy": 14,
+        "ox": 19.33333300000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 61,
+        "layer": "object13",
+        "oy": 34,
+        "ox": 19.33333300000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 54,
+        "layer": "object31",
+        "oy": 4,
+        "ox": 19.33333300000004,
+        "sortDepth": 1.1
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 46,
+        "r": 55,
+        "layer": "object31",
+        "oy": 15.333333000000039,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 60,
+        "r": 55,
+        "layer": "object31",
+        "oy": 15.333333000000039,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 55,
+        "layer": "object31",
+        "oy": 15.333333000000039
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 57,
+        "r": 55,
+        "layer": "object31",
+        "oy": 15.333333000000039
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 74,
+        "layer": "object",
+        "oy": 14,
+        "ox": 19.33333300000004,
+        "sortDepth": 1.4
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 75,
+        "layer": "object",
+        "oy": 24,
+        "ox": 19.33333300000004,
+        "sortDepth": 0.15
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 15,
+        "r": 50,
+        "layer": "object14",
+        "oy": 36,
+        "ox": 49.333333
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 33,
+        "r": 55,
+        "layer": "object14",
+        "ox": 29.33333300000004,
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 35,
+        "r": 35,
+        "layer": "object18",
+        "oy": 15.333333000000039,
+        "ox": 38
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 37,
+        "r": 40,
+        "layer": "object18",
+        "oy": 35.33333300000004,
+        "ox": 18
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 37,
+        "r": 44,
+        "layer": "object11",
+        "oy": 25.333333,
+        "ox": 18.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 49,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 41,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 51,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 43,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 40,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 41,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 40,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 41,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 53,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 45,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 59,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 57,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 55,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 47,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 30,
+        "oy": 2
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 47,
+        "r": 67,
+        "layer": "object13",
+        "oy": 39.33333300000004,
+        "ox": 16.66666699999996
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 47,
+        "r": 70,
+        "layer": "object13",
+        "oy": 17.33333300000004,
+        "ox": 16.66666699999996
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 47,
+        "r": 72,
+        "layer": "object13",
+        "oy": 8.666666999999961,
+        "ox": 16.66666699999996
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 62,
+        "layer": "object13",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 60,
+        "layer": "object13",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 58,
+        "layer": "object13",
+        "ox": 20,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 62,
+        "r": 63,
+        "layer": "object13",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 75,
+        "layer": "object13",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 73,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 65,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 67,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 69,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 62,
+        "r": 71,
+        "layer": "object13",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 28,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 30,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 2,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 4,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 22,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 25,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 28,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 31,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 34,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 37,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 32,
+        "layer": "ground4",
+        "ox": 8
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 0,
+        "r": 17,
+        "layer": "ground4",
+        "ox": 38,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 14,
+        "layer": "ground4",
+        "ox": 18.666667,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 20,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 29,
+        "layer": "ground4",
+        "ox": 8
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 1,
+        "r": 83,
+        "layer": "ground4",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 4,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 86,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 89,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 7,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 8,
+        "r": 86,
+        "layer": "ground4",
+        "ox": 8
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 8,
+        "r": 89,
+        "layer": "ground4",
+        "ox": 8
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 10,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 13,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 16,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 19,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 40,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 42,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 10,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 12,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 14,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 18,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 16,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 20,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 26,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 22,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 24,
+        "r": 83,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 34,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 32,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 36,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 38,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 40,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 42,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 43,
+        "r": 76,
+        "layer": "object6",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 78,
+        "layer": "object6",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 79,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 80,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 43,
+        "r": 82,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 51,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 57,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 59,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 61,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 24,
+        "r": 82,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 0,
+        "r": 82,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 72,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 21,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 41,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 44,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 12.666666999999961
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 43,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 31,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 68,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 17,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 37,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 27,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 70,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 19,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 39,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 29,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 66,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 15,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 35,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 25,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 64,
+        "layer": "object13",
+        "ox": 6,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 13,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 33,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "sortDepth": 0,
+        "c": 61,
+        "r": 23,
+        "layer": "object25",
+        "ox": 16,
+        "oy": 32.66666699999996
+      },
+      {
+        "id": "tile_mvnn2p1x",
+        "c": 42,
+        "r": 78,
+        "layer": "object17",
+        "oy": 30,
+        "ox": 30,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
+        "r": 74,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
+        "r": 46,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
+        "r": 64,
+        "layer": "object13",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 61,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 49,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "oy": 2,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 49,
+        "r": 45,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 10,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 48,
+        "r": 13,
+        "layer": "object25",
+        "sortDepth": 0,
+        "ox": 20,
+        "oy": 2
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 41,
+        "layer": "object25",
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 41,
+        "layer": "object25",
+        "ox": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 41,
+        "layer": "object25",
+        "ox": 29.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 41,
+        "layer": "object25",
+        "ox": 42.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 41,
+        "layer": "object25",
+        "ox": 4
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 41,
+        "layer": "object25",
+        "ox": 16.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 41,
+        "layer": "object25",
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 37,
+        "r": 80,
+        "layer": "object17",
+        "ox": 10,
+        "oy": 10,
+        "sortDepth": 0.75
+      },
+      {
+        "id": "tile_mw49f97t",
+        "c": 28,
+        "r": 79,
+        "layer": "object17",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 38,
+        "r": 79,
+        "layer": "object17",
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 30,
+        "r": 41,
+        "layer": "object11",
+        "oy": 18
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 29,
+        "r": 44,
+        "layer": "object11",
+        "oy": 25.33333300000004,
+        "ox": 38.66666699999996
+      },
+      {
+        "id": "tile_mvzbolt4",
+        "c": 15,
+        "r": 50,
+        "layer": "object11",
+        "ox": 20,
+        "oy": 7.333333
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 15,
+        "r": 50,
+        "layer": "object14",
+        "oy": 15.333333,
+        "ox": 19.333333
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 26,
+        "r": 69,
+        "layer": "object16",
+        "oy": 30,
+        "ox": 1.333333,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "backroom-door-key",
+          "qty": 1
+        }
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 38,
+        "r": 66,
+        "layer": "object16",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 39,
+        "r": 67,
+        "layer": "object16",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 39,
+        "r": 69,
+        "layer": "object16",
+        "oy": 30,
+        "ox": 14.666667
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 39,
+        "r": 68,
+        "layer": "object16",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 39,
+        "r": 69,
+        "layer": "object16",
+        "oy": -1.333333
+      },
+      {
+        "id": "tile_mvzbvnsy",
+        "c": 37,
+        "r": 71,
+        "layer": "object",
+        "oy": 2.666667,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 37,
+        "r": 75,
+        "layer": "object6",
+        "oy": 31.333333,
+        "ox": -0.666667
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 36,
+        "r": 76,
+        "layer": "object6",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvybeuxg",
+        "c": 25,
+        "r": 62,
+        "layer": "object",
+        "oy": 10,
+        "fx": true,
+        "ox": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 16,
+        "r": 62,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvortyiv",
+        "c": 28,
+        "r": 72,
+        "layer": "object16",
+        "oy": -3.333333,
+        "ox": -4
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 26,
+        "r": 69,
+        "layer": "object16",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvzbvnsy",
+        "c": 25,
+        "r": 72,
+        "layer": "object6",
+        "oy": 12.666667,
+        "fx": true
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 28,
+        "r": 75,
+        "layer": "object12",
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 30,
+        "r": 75,
+        "layer": "object12",
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 26,
+        "r": 75,
+        "layer": "object12",
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 27,
+        "r": 75,
+        "layer": "object12",
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 29,
+        "r": 75,
+        "layer": "object12",
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 31,
+        "r": 75,
+        "layer": "object12",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 4,
+        "r": 83,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 9,
+        "r": 83,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 4,
+        "r": 85,
+        "layer": "object6",
+        "ox": 28.666667,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 85,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 4,
+        "r": 87,
+        "layer": "object6",
+        "ox": 28.66666699999999,
+        "oy": 14,
+        "sortDepth": 0.4
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 87,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 89,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 4,
+        "r": 89,
+        "layer": "object6",
+        "ox": 28.66666699999996,
+        "oy": 14
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 6,
+        "r": 83,
+        "layer": "object17",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 8,
+        "r": 85,
+        "layer": "object17",
+        "oy": 20,
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 4,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 13,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 10,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 22,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 41,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 32,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 48,
+        "r": 79,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 24,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 43,
+        "r": 85,
+        "layer": "object12",
+        "oy": 30,
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 34,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 50,
+        "r": 79,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 19,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 38,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 29,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 33,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 45,
+        "r": 79,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 16,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 13,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 35,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 51,
+        "r": 79,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 26,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 30,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 3,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 12,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 9,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 21,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 40,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 31,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 35,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 37,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 36,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 47,
+        "r": 79,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 23,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 42,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 33,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 49,
+        "r": 79,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 18,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 15,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 16,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 17,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 37,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 28,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 32,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 15,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 12,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 2,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 71,
+        "layer": "object12",
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 71,
+        "layer": "object12",
+        "ox": -30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 11,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 8,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 47,
+        "layer": "object12",
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 38,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 20.66666699999996
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 15,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 8
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 19,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 6,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 31,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 35,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 36,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 26,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 21,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 16,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 11,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 5,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 30,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 34,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 25,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 20,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 15,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 10,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 4,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 29,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 33,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 24,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 19,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 14,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 9,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 3,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 28,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 32,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 23,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 18,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 13,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 8,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 2,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 1,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 27,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 22,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 17,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 12,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 7,
+        "r": 24,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 0,
+        "r": 38,
+        "layer": "object12",
+        "oy": 20.666667,
+        "ox": -30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": -1,
+        "r": 15,
+        "layer": "object12",
+        "oy": 8,
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": -1,
+        "r": 19,
+        "layer": "object12",
+        "oy": 16.666667,
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": -1,
+        "r": 24,
+        "layer": "object12",
+        "oy": 0.6666669999999613,
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": -1,
+        "r": 39,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 0.666667
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 20,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 39,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 30,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 34,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 46,
+        "r": 79,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 17,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 14,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 36,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 49,
+        "r": 82,
+        "layer": "object12",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 27,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 31,
+        "r": 44,
+        "layer": "object20",
+        "ox": 20,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 14,
+        "r": 85,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 11,
+        "r": 66,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 17,
+        "r": 65,
+        "layer": "object12",
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 43,
+        "r": 82,
+        "layer": "object12",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 44,
+        "r": 86,
+        "layer": "object12"
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 25,
+        "r": 86,
+        "layer": "object12",
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 1,
+        "r": 86,
+        "layer": "object12",
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 26,
+        "r": 72,
+        "layer": "object12",
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 30,
+        "r": 72,
+        "layer": "object12",
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 28,
+        "r": 72,
+        "layer": "object12",
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 27,
+        "r": 72,
+        "layer": "object12",
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 31,
+        "r": 72,
+        "layer": "object12",
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 29,
+        "r": 72,
+        "layer": "object12",
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 51,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 55,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 56,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 57,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 50,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 54,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 49,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 53,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 48,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 48,
+        "r": 60,
+        "layer": "object31",
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 62,
+        "r": 60,
+        "layer": "object31",
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 56,
+        "r": 60,
+        "layer": "object31",
+        "oy": 4,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 42,
+        "r": 60,
+        "layer": "object31",
+        "oy": 4,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 52,
+        "r": 53,
+        "layer": "object12",
+        "oy": 34
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 40,
+        "layer": "object18",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 6,
+        "r": 43,
+        "layer": "object18",
+        "ox": 20.666667,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 43,
+        "layer": "object18",
+        "ox": 30,
+        "oy": 10,
+        "sortDepth": 1.55
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 38,
+        "layer": "object18",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 37,
+        "layer": "object18",
+        "ox": 30,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 15,
+        "r": 43,
+        "layer": "object18",
+        "ox": 17.333333,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvzbn4vv",
+        "c": 15,
+        "r": 44,
+        "layer": "object18",
+        "ox": 18.666667,
+        "oy": 12
+      },
+      {
+        "id": "tile_mvzbvnsy",
+        "c": 15,
+        "r": 43,
+        "layer": "object11",
+        "ox": 1.333333,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 2,
+        "r": 79,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 3,
+        "r": 79,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 2,
+        "r": 80,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 3,
+        "r": 80,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 3,
+        "r": 80,
+        "layer": "object19",
+        "ox": 20,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvzbolt4",
+        "c": 0,
+        "r": 40,
+        "layer": "object18",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 6,
+        "r": 41,
+        "layer": "object18",
+        "ox": 22,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 3,
+        "r": 45,
+        "layer": "object18",
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 1,
+        "r": 45,
+        "layer": "object18",
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": -1,
+        "r": 45,
+        "layer": "object18",
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 5,
+        "r": 45,
+        "layer": "object18",
+        "oy": 0.6666669999999613
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 20,
+        "r": 41,
+        "layer": "object18",
+        "ox": 31.333333,
+        "oy": 32
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 20,
+        "r": 42,
+        "layer": "object18",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 43,
+        "r": 57,
+        "layer": "object31"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 57,
+        "r": 57,
+        "layer": "object31"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 9,
+        "r": 44,
+        "layer": "object18",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 6,
+        "r": 44,
+        "layer": "object18",
+        "oy": 20,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 9,
+        "r": 41,
+        "layer": "object18",
+        "ox": 30,
+        "oy": 32
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 24,
+        "r": 41,
+        "layer": "object18",
+        "ox": 10,
+        "oy": 32
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 24,
+        "r": 42,
+        "layer": "object18",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 46,
+        "r": 57,
+        "layer": "object31",
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 60,
+        "r": 57,
+        "layer": "object31",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 42,
+        "layer": "object18",
+        "oy": 30,
+        "ox": 18
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 37,
+        "r": 44,
+        "layer": "object18",
+        "oy": 30,
+        "ox": 18
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 20,
+        "r": 45,
+        "layer": "object20",
+        "ox": 10,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 26,
+        "r": 45,
+        "layer": "object20",
+        "ox": 30,
+        "oy": 16
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 12,
+        "r": 47,
+        "layer": "object20",
+        "ox": 10,
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 2,
+        "r": 47,
+        "layer": "object20",
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 14,
+        "r": 47,
+        "layer": "object20",
+        "ox": 10,
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 15,
+        "r": 47,
+        "layer": "object20",
+        "ox": 10,
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 16,
+        "r": 44,
+        "layer": "object20",
+        "ox": 16.666667,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 15,
+        "r": 44,
+        "layer": "object20",
+        "ox": 16.666667,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 4,
+        "r": 47,
+        "layer": "object20",
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 6,
+        "r": 47,
+        "layer": "object20",
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 7,
+        "r": 47,
+        "layer": "object20",
+        "oy": 40
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 10,
+        "r": 48,
+        "layer": "object20",
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 5,
+        "r": 47,
+        "layer": "object20",
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 18,
+        "r": 45,
+        "layer": "object20",
+        "ox": 16,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 19,
+        "r": 45,
+        "layer": "object20",
+        "ox": 10,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 25,
+        "r": 45,
+        "layer": "object20",
+        "ox": 30,
+        "oy": 16
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 11,
+        "r": 47,
+        "layer": "object20",
+        "ox": 10,
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 1,
+        "r": 47,
+        "layer": "object20",
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 13,
+        "r": 47,
+        "layer": "object20",
+        "ox": 10,
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 3,
+        "r": 47,
+        "layer": "object20",
+        "oy": 26
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 24,
+        "r": 45,
+        "layer": "object20",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdqrv1c",
+        "c": 21,
+        "r": 45,
+        "layer": "object20",
+        "oy": 30,
+        "ox": 10
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 2,
+        "r": 79,
+        "layer": "object17",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 24,
+        "r": 78,
+        "layer": "object17",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 2,
+        "r": 34,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 34,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 2,
+        "r": 32,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 32,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 2,
+        "r": 28,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 28,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 2,
+        "r": 30,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 9,
+        "r": 30,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333,
+        "sortDepth": 0.25
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 1,
+        "r": 26,
+        "layer": "object21",
+        "ox": 40,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 9,
+        "r": 26,
+        "layer": "object21",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 14,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 16,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 12,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 11,
+        "r": 34,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 18,
+        "r": 34,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 11,
+        "r": 32,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 18,
+        "r": 32,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 11,
+        "r": 28,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 18,
+        "r": 28,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 11,
+        "r": 30,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 18,
+        "r": 30,
+        "layer": "object21",
+        "oy": 20,
+        "ox": -1.333333,
+        "sortDepth": 0.25
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 10,
+        "r": 26,
+        "layer": "object21",
+        "ox": 40,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 18,
+        "r": 26,
+        "layer": "object21",
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 21,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 23,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 25,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 20,
+        "r": 34,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 26,
+        "r": 34,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38.66666699999996
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 20,
+        "r": 32,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 26,
+        "r": 32,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38.66666699999996
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 20,
+        "r": 28,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 26,
+        "r": 28,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38.66666699999996
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 20,
+        "r": 30,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 26,
+        "r": 30,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38.66666699999996,
+        "sortDepth": 0.25
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 20,
+        "r": 26,
+        "layer": "object21",
+        "oy": 24.666667000000018
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 27,
+        "r": 26,
+        "layer": "object21",
+        "oy": 24.666667000000018
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 32,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 30,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 34,
+        "r": 26,
+        "layer": "object21",
+        "oy": 10.666666999999961,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 29,
+        "r": 34,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 35,
+        "r": 34,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 29,
+        "r": 32,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 35,
+        "r": 32,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 29,
+        "r": 28,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 35,
+        "r": 28,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 29,
+        "r": 30,
+        "layer": "object21",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 35,
+        "r": 30,
+        "layer": "object21",
+        "oy": 20,
+        "ox": 38,
+        "sortDepth": 0.25
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 29,
+        "r": 26,
+        "layer": "object21",
+        "oy": 24.666667000000018
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 36,
+        "r": 26,
+        "layer": "object21",
+        "oy": 24.666667,
+        "ox": -0.666667
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 8,
+        "r": 35,
+        "layer": "object18",
+        "ox": 18.666667,
+        "oy": 7.333333,
+        "sortDepth": 1.6
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 10,
+        "r": 35,
+        "layer": "object18",
+        "ox": 20,
+        "oy": 7.333333
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 28,
+        "r": 35,
+        "layer": "object18",
+        "ox": 20,
+        "oy": 7.333333
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 26,
+        "r": 35,
+        "layer": "object18",
+        "ox": 18.66666699999996,
+        "oy": 7.333333000000039
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 19,
+        "r": 35,
+        "layer": "object18",
+        "ox": 20,
+        "oy": 7.333333
+      },
+      {
+        "id": "tile_mvzc5x73",
+        "c": 17,
+        "r": 35,
+        "layer": "object18",
+        "ox": 18.66666699999996,
+        "oy": 7.333333000000039
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 6,
+        "r": 28,
+        "layer": "object21",
+        "oy": 1.333333
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 4,
+        "r": 18,
+        "layer": "object10",
+        "oy": 21.33333300000004,
+        "doorMode": "picture"
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 10,
+        "r": 18,
+        "layer": "object10",
+        "oy": 21.333332999999982
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 15,
+        "r": 28,
+        "layer": "object21",
+        "oy": 1.3333330000000387
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 21,
+        "r": 18,
+        "layer": "object10",
+        "oy": 21.33333300000004
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 24,
+        "r": 37,
+        "layer": "object10",
+        "oy": 28,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 33,
+        "r": 37,
+        "layer": "object10",
+        "oy": 28
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 24,
+        "r": 28,
+        "layer": "object10",
+        "oy": 1.3333330000000387
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 24,
+        "r": 18,
+        "layer": "object10",
+        "oy": 21.33333300000004,
+        "doorMode": "picture"
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 16,
+        "r": 10,
+        "layer": "object10",
+        "oy": 11.333333000000039,
+        "doorMode": "picture"
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 9,
+        "r": 9,
+        "layer": "object10",
+        "oy": 17.333333,
+        "ox": 20,
+        "sortDepth": 0,
+        "openDark": true
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 33,
+        "r": 28,
+        "layer": "object10",
+        "oy": 1.3333330000000387
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 32,
+        "r": 18,
+        "layer": "object10",
+        "oy": 21.33333300000004,
+        "doorMode": "picture"
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 55,
+        "r": 49,
+        "layer": "object10",
+        "oy": 6.666666999999961,
+        "doorMode": "memory"
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 45,
+        "r": 49,
+        "layer": "object10",
+        "oy": 6.666666999999961
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 10,
+        "r": 32,
+        "layer": "object21",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 10,
+        "r": 28,
+        "layer": "object21",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 19,
+        "r": 32,
+        "layer": "object21",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 19,
+        "r": 28,
+        "layer": "object21",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 28,
+        "r": 32,
+        "layer": "object21",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 28,
+        "r": 28,
+        "layer": "object21",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 36,
+        "r": 22,
+        "layer": "object34",
+        "oy": 20,
+        "ox": -2
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 36,
+        "r": 24,
+        "layer": "object34",
+        "oy": 20,
+        "ox": -2
+      },
+      {
+        "id": "tile_mvzbvnsy",
+        "c": 35,
+        "r": 25,
+        "layer": "object21",
+        "ox": 19.33333300000004,
+        "oy": 23.333332999999982
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 18,
+        "r": 57,
+        "layer": "object19",
+        "ox": 10,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 29,
+        "r": 57,
+        "layer": "object19",
+        "ox": 30,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 51,
+        "r": 58,
+        "layer": "object19",
+        "ox": 30,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 32,
+        "r": 27,
+        "layer": "object19",
+        "ox": 20,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 23,
+        "r": 27,
+        "layer": "object19",
+        "ox": 20,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 14,
+        "r": 27,
+        "layer": "object19",
+        "ox": 20,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 5,
+        "r": 27,
+        "layer": "object19",
+        "ox": 20,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 8,
+        "r": 13,
+        "layer": "object19",
+        "ox": 20,
+        "oy": 10,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 28,
+        "r": 12,
+        "layer": "object19",
+        "oy": 20,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 50,
+        "r": 7,
+        "layer": "object19",
+        "oy": 20,
+        "blend": "hard-light",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 60,
+        "r": 7,
+        "layer": "object19",
+        "oy": 20,
+        "blend": "hard-light",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 14,
+        "r": 10,
+        "layer": "object19",
+        "blend": "hard-light",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 15,
+        "r": 18,
+        "layer": "object19",
+        "blend": "hard-light",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 57,
+        "r": 34,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": 21.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 59,
+        "r": 34,
+        "layer": "object23",
+        "ox": 16,
+        "oy": 21.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 57,
+        "r": 34,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": -8.666667,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 59,
+        "r": 34,
+        "layer": "object23",
+        "ox": 16,
+        "oy": -8.666667,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 8,
+        "r": 11,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1odn",
+        "c": 10,
+        "r": 11,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 12,
+        "r": 11,
+        "layer": "object23",
+        "ox": 10,
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 57,
+        "r": 32,
+        "layer": "object23",
+        "ox": 16.666667,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 59,
+        "r": 32,
+        "layer": "object23",
+        "ox": 16,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 8,
+        "r": 13,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 57,
+        "r": 36,
+        "layer": "object23",
+        "ox": 16.666667,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvph19b4",
+        "c": 10,
+        "r": 13,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 12,
+        "r": 13,
+        "layer": "object23",
+        "ox": 10,
+        "oy": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 59,
+        "r": 36,
+        "layer": "object23",
+        "ox": 16,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "c": 10,
+        "r": 14,
+        "layer": "object23",
+        "ox": 8.666667000000018,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "sortDepth": 0,
+        "c": 21,
+        "r": 14,
+        "layer": "object24",
+        "ox": 34.666667,
+        "oy": 15.333333,
+        "rot": 1
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "sortDepth": 0,
+        "c": 36,
+        "r": 14,
+        "layer": "object24",
+        "ox": 20,
+        "rot": 3,
+        "oy": 25.333333
+      },
+      {
+        "id": "tile_mvzbn4vv",
+        "c": 5,
+        "r": 11,
+        "layer": "object23",
+        "ox": 11.333333,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 15,
+        "layer": "object23",
+        "ox": 29.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 0,
+        "r": 14,
+        "layer": "object23",
+        "ox": 29.333333,
+        "oy": 6.666667
+      },
+      {
+        "id": "tile_poolcore_life_ring_red",
+        "c": 34,
+        "r": 27,
+        "layer": "object21",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_life_ring_blue",
+        "c": 31,
+        "r": 28,
+        "layer": "object21",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 16,
+        "r": 32,
+        "layer": "object21",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvzbolt4",
+        "c": 18,
+        "r": 10,
+        "layer": "object23",
+        "ox": 6,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 14,
+        "r": 31,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 10,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "anomaly-firstaid",
+          "qty": 1
+        }
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 36,
+        "r": 73,
+        "layer": "object9",
+        "ox": 10,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 23,
+        "r": 14,
+        "layer": "object23",
+        "ox": 30,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 34,
+        "r": 14,
+        "layer": "object23",
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 26,
+        "r": 14,
+        "layer": "object23",
+        "ox": 14,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 29,
+        "r": 14,
+        "layer": "object23",
+        "ox": 20.666667,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 32,
+        "r": 14,
+        "layer": "object23",
+        "ox": 12.666667,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 36,
+        "r": 10,
+        "layer": "object23",
+        "ox": 6,
+        "oy": 7.33333300000001
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 87,
+        "r": 8,
+        "layer": "object6",
+        "ox": 36.66666699999996,
+        "oy": 7.333332999999982
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 81,
+        "r": 8,
+        "layer": "object6",
+        "ox": 36.66666699999996,
+        "oy": 7.333332999999982
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 63,
+        "r": 5,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 7.333332999999996
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 7,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 51,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 47,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 43,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 39,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 35,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 31,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 27,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 23,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 19,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 15,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 11,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.666667000000004,
+        "sortDepth": 0.85
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 9,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 53,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 55,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 49,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 45,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 41,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 37,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 33,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 29,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 25,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 21,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 17,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 63,
+        "r": 13,
+        "layer": "object23",
+        "ox": 26.66666699999996,
+        "oy": 6.66666699999999
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 38,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 38,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 38,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 38,
+        "layer": "object25",
+        "ox": 44,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 38,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 38,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 38,
+        "layer": "object25",
+        "oy": 21.33333300000004,
+        "ox": 37.33333300000004
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 36,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 36,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 36,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 36,
+        "layer": "object25",
+        "ox": 42.666667,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 36,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 36,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 36,
+        "layer": "object25",
+        "oy": 2.666667,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 33,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 33,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 33,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 33,
+        "layer": "object25",
+        "ox": 43.333333,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 33,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 33,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 24.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 33,
+        "layer": "object25",
+        "oy": 24.666667,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 31,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 31,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 31,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 31,
+        "layer": "object25",
+        "ox": 58,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 31,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 31,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 6
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 31,
+        "layer": "object25",
+        "oy": 6,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 28,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 28,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 28,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 52,
+        "r": 28,
+        "layer": "object25",
+        "ox": 4.666667,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 54,
+        "r": 28,
+        "layer": "object25",
+        "ox": 14,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 28,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 28
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 28,
+        "layer": "object25",
+        "oy": 28,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 26,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 26,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 26,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 26,
+        "layer": "object25",
+        "ox": 40.666667,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 26,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 26,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 26,
+        "layer": "object25",
+        "oy": 9.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 23,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 23,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 23,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 23,
+        "layer": "object25",
+        "ox": 40.666667,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 23,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 23,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 31.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 23,
+        "layer": "object25",
+        "oy": 31.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 21,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 21,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 21,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 21,
+        "layer": "object25",
+        "ox": 42,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 21,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 21,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 21,
+        "layer": "object25",
+        "oy": 13.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 18,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 18,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 18,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 52,
+        "r": 18,
+        "layer": "object25",
+        "ox": 18,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 18,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 18,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 35.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 18,
+        "layer": "object25",
+        "oy": 35.333333,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 42,
+        "r": 16,
+        "layer": "object25",
+        "ox": 37.333333,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 16,
+        "layer": "object25",
+        "ox": 21.33333300000004,
+        "oy": 16.666667000000018
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 48,
+        "r": 16,
+        "layer": "object25",
+        "ox": 29.333333,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 52,
+        "r": 16,
+        "layer": "object25",
+        "ox": 16.66666699999996,
+        "oy": 16.666667000000018
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 16,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 16,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 58,
+        "r": 16,
+        "layer": "object25",
+        "oy": 16.666667,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkb1l7",
+        "c": 43,
+        "r": 14,
+        "layer": "object25",
+        "ox": -2.666667,
+        "oy": -1.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 45,
+        "r": 14,
+        "layer": "object25",
+        "ox": 21.333333,
+        "oy": -1.333333
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 51,
+        "r": 13,
+        "layer": "object25",
+        "ox": 36.666667,
+        "oy": 38.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 55,
+        "r": 13,
+        "layer": "object25",
+        "ox": 4,
+        "oy": 38.666667
+      },
+      {
+        "id": "tile_mwdkcaac",
+        "c": 57,
+        "r": 13,
+        "layer": "object25",
+        "ox": 16.666667,
+        "oy": 38.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 59,
+        "r": 14,
+        "layer": "object25",
+        "oy": -1.333333,
+        "ox": -2.666667
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 43,
+        "r": 43,
+        "layer": "object25",
+        "oy": 14,
+        "ox": -2.666667
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 45,
+        "r": 43,
+        "layer": "object25",
+        "ox": 22,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 48,
+        "r": 43,
+        "layer": "object25",
+        "ox": 30,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 52,
+        "r": 43,
+        "layer": "object25",
+        "oy": 14,
+        "ox": 3.333333
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 55,
+        "r": 43,
+        "layer": "object25",
+        "oy": 14,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mwdklejx",
+        "c": 56,
+        "r": 43,
+        "layer": "object25",
+        "oy": 14,
+        "ox": 28.666667
+      },
+      {
+        "id": "tile_mwdkcymx",
+        "c": 58,
+        "r": 43,
+        "layer": "object25",
+        "ox": 22,
+        "oy": 14,
+        "fx": true
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 56,
+        "r": 42,
+        "layer": "object26",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 52,
+        "r": 35,
+        "layer": "object26",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 59,
+        "r": 30,
+        "layer": "object26",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 58,
+        "r": 37,
+        "layer": "object26",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 46,
+        "r": 20,
+        "layer": "object26",
+        "oy": 10,
+        "ox": 10.666666999999961
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 44,
+        "r": 43,
+        "layer": "object26",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwbro91n",
+        "c": 12,
+        "r": 10,
+        "layer": "object9",
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwbro91n",
+        "c": 59,
+        "r": 30,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_new_decor_fire_extinguisher",
+        "c": 37,
+        "r": 66,
+        "layer": "object16",
+        "oy": 10
+      },
+      {
+        "id": "tile_eoc_hydrant_red",
+        "c": 29,
+        "r": 52,
+        "layer": "object14",
+        "ox": 20,
+        "oy": 13.333333
+      },
+      {
+        "id": "tile_mw49f97t",
+        "c": 56,
+        "r": 71,
+        "layer": "object7",
+        "ox": 10.666666999999961,
+        "oy": 25.33333300000004
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 43,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 8,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 38,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 13.333333,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 33,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 18.666667,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 28,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 23.333333,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 19,
+        "layer": "object26",
+        "rot": 3,
+        "ox": 17.333333,
+        "sortDepth": 0,
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 23,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 28.666667,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 40,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 31.333333,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 36,
+        "layer": "object26",
+        "rot": 3,
+        "oy": -4,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 31,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 1.333333,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 26,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 6,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 16,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 16,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 14,
+        "layer": "object26",
+        "rot": 3,
+        "oy": -1.333333,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgchw5x",
+        "c": 45,
+        "r": 21,
+        "layer": "object26",
+        "rot": 3,
+        "oy": 11.333333,
+        "ox": 17.333333,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mwgdh193",
+        "c": 34,
+        "r": 50,
+        "layer": "object14",
+        "ox": 10,
+        "oy": 36,
+        "sortDepth": 2.75
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 43,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 43,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 43,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 43,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 43,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 43,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 43,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 43,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 43,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 43,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 16,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 16,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 50,
+        "r": 16,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 19,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 19,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 19,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 19,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 23,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 23,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 23,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 23,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 27,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 27,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 27,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 27,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 31,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 30,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.3333330000000387
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 30,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 3.3333330000000387
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 31,
+        "layer": "object27",
+        "ox": 34,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 31,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 31,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 35,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 35,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 35,
+        "layer": "object27",
+        "ox": 34,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 35,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 35,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 39,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 39,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 39,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 39,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 33,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 43,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 33,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 45,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 41,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 41,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 41,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 41,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 14,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 14,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 14,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 14
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 50,
+        "r": 14,
+        "layer": "object27",
+        "ox": 5.333333000000039,
+        "oy": 13.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 17,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 17,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 50,
+        "r": 17,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 21,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 21,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 21,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 21,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 25,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 25,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 25,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 25,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 29,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 29,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 30,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 3.3333330000000387
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 29,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 29,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 33,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 35,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 33,
+        "layer": "object27",
+        "ox": 34,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 33,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 33,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 33,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 33,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 46,
+        "r": 37,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 37,
+        "layer": "object27",
+        "ox": 14,
+        "oy": 33.33333300000004
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 59,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 57,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 55,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 53,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 51,
+        "r": 37,
+        "layer": "object27",
+        "ox": 4,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 49,
+        "r": 37,
+        "layer": "object27",
+        "ox": 44,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 14,
+        "layer": "object28",
+        "ox": 14.666666999999961,
+        "oy": 14.666667000000018
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 14,
+        "layer": "object28",
+        "ox": 46,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 14,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 14,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 14,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 14,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 43,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 46,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -86.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 43,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 43,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 43,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 43,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 45,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 42,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 40,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 43,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 40,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 40,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 40,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 40,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 38,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 41,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 38,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 38,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 38,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 38,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 36,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 39,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 36,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 34.66666699999996
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 36,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 34.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 36,
+        "layer": "object28",
+        "ox": 20,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 36,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 36,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 34,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 37,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 34,
+        "layer": "object28",
+        "ox": 20,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 34,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 34,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 32,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 35,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 32,
+        "layer": "object28",
+        "ox": 20,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 32,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 32,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 30,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 33,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 30,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 30,
+        "layer": "object28",
+        "ox": 14.666666999999961,
+        "oy": 4.666666999999961
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 30,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 30,
+        "layer": "object28",
+        "ox": 18.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 30,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 31,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 28,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 26,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 29,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 26,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 26,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 26,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 26,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 24,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 27,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 24,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 24,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 24,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 24,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 22,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 25,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 22,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 22,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 22,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 22,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 20,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 23,
+        "layer": "object28",
+        "ox": -154,
+        "oy": -105.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 20,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 20,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 20,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 20,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 18,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 18,
+        "layer": "object28",
+        "ox": 46,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 18,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 18,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 18,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 18,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 16,
+        "layer": "object28",
+        "ox": 14.666666999999961,
+        "oy": 14.666667000000018
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 16,
+        "layer": "object28",
+        "ox": 46,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 16,
+        "layer": "object28",
+        "ox": 14,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 16,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 16,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 16,
+        "layer": "object28",
+        "ox": 14.666667,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 24,
+        "r": 14,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 24,
+        "r": 16,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 26,
+        "r": 14,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 26,
+        "r": 16,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 28,
+        "r": 14,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 28,
+        "r": 16,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 30,
+        "r": 14,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 30,
+        "r": 16,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 32,
+        "r": 14,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 32,
+        "r": 16,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 34,
+        "r": 14,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 34,
+        "r": 16,
+        "layer": "object8",
+        "oy": 30,
+        "ox": -2
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 34,
+        "r": 14,
+        "layer": "object8",
+        "ox": 18,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 34,
+        "r": 16,
+        "layer": "object8",
+        "ox": 18,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 7,
+        "r": 12,
+        "layer": "object30",
+        "ox": 21.333333
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 9,
+        "r": 14,
+        "layer": "object30",
+        "ox": 9.333333,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 9,
+        "r": 15,
+        "layer": "object30",
+        "ox": 9.333333,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 9,
+        "r": 16,
+        "layer": "object30",
+        "ox": 9.333333,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 7,
+        "r": 15,
+        "layer": "object30",
+        "ox": 21.333333
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 7,
+        "r": 15,
+        "layer": "object30",
+        "ox": 21.333332999999982,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 7,
+        "r": 16,
+        "layer": "object30",
+        "ox": 21.333332999999982,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 7,
+        "r": 14,
+        "layer": "object30",
+        "ox": 21.333333
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 7,
+        "r": 13,
+        "layer": "object30",
+        "ox": 21.333333
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 7,
+        "r": 13,
+        "layer": "object30",
+        "ox": 21.333332999999982
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 6,
+        "r": 12,
+        "layer": "object30",
+        "ox": 31.333332999999982
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 8,
+        "r": 14,
+        "layer": "object30",
+        "ox": 19.333333,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 8,
+        "r": 15,
+        "layer": "object30",
+        "ox": 19.333333,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 8,
+        "r": 16,
+        "layer": "object30",
+        "ox": 19.333333,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 6,
+        "r": 15,
+        "layer": "object30",
+        "ox": 31.333332999999982
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 6,
+        "r": 15,
+        "layer": "object30",
+        "ox": 31.333332999999982,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 6,
+        "r": 16,
+        "layer": "object30",
+        "ox": 31.333332999999982,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 6,
+        "r": 14,
+        "layer": "object30",
+        "ox": 31.333332999999982
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 6,
+        "r": 13,
+        "layer": "object30",
+        "ox": 31.333332999999982
+      },
+      {
+        "id": "tile_mwgn2tt1",
+        "c": 6,
+        "r": 13,
+        "layer": "object30",
+        "ox": 31.333332999999982
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 4,
+        "r": 16,
+        "layer": "object30",
+        "ox": 32
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 10,
+        "r": 16,
+        "layer": "object30",
+        "ox": 8.666667,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 10,
+        "r": 15,
+        "layer": "object30",
+        "ox": 8.666667,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 14,
+        "r": 11,
+        "layer": "object30",
+        "ox": 8.666667,
+        "oy": 40.666667
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 17,
+        "r": 14,
+        "layer": "object30",
+        "ox": 38.666667,
+        "oy": 12
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 18,
+        "r": 16,
+        "layer": "object30",
+        "ox": 8.666666999999961,
+        "oy": 0.6666670000000181
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 14,
+        "r": 15,
+        "layer": "object30",
+        "ox": 8.666667,
+        "oy": 40.666667
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 14,
+        "r": 13,
+        "layer": "object30",
+        "ox": 8.666667,
+        "oy": 40.666667
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 16,
+        "r": 12,
+        "layer": "object30",
+        "ox": 8.666666999999961,
+        "oy": 0.6666670000000181
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 16,
+        "r": 12,
+        "layer": "object30",
+        "ox": 26,
+        "oy": 0.666667
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 19,
+        "r": 14,
+        "layer": "object30",
+        "ox": 38.666667,
+        "oy": 12
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 20,
+        "r": 16,
+        "layer": "object30",
+        "ox": 8.666666999999961,
+        "oy": 0.6666670000000181
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 16,
+        "r": 16,
+        "layer": "object30",
+        "ox": 8.666666999999961,
+        "oy": 0.6666670000000181
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 16,
+        "r": 14,
+        "layer": "object30",
+        "ox": 8.666666999999961,
+        "oy": 0.6666670000000181
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 16,
+        "r": 14,
+        "layer": "object30",
+        "ox": 26,
+        "oy": 0.666667
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 12,
+        "r": 15,
+        "layer": "object30",
+        "ox": 8.666667000000018,
+        "oy": 36.66666700000002
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 12,
+        "r": 15,
+        "layer": "object30",
+        "ox": 8.666667,
+        "oy": 9.333333
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 2,
+        "r": 16,
+        "layer": "object30",
+        "ox": 32
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 2,
+        "r": 16,
+        "layer": "object30",
+        "ox": 10.666667
+      },
+      {
+        "id": "tile_mwgnngo0",
+        "c": 83,
+        "r": 7,
+        "layer": "object6",
+        "ox": 16.666667,
+        "sortDepth": 3.25,
+        "oy": -9.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 65,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 72,
+        "layer": "object32",
+        "ox": 25.33333300000004,
+        "oy": 29.33333300000004
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 71,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 69,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 49,
+        "r": 67,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 65,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 72,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 29.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 71,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 69,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 51,
+        "r": 67,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 65,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 72,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 29.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 71,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 69,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 53,
+        "r": 67,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 65,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 71,
+        "layer": "object32",
+        "ox": 8,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 54,
+        "r": 69,
+        "layer": "object32",
+        "ox": 8,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 55,
+        "r": 67,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 65,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 56,
+        "r": 68,
+        "layer": "object32",
+        "ox": 5.333333000000039,
+        "oy": 12
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 57,
+        "r": 67,
+        "layer": "object32",
+        "ox": 25.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 65,
+        "layer": "object32",
+        "ox": 5.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_dark",
+        "c": 59,
+        "r": 67,
+        "layer": "object32",
+        "ox": 5.333333,
+        "oy": 11.333333
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 60,
+        "r": 69,
+        "layer": "object32",
+        "ox": 4.666667,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 60,
+        "r": 71,
+        "layer": "object32",
+        "ox": 4.666667,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 60,
+        "r": 72,
+        "layer": "object32",
+        "ox": 4.666667,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 60,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 60,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 57,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 57,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 59,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 59,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 56,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 56,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 58,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 58,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 55,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 55,
+        "r": 73,
+        "layer": "object32",
+        "ox": 4.666666999999961,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolwater_s_dark",
+        "c": 60,
+        "r": 70,
+        "layer": "object32",
+        "ox": 4.666667,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolwater_deep_dark",
+        "c": 47,
+        "r": 65,
+        "layer": "object32",
+        "ox": 25.33333300000004,
+        "oy": 10.666666999999961
+      },
+      {
+        "id": "tile_poolwater_deep_dark",
+        "c": 47,
+        "r": 72,
+        "layer": "object32",
+        "ox": 25.33333300000004,
+        "oy": 30.66666699999996
+      },
+      {
+        "id": "tile_poolwater_deep_dark",
+        "c": 47,
+        "r": 71,
+        "layer": "object32",
+        "ox": 25.33333300000004,
+        "oy": 10.666666999999961
+      },
+      {
+        "id": "tile_poolwater_deep_dark",
+        "c": 47,
+        "r": 69,
+        "layer": "object32",
+        "ox": 25.33333300000004,
+        "oy": 10.666666999999961
+      },
+      {
+        "id": "tile_poolwater_deep_dark",
+        "c": 47,
+        "r": 67,
+        "layer": "object32",
+        "ox": 25.33333300000004,
+        "oy": 10.666666999999961
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 46,
+        "r": 51,
+        "layer": "object31",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvzbmx47",
+        "c": 43,
+        "r": 47,
+        "layer": "object31",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 60,
+        "r": 47,
+        "layer": "object31",
+        "oy": 30,
+        "ox": 21.33333300000004
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 48,
+        "r": 51,
+        "layer": "object31",
+        "oy": 6
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 50,
+        "r": 51,
+        "layer": "object31",
+        "oy": 6
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 56,
+        "r": 51,
+        "layer": "object31",
+        "oy": 6
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 54,
+        "r": 51,
+        "layer": "object31",
+        "oy": 6
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 52,
+        "r": 51,
+        "layer": "object31",
+        "oy": 6
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 57,
+        "r": 53,
+        "layer": "object12",
+        "oy": 15.333333000000039
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 57,
+        "r": 51,
+        "layer": "object31",
+        "oy": 20,
+        "ox": 1.333333
+      },
+      {
+        "id": "tile_hq_potted_plant",
+        "c": 59,
+        "r": 68,
+        "layer": "object34"
+      },
+      {
+        "id": "tile_mwfznsie",
+        "c": 35,
+        "r": 11,
+        "layer": "object34",
+        "oy": 30
+      },
+      {
+        "id": "tile_mwfznsia",
+        "c": 31,
+        "r": 77,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwfznsia",
+        "c": 30,
+        "r": 45,
+        "layer": "object34",
+        "oy": 20
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 61,
+        "r": 30,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 61,
+        "r": 32,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwfznsic",
+        "c": 61,
+        "r": 31,
+        "layer": "object34",
+        "ox": 10,
+        "oy": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mvquvyy8",
+        "c": 5,
+        "r": 13,
+        "layer": "object34",
+        "oy": 30
+      },
+      {
+        "id": "tile_mw49f97t",
+        "c": 57,
+        "r": 7,
+        "layer": "object34",
+        "oy": 30,
+        "ox": 10
+      },
+      {
+        "id": "tile_mw49f97t",
+        "c": 51,
+        "r": 61,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 18,
+        "r": 67,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 39,
+        "r": 62,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 37,
+        "r": 35,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 39,
+        "r": 32,
+        "layer": "object34",
+        "ox": 2.666667,
+        "oy": 10,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 37,
+        "r": 29,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 30,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 39,
+        "r": 25,
+        "layer": "object34",
+        "ox": 2.666667,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 37,
+        "r": 19,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 38,
+        "r": 22,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 30,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 37,
+        "r": 35,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 39,
+        "r": 32,
+        "layer": "object34",
+        "ox": 2.666667,
+        "oy": 10,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 37,
+        "r": 29,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 30,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 39,
+        "r": 25,
+        "layer": "object34",
+        "ox": 2.666667,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 37,
+        "r": 19,
+        "layer": "object34",
+        "ox": 20,
+        "oy": 10,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_obstacle_wirefence_h",
+        "c": 38,
+        "r": 22,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 30,
+        "sortDepth": 0.75
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 6,
+        "r": 12,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 10,
+        "sortDepth": 3
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 6,
+        "r": 32,
+        "layer": "object34",
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_pickup_almond_water",
+        "c": 40,
+        "r": 80,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_pickup_almond_water",
+        "c": 12,
+        "r": 54,
+        "layer": "object9",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_pickup_adrenaline",
+        "c": 24,
+        "r": 46,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 8,
+        "r": 39,
+        "layer": "object9",
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 36,
+        "r": 55,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 40,
+        "r": 53,
+        "layer": "object9",
+        "ox": 16,
+        "sortDepth": 0,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "medkit",
+          "qty": 1
+        },
+        "oy": 20
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 57,
+        "r": 37,
+        "layer": "ground6",
+        "lockerLoot": {
+          "kind": "item",
+          "id": "anomaly-firstaid",
+          "qty": 1
+        },
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvymwgxl",
+        "c": 61,
+        "r": 61,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "anomaly-firstaid",
+          "qty": 1
+        }
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 61,
+        "r": 35,
+        "layer": "object34",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 37,
+        "r": 39,
+        "layer": "object34",
+        "oy": 18,
+        "ox": 8.666667
+      },
+      {
+        "id": "tile_hq_potted_plant",
+        "c": 61,
+        "r": 33,
+        "layer": "object34",
+        "oy": 30
+      },
+      {
+        "id": "tile_hq_potted_plant",
+        "c": 37,
+        "r": 39,
+        "layer": "object34",
+        "ox": 30,
+        "oy": 8
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 61,
+        "r": 33,
+        "layer": "object34",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 2,
+        "r": 58,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 2,
+        "r": 53,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 2,
+        "r": 54,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 2,
+        "r": 56,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 4,
+        "r": 58,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 4,
+        "r": 53,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 4,
+        "r": 54,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 4,
+        "r": 56,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 6,
+        "r": 58,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 6,
+        "r": 53,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 6,
+        "r": 54,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 6,
+        "r": 56,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 8,
+        "r": 58,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 8,
+        "r": 53,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 8,
+        "r": 54,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 8,
+        "r": 56,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 10,
+        "r": 58,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 10,
+        "r": 53,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 10,
+        "r": 54,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 10,
+        "r": 56,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 11,
+        "r": 58,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 11,
+        "r": 53,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 11,
+        "r": 54,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mwggq9a4",
+        "c": 11,
+        "r": 56,
+        "layer": "ground5",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 32,
+        "r": 67,
+        "layer": "object",
+        "ox": 20,
+        "oy": 20,
+        "sortDepth": 4
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 34,
+        "r": 67,
+        "layer": "object",
+        "ox": 20,
+        "oy": 20,
+        "sortDepth": 4
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 52,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 55,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 58,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 61,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 64,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 64,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 67,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 67,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 70,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 70,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 73,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 73,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 79,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 79,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 82,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 82,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 80,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 83,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 77,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 74,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 71,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 65,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 82,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 79,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 88,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 91,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 59,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 53,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 50,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 47,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 51,
+        "r": 76,
+        "layer": "object6",
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 56,
+        "r": 76,
+        "layer": "object6",
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 51,
+        "r": 82,
+        "layer": "object6",
+        "ox": 18.666667,
+        "oy": 8
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 98,
+        "r": 82,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 107,
+        "r": 60,
+        "layer": "object6",
+        "sortDepth": 3.5,
+        "ox": -20,
+        "oy": 28
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 76,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 77,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 79,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 78,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 81,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 82,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 83,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 84,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 80,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 75,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 73,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 72,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 70,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 69,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 68,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 67,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 71,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 74,
+        "r": 65,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 88,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 90,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 91,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 93,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 89,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 92,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 96,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 94,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 95,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 44,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 41,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 76,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 38,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 94,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 79,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 82,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 88,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 91,
+        "r": 35,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 86,
+        "r": 32,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 86,
+        "r": 29,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 86,
+        "r": 26,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 83,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 86,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 83,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 86,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 80,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 77,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 74,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 71,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 89,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 92,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 95,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 71,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 74,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 77,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 80,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 89,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 92,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 95,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 98,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 98,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 101,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 101,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 79,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 80,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 81,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 82,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 84,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 83,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 85,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 86,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 87,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 88,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 89,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 91,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 92,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 93,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 90,
+        "r": 38,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 67,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 70,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 73,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 69,
+        "r": 59,
+        "layer": "ground4",
+        "sortDepth": 4,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 68,
+        "r": 59,
+        "layer": "object17",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "sortDepth": 4,
+        "c": 65,
+        "r": 76,
+        "layer": "object17",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 64,
+        "r": 76,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 66,
+        "r": 59,
+        "layer": "object17",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 65,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 67,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 69,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 71,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 73,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 75,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 77,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 79,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3kqob",
+        "c": 81,
+        "r": 79,
+        "layer": "object6",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 78,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 76,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 74,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 72,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 70,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 71,
+        "layer": "ground6",
+        "fx": false,
+        "rot": 2,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 68,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 69,
+        "layer": "ground6",
+        "fx": false,
+        "rot": 2,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 66,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 67,
+        "layer": "ground6",
+        "fx": false,
+        "rot": 2,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 84,
+        "r": 64,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "fx": true,
+        "rot": 2,
+        "oy": 38
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 65,
+        "layer": "ground6",
+        "fx": false,
+        "rot": 2,
+        "ox": 5.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 84,
+        "r": 80,
+        "layer": "ground4",
+        "ox": 29.333333,
+        "oy": 27.333333,
+        "rot": 2,
+        "fy": true
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 42,
+        "layer": "object25",
+        "oy": 32,
+        "rot": 0,
+        "ox": 37.33333300000004
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 48,
+        "r": 47,
+        "layer": "object25",
+        "oy": 32,
+        "rot": 0,
+        "ox": 37.33333300000004
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 41,
+        "layer": "object25",
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 38,
+        "layer": "object25",
+        "oy": 22,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 36,
+        "layer": "object25",
+        "oy": 4,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 33,
+        "layer": "object25",
+        "oy": 26,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 31,
+        "layer": "object25",
+        "oy": 7.333333,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 28,
+        "layer": "object25",
+        "oy": 28.666667,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 26,
+        "layer": "object25",
+        "oy": 10,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 23,
+        "layer": "object25",
+        "oy": 31.333333,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 21,
+        "layer": "object25",
+        "oy": 13.333333,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 18,
+        "layer": "object25",
+        "oy": 34.666667,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 16,
+        "layer": "object25",
+        "oy": 16.666667,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 45,
+        "r": 13,
+        "layer": "object25",
+        "oy": 38.666667,
+        "rot": 0,
+        "ox": 37.333333
+      },
+      {
+        "id": "tile_mwuj8w8i",
+        "c": 55,
+        "r": 13,
+        "layer": "object25",
+        "oy": 39.33333299999998,
+        "ox": 12.666666999999961
+      },
+      {
+        "id": "tile_mwuj8w8i",
+        "c": 58,
+        "r": 14,
+        "layer": "object25",
+        "oy": -0.666667,
+        "ox": 4
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 42,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 33.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 40,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 40
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 38,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 22
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 36,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 4
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 33,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 25.333333
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 31,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 6.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 28,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 28.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 26,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 10.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 23,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 21,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 14.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 18,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 36.666667
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 16,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 18
+      },
+      {
+        "id": "tile_mwdkcn5r",
+        "c": 49,
+        "r": 13,
+        "layer": "object25",
+        "fx": true,
+        "ox": 24,
+        "oy": 39.333333
+      },
+      {
+        "id": "tile_mwuj8w8i",
+        "c": 52,
+        "r": 13,
+        "layer": "object25",
+        "ox": 5.333333000000039,
+        "fx": true,
+        "oy": 39.33333299999998
+      },
+      {
+        "id": "tile_mwuj8w8i",
+        "c": 49,
+        "r": 13,
+        "layer": "object25",
+        "fx": true,
+        "ox": 16.66666699999996,
+        "oy": 38.66666700000002
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 14,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 16,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 18,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 20,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 22,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 24,
+        "layer": "object25",
+        "fx": true,
+        "ox": 10
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 26,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 28,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 30,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 32,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 34,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 36,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 38,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 40,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 42,
+        "layer": "object25",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mwujtpva",
+        "c": 48,
+        "r": 43,
+        "layer": "object25",
+        "ox": 10,
+        "oy": 34,
+        "fx": true
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "c": 54,
+        "r": 14,
+        "layer": "object25",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr3nuyx",
+        "c": 54,
+        "r": 13,
+        "layer": "object25",
+        "oy": 46
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 53,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 55,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 57,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 59,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 61,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 65,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 67,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 69,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 73,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 85,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 83,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 81,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 75,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 77,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 63,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 79,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 71,
+        "r": 83,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 87,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 89,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 91,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 93,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 95,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 97,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 97,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 98,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 99,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 74,
+        "r": 73,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 75,
+        "r": 73,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 76,
+        "r": 73,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 73,
+        "r": 69,
+        "layer": "ground6",
+        "ox": 20,
+        "oy": -2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 73,
+        "r": 72,
+        "layer": "ground6",
+        "oy": 3.3333330000000387,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 75,
+        "r": 69,
+        "layer": "ground6",
+        "ox": 20,
+        "oy": -2
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 75,
+        "r": 72,
+        "layer": "ground6",
+        "oy": 3.3333330000000387,
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 100,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 102,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 101,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 104,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 103,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 105,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 106,
+        "r": 65,
+        "layer": "object25"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 97,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 100,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 103,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 99,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 101,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 103,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 105,
+        "r": 83,
+        "layer": "object15"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 106,
+        "r": 82,
+        "layer": "object6",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 67,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 69,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 71,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 73,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 75,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 77,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 79,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 81,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 83,
+        "r": 64,
+        "layer": "ground7",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 76,
+        "r": 70,
+        "layer": "ground6",
+        "ox": 46.666667,
+        "oy": 26.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 72,
+        "r": 70,
+        "layer": "ground6",
+        "ox": 36.66666699999996,
+        "oy": 32
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 76,
+        "r": 69,
+        "layer": "ground6",
+        "ox": 46.666667,
+        "oy": 16.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 72,
+        "r": 69,
+        "layer": "ground6",
+        "ox": 36.66666699999996,
+        "oy": 12
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 73,
+        "r": 72,
+        "layer": "ground6",
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 73,
+        "r": 69,
+        "layer": "ground6",
+        "oy": -1.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 77,
+        "r": 72,
+        "layer": "ground6",
+        "oy": 2.666667,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 77,
+        "r": 68,
+        "layer": "ground6",
+        "oy": 38,
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 73,
+        "r": 73,
+        "layer": "ground7",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 76,
+        "r": 73,
+        "layer": "ground7",
+        "ox": 27.333333
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 69,
+        "r": 7,
+        "layer": "object23",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 71,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 73,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 77,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 81,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 89,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 93,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 97,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 101,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 103,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 75,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 79,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 91,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 95,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 99,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 71,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 72,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 73,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 75,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 76,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 74,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 77,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 78,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 79,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 80,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 81,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 82,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 89,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 90,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 91,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 92,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 93,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 94,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 95,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 96,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 97,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 98,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 99,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 100,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 102,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 103,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 101,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 71,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 72,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 74,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 75,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 77,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 78,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 73,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 76,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 80,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 79,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 83,
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 86,
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 87,
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 90,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 92,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 94,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 96,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 104,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 103,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 102,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 99,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 98,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 97,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 95,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 91,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 81,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 82,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 84,
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 85,
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 88,
+        "r": 13,
+        "layer": "ground7",
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 89,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 93,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 101,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 100,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 105,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 106,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 107,
+        "r": 12,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 74,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 77,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 80,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 83,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 101,
+        "r": 74,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 101,
+        "r": 77,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 101,
+        "r": 80,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 101,
+        "r": 83,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 98,
+        "r": 74,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 98,
+        "r": 77,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 98,
+        "r": 80,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 98,
+        "r": 83,
+        "layer": "ground7",
+        "oy": -6.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 87,
+        "r": 64,
+        "layer": "ground6",
+        "fx": true,
+        "oy": 2
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 73,
+        "layer": "ground6",
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 75,
+        "layer": "ground6",
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 77,
+        "layer": "ground6",
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 79,
+        "layer": "ground6",
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 81,
+        "layer": "ground6",
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 83,
+        "layer": "ground6",
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 97,
+        "r": 81,
+        "layer": "ground6",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 97,
+        "r": 79,
+        "layer": "ground6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 97,
+        "r": 77,
+        "layer": "ground6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 97,
+        "r": 75,
+        "layer": "ground6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 97,
+        "r": 73,
+        "layer": "ground6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 105,
+        "r": 73,
+        "layer": "ground6",
+        "ox": 4.666667,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 103,
+        "r": 73,
+        "layer": "ground6",
+        "ox": 4.666667,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 101,
+        "r": 73,
+        "layer": "ground6",
+        "ox": 4.666667,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 99,
+        "r": 73,
+        "layer": "ground6",
+        "ox": 4.666667,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 97,
+        "r": 73,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": -3.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 88,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 90,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 92,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 94,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 96,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 98,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 100,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 102,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 104,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 106,
+        "r": 64,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 71,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 73,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 32.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 74,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 32.666667,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 79,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 81,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 83,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 85,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 87,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 89,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 91,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 97,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 99,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 101,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 103,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 105,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 34
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 93,
+        "r": 61,
+        "layer": "ground6",
+        "oy": 33.333333,
+        "ox": -13.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 79,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 81,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 83,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 85,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 87,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 89,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 91,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 93,
+        "r": 37,
+        "layer": "ground6",
+        "ox": -14,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 76,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 78,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 80,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 81,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 84,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 83,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 89,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 91,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 93,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 95,
+        "r": 34,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 71,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 73,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 75,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 77,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 79,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 81,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 83,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 85,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 87,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 89,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 91,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 93,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 95,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 97,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 99,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 101,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 89,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 91,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 93,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 95,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 97,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 99,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 101,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 105,
+        "r": 9,
+        "layer": "object23"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 106,
+        "r": 8,
+        "layer": "object23",
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 20,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 23,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 103,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 105,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 81,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 84,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.6666669999999613,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 83,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 79,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 71,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 73,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 75,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 77,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 103,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 105,
+        "r": 19,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 104,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 105,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 106,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 97,
+        "r": 48,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 100,
+        "r": 48,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 104,
+        "r": 48,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 103,
+        "r": 48,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 105,
+        "r": 50,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 103,
+        "r": 50,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 101,
+        "r": 50,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 99,
+        "r": 50,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 97,
+        "r": 50,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 105,
+        "r": 47,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 103,
+        "r": 47,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 101,
+        "r": 47,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 99,
+        "r": 47,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 97,
+        "r": 47,
+        "layer": "ground6",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 97,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 98,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 99,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 100,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 101,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 102,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 103,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 104,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 105,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 106,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 50,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 50,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 49,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 37,
+        "layer": "ground6",
+        "oy": 40,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 37,
+        "layer": "ground6",
+        "oy": 39.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 52,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 52,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 51,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 39,
+        "layer": "ground6",
+        "oy": 39.333333,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 39,
+        "layer": "ground6",
+        "oy": 38.666667,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 54,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 54,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 53,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 41,
+        "layer": "ground6",
+        "oy": 38.666667,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 41,
+        "layer": "ground6",
+        "oy": 38,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 56,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 56,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 55,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 43,
+        "layer": "ground6",
+        "oy": 38,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 43,
+        "layer": "ground6",
+        "oy": 37.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 58,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 58,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 57,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 45,
+        "layer": "ground6",
+        "oy": 37.333333,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 45,
+        "layer": "ground6",
+        "oy": 36.666667,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 60,
+        "layer": "ground6",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 94,
+        "r": 60,
+        "layer": "ground6",
+        "oy": -4,
+        "ox": -5.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 59,
+        "layer": "ground6",
+        "oy": 35.333333,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 93,
+        "r": 47,
+        "layer": "ground6",
+        "oy": 36.666667,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 78,
+        "r": 47,
+        "layer": "ground6",
+        "oy": 36,
+        "ox": 7.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 35,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 35,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 37,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 37,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 39,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 39,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 41,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 41,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 43,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 43,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 45,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 45,
+        "layer": "ground6",
+        "ox": 6.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 47,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 96,
+        "r": 46,
+        "layer": "ground6",
+        "ox": 6.666666999999961,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 49,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 51,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 53,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 55,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 57,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 59,
+        "layer": "ground6",
+        "ox": 34.666667,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 75,
+        "r": 60,
+        "layer": "ground6",
+        "ox": 34.66666699999996,
+        "oy": 24
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 76,
+        "r": 61,
+        "layer": "object23",
+        "oy": 32,
+        "ox": -2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 78,
+        "r": 36,
+        "layer": "object23",
+        "oy": 42,
+        "ox": 11.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 83,
+        "r": 34,
+        "layer": "object23",
+        "oy": 31.333333,
+        "ox": 119.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 88,
+        "r": 25,
+        "layer": "object23",
+        "oy": 2,
+        "ox": 11.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 83,
+        "r": 25,
+        "layer": "object23",
+        "oy": 2,
+        "ox": 119.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 88,
+        "r": 34,
+        "layer": "object23",
+        "oy": 32,
+        "ox": 11.333333000000039
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 94,
+        "r": 36,
+        "layer": "object23",
+        "oy": 41.333333,
+        "ox": -2
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 96,
+        "r": 49,
+        "layer": "object23",
+        "oy": 41.333333,
+        "ox": 13.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 96,
+        "r": 47,
+        "layer": "object23",
+        "oy": 30,
+        "ox": 10.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 96,
+        "r": 61,
+        "layer": "object23",
+        "oy": 33.333333,
+        "ox": 14
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 93,
+        "r": 61,
+        "layer": "object23",
+        "oy": 33.333333,
+        "ox": 38.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 78,
+        "r": 61,
+        "layer": "object23",
+        "oy": 32.666667,
+        "ox": 10.666667
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 84,
+        "r": 50,
+        "layer": "object23",
+        "oy": 36,
+        "ox": 39.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 84,
+        "r": 53,
+        "layer": "object23",
+        "oy": 2.6666669999999613,
+        "ox": 39.33333300000004
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 87,
+        "r": 50,
+        "layer": "object23",
+        "oy": 36,
+        "ox": 11.333333
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 87,
+        "r": 53,
+        "layer": "object23",
+        "oy": 2.6666669999999613,
+        "ox": 11.333333000000039
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
+        "r": 32,
+        "layer": "ground6",
+        "oy": 50,
+        "ox": 114.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 33,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
+        "r": 30,
+        "layer": "ground6",
+        "oy": 50,
+        "ox": 114.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 31,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
+        "r": 28,
+        "layer": "ground6",
+        "oy": 50,
+        "ox": 114.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 29,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
+        "r": 26,
+        "layer": "ground6",
+        "oy": 50,
+        "ox": 114.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 27,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 83,
+        "r": 24,
+        "layer": "ground6",
+        "oy": 50,
+        "ox": 114.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 25,
+        "layer": "ground6",
+        "oy": 13.333333,
+        "ox": 6.666667
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 85,
+        "r": 51,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 85,
+        "r": 51,
+        "layer": "ground6",
+        "ox": -5.333333,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 87,
+        "r": 51,
+        "layer": "ground6",
+        "ox": 7.333333,
+        "oy": 15.333333
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 85,
+        "r": 50,
+        "layer": "ground6",
+        "oy": 36,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvr32pqo",
+        "c": 85,
+        "r": 53,
+        "layer": "ground6",
+        "ox": 20,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 85,
+        "r": 54,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 86,
+        "r": 54,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 87,
+        "r": 54,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 73,
+        "r": 69,
+        "layer": "ground8",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 75,
+        "r": 69,
+        "layer": "ground8",
+        "oy": 30,
+        "ox": -6
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 57,
+        "r": 77,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 61,
+        "r": 77,
+        "layer": "object9",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 67,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 68,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 69,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 70,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 71,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 72,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 73,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 74,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 75,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 77,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 78,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 76,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 80,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 81,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 82,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 83,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 84,
+        "r": 77,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 88,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 93,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 95,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 97,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 96,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 94,
+        "r": 82,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 81,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 82,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 80,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 71,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 73,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 72,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 74,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 75,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 84,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 86,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 88,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 93,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 83,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 85,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 87,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 97,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 98,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 99,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 101,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 102,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 103,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 105,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 106,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 104,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 100,
+        "r": 59,
+        "layer": "object35"
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 74,
+        "r": 74,
+        "layer": "ground9",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 68,
+        "r": 66,
+        "layer": "ground9",
+        "ox": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 74,
+        "r": 66,
+        "layer": "ground9",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 81,
+        "r": 65,
+        "layer": "ground9",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 91,
+        "r": 65,
+        "layer": "ground9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 102,
+        "r": 65,
+        "layer": "ground9",
+        "oy": 30,
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 96,
+        "r": 65,
+        "layer": "ground9",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 83,
+        "r": 12,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 86,
+        "r": 12,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_mvr2g292",
+        "c": 83,
+        "r": 14,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr2g292",
+        "c": 85,
+        "r": 14,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr2g292",
+        "c": 87,
+        "r": 14,
+        "layer": "ground6",
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 82,
+        "r": 12,
+        "layer": "ground6",
+        "oy": 8,
+        "ox": 34.666667
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 88,
+        "r": 12,
+        "layer": "ground6",
+        "ox": 8,
+        "oy": 8
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 101,
+        "r": 51,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 85,
+        "r": 54,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 81,
+        "r": 38,
+        "layer": "ground9",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 89,
+        "r": 39,
+        "layer": "ground9",
+        "ox": 20
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 91,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 97,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 103,
+        "r": 26,
+        "layer": "ground9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 71,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 75,
+        "r": 26,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 80,
+        "r": 26,
+        "layer": "ground9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 80,
+        "r": 12,
+        "layer": "ground9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 85,
+        "r": 15,
+        "layer": "ground9",
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_electric_light_02_blue",
+        "c": 89,
+        "r": 12,
+        "layer": "ground9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 64,
+        "r": 81,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 105,
+        "r": 76,
+        "layer": "object9",
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_pickup_battery",
+        "c": 40,
+        "r": 47,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 44,
+        "r": 10,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker_key",
+        "c": 105,
+        "r": 23,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 71,
+        "r": 18,
+        "layer": "object9",
+        "oy": 10
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 104,
+        "r": 78,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 100,
+        "r": 78,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 74,
+        "r": 68,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 105,
+        "r": 48,
+        "layer": "object9",
+        "lockerLoot": {
+          "kind": "bullet",
+          "id": "shock",
+          "qty": 1
+        }
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 105,
+        "r": 19,
+        "layer": "object9",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 70,
+        "r": 23,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 105,
+        "r": 72,
+        "layer": "object9",
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_ammo_crate",
+        "c": 85,
+        "r": 50,
+        "layer": "object9",
+        "oy": 30,
+        "ox": 20,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "anomaly-firstaid",
+          "qty": 1
+        }
+      },
+      {
+        "id": "tile_street_capsule_toy_machines",
+        "c": 38,
+        "r": 7,
+        "layer": "object9"
+      },
+      {
+        "id": "tile_interactive_pickup_almond_water",
+        "c": 100,
+        "r": 75,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 37,
+        "r": 52,
+        "layer": "object14",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 36,
+        "r": 52,
+        "layer": "object14",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mwdka8vr",
+        "c": 36,
+        "r": 52,
+        "layer": "object14",
+        "oy": 10
+      },
+      {
+        "id": "tile_mvpj1fdy",
+        "c": 64,
+        "r": 78,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mvr11zmd",
+        "c": 70,
+        "r": 59,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 69,
+        "r": 68,
+        "layer": "object15",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 80,
+        "r": 75,
+        "layer": "object15",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 93,
+        "r": 69,
+        "layer": "object15",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 90,
+        "r": 78,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 103,
+        "r": 69,
+        "layer": "object15",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 90,
+        "r": 54,
+        "layer": "object15",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 80,
+        "r": 45,
+        "layer": "object15",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 73,
+        "r": 55,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 91,
+        "r": 40,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 73,
+        "r": 28,
+        "layer": "object15",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 103,
+        "r": 39,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 77,
+        "r": 16,
+        "layer": "object15",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 85,
+        "r": 16,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 89,
+        "r": 14,
+        "layer": "object15",
+        "ox": 30
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 104,
+        "r": 32,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_mvqyrysf",
+        "c": 92,
+        "r": 28,
+        "layer": "object15",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_life_ring_red",
+        "c": 59,
+        "r": 78,
+        "layer": "object6",
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 83,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 84,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_poolcore_deep_water_gradient",
+        "c": 85,
+        "r": 26,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 60,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 62,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 64,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 66,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 68,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 70,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 72,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 65,
+        "r": 74,
+        "layer": "top",
+        "oy": 15.333333000000039,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 51,
+        "r": 78,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 51,
+        "r": 80,
+        "layer": "top",
+        "ox": 20,
+        "oy": -4.666667
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 65,
+        "r": 60,
+        "layer": "top",
+        "ox": 20,
+        "oy": 4,
+        "fx": true
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 51,
+        "r": 80,
+        "layer": "top",
+        "ox": 20,
+        "oy": 23.333333
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 63,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 65,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 67,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 69,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 71,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 73,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 75,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 77,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 79,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 80,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 57,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 55,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 53,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 51,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 49,
+        "layer": "top",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 47,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 45,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 43,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 41,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 39,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 37,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 35,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 33,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 31,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 29,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 27,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 25,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 23,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 21,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 19,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 17,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 15,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 13,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 11,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 69,
+        "r": 9,
+        "layer": "top",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 59,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 57,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 55,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 53,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 51,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 49,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 47,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 45,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 43,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 41,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 39,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 37,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 35,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 33,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 31,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 29,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 27,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 25,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 23,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 21,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 19,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 17,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 15,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 13,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 11,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 106,
+        "r": 10,
+        "layer": "top",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 3,
+        "r": 37,
+        "layer": "top",
+        "ox": 20,
+        "angle": -10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 3,
+        "r": 63,
+        "layer": "top",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 10,
+        "r": 69,
+        "layer": "top",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 13,
+        "r": 46,
+        "layer": "top",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 32,
+        "r": 27,
+        "layer": "top",
+        "oy": 10,
+        "ox": 20,
+        "circuit": 2
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 23,
+        "r": 27,
+        "layer": "top",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 14,
+        "r": 27,
+        "layer": "top",
+        "oy": 10,
+        "ox": 20,
+        "circuit": 2
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 5,
+        "r": 27,
+        "layer": "top",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 8,
+        "r": 13,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 22,
+        "r": 42,
+        "layer": "top",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 28,
+        "r": 12,
+        "layer": "top",
+        "oy": 10,
+        "circuit": 3
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 50,
+        "r": 7,
+        "layer": "top",
+        "oy": 10,
+        "circuit": 3,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 60,
+        "r": 7,
+        "layer": "top",
+        "oy": 10,
+        "circuit": 3,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 14,
+        "r": 9,
+        "layer": "top",
+        "oy": 30,
+        "circuit": 3,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 15,
+        "r": 18,
+        "layer": "top",
+        "circuit": 3
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 20,
+        "r": 61,
+        "layer": "top",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 18,
+        "r": 57,
+        "layer": "top",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 29,
+        "r": 57,
+        "layer": "top",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 27,
+        "r": 78,
+        "layer": "top",
+        "ox": 10,
+        "circuit": 2
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 57,
+        "r": 72,
+        "layer": "top",
+        "ox": 10,
+        "circuit": 2
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 3,
+        "r": 80,
+        "layer": "top",
+        "ox": 20,
+        "oy": 10,
+        "circuit": 2
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 51,
+        "r": 58,
+        "layer": "top",
+        "ox": 30,
+        "oy": 10,
+        "circuit": 2
+      }
+    ],
+    "solid": [
+      "10,84",
+      "10,85",
+      "10,86",
+      "10,87",
+      "10,88",
+      "10,89",
+      "12,85",
+      "13,85",
+      "12,86",
+      "13,86",
+      "14,85",
+      "15,85",
+      "14,86",
+      "15,86",
+      "16,85",
+      "17,85",
+      "16,86",
+      "17,86",
+      "18,85",
+      "19,85",
+      "18,86",
+      "19,86",
+      "20,85",
+      "21,85",
+      "20,86",
+      "21,86",
+      "22,85",
+      "23,85",
+      "22,86",
+      "23,86",
+      "24,85",
+      "25,85",
+      "24,86",
+      "25,86",
+      "26,85",
+      "27,85",
+      "26,86",
+      "27,86",
+      "28,85",
+      "29,85",
+      "28,86",
+      "29,86",
+      "30,85",
+      "31,85",
+      "30,86",
+      "31,86",
+      "32,85",
+      "33,85",
+      "32,86",
+      "33,86",
+      "34,85",
+      "35,85",
+      "34,86",
+      "35,86",
+      "36,85",
+      "37,85",
+      "36,86",
+      "37,86",
+      "38,85",
+      "39,85",
+      "38,86",
+      "39,86",
+      "40,85",
+      "41,85",
+      "40,86",
+      "41,86",
+      "42,85",
+      "43,85",
+      "42,86",
+      "43,86",
+      "44,85",
+      "45,85",
+      "44,86",
+      "45,86",
+      "5,84",
+      "5,85",
+      "5,86",
+      "5,87",
+      "5,88",
+      "5,89",
+      "4,84",
+      "3,84",
+      "2,84",
+      "1,84",
+      "1,83",
+      "1,82",
+      "1,81",
+      "1,80",
+      "1,79",
+      "1,78",
+      "1,77",
+      "1,76",
+      "1,75",
+      "1,74",
+      "1,73",
+      "1,72",
+      "1,71",
+      "1,70",
+      "1,69",
+      "1,68",
+      "1,67",
+      "1,66",
+      "1,65",
+      "1,64",
+      "1,63",
+      "1,62",
+      "1,61",
+      "1,60",
+      "1,59",
+      "1,58",
+      "1,57",
+      "1,56",
+      "1,55",
+      "1,54",
+      "1,53",
+      "1,52",
+      "1,51",
+      "1,50",
+      "1,44",
+      "1,43",
+      "1,42",
+      "1,41",
+      "1,40",
+      "1,39",
+      "2,37",
+      "2,38",
+      "3,37",
+      "3,38",
+      "4,37",
+      "4,38",
+      "5,37",
+      "5,38",
+      "7,37",
+      "7,38",
+      "8,37",
+      "8,38",
+      "9,37",
+      "9,38",
+      "10,37",
+      "10,38",
+      "11,37",
+      "11,38",
+      "12,37",
+      "12,38",
+      "13,37",
+      "13,38",
+      "14,37",
+      "14,38",
+      "16,38",
+      "17,38",
+      "18,38",
+      "19,38",
+      "20,38",
+      "21,38",
+      "22,38",
+      "23,38",
+      "23,37",
+      "22,37",
+      "21,37",
+      "20,37",
+      "19,37",
+      "18,37",
+      "17,37",
+      "16,37",
+      "25,38",
+      "26,38",
+      "27,38",
+      "28,38",
+      "29,38",
+      "30,38",
+      "25,37",
+      "26,37",
+      "27,37",
+      "28,37",
+      "29,37",
+      "30,37",
+      "31,37",
+      "31,38",
+      "32,37",
+      "32,38",
+      "34,37",
+      "34,38",
+      "35,37",
+      "35,38",
+      "36,37",
+      "36,38",
+      "4,80",
+      "3,80",
+      "2,80",
+      "2,81",
+      "3,81",
+      "4,81",
+      "25,80",
+      "26,80",
+      "27,80",
+      "28,80",
+      "29,80",
+      "31,80",
+      "32,80",
+      "25,79",
+      "37,80",
+      "37,79",
+      "38,79",
+      "41,79",
+      "42,79",
+      "43,79",
+      "44,79",
+      "44,80",
+      "44,81",
+      "44,82",
+      "44,83",
+      "44,84",
+      "45,79",
+      "46,79",
+      "47,79",
+      "48,79",
+      "49,79",
+      "50,79",
+      "51,79",
+      "52,79",
+      "57,79",
+      "58,79",
+      "59,79",
+      "60,79",
+      "61,79",
+      "62,79",
+      "63,79",
+      "63,78",
+      "63,77",
+      "63,76",
+      "63,75",
+      "63,74",
+      "63,73",
+      "63,72",
+      "63,71",
+      "63,70",
+      "63,69",
+      "63,68",
+      "63,67",
+      "63,66",
+      "63,65",
+      "63,64",
+      "63,63",
+      "63,62",
+      "62,62",
+      "64,62",
+      "65,62",
+      "48,62",
+      "49,62",
+      "50,62",
+      "51,62",
+      "52,62",
+      "54,62",
+      "55,62",
+      "56,62",
+      "57,62",
+      "39,62",
+      "40,62",
+      "41,62",
+      "42,62",
+      "43,62",
+      "43,61",
+      "48,61",
+      "2,71",
+      "16,71",
+      "17,71",
+      "18,71",
+      "19,71",
+      "20,71",
+      "21,71",
+      "3,71",
+      "4,71",
+      "6,71",
+      "7,71",
+      "8,71",
+      "9,71",
+      "10,71",
+      "11,71",
+      "12,71",
+      "13,71",
+      "14,71",
+      "15,71",
+      "23,71",
+      "24,71",
+      "25,71",
+      "25,72",
+      "25,73",
+      "25,74",
+      "25,75",
+      "25,76",
+      "25,77",
+      "25,78",
+      "26,75",
+      "27,75",
+      "28,75",
+      "29,75",
+      "30,75",
+      "31,75",
+      "32,75",
+      "32,74",
+      "33,74",
+      "34,74",
+      "35,74",
+      "36,74",
+      "37,74",
+      "32,76",
+      "32,77",
+      "32,78",
+      "32,79",
+      "38,72",
+      "38,73",
+      "38,74",
+      "38,75",
+      "38,76",
+      "38,77",
+      "38,78",
+      "38,71",
+      "38,70",
+      "38,69",
+      "35,71",
+      "36,71",
+      "37,71",
+      "33,71",
+      "32,71",
+      "31,71",
+      "30,71",
+      "29,71",
+      "28,71",
+      "27,71",
+      "26,71",
+      "24,78",
+      "24,79",
+      "8,66",
+      "9,66",
+      "10,66",
+      "11,66",
+      "12,66",
+      "13,66",
+      "14,66",
+      "15,66",
+      "16,66",
+      "17,66",
+      "7,66",
+      "7,67",
+      "7,68",
+      "7,69",
+      "7,70",
+      "7,65",
+      "8,65",
+      "9,65",
+      "10,65",
+      "11,65",
+      "12,65",
+      "13,65",
+      "14,65",
+      "15,65",
+      "16,65",
+      "17,65",
+      "15,57",
+      "15,58",
+      "15,59",
+      "15,60",
+      "15,61",
+      "15,62",
+      "15,63",
+      "16,59",
+      "17,59",
+      "18,59",
+      "19,59",
+      "20,59",
+      "21,59",
+      "22,59",
+      "23,59",
+      "24,59",
+      "25,59",
+      "26,59",
+      "27,59",
+      "28,59",
+      "29,59",
+      "30,59",
+      "31,59",
+      "32,59",
+      "33,59",
+      "34,59",
+      "2,64",
+      "2,63",
+      "3,63",
+      "3,64",
+      "4,64",
+      "4,63",
+      "16,54",
+      "17,54",
+      "18,54",
+      "19,54",
+      "20,54",
+      "21,54",
+      "22,54",
+      "23,54",
+      "24,54",
+      "25,54",
+      "26,54",
+      "27,54",
+      "28,54",
+      "29,54",
+      "30,54",
+      "31,54",
+      "32,54",
+      "33,54",
+      "34,54",
+      "35,54",
+      "36,54",
+      "37,54",
+      "16,53",
+      "16,52",
+      "16,51",
+      "16,50",
+      "16,49",
+      "16,48",
+      "16,47",
+      "16,46",
+      "16,45",
+      "16,44",
+      "16,43",
+      "11,43",
+      "12,43",
+      "13,43",
+      "14,43",
+      "15,43",
+      "11,50",
+      "12,50",
+      "13,50",
+      "14,50",
+      "15,50",
+      "6,50",
+      "5,50",
+      "4,50",
+      "3,50",
+      "2,50",
+      "6,48",
+      "7,48",
+      "8,48",
+      "6,49",
+      "11,49",
+      "31,48",
+      "32,48",
+      "34,48",
+      "35,48",
+      "36,48",
+      "37,48",
+      "38,48",
+      "38,49",
+      "38,50",
+      "38,51",
+      "38,52",
+      "38,53",
+      "38,54",
+      "38,55",
+      "38,56",
+      "38,57",
+      "38,58",
+      "38,59",
+      "38,60",
+      "38,61",
+      "38,62",
+      "38,63",
+      "38,64",
+      "38,65",
+      "38,66",
+      "37,66",
+      "36,66",
+      "35,66",
+      "34,66",
+      "33,66",
+      "32,66",
+      "31,66",
+      "30,66",
+      "29,66",
+      "28,66",
+      "27,66",
+      "26,66",
+      "18,65",
+      "18,66",
+      "26,65",
+      "26,64",
+      "26,63",
+      "26,62",
+      "18,64",
+      "18,63",
+      "18,62",
+      "19,63",
+      "20,63",
+      "21,63",
+      "22,63",
+      "23,63",
+      "24,63",
+      "25,63",
+      "19,62",
+      "20,62",
+      "21,62",
+      "22,62",
+      "23,62",
+      "24,62",
+      "25,62",
+      "43,60",
+      "48,60",
+      "44,60",
+      "57,61",
+      "57,60",
+      "61,60",
+      "62,60",
+      "62,61",
+      "44,59",
+      "44,58",
+      "44,57",
+      "44,56",
+      "44,55",
+      "44,54",
+      "44,53",
+      "44,52",
+      "44,51",
+      "44,50",
+      "46,50",
+      "47,50",
+      "48,50",
+      "49,50",
+      "50,50",
+      "51,50",
+      "52,50",
+      "53,50",
+      "54,50",
+      "56,50",
+      "57,50",
+      "58,50",
+      "59,50",
+      "60,50",
+      "61,50",
+      "61,51",
+      "61,52",
+      "61,53",
+      "61,54",
+      "61,55",
+      "61,56",
+      "47,53",
+      "47,54",
+      "47,55",
+      "47,56",
+      "48,53",
+      "49,53",
+      "50,53",
+      "51,53",
+      "52,53",
+      "53,53",
+      "54,53",
+      "55,53",
+      "56,53",
+      "57,53",
+      "58,53",
+      "58,54",
+      "58,55",
+      "58,56",
+      "47,57",
+      "47,58",
+      "47,59",
+      "47,60",
+      "47,61",
+      "58,57",
+      "58,58",
+      "58,59",
+      "58,60",
+      "61,57",
+      "61,58",
+      "61,59",
+      "17,47",
+      "21,47",
+      "25,47",
+      "26,47",
+      "27,47",
+      "29,47",
+      "30,47",
+      "30,48",
+      "18,47",
+      "21,46",
+      "22,46",
+      "25,46",
+      "17,44",
+      "18,44",
+      "19,44",
+      "20,44",
+      "21,44",
+      "21,45",
+      "25,45",
+      "25,44",
+      "26,44",
+      "27,44",
+      "28,44",
+      "29,44",
+      "30,44",
+      "31,44",
+      "32,44",
+      "33,44",
+      "34,44",
+      "35,44",
+      "36,44",
+      "37,44",
+      "38,44",
+      "38,45",
+      "38,46",
+      "38,47",
+      "9,36",
+      "9,35",
+      "9,34",
+      "9,33",
+      "9,32",
+      "9,31",
+      "9,30",
+      "9,29",
+      "9,28",
+      "9,27",
+      "11,27",
+      "11,28",
+      "11,29",
+      "11,30",
+      "11,31",
+      "11,32",
+      "11,33",
+      "11,34",
+      "11,35",
+      "11,36",
+      "18,27",
+      "18,28",
+      "18,29",
+      "18,30",
+      "18,31",
+      "18,32",
+      "18,33",
+      "18,34",
+      "18,35",
+      "18,36",
+      "20,27",
+      "20,28",
+      "20,29",
+      "20,30",
+      "20,31",
+      "20,32",
+      "20,33",
+      "20,34",
+      "20,35",
+      "20,36",
+      "27,27",
+      "27,28",
+      "27,29",
+      "27,30",
+      "27,31",
+      "27,33",
+      "27,34",
+      "27,35",
+      "27,36",
+      "29,27",
+      "29,28",
+      "29,29",
+      "29,30",
+      "29,31",
+      "29,32",
+      "29,33",
+      "29,34",
+      "29,35",
+      "29,36",
+      "36,27",
+      "36,28",
+      "36,29",
+      "36,31",
+      "36,32",
+      "36,33",
+      "36,34",
+      "36,35",
+      "36,36",
+      "36,30",
+      "10,36",
+      "21,36",
+      "27,32",
+      "30,36",
+      "37,36",
+      "37,38",
+      "37,37",
+      "4,29",
+      "5,29",
+      "8,29",
+      "7,29",
+      "13,29",
+      "14,29",
+      "16,29",
+      "17,29",
+      "21,29",
+      "22,29",
+      "23,29",
+      "25,29",
+      "26,29",
+      "30,29",
+      "31,29",
+      "32,29",
+      "34,29",
+      "35,29",
+      "1,24",
+      "2,24",
+      "3,24",
+      "4,24",
+      "5,24",
+      "6,24",
+      "7,24",
+      "8,24",
+      "9,24",
+      "10,24",
+      "11,24",
+      "12,24",
+      "13,24",
+      "14,24",
+      "15,24",
+      "16,24",
+      "17,24",
+      "18,24",
+      "19,24",
+      "20,24",
+      "21,24",
+      "22,24",
+      "23,24",
+      "25,24",
+      "26,24",
+      "27,24",
+      "29,24",
+      "30,24",
+      "31,24",
+      "32,24",
+      "33,24",
+      "34,24",
+      "35,24",
+      "36,24",
+      "24,24",
+      "28,24",
+      "2,19",
+      "3,19",
+      "5,19",
+      "6,19",
+      "7,19",
+      "8,19",
+      "9,19",
+      "11,19",
+      "12,19",
+      "13,19",
+      "14,19",
+      "15,19",
+      "16,19",
+      "17,19",
+      "18,19",
+      "19,19",
+      "20,19",
+      "22,19",
+      "23,19",
+      "25,19",
+      "26,19",
+      "27,19",
+      "28,19",
+      "29,19",
+      "30,19",
+      "31,19",
+      "33,19",
+      "34,19",
+      "35,19",
+      "36,19",
+      "37,25",
+      "37,26",
+      "37,24",
+      "37,23",
+      "37,22",
+      "37,21",
+      "37,20",
+      "37,19",
+      "37,18",
+      "25,18",
+      "26,18",
+      "27,18",
+      "28,18",
+      "29,18",
+      "30,18",
+      "31,18",
+      "33,18",
+      "34,18",
+      "35,18",
+      "36,18",
+      "22,18",
+      "23,18",
+      "19,13",
+      "20,13",
+      "21,13",
+      "22,13",
+      "23,13",
+      "24,13",
+      "25,13",
+      "26,13",
+      "27,13",
+      "28,13",
+      "29,13",
+      "30,13",
+      "31,13",
+      "32,13",
+      "33,13",
+      "34,13",
+      "35,13",
+      "36,13",
+      "37,13",
+      "14,11",
+      "15,11",
+      "17,11",
+      "18,11",
+      "8,11",
+      "7,11",
+      "6,11",
+      "6,12",
+      "6,13",
+      "6,14",
+      "6,15",
+      "5,15",
+      "4,15",
+      "3,15",
+      "2,15",
+      "1,15",
+      "19,12",
+      "1,16",
+      "1,17",
+      "1,18",
+      "1,19",
+      "9,14",
+      "8,14",
+      "9,10",
+      "8,10",
+      "11,10",
+      "12,10",
+      "13,10",
+      "12,11",
+      "13,11",
+      "11,11",
+      "10,10",
+      "37,12",
+      "37,11",
+      "37,10",
+      "37,9",
+      "37,8",
+      "38,8",
+      "39,8",
+      "40,8",
+      "41,8",
+      "42,8",
+      "47,8",
+      "48,8",
+      "49,8",
+      "50,8",
+      "51,8",
+      "52,8",
+      "53,8",
+      "54,8",
+      "55,8",
+      "64,11",
+      "64,12",
+      "64,13",
+      "64,14",
+      "64,15",
+      "64,16",
+      "64,17",
+      "64,18",
+      "64,19",
+      "64,20",
+      "64,21",
+      "64,22",
+      "64,24",
+      "64,25",
+      "64,27",
+      "64,28",
+      "64,29",
+      "64,30",
+      "64,23",
+      "64,26",
+      "64,31",
+      "64,32",
+      "64,33",
+      "64,34",
+      "64,35",
+      "64,36",
+      "64,37",
+      "64,38",
+      "64,39",
+      "64,40",
+      "64,41",
+      "64,42",
+      "64,43",
+      "64,44",
+      "64,45",
+      "64,47",
+      "64,48",
+      "64,49",
+      "64,50",
+      "64,51",
+      "64,52",
+      "64,53",
+      "64,46",
+      "64,54",
+      "64,55",
+      "64,56",
+      "62,58",
+      "63,58",
+      "64,58",
+      "64,57",
+      "10,43",
+      "7,43",
+      "6,43",
+      "5,43",
+      "4,43",
+      "3,43",
+      "2,43",
+      "7,44",
+      "7,45",
+      "7,46",
+      "7,47",
+      "10,44",
+      "10,45",
+      "10,47",
+      "39,67",
+      "40,68",
+      "40,69",
+      "39,69",
+      "39,70",
+      "58,71",
+      "58,70",
+      "59,70",
+      "1,20",
+      "1,21",
+      "1,23",
+      "1,22",
+      "22,65",
+      "22,66",
+      "21,66",
+      "21,65",
+      "20,65",
+      "20,66",
+      "19,66",
+      "19,65",
+      "26,72",
+      "27,72",
+      "28,72",
+      "37,78",
+      "17,45",
+      "17,46",
+      "18,45",
+      "18,46",
+      "19,45",
+      "20,45",
+      "20,46",
+      "9,13",
+      "10,13",
+      "18,67",
+      "18,68",
+      "8,70",
+      "9,70",
+      "10,70",
+      "11,70",
+      "12,70",
+      "13,70",
+      "14,70",
+      "15,70",
+      "16,70",
+      "17,70",
+      "19,70",
+      "20,70",
+      "21,70",
+      "18,70",
+      "23,70",
+      "24,70",
+      "6,70",
+      "4,70",
+      "3,70",
+      "2,70",
+      "33,70",
+      "32,70",
+      "31,70",
+      "30,70",
+      "29,70",
+      "28,70",
+      "27,70",
+      "26,70",
+      "35,70",
+      "36,70",
+      "37,70",
+      "27,65",
+      "28,65",
+      "29,65",
+      "30,65",
+      "31,65",
+      "32,65",
+      "33,65",
+      "34,65",
+      "35,65",
+      "36,65",
+      "37,65",
+      "16,58",
+      "17,58",
+      "18,58",
+      "19,58",
+      "20,58",
+      "21,58",
+      "22,58",
+      "23,58",
+      "24,58",
+      "25,58",
+      "26,58",
+      "27,58",
+      "28,58",
+      "29,58",
+      "30,58",
+      "31,58",
+      "32,58",
+      "33,58",
+      "34,58",
+      "17,52",
+      "18,52",
+      "19,52",
+      "20,52",
+      "21,52",
+      "22,52",
+      "23,52",
+      "24,52",
+      "25,52",
+      "26,52",
+      "27,52",
+      "28,52",
+      "29,52",
+      "30,52",
+      "31,52",
+      "32,52",
+      "33,52",
+      "34,52",
+      "31,47",
+      "32,47",
+      "34,47",
+      "35,47",
+      "36,47",
+      "37,47",
+      "29,46",
+      "27,46",
+      "26,46",
+      "31,43",
+      "32,43",
+      "33,43",
+      "34,43",
+      "35,43",
+      "36,43",
+      "37,43",
+      "38,43",
+      "25,43",
+      "26,43",
+      "27,43",
+      "28,43",
+      "29,43",
+      "30,43",
+      "21,43",
+      "20,43",
+      "19,43",
+      "18,43",
+      "17,43",
+      "2,23",
+      "3,23",
+      "4,23",
+      "5,23",
+      "6,23",
+      "7,23",
+      "8,23",
+      "9,23",
+      "10,23",
+      "11,23",
+      "12,23",
+      "13,23",
+      "14,23",
+      "15,23",
+      "16,23",
+      "17,23",
+      "18,23",
+      "19,23",
+      "20,23",
+      "21,23",
+      "22,23",
+      "23,23",
+      "24,23",
+      "25,23",
+      "26,23",
+      "27,23",
+      "28,23",
+      "29,23",
+      "30,23",
+      "31,23",
+      "32,23",
+      "33,23",
+      "34,23",
+      "35,23",
+      "36,23",
+      "2,18",
+      "3,18",
+      "5,18",
+      "6,18",
+      "7,18",
+      "8,18",
+      "9,18",
+      "11,18",
+      "12,18",
+      "13,18",
+      "14,18",
+      "15,18",
+      "16,18",
+      "17,18",
+      "18,18",
+      "19,18",
+      "20,18",
+      "44,49",
+      "46,49",
+      "47,49",
+      "48,49",
+      "49,49",
+      "50,49",
+      "51,49",
+      "52,49",
+      "53,49",
+      "54,49",
+      "56,49",
+      "57,49",
+      "58,49",
+      "59,49",
+      "60,49",
+      "49,61",
+      "50,61",
+      "51,61",
+      "52,61",
+      "53,61",
+      "54,61",
+      "55,61",
+      "56,61",
+      "39,61",
+      "40,61",
+      "41,61",
+      "42,61",
+      "63,61",
+      "64,61",
+      "65,61",
+      "62,59",
+      "41,78",
+      "42,78",
+      "43,78",
+      "44,78",
+      "26,76",
+      "27,76",
+      "28,76",
+      "30,76",
+      "31,76",
+      "29,76",
+      "26,77",
+      "27,77",
+      "28,77",
+      "29,77",
+      "30,77",
+      "31,77",
+      "8,67",
+      "9,67",
+      "10,67",
+      "11,67",
+      "12,67",
+      "13,67",
+      "15,67",
+      "16,67",
+      "17,67",
+      "14,67",
+      "17,68",
+      "16,68",
+      "15,68",
+      "14,68",
+      "13,68",
+      "12,68",
+      "11,68",
+      "10,68",
+      "9,68",
+      "8,68",
+      "8,69",
+      "9,69",
+      "10,69",
+      "11,69",
+      "12,69",
+      "13,69",
+      "14,69",
+      "15,69",
+      "16,69",
+      "17,69",
+      "18,69",
+      "0,27",
+      "1,27",
+      "2,27",
+      "0,25",
+      "0,26",
+      "1,25",
+      "1,26",
+      "2,25",
+      "2,26",
+      "3,25",
+      "4,25",
+      "5,25",
+      "6,25",
+      "7,25",
+      "8,25",
+      "9,25",
+      "10,25",
+      "11,25",
+      "12,25",
+      "13,25",
+      "14,25",
+      "16,25",
+      "17,25",
+      "18,25",
+      "19,25",
+      "20,25",
+      "21,25",
+      "15,25",
+      "3,26",
+      "4,26",
+      "5,26",
+      "6,26",
+      "8,26",
+      "9,26",
+      "10,26",
+      "11,26",
+      "12,26",
+      "14,26",
+      "15,26",
+      "16,26",
+      "17,26",
+      "18,26",
+      "20,26",
+      "21,26",
+      "22,26",
+      "7,26",
+      "13,26",
+      "19,26",
+      "22,25",
+      "0,28",
+      "1,28",
+      "2,28",
+      "0,29",
+      "1,29",
+      "0,30",
+      "1,30",
+      "0,31",
+      "1,31",
+      "0,32",
+      "1,32",
+      "0,33",
+      "1,33",
+      "0,34",
+      "1,34",
+      "0,35",
+      "1,35",
+      "0,36",
+      "1,36",
+      "2,36",
+      "2,35",
+      "2,32",
+      "2,31",
+      "2,30",
+      "2,29",
+      "2,34",
+      "2,33",
+      "23,25",
+      "24,25",
+      "25,25",
+      "27,25",
+      "28,25",
+      "29,25",
+      "31,25",
+      "32,25",
+      "33,25",
+      "34,25",
+      "35,25",
+      "30,25",
+      "26,25",
+      "36,25",
+      "36,26",
+      "35,26",
+      "34,26",
+      "33,26",
+      "32,26",
+      "31,26",
+      "30,26",
+      "29,26",
+      "28,26",
+      "27,26",
+      "26,26",
+      "25,26",
+      "24,26",
+      "23,26",
+      "28,27",
+      "28,28",
+      "28,29",
+      "28,30",
+      "28,31",
+      "28,32",
+      "28,33",
+      "28,34",
+      "28,35",
+      "28,36",
+      "19,27",
+      "19,28",
+      "19,29",
+      "19,30",
+      "19,31",
+      "19,32",
+      "19,33",
+      "19,34",
+      "19,35",
+      "19,36",
+      "10,46",
+      "11,44",
+      "12,44",
+      "13,44",
+      "14,44",
+      "15,44",
+      "11,45",
+      "12,45",
+      "13,45",
+      "14,45",
+      "15,45",
+      "11,46",
+      "12,46",
+      "13,46",
+      "14,46",
+      "15,46",
+      "11,47",
+      "12,47",
+      "13,47",
+      "14,47",
+      "15,47",
+      "13,48",
+      "14,48",
+      "15,48",
+      "12,48",
+      "12,49",
+      "13,49",
+      "14,49",
+      "15,49",
+      "11,48",
+      "10,48",
+      "6,44",
+      "5,44",
+      "4,44",
+      "3,44",
+      "2,44",
+      "2,45",
+      "4,45",
+      "5,45",
+      "6,45",
+      "6,46",
+      "5,46",
+      "4,46",
+      "3,46",
+      "2,46",
+      "3,45",
+      "6,47",
+      "5,47",
+      "4,47",
+      "3,47",
+      "2,47",
+      "5,48",
+      "4,48",
+      "3,48",
+      "2,48",
+      "5,49",
+      "4,49",
+      "3,49",
+      "2,49",
+      "7,10",
+      "6,10",
+      "15,10",
+      "14,10",
+      "17,10",
+      "18,10",
+      "20,12",
+      "21,12",
+      "22,12",
+      "23,12",
+      "24,12",
+      "25,12",
+      "26,12",
+      "27,12",
+      "28,12",
+      "29,12",
+      "30,12",
+      "31,12",
+      "32,12",
+      "33,12",
+      "34,12",
+      "35,12",
+      "36,12",
+      "26,45",
+      "27,45",
+      "28,45",
+      "29,45",
+      "30,45",
+      "30,46",
+      "31,45",
+      "32,45",
+      "33,45",
+      "34,45",
+      "35,45",
+      "36,45",
+      "37,45",
+      "31,46",
+      "32,46",
+      "33,46",
+      "34,46",
+      "35,46",
+      "36,46",
+      "37,46",
+      "48,54",
+      "49,54",
+      "50,54",
+      "51,54",
+      "52,54",
+      "53,54",
+      "54,54",
+      "55,54",
+      "56,54",
+      "57,54",
+      "57,55",
+      "56,55",
+      "54,55",
+      "52,55",
+      "51,55",
+      "50,55",
+      "49,55",
+      "48,55",
+      "53,55",
+      "55,55",
+      "48,56",
+      "49,56",
+      "50,56",
+      "51,56",
+      "52,56",
+      "53,56",
+      "54,56",
+      "55,56",
+      "56,56",
+      "57,56",
+      "39,60",
+      "40,60",
+      "41,60",
+      "42,60",
+      "43,59",
+      "42,59",
+      "41,59",
+      "40,59",
+      "39,59",
+      "39,58",
+      "40,58",
+      "41,58",
+      "42,58",
+      "43,58",
+      "43,57",
+      "42,57",
+      "41,57",
+      "40,57",
+      "39,57",
+      "20,8",
+      "21,8",
+      "22,8",
+      "20,9",
+      "21,9",
+      "22,9",
+      "20,10",
+      "21,10",
+      "22,10",
+      "23,8",
+      "24,8",
+      "25,8",
+      "23,9",
+      "24,9",
+      "25,9",
+      "23,10",
+      "24,10",
+      "25,10",
+      "26,8",
+      "27,8",
+      "28,8",
+      "26,9",
+      "27,9",
+      "28,9",
+      "26,10",
+      "27,10",
+      "28,10",
+      "20,5",
+      "21,5",
+      "22,5",
+      "20,6",
+      "21,6",
+      "22,6",
+      "20,7",
+      "21,7",
+      "22,7",
+      "23,5",
+      "23,6",
+      "23,7",
+      "24,5",
+      "24,6",
+      "24,7",
+      "25,5",
+      "25,6",
+      "25,7",
+      "26,5",
+      "26,6",
+      "26,7",
+      "27,5",
+      "27,6",
+      "27,7",
+      "28,5",
+      "28,6",
+      "28,7",
+      "29,5",
+      "29,6",
+      "29,7",
+      "30,5",
+      "30,6",
+      "30,7",
+      "31,5",
+      "31,6",
+      "31,7",
+      "32,5",
+      "32,6",
+      "32,7",
+      "33,5",
+      "33,6",
+      "33,7",
+      "34,6",
+      "34,7",
+      "32,8",
+      "33,8",
+      "35,6",
+      "35,7",
+      "36,6",
+      "36,7",
+      "34,5",
+      "35,5",
+      "36,5",
+      "31,8",
+      "31,9",
+      "32,9",
+      "33,9",
+      "31,10",
+      "32,10",
+      "33,10",
+      "29,8",
+      "30,8",
+      "29,9",
+      "30,9",
+      "29,10",
+      "30,10",
+      "3,12",
+      "4,12",
+      "5,12",
+      "2,10",
+      "2,11",
+      "2,12",
+      "1,10",
+      "1,11",
+      "1,12",
+      "2,9",
+      "3,9",
+      "4,9",
+      "5,9",
+      "3,10",
+      "4,10",
+      "5,10",
+      "3,11",
+      "4,11",
+      "5,11",
+      "3,8",
+      "4,8",
+      "5,8",
+      "3,7",
+      "4,7",
+      "5,7",
+      "3,6",
+      "4,6",
+      "5,6",
+      "3,5",
+      "4,5",
+      "5,5",
+      "2,6",
+      "2,7",
+      "2,8",
+      "1,5",
+      "2,5",
+      "6,5",
+      "7,5",
+      "8,5",
+      "6,6",
+      "7,6",
+      "8,6",
+      "6,7",
+      "7,7",
+      "8,7",
+      "9,5",
+      "9,6",
+      "9,7",
+      "10,5",
+      "10,6",
+      "10,7",
+      "11,5",
+      "11,6",
+      "11,7",
+      "12,5",
+      "12,6",
+      "12,7",
+      "13,5",
+      "14,5",
+      "13,6",
+      "14,6",
+      "13,7",
+      "14,7",
+      "15,5",
+      "15,6",
+      "15,7",
+      "16,5",
+      "16,6",
+      "16,7",
+      "17,5",
+      "17,6",
+      "17,7",
+      "18,5",
+      "18,6",
+      "18,7",
+      "19,5",
+      "19,6",
+      "19,7",
+      "6,8",
+      "7,8",
+      "9,8",
+      "10,8",
+      "11,8",
+      "12,8",
+      "13,8",
+      "14,8",
+      "15,8",
+      "16,8",
+      "17,8",
+      "18,8",
+      "19,8",
+      "8,8",
+      "34,8",
+      "34,9",
+      "34,10",
+      "35,8",
+      "36,8",
+      "36,9",
+      "35,9",
+      "35,10",
+      "36,10",
+      "0,12",
+      "0,11",
+      "0,10",
+      "0,9",
+      "1,7",
+      "1,8",
+      "1,9",
+      "0,8",
+      "0,7",
+      "0,6",
+      "0,5",
+      "1,6",
+      "0,13",
+      "0,14",
+      "0,16",
+      "0,17",
+      "0,18",
+      "0,19",
+      "0,20",
+      "0,21",
+      "0,22",
+      "0,23",
+      "0,24",
+      "0,15",
+      "38,5",
+      "39,5",
+      "40,5",
+      "38,6",
+      "39,6",
+      "40,6",
+      "38,7",
+      "39,7",
+      "40,7",
+      "37,5",
+      "37,6",
+      "37,7",
+      "41,5",
+      "42,5",
+      "43,5",
+      "41,6",
+      "42,6",
+      "43,6",
+      "41,7",
+      "42,7",
+      "43,7",
+      "44,5",
+      "44,6",
+      "44,7",
+      "45,5",
+      "45,6",
+      "45,7",
+      "46,5",
+      "46,6",
+      "46,7",
+      "47,5",
+      "47,6",
+      "47,7",
+      "48,5",
+      "49,5",
+      "48,6",
+      "49,6",
+      "48,7",
+      "49,7",
+      "50,5",
+      "50,6",
+      "50,7",
+      "51,5",
+      "51,6",
+      "51,7",
+      "52,5",
+      "52,6",
+      "52,7",
+      "53,5",
+      "54,5",
+      "53,6",
+      "54,6",
+      "53,7",
+      "54,7",
+      "55,5",
+      "56,5",
+      "55,6",
+      "56,6",
+      "55,7",
+      "56,7",
+      "57,5",
+      "58,5",
+      "57,6",
+      "58,6",
+      "57,7",
+      "58,7",
+      "59,5",
+      "60,5",
+      "61,5",
+      "59,6",
+      "60,6",
+      "61,6",
+      "59,7",
+      "60,7",
+      "61,7",
+      "63,5",
+      "64,5",
+      "63,6",
+      "64,6",
+      "62,7",
+      "63,7",
+      "64,7",
+      "61,49",
+      "26,74",
+      "27,74",
+      "28,74",
+      "29,74",
+      "30,74",
+      "31,74",
+      "7,64",
+      "8,64",
+      "9,64",
+      "10,64",
+      "11,64",
+      "12,64",
+      "13,64",
+      "14,64",
+      "16,64",
+      "17,64",
+      "15,64",
+      "59,71",
+      "57,70",
+      "64,8",
+      "64,9",
+      "64,10",
+      "61,8",
+      "62,8",
+      "63,8",
+      "62,6",
+      "62,5",
+      "45,78",
+      "46,78",
+      "47,78",
+      "48,78",
+      "49,78",
+      "50,78",
+      "51,78",
+      "52,78",
+      "57,78",
+      "58,78",
+      "59,78",
+      "60,78",
+      "61,78",
+      "62,78",
+      "26,79",
+      "27,79",
+      "28,79",
+      "29,79",
+      "31,79",
+      "43,50",
+      "43,49",
+      "56,8",
+      "57,8",
+      "58,8",
+      "59,8",
+      "60,8",
+      "32,73",
+      "33,73",
+      "34,73",
+      "35,73",
+      "36,73",
+      "37,73",
+      "9,48",
+      "3,27",
+      "3,28",
+      "3,30",
+      "3,31",
+      "3,32",
+      "3,33",
+      "3,34",
+      "3,35",
+      "3,29",
+      "3,36",
+      "12,27",
+      "12,28",
+      "12,30",
+      "12,31",
+      "12,32",
+      "12,29",
+      "12,33",
+      "12,34",
+      "12,35",
+      "12,36",
+      "62,32",
+      "62,31",
+      "61,33",
+      "61,30",
+      "60,31",
+      "43,8",
+      "44,8",
+      "45,8",
+      "46,8",
+      "59,32",
+      "60,32",
+      "61,32",
+      "56,39",
+      "58,40",
+      "55,48",
+      "54,48",
+      "56,48",
+      "48,57",
+      "49,57",
+      "50,57",
+      "51,57",
+      "52,57",
+      "53,57",
+      "54,57",
+      "55,57",
+      "56,57",
+      "57,57",
+      "48,58",
+      "49,58",
+      "50,58",
+      "52,58",
+      "54,58",
+      "55,58",
+      "56,58",
+      "57,58",
+      "53,58",
+      "51,58",
+      "48,59",
+      "49,59",
+      "50,59",
+      "51,59",
+      "52,59",
+      "53,59",
+      "54,59",
+      "55,59",
+      "56,59",
+      "57,59",
+      "49,60",
+      "50,60",
+      "51,60",
+      "52,60",
+      "53,60",
+      "54,60",
+      "55,60",
+      "56,60",
+      "64,59",
+      "64,60",
+      "65,60",
+      "65,59",
+      "65,58",
+      "65,57",
+      "65,56",
+      "66,56",
+      "66,57",
+      "66,58",
+      "66,59",
+      "0,45",
+      "0,46",
+      "0,47",
+      "0,48",
+      "0,49",
+      "1,49",
+      "1,48",
+      "1,47",
+      "1,46",
+      "1,45",
+      "0,37",
+      "0,38",
+      "1,37",
+      "1,38",
+      "1,85",
+      "2,85",
+      "3,85",
+      "4,85",
+      "2,86",
+      "3,86",
+      "1,86",
+      "4,86",
+      "0,69",
+      "0,70",
+      "0,71",
+      "0,39",
+      "1,13",
+      "2,13",
+      "3,13",
+      "4,13",
+      "5,13",
+      "1,14",
+      "2,14",
+      "3,14",
+      "4,14",
+      "5,14",
+      "8,9",
+      "7,9",
+      "6,9",
+      "11,9",
+      "12,9",
+      "13,9",
+      "14,9",
+      "15,9",
+      "16,9",
+      "17,9",
+      "18,9",
+      "20,11",
+      "21,11",
+      "22,11",
+      "23,11",
+      "24,11",
+      "25,11",
+      "26,11",
+      "27,11",
+      "28,11",
+      "29,11",
+      "30,11",
+      "31,11",
+      "32,11",
+      "33,11",
+      "34,11",
+      "35,11",
+      "36,11",
+      "19,9",
+      "19,10",
+      "24,77",
+      "26,78",
+      "27,78",
+      "28,78",
+      "29,78",
+      "31,78",
+      "30,78",
+      "47,52",
+      "48,52",
+      "49,52",
+      "50,52",
+      "51,52",
+      "52,52",
+      "53,52",
+      "54,52",
+      "55,52",
+      "56,52",
+      "57,52",
+      "58,52",
+      "6,84",
+      "7,84",
+      "9,86",
+      "8,86",
+      "62,63",
+      "5,28",
+      "5,27",
+      "4,28",
+      "4,27",
+      "6,27",
+      "7,27",
+      "8,27",
+      "8,28",
+      "7,28",
+      "14,27",
+      "14,28",
+      "13,27",
+      "13,28",
+      "16,27",
+      "16,28",
+      "17,27",
+      "17,28",
+      "22,28",
+      "22,27",
+      "23,27",
+      "23,28",
+      "25,28",
+      "25,27",
+      "26,27",
+      "26,28",
+      "24,27",
+      "15,27",
+      "33,27",
+      "32,27",
+      "32,28",
+      "31,28",
+      "31,27",
+      "34,27",
+      "34,28",
+      "35,28",
+      "35,27",
+      "39,36",
+      "38,36",
+      "39,33",
+      "40,33",
+      "39,26",
+      "40,26",
+      "39,24",
+      "40,24",
+      "38,20",
+      "39,20",
+      "38,31",
+      "39,31",
+      "41,55",
+      "58,37",
+      "37,39",
+      "38,40",
+      "61,35",
+      "61,34",
+      "62,33",
+      "61,36",
+      "60,30",
+      "54,9",
+      "38,41",
+      "38,42",
+      "58,72",
+      "19,11",
+      "63,59",
+      "63,60",
+      "66,60",
+      "67,60",
+      "68,60",
+      "66,61",
+      "67,61",
+      "68,61",
+      "66,62",
+      "67,62",
+      "68,62",
+      "69,60",
+      "69,61",
+      "69,62",
+      "70,60",
+      "70,61",
+      "70,62",
+      "68,59",
+      "69,59",
+      "70,59",
+      "68,58",
+      "69,58",
+      "70,58",
+      "67,58",
+      "67,59",
+      "67,57",
+      "68,57",
+      "69,57",
+      "67,56",
+      "68,56",
+      "69,56",
+      "67,55",
+      "68,55",
+      "69,55",
+      "67,54",
+      "68,54",
+      "69,54",
+      "70,54",
+      "70,55",
+      "70,56",
+      "70,57",
+      "68,51",
+      "69,51",
+      "70,51",
+      "68,52",
+      "69,52",
+      "70,52",
+      "68,53",
+      "69,53",
+      "70,53",
+      "67,51",
+      "67,52",
+      "67,53",
+      "66,51",
+      "66,52",
+      "66,53",
+      "66,54",
+      "65,52",
+      "65,53",
+      "65,54",
+      "65,55",
+      "66,55",
+      "65,50",
+      "66,50",
+      "67,50",
+      "65,51",
+      "65,49",
+      "66,49",
+      "67,49",
+      "66,48",
+      "67,48",
+      "68,48",
+      "68,49",
+      "68,50",
+      "66,47",
+      "67,47",
+      "68,47",
+      "69,47",
+      "69,48",
+      "69,49",
+      "70,48",
+      "70,49",
+      "69,50",
+      "70,50",
+      "67,41",
+      "68,41",
+      "69,41",
+      "67,42",
+      "68,42",
+      "69,42",
+      "67,43",
+      "68,43",
+      "69,43",
+      "66,41",
+      "66,42",
+      "66,43",
+      "65,42",
+      "65,43",
+      "65,44",
+      "66,44",
+      "67,44",
+      "65,45",
+      "66,45",
+      "67,45",
+      "65,46",
+      "66,46",
+      "67,46",
+      "65,47",
+      "65,48",
+      "68,46",
+      "69,46",
+      "68,45",
+      "69,45",
+      "70,45",
+      "70,46",
+      "70,47",
+      "68,44",
+      "69,44",
+      "70,44",
+      "70,43",
+      "70,41",
+      "70,42",
+      "68,40",
+      "69,40",
+      "70,40",
+      "68,39",
+      "69,39",
+      "70,39",
+      "68,38",
+      "69,38",
+      "70,38",
+      "67,38",
+      "67,39",
+      "67,40",
+      "66,38",
+      "66,39",
+      "66,40",
+      "65,38",
+      "65,39",
+      "65,40",
+      "65,41",
+      "66,28",
+      "67,28",
+      "68,28",
+      "66,29",
+      "67,29",
+      "68,29",
+      "66,30",
+      "67,30",
+      "68,30",
+      "65,28",
+      "65,29",
+      "65,30",
+      "65,31",
+      "66,31",
+      "67,31",
+      "65,32",
+      "66,32",
+      "67,32",
+      "65,33",
+      "66,33",
+      "67,33",
+      "65,34",
+      "66,34",
+      "67,34",
+      "65,35",
+      "66,35",
+      "67,35",
+      "68,34",
+      "68,35",
+      "66,36",
+      "67,36",
+      "68,36",
+      "66,37",
+      "67,37",
+      "68,37",
+      "69,35",
+      "69,36",
+      "69,37",
+      "65,36",
+      "65,37",
+      "70,36",
+      "70,37",
+      "70,35",
+      "69,34",
+      "70,34",
+      "68,33",
+      "69,33",
+      "70,33",
+      "68,32",
+      "69,32",
+      "70,32",
+      "68,31",
+      "69,31",
+      "70,31",
+      "69,30",
+      "70,30",
+      "69,29",
+      "70,29",
+      "69,28",
+      "70,28",
+      "68,27",
+      "69,27",
+      "70,27",
+      "67,26",
+      "68,26",
+      "69,26",
+      "67,27",
+      "67,25",
+      "68,25",
+      "69,25",
+      "67,24",
+      "68,24",
+      "69,24",
+      "66,24",
+      "66,25",
+      "66,26",
+      "65,26",
+      "65,27",
+      "66,27",
+      "67,17",
+      "68,17",
+      "69,17",
+      "67,18",
+      "68,18",
+      "69,18",
+      "67,19",
+      "68,19",
+      "69,19",
+      "66,17",
+      "66,18",
+      "66,19",
+      "65,18",
+      "65,19",
+      "65,20",
+      "66,20",
+      "67,20",
+      "65,21",
+      "66,21",
+      "67,21",
+      "65,22",
+      "66,22",
+      "67,22",
+      "65,23",
+      "66,23",
+      "67,23",
+      "65,24",
+      "65,25",
+      "70,25",
+      "70,26",
+      "70,24",
+      "68,23",
+      "69,23",
+      "70,23",
+      "68,22",
+      "69,22",
+      "70,22",
+      "68,21",
+      "69,21",
+      "70,21",
+      "68,20",
+      "69,20",
+      "70,20",
+      "70,19",
+      "65,5",
+      "66,5",
+      "67,5",
+      "65,6",
+      "66,6",
+      "67,6",
+      "65,7",
+      "66,7",
+      "67,7",
+      "65,8",
+      "66,8",
+      "67,8",
+      "65,9",
+      "66,9",
+      "67,9",
+      "65,10",
+      "66,10",
+      "67,10",
+      "65,11",
+      "66,11",
+      "67,11",
+      "65,12",
+      "66,12",
+      "67,12",
+      "65,13",
+      "66,13",
+      "67,13",
+      "65,14",
+      "66,14",
+      "67,14",
+      "65,15",
+      "66,15",
+      "67,15",
+      "68,13",
+      "68,14",
+      "68,15",
+      "66,16",
+      "67,16",
+      "68,16",
+      "65,16",
+      "65,17",
+      "69,16",
+      "70,17",
+      "70,18",
+      "70,16",
+      "69,15",
+      "70,15",
+      "69,14",
+      "70,14",
+      "69,13",
+      "70,13",
+      "68,12",
+      "69,12",
+      "70,12",
+      "68,11",
+      "69,11",
+      "70,11",
+      "68,10",
+      "69,10",
+      "70,10",
+      "68,9",
+      "69,9",
+      "70,9",
+      "68,8",
+      "69,8",
+      "70,8",
+      "68,7",
+      "69,7",
+      "70,7",
+      "68,6",
+      "69,6",
+      "70,6",
+      "68,5",
+      "69,5",
+      "70,5",
+      "71,5",
+      "71,6",
+      "71,7",
+      "72,5",
+      "72,6",
+      "72,7",
+      "73,5",
+      "73,6",
+      "73,7",
+      "71,8",
+      "72,8",
+      "73,8",
+      "74,6",
+      "75,6",
+      "74,7",
+      "75,7",
+      "74,8",
+      "75,8",
+      "76,6",
+      "76,7",
+      "76,8",
+      "77,6",
+      "77,7",
+      "77,8",
+      "78,6",
+      "78,7",
+      "78,8",
+      "79,6",
+      "80,6",
+      "79,7",
+      "80,7",
+      "79,8",
+      "80,8",
+      "81,6",
+      "81,7",
+      "81,8",
+      "82,6",
+      "82,7",
+      "82,8",
+      "83,6",
+      "83,7",
+      "83,8",
+      "84,6",
+      "84,7",
+      "84,8",
+      "85,6",
+      "85,7",
+      "85,8",
+      "74,5",
+      "75,5",
+      "76,5",
+      "77,5",
+      "78,5",
+      "79,5",
+      "80,5",
+      "81,5",
+      "82,5",
+      "83,5",
+      "84,5",
+      "85,5",
+      "86,5",
+      "87,5",
+      "88,5",
+      "86,6",
+      "87,6",
+      "88,6",
+      "86,7",
+      "87,7",
+      "88,7",
+      "89,6",
+      "90,6",
+      "89,7",
+      "90,7",
+      "88,8",
+      "89,8",
+      "90,8",
+      "91,6",
+      "91,7",
+      "91,8",
+      "92,6",
+      "92,7",
+      "92,8",
+      "89,9",
+      "90,9",
+      "91,9",
+      "88,9",
+      "87,8",
+      "87,9",
+      "86,8",
+      "86,9",
+      "85,9",
+      "84,9",
+      "83,9",
+      "83,10",
+      "82,9",
+      "82,10",
+      "81,9",
+      "81,10",
+      "80,9",
+      "80,10",
+      "80,11",
+      "81,11",
+      "82,11",
+      "79,9",
+      "79,10",
+      "79,11",
+      "78,9",
+      "78,10",
+      "78,11",
+      "77,9",
+      "77,10",
+      "77,11",
+      "76,9",
+      "76,10",
+      "76,11",
+      "75,9",
+      "75,10",
+      "75,11",
+      "74,9",
+      "74,10",
+      "74,11",
+      "73,9",
+      "73,10",
+      "73,11",
+      "72,9",
+      "72,10",
+      "72,11",
+      "71,9",
+      "71,10",
+      "71,11",
+      "71,12",
+      "72,12",
+      "73,12",
+      "74,12",
+      "75,12",
+      "76,12",
+      "77,12",
+      "78,12",
+      "79,12",
+      "80,12",
+      "81,12",
+      "82,12",
+      "86,10",
+      "86,11",
+      "87,10",
+      "87,11",
+      "88,10",
+      "89,10",
+      "88,11",
+      "89,11",
+      "89,12",
+      "90,10",
+      "90,11",
+      "90,12",
+      "91,10",
+      "92,10",
+      "91,11",
+      "92,11",
+      "91,12",
+      "92,12",
+      "93,10",
+      "94,10",
+      "93,11",
+      "94,11",
+      "93,12",
+      "94,12",
+      "95,10",
+      "95,11",
+      "95,12",
+      "96,10",
+      "96,11",
+      "96,12",
+      "97,10",
+      "97,11",
+      "97,12",
+      "98,10",
+      "98,11",
+      "98,12",
+      "99,10",
+      "99,11",
+      "99,12",
+      "100,10",
+      "100,11",
+      "100,12",
+      "101,10",
+      "101,11",
+      "101,12",
+      "102,10",
+      "102,11",
+      "102,12",
+      "103,10",
+      "103,11",
+      "103,12",
+      "101,9",
+      "102,9",
+      "103,9",
+      "102,8",
+      "103,8",
+      "104,8",
+      "104,9",
+      "104,10",
+      "102,7",
+      "103,7",
+      "104,7",
+      "102,6",
+      "103,6",
+      "104,6",
+      "102,5",
+      "103,5",
+      "104,5",
+      "89,5",
+      "90,5",
+      "93,6",
+      "94,6",
+      "95,6",
+      "93,7",
+      "94,7",
+      "95,7",
+      "93,8",
+      "94,8",
+      "95,8",
+      "96,6",
+      "97,6",
+      "98,6",
+      "96,7",
+      "97,7",
+      "98,7",
+      "96,8",
+      "97,8",
+      "98,8",
+      "99,6",
+      "100,6",
+      "99,7",
+      "100,7",
+      "99,8",
+      "100,8",
+      "101,6",
+      "101,7",
+      "101,8",
+      "99,5",
+      "100,5",
+      "101,5",
+      "96,5",
+      "97,5",
+      "98,5",
+      "94,5",
+      "95,5",
+      "92,5",
+      "93,5",
+      "91,5",
+      "113,9",
+      "114,9",
+      "115,9",
+      "113,10",
+      "114,10",
+      "115,10",
+      "113,11",
+      "114,11",
+      "115,11",
+      "112,9",
+      "112,10",
+      "112,11",
+      "111,9",
+      "111,10",
+      "111,11",
+      "109,9",
+      "110,9",
+      "109,10",
+      "110,10",
+      "109,11",
+      "110,11",
+      "108,9",
+      "108,10",
+      "108,11",
+      "107,9",
+      "107,10",
+      "107,11",
+      "106,9",
+      "106,10",
+      "106,11",
+      "105,9",
+      "105,10",
+      "105,11",
+      "104,11",
+      "104,12",
+      "105,12",
+      "106,12",
+      "107,12",
+      "108,12",
+      "109,12",
+      "110,12",
+      "111,12",
+      "112,12",
+      "113,12",
+      "114,12",
+      "115,12",
+      "114,8",
+      "115,8",
+      "114,7",
+      "115,7",
+      "114,6",
+      "115,6",
+      "114,5",
+      "115,5",
+      "113,5",
+      "113,6",
+      "113,7",
+      "111,5",
+      "112,5",
+      "111,6",
+      "112,6",
+      "111,7",
+      "112,7",
+      "109,5",
+      "110,5",
+      "109,6",
+      "110,6",
+      "109,7",
+      "110,7",
+      "107,5",
+      "108,5",
+      "107,6",
+      "108,6",
+      "107,7",
+      "108,7",
+      "105,5",
+      "106,5",
+      "105,6",
+      "106,6",
+      "105,7",
+      "106,7",
+      "95,9",
+      "96,9",
+      "97,9",
+      "94,9",
+      "92,9",
+      "93,9",
+      "99,9",
+      "100,9",
+      "107,8",
+      "108,8",
+      "109,8",
+      "110,8",
+      "111,8",
+      "112,8",
+      "113,8",
+      "105,8",
+      "98,9",
+      "106,8",
+      "110,13",
+      "111,13",
+      "112,13",
+      "110,14",
+      "111,14",
+      "112,14",
+      "110,15",
+      "111,15",
+      "112,15",
+      "109,14",
+      "109,15",
+      "109,16",
+      "110,16",
+      "111,16",
+      "108,14",
+      "108,15",
+      "108,16",
+      "108,13",
+      "109,13",
+      "107,13",
+      "107,14",
+      "107,15",
+      "107,16",
+      "107,17",
+      "108,17",
+      "109,17",
+      "107,18",
+      "108,18",
+      "109,18",
+      "107,19",
+      "108,19",
+      "109,19",
+      "107,20",
+      "108,20",
+      "109,20",
+      "110,18",
+      "110,19",
+      "110,20",
+      "108,21",
+      "109,21",
+      "110,21",
+      "108,22",
+      "109,22",
+      "110,22",
+      "108,23",
+      "109,23",
+      "110,23",
+      "108,24",
+      "109,24",
+      "110,24",
+      "108,25",
+      "109,25",
+      "110,25",
+      "107,21",
+      "107,22",
+      "107,23",
+      "107,24",
+      "107,25",
+      "110,26",
+      "111,25",
+      "111,26",
+      "111,27",
+      "112,26",
+      "113,26",
+      "112,27",
+      "113,27",
+      "111,28",
+      "112,28",
+      "113,28",
+      "112,25",
+      "113,25",
+      "114,25",
+      "114,26",
+      "114,27",
+      "113,24",
+      "114,24",
+      "115,24",
+      "115,25",
+      "115,26",
+      "113,22",
+      "114,22",
+      "115,22",
+      "113,23",
+      "114,23",
+      "115,23",
+      "113,21",
+      "114,21",
+      "115,21",
+      "113,20",
+      "114,20",
+      "115,20",
+      "114,19",
+      "115,19",
+      "114,17",
+      "115,17",
+      "114,18",
+      "115,18",
+      "114,16",
+      "115,16",
+      "114,14",
+      "115,14",
+      "114,15",
+      "115,15",
+      "114,13",
+      "115,13",
+      "113,13",
+      "113,14",
+      "113,15",
+      "112,16",
+      "113,16",
+      "110,17",
+      "111,17",
+      "112,17",
+      "111,18",
+      "112,18",
+      "111,19",
+      "112,19",
+      "111,20",
+      "112,20",
+      "111,21",
+      "112,21",
+      "111,22",
+      "112,22",
+      "111,23",
+      "112,23",
+      "111,24",
+      "112,24",
+      "113,19",
+      "113,18",
+      "113,17",
+      "107,26",
+      "108,26",
+      "109,26",
+      "107,27",
+      "108,27",
+      "109,27",
+      "107,28",
+      "108,28",
+      "109,28",
+      "107,29",
+      "108,29",
+      "109,29",
+      "107,30",
+      "108,30",
+      "109,30",
+      "110,29",
+      "110,30",
+      "108,31",
+      "109,31",
+      "110,31",
+      "108,32",
+      "109,32",
+      "110,32",
+      "108,33",
+      "109,33",
+      "110,33",
+      "108,34",
+      "109,34",
+      "110,34",
+      "108,35",
+      "109,35",
+      "110,35",
+      "108,36",
+      "109,36",
+      "110,36",
+      "108,37",
+      "109,37",
+      "110,37",
+      "108,38",
+      "109,38",
+      "110,38",
+      "108,39",
+      "109,39",
+      "110,39",
+      "107,36",
+      "107,37",
+      "107,38",
+      "107,35",
+      "107,34",
+      "107,33",
+      "107,32",
+      "107,31",
+      "110,28",
+      "110,27",
+      "111,29",
+      "112,29",
+      "113,29",
+      "114,28",
+      "114,29",
+      "112,30",
+      "113,30",
+      "114,30",
+      "112,31",
+      "113,31",
+      "114,31",
+      "112,32",
+      "113,32",
+      "114,32",
+      "112,33",
+      "113,33",
+      "114,33",
+      "112,34",
+      "113,34",
+      "114,34",
+      "112,35",
+      "113,35",
+      "114,35",
+      "112,36",
+      "113,36",
+      "114,36",
+      "111,35",
+      "111,36",
+      "111,37",
+      "112,37",
+      "113,37",
+      "111,38",
+      "112,38",
+      "113,38",
+      "111,39",
+      "112,39",
+      "113,39",
+      "111,40",
+      "112,40",
+      "113,40",
+      "111,34",
+      "111,32",
+      "111,33",
+      "111,30",
+      "111,31",
+      "115,27",
+      "115,28",
+      "115,29",
+      "115,30",
+      "115,31",
+      "115,32",
+      "115,33",
+      "115,34",
+      "115,35",
+      "115,36",
+      "114,37",
+      "115,37",
+      "114,38",
+      "115,38",
+      "114,39",
+      "115,39",
+      "114,40",
+      "115,40",
+      "114,41",
+      "115,41",
+      "114,42",
+      "115,42",
+      "114,43",
+      "115,43",
+      "114,44",
+      "115,44",
+      "113,43",
+      "113,44",
+      "113,45",
+      "114,45",
+      "115,45",
+      "113,46",
+      "114,46",
+      "115,46",
+      "111,45",
+      "112,45",
+      "111,46",
+      "112,46",
+      "111,47",
+      "112,47",
+      "113,47",
+      "109,44",
+      "110,44",
+      "111,44",
+      "109,45",
+      "110,45",
+      "109,46",
+      "110,46",
+      "108,43",
+      "109,43",
+      "110,43",
+      "108,44",
+      "108,45",
+      "107,42",
+      "108,42",
+      "109,42",
+      "107,43",
+      "107,44",
+      "107,41",
+      "108,41",
+      "109,41",
+      "107,40",
+      "108,40",
+      "109,40",
+      "107,39",
+      "110,53",
+      "111,53",
+      "112,53",
+      "110,54",
+      "111,54",
+      "112,54",
+      "110,55",
+      "111,55",
+      "112,55",
+      "110,56",
+      "111,56",
+      "112,56",
+      "109,53",
+      "109,54",
+      "109,55",
+      "108,52",
+      "109,52",
+      "110,52",
+      "108,53",
+      "108,54",
+      "108,51",
+      "109,51",
+      "110,51",
+      "108,50",
+      "109,50",
+      "110,50",
+      "107,49",
+      "108,49",
+      "109,49",
+      "107,50",
+      "107,51",
+      "107,48",
+      "108,48",
+      "109,48",
+      "107,47",
+      "108,47",
+      "109,47",
+      "107,46",
+      "108,46",
+      "107,45",
+      "110,41",
+      "111,41",
+      "110,42",
+      "111,42",
+      "111,43",
+      "110,40",
+      "112,41",
+      "112,42",
+      "113,41",
+      "113,42",
+      "112,43",
+      "112,44",
+      "114,47",
+      "115,47",
+      "113,48",
+      "114,48",
+      "115,48",
+      "112,48",
+      "111,48",
+      "110,47",
+      "110,48",
+      "110,49",
+      "111,49",
+      "112,49",
+      "111,50",
+      "112,50",
+      "111,51",
+      "112,51",
+      "111,52",
+      "112,52",
+      "113,51",
+      "113,52",
+      "113,53",
+      "113,54",
+      "114,53",
+      "114,54",
+      "113,55",
+      "114,55",
+      "115,53",
+      "115,54",
+      "115,55",
+      "114,52",
+      "115,52",
+      "114,51",
+      "115,51",
+      "114,50",
+      "115,50",
+      "114,49",
+      "115,49",
+      "113,50",
+      "113,56",
+      "114,56",
+      "112,57",
+      "113,57",
+      "114,57",
+      "112,58",
+      "113,58",
+      "114,58",
+      "112,59",
+      "113,59",
+      "114,59",
+      "112,60",
+      "113,60",
+      "114,60",
+      "112,61",
+      "113,61",
+      "114,61",
+      "115,59",
+      "115,60",
+      "115,61",
+      "115,58",
+      "115,56",
+      "115,57",
+      "113,49",
+      "107,52",
+      "107,53",
+      "107,54",
+      "107,55",
+      "108,55",
+      "107,56",
+      "108,56",
+      "109,56",
+      "107,57",
+      "108,57",
+      "109,57",
+      "107,58",
+      "108,58",
+      "109,58",
+      "110,57",
+      "110,58",
+      "108,59",
+      "109,59",
+      "110,59",
+      "108,60",
+      "109,60",
+      "110,60",
+      "108,61",
+      "109,61",
+      "110,61",
+      "108,62",
+      "109,62",
+      "110,62",
+      "108,63",
+      "109,63",
+      "110,63",
+      "110,67",
+      "111,67",
+      "112,67",
+      "110,68",
+      "111,68",
+      "112,68",
+      "110,69",
+      "111,69",
+      "112,69",
+      "109,67",
+      "109,68",
+      "109,69",
+      "108,68",
+      "108,69",
+      "108,70",
+      "109,70",
+      "110,70",
+      "108,67",
+      "107,66",
+      "108,66",
+      "109,66",
+      "107,67",
+      "107,68",
+      "107,65",
+      "108,65",
+      "109,65",
+      "107,64",
+      "108,64",
+      "109,64",
+      "107,63",
+      "107,62",
+      "107,61",
+      "107,60",
+      "111,57",
+      "111,58",
+      "111,59",
+      "111,60",
+      "111,61",
+      "111,62",
+      "112,62",
+      "113,62",
+      "111,63",
+      "112,63",
+      "113,63",
+      "111,64",
+      "112,64",
+      "113,64",
+      "111,65",
+      "112,65",
+      "113,65",
+      "111,66",
+      "112,66",
+      "113,66",
+      "113,67",
+      "110,66",
+      "110,65",
+      "110,64",
+      "107,59",
+      "114,62",
+      "114,63",
+      "114,64",
+      "115,62",
+      "115,63",
+      "115,64",
+      "114,65",
+      "115,65",
+      "114,66",
+      "115,66",
+      "114,67",
+      "115,67",
+      "114,68",
+      "115,68",
+      "114,69",
+      "115,69",
+      "114,70",
+      "115,70",
+      "114,71",
+      "115,71",
+      "114,72",
+      "115,72",
+      "114,73",
+      "115,73",
+      "114,74",
+      "115,74",
+      "114,75",
+      "115,75",
+      "112,80",
+      "113,80",
+      "114,80",
+      "112,81",
+      "113,81",
+      "114,81",
+      "112,82",
+      "113,82",
+      "114,82",
+      "112,83",
+      "113,83",
+      "114,83",
+      "115,82",
+      "115,83",
+      "113,84",
+      "114,84",
+      "115,84",
+      "115,81",
+      "115,80",
+      "114,79",
+      "115,79",
+      "114,78",
+      "115,78",
+      "114,77",
+      "115,77",
+      "114,76",
+      "115,76",
+      "113,74",
+      "113,75",
+      "113,76",
+      "113,72",
+      "113,73",
+      "113,71",
+      "112,70",
+      "113,70",
+      "112,71",
+      "112,72",
+      "113,69",
+      "113,68",
+      "111,70",
+      "108,71",
+      "109,71",
+      "110,71",
+      "107,69",
+      "107,70",
+      "107,71",
+      "107,72",
+      "108,72",
+      "109,72",
+      "107,73",
+      "108,73",
+      "109,73",
+      "107,74",
+      "108,74",
+      "109,74",
+      "107,75",
+      "108,75",
+      "109,75",
+      "110,74",
+      "110,75",
+      "108,76",
+      "109,76",
+      "110,76",
+      "108,77",
+      "109,77",
+      "110,77",
+      "108,78",
+      "109,78",
+      "110,78",
+      "108,79",
+      "109,79",
+      "110,79",
+      "108,80",
+      "109,80",
+      "110,80",
+      "108,81",
+      "109,81",
+      "110,81",
+      "108,82",
+      "109,82",
+      "110,82",
+      "108,83",
+      "109,83",
+      "110,83",
+      "108,84",
+      "109,84",
+      "110,84",
+      "107,80",
+      "107,81",
+      "107,82",
+      "107,79",
+      "107,78",
+      "107,77",
+      "107,76",
+      "110,73",
+      "110,72",
+      "111,72",
+      "111,73",
+      "111,74",
+      "111,71",
+      "112,73",
+      "112,74",
+      "111,75",
+      "112,75",
+      "111,76",
+      "112,76",
+      "111,77",
+      "112,77",
+      "113,77",
+      "111,78",
+      "112,78",
+      "113,78",
+      "111,79",
+      "112,79",
+      "113,79",
+      "111,80",
+      "111,81",
+      "111,82",
+      "111,83",
+      "111,84",
+      "112,84",
+      "111,85",
+      "112,85",
+      "113,85",
+      "111,86",
+      "112,86",
+      "113,86",
+      "111,87",
+      "112,87",
+      "113,87",
+      "111,88",
+      "112,88",
+      "113,88",
+      "111,89",
+      "112,89",
+      "113,89",
+      "114,86",
+      "115,86",
+      "114,87",
+      "115,87",
+      "114,88",
+      "115,88",
+      "114,89",
+      "115,89",
+      "114,85",
+      "115,85",
+      "109,85",
+      "110,85",
+      "109,86",
+      "110,86",
+      "109,87",
+      "110,87",
+      "108,85",
+      "108,86",
+      "107,83",
+      "107,84",
+      "107,85",
+      "107,86",
+      "107,87",
+      "108,87",
+      "107,88",
+      "108,88",
+      "109,88",
+      "106,86",
+      "106,87",
+      "106,88",
+      "105,86",
+      "105,87",
+      "105,88",
+      "104,86",
+      "104,87",
+      "104,88",
+      "103,85",
+      "104,85",
+      "105,85",
+      "103,86",
+      "103,87",
+      "102,85",
+      "102,86",
+      "102,87",
+      "101,85",
+      "101,86",
+      "101,87",
+      "100,85",
+      "100,86",
+      "100,87",
+      "99,85",
+      "99,86",
+      "99,87",
+      "98,85",
+      "98,86",
+      "98,87",
+      "106,85",
+      "110,88",
+      "109,89",
+      "110,89",
+      "108,89",
+      "106,89",
+      "107,89",
+      "104,89",
+      "105,89",
+      "102,88",
+      "103,88",
+      "102,89",
+      "103,89",
+      "101,88",
+      "101,89",
+      "100,88",
+      "100,89",
+      "99,88",
+      "99,89",
+      "97,87",
+      "97,88",
+      "98,88",
+      "97,89",
+      "98,89",
+      "96,87",
+      "96,88",
+      "96,89",
+      "95,87",
+      "95,88",
+      "95,89",
+      "94,87",
+      "94,88",
+      "94,89",
+      "93,87",
+      "93,88",
+      "93,89",
+      "92,87",
+      "92,88",
+      "92,89",
+      "90,87",
+      "91,87",
+      "90,88",
+      "91,88",
+      "90,89",
+      "91,89",
+      "87,87",
+      "88,87",
+      "89,87",
+      "87,88",
+      "88,88",
+      "89,88",
+      "87,89",
+      "88,89",
+      "89,89",
+      "86,87",
+      "86,88",
+      "86,89",
+      "85,87",
+      "85,88",
+      "85,89",
+      "84,87",
+      "84,88",
+      "84,89",
+      "83,87",
+      "83,88",
+      "83,89",
+      "82,87",
+      "82,88",
+      "82,89",
+      "79,87",
+      "80,87",
+      "81,87",
+      "79,88",
+      "80,88",
+      "81,88",
+      "79,89",
+      "80,89",
+      "81,89",
+      "77,87",
+      "78,87",
+      "77,88",
+      "78,88",
+      "77,89",
+      "78,89",
+      "76,87",
+      "76,88",
+      "76,89",
+      "75,87",
+      "75,88",
+      "75,89",
+      "73,87",
+      "74,87",
+      "73,88",
+      "74,88",
+      "73,89",
+      "74,89",
+      "72,87",
+      "72,88",
+      "72,89",
+      "71,87",
+      "71,88",
+      "71,89",
+      "71,86",
+      "72,86",
+      "73,86",
+      "71,85",
+      "72,85",
+      "73,85",
+      "74,85",
+      "74,86",
+      "75,85",
+      "75,86",
+      "76,85",
+      "76,86",
+      "77,85",
+      "77,86",
+      "78,85",
+      "79,85",
+      "78,86",
+      "79,86",
+      "80,85",
+      "80,86",
+      "81,86",
+      "82,86",
+      "83,86",
+      "84,86",
+      "85,86",
+      "86,86",
+      "87,86",
+      "88,86",
+      "89,86",
+      "90,86",
+      "91,86",
+      "92,86",
+      "93,86",
+      "94,86",
+      "95,86",
+      "96,86",
+      "97,86",
+      "96,85",
+      "97,85",
+      "95,85",
+      "93,85",
+      "94,85",
+      "92,85",
+      "91,85",
+      "90,85",
+      "89,85",
+      "88,85",
+      "86,85",
+      "87,85",
+      "85,85",
+      "83,85",
+      "84,85",
+      "82,85",
+      "81,85",
+      "68,85",
+      "69,85",
+      "70,85",
+      "68,86",
+      "69,86",
+      "70,86",
+      "68,87",
+      "69,87",
+      "70,87",
+      "67,85",
+      "67,86",
+      "67,87",
+      "65,85",
+      "66,85",
+      "65,86",
+      "66,86",
+      "65,87",
+      "66,87",
+      "64,85",
+      "64,86",
+      "64,87",
+      "62,85",
+      "63,85",
+      "62,86",
+      "63,86",
+      "62,87",
+      "63,87",
+      "61,85",
+      "61,86",
+      "61,87",
+      "60,85",
+      "60,86",
+      "60,87",
+      "59,85",
+      "59,86",
+      "59,87",
+      "58,85",
+      "58,86",
+      "58,87",
+      "57,85",
+      "57,86",
+      "57,87",
+      "56,85",
+      "56,86",
+      "56,87",
+      "55,85",
+      "55,86",
+      "55,87",
+      "54,85",
+      "54,86",
+      "54,87",
+      "53,85",
+      "53,86",
+      "53,87",
+      "52,85",
+      "52,86",
+      "52,87",
+      "51,85",
+      "51,86",
+      "51,87",
+      "50,85",
+      "50,86",
+      "50,87",
+      "49,85",
+      "49,86",
+      "49,87",
+      "48,85",
+      "48,86",
+      "48,87",
+      "47,85",
+      "47,86",
+      "47,87",
+      "46,85",
+      "46,86",
+      "46,87",
+      "45,87",
+      "45,84",
+      "46,84",
+      "47,84",
+      "45,83",
+      "46,83",
+      "47,83",
+      "45,82",
+      "46,82",
+      "47,82",
+      "45,81",
+      "46,81",
+      "47,81",
+      "45,80",
+      "46,80",
+      "47,80",
+      "48,80",
+      "48,81",
+      "48,82",
+      "49,80",
+      "50,80",
+      "49,81",
+      "50,81",
+      "49,82",
+      "50,82",
+      "51,80",
+      "51,81",
+      "51,82",
+      "49,83",
+      "50,83",
+      "51,83",
+      "49,84",
+      "50,84",
+      "51,84",
+      "48,83",
+      "48,84",
+      "47,88",
+      "48,88",
+      "49,88",
+      "47,89",
+      "48,89",
+      "49,89",
+      "50,88",
+      "50,89",
+      "51,88",
+      "51,89",
+      "52,88",
+      "53,88",
+      "52,89",
+      "53,89",
+      "54,88",
+      "55,88",
+      "54,89",
+      "55,89",
+      "56,88",
+      "56,89",
+      "57,88",
+      "57,89",
+      "58,88",
+      "58,89",
+      "59,88",
+      "60,88",
+      "59,89",
+      "60,89",
+      "61,88",
+      "61,89",
+      "62,88",
+      "62,89",
+      "63,88",
+      "64,88",
+      "63,89",
+      "64,89",
+      "65,88",
+      "65,89",
+      "66,88",
+      "66,89",
+      "67,88",
+      "68,88",
+      "67,89",
+      "68,89",
+      "69,88",
+      "70,88",
+      "69,89",
+      "70,89",
+      "45,88",
+      "46,88",
+      "45,89",
+      "46,89",
+      "43,87",
+      "44,87",
+      "43,88",
+      "44,88",
+      "43,89",
+      "44,89",
+      "41,87",
+      "42,87",
+      "41,88",
+      "42,88",
+      "41,89",
+      "42,89",
+      "39,87",
+      "40,87",
+      "39,88",
+      "40,88",
+      "39,89",
+      "40,89",
+      "38,87",
+      "38,88",
+      "38,89",
+      "36,87",
+      "37,87",
+      "36,88",
+      "37,88",
+      "36,89",
+      "37,89",
+      "35,87",
+      "35,88",
+      "35,89",
+      "34,87",
+      "34,88",
+      "33,87",
+      "33,88",
+      "14,87",
+      "15,87",
+      "16,87",
+      "14,88",
+      "15,88",
+      "16,88",
+      "14,89",
+      "15,89",
+      "16,89",
+      "13,87",
+      "13,88",
+      "13,89",
+      "12,87",
+      "12,88",
+      "12,89",
+      "11,87",
+      "11,88",
+      "11,89",
+      "17,87",
+      "18,87",
+      "17,88",
+      "18,88",
+      "17,89",
+      "18,89",
+      "20,87",
+      "21,87",
+      "22,87",
+      "20,88",
+      "21,88",
+      "22,88",
+      "20,89",
+      "21,89",
+      "22,89",
+      "23,87",
+      "24,87",
+      "23,88",
+      "24,88",
+      "23,89",
+      "24,89",
+      "25,87",
+      "26,87",
+      "25,88",
+      "26,88",
+      "25,89",
+      "26,89",
+      "27,87",
+      "27,88",
+      "27,89",
+      "28,88",
+      "29,88",
+      "28,89",
+      "29,89",
+      "30,88",
+      "31,88",
+      "30,89",
+      "31,89",
+      "32,88",
+      "32,89",
+      "33,89",
+      "34,89",
+      "29,87",
+      "30,87",
+      "31,87",
+      "28,87",
+      "19,87",
+      "19,88",
+      "19,89",
+      "32,87",
+      "64,63",
+      "65,63",
+      "64,64",
+      "65,64",
+      "66,63",
+      "66,64",
+      "65,65",
+      "66,65",
+      "64,65",
+      "64,66",
+      "65,66",
+      "64,67",
+      "65,67",
+      "64,68",
+      "65,68",
+      "66,67",
+      "66,68",
+      "66,66",
+      "65,69",
+      "66,69",
+      "65,70",
+      "66,70",
+      "65,71",
+      "66,71",
+      "65,72",
+      "66,72",
+      "65,73",
+      "66,73",
+      "65,74",
+      "66,74",
+      "65,75",
+      "66,75",
+      "65,76",
+      "66,76",
+      "65,77",
+      "66,77",
+      "64,76",
+      "64,77",
+      "64,78",
+      "65,78",
+      "66,78",
+      "65,79",
+      "66,79",
+      "64,79",
+      "64,75",
+      "64,74",
+      "64,71",
+      "64,72",
+      "64,70",
+      "64,69",
+      "64,73",
+      "80,39",
+      "83,11",
+      "84,11",
+      "84,10",
+      "85,10",
+      "85,11"
+    ],
+    "breakable": [],
+    "coreSpots": [
+      "86,21"
+    ],
+    "coreCount": 1,
+    "difficulty": 3,
+    "monsterMix": [
+      {
+        "id": "fish_head",
+        "weight": 50
+      },
+      {
+        "id": "milkfish_kid",
+        "weight": 30
+      },
+      {
+        "id": "milkfish_kid_small",
+        "weight": 40
+      },
+      {
+        "id": "clownfish",
+        "weight": 40
+      }
+    ],
+    "camp": [],
+    "rules": {
+      "money": 5000,
+      "guide": 100,
+      "guideRegen": 9,
+      "speed": 44,
+      "reward": 8
+    },
+    "solidOffsets": {
+      "10,84": [
+        10,
+        11
+      ],
+      "10,85": [
+        10,
+        11
+      ],
+      "10,86": [
+        10,
+        11
+      ],
+      "10,87": [
+        10,
+        11
+      ],
+      "10,88": [
+        10,
+        11
+      ],
+      "10,89": [
+        10,
+        11
+      ],
+      "12,86": [
+        -31,
+        -29
+      ],
+      "12,85": [
+        -31,
+        -29
+      ],
+      "13,85": [
+        -31,
+        -29
+      ],
+      "13,86": [
+        -31,
+        -29
+      ],
+      "14,86": [
+        -31,
+        -29
+      ],
+      "14,85": [
+        -31,
+        -29
+      ],
+      "15,85": [
+        -31,
+        -29
+      ],
+      "15,86": [
+        -31,
+        -29
+      ],
+      "16,86": [
+        -31,
+        -29
+      ],
+      "16,85": [
+        -31,
+        -29
+      ],
+      "17,85": [
+        -31,
+        -29
+      ],
+      "17,86": [
+        -31,
+        -29
+      ],
+      "18,86": [
+        -31,
+        -29
+      ],
+      "18,85": [
+        -31,
+        -29
+      ],
+      "19,85": [
+        -31,
+        -29
+      ],
+      "19,86": [
+        -31,
+        -29
+      ],
+      "20,86": [
+        -31,
+        -29
+      ],
+      "20,85": [
+        -31,
+        -29
+      ],
+      "21,85": [
+        -31,
+        -29
+      ],
+      "21,86": [
+        -31,
+        -29
+      ],
+      "22,86": [
+        -31,
+        -29
+      ],
+      "22,85": [
+        -31,
+        -29
+      ],
+      "23,85": [
+        -31,
+        -29
+      ],
+      "23,86": [
+        -31,
+        -29
+      ],
+      "24,85": [
+        -31,
+        -29
+      ],
+      "24,86": [
+        -31,
+        -29
+      ],
+      "25,85": [
+        -31,
+        -29
+      ],
+      "25,86": [
+        -31,
+        -29
+      ],
+      "26,85": [
+        -31,
+        -29
+      ],
+      "26,86": [
+        -31,
+        -29
+      ],
+      "27,85": [
+        -31,
+        -29
+      ],
+      "27,86": [
+        -31,
+        -29
+      ],
+      "28,85": [
+        -31,
+        -29
+      ],
+      "28,86": [
+        -31,
+        -29
+      ],
+      "29,85": [
+        -31,
+        -29
+      ],
+      "29,86": [
+        -31,
+        -29
+      ],
+      "30,85": [
+        -31,
+        -29
+      ],
+      "30,86": [
+        -31,
+        -29
+      ],
+      "31,85": [
+        -31,
+        -29
+      ],
+      "31,86": [
+        -31,
+        -29
+      ],
+      "32,85": [
+        -31,
+        -29
+      ],
+      "32,86": [
+        -31,
+        -29
+      ],
+      "33,85": [
+        -31,
+        -29
+      ],
+      "33,86": [
+        -31,
+        -29
+      ],
+      "34,85": [
+        -31,
+        -29
+      ],
+      "34,86": [
+        -31,
+        -29
+      ],
+      "35,85": [
+        -31,
+        -29
+      ],
+      "35,86": [
+        -31,
+        -29
+      ],
+      "36,85": [
+        -31,
+        -29
+      ],
+      "36,86": [
+        -31,
+        -29
+      ],
+      "37,85": [
+        -31,
+        -29
+      ],
+      "37,86": [
+        -31,
+        -29
+      ],
+      "38,85": [
+        -31,
+        -29
+      ],
+      "38,86": [
+        -31,
+        -29
+      ],
+      "39,85": [
+        -31,
+        -29
+      ],
+      "39,86": [
+        -31,
+        -29
+      ],
+      "40,85": [
+        -31,
+        -29
+      ],
+      "40,86": [
+        -31,
+        -29
+      ],
+      "41,85": [
+        -31,
+        -29
+      ],
+      "41,86": [
+        -31,
+        -29
+      ],
+      "42,85": [
+        -31,
+        -29
+      ],
+      "42,86": [
+        -31,
+        -29
+      ],
+      "43,85": [
+        -31,
+        -29
+      ],
+      "43,86": [
+        -31,
+        -29
+      ],
+      "44,85": [
+        -31,
+        -29
+      ],
+      "44,86": [
+        -31,
+        -29
+      ],
+      "45,85": [
+        -31,
+        -29
+      ],
+      "45,86": [
+        -31,
+        -29
+      ],
+      "5,89": [
+        10,
+        9
+      ],
+      "5,88": [
+        10,
+        9
+      ],
+      "5,87": [
+        10,
+        9
+      ],
+      "5,86": [
+        10,
+        9
+      ],
+      "5,85": [
+        10,
+        9
+      ],
+      "5,84": [
+        10,
+        9
+      ],
+      "4,84": [
+        10,
+        9
+      ],
+      "3,84": [
+        10,
+        9
+      ],
+      "2,84": [
+        10,
+        9
+      ],
+      "1,84": [
+        10,
+        9
+      ],
+      "1,83": [
+        10,
+        9
+      ],
+      "1,82": [
+        10,
+        9
+      ],
+      "1,81": [
+        10,
+        9
+      ],
+      "1,80": [
+        10,
+        9
+      ],
+      "1,79": [
+        10,
+        9
+      ],
+      "1,78": [
+        10,
+        9
+      ],
+      "1,77": [
+        10,
+        9
+      ],
+      "1,76": [
+        10,
+        9
+      ],
+      "1,75": [
+        10,
+        9
+      ],
+      "1,74": [
+        10,
+        9
+      ],
+      "1,73": [
+        10,
+        9
+      ],
+      "1,72": [
+        10,
+        9
+      ],
+      "1,71": [
+        10,
+        9
+      ],
+      "1,70": [
+        10,
+        9
+      ],
+      "1,69": [
+        10,
+        9
+      ],
+      "1,68": [
+        10,
+        9
+      ],
+      "1,67": [
+        10,
+        9
+      ],
+      "1,66": [
+        10,
+        9
+      ],
+      "1,65": [
+        10,
+        9
+      ],
+      "1,64": [
+        10,
+        9
+      ],
+      "1,63": [
+        10,
+        9
+      ],
+      "1,62": [
+        10,
+        9
+      ],
+      "1,61": [
+        10,
+        9
+      ],
+      "1,60": [
+        10,
+        9
+      ],
+      "1,59": [
+        10,
+        9
+      ],
+      "1,58": [
+        10,
+        9
+      ],
+      "1,57": [
+        10,
+        9
+      ],
+      "1,56": [
+        10,
+        9
+      ],
+      "1,55": [
+        10,
+        9
+      ],
+      "1,54": [
+        10,
+        9
+      ],
+      "1,53": [
+        10,
+        9
+      ],
+      "1,52": [
+        10,
+        9
+      ],
+      "1,51": [
+        10,
+        9
+      ],
+      "1,50": [
+        10,
+        9
+      ],
+      "1,44": [
+        10,
+        9
+      ],
+      "1,43": [
+        10,
+        9
+      ],
+      "1,42": [
+        10,
+        9
+      ],
+      "1,41": [
+        10,
+        9
+      ],
+      "1,40": [
+        10,
+        9
+      ],
+      "1,39": [
+        10,
+        9
+      ],
+      "2,37": [
+        10,
+        9
+      ],
+      "2,38": [
+        10,
+        9
+      ],
+      "3,38": [
+        10,
+        9
+      ],
+      "3,37": [
+        10,
+        9
+      ],
+      "4,37": [
+        10,
+        9
+      ],
+      "4,38": [
+        10,
+        9
+      ],
+      "5,38": [
+        0,
+        9
+      ],
+      "5,37": [
+        0,
+        9
+      ],
+      "7,37": [
+        0,
+        8
+      ],
+      "7,38": [
+        0,
+        8
+      ],
+      "8,38": [
+        0,
+        8
+      ],
+      "8,37": [
+        0,
+        8
+      ],
+      "9,37": [
+        0,
+        8
+      ],
+      "9,38": [
+        0,
+        8
+      ],
+      "10,38": [
+        0,
+        8
+      ],
+      "10,37": [
+        0,
+        8
+      ],
+      "11,37": [
+        0,
+        8
+      ],
+      "11,38": [
+        0,
+        8
+      ],
+      "12,38": [
+        0,
+        8
+      ],
+      "12,37": [
+        0,
+        8
+      ],
+      "13,37": [
+        0,
+        8
+      ],
+      "13,38": [
+        0,
+        8
+      ],
+      "14,37": [
+        0,
+        8
+      ],
+      "14,38": [
+        0,
+        8
+      ],
+      "16,37": [
+        0,
+        8
+      ],
+      "16,38": [
+        0,
+        8
+      ],
+      "17,37": [
+        0,
+        8
+      ],
+      "17,38": [
+        0,
+        8
+      ],
+      "18,37": [
+        0,
+        8
+      ],
+      "18,38": [
+        0,
+        8
+      ],
+      "19,37": [
+        0,
+        8
+      ],
+      "19,38": [
+        0,
+        8
+      ],
+      "20,37": [
+        0,
+        8
+      ],
+      "20,38": [
+        0,
+        8
+      ],
+      "21,37": [
+        0,
+        8
+      ],
+      "21,38": [
+        0,
+        8
+      ],
+      "22,37": [
+        0,
+        8
+      ],
+      "22,38": [
+        0,
+        8
+      ],
+      "23,37": [
+        0,
+        8
+      ],
+      "23,38": [
+        0,
+        8
+      ],
+      "25,37": [
+        0,
+        8
+      ],
+      "25,38": [
+        0,
+        8
+      ],
+      "26,38": [
+        0,
+        8
+      ],
+      "26,37": [
+        0,
+        8
+      ],
+      "28,37": [
+        0,
+        8
+      ],
+      "27,38": [
+        0,
+        8
+      ],
+      "29,38": [
+        0,
+        8
+      ],
+      "27,37": [
+        0,
+        8
+      ],
+      "29,37": [
+        0,
+        8
+      ],
+      "30,38": [
+        0,
+        8
+      ],
+      "30,37": [
+        0,
+        8
+      ],
+      "28,38": [
+        0,
+        8
+      ],
+      "31,37": [
+        0,
+        8
+      ],
+      "32,37": [
+        0,
+        8
+      ],
+      "32,38": [
+        0,
+        8
+      ],
+      "31,38": [
+        0,
+        8
+      ],
+      "34,38": [
+        0,
+        8
+      ],
+      "34,37": [
+        0,
+        8
+      ],
+      "35,37": [
+        0,
+        8
+      ],
+      "35,38": [
+        0,
+        8
+      ],
+      "36,38": [
+        0,
+        8
+      ],
+      "36,37": [
+        0,
+        8
+      ],
+      "2,80": [
+        9,
+        0
+      ],
+      "2,81": [
+        9,
+        -13
+      ],
+      "3,80": [
+        9,
+        0
+      ],
+      "3,81": [
+        9,
+        -13
+      ],
+      "4,80": [
+        9,
+        0
+      ],
+      "4,81": [
+        9,
+        -13
+      ],
+      "25,79": [
+        1,
+        -16
+      ],
+      "25,80": [
+        1,
+        -16
+      ],
+      "26,80": [
+        1,
+        -16
+      ],
+      "27,80": [
+        1,
+        -16
+      ],
+      "28,80": [
+        1,
+        -16
+      ],
+      "29,80": [
+        1,
+        -16
+      ],
+      "31,80": [
+        1,
+        -16
+      ],
+      "32,80": [
+        1,
+        -16
+      ],
+      "2,71": [
+        0,
+        -7
+      ],
+      "3,71": [
+        0,
+        -7
+      ],
+      "4,71": [
+        0,
+        -7
+      ],
+      "6,71": [
+        0,
+        -7
+      ],
+      "7,71": [
+        0,
+        -7
+      ],
+      "8,71": [
+        0,
+        -7
+      ],
+      "9,71": [
+        0,
+        -7
+      ],
+      "10,71": [
+        0,
+        -7
+      ],
+      "11,71": [
+        0,
+        -7
+      ],
+      "12,71": [
+        0,
+        -7
+      ],
+      "13,71": [
+        0,
+        -7
+      ],
+      "14,71": [
+        0,
+        -7
+      ],
+      "15,71": [
+        0,
+        -7
+      ],
+      "16,71": [
+        0,
+        -7
+      ],
+      "17,71": [
+        0,
+        -7
+      ],
+      "18,71": [
+        0,
+        -7
+      ],
+      "19,71": [
+        0,
+        -7
+      ],
+      "20,71": [
+        0,
+        -7
+      ],
+      "21,71": [
+        0,
+        -7
+      ],
+      "23,71": [
+        0,
+        -7
+      ],
+      "24,71": [
+        0,
+        -7
+      ],
+      "26,71": [
+        0,
+        -7
+      ],
+      "27,71": [
+        0,
+        -7
+      ],
+      "28,71": [
+        0,
+        -7
+      ],
+      "29,71": [
+        0,
+        -7
+      ],
+      "30,71": [
+        0,
+        -7
+      ],
+      "31,71": [
+        0,
+        -7
+      ],
+      "32,71": [
+        0,
+        -7
+      ],
+      "33,71": [
+        0,
+        -7
+      ],
+      "35,71": [
+        0,
+        -7
+      ],
+      "36,71": [
+        0,
+        -7
+      ],
+      "37,71": [
+        0,
+        -7
+      ],
+      "24,79": [
+        1,
+        -13
+      ],
+      "15,57": [
+        11,
+        5
+      ],
+      "15,58": [
+        11,
+        -15
+      ],
+      "15,59": [
+        11,
+        -15
+      ],
+      "15,60": [
+        11,
+        -15
+      ],
+      "15,61": [
+        11,
+        -15
+      ],
+      "15,62": [
+        11,
+        -15
+      ],
+      "15,63": [
+        11,
+        -15
+      ],
+      "16,59": [
+        11,
+        -15
+      ],
+      "17,59": [
+        11,
+        -15
+      ],
+      "18,59": [
+        11,
+        -15
+      ],
+      "19,59": [
+        11,
+        -15
+      ],
+      "20,59": [
+        11,
+        -15
+      ],
+      "21,59": [
+        11,
+        -15
+      ],
+      "22,59": [
+        11,
+        -15
+      ],
+      "23,59": [
+        11,
+        -15
+      ],
+      "24,59": [
+        11,
+        -15
+      ],
+      "25,59": [
+        11,
+        -15
+      ],
+      "27,59": [
+        11,
+        -15
+      ],
+      "26,59": [
+        11,
+        -15
+      ],
+      "28,59": [
+        11,
+        -15
+      ],
+      "29,59": [
+        11,
+        -15
+      ],
+      "30,59": [
+        11,
+        -15
+      ],
+      "31,59": [
+        11,
+        -15
+      ],
+      "32,59": [
+        11,
+        -15
+      ],
+      "33,59": [
+        11,
+        -15
+      ],
+      "34,59": [
+        11,
+        -15
+      ],
+      "2,64": [
+        9,
+        -10
+      ],
+      "2,63": [
+        9,
+        -10
+      ],
+      "3,63": [
+        9,
+        -10
+      ],
+      "3,64": [
+        9,
+        -10
+      ],
+      "4,64": [
+        9,
+        -10
+      ],
+      "4,63": [
+        9,
+        -10
+      ],
+      "2,50": [
+        6,
+        -25
+      ],
+      "3,50": [
+        6,
+        -25
+      ],
+      "4,50": [
+        6,
+        -25
+      ],
+      "5,50": [
+        6,
+        -25
+      ],
+      "6,50": [
+        6,
+        -25
+      ],
+      "11,50": [
+        6,
+        -25
+      ],
+      "12,50": [
+        6,
+        -25
+      ],
+      "13,50": [
+        6,
+        -25
+      ],
+      "14,50": [
+        6,
+        -25
+      ],
+      "15,50": [
+        6,
+        -25
+      ],
+      "8,48": [
+        -14,
+        -16
+      ],
+      "7,48": [
+        -2,
+        -9
+      ],
+      "6,48": [
+        -15,
+        -6
+      ],
+      "6,49": [
+        -2,
+        -19
+      ],
+      "11,49": [
+        6,
+        -19
+      ],
+      "16,54": [
+        0,
+        -23
+      ],
+      "17,54": [
+        0,
+        -23
+      ],
+      "18,54": [
+        0,
+        -23
+      ],
+      "19,54": [
+        0,
+        -23
+      ],
+      "20,54": [
+        0,
+        -23
+      ],
+      "21,54": [
+        0,
+        -23
+      ],
+      "22,54": [
+        0,
+        -23
+      ],
+      "23,54": [
+        0,
+        -23
+      ],
+      "24,54": [
+        0,
+        -23
+      ],
+      "26,54": [
+        0,
+        -23
+      ],
+      "25,54": [
+        0,
+        -23
+      ],
+      "27,54": [
+        0,
+        -23
+      ],
+      "28,54": [
+        0,
+        -23
+      ],
+      "29,54": [
+        0,
+        -23
+      ],
+      "30,54": [
+        0,
+        -23
+      ],
+      "31,54": [
+        0,
+        -23
+      ],
+      "32,54": [
+        0,
+        -23
+      ],
+      "33,54": [
+        0,
+        -23
+      ],
+      "34,54": [
+        0,
+        -23
+      ],
+      "35,54": [
+        0,
+        -23
+      ],
+      "36,54": [
+        0,
+        -23
+      ],
+      "37,54": [
+        0,
+        -23
+      ],
+      "18,65": [
+        -20,
+        0
+      ],
+      "18,66": [
+        -20,
+        0
+      ],
+      "26,62": [
+        10,
+        0
+      ],
+      "26,63": [
+        10,
+        0
+      ],
+      "26,64": [
+        10,
+        0
+      ],
+      "26,65": [
+        10,
+        0
+      ],
+      "26,66": [
+        10,
+        0
+      ],
+      "18,62": [
+        -19,
+        0
+      ],
+      "18,63": [
+        -19,
+        0
+      ],
+      "18,64": [
+        -19,
+        0
+      ],
+      "19,63": [
+        -19,
+        1
+      ],
+      "20,63": [
+        -19,
+        -23
+      ],
+      "21,63": [
+        -19,
+        -23
+      ],
+      "22,63": [
+        -19,
+        1
+      ],
+      "23,63": [
+        -19,
+        1
+      ],
+      "24,63": [
+        -19,
+        1
+      ],
+      "25,63": [
+        17,
+        2
+      ],
+      "19,62": [
+        -18,
+        0
+      ],
+      "20,62": [
+        -18,
+        0
+      ],
+      "21,62": [
+        -18,
+        0
+      ],
+      "22,62": [
+        -18,
+        0
+      ],
+      "23,62": [
+        -18,
+        0
+      ],
+      "24,62": [
+        -18,
+        0
+      ],
+      "25,62": [
+        16,
+        1
+      ],
+      "44,60": [
+        -16,
+        11
+      ],
+      "44,50": [
+        -19,
+        13
+      ],
+      "44,51": [
+        -19,
+        13
+      ],
+      "44,52": [
+        -19,
+        13
+      ],
+      "44,53": [
+        -19,
+        13
+      ],
+      "44,54": [
+        -19,
+        13
+      ],
+      "44,55": [
+        -19,
+        13
+      ],
+      "44,56": [
+        -19,
+        13
+      ],
+      "44,57": [
+        -19,
+        13
+      ],
+      "44,58": [
+        -19,
+        13
+      ],
+      "44,59": [
+        -19,
+        13
+      ],
+      "47,61": [
+        0,
+        -27
+      ],
+      "57,53": [
+        -18,
+        -1
+      ],
+      "58,53": [
+        -18,
+        -1
+      ],
+      "58,54": [
+        -18,
+        -1
+      ],
+      "58,55": [
+        -18,
+        -1
+      ],
+      "58,56": [
+        -18,
+        -1
+      ],
+      "58,57": [
+        -18,
+        -3
+      ],
+      "58,58": [
+        -18,
+        -3
+      ],
+      "58,59": [
+        -18,
+        -3
+      ],
+      "58,60": [
+        -18,
+        -3
+      ],
+      "57,62": [
+        -10,
+        0
+      ],
+      "57,61": [
+        -10,
+        0
+      ],
+      "57,60": [
+        -10,
+        0
+      ],
+      "62,62": [
+        -7,
+        0
+      ],
+      "62,61": [
+        -7,
+        0
+      ],
+      "62,60": [
+        -7,
+        0
+      ],
+      "63,62": [
+        -8,
+        0
+      ],
+      "64,62": [
+        -8,
+        0
+      ],
+      "65,62": [
+        -8,
+        0
+      ],
+      "18,47": [
+        -19,
+        0
+      ],
+      "21,47": [
+        -17,
+        0
+      ],
+      "30,48": [
+        17,
+        0
+      ],
+      "21,46": [
+        -18,
+        0
+      ],
+      "22,46": [
+        -31,
+        -12
+      ],
+      "25,46": [
+        -2,
+        -2
+      ],
+      "9,36": [
+        20,
+        -14
+      ],
+      "9,35": [
+        20,
+        -14
+      ],
+      "9,34": [
+        20,
+        -14
+      ],
+      "9,33": [
+        20,
+        -14
+      ],
+      "9,32": [
+        20,
+        -14
+      ],
+      "9,31": [
+        20,
+        -14
+      ],
+      "9,30": [
+        20,
+        -14
+      ],
+      "9,29": [
+        20,
+        -14
+      ],
+      "9,28": [
+        20,
+        -14
+      ],
+      "9,27": [
+        20,
+        -14
+      ],
+      "11,27": [
+        -21,
+        -15
+      ],
+      "11,28": [
+        -21,
+        -15
+      ],
+      "11,29": [
+        -21,
+        -15
+      ],
+      "11,30": [
+        -21,
+        -15
+      ],
+      "11,31": [
+        -21,
+        -15
+      ],
+      "11,32": [
+        -21,
+        -15
+      ],
+      "11,33": [
+        -21,
+        -15
+      ],
+      "11,34": [
+        -21,
+        -15
+      ],
+      "11,35": [
+        -21,
+        -15
+      ],
+      "11,36": [
+        -21,
+        -15
+      ],
+      "18,36": [
+        20,
+        -14
+      ],
+      "18,35": [
+        20,
+        -14
+      ],
+      "18,34": [
+        20,
+        -14
+      ],
+      "18,33": [
+        20,
+        -14
+      ],
+      "18,32": [
+        20,
+        -14
+      ],
+      "18,31": [
+        20,
+        -14
+      ],
+      "18,30": [
+        20,
+        -14
+      ],
+      "18,29": [
+        20,
+        -14
+      ],
+      "18,28": [
+        20,
+        -14
+      ],
+      "18,27": [
+        20,
+        -14
+      ],
+      "20,27": [
+        20,
+        -14
+      ],
+      "20,28": [
+        20,
+        -14
+      ],
+      "20,29": [
+        20,
+        -14
+      ],
+      "20,30": [
+        20,
+        -14
+      ],
+      "20,31": [
+        20,
+        -14
+      ],
+      "20,32": [
+        20,
+        -14
+      ],
+      "20,33": [
+        20,
+        -14
+      ],
+      "20,34": [
+        20,
+        -14
+      ],
+      "20,35": [
+        20,
+        -14
+      ],
+      "20,36": [
+        20,
+        -14
+      ],
+      "27,36": [
+        20,
+        -14
+      ],
+      "29,36": [
+        20,
+        -14
+      ],
+      "29,35": [
+        20,
+        -14
+      ],
+      "29,34": [
+        20,
+        -14
+      ],
+      "27,34": [
+        20,
+        -14
+      ],
+      "27,35": [
+        20,
+        -14
+      ],
+      "27,33": [
+        20,
+        -14
+      ],
+      "29,33": [
+        20,
+        -14
+      ],
+      "29,32": [
+        20,
+        -14
+      ],
+      "27,31": [
+        20,
+        -14
+      ],
+      "29,31": [
+        20,
+        -14
+      ],
+      "29,30": [
+        20,
+        -14
+      ],
+      "27,30": [
+        20,
+        -14
+      ],
+      "27,29": [
+        20,
+        -14
+      ],
+      "29,29": [
+        20,
+        -14
+      ],
+      "29,28": [
+        20,
+        -14
+      ],
+      "27,28": [
+        20,
+        -14
+      ],
+      "27,27": [
+        20,
+        -14
+      ],
+      "29,27": [
+        20,
+        -14
+      ],
+      "36,27": [
+        20,
+        -14
+      ],
+      "36,28": [
+        20,
+        -14
+      ],
+      "36,29": [
+        20,
+        -14
+      ],
+      "36,31": [
+        20,
+        -14
+      ],
+      "36,32": [
+        20,
+        -14
+      ],
+      "36,33": [
+        20,
+        -14
+      ],
+      "36,34": [
+        20,
+        -14
+      ],
+      "36,35": [
+        20,
+        -14
+      ],
+      "36,36": [
+        20,
+        -14
+      ],
+      "10,36": [
+        -21,
+        0
+      ],
+      "21,36": [
+        -21,
+        0
+      ],
+      "30,36": [
+        -21,
+        0
+      ],
+      "37,36": [
+        -21,
+        0
+      ],
+      "27,32": [
+        20,
+        -14
+      ],
+      "37,37": [
+        -22,
+        0
+      ],
+      "37,38": [
+        -22,
+        0
+      ],
+      "36,30": [
+        19,
+        -14
+      ],
+      "37,18": [
+        -22,
+        0
+      ],
+      "37,19": [
+        -22,
+        0
+      ],
+      "37,20": [
+        -22,
+        0
+      ],
+      "37,21": [
+        -22,
+        0
+      ],
+      "37,22": [
+        -22,
+        0
+      ],
+      "37,23": [
+        -22,
+        0
+      ],
+      "37,24": [
+        -22,
+        0
+      ],
+      "37,25": [
+        -22,
+        0
+      ],
+      "37,26": [
+        -22,
+        0
+      ],
+      "37,13": [
+        -13,
+        9
+      ],
+      "36,13": [
+        -13,
+        9
+      ],
+      "35,13": [
+        -13,
+        9
+      ],
+      "34,13": [
+        -13,
+        9
+      ],
+      "33,13": [
+        -13,
+        9
+      ],
+      "32,13": [
+        -13,
+        9
+      ],
+      "31,13": [
+        -13,
+        9
+      ],
+      "30,13": [
+        -13,
+        9
+      ],
+      "29,13": [
+        -13,
+        9
+      ],
+      "28,13": [
+        -13,
+        9
+      ],
+      "26,13": [
+        -13,
+        9
+      ],
+      "27,13": [
+        -13,
+        9
+      ],
+      "25,13": [
+        -13,
+        9
+      ],
+      "24,13": [
+        -13,
+        9
+      ],
+      "23,13": [
+        -13,
+        9
+      ],
+      "22,13": [
+        -13,
+        9
+      ],
+      "21,13": [
+        -13,
+        9
+      ],
+      "20,13": [
+        -13,
+        9
+      ],
+      "19,13": [
+        -13,
+        9
+      ],
+      "19,12": [
+        -13,
+        9
+      ],
+      "8,11": [
+        -18,
+        1
+      ],
+      "7,11": [
+        -7,
+        0
+      ],
+      "6,11": [
+        -7,
+        0
+      ],
+      "6,12": [
+        -7,
+        0
+      ],
+      "6,13": [
+        -7,
+        0
+      ],
+      "6,14": [
+        -7,
+        0
+      ],
+      "6,15": [
+        -7,
+        0
+      ],
+      "1,15": [
+        10,
+        0
+      ],
+      "1,16": [
+        10,
+        0
+      ],
+      "1,17": [
+        10,
+        0
+      ],
+      "1,18": [
+        10,
+        0
+      ],
+      "1,19": [
+        10,
+        0
+      ],
+      "8,14": [
+        21,
+        -6
+      ],
+      "9,14": [
+        10,
+        -5
+      ],
+      "9,10": [
+        -17,
+        11
+      ],
+      "8,10": [
+        -17,
+        11
+      ],
+      "10,10": [
+        20,
+        12
+      ],
+      "11,11": [
+        0,
+        -7
+      ],
+      "37,8": [
+        -12,
+        9
+      ],
+      "37,9": [
+        -12,
+        9
+      ],
+      "37,10": [
+        -12,
+        9
+      ],
+      "37,11": [
+        -12,
+        9
+      ],
+      "37,12": [
+        -12,
+        9
+      ],
+      "38,8": [
+        -12,
+        9
+      ],
+      "39,8": [
+        -12,
+        9
+      ],
+      "40,8": [
+        -12,
+        9
+      ],
+      "41,8": [
+        -12,
+        9
+      ],
+      "42,8": [
+        -12,
+        9
+      ],
+      "47,8": [
+        7,
+        11
+      ],
+      "48,8": [
+        7,
+        11
+      ],
+      "49,8": [
+        7,
+        11
+      ],
+      "51,8": [
+        7,
+        11
+      ],
+      "52,8": [
+        7,
+        11
+      ],
+      "53,8": [
+        7,
+        11
+      ],
+      "54,8": [
+        7,
+        11
+      ],
+      "55,8": [
+        7,
+        11
+      ],
+      "50,8": [
+        7,
+        11
+      ],
+      "64,57": [
+        7,
+        8
+      ],
+      "64,56": [
+        7,
+        8
+      ],
+      "64,55": [
+        7,
+        8
+      ],
+      "64,54": [
+        7,
+        8
+      ],
+      "64,53": [
+        7,
+        8
+      ],
+      "64,52": [
+        7,
+        8
+      ],
+      "64,51": [
+        7,
+        8
+      ],
+      "64,50": [
+        7,
+        8
+      ],
+      "64,49": [
+        7,
+        8
+      ],
+      "64,48": [
+        7,
+        8
+      ],
+      "64,47": [
+        7,
+        8
+      ],
+      "64,46": [
+        7,
+        8
+      ],
+      "64,45": [
+        7,
+        8
+      ],
+      "64,44": [
+        7,
+        8
+      ],
+      "64,43": [
+        7,
+        8
+      ],
+      "64,42": [
+        7,
+        8
+      ],
+      "64,41": [
+        7,
+        8
+      ],
+      "64,40": [
+        7,
+        8
+      ],
+      "64,39": [
+        7,
+        8
+      ],
+      "64,38": [
+        7,
+        8
+      ],
+      "64,37": [
+        7,
+        8
+      ],
+      "64,36": [
+        7,
+        8
+      ],
+      "64,35": [
+        7,
+        8
+      ],
+      "64,34": [
+        7,
+        8
+      ],
+      "64,33": [
+        7,
+        8
+      ],
+      "64,32": [
+        7,
+        8
+      ],
+      "64,31": [
+        7,
+        8
+      ],
+      "64,30": [
+        7,
+        8
+      ],
+      "64,29": [
+        7,
+        8
+      ],
+      "64,28": [
+        7,
+        8
+      ],
+      "64,27": [
+        7,
+        8
+      ],
+      "64,26": [
+        7,
+        8
+      ],
+      "64,25": [
+        7,
+        8
+      ],
+      "64,24": [
+        7,
+        8
+      ],
+      "64,23": [
+        7,
+        8
+      ],
+      "64,22": [
+        7,
+        8
+      ],
+      "64,21": [
+        7,
+        8
+      ],
+      "64,20": [
+        7,
+        8
+      ],
+      "64,19": [
+        7,
+        8
+      ],
+      "64,18": [
+        7,
+        8
+      ],
+      "64,17": [
+        7,
+        8
+      ],
+      "64,16": [
+        7,
+        8
+      ],
+      "64,15": [
+        7,
+        8
+      ],
+      "64,14": [
+        7,
+        8
+      ],
+      "64,13": [
+        7,
+        8
+      ],
+      "64,12": [
+        7,
+        8
+      ],
+      "64,11": [
+        7,
+        8
+      ],
+      "25,47": [
+        19,
+        0
+      ],
+      "10,43": [
+        9,
+        1
+      ],
+      "10,44": [
+        11,
+        0
+      ],
+      "10,45": [
+        11,
+        0
+      ],
+      "10,47": [
+        11,
+        0
+      ],
+      "39,70": [
+        14,
+        -11
+      ],
+      "40,69": [
+        0,
+        -31
+      ],
+      "58,71": [
+        5,
+        9
+      ],
+      "58,70": [
+        5,
+        9
+      ],
+      "59,70": [
+        5,
+        9
+      ],
+      "1,20": [
+        10,
+        0
+      ],
+      "1,21": [
+        10,
+        0
+      ],
+      "1,22": [
+        10,
+        0
+      ],
+      "1,23": [
+        10,
+        0
+      ],
+      "19,65": [
+        14,
+        5
+      ],
+      "19,66": [
+        14,
+        -5
+      ],
+      "20,66": [
+        8,
+        -5
+      ],
+      "20,65": [
+        8,
+        5
+      ],
+      "21,65": [
+        8,
+        5
+      ],
+      "22,65": [
+        8,
+        5
+      ],
+      "22,66": [
+        8,
+        -5
+      ],
+      "21,66": [
+        8,
+        -5
+      ],
+      "26,72": [
+        0,
+        -12
+      ],
+      "27,72": [
+        0,
+        -12
+      ],
+      "28,72": [
+        0,
+        -12
+      ],
+      "10,13": [
+        -27,
+        15
+      ],
+      "9,13": [
+        -18,
+        15
+      ],
+      "18,67": [
+        -19,
+        -3
+      ],
+      "18,68": [
+        -19,
+        -3
+      ],
+      "16,58": [
+        10,
+        -12
+      ],
+      "17,58": [
+        10,
+        -12
+      ],
+      "18,58": [
+        10,
+        -12
+      ],
+      "19,58": [
+        10,
+        -12
+      ],
+      "20,58": [
+        10,
+        -12
+      ],
+      "21,58": [
+        10,
+        -12
+      ],
+      "22,58": [
+        10,
+        -12
+      ],
+      "23,58": [
+        10,
+        -12
+      ],
+      "24,58": [
+        10,
+        -12
+      ],
+      "25,58": [
+        10,
+        -12
+      ],
+      "26,58": [
+        10,
+        -12
+      ],
+      "27,58": [
+        10,
+        -12
+      ],
+      "28,58": [
+        10,
+        -12
+      ],
+      "29,58": [
+        10,
+        -12
+      ],
+      "30,58": [
+        10,
+        -12
+      ],
+      "31,58": [
+        10,
+        -12
+      ],
+      "32,58": [
+        10,
+        -12
+      ],
+      "33,58": [
+        10,
+        -12
+      ],
+      "34,58": [
+        10,
+        -12
+      ],
+      "17,52": [
+        0,
+        19
+      ],
+      "18,52": [
+        0,
+        19
+      ],
+      "19,52": [
+        0,
+        19
+      ],
+      "20,52": [
+        0,
+        19
+      ],
+      "21,52": [
+        0,
+        19
+      ],
+      "22,52": [
+        0,
+        19
+      ],
+      "23,52": [
+        0,
+        19
+      ],
+      "24,52": [
+        0,
+        19
+      ],
+      "25,52": [
+        0,
+        19
+      ],
+      "26,52": [
+        0,
+        19
+      ],
+      "27,52": [
+        0,
+        19
+      ],
+      "28,52": [
+        0,
+        19
+      ],
+      "29,52": [
+        0,
+        19
+      ],
+      "30,52": [
+        0,
+        19
+      ],
+      "31,52": [
+        0,
+        19
+      ],
+      "32,52": [
+        0,
+        19
+      ],
+      "33,52": [
+        0,
+        19
+      ],
+      "34,52": [
+        -1,
+        18
+      ],
+      "2,27": [
+        -1,
+        -2
+      ],
+      "2,28": [
+        -1,
+        -2
+      ],
+      "2,29": [
+        -1,
+        -2
+      ],
+      "2,30": [
+        -1,
+        -2
+      ],
+      "2,31": [
+        -1,
+        -2
+      ],
+      "2,32": [
+        -1,
+        -2
+      ],
+      "2,33": [
+        -1,
+        -2
+      ],
+      "2,34": [
+        -1,
+        -2
+      ],
+      "2,35": [
+        -1,
+        -2
+      ],
+      "2,36": [
+        -1,
+        -2
+      ],
+      "19,27": [
+        20,
+        -14
+      ],
+      "19,28": [
+        20,
+        -14
+      ],
+      "19,29": [
+        20,
+        -14
+      ],
+      "19,30": [
+        20,
+        -14
+      ],
+      "19,31": [
+        20,
+        -14
+      ],
+      "19,32": [
+        20,
+        -14
+      ],
+      "19,33": [
+        20,
+        -14
+      ],
+      "19,34": [
+        20,
+        -14
+      ],
+      "19,35": [
+        20,
+        -14
+      ],
+      "19,36": [
+        20,
+        -14
+      ],
+      "28,36": [
+        20,
+        -14
+      ],
+      "28,35": [
+        20,
+        -14
+      ],
+      "28,34": [
+        20,
+        -14
+      ],
+      "28,33": [
+        20,
+        -14
+      ],
+      "28,32": [
+        20,
+        -14
+      ],
+      "28,31": [
+        20,
+        -14
+      ],
+      "28,27": [
+        20,
+        -14
+      ],
+      "28,28": [
+        20,
+        -14
+      ],
+      "28,29": [
+        20,
+        -14
+      ],
+      "28,30": [
+        20,
+        -14
+      ],
+      "20,12": [
+        -12,
+        9
+      ],
+      "21,12": [
+        -12,
+        9
+      ],
+      "22,12": [
+        -12,
+        9
+      ],
+      "23,12": [
+        -12,
+        9
+      ],
+      "24,12": [
+        -12,
+        9
+      ],
+      "26,12": [
+        -12,
+        9
+      ],
+      "27,12": [
+        -12,
+        9
+      ],
+      "28,12": [
+        -12,
+        9
+      ],
+      "29,12": [
+        -12,
+        9
+      ],
+      "30,12": [
+        -12,
+        9
+      ],
+      "31,12": [
+        -12,
+        9
+      ],
+      "32,12": [
+        -12,
+        9
+      ],
+      "33,12": [
+        -12,
+        9
+      ],
+      "34,12": [
+        -12,
+        9
+      ],
+      "35,12": [
+        -12,
+        9
+      ],
+      "36,12": [
+        -12,
+        9
+      ],
+      "25,12": [
+        -13,
+        9
+      ],
+      "36,10": [
+        -11,
+        0
+      ],
+      "36,9": [
+        -11,
+        0
+      ],
+      "36,8": [
+        -11,
+        0
+      ],
+      "36,7": [
+        -11,
+        0
+      ],
+      "36,6": [
+        -11,
+        0
+      ],
+      "36,5": [
+        -11,
+        0
+      ],
+      "37,5": [
+        -9,
+        6
+      ],
+      "37,6": [
+        -9,
+        6
+      ],
+      "37,7": [
+        -9,
+        6
+      ],
+      "38,5": [
+        -9,
+        6
+      ],
+      "39,5": [
+        -9,
+        6
+      ],
+      "40,5": [
+        -9,
+        6
+      ],
+      "41,5": [
+        -9,
+        6
+      ],
+      "42,5": [
+        -9,
+        6
+      ],
+      "43,5": [
+        -9,
+        6
+      ],
+      "43,6": [
+        -9,
+        6
+      ],
+      "43,7": [
+        -9,
+        6
+      ],
+      "42,7": [
+        -9,
+        6
+      ],
+      "41,7": [
+        -9,
+        6
+      ],
+      "40,7": [
+        -9,
+        6
+      ],
+      "39,7": [
+        -9,
+        6
+      ],
+      "38,7": [
+        -9,
+        6
+      ],
+      "38,6": [
+        -9,
+        6
+      ],
+      "39,6": [
+        -9,
+        6
+      ],
+      "40,6": [
+        -9,
+        6
+      ],
+      "41,6": [
+        -9,
+        6
+      ],
+      "42,6": [
+        -9,
+        6
+      ],
+      "44,6": [
+        -9,
+        6
+      ],
+      "45,6": [
+        -9,
+        6
+      ],
+      "46,6": [
+        -9,
+        6
+      ],
+      "47,6": [
+        -9,
+        6
+      ],
+      "48,6": [
+        -9,
+        6
+      ],
+      "50,6": [
+        -9,
+        6
+      ],
+      "51,6": [
+        -9,
+        6
+      ],
+      "52,6": [
+        -9,
+        6
+      ],
+      "53,6": [
+        -9,
+        6
+      ],
+      "54,6": [
+        -9,
+        6
+      ],
+      "58,5": [
+        -9,
+        6
+      ],
+      "57,5": [
+        -9,
+        6
+      ],
+      "56,5": [
+        -9,
+        6
+      ],
+      "55,5": [
+        -9,
+        6
+      ],
+      "54,5": [
+        -9,
+        6
+      ],
+      "53,5": [
+        -9,
+        6
+      ],
+      "52,5": [
+        -9,
+        6
+      ],
+      "51,5": [
+        -9,
+        6
+      ],
+      "50,5": [
+        -9,
+        6
+      ],
+      "49,5": [
+        -9,
+        6
+      ],
+      "48,5": [
+        -9,
+        6
+      ],
+      "47,5": [
+        -9,
+        6
+      ],
+      "46,5": [
+        -9,
+        6
+      ],
+      "45,5": [
+        -9,
+        6
+      ],
+      "44,5": [
+        -9,
+        6
+      ],
+      "58,7": [
+        -9,
+        6
+      ],
+      "57,7": [
+        -9,
+        6
+      ],
+      "56,7": [
+        -9,
+        6
+      ],
+      "55,7": [
+        -9,
+        6
+      ],
+      "54,7": [
+        -9,
+        6
+      ],
+      "53,7": [
+        -9,
+        6
+      ],
+      "52,7": [
+        -9,
+        6
+      ],
+      "51,7": [
+        -9,
+        6
+      ],
+      "50,7": [
+        -9,
+        6
+      ],
+      "49,7": [
+        -9,
+        6
+      ],
+      "48,7": [
+        -9,
+        6
+      ],
+      "47,7": [
+        -9,
+        6
+      ],
+      "46,7": [
+        -9,
+        6
+      ],
+      "45,7": [
+        -9,
+        6
+      ],
+      "44,7": [
+        -9,
+        6
+      ],
+      "58,6": [
+        -9,
+        6
+      ],
+      "57,6": [
+        -9,
+        6
+      ],
+      "56,6": [
+        -9,
+        6
+      ],
+      "55,6": [
+        -9,
+        6
+      ],
+      "59,71": [
+        4,
+        6
+      ],
+      "57,70": [
+        -18,
+        0
+      ],
+      "61,8": [
+        4,
+        9
+      ],
+      "61,7": [
+        4,
+        9
+      ],
+      "61,6": [
+        4,
+        9
+      ],
+      "61,5": [
+        4,
+        9
+      ],
+      "63,6": [
+        4,
+        9
+      ],
+      "63,5": [
+        4,
+        9
+      ],
+      "64,5": [
+        4,
+        9
+      ],
+      "64,6": [
+        4,
+        9
+      ],
+      "64,7": [
+        4,
+        9
+      ],
+      "63,7": [
+        4,
+        9
+      ],
+      "62,7": [
+        4,
+        9
+      ],
+      "62,8": [
+        4,
+        9
+      ],
+      "63,8": [
+        4,
+        9
+      ],
+      "64,8": [
+        4,
+        9
+      ],
+      "64,9": [
+        4,
+        9
+      ],
+      "64,10": [
+        4,
+        9
+      ],
+      "62,6": [
+        4,
+        10
+      ],
+      "62,5": [
+        4,
+        10
+      ],
+      "26,79": [
+        1,
+        -1
+      ],
+      "27,79": [
+        1,
+        -1
+      ],
+      "28,79": [
+        1,
+        -1
+      ],
+      "29,79": [
+        1,
+        -1
+      ],
+      "31,79": [
+        1,
+        -1
+      ],
+      "43,49": [
+        18,
+        0
+      ],
+      "43,50": [
+        18,
+        0
+      ],
+      "10,46": [
+        10,
+        0
+      ],
+      "10,48": [
+        10,
+        0
+      ],
+      "9,48": [
+        24,
+        -14
+      ],
+      "3,27": [
+        -19,
+        -3
+      ],
+      "3,28": [
+        -19,
+        -3
+      ],
+      "3,29": [
+        -19,
+        -3
+      ],
+      "3,30": [
+        -19,
+        -3
+      ],
+      "3,31": [
+        -19,
+        -3
+      ],
+      "3,32": [
+        -19,
+        -3
+      ],
+      "3,33": [
+        -19,
+        -3
+      ],
+      "3,34": [
+        -19,
+        -3
+      ],
+      "3,35": [
+        -19,
+        -3
+      ],
+      "3,36": [
+        -19,
+        -3
+      ],
+      "12,27": [
+        -21,
+        -15
+      ],
+      "12,28": [
+        -21,
+        -15
+      ],
+      "12,29": [
+        -21,
+        -15
+      ],
+      "12,30": [
+        -21,
+        -15
+      ],
+      "12,31": [
+        -21,
+        -15
+      ],
+      "12,32": [
+        -21,
+        -15
+      ],
+      "12,33": [
+        -21,
+        -15
+      ],
+      "12,34": [
+        -21,
+        -15
+      ],
+      "12,35": [
+        -21,
+        -15
+      ],
+      "12,36": [
+        -21,
+        -15
+      ],
+      "61,30": [
+        14,
+        31
+      ],
+      "61,33": [
+        19,
+        -22
+      ],
+      "43,8": [
+        -8,
+        10
+      ],
+      "44,8": [
+        -8,
+        10
+      ],
+      "45,8": [
+        -8,
+        10
+      ],
+      "46,8": [
+        -8,
+        10
+      ],
+      "59,32": [
+        25,
+        -12
+      ],
+      "60,32": [
+        25,
+        -12
+      ],
+      "56,39": [
+        10,
+        11
+      ],
+      "58,40": [
+        21,
+        20
+      ],
+      "24,77": [
+        -8,
+        -9
+      ],
+      "30,78": [
+        0,
+        -8
+      ],
+      "58,52": [
+        -19,
+        0
+      ],
+      "7,84": [
+        20,
+        0
+      ],
+      "6,84": [
+        20,
+        0
+      ],
+      "8,86": [
+        0,
+        5
+      ],
+      "9,86": [
+        0,
+        5
+      ],
+      "62,63": [
+        -2,
+        -23
+      ],
+      "38,31": [
+        -20,
+        -23
+      ],
+      "39,31": [
+        -20,
+        -23
+      ],
+      "38,36": [
+        -20,
+        -1
+      ],
+      "39,36": [
+        -20,
+        -1
+      ],
+      "39,26": [
+        2,
+        -11
+      ],
+      "40,26": [
+        2,
+        -11
+      ],
+      "39,24": [
+        -11,
+        -21
+      ],
+      "40,24": [
+        -11,
+        -21
+      ],
+      "39,20": [
+        -19,
+        -2
+      ],
+      "38,20": [
+        -19,
+        -2
+      ],
+      "41,55": [
+        -3,
+        -19
+      ],
+      "58,37": [
+        -9,
+        20
+      ],
+      "37,39": [
+        9,
+        15
+      ],
+      "38,40": [
+        -10,
+        9
+      ],
+      "62,33": [
+        -11,
+        14
+      ],
+      "61,36": [
+        4,
+        -21
+      ],
+      "60,30": [
+        -11,
+        -4
+      ]
+    },
+    "safe": false,
+    "npcs": false,
+    "portals": [
+      {
+        "c": 33,
+        "r": 48,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          53,
+          62
+        ],
+        "land": [
+          0,
+          44
+        ]
+      },
+      {
+        "c": 30,
+        "r": 80,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          22,
+          71
+        ],
+        "land": [
+          0,
+          36
+        ],
+        "oy": -15
+      },
+      {
+        "c": 33,
+        "r": 29,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          16,
+          11
+        ],
+        "land": [
+          0,
+          45
+        ],
+        "oy": -16
+      },
+      {
+        "c": 10,
+        "r": 10,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          25,
+          63
+        ],
+        "oy": 12,
+        "ox": -20,
+        "land": [
+          -18,
+          52
+        ]
+      },
+      {
+        "c": 15,
+        "r": 29,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          5,
+          20
+        ],
+        "land": [
+          -41,
+          16
+        ],
+        "oy": -17
+      },
+      {
+        "c": 10,
+        "r": 19,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          24,
+          21
+        ],
+        "land": [
+          3,
+          -21
+        ],
+        "oy": 1
+      },
+      {
+        "c": 20,
+        "r": 20,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          10,
+          21
+        ],
+        "land": [
+          0,
+          -17
+        ],
+        "ox": 38,
+        "oy": -34
+      },
+      {
+        "c": 24,
+        "r": 29,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          6,
+          29
+        ],
+        "oy": -1
+      },
+      {
+        "c": 6,
+        "r": 29,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          24,
+          29
+        ]
+      },
+      {
+        "c": 31,
+        "r": 20,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          33,
+          40
+        ],
+        "ox": 39,
+        "oy": -36
+      },
+      {
+        "c": 28,
+        "r": 47,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          57,
+          71
+        ],
+        "ox": 3
+      },
+      {
+        "c": 15,
+        "r": 72,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          55,
+          79
+        ]
+      },
+      {
+        "c": 55,
+        "r": 79,
+        "to": "map_89aacb92-4b89-47ec-a76b-0908972d3fdf",
+        "at": [
+          15,
+          72
+        ]
+      },
+      {
+        "c": 84,
+        "r": 10,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 85,
+        "r": 10,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 86,
+        "r": 10,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 87,
+        "r": 10,
+        "to": "map_mvxz356e"
+      }
+    ],
+    "cols": 116,
+    "rows": 90,
+    "spawnZone": [
+      "3,16",
+      "4,16",
+      "5,16",
+      "6,16",
+      "8,16",
+      "10,16",
+      "11,16",
+      "12,16",
+      "15,16",
+      "17,16",
+      "19,16",
+      "21,16",
+      "21,15",
+      "18,15",
+      "16,15",
+      "15,14",
+      "16,13",
+      "17,13",
+      "17,14",
+      "10,12",
+      "11,12",
+      "38,10",
+      "38,11",
+      "39,11",
+      "39,10",
+      "45,11",
+      "45,12",
+      "46,11",
+      "46,12",
+      "47,11",
+      "47,12",
+      "51,10",
+      "51,11",
+      "52,10",
+      "52,11",
+      "60,11",
+      "60,12",
+      "61,11",
+      "61,12",
+      "2,21",
+      "3,21",
+      "4,21",
+      "5,21",
+      "6,21",
+      "7,21",
+      "8,21",
+      "9,21",
+      "10,21",
+      "11,21",
+      "12,21",
+      "13,21",
+      "14,21",
+      "15,21",
+      "16,21",
+      "17,21",
+      "18,21",
+      "19,21",
+      "20,21",
+      "21,21",
+      "22,21",
+      "23,21",
+      "24,21",
+      "25,21",
+      "26,21",
+      "27,21",
+      "28,21",
+      "29,21",
+      "30,21",
+      "31,21",
+      "32,21",
+      "33,21",
+      "34,21",
+      "35,21",
+      "5,32",
+      "5,33",
+      "14,31",
+      "15,31",
+      "16,31",
+      "23,32",
+      "23,33",
+      "24,33",
+      "24,32",
+      "33,32",
+      "33,33",
+      "34,33",
+      "34,32",
+      "32,40",
+      "24,55",
+      "25,55",
+      "26,55",
+      "35,51",
+      "36,51",
+      "36,50",
+      "35,50",
+      "21,49",
+      "22,49",
+      "21,50",
+      "22,50",
+      "26,48",
+      "25,48",
+      "26,49",
+      "25,49",
+      "29,49",
+      "30,49",
+      "29,50",
+      "30,50",
+      "23,44",
+      "23,45",
+      "17,49",
+      "17,50",
+      "34,62",
+      "35,62",
+      "36,62",
+      "29,61",
+      "30,61",
+      "31,61",
+      "34,68",
+      "33,68",
+      "33,67",
+      "34,67",
+      "24,66",
+      "24,67",
+      "25,67",
+      "25,66",
+      "49,66",
+      "49,67",
+      "50,67",
+      "50,66",
+      "53,68",
+      "53,69",
+      "54,69",
+      "54,68",
+      "58,67",
+      "59,67",
+      "59,66",
+      "58,66",
+      "57,16",
+      "57,17",
+      "58,17",
+      "58,16",
+      "53,19",
+      "53,20",
+      "54,20",
+      "54,19",
+      "57,26",
+      "57,27",
+      "58,27",
+      "58,26",
+      "52,30",
+      "52,31",
+      "53,31",
+      "53,30",
+      "54,38",
+      "55,38",
+      "55,37",
+      "54,37",
+      "57,43",
+      "57,44",
+      "58,44",
+      "58,43",
+      "45,17",
+      "45,18",
+      "46,18",
+      "46,17",
+      "47,24",
+      "47,25",
+      "48,24",
+      "48,25",
+      "39,26",
+      "39,27",
+      "40,27",
+      "40,26",
+      "44,31",
+      "44,33",
+      "45,32",
+      "45,31",
+      "44,32",
+      "45,33",
+      "44,39",
+      "45,40",
+      "45,39",
+      "44,40",
+      "47,43",
+      "47,44",
+      "48,44",
+      "48,43",
+      "40,51",
+      "40,52",
+      "40,53",
+      "40,54",
+      "40,55",
+      "41,51",
+      "41,52",
+      "41,53",
+      "41,54",
+      "41,55",
+      "42,51",
+      "42,52",
+      "42,53",
+      "42,54",
+      "42,55",
+      "40,47",
+      "41,47",
+      "42,47",
+      "63,48",
+      "63,49",
+      "63,50",
+      "63,51",
+      "63,52",
+      "63,53",
+      "63,54",
+      "63,55",
+      "63,56",
+      "46,59",
+      "45,73",
+      "63,15",
+      "60,76",
+      "34,76",
+      "42,82",
+      "35,78",
+      "26,81",
+      "30,82",
+      "19,73",
+      "11,40",
+      "76,21",
+      "77,21",
+      "78,21",
+      "80,21",
+      "82,21",
+      "83,22",
+      "85,22",
+      "89,22",
+      "92,22",
+      "94,22",
+      "96,22",
+      "97,22",
+      "99,23",
+      "100,23",
+      "101,23",
+      "101,22",
+      "102,22",
+      "103,22",
+      "104,22",
+      "105,22",
+      "102,21",
+      "86,23",
+      "86,26",
+      "86,29",
+      "86,31",
+      "85,32",
+      "84,33",
+      "85,34",
+      "79,36",
+      "80,36",
+      "84,36",
+      "86,36",
+      "88,36",
+      "90,36",
+      "91,36",
+      "92,36",
+      "93,36",
+      "94,36",
+      "75,62",
+      "76,62",
+      "79,62",
+      "82,62",
+      "85,62",
+      "87,63",
+      "89,63",
+      "91,63",
+      "93,63",
+      "95,63",
+      "97,63",
+      "98,63",
+      "99,63",
+      "101,63",
+      "102,63",
+      "103,63",
+      "104,63",
+      "105,63",
+      "106,63",
+      "106,62",
+      "95,37",
+      "95,40",
+      "95,42",
+      "95,45",
+      "95,46",
+      "96,48",
+      "96,49",
+      "96,51",
+      "96,52",
+      "96,54",
+      "96,56",
+      "95,58",
+      "95,59",
+      "95,60",
+      "77,37",
+      "77,40",
+      "77,43",
+      "77,46",
+      "77,47",
+      "77,49",
+      "78,50",
+      "78,52",
+      "78,54",
+      "78,56",
+      "78,58",
+      "77,59",
+      "77,60",
+      "77,61",
+      "102,76",
+      "103,77",
+      "103,79",
+      "101,79",
+      "99,78",
+      "99,76",
+      "101,75",
+      "103,75",
+      "103,76",
+      "104,76",
+      "58,81",
+      "60,81",
+      "68,81",
+      "71,81",
+      "74,82",
+      "78,82",
+      "81,82",
+      "83,82",
+      "84,82",
+      "84,81",
+      "86,81",
+      "87,80",
+      "86,78",
+      "85,77",
+      "81,67",
+      "81,68",
+      "82,72",
+      "82,73",
+      "82,74",
+      "82,75",
+      "82,45",
+      "82,52",
+      "82,54",
+      "82,56",
+      "83,57",
+      "86,58",
+      "89,58",
+      "91,57",
+      "91,54",
+      "91,51",
+      "91,48",
+      "91,46",
+      "90,44",
+      "88,41",
+      "86,41",
+      "84,41",
+      "78,30",
+      "76,30",
+      "72,29",
+      "72,30",
+      "73,34",
+      "73,37",
+      "73,39",
+      "74,39",
+      "94,31",
+      "96,31",
+      "101,33",
+      "101,36",
+      "101,40",
+      "101,43",
+      "101,57",
+      "101,56",
+      "100,53",
+      "101,53",
+      "103,55",
+      "102,57",
+      "101,58",
+      "72,51",
+      "72,53",
+      "73,56",
+      "72,58",
+      "72,59",
+      "73,59",
+      "74,55",
+      "73,52",
+      "73,51",
+      "73,50",
+      "73,49",
+      "80,32",
+      "80,31",
+      "81,29",
+      "81,28",
+      "79,27",
+      "76,27",
+      "74,27",
+      "74,28",
+      "72,16",
+      "72,17",
+      "76,17",
+      "83,17",
+      "86,17",
+      "90,18",
+      "95,18",
+      "97,18",
+      "100,18",
+      "102,18",
+      "104,17",
+      "104,16",
+      "105,15",
+      "104,15",
+      "102,14",
+      "97,14",
+      "94,14",
+      "91,14",
+      "89,15",
+      "87,15",
+      "84,15",
+      "81,15",
+      "79,16",
+      "77,15",
+      "75,15",
+      "74,15",
+      "73,14",
+      "74,13",
+      "77,14",
+      "80,14",
+      "80,15",
+      "71,19",
+      "74,18",
+      "83,19",
+      "87,19",
+      "88,19",
+      "89,19",
+      "91,19",
+      "92,19",
+      "91,24",
+      "87,24",
+      "82,24",
+      "79,24",
+      "76,24",
+      "75,24",
+      "73,24",
+      "74,24",
+      "76,23",
+      "80,22",
+      "82,22",
+      "89,23",
+      "91,23",
+      "93,24",
+      "86,43",
+      "84,43",
+      "81,43",
+      "81,44",
+      "85,45",
+      "87,45",
+      "89,45",
+      "89,46",
+      "89,47",
+      "86,47",
+      "79,46",
+      "79,47",
+      "80,49",
+      "82,50",
+      "83,50",
+      "84,49",
+      "84,47",
+      "83,46",
+      "82,47",
+      "81,50",
+      "81,53",
+      "81,56",
+      "81,57",
+      "81,58",
+      "81,59",
+      "81,60",
+      "82,59"
+    ],
+    "layerOrder": [
+      {
+        "id": "ground4",
+        "name": "池核地板"
+      },
+      {
+        "id": "object25",
+        "name": "淺水區"
+      },
+      {
+        "id": "ground7",
+        "name": "超深水區"
+      },
+      {
+        "id": "ground9",
+        "name": "水池燈"
+      },
+      {
+        "id": "ground8",
+        "name": "新圖層"
+      },
+      {
+        "id": "ground6",
+        "name": "磁磚"
+      },
+      {
+        "id": "object27",
+        "name": "水（抽水後消失）",
+        "blend": "multiply"
+      },
+      {
+        "id": "object23",
+        "name": "抽水機"
+      },
+      {
+        "id": "object30",
+        "name": "抽水機_淺水池",
+        "blend": "multiply"
+      },
+      {
+        "id": "object28",
+        "name": "深水（深水時顯現）",
+        "blend": "multiply"
+      },
+      {
+        "id": "object26",
+        "name": "泳池區_物件"
+      },
+      {
+        "id": "object24",
+        "name": "抽水機右側水池"
+      },
+      {
+        "id": "object8",
+        "name": "抽水機_深水池（深水時顯現）",
+        "blend": "multiply"
+      },
+      {
+        "id": "object35",
+        "name": "水池光",
+        "blend": "soft-light"
+      },
+      {
+        "id": "object22",
+        "name": "走廊Ｂ"
+      },
+      {
+        "id": "object21",
+        "name": "R1-R4"
+      },
+      {
+        "id": "object18",
+        "name": "走廊Ａ"
+      },
+      {
+        "id": "object20",
+        "name": "走廊Ａ_牆壁黑影"
+      },
+      {
+        "id": "ground5",
+        "name": "商店_水",
+        "blend": "multiply"
+      },
+      {
+        "id": "object5",
+        "name": "商店"
+      },
+      {
+        "id": "object11",
+        "name": "淋浴間"
+      },
+      {
+        "id": "object14",
+        "name": "淋浴走廊"
+      },
+      {
+        "id": "object31",
+        "name": "雙拱門上方"
+      },
+      {
+        "id": "object13",
+        "name": "池畔平台"
+      },
+      {
+        "id": "object",
+        "name": "後走廊"
+      },
+      {
+        "id": "object16",
+        "name": "後走廊_物件"
+      },
+      {
+        "id": "object7",
+        "name": "救生員台"
+      },
+      {
+        "id": "object32",
+        "name": "救生員台_深水（深水時顯現）",
+        "blend": "multiply"
+      },
+      {
+        "id": "object15",
+        "name": "池畔平台_物件"
+      },
+      {
+        "id": "object6",
+        "name": "基地"
+      },
+      {
+        "id": "object17",
+        "name": "基地_物件"
+      },
+      {
+        "id": "top",
+        "name": "☁️ 上層"
+      },
+      {
+        "id": "object19",
+        "name": "燈光_光暈（實光效果）"
+      },
+      {
+        "id": "object12",
+        "name": "牆壁黑影"
+      },
+      {
+        "id": "object9",
+        "name": "互動道具"
+      },
+      {
+        "id": "object10",
+        "name": "門"
+      },
+      {
+        "id": "object33",
+        "name": "抽水閥"
+      },
+      {
+        "id": "object34",
+        "name": "植栽跟裝飾"
+      }
+    ],
+    "hiddenPickups": [],
+    "edges": [
+      "21,75,B",
+      "22,75,B",
+      "23,75,B",
+      "24,75,B",
+      "20,76,R",
+      "20,77,R",
+      "20,78,R",
+      "20,79,R",
+      "23,78,R",
+      "23,79,R",
+      "21,78,R",
+      "21,79,R",
+      "8,12,R",
+      "8,13,R",
+      "8,11,R",
+      "13,12,R",
+      "13,13,R",
+      "13,14,R",
+      "57,31,B",
+      "58,31,B",
+      "56,69,B",
+      "57,69,B",
+      "58,69,B",
+      "59,69,B",
+      "55,70,R",
+      "55,71,R",
+      "59,70,R",
+      "59,71,R",
+      "59,72,R",
+      "55,72,R",
+      "13,15,R",
+      "9,15,R",
+      "57,32,R",
+      "57,33,R",
+      "57,34,R",
+      "57,35,R",
+      "57,36,R",
+      "58,36,B",
+      "59,36,B",
+      "60,36,B",
+      "61,36,B",
+      "60,33,R",
+      "60,34,R",
+      "60,35,R",
+      "60,36,R",
+      "60,32,R"
+    ],
+    "edgeOffsets": {
+      "20,78,R": [
+        9,
+        -20
+      ],
+      "20,77,R": [
+        9,
+        -7
+      ],
+      "20,76,R": [
+        9,
+        -7
+      ],
+      "21,75,B": [
+        9,
+        -7
+      ],
+      "22,75,B": [
+        9,
+        -7
+      ],
+      "23,75,B": [
+        9,
+        -7
+      ],
+      "24,75,B": [
+        9,
+        -7
+      ],
+      "20,79,R": [
+        8,
+        -29
+      ],
+      "23,78,R": [
+        -8,
+        5
+      ],
+      "23,79,R": [
+        -8,
+        5
+      ],
+      "21,78,R": [
+        -9,
+        6
+      ],
+      "21,79,R": [
+        -9,
+        6
+      ],
+      "8,11,R": [
+        -17,
+        11
+      ],
+      "8,12,R": [
+        -17,
+        11
+      ],
+      "8,13,R": [
+        -17,
+        11
+      ],
+      "13,12,R": [
+        8,
+        -28
+      ],
+      "13,13,R": [
+        8,
+        -28
+      ],
+      "13,14,R": [
+        8,
+        -28
+      ],
+      "58,31,B": [
+        24,
+        4
+      ],
+      "57,31,B": [
+        24,
+        4
+      ],
+      "55,71,R": [
+        8,
+        13
+      ],
+      "55,70,R": [
+        8,
+        13
+      ],
+      "57,69,B": [
+        8,
+        13
+      ],
+      "56,69,B": [
+        8,
+        13
+      ],
+      "58,69,B": [
+        8,
+        13
+      ],
+      "59,69,B": [
+        3,
+        13
+      ],
+      "59,70,R": [
+        3,
+        13
+      ],
+      "59,71,R": [
+        3,
+        13
+      ],
+      "59,72,R": [
+        3,
+        -1
+      ],
+      "55,72,R": [
+        8,
+        0
+      ],
+      "13,15,R": [
+        8,
+        -27
+      ],
+      "9,15,R": [
+        11,
+        -33
+      ],
+      "57,32,R": [
+        -21,
+        9
+      ],
+      "57,33,R": [
+        -22,
+        -12
+      ],
+      "57,34,R": [
+        -22,
+        -12
+      ],
+      "57,35,R": [
+        -22,
+        -12
+      ],
+      "57,36,R": [
+        -22,
+        -12
+      ],
+      "58,36,B": [
+        -20,
+        -5
+      ],
+      "59,36,B": [
+        -20,
+        -5
+      ],
+      "60,36,B": [
+        -20,
+        -5
+      ],
+      "61,36,B": [
+        -20,
+        -5
+      ],
+      "60,36,R": [
+        14,
+        -8
+      ],
+      "60,35,R": [
+        14,
+        -11
+      ],
+      "60,34,R": [
+        14,
+        -11
+      ],
+      "60,33,R": [
+        14,
+        -11
+      ],
+      "60,32,R": [
+        16,
+        1
+      ]
+    },
+    "deepWaterOffsets": {
+      "24,15": [
+        -2,
+        -9
+      ],
+      "24,16": [
+        -2,
+        -9
+      ],
+      "25,16": [
+        -2,
+        -9
+      ],
+      "26,16": [
+        -2,
+        -9
+      ],
+      "27,16": [
+        -2,
+        -9
+      ],
+      "28,16": [
+        -2,
+        -9
+      ],
+      "29,16": [
+        -2,
+        -9
+      ],
+      "30,16": [
+        -2,
+        -9
+      ],
+      "31,16": [
+        -2,
+        -9
+      ],
+      "32,16": [
+        -2,
+        -9
+      ],
+      "33,16": [
+        -2,
+        -9
+      ],
+      "34,16": [
+        -2,
+        -9
+      ],
+      "35,16": [
+        -2,
+        -9
+      ],
+      "36,16": [
+        -23,
+        -9
+      ],
+      "36,15": [
+        -23,
+        -9
+      ],
+      "35,15": [
+        -2,
+        -9
+      ],
+      "34,15": [
+        -2,
+        -9
+      ],
+      "33,15": [
+        -2,
+        -9
+      ],
+      "32,15": [
+        -2,
+        -9
+      ],
+      "31,15": [
+        -2,
+        -9
+      ],
+      "29,15": [
+        -2,
+        -9
+      ],
+      "28,15": [
+        -2,
+        -9
+      ],
+      "27,15": [
+        -2,
+        -9
+      ],
+      "26,15": [
+        -2,
+        -9
+      ],
+      "25,15": [
+        -2,
+        -9
+      ],
+      "24,17": [
+        -2,
+        -9
+      ],
+      "25,17": [
+        -2,
+        -9
+      ],
+      "26,17": [
+        -2,
+        -9
+      ],
+      "27,17": [
+        -2,
+        -9
+      ],
+      "28,17": [
+        -2,
+        -9
+      ],
+      "29,17": [
+        -2,
+        -9
+      ],
+      "30,17": [
+        -2,
+        -9
+      ],
+      "31,17": [
+        -2,
+        -9
+      ],
+      "32,17": [
+        -2,
+        -9
+      ],
+      "33,17": [
+        -2,
+        -9
+      ],
+      "34,17": [
+        -2,
+        -9
+      ],
+      "35,17": [
+        -2,
+        -9
+      ],
+      "36,17": [
+        -23,
+        -9
+      ],
+      "30,15": [
+        -1,
+        -8
+      ],
+      "50,65": [
+        0,
+        12
+      ],
+      "51,65": [
+        0,
+        12
+      ],
+      "52,65": [
+        0,
+        12
+      ],
+      "53,65": [
+        0,
+        12
+      ],
+      "54,65": [
+        0,
+        12
+      ],
+      "55,65": [
+        0,
+        12
+      ],
+      "56,65": [
+        0,
+        12
+      ],
+      "57,65": [
+        0,
+        12
+      ],
+      "58,65": [
+        0,
+        12
+      ],
+      "59,65": [
+        0,
+        12
+      ],
+      "60,65": [
+        0,
+        12
+      ],
+      "50,74": [
+        1,
+        -13
+      ],
+      "51,74": [
+        1,
+        -13
+      ],
+      "60,74": [
+        1,
+        -13
+      ],
+      "58,74": [
+        1,
+        -13
+      ],
+      "57,74": [
+        1,
+        -13
+      ],
+      "56,74": [
+        1,
+        -13
+      ],
+      "55,74": [
+        1,
+        -13
+      ],
+      "54,74": [
+        1,
+        -13
+      ],
+      "53,74": [
+        1,
+        -13
+      ],
+      "52,74": [
+        1,
+        -13
+      ],
+      "59,74": [
+        1,
+        -13
+      ],
+      "50,14": [
+        0,
+        13
+      ],
+      "51,14": [
+        0,
+        13
+      ],
+      "53,14": [
+        0,
+        13
+      ],
+      "55,14": [
+        0,
+        13
+      ],
+      "57,14": [
+        0,
+        13
+      ],
+      "58,14": [
+        0,
+        13
+      ],
+      "59,14": [
+        0,
+        13
+      ],
+      "60,14": [
+        0,
+        13
+      ],
+      "61,14": [
+        -24,
+        13
+      ],
+      "56,14": [
+        0,
+        13
+      ],
+      "54,14": [
+        0,
+        13
+      ],
+      "52,14": [
+        0,
+        13
+      ],
+      "61,15": [
+        -24,
+        0
+      ],
+      "61,16": [
+        -24,
+        0
+      ],
+      "61,17": [
+        -24,
+        0
+      ],
+      "61,18": [
+        -24,
+        0
+      ],
+      "61,19": [
+        -24,
+        0
+      ],
+      "61,20": [
+        -24,
+        0
+      ],
+      "61,21": [
+        -24,
+        0
+      ],
+      "61,22": [
+        -24,
+        0
+      ],
+      "61,23": [
+        -24,
+        0
+      ],
+      "61,24": [
+        -24,
+        0
+      ],
+      "61,25": [
+        -24,
+        0
+      ],
+      "61,26": [
+        -24,
+        0
+      ],
+      "61,27": [
+        -24,
+        0
+      ],
+      "61,28": [
+        -24,
+        0
+      ],
+      "61,29": [
+        -24,
+        0
+      ],
+      "61,30": [
+        -24,
+        0
+      ],
+      "61,31": [
+        -24,
+        0
+      ],
+      "61,37": [
+        -24,
+        0
+      ],
+      "61,38": [
+        -24,
+        0
+      ],
+      "61,39": [
+        -24,
+        0
+      ],
+      "61,40": [
+        -24,
+        0
+      ],
+      "61,41": [
+        -24,
+        0
+      ],
+      "61,42": [
+        -24,
+        0
+      ],
+      "61,43": [
+        -24,
+        0
+      ],
+      "61,44": [
+        -24,
+        0
+      ],
+      "61,45": [
+        -24,
+        0
+      ],
+      "57,32": [
+        -22,
+        0
+      ],
+      "57,33": [
+        -22,
+        0
+      ],
+      "57,34": [
+        -22,
+        0
+      ],
+      "57,35": [
+        -22,
+        0
+      ],
+      "57,36": [
+        -22,
+        0
+      ],
+      "59,69": [
+        1,
+        -29
+      ],
+      "58,69": [
+        1,
+        -29
+      ],
+      "36,14": [
+        -22,
+        0
+      ]
+    },
+    "deepWater": [
+      "52,30",
+      "54,38",
+      "50,14",
+      "51,14",
+      "52,14",
+      "53,14",
+      "54,14",
+      "55,14",
+      "56,14",
+      "57,14",
+      "58,14",
+      "59,14",
+      "60,14",
+      "60,15",
+      "59,15",
+      "58,15",
+      "56,15",
+      "55,15",
+      "54,15",
+      "52,15",
+      "51,15",
+      "50,15",
+      "53,15",
+      "57,15",
+      "61,14",
+      "61,15",
+      "50,16",
+      "51,16",
+      "52,16",
+      "53,16",
+      "54,16",
+      "55,16",
+      "58,16",
+      "59,16",
+      "60,16",
+      "61,16",
+      "56,16",
+      "61,17",
+      "60,17",
+      "59,17",
+      "58,17",
+      "57,17",
+      "56,17",
+      "55,17",
+      "54,17",
+      "53,17",
+      "52,17",
+      "51,17",
+      "50,17",
+      "50,18",
+      "51,18",
+      "52,18",
+      "53,18",
+      "54,18",
+      "55,18",
+      "56,18",
+      "58,18",
+      "59,18",
+      "60,18",
+      "61,18",
+      "57,18",
+      "50,19",
+      "50,20",
+      "50,21",
+      "50,22",
+      "50,23",
+      "50,24",
+      "61,19",
+      "61,20",
+      "61,21",
+      "61,22",
+      "61,23",
+      "61,24",
+      "61,25",
+      "60,19",
+      "59,19",
+      "58,19",
+      "57,19",
+      "56,19",
+      "52,19",
+      "51,19",
+      "51,20",
+      "51,23",
+      "51,25",
+      "52,20",
+      "52,24",
+      "52,26",
+      "51,21",
+      "52,22",
+      "52,21",
+      "52,23",
+      "51,22",
+      "51,24",
+      "52,25",
+      "53,21",
+      "53,23",
+      "53,24",
+      "53,25",
+      "53,26",
+      "53,27",
+      "53,20",
+      "53,22",
+      "55,19",
+      "55,21",
+      "55,23",
+      "55,24",
+      "55,25",
+      "55,27",
+      "55,20",
+      "54,19",
+      "53,19",
+      "54,20",
+      "57,16",
+      "54,21",
+      "54,23",
+      "54,24",
+      "54,25",
+      "54,26",
+      "54,27",
+      "54,22",
+      "55,22",
+      "55,26",
+      "56,20",
+      "57,20",
+      "58,20",
+      "59,20",
+      "60,20",
+      "60,21",
+      "59,21",
+      "58,21",
+      "57,21",
+      "56,21",
+      "56,22",
+      "57,22",
+      "58,22",
+      "59,22",
+      "60,22",
+      "60,23",
+      "59,23",
+      "58,23",
+      "57,23",
+      "56,23",
+      "56,24",
+      "58,24",
+      "59,24",
+      "60,24",
+      "60,25",
+      "59,25",
+      "58,25",
+      "57,25",
+      "56,25",
+      "57,24",
+      "61,26",
+      "60,26",
+      "59,26",
+      "58,26",
+      "57,26",
+      "56,26",
+      "50,25",
+      "50,26",
+      "50,27",
+      "50,28",
+      "50,29",
+      "50,30",
+      "50,31",
+      "50,32",
+      "50,33",
+      "51,26",
+      "51,27",
+      "51,29",
+      "51,30",
+      "51,31",
+      "51,32",
+      "51,33",
+      "51,34",
+      "51,28",
+      "52,28",
+      "52,27",
+      "52,29",
+      "52,31",
+      "52,32",
+      "52,33",
+      "52,34",
+      "53,28",
+      "53,29",
+      "53,30",
+      "53,31",
+      "53,32",
+      "53,33",
+      "53,34",
+      "54,28",
+      "54,29",
+      "54,31",
+      "54,32",
+      "54,33",
+      "54,34",
+      "55,28",
+      "55,29",
+      "55,30",
+      "55,31",
+      "55,33",
+      "55,34",
+      "54,30",
+      "56,27",
+      "56,29",
+      "56,31",
+      "56,32",
+      "56,33",
+      "56,34",
+      "56,35",
+      "55,32",
+      "56,30",
+      "56,28",
+      "57,28",
+      "57,29",
+      "57,30",
+      "57,31",
+      "58,31",
+      "59,31",
+      "60,31",
+      "60,30",
+      "60,29",
+      "60,28",
+      "60,27",
+      "61,27",
+      "61,28",
+      "61,29",
+      "61,30",
+      "61,31",
+      "59,27",
+      "59,28",
+      "59,29",
+      "59,30",
+      "58,27",
+      "58,29",
+      "58,30",
+      "57,27",
+      "58,28",
+      "50,34",
+      "50,35",
+      "50,36",
+      "50,37",
+      "50,38",
+      "50,39",
+      "50,40",
+      "50,41",
+      "51,35",
+      "51,36",
+      "51,38",
+      "51,39",
+      "51,40",
+      "51,41",
+      "51,37",
+      "52,35",
+      "52,36",
+      "52,37",
+      "52,38",
+      "52,39",
+      "52,40",
+      "52,41",
+      "53,41",
+      "53,40",
+      "53,39",
+      "53,38",
+      "53,37",
+      "53,36",
+      "53,35",
+      "54,35",
+      "54,36",
+      "54,37",
+      "54,39",
+      "54,40",
+      "54,41",
+      "55,41",
+      "55,40",
+      "55,38",
+      "55,37",
+      "55,36",
+      "55,35",
+      "56,36",
+      "56,37",
+      "56,38",
+      "56,39",
+      "56,40",
+      "56,41",
+      "55,39",
+      "57,32",
+      "57,33",
+      "57,34",
+      "57,35",
+      "57,36",
+      "57,38",
+      "57,39",
+      "57,40",
+      "57,41",
+      "60,37",
+      "59,37",
+      "58,37",
+      "57,37",
+      "61,37",
+      "61,38",
+      "60,38",
+      "59,38",
+      "58,38",
+      "58,39",
+      "58,40",
+      "58,41",
+      "59,39",
+      "59,40",
+      "59,41",
+      "60,39",
+      "60,40",
+      "60,41",
+      "61,39",
+      "61,40",
+      "61,41",
+      "61,42",
+      "61,43",
+      "61,44",
+      "61,45",
+      "60,45",
+      "59,45",
+      "58,45",
+      "57,45",
+      "56,45",
+      "55,45",
+      "54,45",
+      "53,45",
+      "52,45",
+      "51,45",
+      "50,45",
+      "50,44",
+      "50,43",
+      "50,42",
+      "51,42",
+      "51,43",
+      "51,44",
+      "52,44",
+      "52,43",
+      "52,42",
+      "53,42",
+      "53,43",
+      "53,44",
+      "54,44",
+      "54,43",
+      "54,42",
+      "55,42",
+      "55,43",
+      "55,44",
+      "56,44",
+      "56,43",
+      "56,42",
+      "57,42",
+      "57,43",
+      "57,44",
+      "58,44",
+      "58,43",
+      "58,42",
+      "59,42",
+      "59,43",
+      "59,44",
+      "60,44",
+      "60,43",
+      "60,42",
+      "24,15",
+      "25,15",
+      "26,15",
+      "27,15",
+      "28,15",
+      "29,15",
+      "30,15",
+      "31,15",
+      "32,15",
+      "33,15",
+      "34,15",
+      "35,15",
+      "36,15",
+      "36,16",
+      "35,16",
+      "34,16",
+      "33,16",
+      "32,16",
+      "31,16",
+      "30,16",
+      "29,16",
+      "28,16",
+      "27,16",
+      "26,16",
+      "25,16",
+      "24,16",
+      "24,17",
+      "25,17",
+      "26,17",
+      "27,17",
+      "28,17",
+      "29,17",
+      "30,17",
+      "31,17",
+      "32,17",
+      "33,17",
+      "34,17",
+      "35,17",
+      "36,17",
+      "50,65",
+      "51,65",
+      "52,65",
+      "53,65",
+      "54,65",
+      "55,65",
+      "56,65",
+      "57,65",
+      "58,65",
+      "59,65",
+      "60,65",
+      "60,66",
+      "59,66",
+      "58,66",
+      "57,66",
+      "56,66",
+      "55,66",
+      "54,66",
+      "53,66",
+      "52,66",
+      "51,66",
+      "50,66",
+      "50,67",
+      "51,67",
+      "52,67",
+      "53,67",
+      "54,67",
+      "55,67",
+      "56,67",
+      "57,67",
+      "58,67",
+      "59,67",
+      "60,67",
+      "60,68",
+      "59,68",
+      "58,68",
+      "57,68",
+      "55,68",
+      "54,68",
+      "53,68",
+      "52,68",
+      "51,68",
+      "50,68",
+      "50,69",
+      "51,69",
+      "52,69",
+      "53,69",
+      "54,69",
+      "55,69",
+      "56,69",
+      "57,69",
+      "58,69",
+      "59,69",
+      "60,69",
+      "56,68",
+      "50,70",
+      "51,70",
+      "52,70",
+      "53,70",
+      "54,70",
+      "55,70",
+      "50,71",
+      "51,71",
+      "52,71",
+      "53,71",
+      "54,71",
+      "55,71",
+      "50,72",
+      "51,72",
+      "52,72",
+      "53,72",
+      "54,72",
+      "55,72",
+      "50,73",
+      "51,73",
+      "52,73",
+      "53,73",
+      "54,73",
+      "55,73",
+      "56,73",
+      "57,73",
+      "58,73",
+      "59,73",
+      "60,73",
+      "60,72",
+      "60,71",
+      "60,70",
+      "50,74",
+      "51,74",
+      "52,74",
+      "53,74",
+      "54,74",
+      "55,74",
+      "56,74",
+      "57,74",
+      "58,74",
+      "59,74",
+      "60,74",
+      "24,14",
+      "25,14",
+      "26,14",
+      "27,14",
+      "28,14",
+      "29,14",
+      "30,14",
+      "31,14",
+      "32,14",
+      "33,14",
+      "34,14",
+      "35,14",
+      "36,14"
+    ],
+    "seekBase": true,
+    "tileBoxes": {
+      "tile_poolcore_pillar": [
+        [
+          21,
+          114,
+          40,
+          65
+        ]
+      ],
+      "tile_mvocpp0c": [
+        [
+          0,
+          52,
+          80,
+          90
+        ]
+      ],
+      "tile_mvodgug9": [
+        [
+          0,
+          52,
+          80,
+          91
+        ]
+      ],
+      "tile_mvr3kqob": []
+    },
+    "deepWaterKeep": [
+      "70,78",
+      "67,78",
+      "68,78",
+      "69,78",
+      "69,79",
+      "68,79",
+      "67,79",
+      "70,79",
+      "71,79",
+      "73,79",
+      "74,79",
+      "75,79",
+      "76,79",
+      "77,79",
+      "78,79",
+      "79,79",
+      "80,79",
+      "81,79",
+      "82,79",
+      "83,79",
+      "84,79",
+      "72,79",
+      "71,78",
+      "72,78",
+      "73,78",
+      "74,78",
+      "75,78",
+      "76,78",
+      "77,78",
+      "78,78",
+      "79,78",
+      "80,78",
+      "81,78",
+      "82,78",
+      "83,78",
+      "84,78",
+      "67,77",
+      "68,77",
+      "69,77",
+      "70,77",
+      "71,77",
+      "72,77",
+      "74,77",
+      "75,77",
+      "76,77",
+      "77,77",
+      "78,77",
+      "79,77",
+      "80,77",
+      "81,77",
+      "82,77",
+      "83,77",
+      "84,77",
+      "84,76",
+      "83,76",
+      "82,76",
+      "81,76",
+      "80,76",
+      "78,76",
+      "77,76",
+      "76,76",
+      "75,76",
+      "74,76",
+      "73,76",
+      "72,76",
+      "73,77",
+      "71,76",
+      "70,76",
+      "69,76",
+      "68,76",
+      "67,76",
+      "67,75",
+      "67,74",
+      "67,73",
+      "67,72",
+      "67,71",
+      "67,70",
+      "67,69",
+      "67,68",
+      "67,67",
+      "67,66",
+      "67,65",
+      "68,65",
+      "69,65",
+      "70,65",
+      "71,65",
+      "72,65",
+      "73,65",
+      "74,65",
+      "75,65",
+      "76,65",
+      "77,65",
+      "78,65",
+      "79,65",
+      "81,65",
+      "82,65",
+      "83,65",
+      "83,66",
+      "84,66",
+      "84,65",
+      "80,65",
+      "80,66",
+      "80,67",
+      "80,68",
+      "80,69",
+      "80,70",
+      "80,71",
+      "80,72",
+      "80,73",
+      "80,74",
+      "80,75",
+      "79,75",
+      "79,76",
+      "68,66",
+      "69,66",
+      "71,66",
+      "72,66",
+      "73,66",
+      "74,66",
+      "75,66",
+      "76,66",
+      "77,66",
+      "79,66",
+      "82,66",
+      "82,67",
+      "83,67",
+      "84,67",
+      "84,68",
+      "84,69",
+      "84,70",
+      "84,71",
+      "84,72",
+      "84,73",
+      "84,74",
+      "84,75",
+      "83,75",
+      "82,75",
+      "81,75",
+      "81,74",
+      "81,73",
+      "81,72",
+      "81,71",
+      "81,70",
+      "81,69",
+      "81,68",
+      "81,67",
+      "81,66",
+      "82,68",
+      "82,69",
+      "83,69",
+      "83,70",
+      "82,71",
+      "82,72",
+      "82,73",
+      "82,74",
+      "83,74",
+      "83,73",
+      "83,72",
+      "83,71",
+      "83,68",
+      "82,70",
+      "78,66",
+      "78,67",
+      "79,67",
+      "79,68",
+      "79,69",
+      "79,70",
+      "79,71",
+      "79,72",
+      "78,72",
+      "78,73",
+      "78,74",
+      "78,75",
+      "77,75",
+      "76,75",
+      "75,75",
+      "74,75",
+      "73,75",
+      "72,75",
+      "71,75",
+      "70,75",
+      "69,75",
+      "68,75",
+      "68,74",
+      "68,73",
+      "68,72",
+      "68,71",
+      "68,70",
+      "68,69",
+      "68,68",
+      "68,67",
+      "70,66",
+      "69,67",
+      "70,67",
+      "71,67",
+      "73,67",
+      "74,67",
+      "75,67",
+      "76,67",
+      "77,67",
+      "72,67",
+      "69,68",
+      "70,68",
+      "72,68",
+      "73,68",
+      "74,68",
+      "75,68",
+      "76,68",
+      "77,68",
+      "78,68",
+      "71,68",
+      "72,69",
+      "72,70",
+      "72,71",
+      "72,72",
+      "72,73",
+      "72,74",
+      "71,74",
+      "70,74",
+      "69,74",
+      "69,73",
+      "69,72",
+      "69,71",
+      "69,70",
+      "69,69",
+      "70,69",
+      "71,69",
+      "71,70",
+      "71,71",
+      "71,72",
+      "70,72",
+      "70,73",
+      "70,71",
+      "70,70",
+      "71,73",
+      "73,73",
+      "73,74",
+      "74,74",
+      "75,74",
+      "76,74",
+      "77,74",
+      "77,73",
+      "76,73",
+      "75,73",
+      "74,73",
+      "79,73",
+      "79,74",
+      "78,69",
+      "78,71",
+      "78,70",
+      "88,65",
+      "89,65",
+      "90,65",
+      "91,65",
+      "92,65",
+      "93,65",
+      "94,65",
+      "95,65",
+      "96,65",
+      "97,65",
+      "98,65",
+      "99,65",
+      "100,65",
+      "101,65",
+      "102,65",
+      "103,65",
+      "104,65",
+      "105,65",
+      "106,65",
+      "106,66",
+      "105,66",
+      "104,66",
+      "103,66",
+      "102,66",
+      "101,66",
+      "100,66",
+      "99,66",
+      "98,66",
+      "97,66",
+      "96,66",
+      "95,66",
+      "94,66",
+      "93,66",
+      "92,66",
+      "91,66",
+      "90,66",
+      "89,66",
+      "88,66",
+      "88,67",
+      "89,67",
+      "90,67",
+      "91,67",
+      "92,67",
+      "93,67",
+      "94,67",
+      "96,67",
+      "97,67",
+      "98,67",
+      "99,67",
+      "101,67",
+      "102,67",
+      "103,67",
+      "104,67",
+      "105,67",
+      "106,67",
+      "106,68",
+      "105,68",
+      "104,68",
+      "103,68",
+      "102,68",
+      "101,68",
+      "100,68",
+      "99,68",
+      "98,68",
+      "97,68",
+      "96,68",
+      "95,68",
+      "94,68",
+      "93,68",
+      "91,68",
+      "90,68",
+      "89,68",
+      "88,68",
+      "92,68",
+      "95,67",
+      "100,67",
+      "103,69",
+      "104,69",
+      "105,69",
+      "106,69",
+      "102,69",
+      "100,69",
+      "99,69",
+      "98,69",
+      "97,69",
+      "96,69",
+      "95,69",
+      "94,69",
+      "93,69",
+      "92,69",
+      "91,69",
+      "90,69",
+      "89,69",
+      "88,69",
+      "88,70",
+      "89,70",
+      "89,71",
+      "90,72",
+      "91,72",
+      "93,72",
+      "95,72",
+      "96,72",
+      "98,72",
+      "99,72",
+      "100,72",
+      "101,72",
+      "102,72",
+      "103,72",
+      "104,72",
+      "105,72",
+      "106,72",
+      "106,71",
+      "106,70",
+      "105,70",
+      "104,70",
+      "103,70",
+      "102,70",
+      "101,70",
+      "100,70",
+      "99,70",
+      "98,70",
+      "97,70",
+      "96,70",
+      "94,70",
+      "93,70",
+      "91,70",
+      "90,70",
+      "88,71",
+      "90,71",
+      "92,71",
+      "93,71",
+      "95,71",
+      "96,71",
+      "98,71",
+      "99,71",
+      "100,71",
+      "101,71",
+      "103,71",
+      "104,71",
+      "105,71",
+      "102,71",
+      "97,71",
+      "94,71",
+      "91,71",
+      "92,70",
+      "95,70",
+      "101,69",
+      "88,72",
+      "88,73",
+      "88,74",
+      "88,75",
+      "88,76",
+      "88,77",
+      "88,78",
+      "88,79",
+      "88,80",
+      "88,81",
+      "88,82",
+      "89,82",
+      "90,82",
+      "91,82",
+      "92,82",
+      "93,82",
+      "94,82",
+      "95,82",
+      "96,82",
+      "97,82",
+      "97,83",
+      "96,83",
+      "95,83",
+      "94,83",
+      "93,83",
+      "92,83",
+      "91,83",
+      "90,83",
+      "89,83",
+      "88,83",
+      "89,81",
+      "90,81",
+      "91,81",
+      "92,81",
+      "93,81",
+      "94,81",
+      "95,81",
+      "96,81",
+      "97,81",
+      "97,80",
+      "97,79",
+      "97,78",
+      "97,77",
+      "97,76",
+      "96,76",
+      "96,75",
+      "96,74",
+      "96,73",
+      "97,73",
+      "97,72",
+      "97,74",
+      "97,75",
+      "95,76",
+      "92,75",
+      "89,73",
+      "89,72",
+      "89,74",
+      "89,75",
+      "89,77",
+      "89,78",
+      "89,79",
+      "89,80",
+      "96,80",
+      "96,77",
+      "95,73",
+      "94,73",
+      "94,72",
+      "92,72",
+      "90,73",
+      "89,76",
+      "90,77",
+      "90,78",
+      "91,79",
+      "91,80",
+      "92,80",
+      "96,79",
+      "96,78",
+      "95,75",
+      "94,74",
+      "93,73",
+      "92,73",
+      "91,73",
+      "90,74",
+      "90,79",
+      "90,80",
+      "91,77",
+      "91,76",
+      "90,75",
+      "91,74",
+      "92,74",
+      "93,74",
+      "95,74",
+      "91,75",
+      "90,76",
+      "92,76",
+      "93,76",
+      "94,76",
+      "93,75",
+      "94,75",
+      "94,77",
+      "94,78",
+      "95,78",
+      "95,79",
+      "95,80",
+      "94,80",
+      "93,80",
+      "93,79",
+      "92,79",
+      "92,78",
+      "91,78",
+      "92,77",
+      "93,77",
+      "93,78",
+      "94,79",
+      "95,77",
+      "106,51",
+      "105,51",
+      "104,51",
+      "103,51",
+      "102,51",
+      "101,51",
+      "100,51",
+      "99,51",
+      "98,51",
+      "97,51",
+      "97,52",
+      "97,53",
+      "97,54",
+      "97,55",
+      "97,56",
+      "97,57",
+      "97,58",
+      "97,59",
+      "97,60",
+      "97,61",
+      "98,61",
+      "99,61",
+      "101,61",
+      "102,61",
+      "103,61",
+      "104,61",
+      "105,61",
+      "106,61",
+      "100,61",
+      "99,60",
+      "98,60",
+      "98,59",
+      "98,58",
+      "98,57",
+      "98,56",
+      "98,55",
+      "98,54",
+      "98,53",
+      "98,52",
+      "99,52",
+      "103,52",
+      "104,52",
+      "105,52",
+      "106,52",
+      "106,53",
+      "106,55",
+      "106,56",
+      "106,57",
+      "106,58",
+      "106,59",
+      "106,60",
+      "105,60",
+      "104,60",
+      "103,60",
+      "102,60",
+      "101,60",
+      "100,60",
+      "99,59",
+      "99,58",
+      "99,57",
+      "99,56",
+      "99,55",
+      "99,54",
+      "99,53",
+      "100,53",
+      "101,53",
+      "102,53",
+      "104,53",
+      "105,53",
+      "106,54",
+      "105,54",
+      "105,55",
+      "105,56",
+      "105,57",
+      "105,58",
+      "105,59",
+      "104,59",
+      "103,59",
+      "102,59",
+      "101,59",
+      "100,59",
+      "100,58",
+      "100,57",
+      "100,56",
+      "100,55",
+      "100,54",
+      "101,54",
+      "102,54",
+      "103,54",
+      "104,54",
+      "104,55",
+      "104,56",
+      "104,57",
+      "104,58",
+      "103,58",
+      "102,58",
+      "101,58",
+      "101,57",
+      "101,56",
+      "101,55",
+      "103,55",
+      "103,56",
+      "103,57",
+      "102,57",
+      "102,56",
+      "102,55",
+      "103,53",
+      "102,52",
+      "100,52",
+      "101,52",
+      "92,61",
+      "91,61",
+      "90,61",
+      "89,61",
+      "88,61",
+      "87,61",
+      "86,61",
+      "85,61",
+      "84,61",
+      "83,61",
+      "82,61",
+      "81,61",
+      "80,61",
+      "79,61",
+      "79,60",
+      "80,60",
+      "81,60",
+      "82,60",
+      "84,60",
+      "85,60",
+      "86,60",
+      "87,60",
+      "89,60",
+      "90,60",
+      "91,60",
+      "92,60",
+      "93,60",
+      "93,61",
+      "88,60",
+      "83,60",
+      "79,59",
+      "80,59",
+      "81,59",
+      "82,59",
+      "83,59",
+      "84,59",
+      "85,59",
+      "86,59",
+      "87,59",
+      "88,59",
+      "89,59",
+      "90,59",
+      "91,59",
+      "92,59",
+      "93,59",
+      "88,50",
+      "88,51",
+      "88,53",
+      "88,54",
+      "88,55",
+      "88,56",
+      "88,57",
+      "88,58",
+      "84,44",
+      "84,45",
+      "84,46",
+      "84,47",
+      "84,48",
+      "84,49",
+      "84,50",
+      "84,51",
+      "84,52",
+      "84,53",
+      "84,54",
+      "84,55",
+      "84,56",
+      "84,57",
+      "84,58",
+      "83,44",
+      "83,45",
+      "83,46",
+      "83,47",
+      "83,48",
+      "83,49",
+      "83,50",
+      "83,51",
+      "83,52",
+      "83,53",
+      "83,54",
+      "83,55",
+      "83,56",
+      "83,57",
+      "83,58",
+      "82,58",
+      "82,57",
+      "82,56",
+      "82,54",
+      "82,53",
+      "82,52",
+      "82,50",
+      "82,49",
+      "82,44",
+      "81,44",
+      "80,44",
+      "79,44",
+      "79,45",
+      "79,46",
+      "79,47",
+      "79,48",
+      "79,49",
+      "79,50",
+      "79,51",
+      "79,52",
+      "79,53",
+      "79,54",
+      "79,57",
+      "79,58",
+      "79,55",
+      "79,56",
+      "80,56",
+      "81,57",
+      "80,57",
+      "80,58",
+      "81,58",
+      "81,56",
+      "81,55",
+      "81,54",
+      "81,53",
+      "82,55",
+      "80,55",
+      "80,54",
+      "80,53",
+      "80,52",
+      "80,50",
+      "80,49",
+      "80,48",
+      "80,47",
+      "80,46",
+      "80,45",
+      "81,45",
+      "82,45",
+      "82,46",
+      "81,46",
+      "81,47",
+      "81,48",
+      "81,49",
+      "81,50",
+      "81,51",
+      "81,52",
+      "80,51",
+      "82,51",
+      "82,47",
+      "82,48",
+      "85,54",
+      "86,54",
+      "87,54",
+      "87,55",
+      "86,55",
+      "85,55",
+      "87,56",
+      "86,56",
+      "85,56",
+      "89,57",
+      "86,57",
+      "85,57",
+      "86,58",
+      "87,58",
+      "85,58",
+      "87,57",
+      "89,58",
+      "90,58",
+      "91,58",
+      "92,58",
+      "93,58",
+      "93,56",
+      "93,55",
+      "93,54",
+      "92,53",
+      "92,52",
+      "92,54",
+      "92,55",
+      "92,56",
+      "92,57",
+      "93,57",
+      "91,57",
+      "90,57",
+      "90,56",
+      "89,56",
+      "89,55",
+      "89,54",
+      "88,52",
+      "89,52",
+      "89,53",
+      "90,54",
+      "90,55",
+      "91,56",
+      "91,55",
+      "91,54",
+      "91,53",
+      "91,52",
+      "90,52",
+      "90,53",
+      "93,53",
+      "93,52",
+      "93,51",
+      "93,50",
+      "93,49",
+      "93,48",
+      "93,47",
+      "93,46",
+      "93,45",
+      "92,45",
+      "92,44",
+      "90,44",
+      "89,44",
+      "88,44",
+      "88,45",
+      "88,46",
+      "88,47",
+      "88,48",
+      "88,49",
+      "89,50",
+      "89,51",
+      "90,51",
+      "91,51",
+      "92,51",
+      "92,50",
+      "92,49",
+      "92,48",
+      "92,47",
+      "92,46",
+      "91,44",
+      "90,45",
+      "89,46",
+      "89,47",
+      "89,48",
+      "89,49",
+      "90,50",
+      "91,50",
+      "91,49",
+      "91,48",
+      "91,47",
+      "91,46",
+      "91,45",
+      "90,46",
+      "90,47",
+      "90,48",
+      "90,49",
+      "89,45",
+      "93,44",
+      "93,43",
+      "93,42",
+      "93,41",
+      "93,40",
+      "93,39",
+      "80,38",
+      "79,38",
+      "79,39",
+      "79,40",
+      "79,41",
+      "79,42",
+      "79,43",
+      "80,43",
+      "81,43",
+      "82,43",
+      "83,43",
+      "84,43",
+      "87,43",
+      "88,43",
+      "89,43",
+      "90,43",
+      "91,43",
+      "92,43",
+      "92,42",
+      "92,41",
+      "92,40",
+      "92,39",
+      "92,38",
+      "93,38",
+      "81,38",
+      "82,38",
+      "83,38",
+      "84,38",
+      "86,38",
+      "87,38",
+      "89,38",
+      "90,38",
+      "91,38",
+      "85,38",
+      "85,39",
+      "85,40",
+      "86,40",
+      "87,39",
+      "88,39",
+      "88,38",
+      "86,39",
+      "87,40",
+      "88,40",
+      "89,40",
+      "90,40",
+      "91,40",
+      "91,39",
+      "90,39",
+      "89,39",
+      "91,41",
+      "90,41",
+      "88,41",
+      "87,41",
+      "86,41",
+      "85,41",
+      "84,41",
+      "84,40",
+      "84,39",
+      "83,39",
+      "82,39",
+      "81,39",
+      "80,39",
+      "80,40",
+      "80,41",
+      "81,41",
+      "81,42",
+      "82,42",
+      "83,41",
+      "83,40",
+      "82,40",
+      "81,40",
+      "82,41",
+      "80,42",
+      "91,42",
+      "90,42",
+      "88,42",
+      "86,42",
+      "84,42",
+      "83,42",
+      "85,42",
+      "85,43",
+      "85,44",
+      "86,44",
+      "87,44",
+      "86,43",
+      "87,42",
+      "89,42",
+      "89,41",
+      "105,47",
+      "106,47",
+      "106,46",
+      "105,46",
+      "104,46",
+      "104,47",
+      "103,47",
+      "102,47",
+      "101,47",
+      "100,47",
+      "99,47",
+      "98,47",
+      "97,47",
+      "97,46",
+      "97,45",
+      "97,44",
+      "97,43",
+      "97,42",
+      "97,41",
+      "97,40",
+      "97,39",
+      "97,38",
+      "97,37",
+      "97,36",
+      "97,35",
+      "98,35",
+      "98,36",
+      "98,37",
+      "98,38",
+      "98,39",
+      "98,40",
+      "98,41",
+      "98,42",
+      "98,43",
+      "98,44",
+      "98,45",
+      "98,46",
+      "99,46",
+      "103,46",
+      "102,46",
+      "101,46",
+      "100,46",
+      "99,35",
+      "100,35",
+      "100,36",
+      "100,37",
+      "100,38",
+      "100,39",
+      "100,40",
+      "100,41",
+      "100,42",
+      "100,43",
+      "100,44",
+      "100,45",
+      "99,45",
+      "99,44",
+      "99,43",
+      "99,41",
+      "99,40",
+      "99,39",
+      "99,38",
+      "99,37",
+      "99,36",
+      "101,35",
+      "101,36",
+      "101,37",
+      "101,38",
+      "101,39",
+      "101,40",
+      "101,41",
+      "101,42",
+      "101,43",
+      "101,44",
+      "101,45",
+      "99,42",
+      "106,35",
+      "106,36",
+      "106,41",
+      "106,42",
+      "106,43",
+      "106,44",
+      "106,37",
+      "106,38",
+      "106,39",
+      "106,40",
+      "106,45",
+      "89,34",
+      "90,34",
+      "92,34",
+      "93,34",
+      "94,34",
+      "95,34",
+      "96,34",
+      "97,34",
+      "98,34",
+      "99,34",
+      "100,34",
+      "101,34",
+      "102,34",
+      "103,34",
+      "104,34",
+      "105,34",
+      "106,34",
+      "105,35",
+      "105,36",
+      "105,37",
+      "105,38",
+      "105,39",
+      "105,40",
+      "105,41",
+      "105,42",
+      "105,43",
+      "105,44",
+      "105,45",
+      "104,45",
+      "103,45",
+      "102,45",
+      "102,44",
+      "102,43",
+      "102,42",
+      "102,41",
+      "102,40",
+      "102,39",
+      "102,38",
+      "102,37",
+      "102,36",
+      "102,35",
+      "103,35",
+      "104,35",
+      "104,36",
+      "104,37",
+      "104,38",
+      "104,39",
+      "104,40",
+      "104,41",
+      "104,42",
+      "104,43",
+      "104,44",
+      "103,44",
+      "103,43",
+      "103,42",
+      "103,41",
+      "103,40",
+      "103,39",
+      "103,38",
+      "103,37",
+      "103,36",
+      "106,33",
+      "106,32",
+      "106,31",
+      "106,30",
+      "106,29",
+      "106,28",
+      "106,27",
+      "89,26",
+      "89,27",
+      "89,28",
+      "89,29",
+      "89,30",
+      "89,31",
+      "89,32",
+      "89,33",
+      "90,33",
+      "92,33",
+      "93,33",
+      "95,33",
+      "97,33",
+      "98,33",
+      "99,33",
+      "100,33",
+      "102,33",
+      "103,33",
+      "104,33",
+      "105,33",
+      "105,32",
+      "105,31",
+      "105,30",
+      "105,29",
+      "105,28",
+      "105,27",
+      "106,26",
+      "105,26",
+      "104,26",
+      "103,26",
+      "102,26",
+      "101,26",
+      "100,26",
+      "99,26",
+      "98,26",
+      "97,26",
+      "96,26",
+      "95,26",
+      "94,26",
+      "93,26",
+      "92,26",
+      "91,26",
+      "90,26",
+      "91,34",
+      "91,33",
+      "91,32",
+      "92,32",
+      "93,32",
+      "94,32",
+      "94,33",
+      "96,33",
+      "96,32",
+      "97,32",
+      "98,32",
+      "99,32",
+      "100,32",
+      "101,32",
+      "101,33",
+      "102,32",
+      "103,32",
+      "104,32",
+      "104,31",
+      "104,30",
+      "104,29",
+      "104,28",
+      "104,27",
+      "103,27",
+      "102,27",
+      "101,27",
+      "100,27",
+      "98,27",
+      "97,27",
+      "96,27",
+      "95,27",
+      "94,27",
+      "93,27",
+      "92,27",
+      "91,27",
+      "90,27",
+      "90,28",
+      "90,29",
+      "90,30",
+      "90,31",
+      "90,32",
+      "91,31",
+      "94,31",
+      "96,31",
+      "97,31",
+      "98,31",
+      "99,31",
+      "101,31",
+      "102,31",
+      "103,31",
+      "103,30",
+      "103,29",
+      "103,28",
+      "102,28",
+      "101,28",
+      "100,28",
+      "99,27",
+      "99,28",
+      "98,28",
+      "97,28",
+      "95,28",
+      "94,28",
+      "93,28",
+      "92,28",
+      "91,28",
+      "91,29",
+      "92,29",
+      "93,29",
+      "94,29",
+      "95,29",
+      "96,29",
+      "96,28",
+      "97,29",
+      "98,29",
+      "99,29",
+      "100,29",
+      "101,29",
+      "102,29",
+      "102,30",
+      "101,30",
+      "100,30",
+      "100,31",
+      "99,30",
+      "98,30",
+      "97,30",
+      "95,30",
+      "94,30",
+      "93,30",
+      "92,30",
+      "91,30",
+      "93,31",
+      "92,31",
+      "95,32",
+      "95,31",
+      "96,30",
+      "82,26",
+      "81,26",
+      "80,26",
+      "79,26",
+      "78,26",
+      "77,26",
+      "76,26",
+      "75,26",
+      "74,26",
+      "73,26",
+      "72,26",
+      "71,26",
+      "71,27",
+      "72,27",
+      "73,27",
+      "74,27",
+      "75,27",
+      "77,27",
+      "78,27",
+      "79,27",
+      "80,27",
+      "81,27",
+      "82,27",
+      "76,27",
+      "76,28",
+      "76,29",
+      "76,30",
+      "76,31",
+      "76,32",
+      "76,33",
+      "76,34",
+      "77,34",
+      "78,34",
+      "79,34",
+      "80,34",
+      "81,34",
+      "82,34",
+      "82,33",
+      "82,32",
+      "82,31",
+      "82,30",
+      "82,29",
+      "82,28",
+      "81,28",
+      "80,28",
+      "79,28",
+      "78,28",
+      "77,28",
+      "77,29",
+      "77,30",
+      "77,31",
+      "77,32",
+      "77,33",
+      "78,33",
+      "79,33",
+      "81,33",
+      "81,32",
+      "81,31",
+      "81,30",
+      "81,29",
+      "80,29",
+      "79,29",
+      "78,29",
+      "78,30",
+      "78,31",
+      "78,32",
+      "79,32",
+      "80,33",
+      "80,32",
+      "80,31",
+      "80,30",
+      "79,30",
+      "79,31",
+      "71,28",
+      "72,28",
+      "73,28",
+      "74,28",
+      "75,28",
+      "75,29",
+      "74,29",
+      "73,29",
+      "72,29",
+      "71,29",
+      "71,30",
+      "71,31",
+      "72,32",
+      "72,33",
+      "73,33",
+      "74,33",
+      "75,33",
+      "75,32",
+      "75,31",
+      "75,30",
+      "74,30",
+      "73,30",
+      "72,30",
+      "72,31",
+      "73,31",
+      "73,32",
+      "74,32",
+      "74,31",
+      "71,32",
+      "71,33",
+      "71,34",
+      "72,34",
+      "73,34",
+      "74,34",
+      "75,34",
+      "75,35",
+      "74,35",
+      "73,35",
+      "72,35",
+      "71,35",
+      "71,36",
+      "72,36",
+      "73,37",
+      "74,37",
+      "75,37",
+      "74,38",
+      "75,36",
+      "74,36",
+      "73,36",
+      "72,37",
+      "71,37",
+      "71,38",
+      "72,38",
+      "72,39",
+      "74,39",
+      "75,39",
+      "75,38",
+      "73,38",
+      "73,39",
+      "73,40",
+      "72,40",
+      "71,39",
+      "71,40",
+      "71,41",
+      "72,41",
+      "73,41",
+      "74,41",
+      "74,40",
+      "75,40",
+      "75,41",
+      "75,42",
+      "74,42",
+      "73,43",
+      "73,42",
+      "72,42",
+      "71,42",
+      "71,43",
+      "71,44",
+      "72,44",
+      "72,43",
+      "73,44",
+      "74,44",
+      "74,43",
+      "75,43",
+      "75,44",
+      "71,48",
+      "71,49",
+      "72,49",
+      "73,49",
+      "74,49",
+      "75,48",
+      "74,48",
+      "73,48",
+      "72,48",
+      "75,49",
+      "75,50",
+      "74,50",
+      "73,50",
+      "72,50",
+      "71,50",
+      "71,51",
+      "72,51",
+      "73,51",
+      "74,51",
+      "75,51",
+      "75,52",
+      "74,52",
+      "73,52",
+      "72,52",
+      "71,52",
+      "71,53",
+      "72,53",
+      "73,53",
+      "74,53",
+      "75,53",
+      "75,54",
+      "74,54",
+      "73,54",
+      "72,54",
+      "71,54",
+      "71,55",
+      "72,55",
+      "73,55",
+      "74,55",
+      "75,56",
+      "74,56",
+      "73,56",
+      "72,56",
+      "71,56",
+      "71,57",
+      "72,57",
+      "73,57",
+      "75,55",
+      "75,57",
+      "75,58",
+      "75,61",
+      "74,61",
+      "73,61",
+      "72,61",
+      "71,61",
+      "71,58",
+      "72,58",
+      "72,59",
+      "71,60",
+      "71,59",
+      "74,57",
+      "74,58",
+      "74,59",
+      "74,60",
+      "75,60",
+      "75,59",
+      "73,58",
+      "73,59",
+      "73,60",
+      "72,60",
+      "71,19",
+      "71,18",
+      "71,17",
+      "71,16",
+      "71,15",
+      "71,14",
+      "71,13",
+      "72,13",
+      "73,13",
+      "73,12",
+      "72,12",
+      "71,12",
+      "73,14",
+      "72,14",
+      "72,15",
+      "72,16",
+      "72,17",
+      "72,18",
+      "73,18",
+      "73,19",
+      "74,19",
+      "74,18",
+      "74,17",
+      "74,16",
+      "73,16",
+      "73,15",
+      "74,15",
+      "74,14",
+      "74,13",
+      "74,12",
+      "73,17",
+      "72,19",
+      "75,19",
+      "76,19",
+      "77,19",
+      "78,19",
+      "79,19",
+      "80,19",
+      "81,18",
+      "81,17",
+      "81,16",
+      "81,15",
+      "80,14",
+      "79,13",
+      "78,13",
+      "77,13",
+      "76,12",
+      "75,12",
+      "75,13",
+      "75,18",
+      "76,18",
+      "77,18",
+      "78,18",
+      "79,18",
+      "80,18",
+      "80,17",
+      "80,16",
+      "80,15",
+      "79,14",
+      "78,14",
+      "77,14",
+      "76,13",
+      "75,14",
+      "75,15",
+      "75,16",
+      "75,17",
+      "76,17",
+      "77,17",
+      "78,17",
+      "82,18",
+      "83,18",
+      "84,18",
+      "85,18",
+      "86,18",
+      "87,18",
+      "84,19",
+      "83,19",
+      "82,19",
+      "81,19",
+      "86,19",
+      "87,19",
+      "88,19",
+      "89,19",
+      "90,19",
+      "90,18",
+      "90,17",
+      "90,16",
+      "89,15",
+      "89,14",
+      "81,13",
+      "80,13",
+      "76,14",
+      "76,15",
+      "76,16",
+      "77,16",
+      "78,16",
+      "79,16",
+      "79,17",
+      "79,15",
+      "78,15",
+      "77,15",
+      "106,13",
+      "106,14",
+      "106,15",
+      "106,16",
+      "106,17",
+      "106,18",
+      "106,19",
+      "105,19",
+      "104,19",
+      "103,19",
+      "102,19",
+      "101,19",
+      "100,19",
+      "99,19",
+      "98,19",
+      "97,19",
+      "96,19",
+      "95,19",
+      "94,19",
+      "93,19",
+      "92,19",
+      "91,19",
+      "85,19",
+      "81,14",
+      "82,14",
+      "82,13",
+      "82,15",
+      "82,16",
+      "82,17",
+      "83,17",
+      "84,17",
+      "85,17",
+      "86,17",
+      "87,17",
+      "88,17",
+      "91,17",
+      "92,17",
+      "94,17",
+      "96,17",
+      "98,17",
+      "99,17",
+      "100,17",
+      "101,17",
+      "102,17",
+      "103,17",
+      "104,17",
+      "105,17",
+      "105,18",
+      "105,16",
+      "105,15",
+      "105,14",
+      "105,13",
+      "104,13",
+      "102,13",
+      "100,13",
+      "99,13",
+      "98,13",
+      "96,13",
+      "95,13",
+      "94,13",
+      "92,13",
+      "91,13",
+      "89,13",
+      "77,12",
+      "78,12",
+      "79,12",
+      "80,12",
+      "81,12",
+      "82,12",
+      "90,12",
+      "91,12",
+      "92,12",
+      "93,12",
+      "94,12",
+      "95,12",
+      "96,12",
+      "99,12",
+      "100,12",
+      "101,12",
+      "102,12",
+      "103,12",
+      "104,12",
+      "105,12",
+      "106,12",
+      "98,12",
+      "97,12",
+      "89,12",
+      "87,15",
+      "86,15",
+      "85,15",
+      "84,15",
+      "83,15",
+      "83,16",
+      "84,16",
+      "85,16",
+      "86,16",
+      "87,16",
+      "88,16",
+      "89,16",
+      "88,15",
+      "89,17",
+      "89,18",
+      "88,18",
+      "90,13",
+      "90,14",
+      "90,15",
+      "91,15",
+      "92,15",
+      "92,14",
+      "93,14",
+      "93,13",
+      "94,14",
+      "91,14",
+      "91,16",
+      "92,16",
+      "93,16",
+      "94,16",
+      "95,16",
+      "96,16",
+      "97,16",
+      "98,16",
+      "99,16",
+      "100,16",
+      "101,16",
+      "102,16",
+      "103,16",
+      "104,16",
+      "104,15",
+      "104,14",
+      "103,14",
+      "103,13",
+      "103,15",
+      "102,15",
+      "101,15",
+      "100,15",
+      "98,15",
+      "97,15",
+      "96,15",
+      "95,15",
+      "94,15",
+      "93,15",
+      "95,14",
+      "96,14",
+      "97,14",
+      "98,14",
+      "99,14",
+      "100,14",
+      "101,14",
+      "102,14",
+      "101,13",
+      "97,13",
+      "99,15",
+      "93,17",
+      "92,18",
+      "91,18",
+      "93,18",
+      "94,18",
+      "96,18",
+      "97,18",
+      "99,18",
+      "100,18",
+      "101,18",
+      "102,18",
+      "103,18",
+      "104,18",
+      "98,18",
+      "95,18",
+      "95,17",
+      "97,17",
+      "71,45",
+      "71,46",
+      "72,47",
+      "73,46",
+      "73,45",
+      "72,45",
+      "72,46",
+      "71,47",
+      "73,47",
+      "74,47",
+      "74,46",
+      "75,46",
+      "75,45",
+      "74,45",
+      "75,47",
+      "83,26",
+      "84,26",
+      "85,26",
+      "85,27",
+      "85,28",
+      "85,29",
+      "85,30",
+      "85,31",
+      "85,32",
+      "85,33",
+      "85,34",
+      "84,34",
+      "83,34",
+      "83,33",
+      "83,32",
+      "83,31",
+      "83,30",
+      "83,28",
+      "83,27",
+      "84,27",
+      "84,29",
+      "84,31",
+      "84,32",
+      "84,33",
+      "84,28",
+      "84,30",
+      "83,29"
+    ]
   }
 ];
 // 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來
