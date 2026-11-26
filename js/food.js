@@ -15,7 +15,8 @@ const FOOD_DROPS = {   // 依怪物的 behavior：掉什麼、幾個、機率
 // BOSS 打倒一定掉（散在倒下的地方旁邊）：哪一種 BOSS（怪物身上的旗標）→ 掉什麼、幾個
 const BOSS_FOOD_DROPS = [
   { flag: 'loofahQueen',   id: 'loofah', qty: 5 },   // 絲瓜女王 → 5 條絲瓜（js/loofah-queen.js）
-  { flag: 'bananaEmperor', id: 'banana', qty: 5 },   // 金蕉大王 → 5 根香蕉（js/banana-emperor.js；一般金蕉王的香蕉在 js/golden-banana-king.js）
+  { flag: 'bananaEmperor', id: 'banana', qty: 5, icon: '🍌' },   // 金蕉大王 → 5 根香蕉（js/banana-emperor.js；一般金蕉王的香蕉在 js/golden-banana-king.js）
+  { flag: 'fishKing',      id: 'sashimi', qty: 5 },   // 魚頭王 → 5 片生魚片（js/fish-king.js；死在深水裡的話會漂在水面上）
 ];
 const FOOD_COOK = { time: 1.2 };   // 待在火海裡幾秒會烤熟
 const FOOD_SICK = { dur: 6, slow: .25 };   // 生吃鬧肚子：幾秒、走慢多少
@@ -36,7 +37,7 @@ function foodDeathDrop(e) {
       const a = i / boss.qty * Math.PI * 2 + Math.random() * .5, d = 16 + Math.random() * 22;
       G.groundItems.push({ id: boss.id, qty: 1, x: e.x + Math.cos(a) * d, y: e.y + 8 + Math.sin(a) * d * .6, at: performance.now() / 1000, floor: actorFloor(e) });   // floor：掉在幾樓（陸橋上掉的才不會被橋面蓋住）
     }
-    flash((boss.id === 'banana' ? '🍌 ' : '') + itemById(boss.id).name + ' ×' + boss.qty, e.x, e.y - 60, '#ffe066');
+    flash((boss.icon ? boss.icon + ' ' : '') + itemById(boss.id).name + ' ×' + boss.qty, e.x, e.y - 60, '#ffe066');
     return;
   }
   const d = FOOD_DROPS[e.behavior];
