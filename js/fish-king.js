@@ -66,7 +66,7 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   accel: .9,                  // 加速／減速多快（每秒追上目標速度的幾成；小一點＝起步、停下都慢慢的，比較有重量）
   weave: { amp: .2, freq: 1.5 },   // 游的時候左右擺（amp＝擺多大，弧度；freq＝擺多快）
   strokeSecs: .55,            // 游泳時換一張動作圖要幾秒（大一點＝擺尾慢、比較沉重）
-  dive: [3, 5],               // 潛水幾秒（隨機）；時間到就游去岸邊浮上來
+  dive: [1.5, 2.5],           // 潛水幾秒（隨機）；時間到就游去岸邊浮上來
   surface: [4, 6],            // 浮上來幾秒（隨機）
   approachMax: 4,             // 潛水時間到之後，最多花幾秒游到岸邊才浮上來
   diveTurn: 1.4,              // 潛下去之前轉身露出背面幾秒（打得到、背面比較痛；這段時間身體慢慢沉下去）
@@ -80,7 +80,9 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   // 高壓水砲：每隔幾秒（隨機）一次、預警幾秒、掃多久（秒）、掃的角度（弧度）、射程（格）、水柱多粗（像素）、扣多少血、把人沖開幾格
   //   先跳上岸才噴：reach＝離牠幾格內找岸上的落腳處、shore＝落腳處離水最多幾格、jumpSecs／jumpHeight＝跳上岸要幾秒、跳多高（像素）、
   //   stay＝噴完在岸上多待幾秒才跳回水裡
-  cannon: { every: [2.5, 4], windup: 1.1, sweep: 1.4, arc: 2.094, range: 14.2, width: 60, damage: 14, push: 2.4,
+  //   fromDive＝潛水游到岸邊時，有幾成直接從水裡跳上岸噴水砲（不先浮上來；浮上來常常被溫特一打就縮回去）
+  //   retry＝浮在水面上要噴、但附近找不到岸可以跳時，幾秒後再找一次
+  cannon: { every: [1.5, 2.5], fromDive: .6, retry: .6, windup: 1.1, sweep: 1.4, arc: 2.094, range: 14.2, width: 60, damage: 14, push: 2.4,
     reach: 8, shore: 2.5, jumpSecs: .8, jumpHeight: 120, stay: .6,
     // 沖下水：被水砲沖開時，旁邊 push 格內有深水的話，往水池那邊偏過去（最多偏幾度；0＝照水柱方向直直沖開、不偏）
     //   魚頭王是站在走道上噴的，水柱常常沿著走道掃，不偏的話人只會在走道上滑，很少掉下水
@@ -103,7 +105,10 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   flinch: { turn: .5 },
   // 被雷電打到（雷電彈、安柏）：原地發抖幾秒 → 轉 tilt 度、露出背面魚肉（像趴著）垂直掉下來（fall＝往下掉的加速度）
   //   → 掉在地上就擱淺、掉在水裡就沉下去（sink＝沉下去要幾秒）消失 gone 秒（隨機）再從靠近人的岸邊浮出來
-  shocked: { shake: .8, tilt: 30, fall: 1600, sink: 1.1, gone: [2.5, 4] },
+  shocked: { shake: .8, tilt: 30, fall: 1600, sink: 1.1, gone: [1.2, 2] },
+  // 在岸上（跳上岸噴水砲、擱淺）被雷電打到：原地麻痺 secs 秒（全身發抖、冒電花、不會噴水砲也不會跳回水裡）；
+  //   麻痺結束後 cd 秒內再被電不會又麻痺（不然安柏一直電，牠就永遠動不了）
+  landShock: { secs: 3, cd: 1.5 },
   // 巨物的重量感（跟虱目魚王落地同一套做法）：
   //   落地（跳上岸噴水砲、被電掉在地上）＝畫面大震 landShake 像素、慢慢減弱 landSecs 秒，地上裂開（crack＝中間那片裂痕多大）、揚起塵土、落地聲（音量 landVol）
   //   落水（登場、海豚跳、跳回水裡、被電掉進水裡）＝畫面震 waterShake 像素、慢慢減弱 waterSecs 秒
@@ -121,7 +126,7 @@ const FISH_KING = applyBossSettings('FISH_KING', {
   // 導電：被雷電打到時多扣牠多少血、池裡的隊友／溫特扣多少血、池裡的其他怪物扣多少血、隊友被電暈幾秒、多久才能再導電一次（秒）
   shock: { boss: 60, mate: 12, minion: 40, daze: .8, cd: .6 },
   // 叫小弟：血量剩幾成時叫（每個只叫一次）、叫幾隻、潛到最遠的地方躲幾秒、躲的時候游多快（倍率）
-  minions: { at: [.7, .4], count: 3, hideSecs: 4, fleeMul: 1.8 },
+  minions: { at: [.7, .4], count: 3, hideSecs: 2.5, fleeMul: 1.8 },
   minionId: 'fish_head',
 });
 
@@ -205,9 +210,10 @@ function updateFishKing(dt) {
   K.sparks = K.sparks.filter(s => (s.t += dt) < s.life);
   fkImpactAge(K, dt);   // 水砲打到地上的白色水花：慢慢長大、變形、淡掉（水砲停了也會播完）
   if (K.shockCd > 0) K.shockCd -= dt;
+  if (K.paraCd > 0) K.paraCd -= dt;
   if (K.done) return;
   const e = K.e;
-  if (!fishKingAlive(K)) { K.done = true; K.cannon = null; fkShow(K, true); return; }
+  if (!fishKingAlive(K)) { K.done = true; K.cannon = null; K.paraT = 0; e.tremble = false; fkShow(K, true); return; }
   const P = FISH_KING;
   // 有沒有被溫特打到：溫特的手槍、特殊子彈打中都會設 playerAggroT（隊員打的不會）；牠不用仇恨，讀完就歸零，下次有值＝又被打了
   const playerHit = (e.playerAggroT || 0) > 0; e.playerAggroT = 0;
@@ -223,6 +229,7 @@ function updateFishKing(dt) {
     return;
   }
   fkGrudgeStep(K);   // 記仇：誰在打牠守的核心；核心剩一半暴怒
+  if (K.paraT > 0) { fkParaStep(K, dt); return; }   // 在岸上被電麻痺：什麼都不做（擱淺的話被打照樣比較痛）
   if (K.phase === 'intro') { fkIntroStep(K, dt); return; }
   if (K.phase === 'leap') { fkLeapStep(K, dt); return; }
   if (K.phase === 'landJump') { fkLandJumpStep(K, dt); return; }   // 跳上岸準備噴水砲
@@ -263,7 +270,10 @@ function updateFishKing(dt) {
     if (K.leapRoute) { if (fkLeapRouteStep(K, dt)) return; }   // 正在游去海豚躍路線的起點（地圖編輯器畫的）：游到就跳
     else if ((K.leapT -= dt) <= 0) { if (fkLeapStart(K, Math.round(fkRand(P.leap.hops)) - 1)) return; K.leapT = 1.5; }   // 海豚跳換區（找不到地方跳：等一下再試）
     if (K.t <= 0 && !K.approach) { K.approach = true; K.goal = fkShoreGoal(K); K.t = P.approachMax; }   // 潛水時間到：游去岸邊（靠近人的地方）
-    if (K.approach && (K.t <= 0 || (K.goal && Math.hypot(K.goal.x - e.x, K.goal.y - e.y) < 24))) fkSurface(K);
+    if (K.approach && (K.t <= 0 || (K.goal && Math.hypot(K.goal.x - e.x, K.goal.y - e.y) < 24))) {
+      if (Math.random() < (P.cannon.fromDive || 0) && fkStartCannon(K)) return;   // 有機會直接從水裡跳上岸噴水砲
+      fkSurface(K);
+    }
   } else if (K.turnT > 0) {   // 轉身露出背面，等一下就潛下去
     K.turnT -= dt; fkFace(e, 'back');
     const k = Math.max(0, K.turnT / (K.turnT0 || FISH_KING.diveTurn)); e.fkRise = (K.turnRise ?? 1) * k * k * (3 - 2 * k);   // 轉身時慢慢沉下去
@@ -271,7 +281,7 @@ function updateFishKing(dt) {
     return;
   } else {
     if (K.t <= 0) { K.turnT = K.turnT0 = P.diveTurn; K.turnRise = e.fkRise ?? 1; return; }
-    if ((K.cannonT -= dt * fkRage(K)) <= 0) { K.cannonT = fkRand(P.cannon.every); if (fkStartCannon(K)) return; }   // 暴怒時比較常噴
+    if ((K.cannonT -= dt * fkRage(K)) <= 0) { if (fkStartCannon(K)) { K.cannonT = fkRand(P.cannon.every); return; } K.cannonT = P.cannon.retry || fkRand(P.cannon.every); }   // 暴怒時比較常噴；找不到岸就等一下再找
   }
   fkSwim(K, dt, 1);
 }
@@ -947,6 +957,7 @@ function fishKingShocked(e) {
   const K = fishKingState(); if (!K || K.done || !e || !e.fishKing || K.e !== e || e.hp <= 0) return;
   // 發抖、掉下去：冒頭偷看時（不扣血、沒有血條）、浮在水面上、跳在空中被電到都會
   const pre = K.phase === 'peek';
+  if (K.phase === 'land' || K.phase === 'strand') { fkParalyze(K); return; }   // 在岸上被電：麻痺（岸上不導電）
   if (pre || K.phase === 'leap' || (K.phase === 'swim' && !K.sub)) {
     const inWater = (e.slimeLift || 0) < 5 && deepWaterAtPoint(e.x, e.y);
     fkShockStart(K, pre);
@@ -977,6 +988,32 @@ function fishKingShocked(e) {
     K.sparks.push({ x1: e.x, y1: e.y, x2: x, y2: y, t: 0, life: .3, seed: Math.random() * 10 });
   }
   if (typeof spawnLightningBolt === 'function') for (const a of hit) spawnLightningBolt(a.x, a.y + 10, .5);
+}
+
+// ---- 在岸上被雷電打到：麻痺（FISH_KING.landShock）----
+function fkParalyze(K) {
+  const e = K.e, L = FISH_KING.landShock || { secs: 3, cd: 1.5 };
+  if (K.paraT > 0 || K.paraCd > 0) return;   // 已經在麻痺、或剛麻痺完：不重來
+  K.paraT = L.secs; K.cannon = null;   // 正在預警／噴的水砲中斷
+  e.tremble = true; e.moving = false; e.knockT = 0;
+  flash('麻痺！', e.x, e.y - (e.drawHeight || 190) - 10, '#fff27a', 1.2);
+  if (typeof sfxAt === 'function') bossSfxAt('fishHurt', e.x, e.y, 1, 'fish-king-paralyzed');
+  fkParaSparks(K, 5);
+}
+function fkParaSparks(K, n) {   // 身上竄來竄去的小電花
+  const e = K.e, w = (e.drawWidth || 190) * .4, h = e.drawHeight || 190;
+  for (let i = 0; i < n; i++) {
+    const x = e.x + (Math.random() - .5) * w * 2, y = e.y - Math.random() * h * .7;
+    K.sparks.push({ x1: x, y1: y, x2: x + (Math.random() - .5) * 60, y2: y + (Math.random() - .5) * 60, t: 0, life: .25, seed: Math.random() * 10 });
+  }
+}
+function fkParaStep(K, dt) {
+  const e = K.e;
+  e.dmgTakenMul = K.phase === 'strand' ? FISH_KING.strandMul : 1;
+  e.tremble = true; e.moving = false; e.knockT = 0;
+  if (Math.random() < dt * 8) fkParaSparks(K, 1);
+  if ((K.paraT -= dt) > 0) return;
+  K.paraT = 0; e.tremble = false; K.paraCd = (FISH_KING.landShock || {}).cd || 0;   // 麻痺完：接著原本的事（在岸上就待一下跳回水裡、擱淺就繼續翻）
 }
 
 // ---- 被溫特的一般子彈打到：閃白、轉身往下潛 ----

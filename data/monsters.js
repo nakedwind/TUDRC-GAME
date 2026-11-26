@@ -1844,8 +1844,8 @@ const BOSS_SETTINGS_DEFAULT = {
     },
     "strokeSecs": 0.55,
     "dive": [
-      3,
-      5
+      1.5,
+      2.5
     ],
     "surface": [
       4,
@@ -1865,9 +1865,11 @@ const BOSS_SETTINGS_DEFAULT = {
     },
     "cannon": {
       "every": [
-        2.5,
-        4
+        1.5,
+        2.5
       ],
+      "fromDive": 0.6,
+      "retry": 0.6,
       "windup": 1.1,
       "sweep": 1.4,
       "arc": 2.094,
@@ -1935,9 +1937,13 @@ const BOSS_SETTINGS_DEFAULT = {
       "fall": 1600,
       "sink": 1.1,
       "gone": [
-        2.5,
-        4
+        1.2,
+        2
       ]
+    },
+    "landShock": {
+      "secs": 3,
+      "cd": 1.5
     },
     "impact": {
       "landShake": 10,
@@ -1974,7 +1980,7 @@ const BOSS_SETTINGS_DEFAULT = {
         0.4
       ],
       "count": 3,
-      "hideSecs": 4,
+      "hideSecs": 2.5,
       "fleeMul": 1.8
     }
   },
