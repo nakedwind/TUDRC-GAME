@@ -760,6 +760,24 @@ function loofahCoreShotTarget(aim) {
   }
   return null;
 }
+// 吊著核心的那段藤蔓被子彈打中一下：碎屑、晃一下，打夠 shotHits 下就斷、核心掉下來
+// （一般子彈、分裂彈、雷電彈都用這一個；fromX＝子彈從哪一邊打過來，決定往哪邊晃）
+function loofahCoreVineHit(rec, fromX) {
+  const core = rec.core; if (!core || core.dead || rec.state !== 'hang') return;
+  const hx = core.x, hy = core.y - rec.h - CORE.h * .8 * .5 - 10;
+  for (let i = 0; i < 4; i++) G.effects.push({ particle: true, kind: 'spark', x: hx, y: hy, vx: (Math.random() - .5) * 90, vy: -(10 + Math.random() * 40), r: 1.5 + Math.random(), life: .35, life0: .35, color: i % 2 ? '#7a8432' : '#a6ae52' });
+  if (typeof sfxAt === 'function') sfxAt('knock2', hx, hy, .3, 'loofah-core-vine-hit');
+  rec.hits = (rec.hits || 0) + 1; rec.kick = fromX < core.x ? 8 : -8;   // 被打中：晃一下
+  if (rec.hits >= LOOFAH_QUEEN.core.shotHits) {
+    if (typeof sfxAt === 'function') sfxAt('swordSwing', hx, hy, .4, 'loofah-core-vine-snap');
+    lqDropCore(rec);
+  }
+}
+// 這顆核心現在是不是被絲瓜女王用藤蔓吊在空中：是的話回傳那一筆（rec），不是回傳 null
+function loofahHangRec(core) {
+  for (const rec of G.loofahQueens || []) if (rec.core === core && rec.state === 'hang' && !core.dead) return rec;
+  return null;
+}
 function shootLoofahCoreVine(p, rec, aim, aimAng) {
   const core = rec.core, hx = core.x, hy = core.y - rec.h - CORE.h * .8 * .5 - 10;   // 子彈打在核心上面那一段藤蔓
   const m = gunMuzzleAt(p, aimAng), mx = m.x, my = m.y;
@@ -769,13 +787,7 @@ function shootLoofahCoreVine(p, rec, aim, aimAng) {
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: hx, y2: hy, life: .07, life0: .07, color: '#ffe79a' });
   G.effects.push({ ring: true, x: hx, y: hy, r: 2, r2: 10, life: .14, life0: .14, color: '#a6ae52' });
   sfx('shotPistol');
-  for (let i = 0; i < 4; i++) G.effects.push({ particle: true, kind: 'spark', x: hx, y: hy, vx: (Math.random() - .5) * 90, vy: -(10 + Math.random() * 40), r: 1.5 + Math.random(), life: .35, life0: .35, color: i % 2 ? '#7a8432' : '#a6ae52' });
-  if (typeof sfxAt === 'function') sfxAt('knock2', hx, hy, .3, 'loofah-core-vine-hit');
-  rec.hits = (rec.hits || 0) + 1; rec.kick = aim.x < core.x ? 8 : -8;   // 被打中：晃一下
-  if (rec.hits >= LOOFAH_QUEEN.core.shotHits) {
-    if (typeof sfxAt === 'function') sfxAt('swordSwing', hx, hy, .4, 'loofah-core-vine-snap');
-    lqDropCore(rec);
-  }
+  loofahCoreVineHit(rec, aim.x);
   if (p.ammo <= 0) startReload(p);
   else if (PLAYER_ATK.double && Math.random() < PLAYER_ATK.double) p.atkCd = .07;
 }

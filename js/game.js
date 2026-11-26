@@ -2151,13 +2151,8 @@ function updatePlayerAttack(dt) {
   if (best && best.fogTreeRef) { const cm = rollCrit('player'); damageFogCrystal(best.fogTreeRef, Math.round(playerGun().dmg * (cm || 1))); markHit(cm); best = null; }   // 打到霧樹的水晶：打破就散霧（js/fog.js）
   if (best && best.bigPearlRef) { shootBigPearl(best.bigPearlRef, p.x, p.y); best = null; }   // 打到大珍珠：往子彈的方向推（js/pearl-elder.js）
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
-    const critMul = rollCrit('player'), shotDmg = Math.round(playerGun().dmg * (critMul || 1));
-    wakeCore(best); best.lastHp = best.hp;
-    best.lastHitBy = p; best.lastHitAt = performance.now() / 1000;   // 誰打的：魚頭王會記仇（js/fish-king.js 的 fkGrudgeStep）
-    if (typeof milkfishKingCoreShot === 'function') milkfishKingCoreShot(best);   // 虱目魚王還躲在水池裡：開始登場表演（js/milkfish-king.js）
-    best.hp -= shotDmg; markHit(critMul);
-    if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
-    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60, true); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');
+    const critMul = rollCrit('player');
+    playerShootCore(p, best, Math.round(playerGun().dmg * (critMul || 1)), critMul);
     best = null;
   }
   if (best) {
@@ -2286,6 +2281,16 @@ window.addEventListener('keydown', e => {
   sfx('switch'); setPaused(!paused);
 });
 // 目標在畫面上「身體」的範圍（世界座標）：怪物依圖片大小與浮空高度，異質核心依浮起高度（js/anomalous-core.js）
+// 溫特的子彈打中異質核心：叫醒它並扣血，不吸仇恨、不擊退（一般子彈、分裂彈、雷電彈都用這一個，js/special-guns.js）
+// critMul：爆擊倍率（沒爆擊＝0／undefined）；color：沒爆擊時跳的數字顏色
+function playerShootCore(p, core, shotDmg, critMul, color = '#d69bff') {
+  wakeCore(core); core.lastHp = core.hp;
+  core.lastHitBy = p; core.lastHitAt = performance.now() / 1000;   // 誰打的：魚頭王會記仇（js/fish-king.js 的 fkGrudgeStep）
+  if (typeof milkfishKingCoreShot === 'function') milkfishKingCoreShot(core);   // 虱目魚王還躲在水池裡：開始登場表演（js/milkfish-king.js）
+  core.hp -= shotDmg; markHit(critMul);
+  if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
+  if (critMul) flashCrit('-' + shotDmg, core.x, core.y - 60, true); else flashDmg('-' + shotDmg, core.x, core.y - 56, color);
+}
 function targetBodyBox(t) {
   if (G.cores && G.cores.includes(t)) {
     const lift = typeof coreLift === 'function' ? coreLift(t) : 0;

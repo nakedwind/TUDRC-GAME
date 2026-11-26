@@ -164,8 +164,8 @@ function lineHit(p, ang, maxD, cands, hitR) {
   let target = null, d = maxD;
   if (typeof mothPlayerMisses === 'function' && mothPlayerMisses(p)) return { target, d };   // 吸了人面蝶的混亂鱗粉：八成打偏（js/human-face-butterfly.js）
   for (const o of cands) {
-    if (!G.cores.includes(o) && !onFloor(actorFloor(p), o)) continue;   // 特殊彈只打得到同一層的（陸橋上／下打不到）；核心照原本
-    const b = typeof targetBodyBox === 'function' && G.enemies.includes(o) ? targetBodyBox(o) : { cx: o.x, cy: o.y - 20 };
+    if ((G.enemies.includes(o) || G.towers.includes(o)) && !onFloor(actorFloor(p), o)) continue;   // 特殊彈只打得到同一層的怪物、隊員（陸橋上／下打不到）；核心、油桶這些照原本
+    const b = o.hitPt ? { cx: o.hitPt.x, cy: o.hitPt.y } : typeof targetBodyBox === 'function' && (G.enemies.includes(o) || G.cores.includes(o)) ? targetBodyBox(o) : { cx: o.x, cy: o.y - 20 };   // 核心浮在空中：看畫面上的身體
     for (const [px, py] of [[o.x, o.y], [b.cx, b.cy]]) {
       const along = (px - p.x) * Math.cos(ang) + (py - p.y) * Math.sin(ang);
       if (along < 0 || along > d) continue;
@@ -176,7 +176,50 @@ function lineHit(p, ang, maxD, cands, hitR) {
   return { target, d };
 }
 const liveEnemies = () => G.enemies.filter(e => !e.dead && e.hp > 0);
-const bodyPoint = o => G.enemies.includes(o) && typeof targetBodyBox === 'function' ? (b => ({ x: b.cx, y: b.cy }))(targetBodyBox(o)) : { x: o.x, y: o.y - 20 };
+const bodyPoint = o => o.hitPt ? o.hitPt : (G.enemies.includes(o) || G.cores.includes(o)) && typeof targetBodyBox === 'function' ? (b => ({ x: b.cx, y: b.cy }))(targetBodyBox(o)) : { x: o.x, y: o.y - 20 };
+
+// ---- 分裂彈、雷電彈也打得到「一般子彈打得到的東西」（js/game.js 的 updatePlayerAttack）----
+// 怪物以外：異質核心（躲在順順宮帽裡、被珍珠大童抱著、泡在深水裡的打不到，跟一般子彈一樣）、
+// 絲瓜女王吊在空中的核心（打的是吊著它的藤蔓）、油桶／油箱、異質礦、石頭、霧樹的紫水晶、珍珠大童的大珍珠
+function bulletShotTargets() {
+  const list = liveEnemies();
+  for (const c of G.cores || []) {
+    if (c.dead || c.hidden || c.carried || c.hp <= 0) continue;
+    if (typeof poolCoreSubmerged === 'function' && poolCoreSubmerged(c)) continue;
+    const rec = typeof loofahHangRec === 'function' ? loofahHangRec(c) : null;
+    if (rec) { if (!rec.vineProxy) rec.vineProxy = { lqVineRef: rec }; Object.assign(rec.vineProxy, { x: c.x, y: c.y, hitPt: { x: c.x, y: c.y - rec.h } }); list.push(rec.vineProxy); }   // 吊著的核心：畫面上在 rec.h 那麼高的地方
+    else list.push(c);
+  }
+  for (const o of G.obstacles || []) {
+    if (o.hp <= 0) continue;
+    if (typeof oilItem === 'function' && oilItem(o)) list.push(oilProxy(o));
+    else if (o.ore && typeof oreProxy === 'function') list.push(oreProxy(o));
+    else if (typeof isRock === 'function' && isRock(o)) list.push(rockProxy(o));
+  }
+  for (const t of G.fogTrees || []) if (!t.burnt && typeof fogCrystalProxy === 'function') { const px = fogCrystalProxy(t); px.hitPt = { x: px.x, y: px.y }; list.push(px); }
+  for (const bp of G.bigPearls || []) {
+    if (!bp.shotProxy) bp.shotProxy = { bigPearlRef: bp };
+    Object.assign(bp.shotProxy, { x: bp.x, y: bp.y, hitPt: typeof bigPearlBody === 'function' ? bigPearlBody(bp) : { x: bp.x, y: bp.y } });
+    list.push(bp.shotProxy);
+  }
+  return list;
+}
+// 打中的是不是「怪物以外的東西」（油桶、礦、石頭、水晶、大珍珠、吊核心的藤蔓）：是就照一般子彈的方式處理，回傳 true
+function bulletHitProp(o, dmg, p) {
+  if (o.oilRef) { damageOil(o.oilRef, dmg, 'player'); return true; }
+  if (o.oreRef) { pistolHitOre(o.oreRef, dmg); return true; }
+  if (o.rockRef) { damageRock(o.rockRef, dmg, 'player'); return true; }
+  if (o.fogTreeRef) { damageFogCrystal(o.fogTreeRef, dmg); return true; }
+  if (o.bigPearlRef) { shootBigPearl(o.bigPearlRef, p.x, p.y); return true; }
+  if (o.lqVineRef) { loofahCoreVineHit(o.lqVineRef, p.x); return true; }
+  return false;
+}
+// 特殊子彈打中任何東西：怪物＝bulletHurtEnemy；核心＝跟一般子彈一樣（叫醒、扣血）；其他照 bulletHitProp
+function bulletHitAny(o, dmg, col, p, hitSound) {
+  if (bulletHitProp(o, dmg, p)) return;
+  if (G.cores.includes(o)) { if (typeof playerShootCore === 'function') playerShootCore(p, o, dmg, 0, col); return; }
+  bulletHurtEnemy(o, dmg, col, p, hitSound);
+}
 // 子彈打中怪物：扣血、吸仇恨、閃色、跳數字（跟一般子彈一樣）
 function bulletHurtEnemy(e, dmg, col, p, hitSound = 'monsterHit') {   // hitSound：怪物沒有專屬「被打」音效時播的（分裂彈＝hitSplit）
   e.hp -= dmg;
@@ -205,11 +248,13 @@ function shotOpensHangiCap(p, ang, d) {
 function fireSplit(p, aim, b) {
   const ang = Math.atan2(aim.y - p.y, aim.x - p.x), range = b.range * CELL, hits = new Map();
   aimPose(p, ang);
-  const { x: mx, y: my } = gunMuzzleAt(p, ang), cands = liveEnemies();
+  const { x: mx, y: my } = gunMuzzleAt(p, ang), cands = bulletShotTargets();   // 跟一般子彈一樣：核心、油桶、礦…都打得到
   for (let i = 0; i < b.pellets; i++) {
     const a = ang + (b.pellets > 1 ? (i / (b.pellets - 1) - .5) * b.spread : 0) + (Math.random() - .5) * .05;
     const dist = clearDistance(p, a, range), r = lineHit(p, a, dist, cands, 14);
     let ex = p.x + Math.cos(a) * r.d, ey = p.y + Math.sin(a) * r.d;
+    if (r.target) { const hp = bodyPoint(r.target); if (r.target.hitPt || G.cores.includes(r.target)) { ex = hp.x; ey = hp.y; } }   // 浮在空中的（核心、水晶…）：彈道畫到身上
+    if (!r.target && typeof shootFishEggOnLine === 'function') { const egg = shootFishEggOnLine(p.x, p.y, ex, ey); if (egg) { ex = egg.x; ey = egg.y; } }   // 彈丸打到魚卵：引爆（跟一般子彈一樣，js/clownfish.js）
     if (!r.target) { const cap = shotOpensHangiCap(p, a, r.d); if (cap) { ex = cap.x; ey = cap.y; } }   // 彈丸打到順順宮帽：打開
     G.effects.push({ bullet: true, x1: mx, y1: my, x2: ex, y2: ey, life: .08, life0: .08, color: b.color });
     // 散彈：每顆照打到的距離打折（near 格內全傷害，到射程盡頭剩 farMul 倍）；近距離扇形還沒散開，幾乎每顆都打得到
@@ -217,7 +262,7 @@ function fireSplit(p, aim, b) {
     const pelletDmg = foeMul(b.dmg) * (1 - fall * (1 - (b.farMul ?? 1)));
     if (r.target) { hits.set(r.target, (hits.get(r.target) || 0) + pelletDmg); G.effects.push({ ring: true, x: ex, y: ey, r: 2, r2: 7, life: .12, life0: .12, color: b.color }); }
   }
-  for (const [e, dmg] of hits) bulletHurtEnemy(e, Math.round(dmg), b.color, p, 'hitSplit');
+  for (const [e, dmg] of hits) bulletHitAny(e, Math.round(dmg), b.color, p, 'hitSplit');
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .09, life0: .09 });
   addLightFlash('muzzle', mx, my, 1.2);
   if (typeof spawnShellCasing === 'function') spawnShellCasing(mx, my, ang);
@@ -263,15 +308,19 @@ function flashBangLand(s) {
 function fireShock(p, aim, b) {
   const ang = Math.atan2(aim.y - p.y, aim.x - p.x);
   aimPose(p, ang);
-  const dist = clearDistance(p, ang, 9 * CELL), r = lineHit(p, ang, dist, liveEnemies(), 16);
+  const dist = clearDistance(p, ang, 9 * CELL), r = lineHit(p, ang, dist, bulletShotTargets(), 16);   // 跟一般子彈一樣：核心、油桶、礦…都打得到
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
-  const capHit = r.target ? null : shotOpensHangiCap(p, ang, r.d);   // 電擊打到順順宮帽：打開
-  const end = r.target ? bodyPoint(r.target) : capHit || { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
+  const lineEnd = { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
+  const eggHit = r.target || typeof shootFishEggOnLine !== 'function' ? null : shootFishEggOnLine(p.x, p.y, lineEnd.x, lineEnd.y);   // 電到魚卵：引爆（js/clownfish.js）
+  const capHit = r.target || eggHit ? null : shotOpensHangiCap(p, ang, r.d);   // 電擊打到順順宮帽：打開
+  const end = r.target ? bodyPoint(r.target) : eggHit || capHit || lineEnd;
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .12, life0: .12, color: b.color });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
   sfx('shotShock');
   const struck = [];   // 被電到的地方（隊員在旁邊就會被波及）
-  if (r.target) {
+  if (r.target && bulletHitProp(r.target, Math.round(foeMul(b.dmg)), p)) {   // 打到油桶、礦、石頭、水晶、大珍珠、吊核心的藤蔓：照一般子彈處理，電流不往外跳
+    spawnLightningBolt(end.x, end.y + 10, .6); struck.push({ x: r.target.x, y: r.target.y });
+  } else if (r.target) {
     const hits = [r.target];
     for (let k = 0; k < b.chain; k++) {   // 跳到離上一隻最近、還沒被電到的怪物
       const cur = hits[hits.length - 1]; let next = null, nd = b.chainR * CELL;
@@ -282,6 +331,11 @@ function fireShock(p, aim, b) {
       hits.push(next);
     }
     hits.forEach((e, i) => {
+      if (G.cores.includes(e)) {   // 異質核心：跟一般子彈一樣叫醒、扣血（不會麻痺）；電流再跳到旁邊的怪物
+        playerShootCore(p, e, Math.round(foeMul(b.dmg)), 0, b.color);
+        const bp = bodyPoint(e); spawnLightningBolt(bp.x, bp.y + 10, .6); struck.push(e);
+        return;
+      }
       const dmg = Math.round(foeMul(b.dmg) * (i ? .7 : 1) * (e.shockResist ?? 1) * (typeof elementHitMul === 'function' ? elementHitMul(e, 'shock') : 1));   // 水系怪物雷電傷害 ×1.25   // 波及隊員的傷害在下面，照原本   // 跳出去的弱一點；不怕電的（小丑魚）只吃 shockResist 倍
       bulletHurtEnemy(e, dmg, b.color, p);
       if (!e.noStun && e.shockResist == null) { e.stunT = Math.max(e.stunT || 0, foeMul(b.stun)); e.shockT = Math.max(e.shockT || 0, foeMul(b.stun)); }
