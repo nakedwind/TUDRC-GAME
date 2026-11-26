@@ -25,8 +25,8 @@ const wsTutPress = e => e.type === 'mousedown' || e.type === 'click';
 // 「請玩家點某個東西」的一步：只有那個東西點得到，做到 done 才往下
 const wsTutClickStep = (name, sel, done, extra = {}) => ({ name, who: wsTutWho(), text: wsTutText(name), spots: () => [wsTutRect(sel)],
   allow: e => wsTutPress(e) && tutIn(e, wsTutQ(sel)), done, ...extra });
-// 「告訴玩家」的一步：按 Space 知道了
-const wsTutSayStep = (name, spots, extra = {}) => ({ name, who: wsTutWho(), text: wsTutText(name), ack: true, spots: () => spots().map(wsTutRect), ...extra });
+// 「告訴玩家」的一步：按 Space 或點一下滑鼠 知道了
+const wsTutSayStep = (name, spots, extra = {}) => ({ name, who: wsTutWho(), text: wsTutText(name), ack: true, ackClick: true, spots: () => spots().map(wsTutRect), ...extra });
 // 選一格並捲到看得到的地方
 function wsTutPick(key) {
   if (!key || typeof renderWorkshop !== 'function') return;
@@ -70,7 +70,7 @@ function wsTutSteps() {
     wsTutSayStep('ammo', () => ['#workshop [data-ws-tab="ammo"]', '#workshop .ws-ammo-scroll']),
     wsTutClickStep('clickBuild', '#workshop [data-ws-tab="build"]', () => wsPage === 'build'),
     wsTutSayStep('build', () => ['#workshop [data-ws-tab="build"]', '#workshop .ws-scroll']),
-    // 結尾：按 Space 或直接關掉工坊都算看完
+    // 結尾：按 Space、點一下滑鼠或直接關掉工坊都算看完
     wsTutSayStep('end', () => ['#workshop .workshop-close'], { done: () => !workshopOpen, allow: e => wsTutPress(e) && tutIn(e, wsTutQ('#workshop .workshop-close')) }),
   ];
 }
@@ -140,7 +140,7 @@ function wsTutArmorSteps() {
       allow: e => wsTutPress(e) && tutIn(e, wsTutQ(wsTutArmorItemSel())), done: () => String(backpackSel || '').startsWith(SQ_ARMOR_PREFIX) },
     { name: 'armorWear', ...T('armorWear'), skip: () => !wsTutQ('#backpackDetail [data-sq-wear]'), spots: () => [wsTutRect('#backpackDetail [data-sq-wear]')],
       allow: e => wsTutPress(e) && tutIn(e, wsTutQ('#backpackDetail [data-sq-wear]')), done: () => String(backpackSel || '').startsWith(SQ_WORN_PREFIX) },
-    { name: 'armorDone', ...T('armorDone'), ack: true, spots: () => [wsTutRect('#equipPanel')] },
+    { name: 'armorDone', ...T('armorDone'), ack: true, ackClick: true, spots: () => [wsTutRect('#equipPanel')] },
   ];
 }
 // js/backpack.js 的 openArmorPanel 呼叫：看過工坊教學、背包裡有隊友能穿的裝備、有隊員，才教

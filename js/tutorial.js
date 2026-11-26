@@ -135,6 +135,7 @@ const TUTORIAL = {
     aid: '按 <b>F</b> 用急救包幫{name}補血',
     treating: '{label}……<br><small>完成之前時間會停著</small>',
     ack: '按 <kbd>Space</kbd> 知道了',
+    ackClick: '按 <kbd>Space</kbd> 或點一下滑鼠 知道了',   // 也能用滑鼠點的步驟（ackClick，例如開發工坊教學）
   },
 };
 
@@ -384,7 +385,7 @@ const tutorialHoldsSpawns = () => isNewbieMap() && !(G && G.tutorialWave && G.tu
 // ==================== 動畫教學：暫停＋畫面變暗＋目標發光＋操作動畫 ====================
 // 一段教學（lesson）＝幾個步驟（step），一步做完才換下一步，最後一步做完就恢復遊戲。步驟的欄位：
 //   spots(L)：要發光的東西（畫面座標的方框陣列；round＝圓的）  anchor：卡片貼在第幾個發光的東西旁邊（預設第 0 個）
-//   demo／text：卡片上的動畫和字  ack：按 Space「知道了」就算做完（不用照做）
+//   demo／text：卡片上的動畫和字  ack：按 Space「知道了」就算做完（不用照做）  ackClick：搭配 ack，點一下滑鼠也算知道了
 //   allow(e, L)：這個輸入能不能用（true＝可以、'done'＝可以而且這一步做完了、false＝擋掉）
 //   done(L)：每幀檢查，true＝這一步做完了  back(L)：回傳步驟編號＝退回那一步（例如選單被關掉了）
 //   skip(L)：true＝跳過這一步  enter(L)：開始這一步時做的事  tick(dt, L)：暫停中每幀要做的事
@@ -455,6 +456,13 @@ for (const type of ['keydown', 'mousedown', 'click', 'dblclick', 'contextmenu', 
       if (!e.repeat) { sfx('button'); tutNextStep(); }
       return;
     }
+    // ackClick：滑鼠左鍵點畫面任何地方也算「知道了」（這一步原本就允許點的東西，例如結尾的關閉鈕，照常讓它點）
+    // 放開滑鼠的 click 才換下一步，按下去的 mousedown 先擋掉，免得同一下點擊又點到下一步要點的東西
+    if (s.ack && s.ackClick && (type === 'mousedown' || type === 'click') && e.button === 0 && !(s.allow && s.allow(e, L))) {
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (type === 'click') { sfx('button'); tutNextStep(); }
+      return;
+    }
     const ok = s.allow ? s.allow(e, L) : false;
     if (ok === 'done') { tutNextStep(); return; }   // 做完了：教學先結束（恢復遊戲），這個輸入再照常交給遊戲處理
     if (ok) return;
@@ -478,7 +486,7 @@ function renderTutCard(L) {
   el.classList.remove('hidden');
   const card = el.querySelector('.tf-card');
   card.innerHTML = (s.who ? '<b class="tf-who">' + s.who + '</b>' : '') +   // who：誰說的（例如「諾亞」），寫在卡片最上面
-    (s.demo ? '<div class="tf-demo">' + s.demo + '</div>' : '') + '<p>' + (s.text || '') + '</p>' + (s.after || '') + (s.ack ? '<span class="tf-ack">' + tutCard('ack') + '</span>' : '');   // after：文字下面再放的東西（例如兩個選擇按鈕）
+    (s.demo ? '<div class="tf-demo">' + s.demo + '</div>' : '') + '<p>' + (s.text || '') + '</p>' + (s.after || '') + (s.ack ? '<span class="tf-ack">' + tutCard(s.ackClick ? 'ackClick' : 'ack') + '</span>' : '');   // after：文字下面再放的東西（例如兩個選擇按鈕）
   card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';   // 換步驟：卡片重新彈出來
 }
 function drawTutFocus() {
