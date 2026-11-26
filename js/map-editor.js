@@ -1105,7 +1105,8 @@ function drawMrtExtraCars(s) {
   ctx.restore();
 }
 function drawStampRaw(s) {
-  const t = tileById(s.id); if (!t) return;
+  let t = tileById(s.id); if (!t) return;
+  if (isPowerSwitchTile(t) && stampIsValve(curMap(), s)) t = valveTileInEditor(t);   // 抽水閥：畫紅色的開關圖（跟遊戲一樣）
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
   withStampTransform(ctx, s, x, y, stampW(s, t) * CELL, stampH(s, t) * CELL, () => drawStampPlain(s, t, x, y));   // 大小、角度（js/stamp-transform.js）
 }
@@ -3832,6 +3833,13 @@ const isPowerSwitchTile = t => !!t && (/power-switch-(on|off)\.png$/.test(String
 // 抽水閥：勾了「抽水閥」，或放在名稱有「抽水閥」的圖層（遊戲裡的判斷在 js/pool-tide.js 的 poolIsValve，兩邊要一致）
 const valveLayerOf = (m, s) => !!s && (m.layerOrder || []).some(l => l.id === (s.layer || 'top') && String(l.name || '').includes('抽水閥'));
 const stampIsValve = (m, s) => !!s && (s.valve === true || (s.valve !== false && valveLayerOf(m, s)));
+// 抽水閥在編輯器裡畫的圖：同一個資料夾裡紅色的 valve-switch（開／關跟擺的那張一樣）；沒有紅色版就照原本的圖
+// （遊戲裡的換圖在 js/storage-lockers.js 的 valveSwitchTileFor，兩邊要一致）
+function valveTileInEditor(t) {
+  const file = String(t.file || '').replace(/\\/g, '/'), want = file.replace(/power-switch-(on|off)\.png$/, 'valve-switch-$1.png');
+  if (want === file) return t;
+  return palette().find(x => String(x.file || '').replace(/\\/g, '/') === want) || t;
+}
 function refreshValveControl() {
   let box = document.getElementById('valveControl');
   if (!box) {
