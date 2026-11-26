@@ -436,7 +436,7 @@ function drawWaterMonstersGround(ctx) {
 // 浮在水上的魚卵（js/clownfish.js 的 drawFishEgg 呼叫）：跟丟進水裡的道具同一套載浮載沉（js/pool-fall.js 的 poolFloatPose、js/water.js 的 drawWaded）
 function drawFloatingFishEgg(egg) {
   if (typeof poolFloatPose !== 'function' || typeof drawWaded !== 'function' || !deepWaterAtPoint(egg.x, egg.y)) return false;
-  const S = CLOWNFISH.eggSize;
+  const S = CLOWNFISH.eggSize * (egg.big ? egg.big.size : 1);   // 池核 BOSS 生的大顆魚卵比較大
   egg.floatPose = poolFloatPose(egg, { bottom: egg.y + 2, height: S, width: S * 1.4, sink: .35, bob: .6, pivot: 0 });
   egg.floatBusy = true;
   try { drawWaded(egg, 'float', () => drawFishEgg(ctx, egg)); } finally { egg.floatBusy = false; }
