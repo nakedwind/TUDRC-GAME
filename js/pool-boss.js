@@ -36,6 +36,13 @@ const POOL_BOSS = applyBossSettings('POOL_BOSS', {
   flop: [1.2, 3],             // 擱淺時隔幾秒拍一下
   flopTime: .32,              // 拍一下多久
   flopLift: 14,               // 拍起來多高（像素）
+  // 擱淺時拍起來摔回地上的重量感（巨物；跟魚頭王、虱目魚王落地同一套）：畫面震 shake 像素（離溫特越遠越小）、
+  //   很近時頓一下 stop 秒、地上裂開（crack＝中間那片裂痕多大，0＝不裂）、落地聲音量 vol
+  impact: { shake: 10, stop: .05, crack: 1.1, vol: 1.6 },
+  // 大顆魚卵（只有 BOSS 會生）：不會孵出魚，只是爆炸比較痛
+  //   count＝每次落地生幾顆（最少～最多，隨機）、onLand＝擱淺拍地時生（1＝會、0＝不會）、onWater＝躍出水面落回水面時生（浮在水上）、
+  //   size＝畫多大（一般魚卵的幾倍）、damage＝爆炸傷害（一般魚卵的幾倍）、radius＝爆炸範圍（一般魚卵的幾倍）、max＝場上最多幾顆大顆魚卵
+  bigEgg: { count: [1, 2], onLand: 1, onWater: 1, size: 2.2, damage: 2.5, radius: 1.6, max: 12 },
   // 水花（份量參考油桶爆炸）：drops＝四周噴的水滴、column＝往上衝的水柱水滴、mist＝水霧團、up＝往上噴多快、
   //   spread＝往外噴多快、shake＝畫面搖多大（離溫特越遠越小）；land＝躍出水面後落回水面的那一下（小一點）
   splash: { gravity: 700,
@@ -119,7 +126,7 @@ function poolBossLeap(pb, dt) {
   const e = pb.e, P = POOL_BOSS, L = pb.leap, h = e.drawHeight || 290, art = typeof cfArt === 'function' ? cfArt(e) : {};
   if (L.kind === 'up') {
     const p = (L.t += dt) / P.leapUp.time;
-    if (p >= 1) { pb.leap = null; e.slimeLift = 0; e.forceFrame = null; pb.t = poolBossRand(P.surface); poolBossSplash(e, 'land'); return; }   // 落回水面，露出上半身
+    if (p >= 1) { pb.leap = null; e.slimeLift = 0; e.forceFrame = null; pb.t = poolBossRand(P.surface); poolBossSplash(e, 'land'); if (P.bigEgg.onWater) poolBossLayBigEggs(e, true); return; }   // 落回水面，露出上半身（順便生大顆魚卵，浮在水上）
     e.slimeLift = Math.sin(Math.PI * p) * h * P.leapUp.height;
     e.forceFrame = art.air || null;
     return;
@@ -185,10 +192,48 @@ function poolBossFlop(pb, dt) {
   pb.flopT -= dt;
   if (pb.flopT > 0) { e.forceFrame = art.crouch || null; e.slimeLift = 0; return; }
   const p = -pb.flopT / P.flopTime;
-  if (p >= 1) { pb.flopT = poolBossRand(P.flop); e.slimeLift = 0; e.forceFrame = art.crouch || null; e.forceFlip = !e.forceFlip; nearbyImpactSafe(e); return; }   // 摔回地上，換個方向躺
+  if (p >= 1) {   // 摔回地上，換個方向躺：震動、裂痕、生大顆魚卵
+    pb.flopT = poolBossRand(P.flop); e.slimeLift = 0; e.forceFrame = art.crouch || null; e.forceFlip = !e.forceFlip;
+    poolBossLandImpact(e);
+    if (P.bigEgg.onLand) poolBossLayBigEggs(e, false);
+    return;
+  }
   e.forceFrame = art.air || null; e.slimeLift = Math.sin(Math.PI * p) * P.flopLift;
 }
-const nearbyImpactSafe = e => { if (typeof bossImpact === 'function') bossImpact(e.x, e.y, 3, .04); };
+// 巨物重重摔在地上：畫面震、地上裂開、塵土、白色衝擊圈、落地聲（數值在 POOL_BOSS.impact）
+function poolBossLandImpact(e) {
+  const I = POOL_BOSS.impact, w = e.drawWidth || 200, x = e.x, y = e.y + 14, now = performance.now() / 1000;
+  if (typeof bossImpact === 'function') bossImpact(e.x, e.y, I.shake, 0);   // 離溫特越遠震越小（js/combat-feel.js）
+  if (I.stop > 0 && typeof addHitstop === 'function' && G.player && Math.hypot(G.player.x - e.x, G.player.y - e.y) < CELL * 6) addHitstop(I.stop);   // 很近才頓一下
+  for (let i = 0; i < 2; i++) G.effects.push({ ring: true, x, y, r: 10 + i * 8, r2: w * (.4 + i * .2), life: .4 + i * .12, life0: .4 + i * .12, color: i ? '#b9b2a2' : '#ffffff' });
+  if (typeof rockBurstFx === 'function' && typeof ELITE_BIRD !== 'undefined') rockBurstFx(x, y, ELITE_BIRD.runDust);   // 揚起塵土（js/gourd-monkey.js）
+  if (I.crack > 0) {   // 地上裂開（跟魚頭王、虱目魚王共用的裂痕，js/elite-bird-head.js 的 drawEliteGround 畫）
+    const cracks = G.eliteCracks = G.eliteCracks || [];
+    cracks.push({ size: I.crack, power: 1, life: 6, x, y, at: now });
+    for (let i = 0; i < 3; i++) cracks.push({ size: I.crack * .5, life: 6, x: x + (Math.random() * 2 - 1) * w * .22, y: y - 2 + (Math.random() * 2 - 1) * 10, at: now, rot: (Math.random() * 2 - 1) * .8, flip: Math.random() < .5 });
+    if (cracks.length > 40) cracks.splice(0, cracks.length - 40);
+  }
+  if (I.vol > 0 && typeof sfxAt === 'function') sfxAt('milkfishKingStep', e.x, e.y, I.vol, 'pool-boss-land');   // 落地聲（跟虱目魚王落地同一個）
+}
+// 生大顆魚卵：繞著身體邊緣放（不然會被身體擋住踩不到）；water＝在水面上生（浮在水上，跟水裡小丑魚的魚卵一樣）
+// 大顆魚卵不會孵化；爆炸傷害、範圍、畫多大照 POOL_BOSS.bigEgg（js/clownfish.js 的 blowFishEgg、drawFishEgg 看 egg.big）
+function poolBossLayBigEggs(e, water) {
+  const B = POOL_BOSS.bigEgg, C = typeof CLOWNFISH !== 'undefined' ? CLOWNFISH : null; if (!C) return;
+  const eggs = (G.fishEggs = G.fishEggs || []);
+  const n = Math.min(B.max - eggs.filter(g => g.big).length, Math.round(poolBossRand(B.count)));
+  if (n <= 0) return;
+  const w = e.drawWidth || 200, base = Math.random() * Math.PI * 2;
+  let laid = 0;
+  for (let i = 0; laid < n && i < n * 6; i++) {   // 放不下的位置（牆、岸上／水裡）就換個方向再試
+    const a = base + i / n * Math.PI * 2 + (Math.random() - .5) * .6, r = w * POOL_BOSS.body.rx * (1.05 + Math.random() * .35);
+    const x = e.x + Math.cos(a) * r, y = e.y + 6 + Math.sin(a) * r * .55;
+    if (water ? !deepWaterAtPoint(x, y) : (deepWaterAtPoint(x, y) || (typeof enemyBlocked === 'function' && enemyBlocked(x, y)))) continue;
+    eggs.push({ x, y, floor: typeof actorFloor === 'function' ? actorFloor(e) : 1, vx: 0, vy: 0, arm: C.eggArm, life: C.eggLife, age: 0, fuse: 0, seed: Math.random() * 9,
+      hatch: false, water: !!water, big: { size: B.size, damage: B.damage, radius: B.radius } });
+    laid++;
+  }
+  if (laid && typeof sfxAt === 'function') sfxAt('pop', e.x, e.y, .8, 'pool-boss-egg');
+}
 // ---- 水花（份量參考油桶爆炸）----
 //   up＝從水裡躍出來：水往四周炸開＋往上噴；dive＝跳進水裡：高高的水柱＋往外噴；land＝落回水面：小一點
 //   每次都有：中間一片白色水沫、往外擴散的好幾圈水波、大大小小的水滴、水霧團、畫面搖晃

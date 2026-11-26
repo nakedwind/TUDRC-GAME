@@ -1716,6 +1716,24 @@ const BOSS_SETTINGS_DEFAULT = {
     ],
     "flopTime": 0.32,
     "flopLift": 14,
+    "impact": {
+      "shake": 10,
+      "stop": 0.05,
+      "crack": 1.1,
+      "vol": 1.6
+    },
+    "bigEgg": {
+      "count": [
+        1,
+        2
+      ],
+      "onLand": 1,
+      "onWater": 1,
+      "size": 2.2,
+      "damage": 2.5,
+      "radius": 1.6,
+      "max": 12
+    },
     "splash": {
       "gravity": 700,
       "up": {

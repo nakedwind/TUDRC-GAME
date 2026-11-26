@@ -188,7 +188,7 @@ function removeFishEgg(egg) {
   const i = eggs.indexOf(egg); if (i >= 0) eggs.splice(i, 1);
 }
 function fishEggVictim(egg) {
-  const r = CLOWNFISH.eggTrigger * CELL, p = G.player;
+  const r = CLOWNFISH.eggTrigger * CELL * (egg.big ? Math.sqrt(egg.big.size) : 1), p = G.player;   // 大顆魚卵（池核 BOSS 生的）比較大，踩到的範圍也大一點
   if (p && p.hp > 0 && fieldHits(egg.floor, p) && Math.hypot(p.x - egg.x, p.y - egg.y) <= r) return p;   // 不同樓層的人踩不到
   for (const t of G.towers) if (t.hp > 0 && fieldHits(egg.floor, t) && Math.hypot(t.x - egg.x, t.y - egg.y) <= r) return t;
   return null;   // 怪物自己踩不會爆
@@ -281,7 +281,8 @@ function shootFishEggOnLine(x1, y1, x2, y2) {
   let best = null, bestT = Infinity;
   for (const egg of eggs) {
     const t = Math.max(0, Math.min(1, ((egg.x - x1) * dx + (egg.y - y1) * dy) / len2));
-    if (Math.hypot(x1 + dx * t - egg.x, y1 + dy * t - (egg.y - 6)) > CLOWNFISH.eggShotR || t >= bestT) continue;
+    const big = egg.big ? egg.big.size : 1;   // 大顆魚卵：比較好打中
+    if (Math.hypot(x1 + dx * t - egg.x, y1 + dy * t - (egg.y - 6 * big)) > CLOWNFISH.eggShotR * big || t >= bestT) continue;
     if (!hasLineOfSight(x1, y1, egg.x, egg.y)) continue;
     best = egg; bestT = t;
   }
@@ -293,33 +294,34 @@ function shootFishEggOnLine(x1, y1, x2, y2) {
 
 // ---- 爆炸：炸我方，也炸怪物（打爆魚卵可以當陷阱用）----
 function blowFishEgg(egg) {
-  const C = CLOWNFISH, x = egg.x, y = egg.y, R = C.eggRadius * CELL;
+  const B = egg.big, dmg = B ? B.damage : 1;   // 大顆魚卵（js/pool-boss.js 的 POOL_BOSS.bigEgg）：傷害、範圍都比較大
+  const C = CLOWNFISH, x = egg.x, y = egg.y, R = C.eggRadius * CELL * (B ? B.radius : 1);
   removeFishEgg(egg);
   withBlastFloor(egg.floor, () => {   // 魚卵在幾樓就只炸那一層（js/pathfinding.js）
   // 範圍內、同一層、看得到的對象（js/pathfinding.js 的 areaTargets：範圍效果的唯一入口）
   for (const { a, kind, d } of areaTargets(x, y, R, { los: true })) {
     const k = 1 - .4 * d / R;   // 越靠近中心越痛
     if (kind === 'player') {
-      const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(C.eggPlayer * k) : C.eggPlayer * k;
+      const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(C.eggPlayer * dmg * k) : C.eggPlayer * dmg * k;
       a.hp = Math.max(0, a.hp - hurt); a.hitT = .45; G.damageVignetteT = .45;
       if (typeof playPlayerHit === 'function') playPlayerHit();
       if (typeof blastPush === 'function') blastPush(a, x, y, hurt, 34);
       if (a.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', a.x, a.y - 58, '#ff5b6e'); lose('player', '被魚卵炸到'); }
     } else if (kind === 'tower') {
       const def = Math.max(0, Math.min(.75, (TYPES[a.type] && TYPES[a.type].defense) || 0));
-      const hurt = C.eggSentry * k * (1 - def);
+      const hurt = C.eggSentry * dmg * k * (1 - def);
       a.hp = Math.max(0, a.hp - hurt); a.hitT = Math.max(a.hitT || 0, .2);
       if (typeof blastPush === 'function') blastPush(a, x, y, hurt, 26);
       else flashDmg('-' + Math.round(hurt), a.x, a.y - 26, '#ff9a3c');
       if (a.hp <= 0) { a.target = null; sentryStatus(a, '失去戰鬥能力', '#ff5b6e', true); }
     } else {   // 怪物也會被自家的卵炸到：溫特可以開槍引爆當陷阱
-      const hurt = C.eggEnemy * k;
+      const hurt = C.eggEnemy * dmg * k;
       a.hp -= hurt; a.hitT = .2; a.hitColor = '#ff9a3c';
       flashDmg('-' + Math.round(hurt), a.x, a.y - 26, '#ff9a3c');
       if (typeof enemyHitReact === 'function') enemyHitReact(a, x, y, true);
     }
   }
-  if (typeof damageCoresInBlast === 'function') damageCoresInBlast(x, y, R, C.eggEnemy);
+  if (typeof damageCoresInBlast === 'function') damageCoresInBlast(x, y, R, C.eggEnemy * dmg);
   for (const other of [...(G.fishEggs || [])]) {   // 連鎖引爆旁邊的魚卵（同一層的）
     if (other.fuse > 0 || !blastHits(other)) continue;
     if (Math.hypot(other.x - x, other.y - y) <= R) other.fuse = .12 + Math.random() * .1;
@@ -335,8 +337,8 @@ function blowFishEgg(egg) {
     G.effects.push({ ember: true, spark: true, x, y: y - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 40,
       r: 1.2 + Math.random() * 2, life: .3 + Math.random() * .25, life0: .55 });
   }
-  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 8, .06);
-  if (typeof sfxAt === 'function') sfxAt('smallBoom', x, y, .7, 'egg-boom');
+  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, B ? 14 : 8, .06);
+  if (typeof sfxAt === 'function') sfxAt('smallBoom', x, y, B ? 1 : .7, 'egg-boom');
 }
 
 // ---- 繪製（地面層，在角色腳下）----
@@ -358,7 +360,7 @@ function drawFishEgg(ctx, egg) {
     const soon = egg.hatch && egg.age > C.hatchT - C.hatchWarn;   // 快孵化了：微微抖動
     const shake = armed ? (Math.random() * 2 - 1) * 2.2 : soon ? Math.sin(now * 26 + egg.seed) * 1.1 : 0;
     const fade = !egg.hatch && egg.life < 3 ? Math.max(.25, egg.life / 3) : 1;   // 不會孵化的：最後 3 秒慢慢乾掉
-    const s = C.eggSize * (armed ? 1 + .12 * Math.sin(now * 38) : soon ? 1 + .06 * Math.sin(now * 9 + egg.seed) : 1);
+    const s = C.eggSize * (egg.big ? egg.big.size : 1) * (armed ? 1 + .12 * Math.sin(now * 38) : soon ? 1 + .06 * Math.sin(now * 9 + egg.seed) : 1);
     ctx.save();
     if (!egg.water) {   // 地上的影子（浮在水上的不畫）
       ctx.globalAlpha = .25 * fade; ctx.fillStyle = '#071015';
@@ -372,9 +374,10 @@ function drawFishEgg(ctx, egg) {
       ctx.fillStyle = '#ff8c3a'; ctx.beginPath(); ctx.arc(egg.x + shake, egg.y - s / 2, s * .4, 0, Math.PI * 2); ctx.fill();
     }
     if (armed) {   // 引信中：橘紅光暈，提醒快閃開
-      const g = ctx.createRadialGradient(egg.x, egg.y - 3, 0, egg.x, egg.y - 3, 15);
+      const gr = 15 * (egg.big ? egg.big.size : 1), gy = egg.y - s * .2;   // 大顆魚卵的光暈跟著放大
+      const g = ctx.createRadialGradient(egg.x, gy, 0, egg.x, gy, gr);
       g.addColorStop(0, 'rgba(255,120,60,.75)'); g.addColorStop(1, 'rgba(255,90,40,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(egg.x, egg.y - 3, 15, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(egg.x, gy, gr, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
   }
