@@ -4,7 +4,7 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [], zonePaid: [], bossDown: [] };   // bossDown：打倒過的 BOSS（例如人面蝶后打倒後，B56 不再出現預兆影子）   // zonePaid：領過控制獎勵的區域（'all'＝全區控制獎勵）   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
+const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [], zonePaid: [], bossDown: [] };   // bossDown：打倒過的 BOSS（例如人面蝶后打倒後，B56 不再出現預兆影子）   // zonePaid：領過控制獎勵的區域（'all'＝全區控制獎勵，只給一次；區域獎勵每次都給）   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
 try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps', 'zonePaid', 'bossDown']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
 // 打倒過的 BOSS：一般模式記進存檔；測試模式只記到重新整理頁面為止（不改到存檔）
@@ -45,12 +45,12 @@ const missionMoneyGiven = mapId => { const m = missionOfMap(mapId); return m ? m
 function markMissionMapCleared(mapId) {
   const m = missionOfMap(mapId); if (!m || missionState.cleared.includes(m.id)) return;
   missionState.cleared.push(m.id); saveMissions();
-  const got = payZoneRewards(m);   // 第一次控制：區域控制獎勵（＋全區控制獎勵）
+  const got = payZoneRewards(m);   // 區域控制獎勵（＋全區控制獎勵）；這裡只有第一次會跑到（劇情只看一次）
   if (got.length) systemNotice('🏅 ' + got.join('　'));
 }
 
 // ---- 區域控制獎勵、全區控制獎勵（金額在 data/rewards.js，「🏅 獎勵編輯器」改）----
-// 每一區第一次控制時給一次；經費加進這次的作戰經費（G.money，回基地存進錢包，js/progression.js 的 settleSortieMoney），碎片直接入帳
+// 每次控制（打贏結算）都給，重新出擊再清一次可以再領；全區控制獎勵只給一次。經費加進這次的作戰經費（G.money，回基地存進錢包，js/progression.js 的 settleSortieMoney），碎片直接入帳
 // 回傳要顯示的文字（沒有獎勵＝空陣列）；測試模式不給
 const rewardText = (money, crystals) => [money > 0 ? '經費 +$' + money.toLocaleString() : '', crystals > 0 ? '異質碎片 +' + crystals : ''].filter(Boolean).join('、');
 function payReward(r) {
@@ -65,10 +65,8 @@ const bountyByDifficulty = r => { const mul = typeof difficultyOf === 'function'
 function payZoneRewards(m) {
   if (window.TEST_MODE || typeof REWARDS_DATA === 'undefined' || !m) return [];
   const out = [];
-  if (!missionState.zonePaid.includes(m.id)) {
-    missionState.zonePaid.push(m.id);
-    const t = payReward(bountyByDifficulty((REWARDS_DATA.zones || {})[m.id])); if (t) out.push('控制獎勵：' + t);
-  }
+  if (!missionState.zonePaid.includes(m.id)) missionState.zonePaid.push(m.id);   // 領過的區域（只是紀錄，不會擋下次再領）
+  const t = payReward(bountyByDifficulty((REWARDS_DATA.zones || {})[m.id])); if (t) out.push('控制獎勵：' + t);
   const all = MISSIONS.filter(x => x.map);   // 作戰桌上的區域都控制了：全區控制獎勵（只給一次）
   if (!missionState.zonePaid.includes('all') && all.length && all.every(missionCleared)) {
     missionState.zonePaid.push('all');
@@ -316,7 +314,7 @@ function missionWinOverlay() {
   const m = missionOfMap(MAP && MAP.id); if (!m) return false;
   const first = !missionCleared(m);
   if (first) { missionState.cleared.push(m.id); saveMissions(); }
-  const got = first ? payZoneRewards(m) : [];   // 第一次控制：區域控制獎勵（＋全區控制獎勵，data/rewards.js）
+  const got = payZoneRewards(m);   // 每次控制都給區域控制獎勵（＋全區控制獎勵只給一次，data/rewards.js）
   const next = nextMission();
   showOverlay('✅ ' + m.name + ' 已控制',
     (first ? '所有異質核心與殘存異質體已清除！' : '再次清除了這一區的異質體！') + '異質結晶已儲存，可用於哨兵培養。' +
