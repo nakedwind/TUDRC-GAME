@@ -314,12 +314,22 @@ function swimRingAllyTick() {
     if (d < bd) { bd = d; best = { t, spot }; }
   }
   if (!best || now < swimAllyNextAt) return;   // 現在沒有人要下水，或還沒輪到下一個
-  const { t, spot } = best, keepX = t.x, keepY = t.y;
-  t.swimRing = true; t.x = spot.x; t.y = spot.y; t.navPath = null; t.navGoal = null;
-  if (swimRingWithActor(t, () => sentryBlocked(t.x, t.y))) { t.x = keepX; t.y = keepY; t.swimRing = false; return; }   // 那裡被擋住：下不去
+  if (swimRingAllyBoard(best.t, best.spot, true)) swimAllyNextAt = now + swimAllyDelay();
+}
+// 隊員戴上自己的游泳圈下水：移到旁邊那格深水的中間坐上去。回傳 true＝下水了
+//   spot＝下水的深水格（沒給＝找離他最近的）；clearPath＝下水後重新找路（溫特在水裡、叫隊員下水時用）
+//   也給 js/sentry.js 的 moveSentryWithPath 用：溫特和隊員中間隔著深水、用走的到不了時，隊員照「可以游過去」的路走到岸邊，在這裡下水
+function swimRingAllyBoard(t, spot, clearPath = false) {
+  if (!t || t.swimRing || !t.ownRing || t.hp <= 0 || t.sitting || t.eatenBy || t.mrtRide || t.grabbed) return false;
+  spot = spot || deepWaterNearActor(t); if (!spot) return false;   // 還沒走到岸邊
+  const keepX = t.x, keepY = t.y;
+  t.swimRing = true; t.x = spot.x; t.y = spot.y;
+  if (swimRingWithActor(t, () => sentryBlocked(t.x, t.y))) { t.x = keepX; t.y = keepY; t.swimRing = false; return false; }   // 那裡被擋住：下不去
+  if (clearPath) { t.navPath = null; t.navGoal = null; }
+  else if (t.navPath && t.navPath.length && t.navPath[0].c === spot.c && t.navPath[0].r === spot.r) t.navPath.shift();   // 已經在路上的下一格了
   t.gunT = 0; t.meleeSwing = null; t.gunSwing = null;
   // 隊員坐進救生圈也不播音效
-  swimAllyNextAt = now + swimAllyDelay();
+  return true;
 }
 // 沒有游泳圈的隊員走到池邊：頭上冒「想要游泳圈」的泡泡（隔 wantGap 秒才再冒，正在說別的話就不打斷）
 function swimRingWantBubble(t, now) {
