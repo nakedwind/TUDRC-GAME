@@ -252,11 +252,13 @@ function pushFishEggAside(egg, dt) {
     egg.vx += nx * push * dt * 8; egg.vy += ny * push * dt * 8;
   }
   if (!egg.vx && !egg.vy) return;
-  const drag = Math.max(0, 1 - C.pushDrag * dt);
+  const drag = Math.max(0, 1 - (egg.drag ?? C.pushDrag) * dt);   // egg.drag：被池核 BOSS 震開的大顆魚卵有自己的阻力（js/pool-boss.js 的 eggScatter）
   egg.vx *= drag; egg.vy *= drag;
-  if (Math.hypot(egg.vx, egg.vy) < 2) { egg.vx = 0; egg.vy = 0; return; }
+  if (Math.hypot(egg.vx, egg.vy) < 2) { egg.vx = 0; egg.vy = 0; egg.drag = undefined; return; }
   const nx = egg.x + egg.vx * dt, ny = egg.y + egg.vy * dt;
-  if (typeof enemyBlocked === 'function' && enemyBlocked(nx, ny)) { egg.vx = 0; egg.vy = 0; return; }   // 撞到牆就停住
+  // 浮在水上的魚卵只能在深水裡漂（漂到岸邊就停）；地上的撞到牆、深水就停住
+  const stop = egg.water ? (typeof deepWaterAtPoint === 'function' && !deepWaterAtPoint(nx, ny)) : (typeof enemyBlocked === 'function' && enemyBlocked(nx, ny));
+  if (stop) { egg.vx = 0; egg.vy = 0; egg.drag = undefined; return; }
   egg.x = nx; egg.y = ny;
 }
 

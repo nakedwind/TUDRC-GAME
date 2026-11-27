@@ -1734,6 +1734,13 @@ const BOSS_SETTINGS_DEFAULT = {
       "radius": 1.6,
       "max": 12
     },
+    "eggScatter": {
+      "range": 7,
+      "land": 300,
+      "landDrag": 4,
+      "water": 120,
+      "waterDrag": 0.8
+    },
     "splash": {
       "gravity": 700,
       "up": {
