@@ -545,7 +545,7 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.f
     // 走不到的地方：同一個起點、同一個目的地 2 秒內不再重找（兩層一起找路走不到時會搜到上限 6000 格，一次要好幾百毫秒，
     // 隊員每隔一下就重找一次，遊戲會一頓一頓的）
     const gf = goalFloor || placeFloorAt(targetX, targetY, t), now = sentryNavClock();
-    const failKey = cellAt(t.x, t.y).join(',') + ',' + actorFloor(t) + '>' + cellAt(targetX, targetY).join(',') + ',' + gf + (allowDark ? 'd' : '');
+    const failKey = cellAt(t.x, t.y).join(',') + ',' + actorFloor(t) + '>' + cellAt(targetX, targetY).join(',') + ',' + gf + (allowDark ? 'd' : '') + (t.swimRing ? 's' : '');   // s：坐救生圈（或打算游過去）找的路，跟用走的分開記
     if (sentryPathFailed(t, failKey, now)) return null;
     const path = buildSentryPathFloors(t, targetX, targetY, allowDark, gf);
     if (path == null) sentryPathFailMark(t, failKey, now);
@@ -553,7 +553,7 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.f
   }
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
   // 走不到的地方（例如溫特在深水區裡）：同一個起點、同一個目的地 SENTRY_PATH_FAIL_WAIT 內不再重找（找一次要把整張地圖搜完，大地圖會頓一下）
-  const failKey1 = sc + ',' + sr + '>' + rawGc + ',' + rawGr + (allowDark ? 'd' : ''), now1 = sentryNavClock();
+  const failKey1 = sc + ',' + sr + '>' + rawGc + ',' + rawGr + (allowDark ? 'd' : '') + (t.swimRing ? 's' : ''), now1 = sentryNavClock();   // s：坐救生圈（或打算游過去）找的路，跟用走的分開記
   if (sentryPathFailed(t, failKey1, now1)) return null;
   const fail = () => { sentryPathFailMark(t, failKey1, now1); return null; };
   const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return fail();
@@ -728,6 +728,14 @@ function sentryPathBusy() {
 }
 function sentryPathSpend(ms) { sentryPathBusy(); sentryPathSpent += ms; }
 // goalFloor：目的地在幾樓（跟著溫特時＝溫特在的那層；沒給＝照目的地那一格，js/pathfinding.js 的 placeFloorAt）
+// 有自己的游泳圈、還沒坐上去、這張地圖有深水：用走的到不了時可以改成游過去（js/swim-ring.js）
+//   只有跟著溫特（或護衛）走的時候才會游（t.swimAllow，updateSentryMain 跟隨時打開）；平常閒逛、追怪不會為了過去特地下水
+const sentryCanSwim = t => !!(t && t.ownRing && !t.swimRing && typeof deepWaterCells === 'function' && deepWaterCells().size);
+// 假裝已經坐上救生圈（深水不擋）來做 fn：找「可以游過去」的路、判斷路上的深水格走不走得了
+function sentryAsSwimmer(t, fn) {
+  const was = t.swimRing; t.swimRing = true;
+  try { return typeof swimRingWithActor === 'function' ? swimRingWithActor(t, fn) : fn(); } finally { t.swimRing = was; }
+}
 function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
@@ -736,7 +744,8 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
     const shore = swimRingShoreGoal(t, targetX, targetY, dark); if (shore) [targetX, targetY] = shore;
   }
   const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR + (hasFloors && goalFloor ? ',' + goalFloor : '');
-  const nextOk = !next || (next.f ? onFloorDo(next.f, () => sentryCellWalkable(next.c, next.r, false, dark)) : sentryCellWalkable(next.c, next.r, false, dark));   // 路上的下一格照它在的那層判斷
+  const nextWalk = () => !next || (next.f ? onFloorDo(next.f, () => sentryCellWalkable(next.c, next.r, false, dark)) : sentryCellWalkable(next.c, next.r, false, dark));   // 路上的下一格照它在的那層判斷
+  const nextOk = t.navSwim && sentryCanSwim(t) ? sentryAsSwimmer(t, nextWalk) : nextWalk();   // 打算游過去的路：下一格是深水也算走得了
   const midEscalator = next && next.esc && t.escSide && t.navStall <= .8 && nextOk;   // 正在走側面手扶梯那一步：目的地小小移動不用重找（重找會被叫回某一頭）
   // 目的地換了：有陸橋的地圖至少隔 0.3 秒才重找（跟隨時目的地一直小小移動，每一幀都重找太花時間；路走完、卡住、下一格不能走照樣馬上重找）
   // 剛找不到路：先等 0.75 秒再試（不然目的地每動一下就把整區搜一遍）
@@ -750,7 +759,9 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
     } else {
       const t0 = performance.now();
       if (hasFloors) t.navReplanT = .3;
-      t.navPath = buildSentryPath(t, targetX, targetY, dark, goalFloor); t.navGoal = goalKey; t.navTimer = .75;
+      t.navPath = buildSentryPath(t, targetX, targetY, dark, goalFloor); t.navGoal = goalKey; t.navTimer = .75; t.navSwim = false;
+      // 用走的到不了（例如中間隔著深水），但身上有自己的游泳圈：改找「可以游過去」的路，走到岸邊再戴上泳圈下水（js/swim-ring.js 的 swimRingAllyBoard）
+      if (!t.navPath && t.swimAllow && sentryCanSwim(t)) { const wet = sentryAsSwimmer(t, () => buildSentryPath(t, targetX, targetY, dark, goalFloor)); if (wet) { t.navPath = wet; t.navSwim = true; } }
       if (!t.navPath && t.navFallback) t.navPath = buildSentryPath(t, t.navFallback.x, t.navFallback.y, dark, goalFloor);   // 找不到：改找去跟隨對象站的地方
       t.navStall = 0;
       sentryPathSpend(performance.now() - t0);
@@ -758,6 +769,9 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt, goalFloor = null) {
   }
   if (!t.navPath) { t.navFailed = true; if (hasFloors) t.navReplanT = .75; unwedgeSentry(t); return false; }
   t.navFailed = false;
+  // 打算游過去、下一格就是深水、人已經在岸邊：戴上游泳圈下水（這一幀先不走）
+  if (t.navSwim && sentryCanSwim(t) && t.navPath.length && typeof isDeepWaterCell === 'function' && isDeepWaterCell(t.navPath[0].c, t.navPath[0].r)
+      && typeof swimRingAllyBoard === 'function' && swimRingAllyBoard(t)) return false;
   // 下一步是走側面手扶梯：只管左右走，高度由手扶梯跟著斜坡調（js/escalators.js 的 rideSideEscalator）；左右到了就算到
   if (t.navPath.length && t.navPath[0].esc) {
     // 逆著階梯走：隊員走路比溫特慢很多，照平常的速度會被階梯抵銷、永遠下不去 → 這一段加快腳步（SENTRY_ESC_HURRY 倍）
@@ -1033,7 +1047,9 @@ function updateSentryMain(t, dt) {
   // 護衛圈：圈內可自行巡邏；距離被拉開時，會先追上指定角色再恢復自由行動。
   // 玩家明確下達的 goto / hold 指令仍優先，不會被護衛關係覆蓋。
   const companion = sentryCompanionRule(t);
-  if (companion && !hasAggroTarget(t)) {   // 有敵可打時交給接敵邏輯，護衛圈先讓位（避免圈邊抖動）
+  // 坐著游泳圈、跟隨的人卻在岸上：要游上岸走到他身邊。坐泳圈不能開槍，所以看到怪也先上岸（不然會漂在水裡不動）
+  const ashore = !!(companion && t.swimRing && !companion.anchor.swimRing && !(typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(companion.anchor.x, companion.anchor.y)));
+  if (companion && (ashore || !hasAggroTarget(t))) {   // 有敵可打時交給接敵邏輯，護衛圈先讓位（避免圈邊抖動）
     const companionDistance = Math.hypot(companion.anchor.x - t.x, companion.anchor.y - t.y);
     const otherFloor = hasFloors && actorFloor(companion.anchor) !== actorFloor(t);   // 跟隨的人在另一層（例如溫特上了 2 樓）：再近也要跟過去
     // 站在打開的門裡（門口只有一格寬）：就算已經在身邊也不要停在門裡，再往跟隨的人靠近一點、走出門口（不然會把後面的人堵住）
@@ -1052,17 +1068,24 @@ function updateSentryMain(t, dt) {
       t.detourCheckT = (t.detourCheckT || 0) - dt;
       if (t.detourCheckT <= 0) {
         t.detourCheckT = 1;
-        const path = buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, hasFloors ? actorFloor(companion.anchor) : null);
-        t.followDetour = !!(path && path.length * CELL > companion.radius * 1.5);   // 要走的格數比跟隨範圍多一半以上＝要繞路
+        const gf = hasFloors ? actorFloor(companion.anchor) : null;
+        const path = buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, gf);
+        // 用走的到不了（隔著深水），但身上有游泳圈、游得過去：一定要過去（不然直線很近就以為跟上了，站在對岸不動）
+        const swim = !path && sentryCanSwim(t) && !!sentryAsSwimmer(t, () => buildSentryPath(t, companion.anchor.x, companion.anchor.y, true, gf));
+        t.followDetour = swim || !!(path && path.length * CELL > companion.radius * 1.5);   // 要走的格數比跟隨範圍多一半以上＝要繞路
       }
       detour = !!t.followDetour;
     } else t.followDetour = false;
+    if (ashore) detour = true;   // 要上岸：不然游到跟隨範圍內就停在水裡漂著
     if (!t.leftBehind && (companionDistance > companion.radius || otherFloor || detour || onMovingEscalator(t) || inDoorway)) {   // 還站在手扶梯上：先跟著走下來，不在上面停
       t.target = null; t.waitT = 0;
       t.followDark = true;   // 跟著別人走（溫特、或阿瓦倫跟著艾德林）：中間是暗的也照走（溫特身上有燈）；站在門口：門外暗也要走出來，不然會一直堵在門裡
       // 站在門口、對方就在旁邊：直接走到對方站的地方（對方常常就停在門口外面一格，只靠近到一格內的話會停在門裡）；一走出門口就照平常停下來
       // 要繞路：直接走到對方身邊（直線距離本來就在範圍內，照平常的停止距離會原地不動），走到了找路距離變短就恢復平常
-      followTarget(t, companion.anchor, { dist: detour ? CELL * 1.5 : inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
+      // 坐游泳圈要上岸：直接游到對方站的地方（停在離他 1.5 格會剛好停在水裡），一上岸泳圈自動收起，就恢復平常
+      t.swimAllow = true;   // 跟著人走：用走的到不了、身上有游泳圈就游過去（moveSentryWithPath）
+      followTarget(t, companion.anchor, { dist: ashore ? 0 : detour ? CELL * 1.5 : inDoorway && companionDistance <= companion.radius ? 0 : companion.radius * .82, speed: companion.speed }, dt);
+      t.swimAllow = false;
       if (t.mode === 'escort' && typeof watchSentryProgress === 'function') watchSentryProgress(t, dt, leaderLabel(), () => sentryLeaderBlockReason(t));   // 叫來護衛卻過不來：說出原因（js/sentry-blocked.js）
       return;
     }
