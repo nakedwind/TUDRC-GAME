@@ -9,7 +9,9 @@
    ・攻擊也是彈跳：落地瞬間，撞擊範圍內的人會受傷並被撞開。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值都集中在下面的 CLOWNFISH。
 */
-const CLOWNFISH = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const CLOWNFISH = applyBossSettings('CLOWNFISH', {
   // ---- 彈跳（體型放大成 108×132，所以整套動作放慢約一半）----
   hopUp: .44,          // 蹲低蓄力幾秒
   hopAir: .84,         // 騰空幾秒（只有這段會前進）
@@ -66,7 +68,7 @@ const CLOWNFISH = {
   // ---- 測試用 ----
   testSpawn: false,    // 測試生成已關閉；正式生成仍依地圖怪物設定。
   testSpawnDist: 10,   // 離溫特幾格
-};
+});
 const CF_ART = {
   crouch: 'images/monster/clownfish/clownfish-hop-crouch.png',   // 蹲低／落地
   air: 'images/monster/clownfish/clownfish-hop-air.png',         // 騰空
@@ -294,7 +296,7 @@ function shootFishEggOnLine(x1, y1, x2, y2) {
 
 // ---- 爆炸：炸我方，也炸怪物（打爆魚卵可以當陷阱用）----
 function blowFishEgg(egg) {
-  const B = egg.big, dmg = B ? B.damage : 1;   // 大顆魚卵（js/pool-boss.js 的 POOL_BOSS.bigEgg）：傷害、範圍都比較大
+  const B = egg.big, dmg = (B ? B.damage : 1) * difficultyDmgMul(!!B);   // 大顆魚卵（js/pool-boss.js 的 POOL_BOSS.bigEgg）：傷害、範圍都比較大；× 難度的攻擊力（大顆＝BOSS 下的，用 BOSS 攻擊力）
   const C = CLOWNFISH, x = egg.x, y = egg.y, R = C.eggRadius * CELL * (B ? B.radius : 1);
   removeFishEgg(egg);
   withBlastFloor(egg.floor, () => {   // 魚卵在幾樓就只炸那一層（js/pathfinding.js）

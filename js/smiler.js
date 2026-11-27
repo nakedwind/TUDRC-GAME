@@ -4,9 +4,11 @@
 //  ・注視：偶爾在玩家附近隨機的黑暗處浮現一雙眼睛，原地看著玩家，嘴角慢慢咧開笑一下，然後消失。
 //    那一格被照亮就立刻消失。
 //  ・咬人：玩家或隊員（哨兵、嚮導）待在黑暗裡越久，越可能被它從黑暗中咬一口。
-//  ・想調整出現頻率、傷害，改下面的 SMILER 就好。
+//  ・想調整出現頻率、傷害：怪物編輯器「👑 BOSS 數值」→「😁 Smiler」（存在 data/monsters.js）。
 // ============================================================
-const SMILER = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const SMILER = applyBossSettings('SMILER', {
   image: 'images/monster/Smiler/smiler.png',
   size: 64,              // 畫在地圖上的大小（像素）
   eyesRows: 14,          // 圖片上方幾列是眼睛（只露眼睛時用）
@@ -36,7 +38,7 @@ const SMILER = {
   flashTeammate: 0,      // 隊員被咬時，畫面邊框閃紅的強度（溫特被咬＝1；0＝不閃）
   laughVolume: 0.9,      // 注視時笑聲的音量（離越遠越小聲）；錄音本身很小聲，原本 0.22 會被背景白噪音蓋掉
   biteVolume: 0.8,       // 咬人音效的音量
-};
+});
 const smilerImg = new Image();
 let smilerBloody = null;          // 牙齒沾血版本（咬過人之後用）
 smilerImg.onload = () => { try { smilerBloody = makeBloodyTeeth(smilerImg); } catch (_) { smilerBloody = null; } };   // 直接雙擊 HTML 開啟時讀不到像素：就不做沾血版
@@ -148,7 +150,7 @@ function smilerBite(v, s) {
   if (v.hp <= 0 || v.mrtRide) return;   // 撲上來的時候剛好上了捷運：咬空
   if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(v)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const isPlayer = v === G.player, charmed = s && s.charmed;
-  const dmg = charmed ? 0 : isPlayer ? (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SMILER.playerDmg) : SMILER.playerDmg) : SMILER.sentryDmg * (1 - sentryDefense(v));
+  const dmg = charmed ? 0 : isPlayer ? (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SMILER.playerDmg * difficultyDmgMul(false)) : SMILER.playerDmg * difficultyDmgMul(false)) : SMILER.sentryDmg * difficultyDmgMul(false) * (1 - sentryDefense(v));   // × 難度的怪物攻擊力（js/monster-data.js）
   v.hp = Math.max(0, v.hp - dmg);
   v.hitT = Math.max(v.hitT || 0, .3); v.hitColor = '#ff3b4f';
   if (isPlayer) playPlayerHit(1, true);   // 咬到溫特：跟其他怪物一樣用溫特被打中的音效

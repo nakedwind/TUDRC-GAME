@@ -9,7 +9,9 @@
    ・走路時地上會留下水漬，站著不動時腳下會積一攤水；水柱打到的地方也會積水。地上的水會把火弄熄。
    必須在 enemy-ai.js 之後、game.js 之前載入。
 */
-const FISH_HEAD = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const FISH_HEAD = applyBossSettings('FISH_HEAD', {
   frontMul: 0.6,          // 正面被打：傷害 ×0.6（比較不痛）
   backMul: 1.5,           // 斜後（魚肉那面）被打：傷害 ×1.5（比較痛）
   fireMul: 0.25,          // 抗火：火焰傷害 ×0.25（希奧妮的火、燒傷、火海）
@@ -46,7 +48,7 @@ const FISH_HEAD = {
   deathPoolLife: 20,      // 死掉留下的水留幾秒
   streamColor: '#6aa8ff', // 水柱顏色
   wanderRadius: 2.5, wanderSpeedMul: 0.55, idleMin: 1.5, idleMax: 3.5,
-};
+});
 const fhRand = (a, b) => a + Math.random() * (b - a);
 
 // ---- 火：照明彈、火海、身上著火的怪物 ----

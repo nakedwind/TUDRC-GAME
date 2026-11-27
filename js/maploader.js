@@ -914,7 +914,9 @@ function stampIsStandingObstacle(s) {
   standingObstacleCache.set(s.id, yes);
   return yes;
 }
-const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return stampOn2F(s) || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || stampIsStandingObstacle(s) || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
+// 勾了「平貼地面」的圖（一樓）：永遠畫在角色下面，就算手動設了「遮擋 N 格」（sortDepth）也不跟角色排前後
+// （以前設了遮擋線就會變回立體物，池核那兩張斜放的 TWELVE 招牌就是這樣，勾了平貼還是會蓋住角色）；2 樓的圖、椅子照舊
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; if (t.flat && !stampOn2F(s) && !chairConfig(s.id)) return false; return stampOn2F(s) || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || stampIsStandingObstacle(s) || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
 // ---- 只畫畫面看得到的地方 ----
 // 大地圖（例如 Y 區 56×60 格）如果每一幀都把整張地圖的每一格、每張圖重畫一次，會很卡。

@@ -6,12 +6,14 @@
 //    希奧妮的火焰、爆炸這種一下子的火，打到就直接烤熟（cookFoodNear）
 //  ・buff 存在 G.foodBuffs（換地圖就沒了）；同一種 buff 再吃＝時間重算、效果取大的，不同種可以同時有
 // ============================================================
-const FOOD_DROPS = {   // 依怪物的 behavior：掉什麼、幾個、機率
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const FOOD_DROPS = applyBossSettings('FOOD_DROPS', {   // 依怪物的 behavior：掉什麼、幾個、機率
   milkfish:      { id: 'milkfish-belly', min: 1, max: 1, chance: .3 },   // 虱目魚小子 → 虱目魚肚
   milkfishSmall: { id: 'sashimi',        min: 1, max: 1, chance: .3 },   // 小虱目魚小子 → 生魚片
   fishhead:      { id: 'sashimi',        min: 1, max: 2, chance: .3 },   // 魚頭君 → 生魚片
   vine:          { id: 'loofah',         min: 1, max: 1, chance: .3 },   // 絲瓜小姐 → 絲瓜
-};
+});
 // BOSS 打倒一定掉（散在倒下的地方旁邊）：哪一種 BOSS（怪物身上的旗標）→ 掉什麼、幾個
 const BOSS_FOOD_DROPS = [
   { flag: 'loofahQueen',   id: 'loofah', qty: 5 },   // 絲瓜女王 → 5 條絲瓜（js/loofah-queen.js）
@@ -42,7 +44,7 @@ function foodDeathDrop(e) {
     return;
   }
   const d = FOOD_DROPS[e.behavior];
-  if (!d || Math.random() >= d.chance || typeof itemById !== 'function' || !itemById(d.id)) return;
+  if (!d || Math.random() >= Math.min(1, d.chance * (typeof difficultyOf === 'function' ? difficultyOf('dropRate') : 1)) || typeof itemById !== 'function' || !itemById(d.id)) return;   // 機率 × 難度的掉落機率倍率（怪物編輯器 🎚️ 難度）
   const n = d.min + Math.floor(Math.random() * (d.max - d.min + 1)); if (n <= 0) return;
   G.groundItems = G.groundItems || [];
   G.groundItems.push({ id: d.id, qty: n, x: e.x + (Math.random() - .5) * 16, y: e.y + 8, at: performance.now() / 1000, floor: actorFloor(e) });

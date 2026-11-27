@@ -674,7 +674,7 @@ function drawMothBossShadow(ctx, e) {
 function mbFly(e, dt) {
   const P = MOTH_BOSS, mb = e.mb, z = mbZone(e, mb.stage);
   mb.trail -= dt;
-  if (mb.trail <= 0 && !(e.burnT > 0)) { mb.trail = P.trailEvery; mothPuff(e.x + mothRand(-20, 20), e.y + mothRand(-10, 16), mbKind(e, z), false, actorFloor(e)); }
+  if (mb.trail <= 0 && !(e.burnT > 0)) { mb.trail = P.trailEvery; mothPuff(e.x + mothRand(-20, 20), e.y + mothRand(-10, 16), mbKind(e, z), false, actorFloor(e), true); }
   if (mbFollowPath(e, dt, P.flySpeedMul)) {
     mbSet(e, e.carryCore && e.carryCore.carried ? 'land' : 'nest');
     if (!e.carryCore || !e.carryCore.carried) mbArrive(e);
@@ -759,7 +759,7 @@ function mbBurst(e, dt, z, hasTarget, opt = {}) {
     if (typeof sfxAt === 'function') sfxAt('mothSpray', e.x, e.y, 1, 'moth-boss-burst');
   }
   const want = Math.min(s.spots.length, Math.ceil((s.t - s.tele) / B.time * s.spots.length));
-  for (; s.done < want; s.done++) { const p = s.spots[s.done]; mothPuff(p.x, p.y, s.kind, true, actorFloor(e)); }
+  for (; s.done < want; s.done++) { const p = s.spots[s.done]; mothPuff(p.x, p.y, s.kind, true, actorFloor(e), true); }
   if (s.done >= s.spots.length) {
     mb.burst = null; m.spray = null;
     mb.burstCd = mothRand(B.every[0], B.every[1]);

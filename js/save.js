@@ -101,7 +101,8 @@ function renderSaveSlots() {
     }
     const info = document.createElement('div'), title = document.createElement('strong'), detail = document.createElement('small');
     title.textContent = '存檔 ' + n;
-    detail.textContent = slot ? new Date(slot.at).toLocaleString('zh-TW', { hour12: false }) + (slot.scene?.mapName ? ' · ' + slot.scene.mapName : '') : '空白存檔';
+    const slotLevel = slot && typeof DIFFICULTY_LEVELS !== 'undefined' ? DIFFICULTY_LEVELS.find(l => l.id === (slot.values[DIFFICULTY_CHOICE_KEY] || 'normal')) : null;   // 這個存檔的難度（沒記＝普通，js/monster-data.js）
+    detail.textContent = slot ? new Date(slot.at).toLocaleString('zh-TW', { hour12: false }) + (slot.scene?.mapName ? ' · ' + slot.scene.mapName : '') + (slotLevel ? ' · ' + slotLevel.icon + ' ' + slotLevel.name : '') : '空白存檔';
     info.append(title, detail); row.append(info);
     for (const [action, label] of [['save', slot ? '覆寫' : '存入'], ['load', '讀取']]) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'set-btn' + (action === 'save' ? ' primary' : ''); button.textContent = label;

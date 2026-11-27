@@ -5,16 +5,18 @@
 //      - 正在燒（希奧妮的燒傷、站在火海裡、剛被油桶／油箱爆炸炸到）時 HP 歸零
 //      - 或是地上那堆碎塊被火燒到（火海、油桶／油箱爆炸、希奧妮的火焰剛好打到）
 //    → 碎塊著火四散，這時才算擊殺（給經費和異質碎片）
-//  （數值集中在最上面，想調整改這裡就好）
+//  （數值在怪物編輯器「👑 BOSS 數值」→「生命體」改，存在 data/monsters.js）
 // ============================================================
-const LIFEFORM = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const LIFEFORM = applyBossSettings('LIFEFORM', {
   revive: 30,          // 碎掉後幾秒復活
   collapse: .55,       // 碎掉、掉到地上的時間（秒）
   reassemble: 1.3,     // 重新組裝的時間（秒）
   twitch: 5,           // 復活前幾秒，碎塊開始抽動
   burnWindow: .6,      // 被火燒到後幾秒內 HP 歸零，算是被燒死
   slice: 14,           // 切成碎塊時，每塊大約幾像素高
-};
+});
 const lifePiles = () => (G.lifePiles = G.lifePiles || []);
 const isUndying = e => !!(e && e.undying);
 const lifeNow = () => performance.now() / 1000;
@@ -78,7 +80,8 @@ function burnLifePile(p) {
   if (p.state === 'burn') return;
   p.state = 'burn'; p.burnAt = lifeNow();
   const spec = p.spec || {};
-  if (typeof dropShard === 'function') dropShard(p.x, p.y, spec.crystals ?? 3, p.floor || 0); else earnCrystals(spec.crystals ?? 3);   // 打怪不加錢；掉一顆碎片
+  const shard = Math.round((spec.crystals ?? 3) * (typeof difficultyOf === 'function' ? difficultyOf('crystals') : 1));   // × 難度的結晶倍率
+  if (typeof dropShard === 'function') dropShard(p.x, p.y, shard, p.floor || 0); else earnCrystals(shard);   // 打怪不加錢；掉一顆碎片
   if (typeof trackKillAchievements === 'function') trackKillAchievements({ type: spec.id, x: p.x, y: p.y });
   lifeBurnFx(p.x, p.y);
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', p.x, p.y, .68, 'lifeform-burn-death');

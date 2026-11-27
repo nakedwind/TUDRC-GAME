@@ -60,17 +60,19 @@ function payReward(r) {
   if (money > 0 || crystals > 0) { if (typeof updateHUD === 'function') updateHUD(); return rewardText(money, crystals); }
   return '';
 }
+// 難度：獎金的經費、碎片乘上「BOSS 獎金／區域獎勵」倍率（怪物編輯器 🎚️ 難度）
+const bountyByDifficulty = r => { const mul = typeof difficultyOf === 'function' ? difficultyOf('bossBounty') : 1; return r ? { ...r, money: Math.round((Number(r.money) || 0) * mul), crystals: Math.round((Number(r.crystals) || 0) * mul) } : r; };
 function payZoneRewards(m) {
   if (window.TEST_MODE || typeof REWARDS_DATA === 'undefined' || !m) return [];
   const out = [];
   if (!missionState.zonePaid.includes(m.id)) {
     missionState.zonePaid.push(m.id);
-    const t = payReward((REWARDS_DATA.zones || {})[m.id]); if (t) out.push('控制獎勵：' + t);
+    const t = payReward(bountyByDifficulty((REWARDS_DATA.zones || {})[m.id])); if (t) out.push('控制獎勵：' + t);
   }
   const all = MISSIONS.filter(x => x.map);   // 作戰桌上的區域都控制了：全區控制獎勵（只給一次）
   if (!missionState.zonePaid.includes('all') && all.length && all.every(missionCleared)) {
     missionState.zonePaid.push('all');
-    const t = payReward(REWARDS_DATA.allZones); if (t) out.push('全區控制獎勵：' + t);
+    const t = payReward(bountyByDifficulty(REWARDS_DATA.allZones)); if (t) out.push('全區控制獎勵：' + t);
   }
   saveMissions();
   return out;
@@ -109,7 +111,7 @@ function recordBossBounty(e) {
 }
 // 還沒領的獎金：同一隻打倒好幾次，金額加起來、台詞只說一次
 const bossBountiesPending = () => window.TEST_MODE ? [] : BOSS_BOUNTIES.filter(b => missionState.bossBounty.includes(b.id))
-  .map(b => { const n = missionState.bossBounty.filter(id => id === b.id).length; return { ...b, money: (b.money || 0) * n, crystals: (b.crystals || 0) * n }; })
+  .map(b => { const n = missionState.bossBounty.filter(id => id === b.id).length; return { ...b, ...bountyByDifficulty({ money: (b.money || 0) * n, crystals: (b.crystals || 0) * n }) }; })   // × 難度的獎金倍率
   .filter(b => b.money > 0 || b.crystals > 0);
 const bossBountyReady = () => MAP_SAFE && !MAP_STORY && bossBountiesPending().length > 0;   // 基地裡才入帳（戰鬥地圖的錢是作戰經費，劇情地圖不動錢包）
 // 通訊員開口報告：獎金馬上入帳，回傳要說的台詞（這格台詞被清空也要交代錢是哪來的）

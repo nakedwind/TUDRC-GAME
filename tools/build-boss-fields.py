@@ -1,4 +1,5 @@
-# ===== BOSS 數值 → 怪物編輯器 =====
+# ===== BOSS 與特殊怪物數值 → 怪物編輯器 =====
+# （2026-11-27 起也放一般怪物程式裡的招式、行為數字：自爆史萊姆、魚頭君、人面蝶、異質核心、掉食物…，見下面 BOSSES 清單後半）
 # 每隻 BOSS 的數值原本寫在自己的程式檔（js/elite-bird-head.js 的 ELITE_BIRD…）。
 # 這個工具做三件事：
 #   1. 讀每隻 BOSS 的設定，把「數字」欄位和旁邊的中文註解整理成 js/boss-fields.js（怪物編輯器「👑 BOSS 數值」用的欄位說明）
@@ -31,6 +32,21 @@ BOSSES = [
     ('BOSS_CINEMA', 'js/boss-cinema.js', '🎬 BOSS 出場演出（共用）', 'milkfish_king'),   # 不是一隻 BOSS：出場時停住時間、移鏡頭的共用數字
     ('POOL_MONSTER_FALL', 'js/pool-monster-fall.js', '🌊 怪物掉進深水（共用）', 'bird_head'),   # 不是一隻 BOSS：地面怪物被推下深水後掙扎、扣血、爬回岸的共用數字
     ('BOSS_CORE_LINK', 'js/boss-core-link.js', '🛡️ BOSS 守護的核心（共用）', 'bird_head'),   # 不是一隻 BOSS：BOSS 活著核心打不破、核心護盾、核心血越低 BOSS 越脆的共用數字
+    # ---- 一般怪物的特殊數值（2026-11-27 整理）：基本血量、攻擊力在怪物編輯器上方的怪物資料；這裡是各怪物程式自己的招式、行為數字 ----
+    ('SLIME_BOMB', 'js/combat-feel.js', '💥 自爆史萊姆', 'slime', 'monster'),
+    ('SLIME_SPIT', 'js/combat-feel.js', '🧪 吐酸史萊姆', 'slime', 'monster'),
+    ('FISH_HEAD', 'js/fish-head.js', '魚頭君', 'fish_head', 'monster'),
+    ('LOOFAH', 'js/loofah-lady.js', '絲瓜小姐', 'loofah_lady', 'monster'),
+    ('MILKFISH', 'js/milkfish-kid.js', '虱目魚小子', 'milkfish_kid', 'monster'),
+    ('CLOWNFISH', 'js/clownfish.js', '比基尼小丑魚', 'clownfish', 'monster'),
+    ('BANANA_KING', 'js/golden-banana-king.js', '金蕉王', 'golden_banana_king', 'monster'),
+    ('GOURD', 'js/gourd-monkey.js', '葫蘆猴', 'gourd_monkey', 'monster'),
+    ('MOTH', 'js/human-face-butterfly.js', '人面蝶', 'human_face_butterfly', 'monster'),
+    ('HANGI_CAP', 'js/hangi-bao.js', '順順宮帽（夯吉寶的帽子）', 'hangi_bao', 'monster'),
+    ('LIFEFORM', 'js/lifeform.js', '生命體（打不死、要用火）', 'lifeform', 'monster'),
+    ('SMILER', 'js/smiler.js', '😁 Smiler（黑暗中咬人）', '', 'monster'),
+    ('CORE', 'js/anomalous-core.js', '💠 異質核心', '', 'monster'),
+    ('FOOD_DROPS', 'js/food.js', '🍖 怪物掉食物', '', 'monster'),
 ]
 SKIP_KEYS = {'maps', 'color', 'eyeFlash'}   # 地圖位置在地圖相關的地方改；顏色不放進編輯器
 
@@ -260,11 +276,12 @@ def main():
     dm = re.search(r'\nconst BOSS_SETTINGS_DEFAULT = (\{.*?\n\});\n', data_src, re.S)
     old = json.loads(dm.group(1)) if dm else {}
     lst, rows_all, settings = [], {}, {}
-    for key, path, name, base in BOSSES:
+    for key, path, name, base, *rest in BOSSES:
+        group = rest[0] if rest else ('shared' if '共用' in name else 'boss')   # boss＝BOSS、shared＝共用、monster＝一般怪物
         rows, values, desc, art, wrapped = build(key, path)
         rows_all[key] = rows
         settings[key] = merge_keep(values, old.get(key))
-        lst.append({'key': key, 'name': name, 'file': path, 'base': base, 'artDir': art, 'desc': desc})
+        lst.append({'key': key, 'name': name, 'file': path, 'base': base, 'artDir': art, 'desc': desc, 'group': group})
         if wrapped is not None:
             open(os.path.join(ROOT, path), 'w', encoding='utf-8', newline='\n').write(wrapped)
         print('%-15s %3d 個數字' % (key, sum(len(r['k']) for r in rows)))

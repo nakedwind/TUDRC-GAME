@@ -7,7 +7,9 @@
    - 被打破：核心碎裂成好幾塊飛散（碎片、閃光、衝擊波、紫黑粒子）。
    數值都在下面的 CORE 表格。
 */
-const CORE = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const CORE = applyBossSettings('CORE', {
   image: 'images/background/Anomalous-Core.png',
   w: 80, h: 120,                 // 圖片大小（像素）
   hp: 600,                       // 每一級難度的血量
@@ -23,7 +25,7 @@ const CORE = {
     phase2:  { every: [1.1, 2.4], group: [3, 5], speed: 1.35 },
   },
   shards: 11,                    // 打破時碎成幾塊
-};
+});
 const coreImg = new Image(); coreImg.src = CORE.image;
 const randRange = ([lo, hi]) => lo + Math.random() * (hi - lo);
 
@@ -119,7 +121,7 @@ function darkMonsterSpawnCells() {
 }
 function coreSpawnRule(core) {
   const rule = !core.awake ? CORE.spawn.dormant : core.phase === 2 ? CORE.spawn.phase2 : CORE.spawn.phase1;
-  const rate = difficultyOf('spawnRate');   // 整體難度（data/balance.js 的 DIFFICULTY）：召喚間隔跟著拉長
+  const rate = difficultyOf('spawnRate');   // 難度的怪物出現量（怪物編輯器 🎚️ 難度）：召喚間隔跟著拉長
   return { ...rule, every: [rule.every[0] / rate, rule.every[1] / rate] };
 }
 const coreMaxEnemies = () => isNewbieMap() && NEWBIE_START.maxEnemies ? NEWBIE_START.maxEnemies : Math.max(4, Math.round(CORE.maxEnemies * difficultyOf('spawnRate')));   // 場上異質體上限（新手區另外設，data/balance.js 的 NEWBIE_START）

@@ -981,7 +981,7 @@ function fishKingShocked(e) {
   const hit = [];
   for (const a of [G.player, ...(G.towers || [])]) {
     if (!a || a.hp <= 0 || a.vineCap || !inPool(a)) continue;
-    fkHurt(a, S.mate, '在水裡被' + FISH_KING.name + '的電流電倒');
+    fkHurt(a, S.mate * difficultyDmgMul(true), '在水裡被' + FISH_KING.name + '的電流電倒');
     if (a !== G.player) a.dazeT = Math.max(a.dazeT || 0, S.daze);
     flash('觸電！', a.x, a.y - 58, '#bfe9ff', .8); hit.push(a);
   }

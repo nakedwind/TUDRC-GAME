@@ -41,6 +41,15 @@
   #exportOut { width:100%; min-height:150px; background:#0d151e; border:1px solid #4c6479; color:#b6d5e6; border-radius:8px; padding:12px; font:12px/1.5 Consolas,monospace; resize:vertical }
   #status { min-height:23px; color:#84ddbd; margin:10px 0 }
   .slime-panel { margin-top:18px }
+  .difficulty-panel { margin-top:18px }
+  .difficulty-wrap { overflow-x:auto }
+  #difficultyTable { border-collapse:collapse; width:100%; min-width:720px; font-size:13px }
+  #difficultyTable th { color:#9fb3c8; font-weight:600; text-align:left; padding:6px 8px 8px; border-bottom:1px solid #3a4b60; white-space:nowrap }
+  #difficultyTable td { padding:7px 8px; border-bottom:1px solid #2b3a4a; vertical-align:middle }
+  #difficultyTable td.what strong { display:block; color:#e8edf5 } #difficultyTable td.what small { color:#8ea3b8; font-size:12px; line-height:1.5 }
+  #difficultyTable input { width:84px; padding:6px 7px }
+  #difficultyTable input.changed { border-color:#e2b85c; background:#2a2414 }
+  .difficulty-tools { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px; font-size:13px; color:#b8c9da }
   .slime-wrap { overflow-x:auto }
   #slimeTable { border-collapse:collapse; width:100%; min-width:980px; font-size:13px }
   #slimeTable th { color:#9fb3c8; font-weight:600; text-align:left; padding:6px 6px 8px; border-bottom:1px solid #3a4b60; white-space:nowrap }
@@ -59,6 +68,8 @@
   #bossList button.selected { background:#213d50; border-color:#77c7d9 }
   #bossList img { width:42px; height:42px; object-fit:contain; image-rendering:pixelated; background:#0e1721; border-radius:6px }
   #bossList span { display:grid } #bossList small { font-size:11px }
+  #bossList .boss-group { margin:8px 0 0; font-size:13px; color:#9fb3c8; font-weight:600 } #bossList .boss-group:first-child { margin-top:0 }
+  #bossList img.no-art { visibility:hidden }
   #bossDescBox { margin:0 0 10px; font-size:13px; color:#aebccc } #bossDescBox summary { cursor:pointer }
   #bossDesc { white-space:pre-wrap; font:12px/1.6 inherit; background:#121a23; border-radius:8px; padding:10px; margin:8px 0 0 }
   #bossSearch { width:100%; margin:0 0 10px }
@@ -117,15 +128,28 @@
     </section>
   </div>
   <section class="panel boss-panel">
-    <h2>👑 BOSS 數值</h2>
-    <p style="margin-bottom:14px">每隻 BOSS 的血量、招式、時間、範圍都在這裡改。每一行的說明直接取自 BOSS 程式裡的註解，小字是程式裡的欄位名稱；滑鼠停在格子上可以看原本的數字。
+    <h2>👑 BOSS 數值（含一般怪物的特殊數值）</h2>
+    <p style="margin-bottom:14px">每隻 BOSS 的血量、招式、時間、範圍都在這裡改；一般怪物程式自己的招式數字（自爆史萊姆的爆炸、人面蝶的粉塵、異質核心、掉食物…）在列表下面的「一般怪物」。
+      一般怪物的基本血量、攻擊力還是在上方的怪物資料。每一行的說明直接取自 BOSS 程式裡的註解，小字是程式裡的欄位名稱；滑鼠停在格子上可以看原本的數字。
       改動跟上面一起自動儲存，「下載 monsters.js」／「存到專案」也會一起存進去。虱目魚王在上方的怪物列表裡。</p>
     <div class="boss-layout">
       <div id="bossList"></div>
       <div><div class="actions"><h3 style="flex:1;margin:0" id="bossTitle"></h3><span id="bossCinemaBtns" style="display:contents"></span><button id="bossReset">這隻恢復檔案的數字</button></div>
-        <details id="bossDescBox"><summary>這隻 BOSS 怎麼打（程式裡的說明）</summary><pre id="bossDesc"></pre></details>
+        <details id="bossDescBox"><summary>怎麼運作（程式裡的說明）</summary><pre id="bossDesc"></pre></details>
         <input id="bossSearch" type="search" placeholder="搜尋說明或欄位名稱" aria-label="搜尋 BOSS 欄位">
         <div id="bossFields"></div></div>
+    </div>
+  </section>
+  <section class="panel difficulty-panel">
+    <h2>🎚️ 難度</h2>
+    <p style="margin-bottom:14px">玩家開新遊戲時選簡單、普通或困難，遊戲就用那一欄的倍率（1＝原本的數字，0.5＝一半，2＝兩倍）。
+      改動會跟上面一起自動儲存，「下載 monsters.js」也會一起存進去。黃框＝跟檔案裡的數字不一樣。</p>
+    <div class="difficulty-wrap"><table id="difficultyTable">
+      <thead><tr><th>項目</th></tr></thead>
+      <tbody></tbody></table></div>
+    <div class="difficulty-tools">
+      <label>預覽遊戲時用哪一段難度 <select id="difficultyPreview"></select></label>
+      <button id="difficultyReset">難度恢復檔案的數字</button>
     </div>
   </section>
   <section class="panel slime-panel">
@@ -142,14 +166,14 @@
     <small style="display:block;margin-top:10px">場上同時最多一隻巨型；上一隻沒倒，下一隻會等。</small>
   </section>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
-  <script src="data/monsters.js?v=fkcannon2-20261127"></script>
+  <script src="data/monsters.js?v=monstercfg-20261127"></script>
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/monster-data.js?v=bosscfg-20261122"></script>
-  <script src="js/boss-fields.js?v=fkcannon2-20261127"></script>   <!-- 👑 BOSS 數值的欄位說明（tools/build-boss-fields.py 產生） -->
+  <script src="js/monster-data.js?v=difficulty2-20261127"></script>
+  <script src="js/boss-fields.js?v=monstercfg-20261127"></script>   <!-- 👑 BOSS 數值的欄位說明（tools/build-boss-fields.py 產生） -->
   <script src="js/sfx.js?v=bossvoice2-20261126"></script>
   <script src="js/burrowing-mouse.js?v=bosslag-20261125"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=mothcinema-20261123"></script>
+  <script src="js/monster-editor.js?v=monstercfg-20261127"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

@@ -11,7 +11,9 @@
    ・死掉時炸出一大團鱗粉。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值都在下面的 MOTH。
 */
-const MOTH = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const MOTH = applyBossSettings('MOTH', {
   height: 90,           // 平常飛多高（像素）
   bob: 6,               // 上下飄動幅度（像素）
   bobSpeed: 2.2,        // 上下飄動的速度
@@ -48,7 +50,7 @@ const MOTH = {
   sound: { flap: .35, flapEvery: .8, spray: .6, sprayEvery: 1.2 },   // 音量：拍翅膀、撒鱗粉（0～1，再乘音效編輯器的音量）；拍翅膀、撒鱗粉每幾秒播一次（音檔約 0.8、1.25 秒）
   testSpawn: false,     // 測試用：true＝進戰鬥地圖時在營地右邊生一隻（測完改成 false）
   testCampDist: 20,     // 測試用：營地右邊幾格（跟之前測試的葫蘆猴同一個位置）
-};
+});
 // 三種鱗粉的顏色
 const MOTH_COLORS = {
   poison:  { name: '毒鱗粉', rgb: [110, 220, 90], glow: '#7dff6a' },
@@ -245,7 +247,7 @@ function mothSpray(e, dt, active) {
       s.snd -= dt;   // 撒粉的沙沙聲：撒的時候一直接著播
       if (s.snd <= 0 && s.t < C.sprayTime - .4) { s.snd = C.sound.sprayEvery; if (typeof sfxAt === 'function') sfxAt('mothSpray', e.x, e.y, C.sound.spray, 'moth-spray-' + (e.mothKey ||= Math.random().toString(36).slice(2, 7))); }
       s.puff -= dt;
-      if (s.puff <= 0) { s.puff = C.puffEvery; mothPuff(e.x + mothRand(-62, 62), e.y + mothRand(-24, 34), s.kind, false, actorFloor(e)); }
+      if (s.puff <= 0) { s.puff = C.puffEvery; mothPuff(e.x + mothRand(-62, 62), e.y + mothRand(-24, 34), s.kind, false, actorFloor(e), !!e.mothBoss); }
       if (s.t >= C.sprayTime) {
         m.spray = null; m.cd = mothRand(C.cooldown[0], C.cooldown[1]); m.sprayEndAt = G.mothClock || 0;
         if (!(m.fleeT > 0) && m.target && Math.hypot(m.target.x - e.x, m.target.y - e.y) <= C.flee.nearRange * CELL) mothStartFlee(e, C.flee.afterSpray);   // 在目標身邊撒完：先逃開，等一下再回來
@@ -259,11 +261,11 @@ function mothSpray(e, dt, active) {
   }
 }
 // 落下一團鱗粉霧（floor：撒在幾樓，霧只碰得到那一層的人）
-function mothPuff(x, y, kind, big, floor = 0) {
+function mothPuff(x, y, kind, big, floor = 0, boss = false) {   // boss：人面蝶后撒的（爆炸傷害用難度的 BOSS 攻擊力）
   const C = MOTH.cloud, list = G.mothClouds = G.mothClouds || [];
   if (list.length >= C.max) list.shift();
   const a = Math.random() * Math.PI * 2, sp = C.drift * mothRand(.3, 1);
-  list.push({ x, y, floor: hasFloors ? floor : 0, kind, r: C.r0 * (big ? 1.5 : 1), rMax: C.r1 * (big ? 1.35 : 1), age: 0, life: C.life * (big ? 1.3 : 1), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, seed: Math.random() * 100 });
+  list.push({ x, y, floor: hasFloors ? floor : 0, kind, r: C.r0 * (big ? 1.5 : 1), rMax: C.r1 * (big ? 1.35 : 1), age: 0, life: C.life * (big ? 1.3 : 1), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, seed: Math.random() * 100, boss: !!boss });
 }
 const mothCloudDensity = c => Math.min(1, c.age / .35) * Math.min(1, (c.life - c.age) / 1.5);
 
@@ -319,6 +321,7 @@ function mothIgniteNear(x, y, r = 0) {
 function mothBlast(c) { withBlastFloor(c.floor, () => mothBlastNow(c)); }   // 霧在幾樓，爆炸就只炸那一層（js/pathfinding.js）
 function mothBlastNow(c) {
   const B = MOTH.blast, x = c.x, y = c.y, R = Math.max(B.radius * CELL, c.r * .8), k = (mothCloudDensity(c) * .5 + .5) * (c.blastMul || 1);
+  const dk = k * difficultyDmgMul(!!c.boss);   // 炸到溫特、隊員：× 難度的攻擊力（蝶后撒的霧用 BOSS 攻擊力）；炸到怪物不變
   c.boom = true;
   if (G.mothBoomCd <= 0 && typeof sfxAt === 'function') { G.mothBoomCd = .12; G.mothBoomSerial = (G.mothBoomSerial || 0) + 1; sfxAt(c.blastMul > 1 ? 'midBoom' : 'smallBoom', x, y, .7, 'moth-boom-' + G.mothBoomSerial); }   // 大爆炸：比較大聲
   for (const e of G.enemies) {
@@ -335,14 +338,14 @@ function mothBlastNow(c) {
     if (t.hp <= 0 || t.eatenBy || !blastHits(t)) continue;
     const d = Math.hypot(t.x - x, t.y - y);
     if (d > R) continue;
-    const hurt = B.sentry * k * (1 - .4 * d / R) * (1 - sentryDefense(t));
+    const hurt = B.sentry * dk * (1 - .4 * d / R) * (1 - sentryDefense(t));
     t.hp = Math.max(0, t.hp - hurt);
     if (typeof blastPush === 'function') blastPush(t, x, y, hurt, 30);
     if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
   const p = G.player;
   if (p && p.hp > 0 && blastHits(p) && Math.hypot(p.x - x, p.y - y) <= R) {
-    const d = Math.hypot(p.x - x, p.y - y), raw = B.player * k * (1 - .4 * d / R);
+    const d = Math.hypot(p.x - x, p.y - y), raw = B.player * dk * (1 - .4 * d / R);
     const hurt = typeof equipPlayerDamage === 'function' ? equipPlayerDamage(raw) : raw;
     p.hp = Math.max(0, p.hp - hurt); G.damageVignetteT = .5;
     if (typeof playPlayerHit === 'function') playPlayerHit();
@@ -446,7 +449,7 @@ function mothStatuses(dt) {
       a.mothPoisonT -= dt; a.mothPoisonTick -= dt;
       if (a.mothPoisonTick <= 0) {
         a.mothPoisonTick += C.poison.tick;
-        const dmg = C.poison.dmg;
+        const dmg = Math.max(1, Math.round(C.poison.dmg * difficultyDmgMul(G.enemies.some(e => e.mothBoss && !e.dead && e.hp > 0))));   // × 難度的攻擊力（人面蝶后在場用 BOSS 攻擊力）
         a.hp = Math.max(0, a.hp - dmg);
         if (a.mothSleepHp != null) a.mothSleepHp = a.hp;   // 毒不會把睡著的人弄醒
         flashDmg('-' + dmg, a.x + 12, a.y - 40, MOTH_COLORS.poison.glow, { small: true });
@@ -631,10 +634,10 @@ function mothDodgesMelee(t, target) {
 // ---- 死掉：炸出一大團鱗粉，屍體從空中掉下來、化成灰（沿用珍珠小童的 drop 屍體，js/pearl-kid.js）----
 function mothDeathBurst(e) {
   const kind = (e.mo && e.mo.spray && e.mo.spray.kind) || mothPick(MOTH_KINDS);
-  mothPuff(e.x, e.y + 4, kind, true, actorFloor(e));
+  mothPuff(e.x, e.y + 4, kind, true, actorFloor(e), !!e.mothBoss);
   for (let i = 0; i < MOTH.deathPuffs - 1; i++) {
     const a = i / (MOTH.deathPuffs - 1) * Math.PI * 2;
-    mothPuff(e.x + Math.cos(a) * 96, e.y + 4 + Math.sin(a) * 53, kind, true, actorFloor(e));
+    mothPuff(e.x + Math.cos(a) * 96, e.y + 4 + Math.sin(a) * 53, kind, true, actorFloor(e), !!e.mothBoss);
   }
   const f = e.frames || {};
   (G.fxCorpses = G.fxCorpses || []).push({ floor: actorFloor(e), drop: true, noBits: true, img: monsterImage(f.front || e.sprite), x: e.x, y: e.y, z: e.slimeLift || 0, vz: 0,

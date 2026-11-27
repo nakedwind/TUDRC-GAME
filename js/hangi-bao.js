@@ -11,7 +11,9 @@
      不受上面「綁定夯吉寶」的限制（地圖有標大宮帽就有）。
    必須在 enemy-ai.js 之後、game.js 之前載入。
 */
-const HANGI_CAP = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const HANGI_CAP = applyBossSettings('HANGI_CAP', {
   image: 'images/monster/Hangi-Bao/shunshun-cap.png',          // 地上關著的帽子
   openImage: 'images/monster/Hangi-Bao/shunshun-cap-open.png', // 打開後的帽子
   scale: 1.2,            // 帽子畫在地上的大小（1＝圖片原本的大小；1.2＝放大 1.2 倍）
@@ -25,7 +27,7 @@ const HANGI_CAP = {
   lootChance: 0.3,       // 打開時掉出物品的機率（物品表是空的就不會掉）
   // 掉落物品表：之後再設定。格式：{ id: '物品 id（data/items.js 或 data/supplies.js）', n: 數量, weight: 抽中比重 }
   loot: [],
-};
+});
 const HB_HIT_R = 18;      // 帽子打中人的判定半徑（像素）
 const hbImg = file => monsterImage(file);
 const hbRand = ([a, b]) => a + Math.random() * (b - a);
@@ -160,7 +162,7 @@ function openHangiCap(cap) {
   }
   // 掉落物品（物品表之後再設定）
   const loot = HANGI_CAP.loot.filter(it => it && it.id && typeof itemById === 'function' && itemById(it.id));
-  if (loot.length && Math.random() < HANGI_CAP.lootChance) {
+  if (loot.length && Math.random() < Math.min(1, HANGI_CAP.lootChance * (typeof difficultyOf === 'function' ? difficultyOf('dropRate') : 1))) {   // × 難度的掉落機率倍率
     let roll = Math.random() * loot.reduce((sum, it) => sum + (it.weight || 1), 0), pick = loot[0];
     for (const it of loot) { roll -= it.weight || 1; if (roll <= 0) { pick = it; break; } }
     const n = Math.max(1, pick.n || 1);

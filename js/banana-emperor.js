@@ -517,7 +517,7 @@ function beApplyDebuff(a, id) {
   const D = BANANA_EMPEROR.debuffs[id], col = BANANA_EMPEROR.spells[id].color;
   if (!D) return;
   if (D.drain) {
-    const n = Math.min(D.drain, Math.max(0, a.hp - 1));
+    const n = Math.min(Math.round(D.drain * difficultyDmgMul(true)), Math.max(0, a.hp - 1));   // × 難度的 BOSS 攻擊力（js/monster-data.js）
     if (n > 0) { a.hp -= n; flashDmg('-' + n, a.x, a.y - 46, beHex(col)); }
   } else {
     const d = (a.beDebuff = a.beDebuff || {});

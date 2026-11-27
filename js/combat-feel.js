@@ -31,15 +31,37 @@ function applySlimeSettings() {
   GIANT_EVENT.first = s.giant.first; GIANT_EVENT.every = s.giant.every;
 }
 // 自爆史萊姆：靠近目標後引爆的距離、引信秒數、爆炸半徑與各對象傷害
-const SLIME_BOMB = { trigger: CELL * 1.25, fuse: 1.1, radius: CELL * 1.6,
-                     player: 24, sentry: 30, building: 60, monster: 20, killedMul: .6 };
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const SLIME_BOMB = applyBossSettings('SLIME_BOMB', {
+  trigger: CELL * 1.25,   // 離目標多近開始引爆
+  fuse: 1.1,              // 引信幾秒才爆
+  radius: CELL * 1.6,     // 爆炸範圍
+  player: 24,             // 炸到溫特的傷害（再乘難度的怪物攻擊力）
+  sentry: 30,             // 炸到隊員的傷害（再乘難度的怪物攻擊力，依防禦減少）
+  building: 60,           // 炸到建築的傷害（再乘難度的怪物攻擊力）
+  monster: 20,            // 炸到其他怪物的傷害
+  killedMul: .6,          // 還沒引爆就被打死：爆炸威力 ×幾倍
+});
 // 巨型史萊姆登場事件：開戰 first 秒後第一次出現，之後每 every 秒再來一隻（場上同時最多 1 隻）
 const GIANT_EVENT = { first: 45, every: 75 };
 applySlimeSettings();
-// 吐酸史萊姆：range 在多遠內會吐（格）、minRange 太近就不吐；windup 蓄力秒數（地上出現落點警示）
-// flySpeed 酸液飛行速度（格／秒）；cooldown 冷卻；pool 地上酸液：半徑（格）、存在秒數、每秒傷害（玩家／哨兵）
-const SLIME_SPIT = { range: 5, minRange: 1.5, windup: .75, flySpeed: 6.5, cooldown: 3.8,
-                     pool: { radius: .75, life: 4.5, playerDps: 9, sentryDps: 10 } };
+// 吐酸史萊姆：吐酸液攻擊，地上留一灘酸液
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const SLIME_SPIT = applyBossSettings('SLIME_SPIT', {
+  range: 5,               // 在多遠內會吐（格）
+  minRange: 1.5,          // 太近就不吐（格）
+  windup: .75,            // 蓄力幾秒（地上出現落點警示）
+  flySpeed: 6.5,          // 酸液飛行速度（格／秒）
+  cooldown: 3.8,          // 吐完冷卻幾秒
+  pool: {                 // 地上的酸液
+    radius: .75,          // 半徑（格）
+    life: 4.5,            // 存在幾秒
+    playerDps: 9,         // 溫特站在裡面每秒扣多少（再乘難度的怪物攻擊力）
+    sentryDps: 10,        // 隊員站在裡面每秒扣多少（再乘難度的怪物攻擊力）
+  },
+});
 // 受擊回饋：擊退距離（一般／重擊）、重擊硬直秒數
 const HIT_FEEL = { knock: 5, heavyKnock: 16, stagger: .3 };
 // 畫面震動只在玩家附近發生：range 格以內才震，越近越強
@@ -270,12 +292,13 @@ function bomberShouldArm(e) {
 function slimeExplode(e, mul) { withBlastFloor(actorFloor(e), () => slimeExplodeNow(e, mul)); }   // 史萊姆在幾樓就只炸那一層（js/pathfinding.js）
 function slimeExplodeNow(e, mul) {
   const R = SLIME_BOMB.radius, x = e.x, y = e.y;
+  const dmul = mul * difficultyDmgMul(false);   // 炸到溫特、隊員、建築：× 難度的怪物攻擊力（js/monster-data.js）
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 自爆史萊姆也炸得開可炸開的牆（js/breakable-walls.js）
   if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 炸開珍珠大童的貝殼（js/pearl-elder.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 自爆史萊姆的爆炸波及順順宮帽：打開帽子
   const p = G.player;
   if (p && p.hp > 0 && blastHits(p) && Math.hypot(p.x - x, p.y - y) <= R) {
-    const dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SLIME_BOMB.player * mul) : SLIME_BOMB.player * mul));
+    const dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SLIME_BOMB.player * dmul) : SLIME_BOMB.player * dmul));
     p.hp = Math.max(0, p.hp - dmg);
     p.hitT = .45; p.underAttackT = 5; G.damageVignetteT = .5;
     playPlayerHit(1, true);   // 溫特被自爆史萊姆炸到
@@ -290,7 +313,7 @@ function slimeExplodeNow(e, mul) {
   for (const t of G.towers) {
     if (t.hp <= 0 || !blastHits(t) || Math.hypot(t.x - x, t.y - y) > R) continue;
     const defense = sentryDefense(t);
-    const dmg = SLIME_BOMB.sentry * mul * (1 - defense);
+    const dmg = SLIME_BOMB.sentry * dmul * (1 - defense);
     t.hp = Math.max(0, t.hp - dmg); t.hitT = Math.max(t.hitT || 0, .25);
     flashDmg('-' + Math.round(dmg), t.x, t.y - 30, '#ff8f8f');
     if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
@@ -306,7 +329,7 @@ function slimeExplodeNow(e, mul) {
       continue;
     }
     if (!o.playerBuilt || o.isBase || o.hp <= 0 || enemyObstacleDistance(e, o) > R) continue;
-    o.hp -= SLIME_BOMB.building * mul; o.hitT = HIT_DUR;
+    o.hp -= SLIME_BOMB.building * dmul; o.hitT = HIT_DUR;
     if (o.hp <= 0) removeBarrier(o);
   }
   for (const other of G.enemies) {   // 炸到其他怪物（可以引發連鎖爆炸）
@@ -618,23 +641,23 @@ function updateAcidSpit(dt) {
     G.acidShots = G.acidShots.filter(s => !s.done);
   }
   if (G.spitPools) {
-    const P = SLIME_SPIT.pool;
+    const P = SLIME_SPIT.pool, am = difficultyDmgMul(false);   // am：酸液傷害 × 難度的怪物攻擊力（js/monster-data.js）
     for (const pool of G.spitPools) {
       pool.t -= dt;
       if (pool.t <= 0) continue;
       const inPool = o => { const dx = o.x - pool.x, dy = (o.y - pool.y) / .6; return dx * dx + dy * dy <= pool.r * pool.r; };
       const p = G.player;
       if (p && p.hp > 0 && fieldHits(pool.floor, p) && inPool(p)) {
-        p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(P.playerDps * dt * (typeof equipAcidMul === 'function' ? equipAcidMul() : 1)) : P.playerDps * dt));   // 防毒面具也減少酸液傷害
+        p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(P.playerDps * am * dt * (typeof equipAcidMul === 'function' ? equipAcidMul() : 1)) : P.playerDps * am * dt));   // 防毒面具也減少酸液傷害
         p.hitT = Math.max(p.hitT || 0, .15); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .25);
         p.acidTick = (p.acidTick || 0) - dt;
-        if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * .5), p.x, p.y - 46, '#d4e04a'); playPlayerHit(.55, true); }   // 踩在吐酸史萊姆的酸液裡：每次燙傷小聲響一下
+        if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * am * .5), p.x, p.y - 46, '#d4e04a'); playPlayerHit(.55, true); }   // 踩在吐酸史萊姆的酸液裡：每次燙傷小聲響一下
         if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '踩進吐酸史萊姆的酸液'); }
       }
       for (const t of G.towers) {
         if (t.hp <= 0 || !fieldHits(pool.floor, t) || !inPool(t)) continue;
         const def = sentryDefense(t);
-        t.hp = Math.max(0, t.hp - P.sentryDps * (1 - def) * dt);
+        t.hp = Math.max(0, t.hp - P.sentryDps * am * (1 - def) * dt);
         t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#d4e04a';
         if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
       }

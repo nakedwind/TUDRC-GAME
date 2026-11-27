@@ -184,7 +184,7 @@ function createMonster(spec, x, y, variant) {
     floor: hasFloors ? floorAtPoint(x, y) : undefined,   // 一出生就定好在幾樓（js/pathfinding.js）：正在爆炸的那層、旁邊的人、或那格是不是只有 2 樓
     speed: Number(oldRules.speed) || spec.speed,
     reward: oldRules.reward != null ? Number(oldRules.reward) : spec.reward,
-    crystals: spec.crystals, playerDamage: dmg(spec.playerDamage),
+    crystals: spec.crystals == null ? spec.crystals : Math.round(spec.crystals * difficultyOf('crystals')), playerDamage: dmg(spec.playerDamage),   // 結晶：擊殺掉的碎片 × 難度的結晶倍率（BOSS 的碎片倍率是乘在這個上面）
     sentryDamage: dmg(spec.sentryDamage), buildingDamage: dmg(spec.buildingDamage),
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
@@ -2741,6 +2741,7 @@ function update(dt) {
     e.prevHp = e.hp;
   }
   if (typeof bossCoreDefense === 'function') bossCoreDefense();   // 核心血越多，守它的 BOSS 受到的傷害越少（js/boss-core-link.js）
+  if (typeof applyEnemyDifficulty === 'function') for (const e of G.enemies) if (!e.difficultyDone) applyEnemyDifficulty(e);   // BOSS 出場：血量、攻擊力換成難度的 BOSS 倍率（js/monster-data.js）
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if ((e.ratKing || e.ratKingHand) && typeof ratKingHoldDeath === 'function' && ratKingHoldDeath(e)) continue;   /* 花蓮老鼠王：先照核心護甲算、沒血了等列車撞飛；抓人的手被打掉只放人（js/rat-king.js） */ if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3, actorFloor(e)); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death', typeof isBossVoice === 'function' && isBossVoice(e));   /* BOSS 死掉：低沉、大聲、有回音（js/sfx.js 的 BOSS_VOICE） */ else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
@@ -2752,7 +2753,7 @@ function update(dt) {
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
-    const coreReward = mrtExitsAllOpen() ? MRT_OPEN_CORE_REWARD : core.reward;   // 捷運入口解封了：核心只掉碎片（js/mrt-locks.js）
+    const coreReward = Math.round((mrtExitsAllOpen() ? MRT_OPEN_CORE_REWARD : core.reward) * difficultyOf('crystals'));   // × 難度的結晶倍率   // 捷運入口解封了：核心只掉碎片（js/mrt-locks.js）
     earnCrystals(coreReward); if (G.battle) G.battle.cores++; flash('核心摧毀 +'+coreReward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + coreReward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);

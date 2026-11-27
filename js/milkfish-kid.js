@@ -16,7 +16,9 @@
      不攻擊（game.js 的哨兵攻擊）、不畫本人（render.js 的 drawTower，改由 drawEnemy 在魚嘴畫腳）。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值在下面的 MILKFISH。
 */
-const MILKFISH = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const MILKFISH = applyBossSettings('MILKFISH', {
   noticeRange: 12,        // 看到隊友的距離（格）；玩家另用 playerNoticeRange
   loseRange: 16,          // 追多遠就放棄（格）
   eatReach: 42,           // 離隊友幾像素內可以吃
@@ -48,7 +50,7 @@ const MILKFISH = {
   legsFps: 6,             // 嘴裡的腳踢動畫速度（張／秒）
   mouthRow: 21,           // 魚嘴開口在圖片的第幾排（腳的圖片下緣對齊這裡；圖片高 120）
   wanderRadius: 2.5, wanderSpeedMul: 0.55, idleMin: 1.5, idleMax: 3.5,
-};
+});
 const MILKFISH_ART = 'images/monster/milkfish-kid/milkfish-kid-';
 const MILKFISH_SMALL_ART = 'images/monster/milkfish-kid-small/milkfish-kid-small-';
 // 嘴裡露出的腳：哨兵、嚮導各三張（踢腳動畫）

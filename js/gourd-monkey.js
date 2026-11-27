@@ -9,7 +9,9 @@
    ・身體很寬：只有一格寬的通道擠不過去（gourdWide：要有 2×2 的空地才走得過）。被建築擋路就直接壓上去。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值在下面的 GOURD。
 */
-const GOURD = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const GOURD = applyBossSettings('GOURD', {
   noticeRange: 7,       // 看到玩家／隊友的距離（格）
   loseRange: 12,        // 追多遠就放棄（格）
   slamRange: 3.5,       // 目標在幾格內就準備壓下去
@@ -72,7 +74,7 @@ const GOURD = {
     squash: 'images/monster/gourd-monkey/gourd-monkey-squash.png',
     tall: 'images/monster/gourd-monkey/gourd-monkey-tall.png',
   },
-};
+});
 const gmRand = (a, b) => a + Math.random() * (b - a);
 // 這隻用哪一套數值：一般葫蘆猴用 GOURD；葫蘆猴王（js/gourd-king.js）用自己放大過的那套
 function gmCfg(e) { return e && e.gourdKing && typeof gourdKingCfg === 'function' ? gourdKingCfg(e) : GOURD; }

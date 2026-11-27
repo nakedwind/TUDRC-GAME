@@ -25,9 +25,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
-<script src="js/new-game.js?v=helmetbat-20261126"></script>
+<script src="js/new-game.js?v=difficulty-20261127"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=wstut-20261126">
+<link rel="stylesheet" href="css/style.css?v=difficulty-20261127">
 <link rel="stylesheet" href="css/tpad-map.css?v=matefaces-20261126">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
@@ -297,12 +297,12 @@
   <script src="data/missions.js?v=rewards-20261126"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/rewards.js?v=funds-20261126"></script>   <!-- 獎勵：BOSS 特別獎金、區域控制獎勵、全區控制獎勵（🏅 獎勵編輯器） -->
   <script src="data/dialogues.js?v=w118brief-20261126"></script>  <!-- 所有台詞（對話編輯器） -->
-  <script src="data/balance.js?v=20261126fogglow"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/balance.js?v=difficulty-20261127"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=fkcannon2-20261127"></script>  <!-- 2b. 怪物種類與數值 -->
-  <script src="js/monster-data.js?v=bosscfg-20261122"></script>
+  <script src="data/monsters.js?v=monstercfg-20261127"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="js/monster-data.js?v=difficulty2-20261127"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
@@ -324,7 +324,7 @@
   <script src="data/surface-tags.js?v=poolfloor1-20261124"></script>   <!-- 素材的牆／地板標記（🧱 牆地板編輯器匯出） -->
   <script src="js/surface-tags.js?v=walltop2-20261118"></script>   <!-- 牆／地板標記：讀標記（含編輯器還沒存的修改） -->
   <script src="js/map-levels.js?v=no1fauto-20261118"></script>   <!-- 地圖的樓層資料規則（地圖編輯器共用） -->
-  <script src="js/maploader.js?v=perf2-20261127"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=flatsign-20261127"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/kelp-sway.js?v=kelp-20261126"></script>    <!-- 水草微微晃動（地圖上擺的水草物件圖） -->
   <script src="js/water.js?v=dive-20261126"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/pits.js?v=bridgefloor-20261121"></script>   <!-- 6b. 坑洞：走過會變慢（hole01、hole02 等）；哪些素材是坑洞在地圖／基地編輯器勾 -->
@@ -353,9 +353,9 @@
   <script>document.write('<script src="data/squad-skills.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 技能樹內容（Y102隊員裝備／技能編輯器匯出）；每次都讀最新的 -->
   <script src="data/guide-skills.js?v=range5-20261122"></script>   <!-- 嚮導技能樹：技能內容與數值（必須在 js/skills.js 之前） -->
   <script src="js/skills.js?v=say-20261106"></script>   <!-- 技能樹：12 格、花碎片學技能 -->
-  <script src="js/anomalous-core.js?v=corelink-20261126"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
+  <script src="js/anomalous-core.js?v=monstercfg-20261127"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
   <script src="js/core-frenzy.js?v=fishking-20261125"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
-  <script src="js/combat-feel.js?v=mfall-20261124"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/combat-feel.js?v=monstercfg-20261127"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="data/achievements.js?v=merge4-20261115"></script>   <!-- 9d. 成就的內容（分類、名稱、條件、文字；用「🏆 成就編輯器」編輯） -->
   <script src="js/achievement-config.js?v=merge4-20261115"></script>   <!-- 成就的設定（跟成就編輯器共用） -->
   <script src="js/achievements.js?v=merge4-20261115"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
@@ -366,24 +366,24 @@
   <script src="js/elite-bird-head.js?v=bossvoice-20261126"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
   <script src="js/pearl-kid.js?v=placefloor-20261115"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/pearl-elder.js?v=bossvoice-20261126"></script> <!-- 9f3b. 菁英珍珠小童「珍珠大童」：抱著核心閒晃、閉殼降珍珠、大珍珠掩體可推動撞擊 -->
-  <script src="js/hangi-bao.js?v=bridgefloor-20261121"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
-  <script src="js/elite-cap-king.js?v=bossvoice-20261126"></script> <!-- 9f4a. 菁英 BOSS「順順宮主」：核心躲在大宮帽裡、大夯吉寶、蓋杯子洗牌 -->
+  <script src="js/hangi-bao.js?v=monstercfg-20261127"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
+  <script src="js/elite-cap-king.js?v=difficulty-20261127"></script> <!-- 9f4a. 菁英 BOSS「順順宮主」：核心躲在大宮帽裡、大夯吉寶、蓋杯子洗牌 -->
   <script src="js/street-vehicles.js?v=merge-20261115c"></script> <!-- 9f4b. K56 路邊會暴衝的機車、腳踏車：敵我都撞飛 -->
-  <script src="js/fish-head.js?v=fkleap-20261126"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/loofah-lady.js?v=nodeep2-20261123"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
-  <script src="js/clownfish.js?v=bigegg1-20261127"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
+  <script src="js/fish-head.js?v=monstercfg-20261127"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
+  <script src="js/loofah-lady.js?v=monstercfg-20261127"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
+  <script src="js/clownfish.js?v=monstercfg-20261127"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
   <script src="js/pool-boss.js?v=bigegg1-20261127"></script> <!-- 9f7b. 池核 BOSS：巨大比基尼小丑魚（守核心、深水區游泳潛水、抽水時擱淺） -->
-  <script src="js/fish-king.js?v=fkcannon2-20261127"></script> <!-- 9f7c. W118 魚頭王：深水裡潛水、高壓水砲、水柱衝天、被推上岸擱淺、導電、叫小弟 -->
+  <script src="js/fish-king.js?v=difficulty2-20261127"></script> <!-- 9f7c. W118 魚頭王：深水裡潛水、高壓水砲、水柱衝天、被推上岸擱淺、導電、叫小弟 -->
   <script src="js/water-monsters.js?v=bigegg1-20261127"></script> <!-- 9f7d. 水中怪物（生在深水裡游泳、攻擊）＋泳圈上戰鬥（攻速、命中率、後座力） -->
   <script src="js/pool-surge.js?v=pull2-20261126"></script>   <!-- 9f7c. 大型怪物落水：水滿溢出來、把岸上的人和東西推開 -->
-  <script src="js/golden-banana-king.js?v=slipspeed-20261124"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
-  <script src="js/gourd-monkey.js?v=perf-20261124"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
+  <script src="js/golden-banana-king.js?v=monstercfg-20261127"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
+  <script src="js/gourd-monkey.js?v=monstercfg-20261127"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/boss-cinema.js?v=debrisfix-20261123"></script> <!-- 9f9a. BOSS 出場演出：時間停住、鏡頭移到出場的地方、上下黑邊（虱目魚王、葫蘆猴王、花蓮老鼠王共用） -->
   <script src="js/gourd-king.js?v=bossvoice-20261126"></script> <!-- 9f9b. 菁英葫蘆猴「葫蘆猴王」：R89 BOSS 牆後面，核心醒了撞牆出來、巨型壓頂、天花板落石、暴怒連跳 -->
-  <script src="js/rat-king.js?v=corelink-20261126"></script> <!-- 9f9c. 菁英花蓮版權老鼠「花蓮老鼠王」：O666 上方月台的 BOSS，從鐵軌冒出、手抓人搬核心、核心是護甲、列車撞飛 -->
-  <script src="js/human-face-butterfly.js?v=20261126gk1"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
-  <script src="js/moth-boss.js?v=bossdown-20261126"></script> <!-- 9f10b. 菁英人面蝶「人面蝶后」：抱著核心在 B56 四個區域之間飛、築巢、大面積撒粉 -->
-  <script src="js/milkfish-kid.js?v=offaudit2-20261122"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
+  <script src="js/rat-king.js?v=difficulty-20261127"></script> <!-- 9f9c. 菁英花蓮版權老鼠「花蓮老鼠王」：O666 上方月台的 BOSS，從鐵軌冒出、手抓人搬核心、核心是護甲、列車撞飛 -->
+  <script src="js/human-face-butterfly.js?v=monstercfg-20261127"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
+  <script src="js/moth-boss.js?v=difficulty2-20261127"></script> <!-- 9f10b. 菁英人面蝶「人面蝶后」：抱著核心在 B56 四個區域之間飛、築巢、大面積撒粉 -->
+  <script src="js/milkfish-kid.js?v=monstercfg-20261127"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
   <script src="js/render.js?v=waterpick-20261126"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=levels3-20261115"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
@@ -404,11 +404,11 @@
   <script src="js/fog.js?v=fogglow-20261126"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
   <script src="js/vines.js?v=ferryred-20261126"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
   <script src="js/loofah-queen.js?v=splitshock-20261127"></script> <!-- 9n4. 菁英絲瓜小姐「絲瓜女王」：踏地垂下藤蔓、核心吊在頭上、農田長藤蔓 -->
-  <script src="js/milkfish-king.js?v=bossvoice-20261126"></script> <!-- 9n5. 菁英 BOSS「虱目魚王」：吞核心保護、吃建築和隊友再吐出來砸人（G11區） -->
-  <script src="js/banana-emperor.js?v=bosscfg-20261122"></script> <!-- 9n5. 菁英金蕉王「金蕉大王」：守核心、舉杖敲地施法（補血／加攻／加防／加速／香蕉皮雨）、大隻隊員 -->
+  <script src="js/milkfish-king.js?v=difficulty2-20261127"></script> <!-- 9n5. 菁英 BOSS「虱目魚王」：吞核心保護、吃建築和隊友再吐出來砸人（G11區） -->
+  <script src="js/banana-emperor.js?v=difficulty2-20261127"></script> <!-- 9n5. 菁英金蕉王「金蕉大王」：守核心、舉杖敲地施法（補血／加攻／加防／加速／香蕉皮雨）、大隻隊員 -->
   <script src="js/leaf-piles.js?v=leafpile4-20261106"></script> <!-- 9n4. 森林的樹葉堆：燒掉露出道具或小史萊姆（地圖編輯器擺放） -->
-  <script src="js/lifeform.js?v=levels3-20261115"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
-  <script src="js/smiler.js?v=mrtsafe-20261123"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
+  <script src="js/lifeform.js?v=monstercfg-20261127"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
+  <script src="js/smiler.js?v=monstercfg-20261127"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=offaudit2-20261122"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/rocks.js?v=rocks-20261122"></script> <!-- 9m2. 地圖上擺的石頭：溫特開槍打得破（碎掉動畫借 js/milkfish-king.js 的 mkShatter） -->
   <script src="js/landmine.js?v=surgebuild-20261126"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
@@ -433,7 +433,7 @@
   <script src="js/escalators.js?v=merge-20261120b"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
   <script src="js/rescue-dog.js?v=twosquad2-20261103"></script>
   <script src="js/ground-items.js?v=float-20261124"></script>   <!-- 背包裡的東西放在地上、撿回來；嚮導撿、球球叼急救包和杏仁水 -->
-  <script src="js/food.js?v=mkbelly-20261127"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
+  <script src="js/food.js?v=monstercfg-20261127"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/chickens.js?v=nest2-20261115"></script>   <!-- 森林的雞：閒晃、下蛋、抱起來；鳥巢長蛋（數值在 data/chickens.js） -->
   <script src="js/cooking.js?v=wspages-20261109"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
   <script src="js/meal.js?v=firsthint3-20261115"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
@@ -442,9 +442,9 @@
   <script src="js/ball-poses.js?v=ballsit-20261109"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
   <script src="js/first-hints.js?v=hintfix-20261124"></script> <!-- 首次遊玩：基地裡諾亞、置物櫃、衣櫃、防具箱頭上飄提示，用過就不再出現 -->
-  <script src="js/missions.js?v=bossdown-20261126"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
+  <script src="js/missions.js?v=difficulty-20261127"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
-  <script src="js/save.js?v=slotdb-20261122"></script> <!-- 9k. 存檔、設定選單 -->
+  <script src="js/save.js?v=difficulty2-20261127"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/boss-music.js?v=fishking-20261125"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=merge-20261115"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/map-ambient.js?v=deeptest-20261126"></script> <!-- 9k3. 地圖專屬環境背景音：池核的滴水聲 -->
@@ -475,7 +475,7 @@
   <script src="js/ui-layout.js?v=fundcard2-20261115"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/save-restore.js?v=restore2-20261114"></script>   <!-- 設定→存檔：匯出／匯入存檔、找回進度 -->
   <script src="js/boss-core-link.js?v=corelink2-20261126"></script>   <!-- BOSS 守護的核心：BOSS 活著打不破、核心護盾、核心血越低 BOSS 越脆（在各 BOSS 之後、game.js 之前） -->
-  <script src="js/game.js?v=splitshock-20261127"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=difficulty-20261127"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=ratking-20261120"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
@@ -508,6 +508,7 @@
   <script src="data/party.js?v=party12-20261107"></script>   <!-- 慶功宴設定：菜單、時間、台詞 -->
   <script src="js/party.js?v=party21-20261107"></script>   <!-- 慶功宴：食堂出餐小遊戲 -->
   <script src="js/defeat-aid.js?v=defeataid-20261102"></script>   <!-- 連續失利補助：同一區連續兩次全滅，撥款 $10,000 -->
+  <script src="js/difficulty.js?v=difficulty2-20261127"></script>   <!-- 三段難度：開新遊戲選難度、簡單難度原地復活（要在 defeat-aid.js 之後） -->
   <script src="js/channel-actions.js?v=movecancel-20261025"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=track-20261125"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=metroonly-20261122b"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->

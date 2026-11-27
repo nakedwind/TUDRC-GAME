@@ -7,7 +7,9 @@
      把藤蔓射斷：每打中一發縮短的時間跟自己被纏住時按一下方向鍵一樣（LOOFAH.struggleCut）。開槍照常扣子彈、要裝填，不會打傷隊友。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值在下面的 LOOFAH。
 */
-const LOOFAH = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const LOOFAH = applyBossSettings('LOOFAH', {
   noticeRange: 8,       // 看到玩家／哨兵的距離（格）
   loseRange: 13,        // 追多遠就放棄（格）
   stompRange: 5.5,      // 幾格內會踏地放藤蔓
@@ -32,7 +34,7 @@ const LOOFAH = {
   stompFrame: 'images/monster/loofah-lady/loofah-lady-stomp.png',
   stepEvery: 20,        // 走幾像素響一次腳步聲
   fireR: 22,            // 怕火：火（火海、燃燒彈、希奧妮的火）離藤蔓多近就燒掉（像素）；鑽地中的藤蔓碰到火也會燒掉
-};
+});
 const llRand = (a, b) => a + Math.random() * (b - a);
 
 // ---- 目標 ----

@@ -9,11 +9,13 @@ function status(text, error = false) {
 }
 let slimeCfg = slimeSettings(true);
 let bossCfg = bossSettings(true);   // BOSS 數值（data/monsters.js 的 BOSS_SETTINGS_DEFAULT）
+let difficultyCfg = difficultySettings(true);   // 三段難度（data/monsters.js 的 DIFFICULTY_SETTINGS_DEFAULT）
 function saveMonsters() {
   try {
     localStorage.setItem(MONSTER_STORAGE_KEY, JSON.stringify(monsters));
     localStorage.setItem(SLIME_SETTINGS_STORAGE_KEY, JSON.stringify(slimeCfg));
     localStorage.setItem(BOSS_SETTINGS_STORAGE_KEY, JSON.stringify(bossCfg));
+    localStorage.setItem(DIFFICULTY_STORAGE_KEY, JSON.stringify(difficultyCfg));
     status('已自動儲存到這台瀏覽器。');
   } catch (_) { status('儲存失敗：瀏覽器暫存空間不足。', true); }
 }
@@ -160,7 +162,9 @@ function exportText() {
     + '/* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */\n'
     + 'const SLIME_SETTINGS_DEFAULT = ' + JSON.stringify(validSlimeSettings(slimeCfg), null, 2) + ';\n'
     + '\n/* BOSS 數值（由怪物編輯器匯出）：每隻 BOSS 程式檔裡設定的數字，遊戲開場時用這裡的蓋過去（js/monster-data.js 的 applyBossSettings）。 */\n'
-    + 'const BOSS_SETTINGS_DEFAULT = ' + JSON.stringify(validBossSettings(bossCfg), null, 2) + ';\n';
+    + 'const BOSS_SETTINGS_DEFAULT = ' + JSON.stringify(validBossSettings(bossCfg), null, 2) + ';\n'
+    + '\n/* 三段難度（由怪物編輯器「🎚️ 難度」匯出）：每一段難度的倍率，1＝原本的數字。開新遊戲時選哪一段，存在玩家的存檔裡（js/monster-data.js 的 difficultyValue）。 */\n'
+    + 'const DIFFICULTY_SETTINGS_DEFAULT = ' + JSON.stringify(validDifficultySettings(difficultyCfg), null, 2) + ';\n';
 }
 
 // ================= 史萊姆種類 =================
@@ -237,19 +241,19 @@ document.getElementById('exportMonsters').addEventListener('click', () => {
 });
 document.getElementById('previewMonster').addEventListener('click', () => {
   saveMonsters();
-  const query = new URLSearchParams({ previewMonsters: '1', monsterPreview: '1', monsterId: currentMonster().id });
+  const query = new URLSearchParams({ previewMonsters: '1', monsterPreview: '1', monsterId: currentMonster().id, difficulty: difficultyPreviewId() });
   window.open('塔防原型.html?' + query, 'single_monster_preview');
   status('已開啟單隻測試場：可移動閃避、射擊；不會寫入正式存檔，也不改地圖配置。');
 });
 document.getElementById('previewGame').addEventListener('click', () => {
-  saveMonsters(); window.open('塔防原型.html?previewMonsters=1', 'monster_preview');
-  status('已開啟使用瀏覽器暫存怪物設定的遊戲預覽。');
+  saveMonsters(); window.open('塔防原型.html?previewMonsters=1&difficulty=' + difficultyPreviewId(), 'monster_preview');
+  status('已開啟使用瀏覽器暫存怪物設定的遊戲預覽（難度：' + DIFFICULTY_LEVELS.find(l => l.id === difficultyPreviewId()).name + '）。');
 });
 document.getElementById('resetMonsters').addEventListener('click', () => {
   if (!confirm('丟棄這台瀏覽器裡尚未匯出的怪物設定，重新載入 data/monsters.js？')) return;
-  localStorage.removeItem(MONSTER_STORAGE_KEY); localStorage.removeItem(SLIME_SETTINGS_STORAGE_KEY); localStorage.removeItem(BOSS_SETTINGS_STORAGE_KEY);
-  monsters = monsterCatalog(false); selectedId = monsters[0].id; slimeCfg = slimeSettings(false); bossCfg = bossSettings(false);
-  render(); renderSlimeTable(); renderBossPanel(); status('已從檔案重新載入。');
+  localStorage.removeItem(MONSTER_STORAGE_KEY); localStorage.removeItem(SLIME_SETTINGS_STORAGE_KEY); localStorage.removeItem(BOSS_SETTINGS_STORAGE_KEY); localStorage.removeItem(DIFFICULTY_STORAGE_KEY);
+  monsters = monsterCatalog(false); selectedId = monsters[0].id; slimeCfg = slimeSettings(false); bossCfg = bossSettings(false); difficultyCfg = difficultySettings(false);
+  render(); renderSlimeTable(); renderBossPanel(); renderDifficultyTable(); status('已從檔案重新載入。');
 });
 // 與遊戲共用素材、出土選圖、手部前搖；只繪圖，不寫入遊戲存檔。
 const burrowPreviewImages = new Map();
@@ -296,7 +300,7 @@ function drawBurrowEditorPreview(now) {
   requestAnimationFrame(drawBurrowEditorPreview);
 }
 requestAnimationFrame(drawBurrowEditorPreview);
-// ================= 👑 BOSS 數值 =================
+// ================= 👑 BOSS 數值（含一般怪物的特殊數值）=================
 // 欄位和說明來自 js/boss-fields.js（tools/build-boss-fields.py 從 BOSS 程式檔的註解產生），數字存在 bossCfg。
 // 常見欄位名稱的中文（小字顯示；沒列到的就顯示原本的英文名稱）
 const BOSS_KEY_ZH = {
@@ -320,6 +324,7 @@ function bossSet(key, path, v) {
 function bossThumb(b) {   // 列表的圖：基準怪物的圖換成 BOSS 專用資料夾（找不到就用原圖）
   const m = monsters.find(x => x.id === b.base), src = m ? m.sprite : '';
   const img = new Image(); img.alt = '';
+  if (!src) { img.className = 'no-art'; return img; }   // 沒有基準怪物（Smiler、異質核心、掉食物）：留空位
   img.onerror = () => { img.onerror = null; img.src = src; };
   img.src = b.artDir && src ? b.artDir + src.split('/').pop() : src;
   return img;
@@ -334,12 +339,20 @@ function bossListButton(img, title, note, onClick, selected) {
 }
 function renderBossList() {
   const box = document.getElementById('bossList'); box.replaceChildren();
-  for (const b of BOSS_LIST) box.append(bossListButton(bossThumb(b), b.name, b.file, () => { bossSel = b.key; renderBossPanel(); }, b.key === bossSel));
+  // 分三區：BOSS、共用、一般怪物（js/boss-fields.js 的 group，tools/build-boss-fields.py 產生）
+  const heading = text => { const h = document.createElement('div'); h.className = 'boss-group'; h.textContent = text; box.append(h); };
+  const item = b => box.append(bossListButton(bossThumb(b), b.name, b.file, () => { bossSel = b.key; renderBossPanel(); }, b.key === bossSel));
+  heading('👑 BOSS');
+  BOSS_LIST.filter(b => (b.group || 'boss') === 'boss').forEach(item);
   const km = monsters.find(m => m.id === 'milkfish_king');   // 虱目魚王是怪物列表裡的一隻，點了跳過去
   if (km) {
     const img = new Image(); img.src = km.sprite; img.alt = '';
     box.append(bossListButton(img, km.name, '在上方怪物列表（點這裡跳過去）', () => { selectedId = km.id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, false));
   }
+  heading('🔧 共用');
+  BOSS_LIST.filter(b => b.group === 'shared').forEach(item);
+  heading('🐾 一般怪物');
+  BOSS_LIST.filter(b => b.group === 'monster').forEach(item);
 }
 const bossRowText = r => (r.t + ' ' + r.k.map(([p, c]) => p + ' ' + c + ' ' + (BOSS_KEY_ZH[p.split('.').pop()] || '')).join(' ')).toLowerCase();
 function renderBossFields() {
@@ -425,3 +438,43 @@ document.getElementById('bossReset').addEventListener('click', () => {
 render();
 renderSlimeTable();
 renderBossPanel();
+
+// ================= 🎚️ 難度 =================
+// 一列一個倍率、一欄一段難度；欄位清單和說明在 js/monster-data.js 的 DIFFICULTY_FIELDS（遊戲也讀同一份）
+const difficultyFileVal = (id, key) => validDifficultySettings(null)[id][key];   // 檔案裡的數字（黃框比對用）
+const difficultyPreviewEl = document.getElementById('difficultyPreview');
+const difficultyPreviewId = () => difficultyPreviewEl.value || 'normal';
+for (const lv of DIFFICULTY_LEVELS) { const o = document.createElement('option'); o.value = lv.id; o.textContent = lv.icon + ' ' + lv.name; difficultyPreviewEl.append(o); }
+difficultyPreviewEl.value = 'normal';
+function renderDifficultyTable() {
+  const headRow = document.querySelector('#difficultyTable thead tr');
+  headRow.replaceChildren(Object.assign(document.createElement('th'), { textContent: '項目' }));
+  for (const lv of DIFFICULTY_LEVELS) headRow.append(Object.assign(document.createElement('th'), { textContent: lv.icon + ' ' + lv.name }));
+  const body = document.querySelector('#difficultyTable tbody');
+  body.replaceChildren();
+  for (const f of DIFFICULTY_FIELDS) {
+    const tr = document.createElement('tr'), what = document.createElement('td');
+    what.className = 'what';
+    what.append(Object.assign(document.createElement('strong'), { textContent: f.name }), Object.assign(document.createElement('small'), { textContent: f.desc }));
+    tr.append(what);
+    for (const lv of DIFFICULTY_LEVELS) {
+      const td = document.createElement('td'), input = document.createElement('input');
+      input.type = 'number'; input.step = f.step; input.min = f.min || 0; if (f.max != null) input.max = f.max;
+      input.setAttribute('aria-label', lv.name + ' ' + f.name);
+      const show = () => { input.value = difficultyCfg[lv.id][f.key]; input.classList.toggle('changed', difficultyCfg[lv.id][f.key] !== difficultyFileVal(lv.id, f.key)); };
+      show();
+      input.addEventListener('change', () => {
+        difficultyCfg[lv.id][f.key] = input.value === '' ? difficultyFileVal(lv.id, f.key) : Number(input.value);
+        difficultyCfg = validDifficultySettings(difficultyCfg);   // 夾在合理範圍內（不能是負數、整數欄位取整數）
+        show(); saveMonsters();
+      });
+      td.append(input); tr.append(td);
+    }
+    body.append(tr);
+  }
+}
+document.getElementById('difficultyReset').addEventListener('click', () => {
+  if (!confirm('難度表格恢復成 data/monsters.js 檔案裡的數字？')) return;
+  difficultyCfg = validDifficultySettings(null); saveMonsters(); renderDifficultyTable(); status('難度已恢復檔案的數字。');
+});
+renderDifficultyTable();

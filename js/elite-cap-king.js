@@ -186,7 +186,7 @@ function capKingSpawnBig(cap) {
     e.sprite = swap(e.sprite);
     if (e.frames) e.frames = Object.fromEntries(Object.entries(e.frames).map(([k, f]) => [k, Array.isArray(f) ? f.map(swap) : swap(f)]));
   }
-  e.hp = e.maxhp = withCore ? B.lordHp : Math.round(e.maxhp * B.hpMul);
+  e.hp = e.maxhp = withCore ? Math.round(B.lordHp * difficultyOf('monsterHp')) : Math.round(e.maxhp * B.hpMul);   // 宮主本人也先乘怪物血量倍率（跟其他 BOSS 一樣），出場後換成 BOSS 血量倍率（js/monster-data.js）
   if (withCore && B.coreTint) e.tint = 'multiply:' + B.coreTint;   // 稍微偏紅（js/combat-feel.js 的 tintedSprite）
   e.playerDamage = Math.round(e.playerDamage * B.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * B.dmgMul);

@@ -3,6 +3,7 @@
   const REQUEST = 'tudrc-new-game-request-v1';
   const START_MAP = 'tudrc-new-game-map-v1';
   const BACKUP = 'tudrc-before-new-game-v1';
+  const PICKED_DIFFICULTY = 'tudrc-new-game-difficulty-v1';   // 開新遊戲時選的難度（重新整理後才寫進存檔）
   const progressKeys = [
     'tudrc-save-v1', 'tudrc_equipment_v1', 'sentinel-crystals-v1',
     'tudrc_team_v1', 'tudrc_achievements_v1', 'tudrc_quests_v1',
@@ -38,6 +39,7 @@
     'tudrc_target_best_v1',   // 射擊練習最佳紀錄（js/target-practice.js）
     'tudrc_minigame_stats_v1',   // 每款小遊戲玩了幾局、花了多少時間（js/pc-stats.js）
     'tudrc_arcade_best_v1',   // 電腦裡貪食蛇、俄羅斯方塊、彈珠檯的最高分（js/pc-arcade.js）
+    'tudrc_difficulty_v1',   // 開新遊戲時選的難度：簡單／普通／困難（js/monster-data.js 的 DIFFICULTY_CHOICE_KEY、js/difficulty.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
@@ -141,6 +143,9 @@
         const values = Object.fromEntries(progressKeys.map(key => [key, localStorage.getItem(key)]));
         localStorage.setItem(BACKUP, JSON.stringify({ at: Date.now(), values }));
         progressKeys.forEach(key => localStorage.removeItem(key));
+        const picked = sessionStorage.getItem(PICKED_DIFFICULTY);   // 選難度畫面選的（沒選＝普通）
+        sessionStorage.removeItem(PICKED_DIFFICULTY);
+        if (/^(easy|normal|hard)$/.test(picked || '')) localStorage.setItem('tudrc_difficulty_v1', picked);
         startedFresh = true;
       } else if (request.startsWith('slot:')) {
         pendingSlot = Number(request.split(':')[1]); startedFresh = true;   // 進度在按「讀取」時就寫回去了（js/save.js），現場等一下從 IndexedDB 讀
@@ -158,14 +163,18 @@
     const text = action === 'new'
       ? (fromStart ? '從頭開始新遊戲？會從開場劇情和新手區重新開始。' : '開始新遊戲？') + '背包、裝備、養成、任務、成就與開櫃紀錄將重設。舊進度會先備份。'
       : '還原上次開始新遊戲前的備份？目前進度將被取代。';
+    // 開新遊戲：先跳選難度畫面（js/difficulty.js），選好才重新開始；沒有選難度畫面（例如其他頁面）才用確認框
+    if (action === 'new' && typeof window.pickDifficulty === 'function') { window.pickDifficulty(text, id => go(id)); return; }
     if (!confirm(text)) return;
-    try {
+    go(null);
+    function go(difficulty) { try {
+      if (difficulty) sessionStorage.setItem(PICKED_DIFFICULTY, difficulty); else sessionStorage.removeItem(PICKED_DIFFICULTY);
       if (action === 'new' && fromStart && typeof NEWBIE_START !== 'undefined') sessionStorage.setItem(START_MAP, NEWBIE_START.mapId);
       else if (action === 'new' && typeof MAP !== 'undefined' && MAP?.id) sessionStorage.setItem(START_MAP, MAP.id);
       else sessionStorage.removeItem(START_MAP);
       sessionStorage.setItem(REQUEST, action);
       location.reload();
-    } catch (error) { alert('無法重新開始：' + error.message); }
+    } catch (error) { alert('無法重新開始：' + error.message); } }
   }
   // 全部物品解鎖：每種物品 20 個（略過一般背包容量）、裝備與武器最高等級、子彈補滿、背包／彈匣擴充到最大、建築都開發好
   // 開始畫面的 🧪 測試模式、地圖編輯器的 ▶ 預覽遊戲都用這個

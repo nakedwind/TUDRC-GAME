@@ -46,6 +46,94 @@ function bossSettings(useBrowserDraft = false) {
   }
   return validBossSettings(null);
 }
+// ---- 三段難度（怪物編輯器「🎚️ 難度」；數值在 data/monsters.js 的 DIFFICULTY_SETTINGS_DEFAULT）----
+// 玩家開新遊戲時選哪一段，存在存檔 DIFFICULTY_CHOICE_KEY（js/new-game.js 的進度清單裡，每個存檔欄位各自記）。
+// 沒選過（舊存檔、第一次玩直接按開始）＝普通。
+const DIFFICULTY_STORAGE_KEY = 'tudrc_difficulty_settings_v1';   // 編輯器的暫存（預覽遊戲也讀這份）
+const DIFFICULTY_CHOICE_KEY = 'tudrc_difficulty_v1';             // 玩家選的難度：easy／normal／hard
+const DIFFICULTY_LEVELS = [
+  { id: 'easy', name: '簡單', icon: '🌱', desc: '怪物比較少、比較弱，每場第一次倒下可以原地站起來' },
+  { id: 'normal', name: '普通', icon: '⚖️', desc: '原本設計的難度' },
+  { id: 'hard', name: '困難', icon: '🔥', desc: '怪物更多、更硬、更痛，但獎勵也比較多' },
+];
+// 每一段難度有哪些倍率（編輯器的表格照這個順序排；step 是編輯器按上下鍵一次加減多少）
+const DIFFICULTY_FIELDS = [
+  { key: 'spawnRate', min: .05, name: '怪物出現量', desc: '核心召喚的速度、場上怪物上限、巨型史萊姆出現的頻率', step: .05 },
+  { key: 'monsterHp', min: .05, name: '怪物血量', desc: '一般怪物（不含 BOSS）', step: .05 },
+  { key: 'monsterDamage', name: '怪物攻擊力', desc: '一般怪物打溫特、隊員、建築（不含 BOSS）', step: .05 },
+  { key: 'bossHp', min: .05, name: 'BOSS 血量', desc: '所有 BOSS 的血量（不吃上面的怪物血量）', step: .05 },
+  { key: 'bossDamage', name: 'BOSS 攻擊力', desc: '所有 BOSS 的普通攻擊和招式傷害（不吃上面的怪物攻擊力）', step: .05 },
+  { key: 'crystals', name: '結晶', desc: '打怪掉的碎片、打破核心拿到的結晶', step: .05 },
+  { key: 'bossBounty', name: 'BOSS 獎金／區域獎勵', desc: '回基地領的 BOSS 特別獎金、第一次控制區域的獎勵（經費和碎片都算）', step: .05 },
+  { key: 'dropRate', name: '怪物掉落機率', desc: '怪物死掉掉食物、物品的機率（BOSS 一定會掉的不受影響；機率最高 100%）', step: .05 },
+  { key: 'revives', name: '原地復活次數', desc: '每一場溫特倒下時可以原地站起來幾次（0＝不行，照原本撤退）', step: 1, int: true },
+  { key: 'reviveHp', name: '復活時的血量', desc: '原地站起來時回到最大血量的幾成（0.5＝一半）', step: .05, max: 1 },
+];
+function validDifficultySettings(raw) {
+  const base = typeof DIFFICULTY_SETTINGS_DEFAULT !== 'undefined' ? DIFFICULTY_SETTINGS_DEFAULT : {};
+  const src = raw && typeof raw === 'object' ? raw : {};
+  return Object.fromEntries(DIFFICULTY_LEVELS.map(({ id }) => {
+    const own = src[id] || {}, def = base[id] || {};
+    return [id, Object.fromEntries(DIFFICULTY_FIELDS.map(f => {
+      let n = Number(own[f.key]);
+      if (!Number.isFinite(n) || own[f.key] === null || own[f.key] === '') n = Number(def[f.key]);
+      if (!Number.isFinite(n)) n = f.key === 'revives' ? 0 : f.key === 'reviveHp' ? .5 : 1;
+      n = Math.max(f.min || 0, n); if (f.max) n = Math.min(f.max, n); if (f.int) n = Math.round(n);
+      return [f.key, n];
+    }))];
+  }));
+}
+function difficultySettings(useBrowserDraft = false) {
+  if (useBrowserDraft) {
+    try { const saved = typeof DraftSync !== 'undefined' ? DraftSync.load(DIFFICULTY_STORAGE_KEY, (typeof DIFFICULTY_SETTINGS_DEFAULT !== 'undefined' ? DIFFICULTY_SETTINGS_DEFAULT : undefined), { label: '難度設定' }) : JSON.parse(localStorage.getItem(DIFFICULTY_STORAGE_KEY) || 'null'); if (saved) return validDifficultySettings(saved); } catch (_) {}
+  }
+  return validDifficultySettings(null);
+}
+// 玩家現在選的難度（id）
+function currentDifficultyId() {
+  try {   // 編輯器的預覽遊戲（網址帶 preview=1 或 previewMonsters=1）可以用 &difficulty=easy 指定難度，不動玩家存檔
+    const q = typeof location !== 'undefined' && /[?&](preview|previewMonsters)=1(&|$)/.test(location.search) && new URLSearchParams(location.search).get('difficulty');
+    if (q && DIFFICULTY_LEVELS.some(l => l.id === q)) return q;
+  } catch (_) {}
+  try { const id = localStorage.getItem(DIFFICULTY_CHOICE_KEY); if (DIFFICULTY_LEVELS.some(l => l.id === id)) return id; } catch (_) {}
+  return 'normal';
+}
+const currentDifficulty = () => DIFFICULTY_LEVELS.find(l => l.id === currentDifficultyId());
+let difficultyCache = null;
+// 現在這段難度某一個倍率的值（遊戲各處用這個；data/balance.js 的 difficultyOf 也是轉到這裡）
+function difficultyValue(key) {
+  if (!difficultyCache) difficultyCache = difficultySettings(typeof location !== 'undefined' && /[?&](preview|previewMonsters)=1(&|$)/.test(location.search));
+  const id = typeof practiceOn === 'function' && practiceOn() ? 'normal' : currentDifficultyId();   // 練習模式（B-2 訓練室）一律用普通難度的數字
+  const v = (difficultyCache[id] || {})[key];
+  return Number.isFinite(v) ? v : 1;
+}
+// 招式自己帶的傷害數字（不是從怪物攻擊力算出來的那些，例如爆炸、酸液、魚卵）乘上難度的攻擊力倍率
+// boss＝true 用「BOSS 攻擊力」，不然用「怪物攻擊力」；各怪物、BOSS 的程式在扣血前呼叫
+function difficultyDamage(n, boss) { return n * difficultyValue(boss ? 'bossDamage' : 'monsterDamage'); }
+const difficultyDmgMul = boss => typeof difficultyValue === 'function' ? difficultyValue(boss ? 'bossDamage' : 'monsterDamage') : 1;
+// BOSS 招式自己帶的傷害數字（applyBossSettings 會乘上 BOSS 攻擊力倍率）
+// 只列「直接打溫特、隊員、建築」的數字；BOSS 普通攻擊是從牠的攻擊力算的，在 applyEnemyDifficulty 處理；打怪物、倍率類的不列
+const BOSS_DAMAGE_PATHS = {
+  LOOFAH_QUEEN: ['stomp.rockDamage', 'vines.ground.wallDamage'],
+  PEARL_ELDER: ['rain.smallDmg', 'rain.bigDmg', 'roll.dmg'],
+  GOURD_KING: ['rocks.playerDamage', 'rocks.sentryDamage'],
+  RAT_KING: ['grab.throw.wallDamage'],
+  POOL_BOSS: ['touchDamage'],
+  FISH_KING: ['cannon.damage', 'geyser.landDamage'],
+};
+// 哪些怪物算 BOSS（跟 js/sfx.js 的 isBossVoice 同一份名單；抓人的老鼠手不算）
+const isDifficultyBoss = e => !!e && !e.ratKingHand && !!(e.elite || e.capKing || e.pearlBoss || e.mothBoss || e.loofahQueen
+  || e.bananaEmperor || e.gourdKing || e.ratKing || e.poolBoss || e.fishKing || e.behavior === 'milkfishKing');
+// 怪物出生時（createMonster）血量、攻擊力乘的是「怪物」倍率；BOSS 出場後第一次經過這裡，換成「BOSS」倍率（js/game.js 每一幀呼叫）
+function applyEnemyDifficulty(e) {
+  if (!e || e.difficultyDone) return;
+  e.difficultyDone = true;
+  if (!isDifficultyBoss(e)) return;
+  const hpMul = difficultyValue('bossHp') / (difficultyValue('monsterHp') || 1);
+  const dmgMul = difficultyValue('bossDamage') / (difficultyValue('monsterDamage') || 1);
+  if (hpMul !== 1 && e.maxhp > 0) { const ratio = e.hp / e.maxhp; e.maxhp = Math.max(1, Math.round(e.maxhp * hpMul)); if (e.hp > 0) e.hp = Math.max(1, Math.round(e.maxhp * ratio)); }
+  if (dmgMul !== 1) for (const k of ['playerDamage', 'sentryDamage', 'buildingDamage']) if (typeof e[k] === 'number') e[k] = Math.round(e[k] * dmgMul);
+}
 let bossSettingsCache = null;
 function applyBossSettings(key, cfg) {
   if (!bossSettingsCache) bossSettingsCache = bossSettings(typeof location !== 'undefined' && /[?&](preview|previewMonsters)=1(&|$)/.test(location.search));
@@ -58,6 +146,12 @@ function applyBossSettings(key, cfg) {
     }
   };
   put(cfg, bossSettingsCache[key]);
+  // 難度：BOSS 招式自己的傷害數字（不是從牠的攻擊力算出來的那些）乘上「BOSS 攻擊力」倍率
+  for (const path of BOSS_DAMAGE_PATHS[key] || []) {
+    const keys = path.split('.'), last = keys.pop();
+    const box = keys.reduce((o, k) => o && o[k], cfg);
+    if (box && typeof box[last] === 'number') box[last] = Math.round(box[last] * difficultyValue('bossDamage') * 100) / 100;
+  }
   return cfg;
 }
 function validMonsterCatalog(list) {

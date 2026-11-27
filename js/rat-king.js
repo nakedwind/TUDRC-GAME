@@ -331,7 +331,7 @@ function rkEmerge(K) {
   const edge = rkEdgeY(), x = rkHomeX();
   const e = createMonster(base, x, edge + 6);   // 腳底放在月台第一排（打得到、看得到），畫的時候照月台邊緣切
   e.behavior = 'ratKing'; e.ratKing = true; e.eliteName = B.name; e.eliteAwake = false; e.floor = 1;
-  e.hp = e.maxhp = Math.round(B.hp * (typeof difficultyOf === 'function' ? difficultyOf('enemyHp') || 1 : 1));
+  e.hp = e.maxhp = Math.round(B.hp * (typeof difficultyOf === 'function' ? difficultyOf('monsterHp') : 1));   // 先乘怪物血量倍率（跟其他 BOSS 一樣），出場後 js/monster-data.js 的 applyEnemyDifficulty 換成 BOSS 血量倍率
   e.crystals = Math.round((base.crystals ?? 5) * B.crystalMul); e.reward = Math.round((base.reward || 0) * B.rewardMul);
   for (const k of ['playerDamage', 'sentryDamage', 'buildingDamage']) e[k] = Math.round((base[k] || 14) * B.atk);
   e.drawWidth = Math.round(110 * B.scale); e.drawHeight = Math.round(B.showRow * B.scale) + 19;   // 被打的範圍＝看得到的上半身（往下多 19 像素到腳底）

@@ -2091,5 +2091,539 @@ const BOSS_SETTINGS_DEFAULT = {
     "shield": 0.2,
     "defMax": 0.2,
     "noteEvery": 2.5
+  },
+  "SLIME_BOMB": {
+    "fuse": 1.1,
+    "player": 24,
+    "sentry": 30,
+    "building": 60,
+    "monster": 20,
+    "killedMul": 0.6
+  },
+  "SLIME_SPIT": {
+    "range": 5,
+    "minRange": 1.5,
+    "windup": 0.75,
+    "flySpeed": 6.5,
+    "cooldown": 3.8,
+    "pool": {
+      "radius": 0.75,
+      "life": 4.5,
+      "playerDps": 9,
+      "sentryDps": 10
+    }
+  },
+  "FISH_HEAD": {
+    "frontMul": 0.6,
+    "backMul": 1.5,
+    "fireMul": 0.25,
+    "shockMul": 1.6,
+    "fleeTime": 2.5,
+    "fleeSpeedMul": 2.5,
+    "scareHop": 18,
+    "scareHopTime": 0.32,
+    "noticeRange": 7,
+    "loseRange": 12,
+    "sprayRange": 3.5,
+    "windup": 0.45,
+    "sprayTime": 0.5,
+    "cooldown": 2.4,
+    "dropSpeed": 330,
+    "knockback": 1.4,
+    "sentryKnockback": 1,
+    "fireSense": 10,
+    "fireDouse": 0.6,
+    "trailEvery": 16,
+    "trailLife": 6,
+    "poolDelay": 0.8,
+    "poolMaxR": 34,
+    "poolLife": 12,
+    "puddleDouse": 4,
+    "puddleScale": 1.5,
+    "maxPuddles": 70,
+    "streamWidth": 17,
+    "arcHeight": 16,
+    "hitPoolR": 32,
+    "splashSize": 1.6,
+    "deathPoolR": 44,
+    "deathPoolLife": 20,
+    "wanderRadius": 2.5,
+    "wanderSpeedMul": 0.55,
+    "idleMin": 1.5,
+    "idleMax": 3.5
+  },
+  "LOOFAH": {
+    "noticeRange": 8,
+    "loseRange": 13,
+    "stompRange": 5.5,
+    "keepDistance": 2.5,
+    "windup": 0.55,
+    "recover": 0.45,
+    "cooldown": 3,
+    "vineSpeed": 170,
+    "vineOvershoot": 0.4,
+    "vineTurn": 2.4,
+    "vineReach": 12,
+    "vineMaxTravel": 9,
+    "eruptRadius": 34,
+    "rootTime": 7,
+    "linger": 3,
+    "struggleCut": 0.25,
+    "struggleMin": 1,
+    "testSpawnDist": 20,
+    "wanderRadius": 2.5,
+    "wanderSpeedMul": 0.55,
+    "idleMin": 1.5,
+    "idleMax": 3.5,
+    "stepEvery": 20,
+    "fireR": 22
+  },
+  "MILKFISH": {
+    "noticeRange": 12,
+    "loseRange": 16,
+    "eatReach": 42,
+    "windup": 0.25,
+    "chargeRange": 6,
+    "chargeSpeedMul": 4,
+    "chargeDustEvery": 0.07,
+    "playerReach": 46,
+    "playerWindup": 0.5,
+    "playerHitReach": 64,
+    "playerCooldown": 1.2,
+    "playerNoticeRange": 4,
+    "playerLoseRange": 8,
+    "playerChaseTime": 4,
+    "playerLostSightTime": 1.5,
+    "playerChargeTime": 3,
+    "playerChargeRest": 1.5,
+    "playerMissRest": 1,
+    "playerReacquireDelay": 1.5,
+    "gulpReach": 70,
+    "missCooldown": 0.3,
+    "digestEvery": 5,
+    "eatCooldown": 1.5,
+    "itemSense": 6,
+    "itemReach": 1.25,
+    "chewTime": 0.9,
+    "chewFps": 7,
+    "biteTime": 0.3,
+    "fullSpeedMul": 0.8,
+    "fleeDist": 10,
+    "fleeSpeedMul": 1.6,
+    "fleeMaxTime": 8,
+    "legsFps": 6,
+    "mouthRow": 21,
+    "wanderRadius": 2.5,
+    "wanderSpeedMul": 0.55,
+    "idleMin": 1.5,
+    "idleMax": 3.5
+  },
+  "CLOWNFISH": {
+    "hopUp": 0.44,
+    "hopAir": 0.84,
+    "hopLand": 0.36,
+    "hopRest": 1,
+    "chaseRestMul": 0.4,
+    "hopHeight": 38,
+    "hatchlingHopMul": 0.5,
+    "swimMul": 0.45,
+    "swimPulse": 2,
+    "swimFrameMul": 5,
+    "noticeRange": 9,
+    "loseRange": 14,
+    "hitRadius": 50,
+    "startleCd": 1.4,
+    "startleHops": 1,
+    "startleMul": 1.35,
+    "clutchMin": 1,
+    "clutchMax": 1,
+    "clutchSpread": 20,
+    "eggMax": 40,
+    "eggGap": 0,
+    "eggArm": 0.8,
+    "eggLife": 300,
+    "eggTrigger": 0.5,
+    "eggFuse": 0.6,
+    "eggRadius": 1.4,
+    "eggPlayer": 16,
+    "eggSentry": 20,
+    "eggEnemy": 14,
+    "eggSize": 16,
+    "eggShotR": 11,
+    "pushRadius": 22,
+    "pushSpeed": 46,
+    "pushDrag": 5.5,
+    "trailLife": 8,
+    "poolDelay": 0.7,
+    "poolMaxR": 24,
+    "poolLife": 12,
+    "poolGrow": 12,
+    "hatchChance": 0.5,
+    "hatchT": 15,
+    "hatchWarn": 3,
+    "hatchMax": 8,
+    "testSpawnDist": 10
+  },
+  "BANANA_KING": {
+    "healEvery": 10,
+    "healAmount": 30,
+    "healRange": 6,
+    "castTime": 0.9,
+    "glow": 0.5,
+    "seeRange": 10,
+    "healStand": 3,
+    "noticeRange": 12,
+    "feelRange": 4,
+    "safeRange": 14,
+    "fleeSpeedMul": 1.8,
+    "buddyRange": 12,
+    "buddyStand": 1.5,
+    "peelCount": 3,
+    "peelCd": 8,
+    "peelFly": 0.5,
+    "peelHeight": 34,
+    "peelDist": [
+      1,
+      2.2
+    ],
+    "peelSpread": 50,
+    "peelLife": 40,
+    "peelMax": 15,
+    "peelTrigger": 16,
+    "slipDist": 2.5,
+    "slipTime": 0.9,
+    "slipDizzy": 3,
+    "peelScale": 1.6,
+    "squadSize": 3,
+    "squadRange": 3,
+    "squadLeash": 8,
+    "squadRegroup": 2.5,
+    "squadFleeRange": 20,
+    "dropMin": 1,
+    "dropMax": 2,
+    "testCampDist": 20
+  },
+  "GOURD": {
+    "noticeRange": 7,
+    "loseRange": 12,
+    "slamRange": 3.5,
+    "maxLeap": 4.2,
+    "crouch": 0.45,
+    "rise": 0.6,
+    "hang": 0.35,
+    "drop": 0.12,
+    "recover": 1.3,
+    "cooldown": 3.2,
+    "height": 105,
+    "track": 55,
+    "hitRadius": 69,
+    "knockRadius": 138,
+    "knockMax": 2.2,
+    "knockMin": 0.8,
+    "knockTime": 0.55,
+    "tossHeight": 44,
+    "tossMinHeight": 22,
+    "tossSpin": 0.55,
+    "bounceTime": 0.2,
+    "monsterDamageMul": 0.3,
+    "shockBuildingDamage": 15,
+    "hopMax": 18,
+    "hopMin": 7,
+    "hopTime": 0.38,
+    "shakeMax": 14,
+    "shakeMin": 4,
+    "shakeRange": 12,
+    "dragPulse": 2.2,
+    "dragMin": 0.15,
+    "wanderSteps": 3,
+    "idleMin": 2,
+    "idleMax": 4.5,
+    "wanderSpeedMul": 0.7,
+    "markEvery": 7,
+    "markLife": 7,
+    "soundEvery": 26,
+    "laughCooldown": 8,
+    "laughDelay": 0.45,
+    "testCampDist": 20,
+    "bodyW": 0.42,
+    "bodyFlat": 0.5,
+    "bodyY": 4,
+    "bodyAirLift": 24,
+    "crackScale": 1,
+    "crackLife": 5,
+    "fx": {
+      "rocks": 18,
+      "rockSpeed": [
+        70,
+        190
+      ],
+      "rockUp": [
+        140,
+        280
+      ],
+      "dust": 12,
+      "dustRise": 5,
+      "flash": 0.14
+    }
+  },
+  "MOTH": {
+    "height": 90,
+    "bob": 6,
+    "bobSpeed": 2.2,
+    "wobble": 0.45,
+    "flapFps": 5,
+    "noticeRange": 8,
+    "loseRange": 13,
+    "hoverMin": 1.2,
+    "hoverMax": 2.6,
+    "wanderRadius": 4,
+    "idleMin": 1.5,
+    "idleMax": 3.5,
+    "wanderSpeedMul": 0.6,
+    "flee": {
+      "hitTime": 2,
+      "afterSpray": 2.5,
+      "nearRange": 3.5,
+      "speedMul": 2.2,
+      "dist": 4,
+      "sprayCd": 3
+    },
+    "telegraph": 0.8,
+    "sprayTime": 4,
+    "puffEvery": 0.22,
+    "cooldown": [
+      0.8,
+      1.6
+    ],
+    "cloud": {
+      "r0": 53,
+      "r1": 149,
+      "grow": 2,
+      "life": 7,
+      "drift": 10,
+      "max": 70
+    },
+    "doseTime": 1.4,
+    "doseDecay": 0.45,
+    "immune": 2,
+    "poison": {
+      "time": 8,
+      "tick": 1,
+      "dmg": 3
+    },
+    "confuse": {
+      "time": 6,
+      "playerMiss": 0.8,
+      "lineGap": 5
+    },
+    "sleep": {
+      "time": 20
+    },
+    "meleeMiss": 0.95,
+    "blast": {
+      "radius": 1.4,
+      "enemy": 45,
+      "sentry": 14,
+      "player": 12,
+      "chainDelay": 0.07,
+      "mothMul": 0.3
+    },
+    "blastMin": 2,
+    "bigBlastAt": 3,
+    "bigBlastMul": 1.6,
+    "lure": {
+      "range": 7,
+      "perch": 6,
+      "cooldown": 14
+    },
+    "deathPuffs": 7,
+    "sound": {
+      "flap": 0.35,
+      "flapEvery": 0.8,
+      "spray": 0.6,
+      "sprayEvery": 1.2
+    },
+    "testCampDist": 20
+  },
+  "HANGI_CAP": {
+    "scale": 1.2,
+    "wallGap": 1,
+    "startCount": [
+      2,
+      3
+    ],
+    "max": 4,
+    "respawnEvery": [
+      60,
+      100
+    ],
+    "minDistFromPlayer": 7,
+    "spawnCount": [
+      3,
+      5
+    ],
+    "openStay": 6,
+    "lootChance": 0.3
+  },
+  "LIFEFORM": {
+    "revive": 30,
+    "collapse": 0.55,
+    "reassemble": 1.3,
+    "twitch": 5,
+    "burnWindow": 0.6,
+    "slice": 14
+  },
+  "SMILER": {
+    "size": 64,
+    "eyesRows": 14,
+    "jawRow": 24,
+    "jawOpen": 2.5,
+    "chuckle": 1,
+    "tilt": -0.16,
+    "skew": 0.1,
+    "watchEvery": [
+      18,
+      35
+    ],
+    "watchDist": [
+      4,
+      9
+    ],
+    "stare": [
+      3,
+      4.5
+    ],
+    "smile": 1.2,
+    "laughHold": 4,
+    "grace": 2,
+    "biteRate": 0.15,
+    "biteRamp": 0.05,
+    "biteMax": 0.45,
+    "biteCd": 5,
+    "playerDmg": 12,
+    "sentryDmg": 16,
+    "woundLife": 1.1,
+    "biteLinger": 1.2,
+    "shakePlayer": 7,
+    "shakeTeammate": 0,
+    "flashTeammate": 0,
+    "laughVolume": 0.9,
+    "biteVolume": 0.8
+  },
+  "CORE": {
+    "w": 80,
+    "h": 120,
+    "hp": 600,
+    "reward": 100,
+    "wakeAvarenCells": 0,
+    "float": {
+      "height": 18,
+      "bob": 5,
+      "rise": 0.9
+    },
+    "pool": {
+      "r": 46,
+      "dps": 8
+    },
+    "phase2At": 0.5,
+    "maxEnemies": 60,
+    "spawn": {
+      "dormant": {
+        "every": [
+          2.6,
+          6.8
+        ],
+        "group": [
+          1,
+          3
+        ],
+        "speed": 1
+      },
+      "phase1": {
+        "every": [
+          1.8,
+          3.6
+        ],
+        "group": [
+          2,
+          4
+        ],
+        "speed": 1
+      },
+      "phase2": {
+        "every": [
+          1.1,
+          2.4
+        ],
+        "group": [
+          3,
+          5
+        ],
+        "speed": 1.35
+      }
+    },
+    "shards": 11
+  },
+  "FOOD_DROPS": {
+    "milkfish": {
+      "min": 1,
+      "max": 1,
+      "chance": 0.3
+    },
+    "milkfishSmall": {
+      "min": 1,
+      "max": 1,
+      "chance": 0.3
+    },
+    "fishhead": {
+      "min": 1,
+      "max": 2,
+      "chance": 0.3
+    },
+    "vine": {
+      "min": 1,
+      "max": 1,
+      "chance": 0.3
+    }
+  }
+};
+
+/* 三段難度（由怪物編輯器「🎚️ 難度」匯出）：每一段難度的倍率，1＝原本的數字。開新遊戲時選哪一段，存在玩家的存檔裡（js/monster-data.js 的 difficultyValue）。 */
+const DIFFICULTY_SETTINGS_DEFAULT = {
+  "easy": {
+    "spawnRate": 0.35,
+    "monsterHp": 0.7,
+    "monsterDamage": 0.6,
+    "bossHp": 0.7,
+    "bossDamage": 0.6,
+    "crystals": 0.8,
+    "bossBounty": 0.8,
+    "dropRate": 0.8,
+    "revives": 1,
+    "reviveHp": 0.5
+  },
+  "normal": {
+    "spawnRate": 0.5,
+    "monsterHp": 1,
+    "monsterDamage": 1,
+    "bossHp": 1,
+    "bossDamage": 1,
+    "crystals": 1,
+    "bossBounty": 1,
+    "dropRate": 1,
+    "revives": 0,
+    "reviveHp": 0.5
+  },
+  "hard": {
+    "spawnRate": 0.7,
+    "monsterHp": 1.4,
+    "monsterDamage": 1.5,
+    "bossHp": 1.4,
+    "bossDamage": 1.5,
+    "crystals": 1.3,
+    "bossBounty": 1.3,
+    "dropRate": 1.3,
+    "revives": 0,
+    "reviveHp": 0.5
   }
 };

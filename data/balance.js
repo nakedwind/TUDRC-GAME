@@ -263,14 +263,10 @@ const FOG_TREE = {
   crystalGlow: 1.35,  // 水晶亮度：水晶本身的紫光和照到周圍的光都乘這個倍數（1＝原本的亮度，越大越亮）
 };
 
-// ===== 整體難度（2026-10-11 依玩家回饋：難度降低一半）=====
-// 1＝原本的難度。調小＝變簡單，調大＝變難。
-const DIFFICULTY = {
-  spawnRate: 0.5,      // 怪物出現的量：0.5＝核心召喚間隔變兩倍、場上怪物上限減半、巨型史萊姆登場間隔變兩倍
-  monsterHp: 1,        // 怪物血量倍率（所有怪物，包含史萊姆各種類、鳥頭人）
-  monsterDamage: 1,    // 怪物攻擊力倍率（打玩家、哨兵、建築）
-};
-const difficultyOf = key => (typeof DIFFICULTY !== 'undefined' && Number(DIFFICULTY[key]) > 0) ? Number(DIFFICULTY[key]) : 1;
+// ===== 整體難度：改成簡單／普通／困難三段（2026-11-27）=====
+// 數值搬到 data/monsters.js 的 DIFFICULTY_SETTINGS_DEFAULT，用「怪物編輯器 → 🎚️ 難度」調；這裡只是轉過去讀玩家選的那一段。
+// 例如 difficultyOf('spawnRate')：怪物出現量（0.5＝核心召喚間隔變兩倍、場上怪物上限減半、巨型史萊姆登場間隔變兩倍）
+const difficultyOf = key => typeof difficultyValue === 'function' ? difficultyValue(key) : 1;
 
 // ---- 屬性相剋 ----
 // 火系角色（異能力是「火焰」的，例如希奧妮）打水系怪物或 BOSS：攻擊力 ×fireVsWater（0.8＝−20%）

@@ -263,7 +263,7 @@ function mkDropPool(e) {
   const blobs = [];
   for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * R * .5, dy: (Math.random() * 2 - 1) * R * .35, rr: R * (.55 + Math.random() * .5) });
   const floor = typeof actorFloor === 'function' ? actorFloor(e) : 0;
-  const pool = { x, y, floor, r: R, t: C.acidPoolLife, t0: C.acidPoolLife, dps: C.acidPoolDps, blobs, fizz: 0, noEnemy: true, mkKing: true };   // noEnemy：怪物踩到不扣血（跟異質核心腳下的一樣，js/game.js）
+  const pool = { x, y, floor, r: R, t: C.acidPoolLife, t0: C.acidPoolLife, dps: C.acidPoolDps * difficultyDmgMul(true), blobs, fizz: 0, noEnemy: true, mkKing: true };   // noEnemy：怪物踩到不扣血（跟異質核心腳下的一樣，js/game.js）
   (G.acidPools = G.acidPools || []).push(pool);
   mk.lastPool = pool;
   if (typeof addScorchMark === 'function') addScorchMark(x, y, R, pool, 'corrosion');   // 地上焦痕（腐蝕池還在時透紫光，js/attack-fx.js）
@@ -575,7 +575,7 @@ function mkChargeStep(e, dt) {
   }
 }
 function mkChargeHits(e, ch) {
-  const C = mkCfg(e), p = G.player, R = (e.drawWidth || 220) * .22, atk = mkAtk(e), dmg = C.chargeDamage * atk;
+  const C = mkCfg(e), p = G.player, R = (e.drawWidth || 220) * .22, atk = mkAtk(e), dmg = C.chargeDamage * atk * difficultyDmgMul(true);   // × 難度的 BOSS 攻擊力（js/monster-data.js）
   if (p && p.hp > 0 && !ch.hit.has(p) && !p.vineCap && sameFloor(e, p) && mkDist(p, e) <= R) {
     ch.hit.add(p);
     if (!(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {
@@ -863,9 +863,9 @@ function mkDrawShards(ctx) {
 // 隊友落地：自己摔傷（不會摔死），旁邊的人被砸到
 function mkMateLand(s) {
   const C = mkCfg(s.king), a = s.t, x = a.x, y = a.y;
-  const atk = s.atk || 1, dmg = Math.min(C.mateLandDamage * atk, Math.max(0, a.hp - 1));
+  const atk = s.atk || 1, dmg = Math.min(C.mateLandDamage * atk * difficultyDmgMul(true), Math.max(0, a.hp - 1));   // × 難度的 BOSS 攻擊力
   if (dmg > 0) { a.hp -= dmg; if (s.cap) s.cap.hp = a.hp; flashDmg('-' + Math.round(dmg), a.x, a.y - 50, '#ff6b6b'); }
-  mkSplash(s.king, x, y, C.spitDamage * .6 * atk, a);
+  mkSplash(s.king, x, y, C.spitDamage * .6 * atk * difficultyDmgMul(true), a);
   G.effects.push({ ring: true, x, y: y + 12, r: 6, r2: C.spitRadius * CELL, life: .35, life0: .35, color: '#cfe9ff' });
   if (typeof bossImpact === 'function') bossImpact(x, y, 5, .05);
 }
@@ -876,7 +876,7 @@ function mkItemLand(s) {
   o.c = c - Math.floor(((o.w || 1) - 1) / 2); o.r = r - ((o.h || 1) - 1); o.hp = 0;   // 落點：讓物品的「站立格」對在落點上
   const floorOf = typeof actorFloor === 'function' ? actorFloor(e) : undefined;
   const run = fn => typeof withBlastFloor === 'function' ? withBlastFloor(floorOf, fn) : fn();
-  mkSplash(e, x, y, C.spitDamage * (s.atk || 1), null);
+  mkSplash(e, x, y, C.spitDamage * (s.atk || 1) * difficultyDmgMul(true), null);   // × 難度的 BOSS 攻擊力
   G.effects.push({ ring: true, x, y: y + 6, r: 6, r2: C.spitRadius * CELL, life: .35, life0: .35, color: '#d9d2c0' });
   for (let i = 0; i < 10; i++) { const a = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 120; G.effects.push({ particle: true, kind: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 40, r: 2 + Math.random() * 2.5, life: .45, life0: .45, color: '#9a9283' }); }
   if (typeof bossImpact === 'function') bossImpact(x, y, 6, .05); else addShake(4);
@@ -1512,7 +1512,7 @@ function mkJumpStep(e, dt) {
 }
 // 落地：大震動、塵土、裂痕；落點附近的人受傷、被撞開
 function mkJumpLand(e) {
-  const mk = e.mk, C = mkCfg(e), R = C.jumpSlamR * CELL, dmg = C.jumpDamage * mkAtk(e);
+  const mk = e.mk, C = mkCfg(e), R = C.jumpSlamR * CELL, dmg = C.jumpDamage * mkAtk(e) * difficultyDmgMul(true);   // × 難度的 BOSS 攻擊力
   e.airborne = false; e.slimeLift = 0; e.hitSquashT = .16;
   e.lastSafeX = e.x; e.lastSafeY = e.y;
   mk.jump = null; mk.reach = null; mk.plan = null; mk.stuck = null;

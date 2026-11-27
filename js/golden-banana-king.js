@@ -10,7 +10,9 @@
    ・測試用：進戰鬥地圖時在營地右邊 testCampDist 格生一隻（testSpawn 改 false 就關掉）。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值都集中在下面的 BANANA_KING。
 */
-const BANANA_KING = {
+// 數字以 data/monsters.js 的 BOSS_SETTINGS_DEFAULT 為準（怪物編輯器「👑 BOSS 數值」）；這裡的數字只在那邊沒有這一格時才用。
+// 新增或刪掉數字欄位、改了註解之後，要跑一次 tools/build-boss-fields.py（編輯器的欄位和說明才會跟著更新）
+const BANANA_KING = applyBossSettings('BANANA_KING', {
   // ---- 補血 ----
   healEvery: 10,       // 幾秒施法一次
   healAmount: 30,      // 每次補多少 HP
@@ -57,7 +59,7 @@ const BANANA_KING = {
   // ---- 測試用 ----
   testSpawn: false,    // 測試用：true＝進戰鬥地圖時在營地右邊生一隻
   testCampDist: 20,    // 營地右邊幾格
-};
+});
 const BK_ART = {
   cast1: 'images/monster/golden-banana-king/golden-banana-king-cast-01.png',
   cast2: 'images/monster/golden-banana-king/golden-banana-king-cast-02.png',
