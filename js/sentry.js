@@ -525,22 +525,37 @@ function unwedgeSentry(t) {
 // 「找不到路等 2 秒再找」要照遊戲時間等：暫停、選單開著時不算；自動測試一下子跑完 30 秒的遊戲時，也真的會重找
 // （以前照真實時間，測試裡隊員在手扶梯頂端找路失敗一次後就一直不重找，「隊員跟著溫特上下樓」測試會失敗）
 function sentryNavClock() { return ((typeof G !== 'undefined' && G && G.navClock) || 0) * 1000; }
+// 「這段路剛剛找過、走不到」的記錄：每個隊員記好幾段（key → 到幾點以前不再找）
+// 以前只記一段：溫特泡在深水裡時，「跟著溫特走」和「從暗處走出來」兩種找路目的地差一格，互相蓋掉對方的記錄，
+// 結果每次都重新把整張地圖搜一遍（W118 一次 20 多毫秒），打魚頭王時溫特常掉進水裡，隊員一直重找，遊戲一頓一頓的
+function sentryPathFailed(t, key, now) {
+  const m = t._pathFails; if (!m) return false;
+  const until = m.get(key);
+  if (until == null) return false;
+  if (now < until && until - now <= SENTRY_PATH_FAIL_WAIT) return true;   // 後面那個條件：重新開局時鐘歸零，舊的記錄不算
+  m.delete(key); return false;
+}
+function sentryPathFailMark(t, key, now) {
+  const m = t._pathFails || (t._pathFails = new Map());
+  if (m.size > 16) for (const [k, u] of m) if (!(now < u && u - now <= SENTRY_PATH_FAIL_WAIT)) m.delete(k);   // 過期的清掉，不會越記越多
+  m.set(key, now + SENTRY_PATH_FAIL_WAIT);
+}
 function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.followDark), goalFloor = null) {   // allowDark：找一條可以穿過黑暗的路（召喚時、跟著溫特走時、去撿地上的東西時）
   if (hasFloors) {
     // 走不到的地方：同一個起點、同一個目的地 2 秒內不再重找（兩層一起找路走不到時會搜到上限 6000 格，一次要好幾百毫秒，
     // 隊員每隔一下就重找一次，遊戲會一頓一頓的）
     const gf = goalFloor || placeFloorAt(targetX, targetY, t), now = sentryNavClock();
     const failKey = cellAt(t.x, t.y).join(',') + ',' + actorFloor(t) + '>' + cellAt(targetX, targetY).join(',') + ',' + gf + (allowDark ? 'd' : '');
-    if (t._pathFail && t._pathFail.key === failKey && now < t._pathFail.until && t._pathFail.until - now <= SENTRY_PATH_FAIL_WAIT) return null;   // 後面那個條件：重新開局時鐘歸零，舊的記錄不算
+    if (sentryPathFailed(t, failKey, now)) return null;
     const path = buildSentryPathFloors(t, targetX, targetY, allowDark, gf);
-    t._pathFail = path == null ? { key: failKey, until: now + SENTRY_PATH_FAIL_WAIT } : null;
+    if (path == null) sentryPathFailMark(t, failKey, now);
     return path;
   }
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
   // 走不到的地方（例如溫特在深水區裡）：同一個起點、同一個目的地 SENTRY_PATH_FAIL_WAIT 內不再重找（找一次要把整張地圖搜完，大地圖會頓一下）
   const failKey1 = sc + ',' + sr + '>' + rawGc + ',' + rawGr + (allowDark ? 'd' : ''), now1 = sentryNavClock();
-  if (t._pathFail && t._pathFail.key === failKey1 && now1 < t._pathFail.until && t._pathFail.until - now1 <= SENTRY_PATH_FAIL_WAIT) return null;
-  const fail = () => { t._pathFail = { key: failKey1, until: now1 + SENTRY_PATH_FAIL_WAIT }; return null; };
+  if (sentryPathFailed(t, failKey1, now1)) return null;
+  const fail = () => { sentryPathFailMark(t, failKey1, now1); return null; };
   const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return fail();
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
   if (startKey === goalKey) return [];
@@ -557,7 +572,6 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.f
     }
   }
   if (!cameFrom.has(goalKey)) return fail();
-  t._pathFail = null;
   const path = []; let key = goalKey;
   while (key && key !== startKey) {
     const [c, r] = key.split(',').map(Number); path.push({ c, r }); key = cameFrom.get(key);

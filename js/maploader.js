@@ -572,7 +572,7 @@ function seedOtherMapObstacles() {
     const o = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type,
       c, r, w, h, solid, hp: spec.hp, maxhp: spec.hp, hitT: 0, ore: !!spec.ore };
     // 用方向鍵微調過位置：c、r 已經對齊到最近的格子，剩下不到半格的像素記在 off，走路碰撞照微調後的範圍算（js/build.js 的 gridBlockAtPoint）
-    if (stamp) { const ox = stamp.ox || 0, oy = stamp.oy || 0, off = [ox - Math.round(ox / CELL) * CELL, oy - Math.round(oy / CELL) * CELL]; if (off[0] || off[1]) o.off = off; }
+    if (stamp) { const ox = stamp.ox || 0, oy = stamp.oy || 0, off = [ox - Math.round(ox / CELL) * CELL, oy - Math.round(oy / CELL) * CELL]; if (off[0] || off[1]) { o.off = off; if (typeof gridOffNearCache !== 'undefined') gridOffNearCache.grid = null; } }   // 有微調過的：js/build.js 的加速表要重算
     for (const [dc, dr] of solid) {
       const key = (c + dc) + ',' + (r + dr);
       mapWalls.delete(key); // 舊地圖若另畫了固定碰撞，改由可破壞物件接管。

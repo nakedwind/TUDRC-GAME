@@ -8,15 +8,37 @@ window.addEventListener('keydown', e => { if (!e.repeat && e.key.toLowerCase() =
 const buildAt = (c, r) => G.grid[c + ',' + r];
 // 這個點有沒有被格子上的東西擋住（pick(c, r)＝那一格算不算擋、回傳擋的東西）：
 // 地圖上用方向鍵微調過位置的建築、礦物（o.off＝偏了幾像素，js/maploader.js 的 seedOtherMapObstacles）照微調後的範圍算，不是整格整格對齊
+// 加速：哪些格子旁邊（含自己）有微調過位置的東西。不在這裡面的格子，只要看自己那格就好，不用把旁邊 8 格一格一格問
+//   （隊員找路一次要問上萬次，W118 光這個就要十幾毫秒）。微調過的東西只有地圖開場擺的（js/maploader.js 擺的時候會叫它重算），
+//   玩家蓋的建築都對齊格子；保險起見遊戲時間每半秒也重算一次（用 js/game.js 每幀的時間 last，不呼叫 performance.now：一次找路問上萬次，光呼叫它就很慢）
+let gridOffNearCache = { grid: null, at: -1e9, set: null };
+function gridOffNearSet() {
+  const now = typeof last === 'number' ? last : 0, C = gridOffNearCache;
+  if (C.grid === G.grid && now >= C.at && now - C.at < 500) return C.set;
+  const set = new Set();
+  for (const k in G.grid) {
+    const o = G.grid[k]; if (!o || !o.off) continue;
+    const i = k.indexOf(','), c = +k.slice(0, i), r = +k.slice(i + 1);
+    for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) set.add((c + dc) + ',' + (r + dr));
+  }
+  gridOffNearCache = { grid: G.grid, at: now, set };
+  return set;
+}
 function gridBlockAtPoint(x, y, pick) {
   const [c, r] = cellAt(x, y), here = pick(c, r);
   if (here && !here.off) return here;
+  const near = gridOffNearSet();
+  if (!near.size || !near.has(c + ',' + r)) return here && here.off ? gridBlockOffHit(x, y, c, r, here) : null;   // 附近沒有微調過的東西：結果只看自己那格
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
     const o = pick(c + dc, r + dr); if (!o) continue;
     const off = o.off || [0, 0], x0 = OX + (c + dc) * CELL + off[0], y0 = OY + (r + dr) * CELL + off[1];
     if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return o;
   }
   return null;
+}
+function gridBlockOffHit(x, y, c, r, o) {   // 保險：微調過的東西自己那格（照理不會走到這裡）
+  const off = o.off || [0, 0], x0 = OX + c * CELL + off[0], y0 = OY + r * CELL + off[1];
+  return x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL ? o : null;
 }
 // 溫特、隊員走路用：格子上的東西（建築、礦物、順順宮帽…）只擋同一層的人
 const gridAtPointForWalker = (x, y) => gridBlockAtPoint(x, y, (c, r) => { const go = G.grid[c + ',' + r]; return go && (!hasFloors || (go.floor === 2 ? 2 : 1) === floorCtx) ? go : null; });
