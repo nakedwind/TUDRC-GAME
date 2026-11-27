@@ -10,12 +10,12 @@ const REWARDS_DATA = {
     { "id": "capKing", "name": "順順宮主", "flag": "capKingLord", "money": 3000, "crystals": 0 },
     { "id": "pearl", "name": "珍珠大童", "flag": "pearlBoss", "money": 3000, "crystals": 0 },
     { "id": "loofahQueen", "name": "絲瓜女王", "flag": "loofahQueen", "money": 4000, "crystals": 0 },
-    { "id": "bananaEmperor", "name": "金蕉皇帝", "flag": "bananaEmperor", "money": 0, "crystals": 0 },
+    { "id": "bananaEmperor", "name": "金蕉皇帝", "flag": "bananaEmperor", "money": 4000, "crystals": 0 },
     { "id": "gourdKing", "name": "葫蘆猴王", "flag": "gourdKing", "money": 5000, "crystals": 0 },
     { "id": "mothBoss", "name": "人面蝶后", "flag": "mothBoss", "money": 5000, "crystals": 0 },
     { "id": "milkfishKing", "name": "虱目魚王", "flag": "milkfishKing", "money": 5000, "crystals": 0 },
     { "id": "ratKing", "name": "花蓮老鼠王", "flag": "ratKing", "money": 5000, "crystals": 0 },
-    { "id": "poolBoss", "name": "巨大比基尼小丑魚", "flag": "poolBoss", "money": 0, "crystals": 0 },
+    { "id": "poolBoss", "name": "巨大比基尼小丑魚", "flag": "poolBoss", "money": 4000, "crystals": 0 },
     { "id": "fishKing", "name": "魚頭王", "flag": "fishKing", "money": 0, "crystals": 0 }
   ],
   "zones": {
