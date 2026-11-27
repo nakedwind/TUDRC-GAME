@@ -42,7 +42,8 @@ const POOL_BOSS = applyBossSettings('POOL_BOSS', {
   // 大顆魚卵（只有 BOSS 會生）：不會孵出魚，只是爆炸比較痛
   //   count＝每次落地生幾顆（最少～最多，隨機）、onLand＝擱淺拍地時生（1＝會、0＝不會）、onWater＝躍出水面落回水面時生（浮在水上）、
   //   size＝畫多大（一般魚卵的幾倍）、damage＝爆炸傷害（一般魚卵的幾倍）、radius＝爆炸範圍（一般魚卵的幾倍）、max＝場上最多幾顆大顆魚卵
-  bigEgg: { count: [1, 2], onLand: 1, onWater: 1, size: 2.2, damage: 2.5, radius: 1.6, max: 12 },
+  //   timer＝生下來幾秒後自己爆炸（0＝不會自己爆）、warn＝爆炸前幾秒開始抖動提醒
+  bigEgg: { count: [1, 2], onLand: 1, onWater: 1, size: 2.2, damage: 2.5, radius: 1.6, max: 12, timer: 15, warn: 3 },
   // BOSS 每跳一次，附近的大顆魚卵被震開：range＝幾格內的會被震到、land／water＝在地上／浮在水上被推開的速度（像素／秒，離 BOSS 越近越快）、
   //   landDrag／waterDrag＝滑動的阻力（越大停得越快；水上的小一點，會慢慢飄散開來）
   //   地上：擱淺時每次拍地摔回去；水裡：躍出水面、落回水面、一頭栽進水裡時都會
@@ -248,7 +249,7 @@ function poolBossLayBigEggs(e, water) {
     const x = e.x + Math.cos(a) * r, y = e.y + 6 + Math.sin(a) * r * .55;
     if (water ? !deepWaterAtPoint(x, y) : (deepWaterAtPoint(x, y) || (typeof enemyBlocked === 'function' && enemyBlocked(x, y)))) continue;
     eggs.push({ x, y, floor: typeof actorFloor === 'function' ? actorFloor(e) : 1, vx: 0, vy: 0, arm: C.eggArm, life: C.eggLife, age: 0, fuse: 0, seed: Math.random() * 9,
-      hatch: false, water: !!water, big: { size: B.size, damage: B.damage, radius: B.radius } });
+      hatch: false, water: !!water, big: { size: B.size, damage: B.damage, radius: B.radius, timer: B.timer, warn: B.warn } });
     laid++;
   }
   if (laid && typeof sfxAt === 'function') sfxAt('pop', e.x, e.y, .8, 'pool-boss-egg');

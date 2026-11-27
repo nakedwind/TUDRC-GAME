@@ -301,7 +301,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=winterlines-20261127"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
-  <script src="data/monsters.js?v=eggscatter1-20261127"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=eggtimer1-20261127"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=difficulty2-20261127"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -371,8 +371,8 @@
   <script src="js/street-vehicles.js?v=merge-20261115c"></script> <!-- 9f4b. K56 路邊會暴衝的機車、腳踏車：敵我都撞飛 -->
   <script src="js/fish-head.js?v=monstercfg-20261127"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=monstercfg-20261127"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
-  <script src="js/clownfish.js?v=eggscatter1-20261127"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
-  <script src="js/pool-boss.js?v=eggscatter1-20261127"></script> <!-- 9f7b. 池核 BOSS：巨大比基尼小丑魚（守核心、深水區游泳潛水、抽水時擱淺） -->
+  <script src="js/clownfish.js?v=eggtimer1-20261127"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
+  <script src="js/pool-boss.js?v=eggtimer1-20261127"></script> <!-- 9f7b. 池核 BOSS：巨大比基尼小丑魚（守核心、深水區游泳潛水、抽水時擱淺） -->
   <script src="js/fish-king.js?v=difficulty2-20261127"></script> <!-- 9f7c. W118 魚頭王：深水裡潛水、高壓水砲、水柱衝天、被推上岸擱淺、導電、叫小弟 -->
   <script src="js/water-monsters.js?v=bigegg1-20261127"></script> <!-- 9f7d. 水中怪物（生在深水裡游泳、攻擊）＋泳圈上戰鬥（攻速、命中率、後座力） -->
   <script src="js/pool-surge.js?v=pull2-20261126"></script>   <!-- 9f7c. 大型怪物落水：水滿溢出來、把岸上的人和東西推開 -->

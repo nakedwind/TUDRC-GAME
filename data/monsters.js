@@ -1732,7 +1732,9 @@ const BOSS_SETTINGS_DEFAULT = {
       "size": 2.2,
       "damage": 2.5,
       "radius": 1.6,
-      "max": 12
+      "max": 12,
+      "timer": 15,
+      "warn": 3
     },
     "eggScatter": {
       "range": 7,

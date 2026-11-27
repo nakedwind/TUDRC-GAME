@@ -231,6 +231,11 @@ function updateFishEggs(dt) {
     egg.age += dt; egg.life -= dt;
     if (egg.arm > 0) egg.arm -= dt;
     if (egg.hatch && egg.age >= C.hatchT) { hatchFishEgg(egg); continue; }
+    if (egg.big && egg.big.timer > 0 && egg.age >= egg.big.timer) {   // 池核 BOSS 的大顆魚卵：時間到自己爆炸（js/pool-boss.js 的 bigEgg.timer），先晃一下再炸
+      egg.fuse = C.eggFuse;
+      if (typeof sfxAt === 'function') sfxAt('eggSquish', egg.x, egg.y, .7, 'egg-squish');
+      continue;
+    }
     if (egg.life <= 0) { removeFishEgg(egg); continue; }
     if (egg.arm > 0) continue;
     if (fishEggVictim(egg)) {
@@ -361,7 +366,8 @@ function drawFishEgg(ctx, egg) {
   const img = typeof monsterImage === 'function' ? monsterImage(CF_ART.egg) : null;
   {
     const armed = egg.fuse > 0;
-    const soon = egg.hatch && egg.age > C.hatchT - C.hatchWarn;   // 快孵化了：微微抖動
+    const soon = (egg.hatch && egg.age > C.hatchT - C.hatchWarn)   // 快孵化了：微微抖動
+      || (egg.big && egg.big.timer > 0 && egg.age > egg.big.timer - (egg.big.warn || 0));   // 大顆魚卵快自己爆炸了：也抖
     const shake = armed ? (Math.random() * 2 - 1) * 2.2 : soon ? Math.sin(now * 26 + egg.seed) * 1.1 : 0;
     const fade = !egg.hatch && egg.life < 3 ? Math.max(.25, egg.life / 3) : 1;   // 不會孵化的：最後 3 秒慢慢乾掉
     const s = C.eggSize * (egg.big ? egg.big.size : 1) * (armed ? 1 + .12 * Math.sin(now * 38) : soon ? 1 + .06 * Math.sin(now * 9 + egg.seed) : 1);
