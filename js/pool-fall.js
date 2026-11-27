@@ -6,7 +6,7 @@
      ② 硬要往深水走：溫特在水邊一直往深水的方向走、被擋住超過 pushSecs 秒，就一定會掉（頭上的「好像可以用泳圈做點什麼……」不理它）
         斜著走、貼著水邊被往旁邊挪也算（只要朝水的那個方向走不過去）；剛爬上岸的冷卻（cooldown）不算，硬要走進去就是會掉
    掉下去的過程：
-     搖晃（wobble）：原地左右晃、頭上說一句（對話編輯器的「掉進水池」poolFall；溫特沒填就用 POOL_FALL.winterSay）
+     搖晃（wobble）：原地左右晃、頭上說一句（對話編輯器的「掉進水池」poolFall；沒填就不說）
      → 掉下去（fall）：往深水裡跳一小段弧線，落水的那一刻噴起水柱＋水花＋水波
      → 掙扎（struggle）：泡在水裡載浮載沉、左右搖擺、不斷濺起小水花，臉換成 >< 的表情
         （圖是各角色資料夾裡手畫的 *_drown.png，有哪些角色寫在 js/game.js 的 DROWN_FACE_FOLDERS），
@@ -68,7 +68,6 @@ const POOL_FALL = {
   sound: 'poolBossSplash', soundVol: .45,   // 落水的水花聲（音效編輯器；借池核 BOSS 的水花聲）
   splashSound: 'poolFallSplash', splashSoundVol: .45,   // 落水聲（音效編輯器的「掉進深水的落水聲」），跟上面的水花聲一起播
   struggleSoundVol: 1,   // 掙扎時循環播划水聲（音效編輯器的「划水聲」poolPaddle）的音量：1＝跟坐救生圈划水一樣大；隊員離溫特越遠越小聲
-  winterSay: '哇、腳滑了——！',   // 溫特失足時說的話（對話編輯器的溫特「掉進水池」有填就用那邊的）
   saySecs: 1.8,
 };
 
@@ -131,7 +130,7 @@ function poolFallStart(a) {
   a.moving = false; a.dashT = 0; a.navPath = null; a.target = null;
   const isPlayer = typeof G !== 'undefined' && G && a === G.player;
   const id = isPlayer ? (typeof PLAYER_CHARACTER !== 'undefined' ? PLAYER_CHARACTER : 'winter') : a.type;
-  const line = (typeof pickDialogueLine === 'function' && pickDialogueLine(id, 'poolFall')) || (isPlayer ? POOL_FALL.winterSay : null);
+  const line = isPlayer ? (typeof playerLine === 'function' && playerLine('poolFall')) : (typeof pickDialogueLine === 'function' && pickDialogueLine(id, 'poolFall'));   // 對話編輯器的「掉進水池」
   if (!line) return;
   if (isPlayer) a.poolSay = { text: line, until: performance.now() + POOL_FALL.saySecs * 1000 };   // 溫特頭上的泡泡（js/pool-tide.js 的 drawPoolTideBubble 畫）
   else if (!a.berserk) a.say = { text: line, life: POOL_FALL.saySecs };
@@ -382,8 +381,11 @@ function poolFallSplashIn(a, panic) {
   poolFallSplash(a.x, a.y + 10, true);
   poolFallSounds(a, 1, 'pool-splashin-');
   if (typeof nearbyImpact === 'function') nearbyImpact(a.x, a.y, 2, 0);
-  if (typeof G !== 'undefined' && G && a === G.player) a.poolSay = { text: '咕嚕……救、救命！', until: performance.now() + panic * 1000 };
-  else if (!a.berserk) a.say = { text: '咕嚕咕嚕……！', life: Math.min(2.5, panic) };
+  // 喊一句（對話編輯器的「被噴進水裡」poolStruggle；沒填就不說）
+  const isPlayer = typeof G !== 'undefined' && G && a === G.player;
+  const cry = isPlayer ? (typeof playerLine === 'function' && playerLine('poolStruggle')) : (typeof pickDialogueLine === 'function' && pickDialogueLine(a.type, 'poolStruggle'));
+  if (cry && isPlayer) a.poolSay = { text: cry, until: performance.now() + panic * 1000 };
+  else if (cry && !a.berserk) a.say = { text: cry, life: Math.min(2.5, panic) };
   return true;
 }
 

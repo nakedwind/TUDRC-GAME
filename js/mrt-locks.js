@@ -153,7 +153,7 @@ function useMrtLockNearPlayer() {
   if (n > 0 && n < need) {   // 鑰匙不夠（例如要 2 把只有 1 把）：飄字說還差幾把
     sfx('error'); flash(mrtLockPrompt(l), l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
   }
-  if (n <= 0) {   // 沒有好遊卡／異質鑰匙：溫特在對話框說話（data/doors.js 的 LOCKED_NEED_KEY_TEXT）
+  if (n <= 0) {   // 沒有好遊卡／異質鑰匙：溫特在對話框說話（對話編輯器裡溫特的「沒有鑰匙打不開」）
     if (typeof winterSay === 'function' && winterSay(lockedNeedKeyText())) return true;
     sfx('error'); flash(mrtLockedText(l), l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
   }

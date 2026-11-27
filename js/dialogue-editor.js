@@ -9,16 +9,19 @@ const clone = v => JSON.parse(JSON.stringify(v));
 // ordered：找他說話時依序一句一句說完；name：可用 {name}；item：可用 {item}。每一格都只用自己的台詞：沒填就不說話（不會借用別格或「通用台詞」）
 // 遊戲裡角色說的每一句話都從這裡來（程式裡不寫台詞）
 const SITUATIONS = [
+  // 找他說話：有填「第一次見面／平常說話／偶爾閒聊」任何一格，就只用這三格；三格都空才用「找他說話（舊）」（js/game.js 的 openDialogue）
+  { group: '找他說話', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
+  { group: '找他說話', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>。大約<b>四次有一次</b>改抽「偶爾閒聊」。' },
+  { group: '找他說話', key: 'chat', label: '偶爾閒聊（隨機一句）', warnEmpty: true,
+    when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。',
+    emptyText: '⚠ 還沒有台詞：抽到這一格（大約四次一次）時他不會說話，在基地裡只會回「……」。' },
+  { group: '找他說話', key: 'npc', label: '找他說話（舊的一格）', when: '<b>上面三格都沒填</b>才會用這裡：每次找他說話隨機說一句。上面任何一格有填，這裡就<b>不會用到</b>。' },
   { group: '日常（基地裡）', key: 'idle', label: '閒晃時的頭上泡泡', when: '在基地等安全場景閒晃時，每隔 <b>5～13 秒</b>隨機冒出一句。' },
+  { group: '日常（基地裡）', key: 'idleMeal', label: '在食堂閒晃', when: '在 <b>食堂</b>（有餐盤架、打飯台、回收區的地圖）閒晃、吃飯時的頭上泡泡：改說這裡的，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
+  { group: '日常（基地裡）', key: 'mealInvite', label: '接受吃飯邀請', when: '在基地跟他對話、選右邊的「🍽️ 邀請吃飯」時，頭上冒出這一句（隨機一句）。沒填就不說話（照樣跟去吃）。' },
   { group: '日常（基地裡）', key: 'idleSoothe', label: '在疏導室閒晃（負荷高被送來）', when: '負荷 <b>30</b> 以上、回基地時被送到 <b>2F疏導室</b>：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞（每隔 5～13 秒隨機一句）。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'idleHospital', label: '住院時的頭上泡泡', when: '受傷住進 <b>1F醫院</b>（躺病床或在醫院走動）：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'talkHospital', label: '住院中找他說話（睡覺）', when: '他受傷<b>住院</b>時找他說話：打開對話框，他在睡覺，<b>隨機說一句</b>（例如 Zzz……），下一句由系統說還要幾分鐘出院。沒填就只顯示系統那一句。' },
-  { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', when: '在基地走到他旁邊按 <b>Space</b>，每次<b>隨機說一句</b>。沒填就不說話。' },
-  { group: '日常（基地裡）', key: 'idleMeal', label: '在食堂閒晃', when: '在 <b>食堂</b>（有餐盤架、打飯台、回收區的地圖）閒晃、吃飯時的頭上泡泡：改說這裡的，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
-  { group: '日常（基地裡）', key: 'mealInvite', label: '接受吃飯邀請', when: '在基地跟他對話、選右邊的「🍽️ 邀請吃飯」時，頭上冒出這一句（隨機一句）。沒填就不說話（照樣跟去吃）。' },
-  { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
-  { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>（大約四次有一次改說「偶爾閒聊」）。抽到的那一格沒填就不說話。' },
-  { group: '找他說話（特殊）', key: 'chat', label: '偶爾閒聊（隨機一句）', when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。' },
   { group: '送禮與委託', key: 'giftLove', label: '收到最愛的禮物', item: true, when: '在基地送他<b>最愛</b>的零食飲料時，隨機說一句。沒填就不說（對話框只顯示「收下了」的系統訊息）。' },
   { group: '送禮與委託', key: 'giftLike', label: '收到喜歡的禮物', item: true, when: '送他<b>喜歡</b>的東西時，隨機說一句。' },
   { group: '送禮與委託', key: 'giftNormal', label: '收到普通的禮物', item: true, when: '送他<b>普通</b>（沒特別喜歡、也不討厭）的東西時，隨機說一句。' },
@@ -28,7 +31,6 @@ const SITUATIONS = [
   { group: '送禮與委託', key: 'giftRefuse', label: '拒收禮物', item: true, when: '送他<b>不收</b>的東西時（data/gifts.js 喜好裡的 refuse，例如塔納不收熊熊頭套），他說這句拒絕，東西留在你身上、不算送禮次數。沒填就只顯示「不收」的系統訊息。' },
   { group: '送禮與委託', key: 'requestAsk', label: '委託：想吃東西', item: true, when: '回到基地時他想吃某樣東西（頭上冒圖示），找他說話時<b>先說這一句</b>。沒填就不說（禮物選單裡還是會標「想吃！」）。' },
   { group: '送禮與委託', key: 'requestReward', label: '委託：完成時交給你東西', when: '照他想吃的送了之後，把回憶碎片（或異質碎片）交給溫特時說的話（隨機一句）。' },
-  { group: '保留（遊戲不會用）', key: 'reserve', label: '保留台詞', when: '先收起來的台詞，<b>遊戲不會說</b>。之後要用時，複製到上面的情境就好（例如角色搬到別的地方時）。' },
   { group: '戰鬥中', key: 'battle', label: '出勤時的頭上泡泡', when: '戰鬥地圖中，每隔 <b>11～22 秒</b>隨機冒出一句。' },
   { group: '戰鬥中', key: 'lowSp', label: '嚮導 SP 偏低・頭暈', when: '嚮導 SP 低於 <b>40</b> 時說一句；恢復到 45 以上後可再次觸發。' },
   { group: '戰鬥中', key: 'ultimate', label: '放大招時喊的話', when: '大招冷卻好、<b>放大招的瞬間</b>。' },
@@ -37,6 +39,7 @@ const SITUATIONS = [
   { group: '戰鬥中', key: 'guard', label: '衝去保護部隊長', when: '部隊長被怪物攻擊、他衝過去保護時（每 <b>6 秒</b>最多一次）。' },
   { group: '戰鬥中', key: 'drown', label: '溺水', when: '池核的水漲回來時還待在深水區、沒坐救生圈，<b>每秒扣 1 HP</b>，每隔 <b>6～10 秒</b>喊一句（js/pool-tide.js）。' },
   { group: '戰鬥中', key: 'poolFall', label: '掉進水池', when: '走在深水區旁邊太靠近水邊、或硬往深水走，<b>失足搖晃的那一刻</b>說一句，接著掉進水裡掙扎（js/pool-fall.js）。溫特也可以填。' },
+  { group: '戰鬥中', key: 'poolStruggle', label: '被噴進水裡（慌張）', when: '被魚頭王的水柱噴飛、<b>直接掉進深水的那一刻</b>喊一句（js/pool-fall.js）。溫特也可以填。' },
   { group: '戰鬥中・被怪物攻擊', key: 'hurt', label: '一般被打', when: '被怪物打到時<b>有時候</b>說一句（大約一半機率，說完至少隔 <b>7 秒</b>）。數值在 js/mate-hurt-talk.js 的 MATE_HURT_TALK。' },
   { group: '戰鬥中・被怪物攻擊', key: 'lowHp', label: '快沒血', when: '血量掉到 <b>3 成</b>以下時說一句；回到 5 成以上後，下次掉下去會再說。' },
   { group: '戰鬥中・被怪物攻擊', key: 'down', label: '倒下（失去戰鬥能力）', when: '血量歸零、倒下的那一刻說一句。' },
@@ -53,6 +56,14 @@ const SITUATIONS = [
   { group: '汙染與暴走', key: 'relief', label: '瀕臨暴走時被疏導', when: '汙染 70 以上時被疏導、降到 <b>70 以下</b>。' },
   { group: '汙染與暴走', key: 'soothed', label: '從暴走被疏導回來', when: '暴走中被疏導、<b>恢復清醒</b>時。' },
   { group: '汙染與暴走', key: 'friendlyHit', label: '被暴走的隊友打到', name: true, when: '被暴走的隊友攻擊時（每 <b>4 秒</b>最多一次）。' },
+  // 玩家（溫特）自己說的話：遊戲裡溫特頭上的泡泡、對話框（艾德林帶隊時先找艾德林自己的，沒填用溫特的；js/dialogue-data.js 的 playerLine）
+  { group: '玩家自己說的話', key: 'lockedDoor', label: '門鎖住了', when: '走到<b>鎖住的房門</b>或鎖住的出入口按 Space，下方對話框說一句。地圖編輯器裡那扇門另外寫了台詞的話，改說那扇門自己的。沒填就只說「……」。' },
+  { group: '玩家自己說的話', key: 'lockedNeedKey', label: '沒有鑰匙打不開', when: '上鎖的門、記憶之門、捷運閘門、封鎖的捷運入口，<b>身上沒有需要的鑰匙（卡）</b>時，下方對話框說一句。沒填就只說「……」。' },
+  { group: '玩家自己說的話', key: 'mealTake', label: '拿起餐盤', when: '在食堂的<b>餐盤架拿餐盤</b>時，下方對話框說一句。沒填就不說。' },
+  { group: '玩家自己說的話', key: 'swimRingHint', label: '沒泳圈想下深水', when: '身上<b>沒有泳圈</b>、一直往深水區走時，頭上冒一句提示（有泳圈的話改成腳下出現「進入水中」）。沒填就不顯示。' },
+  { group: '玩家自己說的話', key: 'drownStart', label: '開始溺水', when: '池核的水漲回來時溫特還在深水區、沒坐救生圈，<b>開始溺水的那一刻</b>頭上喊一句。沒填就不說。' },
+  { group: '玩家自己說的話', key: 'tideSwitch', label: '水又漲回來（自言自語）', when: '池核的水<b>開始漲回來</b>、深水區沒有隊友時，溫特頭上自言自語一句（提示要去找抽水的開關）。沒填就不說。' },
+  { group: '玩家自己說的話', key: 'valveNoPower', label: '發電機還沒開就按抽水閥', when: '發電機（抽水機）<b>還沒全部打開</b>就去按抽水閥，溫特頭上說一句（提示要先做什麼）。沒填就不說。' },
   // 報告任務（通訊員）：每個任務一格，任務清單在 data/missions.js
   ...(typeof MISSIONS !== 'undefined' ? MISSIONS : []).map(m => ({
     group: '報告任務（通訊員）', key: 'brief_' + m.id, label: '報告任務：' + m.name, ordered: true,
@@ -63,7 +74,13 @@ const SITUATIONS = [
     group: '報告任務（通訊員）', key: 'bounty_' + b.id, label: '特別獎金：' + b.name, ordered: true,
     when: '討伐' + b.name + '後回到應變中心，他會走過來<b>依序</b>報告（每次討伐都會報告，排在報告任務前面）。<b>{money}</b> 會換成經費（' + b.money + '）、<b>{crystals}</b> 會換成異質碎片（' + (b.crystals || 0) + '）。金額在 🏅 獎勵編輯器改。',
   })),
+  { group: '保留（遊戲不會用）', key: 'reserve', label: '保留台詞', when: '先收起來的台詞，<b>遊戲不會說</b>。之後要用時，複製到上面的情境就好（例如角色搬到別的地方時）。' },
 ];
+// 每一組的小圖示（右邊最上面的跳轉按鈕、分組標題用）
+const GROUP_ICON = { '找他說話': '💬', '日常（基地裡）': '🏠', '送禮與委託': '🎁', '戰鬥中': '⚔️', '戰鬥中・被怪物攻擊': '🩹', '汙染與暴走': '☣️',
+  '玩家自己說的話': '🙋', '報告任務（通訊員）': '📋', '保留（遊戲不會用）': '📦', '狂戰士人格（高汙染時性格大變）': '🔥' };
+// 玩家（溫特）一定有的格子
+const PLAYER_SITUATIONS = SITUATIONS.filter(s => s.group === '玩家自己說的話').map(s => s.key).concat(['poolFall', 'poolStruggle']);
 // 狂戰士人格的台詞欄位
 const RAGE_FIELDS = [
   { key: 'onset', label: '性格切換的那一刻', when: '汙染<b>剛到門檻</b>時說一句，周圍閃一圈光。沒填就不說。' },
@@ -76,7 +93,7 @@ const RAGE_FIELDS = [
 ];
 // 可以收禮的角色（data/gifts.js 的 GIFT_PREFS）都有「送禮與委託」這幾格
 // 被怪物攻擊時的台詞（js/mate-hurt-talk.js）：出勤隊員都有這幾格
-const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed', 'vineGrab', 'vineLand', 'confusedAttack', 'confusedHit', 'drown', 'poolFall'];   // drown：池核溺水（js/pool-tide.js）；poolFall：失足掉進深水（js/pool-fall.js）
+const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed', 'vineGrab', 'vineLand', 'confusedAttack', 'confusedHit', 'drown', 'poolFall', 'poolStruggle'];   // drown：池核溺水（js/pool-tide.js）；poolFall：失足掉進深水、poolStruggle：被噴進深水（js/pool-fall.js）
 const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'giftAfter', 'giftRefuse', 'requestAsk', 'requestReward'];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };
@@ -93,7 +110,7 @@ try {
 if (usingDraft && typeof DIALOGUES !== 'undefined') {
   for (const [id, entry] of Object.entries(DIALOGUES.characters || {})) {
     if (!draft.characters[id]) continue;
-    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key.startsWith('bounty_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key) || MATE_HURT_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
+    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key.startsWith('bounty_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key) || MATE_HURT_SITUATIONS.includes(key) || PLAYER_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
   }
 }
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
@@ -154,12 +171,16 @@ if (typeof GIFT_PREFS !== 'undefined') for (const id of Object.keys(GIFT_PREFS))
     if (!(k in inFile) && Array.isArray(entry[k]) && !entry[k].length) autoAdded.add(id + '.' + k);
   }
 }
-// 每個角色都有「平常說話（隨機一句）」這一格（沒寫台詞的話匯出時拿掉，遊戲照舊用「找他說話（基地）」）
+// 每個角色都有「第一次見面」「平常說話」「偶爾閒聊」「保留台詞」這幾格（以前只有填過的人才看得到，例如只有塔納有「偶爾閒聊」）；
+// 玩家溫特另外有「玩家自己說的話」那幾格。沒寫台詞的話匯出時拿掉，檔案不會多一堆空資料
 for (const [id, entry] of Object.entries(draft.characters)) {
-  if (!entry || 'talk' in entry) continue;
+  if (!entry) continue;
   const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
-  entry.talk = [];
-  if (!('talk' in inFile)) autoAdded.add(id + '.talk');
+  for (const k of ['firstTalk', 'talk', 'chat', 'reserve', ...(charInfo(id).kind === 'player' ? PLAYER_SITUATIONS : [])]) {
+    if (k in entry) continue;
+    entry[k] = inFile[k] ? clone(inFile[k]) : [];   // 暫存是舊的：用正式檔案裡的台詞
+    if (!(k in inFile)) autoAdded.add(id + '.' + k);
+  }
 }
 // 可以邀請一起吃飯的人（球球以外的每個角色）都有「接受吃飯邀請」「在食堂閒晃」這兩格（js/meal-invite.js、js/sentry.js；沒寫台詞的話匯出時拿掉）
 if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHARACTERS)) {
@@ -240,9 +261,11 @@ function entryMatches(id) {
 function renderList() {
   const list = $d('characterList'); list.innerHTML = '';
   const ids = Object.keys(draft.characters);
-  const groups = [['戰鬥人員', ids.filter(id => ['sentinel', 'guide'].includes(charInfo(id).kind))],
-                  ['非戰鬥人員', ids.filter(id => !['sentinel', 'guide'].includes(charInfo(id).kind))],
-                  ['其他', [DEFAULT_ID]]];
+  const kindOf = id => charInfo(id).kind;
+  const groups = [['玩家', ids.filter(id => kindOf(id) === 'player')],
+                  ['戰鬥人員', ids.filter(id => ['sentinel', 'guide'].includes(kindOf(id)))],
+                  ['非戰鬥人員', ids.filter(id => !['sentinel', 'guide', 'player'].includes(kindOf(id)))],
+                  ['已停用', [DEFAULT_ID]]];
   let total = 0;
   for (const [title, members] of groups) {
     if (!members.length) continue;
@@ -251,8 +274,10 @@ function renderList() {
       const info = charInfo(id), n = countLines(entryOf(id)); total += n;
       const b = document.createElement('button');
       b.className = 'character-item' + (id === selected ? ' selected' : '') + (entryMatches(id) ? '' : ' dim');
+      const empty = id === DEFAULT_ID ? 0 : emptyWarnCount(entryOf(id));   // 「偶爾閒聊」這種沒填會回「……」的格子
       b.innerHTML = portraitHtml(info, '') + '<span><b>' + esc(info.name) + '</b><small>' +
-        (id === DEFAULT_ID ? '已停用（遊戲不會用）' : (KIND_LABEL[info.kind] || '')) + '</small></span><em class="count">' + n + ' 句</em>';
+        (id === DEFAULT_ID ? '遊戲不會用' : (KIND_LABEL[info.kind] || '')) + (empty ? ' ・<i class="warn">⚠ 偶爾閒聊沒填</i>' : '') +
+        '</small></span><em class="count">' + n + ' 句</em>';
       b.addEventListener('click', () => { selected = id; renderAll(); });
       list.appendChild(b);
     }
@@ -357,10 +382,29 @@ function fieldEditor(container, obj, key, opt) {
 }
 
 function situationBox(parent, title, whenHtml, count, extraCls = '') {
-  const box = document.createElement('div'); box.className = 'situation ' + extraCls;
-  box.innerHTML = '<div class="sit-head"><h3>' + esc(title) + '</h3><span class="count">' + count + ' 句</span></div><p class="when">' + whenHtml + '</p>';
+  const box = document.createElement('div'); box.className = 'situation ' + extraCls + (count ? '' : ' blank');
+  box.innerHTML = '<div class="sit-head"><h3>' + esc(title) + '</h3><span class="count' + (count ? '' : ' none') + '">' + (count ? count + ' 句' : '未填') + '</span></div><p class="when">' + whenHtml + '</p>';
   parent.appendChild(box);
   return box;
+}
+// 有幾個「沒填會回『……』」的格子（目前只有偶爾閒聊：有填平常說話、偶爾閒聊卻空著）
+function emptyWarnCount(entry) {
+  if (!entry) return 0;
+  return SITUATIONS.filter(s => s.warnEmpty && s.key in entry && !allLines(entry[s.key]).length && allLines(entry.talk).length).length;
+}
+// 分組收起來／只看未填：記在這台瀏覽器（壞掉就用預設）
+const VIEW_KEY = 'tudrc_dialogue_editor_view_v1';
+let view = { closed: {}, blankOnly: false };
+try { view = Object.assign(view, JSON.parse(localStorage.getItem(VIEW_KEY) || '{}')); } catch (_) {}
+const saveView = () => { try { localStorage.setItem(VIEW_KEY, JSON.stringify(view)); } catch (_) {} };
+// 一個分組：可以點標題收起來
+function groupSection(ed, title, filled, total) {
+  const sec = document.createElement('details'); sec.className = 'group'; sec.open = !view.closed[title];
+  sec.id = 'grp-' + encodeURIComponent(title);
+  sec.innerHTML = '<summary class="group-title"><span>' + (GROUP_ICON[title] || '•') + ' ' + esc(title) + '</span><span class="group-count">' + filled + ' / ' + total + ' 格有台詞</span></summary>';
+  sec.addEventListener('toggle', () => { if (sec.open) delete view.closed[title]; else view.closed[title] = 1; saveView(); });
+  ed.appendChild(sec);
+  return sec;
 }
 
 // ---- 右側：選中角色的所有情境 ----
@@ -372,32 +416,63 @@ function renderEditor() {
                               : '共 ' + countLines(entry) + ' 句台詞。') + '</p></div>';
   const ed = $d('editor'); ed.innerHTML = '';
   const q = query();
-  let lastGroup = '';
-  for (const s of SITUATIONS) {
-    if (!(s.key in entry)) continue;
+  // 這個角色有的情境，照分組排好
+  const shown = SITUATIONS.filter(s => s.key in entry), groups = [];
+  for (const s of shown) { let g = groups.find(x => x.name === s.group); if (!g) groups.push(g = { name: s.group, list: [] }); g.list.push(s); }
+  const blanks = shown.filter(s => !allLines(entry[s.key]).length).length;
+  if (selected !== DEFAULT_ID) $d('hero').querySelector('p').innerHTML = '共 ' + countLines(entry) + ' 句台詞・' + shown.length + ' 個情境，' +
+    (blanks ? '<b class="warn">' + blanks + ' 個還沒填</b>（沒填的情境遊戲裡就不說話）' : '全部都有台詞') + '。';
+  // 最上面：跳到某一組的按鈕＋只看還沒填的
+  const bar = document.createElement('div'); bar.className = 'jump-bar';
+  for (const g of groups) {
+    const filled = g.list.filter(s => allLines(entry[s.key]).length).length;
+    const b = document.createElement('button'); b.className = 'small chip' + (filled < g.list.length ? ' has-blank' : '');
+    b.textContent = (GROUP_ICON[g.name] || '') + ' ' + g.name.replace(/（.*）/, '') + ' ' + filled + '/' + g.list.length;
+    b.title = '跳到「' + g.name + '」';
+    b.addEventListener('click', () => { const sec = document.getElementById('grp-' + encodeURIComponent(g.name)); if (sec) { sec.open = true; sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+    bar.appendChild(b);
+  }
+  if (entry.rage) {
+    const b = document.createElement('button'); b.className = 'small chip'; b.textContent = '🔥 狂戰士人格';
+    b.addEventListener('click', () => { const sec = document.getElementById('grp-rage'); if (sec) { sec.open = true; sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+    bar.appendChild(b);
+  }
+  const only = document.createElement('label'); only.className = 'blank-only';
+  only.innerHTML = '<input type="checkbox"' + (view.blankOnly ? ' checked' : '') + '> 只看還沒填的';
+  only.querySelector('input').addEventListener('change', e => { view.blankOnly = e.target.checked; saveView(); renderEditor(); });
+  bar.appendChild(only);
+  ed.appendChild(bar);
+  let sec = null, lastGroup = '';
+  for (const s of shown) {
+    const lines = allLines(entry[s.key]);
+    if (view.blankOnly && lines.length && !q) continue;   // 只看還沒填的（搜尋時照樣全部顯示）
     if (s.group !== lastGroup) {
       lastGroup = s.group;
-      const g = document.createElement('div'); g.className = 'group-title'; g.textContent = s.group; ed.appendChild(g);
+      const g = groups.find(x => x.name === s.group);
+      sec = groupSection(ed, s.group, g.list.filter(x => allLines(entry[x.key]).length).length, g.list.length);
     }
-    const lines = allLines(entry[s.key]);
     const hit = q && lines.some(l => l.toLowerCase().includes(q));
     let when = s.when;
     if (s.name) when += ' 可以用 <code>{name}</code> 代表' + (typeof s.name === 'string' ? s.name : '攻擊他的人') + '的名字。';   // name 寫文字＝{name} 代表誰
     if (s.item) when += ' 可以用 <code>{item}</code> 代表東西的名稱。';
     if (s.ordered) when += ' 可以用 ↑↓ 調整順序。';
-    const box = situationBox(ed, s.label, when, lines.length, hit ? 'match' : '');
+    const warn = s.warnEmpty && !lines.length && allLines(entry.talk).length;   // 有平常說話、偶爾閒聊卻空著：會回「……」
+    const box = situationBox(sec, s.label, when, lines.length, (hit ? 'match ' : '') + (warn ? 'warn-box' : ''));
     fieldEditor(box, entry, s.key, {
       ordered: s.ordered,
-      emptyText: s.fallback && selected !== DEFAULT_ID ? '沒有專屬台詞，會改用「通用台詞」。' : '還沒有台詞，這個情境不會說話。',
+      emptyText: s.emptyText || '還沒有台詞，這個情境不會說話。',
     });
   }
-  if (entry.rage) renderRage(ed, entry.rage);
+  if (view.blankOnly && !q && !ed.querySelector('.situation')) ed.insertAdjacentHTML('beforeend', '<p class="all-done">🎉 這個角色每個情境都有台詞了。</p>');
+  if (entry.rage && !(view.blankOnly && !q)) renderRage(ed, entry.rage);
 }
 
 // ---- 狂戰士人格 ----
 function renderRage(ed, rage) {
-  const g = document.createElement('div'); g.className = 'group-title'; g.textContent = '狂戰士人格（高汙染時性格大變）'; ed.appendChild(g);
-  const box = document.createElement('div'); box.className = 'situation rage'; ed.appendChild(box);
+  const title = '狂戰士人格（高汙染時性格大變）';
+  const sec = groupSection(ed, title, rage.enabled ? 1 : 0, 1); sec.id = 'grp-rage';
+  sec.querySelector('.group-count').textContent = rage.enabled ? '已啟用' : '沒啟用';
+  const box = document.createElement('div'); box.className = 'situation rage'; sec.appendChild(box);
   box.innerHTML = '<p class="when">汙染到<b>門檻</b>以上時，說話方式完全改變；被疏導後恢復原本的個性。啟用後只說這裡的台詞，<b>沒填的欄位就不說話</b>。</p>';
   const toggle = document.createElement('label'); toggle.className = 'rage-toggle';
   toggle.innerHTML = '<input type="checkbox"' + (rage.enabled ? ' checked' : '') + '> 啟用狂戰士人格';

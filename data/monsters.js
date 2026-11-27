@@ -2591,14 +2591,14 @@ const BOSS_SETTINGS_DEFAULT = {
 /* 三段難度（由怪物編輯器「🎚️ 難度」匯出）：每一段難度的倍率，1＝原本的數字。開新遊戲時選哪一段，存在玩家的存檔裡（js/monster-data.js 的 difficultyValue）。 */
 const DIFFICULTY_SETTINGS_DEFAULT = {
   "easy": {
-    "spawnRate": 0.35,
-    "monsterHp": 0.7,
-    "monsterDamage": 0.6,
-    "bossHp": 0.7,
+    "spawnRate": 0.5,
+    "monsterHp": 0.5,
+    "monsterDamage": 0.5,
+    "bossHp": 0.6,
     "bossDamage": 0.6,
-    "crystals": 0.8,
-    "bossBounty": 0.8,
-    "dropRate": 0.8,
+    "crystals": 1,
+    "bossBounty": 1,
+    "dropRate": 1,
     "revives": 1,
     "reviveHp": 0.5
   },
@@ -2615,7 +2615,7 @@ const DIFFICULTY_SETTINGS_DEFAULT = {
     "reviveHp": 0.5
   },
   "hard": {
-    "spawnRate": 0.7,
+    "spawnRate": 0.6,
     "monsterHp": 1.4,
     "monsterDamage": 1.5,
     "bossHp": 1.4,

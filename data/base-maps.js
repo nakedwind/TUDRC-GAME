@@ -2277,15 +2277,6 @@ const BASE_MAPS = [
         "oy": 10
       },
       {
-        "id": "tile_halloween_spider_web",
-        "c": 23,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -8,
-        "oy": -6
-      },
-      {
         "id": "tile_prop_shelf_locker_unit_02",
         "c": 23,
         "r": 13,
@@ -2336,6 +2327,14 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "top",
         "ox": 30
+      },
+      {
+        "id": "tile_new_decor_poster",
+        "c": 24,
+        "r": 8,
+        "layer": "object",
+        "ox": 0,
+        "oy": 16
       }
     ],
     "solid": [

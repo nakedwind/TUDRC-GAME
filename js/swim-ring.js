@@ -18,7 +18,6 @@
      ・划水的時候循環播放划水聲（音效編輯器的 poolPaddle）；掉進水裡掙扎時也播（js/pool-fall.js 的 poolStruggleSoundGain） */
 const SWIM_RING = {
   itemId: 'swim-ring',
-  hintText: '好像可以用泳圈做點什麼……',   // 身上沒有泳圈、想走進深水區時溫特頭上的泡泡（有泳圈的話改成腳下出現「進入水中」）
   enterPrompt: '進入水中',   // 身上有泳圈、靠近深水區時的互動提示（按空白鍵坐上泳圈下水）
   noRingText: '身上沒有救生圈。',            // 沒有救生圈還按空白鍵
   hintSecs: 1.6,       // 頭上的泡泡停多久（秒）
@@ -156,7 +155,10 @@ function swimRingAfterMove(p, dx, dy) {
   }
   if (!(dx || dy) || !deepWaterCells().size || p.drowning) return;   // 溺水中：頭上已經在喊要救生圈（js/pool-tide.js），不再跳這個提示
   const len = Math.hypot(dx, dy), ahead = PLAYER.r + 6;
-  if (deepWaterAtPoint(p.x + dx / len * ahead, p.y + dy / len * ahead)) p.swimHintAt = performance.now();   // 往深水走：頭上跳提示
+  if (deepWaterAtPoint(p.x + dx / len * ahead, p.y + dy / len * ahead)) {   // 往深水走：頭上跳提示
+    if (performance.now() - (p.swimHintAt || 0) > SWIM_RING.hintSecs * 1000) p.swimHintText = typeof playerLine === 'function' ? playerLine('swimRingHint') : null;   // 新的一次才重抽一句（不然每一幀換一句）
+    p.swimHintAt = performance.now();
+  }
 }
 
 // ---- 坐救生圈划到深水區的邊上：岸上離救生圈最近、站得住的地方 { x, y }（js/render.js 畫「收起泳圈」、空白鍵用）----
@@ -400,7 +402,7 @@ function drawSwimRingHint() {
   if (hasSwimRing()) return;   // 身上有泳圈：腳下改成「進入水中」（swimRingEnterSpot）
   if (performance.now() - p.swimHintAt > SWIM_RING.hintSecs * 1000) return;
   if (!deepWaterNearPlayer()) return;   // 走開了就不顯示
-  if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, SWIM_RING.hintText);
+  if (p.swimHintText && typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, p.swimHintText);   // 對話編輯器裡溫特的「沒泳圈想下深水」；沒填就不顯示
 }
 // 身上有泳圈、站在深水區岸邊：「進入水中」的提示畫在哪（js/render.js 的互動提示）；不顯示＝null
 function swimRingEnterSpot() {

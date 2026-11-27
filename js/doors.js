@@ -227,7 +227,7 @@ function doorPrompt(d) {
   if (d.mode === 'chain' || d.mode === 'memory') return have ? '用' + key.name + '解開鎖鏈' : '被鎖鏈鎖住了（需要' + key.name + '）';
   return have ? '用' + key.name + '開鎖' : '門鎖住了（需要' + key.name + '）';
 }
-// 沒有鑰匙打不開：轉一下門把，溫特在對話框說話（data/doors.js 的 LOCKED_NEED_KEY_TEXT）；對話框不能開時退回飄字
+// 沒有鑰匙打不開：轉一下門把，溫特在對話框說話（對話編輯器裡溫特的「沒有鑰匙打不開」）；對話框不能開時退回飄字
 function lockedNeedKey(x, y, fallback, top) {
   if (typeof sfxAt === 'function') sfxAt('lockedDoor', x, y, .35, 'locked-door');
   if (typeof winterSay === 'function' && winterSay(lockedNeedKeyText())) return;

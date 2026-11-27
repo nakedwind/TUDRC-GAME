@@ -43,7 +43,20 @@
     .hero img, .hero .ph { width:76px; height:76px; object-fit:cover; image-rendering:pixelated; border-radius:13px; background:#101b27; border:1px solid #41627a; display:grid; place-items:center; font-size:34px }
     .hero h2 { font-size:23px; margin-bottom:3px } .hero p { margin:0; font-size:13px }
     .tag { display:inline-block; border-radius:20px; background:#27495c; color:#a9e1fd; font-size:12px; padding:3px 9px; margin-bottom:6px }
-    .group-title { margin:22px 0 10px; font-size:13px; letter-spacing:3px; color:#ffd77a }
+    .group { margin-top:14px }
+    .group-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px; padding:9px 12px; font-size:14px; letter-spacing:2px; color:#ffd77a; background:#1b2a37; border:1px solid #33506a; border-radius:10px; cursor:pointer; list-style:none; position:sticky; top:0; z-index:2 }
+    .group-title::-webkit-details-marker { display:none }
+    .group-title::after { content:'▾'; color:#7fa2b8; margin-left:6px } .group:not([open]) > .group-title::after { content:'▸' }
+    .group:not([open]) > .group-title { margin-bottom:0 }
+    .group-count { margin-left:auto; font-size:11px; letter-spacing:0; color:#8fb3c9 }
+    .jump-bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:14px 0 4px; padding:10px; background:#111d28; border:1px solid #2b4559; border-radius:12px }
+    .chip { background:#1c2e3d; border-color:#3a5872 } .chip.has-blank { border-color:#8a7440 }
+    .blank-only { margin-left:auto; display:flex; align-items:center; gap:6px; font-size:13px; color:#c3d6e4; cursor:pointer }
+    .situation.blank { border-style:dashed; background:#0f1923 }
+    .situation.warn-box { border-color:#a77a2c; background:#1d1a10 }
+    .count.none { background:#3a2f1a; color:#e8c27a }
+    .warn { color:#ffcf6e; font-style:normal; font-weight:600 }
+    .all-done { margin-top:20px; color:#8ce0be }
     .situation { margin:0 0 12px; padding:14px 16px; background:#111d28; border:1px solid #2b4559; border-radius:12px }
     .situation.match { border-color:#e0c060 }
     .sit-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:3px }
@@ -92,7 +105,7 @@
     <div><h1>💬 對話編輯器</h1><p>整理所有角色會說的話，以及在什麼情境下說。</p></div>
     <nav class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="角色資料頁.html">角色資料頁</a></nav>
   </header>
-  <div class="notice"><strong>編輯方式：</strong>修改會先自動保存在這台瀏覽器。確認後按「下載 dialogues.js」，用下載的檔案取代遊戲資料夾裡的 <code>data/dialogues.js</code>，重新整理遊戲就會生效。同一個情境放幾句都可以，遊戲會隨機挑一句（「依序說完」的情境除外）。</div>
+  <div class="notice"><strong>編輯方式：</strong>修改會先自動保存在這台瀏覽器。確認後按「存到專案」（或「下載 dialogues.js」取代 <code>data/dialogues.js</code>），重新整理遊戲就會生效。同一個情境放幾句都可以，遊戲會隨機挑一句（「依序說完」的情境除外）。<b>每一格都只用自己的台詞：沒填的情境遊戲裡就不說話</b>（虛線框、標「未填」的就是還沒填的）。</div>
   <main class="layout">
     <aside class="panel sidebar">
       <div class="sidebar-head"><h2>角色</h2><span id="total" class="count"></span></div>
@@ -112,13 +125,13 @@
   </main>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script src="data/characters.js?v=colynparry-20261023"></script>
-  <script src="data/dialogues.js?v=w118brief-20261126"></script>
+  <script src="data/dialogues.js?v=undergroundchat-20261127"></script>
   <script src="data/missions.js?v=rewards-20261126"></script>   <!-- 任務清單：亞許的「報告任務」每個任務一格 -->
   <script src="data/rewards.js?v=funds-20261126"></script>   <!-- 獎勵：BOSS 特別獎金、區域控制獎勵、全區控制獎勵（🏅 獎勵編輯器） -->
-  <script src="data/gifts.js?v=devotion-20261103"></script>   <!-- 誰可以收禮：那些人有「送禮與委託」的台詞格子 -->
+  <script src="data/gifts.js?v=charlines-20261127"></script>   <!-- 誰可以收禮：那些人有「送禮與委託」的台詞格子 -->
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/sfx.js?v=bossvoice2-20261126"></script><script src="js/ui-feedback.js"></script>
-  <script src="js/dialogue-editor.js?v=npcrandom-20261126"></script>
+  <script src="js/sfx.js?v=missingsfx2-20261127"></script><script src="js/ui-feedback.js"></script>
+  <script src="js/dialogue-editor.js?v=winterlines-20261127"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['download'], files: [{ path: 'data/dialogues.js', label: '對話', text: () => exportSource() }], status: (m, e) => setStatus(m, e) });</script>
   <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

@@ -39,9 +39,20 @@
   @media(max-width:800px) { #chargerFields { grid-template-columns:repeat(2,minmax(130px,1fr)) } }
   .foot { margin-top:20px; border-top:1px solid #344454; padding-top:16px }
   #exportOut { width:100%; min-height:150px; background:#0d151e; border:1px solid #4c6479; color:#b6d5e6; border-radius:8px; padding:12px; font:12px/1.5 Consolas,monospace; resize:vertical }
-  #status { min-height:23px; color:#84ddbd; margin:10px 0 }
-  .slime-panel { margin-top:18px }
-  .difficulty-panel { margin-top:18px }
+  #status { color:#84ddbd }
+  /* 上方固定的存檔列、分頁列 */
+  .head { margin-bottom:14px } .head p { margin:0 }
+  .savebar { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 12px; margin:0 0 12px; background:#16202b; border:1px solid #3a4b60; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.35) }
+  .savebar .sep { width:1px; align-self:stretch; background:#3a4b60; margin:0 4px }
+  .savebar label { display:flex; gap:6px; align-items:center; font-size:13px; color:#b8c9da }
+  .savebar #status { flex:1 1 220px; margin:0; min-height:0; font-size:13px; text-align:right }
+  .savebar .hint { flex-basis:100%; font-size:12px; color:#8ea3b8 }
+  .tabs { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; border-bottom:1px solid #3a4b60 }
+  .tabs button { border-radius:9px 9px 0 0; border-bottom:none; background:#16202b; border-color:#35485c; color:#b8c9da; padding:9px 16px }
+  .tabs button[aria-selected="true"] { background:#1c2530; border-color:#5b7793; color:#fff; font-weight:600; box-shadow:inset 0 3px 0 #64b6bd }
+  .page[hidden] { display:none }
+  .page > .panel > p.intro { margin-bottom:14px }
+  #exportBox { margin-top:8px; font-size:13px; color:#aebccc } #exportBox summary { cursor:pointer }
   .difficulty-wrap { overflow-x:auto }
   #difficultyTable { border-collapse:collapse; width:100%; min-width:720px; font-size:13px }
   #difficultyTable th { color:#9fb3c8; font-weight:600; text-align:left; padding:6px 8px 8px; border-bottom:1px solid #3a4b60; white-space:nowrap }
@@ -61,9 +72,8 @@
   .slime-thumb img { image-rendering:pixelated }
   .giant-fields { display:flex; gap:16px; flex-wrap:wrap; margin-top:14px }
   .giant-fields label { display:grid; gap:5px; font-size:13px; color:#b8c9da } .giant-fields input { width:120px }
-  .boss-panel { margin-top:18px }
   .boss-layout { display:grid; grid-template-columns:minmax(200px,240px) 1fr; gap:18px; align-items:start }
-  #bossList { display:grid; gap:7px }
+  #bossList { display:grid; gap:7px; max-height:720px; overflow:auto; padding-right:4px }
   #bossList button { display:flex; gap:10px; align-items:center; width:100%; text-align:left; background:#15202b; border-color:#35485c }
   #bossList button.selected { background:#213d50; border-color:#77c7d9 }
   #bossList img { width:42px; height:42px; object-fit:contain; image-rendering:pixelated; background:#0e1721; border-radius:6px }
@@ -86,13 +96,31 @@
 </style>
 </head>
 <body>
-  <div class="top"><div><h1>🐾 異質體編輯器</h1><p>怪物的能力與圖片在這裡設定；每張地圖只決定會出現哪些怪物及出現比例。</p></div>
-    <nav class="nav"><a href="塔防原型.html">回遊戲</a><a href="地圖編輯器.html">地圖編輯器</a></nav></div>
+  <div class="head"><h1>🐾 異質體編輯器</h1><p>怪物的能力、BOSS 與各種怪物的招式數字、史萊姆種類、難度都在這裡改；每張地圖只決定會出現哪些怪物和比例（地圖編輯器）。</p></div>
+  <!-- 存檔列：五個分頁改的東西全部存在同一個 data/monsters.js，所以存檔、預覽放在最上面共用 -->
+  <div class="savebar">
+    <button id="exportMonsters" class="primary">下載 monsters.js</button><button id="resetMonsters">從檔案重新載入</button>
+    <span class="sep"></span>
+    <button id="previewGame">▶ 預覽遊戲</button>
+    <label>難度 <select id="difficultyPreview"></select></label>
+    <div id="status" role="status"></div>
+    <small class="hint">五個分頁的改動都會自動存在這台瀏覽器；按「💾 存到專案」（或下載 monsters.js 放到 data 資料夾）才會存進專案、給其他電腦用。</small>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="編輯器分頁">
+    <button type="button" role="tab" data-tab="monsters" aria-selected="true">🐾 怪物</button>
+    <button type="button" role="tab" data-tab="slime" aria-selected="false">🟢 史萊姆種類</button>
+    <button type="button" role="tab" data-tab="boss" aria-selected="false">👑 BOSS</button>
+    <button type="button" role="tab" data-tab="special" aria-selected="false">🧩 特殊數值</button>
+    <button type="button" role="tab" data-tab="difficulty" aria-selected="false">🎚️ 難度</button>
+  </nav>
+
+  <!-- 🐾 怪物：每種怪物的基本資料（血量、速度、攻擊、圖片、攻擊模式） -->
+  <div class="page" data-page="monsters">
   <div class="layout">
     <section class="panel"><div class="toolbar"><button class="primary" id="addMonster">＋ 新增異質體</button><button id="duplicateMonster">複製</button></div>
       <input id="search" type="search" placeholder="搜尋名稱或 ID" aria-label="搜尋異質體">
       <div id="monsterList"></div></section>
-    <section class="panel"><div class="actions"><h2 style="flex:1" id="editingTitle">怪物資料</h2><button class="danger" id="deleteMonster">刪除此種類</button></div>
+    <section class="panel"><div class="actions"><h2 style="flex:1" id="editingTitle">怪物資料</h2><button id="previewMonster">▶ 單隻測試場</button><button class="danger" id="deleteMonster">刪除此種類</button></div>
       <div class="details"><div><div class="preview"><img id="spritePreview" alt="怪物圖片預覽"><span id="spriteError"></span></div>
         <p style="margin-top:12px;font-size:12px">圖片請放在 <code>images/monster/</code>，再填入相對路徑。</p></div>
         <div class="fields">
@@ -122,40 +150,17 @@
           <small>本體鑽地瞬移，出土與入土時仍可受傷。橘圈鎖定5×5 格內的落點，可移動閃避；本體離開後原地洞保留 5 秒。正式出現位置由地圖編輯器的怪物種類／權重決定。</small>
         </div>
       </div>
-      <div class="foot"><div class="actions"><button id="previewMonster">▶ 單隻測試場</button><button id="previewGame">▶ 用暫存設定預覽遊戲</button><button id="exportMonsters" class="primary">下載 monsters.js</button><button id="resetMonsters">從檔案重新載入</button></div>
-        <small>編輯會自動儲存在這台瀏覽器。正式保留並同步到其他電腦時，下載檔案並放到 <code>data/monsters.js</code>。</small>
-        <div id="status" role="status"></div><textarea id="exportOut" readonly aria-label="怪物設定匯出內容"></textarea></div>
+      <details id="exportBox"><summary>查看匯出內容（按「下載 monsters.js」後出現）</summary><textarea id="exportOut" readonly aria-label="怪物設定匯出內容"></textarea></details>
     </section>
   </div>
-  <section class="panel boss-panel">
-    <h2>👑 BOSS 數值（含一般怪物的特殊數值）</h2>
-    <p style="margin-bottom:14px">每隻 BOSS 的血量、招式、時間、範圍都在這裡改；一般怪物程式自己的招式數字（自爆史萊姆的爆炸、人面蝶的粉塵、異質核心、掉食物…）在列表下面的「一般怪物」。
-      一般怪物的基本血量、攻擊力還是在上方的怪物資料。每一行的說明直接取自 BOSS 程式裡的註解，小字是程式裡的欄位名稱；滑鼠停在格子上可以看原本的數字。
-      改動跟上面一起自動儲存，「下載 monsters.js」／「存到專案」也會一起存進去。虱目魚王在上方的怪物列表裡。</p>
-    <div class="boss-layout">
-      <div id="bossList"></div>
-      <div><div class="actions"><h3 style="flex:1;margin:0" id="bossTitle"></h3><span id="bossCinemaBtns" style="display:contents"></span><button id="bossReset">這隻恢復檔案的數字</button></div>
-        <details id="bossDescBox"><summary>怎麼運作（程式裡的說明）</summary><pre id="bossDesc"></pre></details>
-        <input id="bossSearch" type="search" placeholder="搜尋說明或欄位名稱" aria-label="搜尋 BOSS 欄位">
-        <div id="bossFields"></div></div>
-    </div>
-  </section>
-  <section class="panel difficulty-panel">
-    <h2>🎚️ 難度</h2>
-    <p style="margin-bottom:14px">玩家開新遊戲時選簡單、普通或困難，遊戲就用那一欄的倍率（1＝原本的數字，0.5＝一半，2＝兩倍）。
-      改動會跟上面一起自動儲存，「下載 monsters.js」也會一起存進去。黃框＝跟檔案裡的數字不一樣。</p>
-    <div class="difficulty-wrap"><table id="difficultyTable">
-      <thead><tr><th>項目</th></tr></thead>
-      <tbody></tbody></table></div>
-    <div class="difficulty-tools">
-      <label>預覽遊戲時用哪一段難度 <select id="difficultyPreview"></select></label>
-      <button id="difficultyReset">難度恢復檔案的數字</button>
-    </div>
-  </section>
-  <section class="panel slime-panel">
+  </div>
+
+  <!-- 🟢 史萊姆種類 -->
+  <div class="page" data-page="slime" hidden>
+  <section class="panel">
     <h2>🟢 史萊姆種類</h2>
-    <p style="margin-bottom:14px">每種史萊姆都是用上面「史萊姆」的數值乘上倍率。生成一隻史萊姆時，依序擲出現機率，都沒中就是一般史萊姆。
-      巨型史萊姆依下方時間固定登場，小史萊姆是分裂史萊姆死掉時分出來的。改動會跟上面一起自動儲存，「下載 monsters.js」也會一起存進去。</p>
+    <p class="intro">每種史萊姆都是用「🐾 怪物」分頁裡「史萊姆」的數值乘上倍率。生成一隻史萊姆時，依序擲出現機率，都沒中就是一般史萊姆。
+      巨型史萊姆依下方時間固定登場，小史萊姆是分裂史萊姆死掉時分出來的。</p>
     <div class="slime-wrap"><table id="slimeTable">
       <thead><tr><th>預覽</th><th>名稱</th><th>出現機率 %</th><th>開戰幾秒後出現</th><th>血量 ×</th><th>速度 ×</th><th>攻擊 ×</th><th>獎勵 ×</th><th>體型 ×</th><th>顏色偏移 °</th><th>實際數值</th></tr></thead>
       <tbody></tbody></table></div>
@@ -165,15 +170,44 @@
     </div>
     <small style="display:block;margin-top:10px">場上同時最多一隻巨型；上一隻沒倒，下一隻會等。</small>
   </section>
+  </div>
+
+  <!-- 👑 BOSS／🧩 特殊數值：同一個面板，列表依分頁不同（js/monster-editor.js 的 bossTab） -->
+  <div class="page" data-page="boss special" hidden>
+  <section class="panel boss-panel">
+    <h2 id="bossPanelTitle">👑 BOSS</h2>
+    <p class="intro" id="bossPanelIntro"></p>
+    <div class="boss-layout">
+      <div id="bossList"></div>
+      <div><div class="actions"><h3 style="flex:1;margin:0" id="bossTitle"></h3><span id="bossCinemaBtns" style="display:contents"></span><button id="bossReset">這隻恢復檔案的數字</button></div>
+        <details id="bossDescBox"><summary>怎麼運作（程式裡的說明）</summary><pre id="bossDesc"></pre></details>
+        <input id="bossSearch" type="search" placeholder="搜尋說明或欄位名稱" aria-label="搜尋 BOSS 欄位">
+        <div id="bossFields"></div></div>
+    </div>
+  </section>
+  </div>
+
+  <!-- 🎚️ 難度 -->
+  <div class="page" data-page="difficulty" hidden>
+  <section class="panel">
+    <h2>🎚️ 難度</h2>
+    <p class="intro">玩家開新遊戲時選簡單、普通或困難，遊戲就用那一欄的倍率（1＝原本的數字，0.5＝一半，2＝兩倍）。黃框＝跟檔案裡的數字不一樣。
+      想試玩某一段難度：上方存檔列的「難度」選好再按「▶ 預覽遊戲」。</p>
+    <div class="difficulty-wrap"><table id="difficultyTable">
+      <thead><tr><th>項目</th></tr></thead>
+      <tbody></tbody></table></div>
+    <div class="difficulty-tools"><button id="difficultyReset">難度恢復檔案的數字</button></div>
+  </section>
+  </div>
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script src="data/monsters.js?v=monstercfg-20261127"></script>
   <script src="js/draft-sync.js?v=orderfix-20261111"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
   <script src="js/monster-data.js?v=difficulty2-20261127"></script>
   <script src="js/boss-fields.js?v=monstercfg-20261127"></script>   <!-- 👑 BOSS 數值的欄位說明（tools/build-boss-fields.py 產生） -->
-  <script src="js/sfx.js?v=bossvoice2-20261126"></script>
+  <script src="js/sfx.js?v=missingsfx2-20261127"></script>
   <script src="js/burrowing-mouse.js?v=bosslag-20261125"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=monstercfg-20261127"></script>
+  <script src="js/monster-editor.js?v=tabs2-20261127"></script>
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=rewards-20261126"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

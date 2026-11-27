@@ -74,8 +74,8 @@ const GIFT_PREFS = {
   claire: {
     love: ['cream-puff', 'tea-collection'], like: ['milk-tea', 'papaya-milk', 'kuai-kuai'], dislike: ['sarsaparilla'],
   },
-  muomn: {
-    love: [], like: [], dislike: [],
+  muomn: {   // 2026-11-27 問卷選「Claude 決定」：忙到沒空吃飯的文書＋疏導，愛甜的奶茶、方便吃的點心
+    love: ['milk-tea', 'cream-puff'], like: ['papaya-milk', 'corn-snack', 'tea'], dislike: ['spicy-snack'],
   },
   noah: {
     love: ['pure-tea', 'tea'], like: ['oyster-omelet'], dislike: ['spicy-snack'],

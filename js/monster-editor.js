@@ -337,22 +337,35 @@ function bossListButton(img, title, note, onClick, selected) {
   btn.append(img, label); btn.addEventListener('click', onClick);
   return btn;
 }
+// 「👑 BOSS」「🧩 特殊數值」兩個分頁共用同一個面板，列表分開：
+//   👑 BOSS＝每隻 BOSS＋BOSS 共用的（出場演出、BOSS 守護的核心）
+//   🧩 特殊數值＝一般怪物程式自己的招式數字＋水中怪物共用的（js/boss-fields.js 的 group，tools/build-boss-fields.py 產生）
+const BOSS_SHARED_KEYS = ['BOSS_CINEMA', 'BOSS_CORE_LINK'];
+const bossTabOf = b => (b.group || 'boss') === 'boss' || BOSS_SHARED_KEYS.includes(b.key) ? 'boss' : 'special';
+let bossTab = 'boss';
+const BOSS_TAB_TEXT = {
+  boss: ['👑 BOSS', '每隻 BOSS 的血量、招式、時間、範圍都在這裡改。每一行的說明取自程式裡的註解，小字是程式裡的欄位名稱；滑鼠停在格子上可以看檔案裡原本的數字，黃框＝跟檔案不一樣。虱目魚王在「🐾 怪物」分頁裡。'],
+  special: ['🧩 特殊數值', '一般怪物程式自己的招式、行為數字（自爆史萊姆的爆炸、人面蝶的粉塵、魚頭君、異質核心、掉食物…）和水中怪物共用的數字。基本血量、攻擊力在「🐾 怪物」分頁。寫著「再乘難度」的傷害，遊戲裡會再乘「🎚️ 難度」的攻擊力倍率。'],
+};
 function renderBossList() {
   const box = document.getElementById('bossList'); box.replaceChildren();
-  // 分三區：BOSS、共用、一般怪物（js/boss-fields.js 的 group，tools/build-boss-fields.py 產生）
   const heading = text => { const h = document.createElement('div'); h.className = 'boss-group'; h.textContent = text; box.append(h); };
   const item = b => box.append(bossListButton(bossThumb(b), b.name, b.file, () => { bossSel = b.key; renderBossPanel(); }, b.key === bossSel));
-  heading('👑 BOSS');
-  BOSS_LIST.filter(b => (b.group || 'boss') === 'boss').forEach(item);
-  const km = monsters.find(m => m.id === 'milkfish_king');   // 虱目魚王是怪物列表裡的一隻，點了跳過去
-  if (km) {
-    const img = new Image(); img.src = km.sprite; img.alt = '';
-    box.append(bossListButton(img, km.name, '在上方怪物列表（點這裡跳過去）', () => { selectedId = km.id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }, false));
+  if (bossTab === 'boss') {
+    BOSS_LIST.filter(b => (b.group || 'boss') === 'boss').forEach(item);
+    const km = monsters.find(m => m.id === 'milkfish_king');   // 虱目魚王是怪物列表裡的一隻，點了跳過去
+    if (km) {
+      const img = new Image(); img.src = km.sprite; img.alt = '';
+      box.append(bossListButton(img, km.name, '在「🐾 怪物」分頁（點這裡跳過去）', () => { selectedId = km.id; showEditorTab('monsters'); render(); }, false));
+    }
+    heading('🔧 BOSS 共用');
+    BOSS_LIST.filter(b => BOSS_SHARED_KEYS.includes(b.key)).forEach(item);
+  } else {
+    heading('🐾 一般怪物');
+    BOSS_LIST.filter(b => b.group === 'monster').forEach(item);
+    heading('🌊 水中怪物共用');
+    BOSS_LIST.filter(b => b.group === 'shared' && !BOSS_SHARED_KEYS.includes(b.key)).forEach(item);
   }
-  heading('🔧 共用');
-  BOSS_LIST.filter(b => b.group === 'shared').forEach(item);
-  heading('🐾 一般怪物');
-  BOSS_LIST.filter(b => b.group === 'monster').forEach(item);
 }
 const bossRowText = r => (r.t + ' ' + r.k.map(([p, c]) => p + ' ' + c + ' ' + (BOSS_KEY_ZH[p.split('.').pop()] || '')).join(' ')).toLowerCase();
 function renderBossFields() {
@@ -420,6 +433,9 @@ function cinemaButton(boss, text) {
   return btn;
 }
 function renderBossPanel() {
+  if (bossTabOf(BOSS_LIST.find(x => x.key === bossSel) || {}) !== bossTab) bossSel = (bossTab === 'special' ? BOSS_LIST.find(x => x.group === 'monster') : BOSS_LIST.find(x => bossTabOf(x) === 'boss')).key;   // 換分頁：選列表最上面那個
+  const [title, intro] = BOSS_TAB_TEXT[bossTab];
+  document.getElementById('bossPanelTitle').textContent = title; document.getElementById('bossPanelIntro').textContent = intro;
   const b = BOSS_LIST.find(x => x.key === bossSel);
   document.getElementById('bossTitle').textContent = b.name;
   const cb = document.getElementById('bossCinemaBtns');   // 有出場演出的 BOSS：標題旁邊放播放鈕；共用那頁放三顆
@@ -478,3 +494,16 @@ document.getElementById('difficultyReset').addEventListener('click', () => {
   difficultyCfg = validDifficultySettings(null); saveMonsters(); renderDifficultyTable(); status('難度已恢復檔案的數字。');
 });
 renderDifficultyTable();
+
+// ================= 分頁 =================
+// 🐾 怪物／🟢 史萊姆種類／👑 BOSS／🧩 特殊數值／🎚️ 難度；記住上次看哪一頁（只記在這台瀏覽器）
+const EDITOR_TAB_KEY = 'tudrc_monster_editor_tab_v1';
+function showEditorTab(tab) {
+  if (!document.querySelector('.tabs [data-tab="' + tab + '"]')) tab = 'monsters';
+  document.querySelectorAll('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  document.querySelectorAll('.page').forEach(pg => { pg.hidden = !pg.dataset.page.split(' ').includes(tab); });
+  if (tab === 'boss' || tab === 'special') { bossTab = tab; renderBossPanel(); }
+  try { localStorage.setItem(EDITOR_TAB_KEY, tab); } catch (_) {}
+}
+document.querySelectorAll('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => showEditorTab(b.dataset.tab)));
+showEditorTab((() => { try { return localStorage.getItem(EDITOR_TAB_KEY) || 'monsters'; } catch (_) { return 'monsters'; } })());

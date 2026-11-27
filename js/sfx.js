@@ -82,9 +82,9 @@ const SFX = (() => {
     shotTranq: '戰鬥/槍械/開槍.mp3',
     hitTranq: '戰鬥/命中/hit.mp3',
     shotConfuse: '戰鬥/槍械/開槍.mp3',       // 混亂彈（先借麻醉彈的聲音）
-    hitConfuse: '戰鬥/命中/hit.mp3',
+    hitConfuse: '戰鬥/命中/漆彈打中.wav',    // 混亂彈打中：跟螢光漆彈打中同一個音檔
     shotPaint: '戰鬥/槍械/開槍.mp3',
-    hitPaint: '戰鬥/命中/hit.mp3',
+    hitPaint: '戰鬥/命中/漆彈打中.wav',      // 濕濕的「啪」＋油漆噴濺（tools/make_missing_sfx.py 合成）
     shotSplit: '戰鬥/槍械/開槍.mp3',
     hitSplit: '戰鬥/命中/hit.mp3',           // 同 hitPistol：沒有專屬「被打」音效的怪物才播
     shotFlash: '介面/切換.mp3',
@@ -118,6 +118,7 @@ const SFX = (() => {
     swordSwing: '戰鬥/近戰/揮劍.mp3',
     heartbeat: '玩家/心跳.mp3',
     achievement: '獎勵/升級.mp3',
+    coin: '獎勵/經費入帳.wav',   // 戰鬥地圖一開始跳出經費卡（js/fund-card.js）：硬幣「叮叮」（tools/make_missing_sfx.py 合成）
     glassBreak3: '環境/破壞/玻璃破掉3.mp3',
     glassBreak4: '環境/破壞/玻璃破掉4.mp3',
     oreMine: '環境/破壞/挖礦.mp3',   // 異質礦被破壞時（跟玻璃破掉一起播；js/ore.js）
@@ -270,11 +271,11 @@ const SFX = (() => {
     bossCore: '戰鬥/異質核心甦醒.mp3',        // 異質核心甦醒到被打破
     eliteScream: '怪物/鳥頭人/鳥頭人被打.mp3',   // 鳥頭大隊長甦醒時的尖叫：跟鳥頭人被打同一個音檔，開大聲、加回音（SOUND_ECHO）
     eliteStep: '戰鬥/heavy-walking-footsteps.mp3',   // 鳥頭大隊長沉重的腳步（js/elite-bird-head.js 的 eliteBirdFootsteps）
-    // 順順宮主（js/elite-cap-king.js）：先借用現有音檔，之後在音效編輯器換成專屬的
+    // 順順宮主（js/elite-cap-king.js）：蓋回去、洗牌用 tools/make_missing_sfx.py 合成；其他借用夯吉寶的音檔
     capKingPop: '怪物/夯吉寶/夯吉衝出來.mp3',          // 大宮帽打開
     capKingStep: '戰鬥/heavy-walking-footsteps.mp3',   // 大夯吉寶的腳步
-    capKingClose: '戰鬥/命中/敲打2.mp3',               // 大宮帽蓋回去
-    capKingShuffle: '戰鬥/近戰/揮劍.mp3',              // 蓋杯子洗牌，每換一次
+    capKingClose: '怪物/夯吉寶/宮帽蓋下.wav',          // 大宮帽蓋回去：空心杯子重重的「碰」
+    capKingShuffle: '怪物/夯吉寶/宮帽滑動.wav',        // 蓋杯子洗牌，每換一次：杯子滑過桌面「咻嚓」
     capKingDeath: '怪物/夯吉寶/夯吉死掉.mp3',          // 大夯吉寶死掉：跟夯吉寶同一個音檔，開大聲、加回音（SOUND_ECHO）
     radio: ['無線電.mp3', '無線電雜音.mp3'],   // 無線電接起來／掛斷：兩個一起播（新手區開場希奧妮的無線電，js/tutorial.js）
     baseMusic: '../music/基地音樂.mp3',      // 基地（安全區）背景音樂（js/music.js）；檔案在 music/ 資料夾

@@ -731,11 +731,11 @@ function portalNearPlayer() {
   }
   return best;
 }
-// 鎖住的出入口：轉一下門把的聲音＋溫特說話（沒寫台詞就用 data/doors.js 的 LOCKED_DOOR_TEXT）
+// 鎖住的出入口：轉一下門把的聲音＋溫特說話（沒寫台詞就用對話編輯器裡溫特的「門鎖住了」，js/locked-doors.js 的 lockedDoorText）
 function portalLockedSay(pt) {
   const [x, y] = portalXY(pt);
   if (typeof sfxAt === 'function') sfxAt('lockedDoor', x, y, .35, 'locked-door');
-  if (typeof winterSay === 'function' && winterSay(pt.lockText || (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '……好像被鎖住了。'))) return;
+  if (typeof winterSay === 'function' && winterSay(pt.lockText || (typeof lockedDoorText === 'function' ? lockedDoorText() : '……'))) return;
   flash('鎖住了', x, y - 30, '#ffcf89', 1.8);   // 沒有對話框（不應該發生）：至少飄字
 }
 function portalTargetName(pt) { const i = mapIndexById(pt.to), list = mapList(); return (i >= 0 && list[i] && list[i].name) || '另一張地圖'; }

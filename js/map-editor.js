@@ -3788,7 +3788,7 @@ function refreshLockTextControl() {
     box = document.createElement('label'); box.id = 'lockTextControl';
     box.append('鎖住時溫特說：');
     const input = document.createElement('input'); input.id = 'lockTextInput'; input.type = 'text'; input.style.width = '220px';
-    input.placeholder = (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '') + '（\\n 換下一句）';
+    input.placeholder = '空白＝說對話編輯器裡溫特的「門鎖住了」（\\n 換下一句）';
     box.append(input); document.getElementById('selControls').appendChild(box);
     input.addEventListener('change', () => {
       const s = selectedLockedDoor(); if (!s) return;

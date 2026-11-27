@@ -1,7 +1,7 @@
 // ============================================================
 //  鎖住的門（應變中心的房門）：沒有接到任何地圖的門＝打不開
 //  ・哪些素材算房門：data/doors.js 的 LOCKED_DOOR_TILES。門前面有出入口（通往別的地圖）的就照常進去，不算鎖住。
-//  ・走到門前按空白鍵：下方跳出跟 NPC 一樣的對話框，溫特說一句（預設 LOCKED_DOOR_TEXT；
+//  ・走到門前按空白鍵：下方跳出跟 NPC 一樣的對話框，溫特說一句（預設是對話編輯器裡溫特的「門鎖住了」；
 //    地圖編輯器選那扇門可以另外寫台詞，存在擺放物件的 lockText，\n＝換下一句）。
 // ============================================================
 let lockedDoorCache = null;
@@ -35,7 +35,7 @@ function lockedDoorNearPlayer() {
 function tryLockedDoorNearPlayer() {
   const d = lockedDoorNearPlayer(); if (!d || typeof openTextDialogue !== 'function') return false;
   if (typeof sfxAt === 'function') sfxAt('lockedDoor', d.x, d.bottom, .35, 'locked-door');   // 轉一下門把（小聲；音效編輯器可以換）
-  winterSay(d.stamp.lockText || (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '……好像被鎖住了。'));
+  winterSay(d.stamp.lockText || lockedDoorText());
   return true;
 }
 // 下方跳出對話框，溫特說話（\n＝換下一句）。上鎖的門、記憶之門、捷運閘門／入口沒有鑰匙時也用這個
@@ -46,4 +46,7 @@ function winterSay(text) {
     image: face ? face.src : '', lines: String(text).split('\n').filter(Boolean), kind: typeof PLAYER_CHARACTER !== 'undefined' ? PLAYER_CHARACTER : 'winter' });
   return true;
 }
-const lockedNeedKeyText = () => typeof LOCKED_NEED_KEY_TEXT !== 'undefined' ? LOCKED_NEED_KEY_TEXT : '門被鎖住了，好像需要特定的鑰匙。';
+// 門鎖住、沒鑰匙時溫特說的話：從對話編輯器來（溫特的「門鎖住了」「沒有鑰匙打不開」）；沒填就只說「……」
+const playerLineOr = key => (typeof playerLine === 'function' && playerLine(key)) || '……';
+const lockedDoorText = () => playerLineOr('lockedDoor');
+const lockedNeedKeyText = () => playerLineOr('lockedNeedKey');

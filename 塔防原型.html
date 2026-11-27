@@ -274,15 +274,15 @@
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
-  <script src="data/sound-settings.js?v=bossvoice2-20261126"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=bossvoice2-20261126"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="data/sound-settings.js?v=missingsfx-20261127"></script> <!-- 1a. 音量、替換與自訂音效 -->
+  <script src="js/sfx.js?v=missingsfx2-20261127"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=battlebgm-20261115"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
   <script src="js/level-up-fx.js?v=lvfx-20261102"></script>   <!-- 升級特效：開發、升級、製作、學技能的光效＋音效 -->
 
   <script src="data/characters.js?v=guideability-20261025"></script>  <!-- 集中管理所有角色 -->
-  <script src="data/gifts.js?v=devotion-20261103"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
+  <script src="data/gifts.js?v=charlines-20261127"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=swimring-20261113"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=egg3-20261115"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/chickens.js?v=egg10-20261117"></script>   <!-- 森林的雞、鳥巢、雞蛋：數值設定 -->
@@ -296,10 +296,10 @@
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=rewards-20261126"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/rewards.js?v=funds-20261126"></script>   <!-- 獎勵：BOSS 特別獎金、區域控制獎勵、全區控制獎勵（🏅 獎勵編輯器） -->
-  <script src="data/dialogues.js?v=w118brief-20261126"></script>  <!-- 所有台詞（對話編輯器） -->
+  <script src="data/dialogues.js?v=undergroundchat-20261127"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=difficulty-20261127"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
-  <script src="js/dialogue-data.js?v=dlg-20261006"></script>
+  <script src="js/dialogue-data.js?v=winterlines-20261127"></script>
   <script src="js/mate-hurt-talk.js?v=vinetalk-20261105"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
   <script src="data/monsters.js?v=monstercfg-20261127"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=difficulty2-20261127"></script>
@@ -311,7 +311,7 @@
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=tidy-20261118"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
   <script src="js/map-data.js?v=story-20261021"></script>          <!-- 4c. 三份地圖合在一起給遊戲用（MAPS_DEFAULT） -->
-  <script src="data/doors.js?v=mrtkey-20261115"></script> <!-- 可開關的門（哪些素材是門）-->
+  <script src="data/doors.js?v=winterlines-20261127"></script> <!-- 可開關的門（哪些素材是門）-->
   <script src="data/chairs.js?v=mrtseat-20261115"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
   <script src="js/chair-data.js?v=mrtseat-20261115"></script>
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
@@ -328,16 +328,16 @@
   <script src="js/kelp-sway.js?v=kelp-20261126"></script>    <!-- 水草微微晃動（地圖上擺的水草物件圖） -->
   <script src="js/water.js?v=dive-20261126"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/pits.js?v=bridgefloor-20261121"></script>   <!-- 6b. 坑洞：走過會變慢（hole01、hole02 等）；哪些素材是坑洞在地圖／基地編輯器勾 -->
-  <script src="js/swim-ring.js?v=perf2-20261127"></script>
+  <script src="js/swim-ring.js?v=winterlines-20261127"></script>
   <script src="data/pool-caustics.js?v=init-20261125"></script>   <!-- 水底光紋的數值（🌊 水波紋編輯器存的） -->
   <script src="js/pool-caustics.js?v=tuning-20261125"></script>   <!-- 6b2. 深水區水底的網狀光紋（像游泳池底，慢慢流動） -->   <!-- 6b. 深水區＋救生圈：坐救生圈才能下深水、划水聲 -->
-  <script src="js/pool-tide.js?v=valvered1-20261127"></script>   <!-- 6c. 池核的抽水機、漲潮、抽水閥、溺水 -->
-  <script src="js/pool-fall.js?v=fishking-20261125"></script>   <!-- 6c2. 不小心掉進深水：搖晃、落水水花、溺水掙扎（>< 表情） -->
+  <script src="js/pool-tide.js?v=winterlines-20261127"></script>   <!-- 6c. 池核的抽水機、漲潮、抽水閥、溺水 -->
+  <script src="js/pool-fall.js?v=winterlines-20261127"></script>   <!-- 6c2. 不小心掉進深水：搖晃、落水水花、溺水掙扎（>< 表情） -->
   <script src="js/pool-monster-fall.js?v=fishking-20261125"></script>   <!-- 6c3. 地面怪物被推下深水：掉進水裡掙扎、扣血、爬回岸上 -->
   <script src="js/pool-platform.js?v=reach05-20261127"></script>   <!-- 深水裡的抽水機平台：坐救生圈「上岸」 -->
   <script src="js/field-generator.js?v=deeptest-20261126"></script>   <!-- 6d. 池核力場產生器：第一次走近的音效 -->
   <script src="js/wet-floor.js?v=deeptest-20261126"></script>   <!-- 6e. 池核泳池旁的濕地板：水漬、走路有機會滑倒 -->
-  <script src="js/doors.js?v=doordark-20261120"></script> <!-- 門：手動門／自動門 -->
+  <script src="js/doors.js?v=winterlines-20261127"></script> <!-- 門：手動門／自動門 -->
   <script src="js/memory-doors.js?v=kai-20261103"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
   <script src="js/breakable-walls.js?v=boulderblast-20261122"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=sqhelmet-20261126"></script>     <!-- 7. 黑暗與光源系統 -->
@@ -346,7 +346,7 @@
   <script src="js/team.js?v=sqbat-20261126"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=sqbat-20261126"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/sentry-blocked.js?v=trackcross1-20261125"></script>   <!-- 9-1. 隊員去不了時說出原因（被建築擋住、門關著、在另一層…） -->
-  <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
+  <script src="data/npc-chats.js?v=ballavaren-20261127"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
   <script src="js/npc-chats.js?v=bubblealign-20261115"></script> <!-- 基地 NPC 閒聊小表演：走到桌前、泡泡輪流說話 -->
   <script src="js/progression.js?v=achvimpl-20261023"></script>
   <script src="data/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹資料 -->
@@ -436,7 +436,7 @@
   <script src="js/food.js?v=monstercfg-20261127"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/chickens.js?v=nest2-20261115"></script>   <!-- 森林的雞：閒晃、下蛋、抱起來；鳥巢長蛋（數值在 data/chickens.js） -->
   <script src="js/cooking.js?v=wspages-20261109"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
-  <script src="js/meal.js?v=firsthint3-20261115"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
+  <script src="js/meal.js?v=winterlines-20261127"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
   <script src="js/meal-invite.js?v=dlg2x2-20261118"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
   <script src="js/base-follow.js?v=rooms2f-20261104"></script>   <!-- 雷德在基地裡跟著溫特換地圖（不進溫特辦公室、別人寢室） -->
   <script src="js/ball-poses.js?v=ballsit-20261109"></script>
@@ -464,7 +464,7 @@
   <script src="js/vitals.js?v=lowbed-20261125"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
   <script src="js/camp-beds.js?v=sleepheal-20261117"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
-  <script src="js/mrt-locks.js?v=gates-20261122"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
+  <script src="js/mrt-locks.js?v=winterlines-20261127"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script src="data/mrt-train.js?v=mrtsmall-20261124"></script>   <!-- 捷運列車的設定（物件編輯器匯出） -->
   <script src="js/mrt-train.js?v=staticsort-20261125"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script src="js/mrt-track.js?v=solidhit1-20261125"></script>   <!-- 捷運軌道：跳下、跳上、隊友和怪物跟著跳、列車撞人（地圖編輯器 🛤️ 軌道 筆刷） -->
@@ -475,7 +475,7 @@
   <script src="js/ui-layout.js?v=fundcard2-20261115"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/save-restore.js?v=restore2-20261114"></script>   <!-- 設定→存檔：匯出／匯入存檔、找回進度 -->
   <script src="js/boss-core-link.js?v=corelink2-20261126"></script>   <!-- BOSS 守護的核心：BOSS 活著打不破、核心護盾、核心血越低 BOSS 越脆（在各 BOSS 之後、game.js 之前） -->
-  <script src="js/game.js?v=difficulty-20261127"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=winterlines-20261127"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=ratking-20261120"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
@@ -501,7 +501,7 @@
   <script src="js/pc-stats.js?v=flycards-20261109"></script>   <!-- 電腦的遊戲紀錄：每款小遊戲的局數、時間 -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->
   <script src="js/target-practice.js?v=hintfix-20261124"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
-  <script src="js/locked-doors.js?v=twosquad2-20261103"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
+  <script src="js/locked-doors.js?v=winterlines-20261127"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
   <script src="js/battle-result.js?v=fulltime-20261115"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=losecenter-20261115"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
   <script src="js/practice.js?v=helmetbat-20261126"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->

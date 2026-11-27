@@ -1045,7 +1045,7 @@ function setPortalLock(p, patch) {
   pushUndo();
   if ('locked' in patch) { if (patch.locked) p.locked = true; else { delete p.locked; delete p.lockText; } }
   if ('lockText' in patch) { const t = String(patch.lockText || '').trim(); if (t && p.locked) p.lockText = t; else delete p.lockText; }
-  saveMaps(); draw(); setStatus(p.locked ? '🔒 這個出入口鎖住了：溫特走到這裡只會說「' + (p.lockText || '……好像被鎖住了。') + '」' : '已解除鎖住', '#ffd479');
+  saveMaps(); draw(); setStatus(p.locked ? '🔒 這個出入口鎖住了：溫特走到這裡只會說「' + (p.lockText || '對話編輯器裡溫特的「門鎖住了」') + '」' : '已解除鎖住', '#ffd479');
 }
 // 工具列下面的數字欄：選到出入口才出現
 function syncPortalNudgePanel(m) {
@@ -1057,7 +1057,7 @@ function syncPortalNudgePanel(m) {
     const num = (id, label, min, max) => '<label style="display:flex;align-items:center;gap:4px">' + label + '<input type="number" data-pn="' + id + '" min="' + min + '" max="' + max + '" style="width:62px"></label>';
     box.innerHTML = '<b data-pn-name></b>' + num('ox', '左右', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('oy', '上下', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('radius', '範圍', 10, 300) + '<button type="button" class="btn" data-pn-reset>↺ 重設</button>' + PORTAL_LAND_HTML +
       '<label style="display:flex;align-items:center;gap:4px" title="勾了：這個出入口不通，溫特走到／按空白鍵只會說鎖住的台詞，人留在原地"><input type="checkbox" data-pn-lock>🔒 鎖住</label>' +
-      '<input type="text" data-pn-locktext placeholder="鎖住時說的話（空白＝……好像被鎖住了。）" style="flex:1;min-width:180px">';
+      '<input type="text" data-pn-locktext placeholder="鎖住時說的話（空白＝說對話編輯器裡溫特的「門鎖住了」）" style="flex:1;min-width:180px">';
     tool.parentElement.appendChild(box);
     box.addEventListener('change', e => {   // 🦶 落地點的數字欄
       const d = e.target.dataset || {}, p = portalNudgeTarget(curMap()); if (!p || !d.pl) return;
@@ -2605,7 +2605,7 @@ function refreshLockTextControl() {
     box = document.createElement('label'); box.id = 'lockTextControl';
     box.append('鎖住時溫特說：');
     const input = document.createElement('input'); input.id = 'lockTextInput'; input.type = 'text'; input.style.width = '220px';
-    input.placeholder = (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '') + '（\\n 換下一句）';
+    input.placeholder = '空白＝說對話編輯器裡溫特的「門鎖住了」（\\n 換下一句）';
     box.append(input); document.getElementById('selControls').appendChild(box);
     input.addEventListener('change', () => {
       const s = selectedLockedDoor(); if (!s) return;

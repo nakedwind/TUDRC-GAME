@@ -23,15 +23,12 @@ const POOL_TIDE = {
   drainSecs: 1.5,       // 抽乾要幾秒
   drownDps: 1,          // 溺水每秒扣幾 HP
   drownTalkSecs: [6, 10],   // 溺水的隊友每隔幾秒喊一句（data/dialogues.js 的 drown）
-  drownSay: '溺水了！需要救生圈！',   // 溫特開始溺水的那一刻說的話（頭上的泡泡）
-  drownSaySecs: 2.6,   // 上面那句在頭上停幾秒
+  drownSaySecs: 2.6,   // 溫特開始溺水的那一刻頭上那句（對話編輯器裡溫特的「開始溺水」）停幾秒
   ringPrompt: '空白鍵／使用救生圈',   // 溫特溺水時腳下的互動提示（js/render.js）
   warnText: '快點再次打開抽水閥',   // 只在打巨大比基尼小丑魚 BOSS 時、水又漲回來的時候出現（溺水不會跳）
-  winterText: '一定有開關可以把這些水抽走。',
-  winterSecs: 3.5,      // 溫特的泡泡停多久
+  winterSecs: 3.5,      // 水漲回來時溫特自言自語（對話編輯器裡溫特的「水又漲回來」）的泡泡停多久
   pumpedText: '抽水機已經在運轉了。',   // 抽水機打開後再按
-  valveNoPowerText: '需要先開啟所有發電機',   // 抽水機（發電機）還沒全部啟動時按抽水閥，溫特頭上泡泡的字（11-27 從「沒有什麼反應……」改成直接講要做什麼）
-  valveSaySecs: 2.2,   // 上面那句在溫特頭上的泡泡停幾秒
+  valveSaySecs: 2.2,   // 發電機還沒全開就按抽水閥時，溫特頭上那句（對話編輯器裡溫特的「發電機還沒開」）停幾秒
   valveLowText: '水已經抽掉了。',
   valveBusyText: '抽水閥已經打開了。',   // 倒數中、正在退水時再按
   notice: { secs: 3, rise: '水位即將上升……', drain: '水位即將下降……', y: .2 },   // 漲退水前幾秒提醒、文字、在畫面高度的哪裡（.2＝從上面算 20%）
@@ -84,7 +81,7 @@ function poolPumpCheck() {
 // ---- 抽水閥（地圖編輯器勾了「抽水閥」的電源開關）----
 function usePoolValve() {
   const s = poolTideActive() ? poolTide() : null;
-  if (!s || !s.pumped) { sfx('error'); if (G && G.player) G.player.poolSay = { text: POOL_TIDE.valveNoPowerText, until: performance.now() + POOL_TIDE.valveSaySecs * 1000 }; return; }   // 溫特頭上的泡泡（drawPoolTideBubble）
+  if (!s || !s.pumped) { sfx('error'); const say = typeof playerLine === 'function' && playerLine('valveNoPower'); if (say && G && G.player) G.player.poolSay = { text: say, until: performance.now() + POOL_TIDE.valveSaySecs * 1000 }; return; }   // 溫特頭上的泡泡（drawPoolTideBubble）
   if (s.phase === 'drainSoon' || s.phase === 'draining') { sfx('switch'); systemNotice(POOL_TIDE.valveBusyText); return; }
   if (s.phase !== 'full' && s.phase !== 'high' && s.phase !== 'rising') { sfx('switch'); systemNotice(POOL_TIDE.valveLowText); return; }
   s.firstDrain = s.phase === 'full'; poolDrainSoon(s); sfx('powerOn');   // full＝還沒抽過：第一次抽乾
@@ -114,7 +111,7 @@ function updatePoolTide(dt) {
   } else if (s.phase === 'low' && s.t >= s.riseAt) {
     s.phase = 'rising';
     const mates = poolMatesInDeep();
-    if (!mates.length) s.winterUntil = performance.now() + POOL_TIDE.winterSecs * 1000;   // 深水區沒有隊友：溫特自言自語
+    if (!mates.length) { s.winterText = typeof playerLine === 'function' ? playerLine('tideSwitch') : null; s.winterUntil = performance.now() + POOL_TIDE.winterSecs * 1000; }   // 深水區沒有隊友：溫特自言自語（沒填就不說）
   } else if (s.phase === 'rising') {
     s.deep = Math.min(1, s.deep + dt / POOL_TIDE.riseSecs);
     if (s.deep >= 1) s.phase = 'high';
@@ -159,7 +156,8 @@ function updateWinterDrown(dt, deep) {
   if (!p.drowning) return;
   if (!was) {   // 開始溺水的那一刻：喊一聲（蓋掉「一定有開關可以把這些水抽走。」）
     poolDrownBubbleOnce(p, 'poolDrownSelf', 'winter');   // 冒泡泡的聲音（一次落水只播一次）
-    p.poolSay = { text: POOL_TIDE.drownSay, until: performance.now() + POOL_TIDE.drownSaySecs * 1000 };
+    const cry = typeof playerLine === 'function' && playerLine('drownStart');   // 對話編輯器裡溫特的「開始溺水」；沒填就不說
+    p.poolSay = cry ? { text: cry, until: performance.now() + POOL_TIDE.drownSaySecs * 1000 } : null;
     poolTide().winterUntil = 0; p.swimHintAt = 0;
   }
   const before = Math.ceil(p.hp);
@@ -257,8 +255,8 @@ function drawPoolTideBubble() {
     if (performance.now() < p.poolSay.until) { if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, p.poolSay.text); return; }
     p.poolSay = null;
   }
-  if (!s || !p || performance.now() > s.winterUntil) return;
-  if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, POOL_TIDE.winterText);
+  if (!s || !p || !s.winterText || performance.now() > s.winterUntil) return;
+  if (typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, s.winterText);
 }
 // 要不要跳「快點再次打開抽水閥」：正在打巨大比基尼小丑魚 BOSS（被叫醒了、還活著），而且抽乾過的水又漲回來（正在漲、或已經漲滿）
 // 溺水不會跳；打開抽水閥（開始倒數退水）就消失

@@ -33,7 +33,6 @@ const MEAL = {
   trayOnTable: { back: [0, -40], front: [0, 34], right: [28, -8], left: [-28, -8] },     // 坐下時餐盤放在哪（從座位往哪邊移，依坐的方向）
   trayArt: { file: 'images/餐廳/restaurant-tray-stack.png', crop: [2, 35, 36, 24], slots: [[6, 39, 8, 6], [19, 39, 15, 6], [6, 48, 17, 9], [28, 48, 6, 9]] },   // 餐盤：截餐盤架最上面那一個（圖片像素：左、上、寬、高）；四格＝左上小格、右上長格、左下長格、右下小格
   carryY: 4,           // 拿在手上時餐盤的高度（從角色的 y 往下幾 px；角色圖是 y-46～y+18，頭很大，胸前大約在 y+4）
-  takeLine: '有吃飯，才有力氣工作。',   // 拿起餐盤時溫特說的話
   fullLine: '感覺現在活力充沛。',       // 吃完後溫特頭上的泡泡（「吃飽了！」消失才出現）
   fullFlash: 1.2,      // 「吃飽了！」停留幾秒
   maxDishes: 4,
@@ -192,7 +191,7 @@ function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼
   if (mine) return { label: mine.dirty ? '收髒盤' : '拿起餐盤', x: mine.x, y: mine.y - 22, run: () => { mealTrays().splice(mealTrays().indexOf(mine), 1); p.tray = { foods: mine.foods, left: mine.left, dirty: mine.dirty, eatT: mine.eatT }; sfx('switch'); } };
   const stack = mealNear(MEAL.trayTiles, p.x, p.y, MEAL.trayReach);
   if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof firstHintDone === 'function') firstHintDone('meal');   // 餐廳的首次提示不再飄（js/first-hints.js）
-     if (typeof winterSay === 'function') winterSay(MEAL.takeLine); systemNotice('不想吃了：回到餐盤架可以放回去（裡面有菜要先倒進垃圾桶）'); } };
+     const take = typeof playerLine === 'function' && playerLine('mealTake'); if (take && typeof winterSay === 'function') winterSay(take); systemNotice('不想吃了：回到餐盤架可以放回去（裡面有菜要先倒進垃圾桶）'); } };   // take：對話編輯器裡溫特的「拿起餐盤」，沒填就不說
   return null;
 }
 const mealPrompt = () => mealPlayerAction(true);
