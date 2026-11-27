@@ -1668,7 +1668,7 @@ const BOSS_SETTINGS_DEFAULT = {
   },
   "POOL_BOSS": {
     "scale": 2.2,
-    "hp": 4800,
+    "hp": 4500,
     "coreHpMul": 2,
     "rewardMul": 6,
     "crystalMul": 6,
@@ -1708,7 +1708,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "splashAt": 0.62
     },
     "surfaceDepth": 0.5,
-    "silhouette": 0.35,
+    "silhouette": 0.2,
     "defaultSee": 0.45,
     "flop": [
       1.2,
@@ -1732,7 +1732,7 @@ const BOSS_SETTINGS_DEFAULT = {
       "size": 2.2,
       "damage": 2.5,
       "radius": 1.6,
-      "max": 12,
+      "max": 16,
       "timer": 15,
       "warn": 3
     },
@@ -1779,7 +1779,7 @@ const BOSS_SETTINGS_DEFAULT = {
         "range": 14,
         "spill": 4,
         "push": 90,
-        "pull": 30
+        "pull": 15
       },
       "dive": {
         "range": 15.4,
@@ -1804,7 +1804,7 @@ const BOSS_SETTINGS_DEFAULT = {
   },
   "FISH_KING": {
     "scale": 2.904,
-    "hp": 4200,
+    "hp": 2000,
     "rewardMul": 6,
     "crystalMul": 6,
     "peek": {
