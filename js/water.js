@@ -146,6 +146,16 @@ function drawWaded(a, kind, drawFn) {
     const inner = drawFn, py = info.bottom - info.height * info.w.depth;
     drawFn = () => { ctx.save(); ctx.translate(a.x + dx, py + dy); ctx.rotate(rot); ctx.translate(-a.x, -py); try { inner(); } finally { ctx.restore(); } };
   }
+  // 漂在水上的小東西（魚卵、道具、地圖上的水上撿拾物）：只是一張小圖，直接畫兩次就好——水面以上照常、水面以下半透明。
+  //   不用先畫到另一張畫布再貼回來（那樣每個要將近 0.5 毫秒，魚頭王戰鬥時水上常常漂十幾顆魚卵，光這個就要 5 毫秒以上）
+  if (kind === 'float' && !(info.dive > 0) && info.fade == null) {
+    const lineY = info.bottom - info.height * info.w.depth, BIG = 4000;
+    drawWaterRipple(a, info, 'back');
+    ctx.save(); ctx.beginPath(); ctx.rect(a.x - BIG, lineY - BIG, BIG * 2, BIG); ctx.clip(); drawFn(); ctx.restore();   // 水面以上
+    if (info.w.see > 0) { ctx.save(); ctx.beginPath(); ctx.rect(a.x - BIG, lineY, BIG * 2, BIG); ctx.clip(); ctx.globalAlpha *= info.w.see; drawFn(); ctx.restore(); }   // 水面以下：半透明
+    drawWaterRipple(a, info, 'front');
+    return;
+  }
   const main = ctx, cvs = main.canvas, m = main.getTransform();
   if (!waterLayer) waterLayer = document.createElement('canvas');
   if (waterLayer.width !== cvs.width || waterLayer.height !== cvs.height) { waterLayer.width = cvs.width; waterLayer.height = cvs.height; }

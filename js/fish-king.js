@@ -931,9 +931,9 @@ function fkHopStep(K, dt) {
   if (k < 1) return;
   e.airborne = false; e.slimeLift = 0; K.hop = null; K.phase = 'swim';
   if (H.to.k && deepWaterCells().has(H.to.k)) Object.assign(K, fkRegionFrom(H.to.k, e.drawWidth));   // 之後在跳進去的那一池
-  fkSplash(e, P.splashSize * 1.2, true);
+  fkSplash(e, P.splashSize * 1.2, false);   // 只冒水花：溢水交給下面的 fkDive（以前這裡也溢一次，同一個地方、同一幀疊兩片水浪，推人推兩次、重算形狀的效能也加倍）
   fkWaterImpact(e);   // 跳回水裡：畫面搖晃
-  fkDive(K);   // 一跳回水裡就潛下去
+  fkDive(K);   // 一跳回水裡就潛下去（潛下去那一下會溢水）
 }
 
 // ---- 叫小弟 ----

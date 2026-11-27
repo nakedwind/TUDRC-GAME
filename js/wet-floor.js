@@ -132,9 +132,10 @@ function wetFloorSortables(out) {
   const v = typeof mapDrawRect !== 'undefined' && mapDrawRect ? mapDrawRect : null;
   const inView = (x, y, r) => !v || (x + r > v.x0 && x - r < v.x1 && y + r > v.y0 && y - r < v.y1);
   const drained = typeof poolTide === 'function' && poolTideActive() && poolTide().shallow < .5;
-  if (WET_FLOOR.sheen > 0) for (const [k, w] of f.wet) {   // 整片變深：越靠近泳池越深
-    if (f.pool.has(k) && !drained) continue;   // 還有水的泳池不畫（抽乾後的池底算濕地板）
-    const [c, r] = k.split(',').map(Number), x = OX + c * CELL, y = OY + r * CELL;
+  // 每一格的位置第一次就算好記在 f.wetList（以前每一幀都把所有濕地板格子拆開重算，濕的格子很多，W118 每幀要好幾毫秒）
+  if (!f.wetList) f.wetList = [...f.wet].map(([k, w]) => { const i = k.indexOf(','); return { x: OX + +k.slice(0, i) * CELL, y: OY + +k.slice(i + 1) * CELL, w, pool: f.pool.has(k) }; });
+  if (WET_FLOOR.sheen > 0) for (const { x, y, w, pool } of f.wetList) {   // 整片變深：越靠近泳池越深
+    if (pool && !drained) continue;   // 還有水的泳池不畫（抽乾後的池底算濕地板）
     if (!inView(x + CELL / 2, y + CELL / 2, CELL)) continue;
     out.push({ y: y + 1, draw: () => { ctx.save(); ctx.globalAlpha = WET_FLOOR.sheen * w; ctx.fillStyle = WET_FLOOR.sheenColor; ctx.fillRect(x, y, CELL, CELL); ctx.restore(); } });
   }

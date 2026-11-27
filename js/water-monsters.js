@@ -99,12 +99,23 @@ function aquaPoolHasRoom(e) {
 function aquaNearestCell(e, tx, ty, m = aquaMargin(e)) {
   const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)); if (id == null) return null;
   let best = null, bd = Infinity;
-  for (const [k, v] of L.label) {
-    if (v !== id || !aquaRoomy(L, k, m)) continue;
-    const [c, r] = k.split(',').map(Number), [x, y] = center(c, r), d = Math.hypot(x - tx, y - ty);
-    if (d < bd) { bd = d; best = k; }
+  for (const o of aquaPoolCells(L, id)) {   // 只看這一池的格子（以前每次都把整張地圖的深水格一格一格拆開算，W118 兩千多格，水中怪物一多就會頓）
+    if (m && o.s < m) continue;   // 離岸邊不夠遠
+    const d = Math.hypot(o.x - tx, o.y - ty);
+    if (d < bd) { bd = d; best = o.k; }
   }
   return best;
+}
+// 每一池的格子清單（格子名、中心點、離岸幾格），第一次用到時整理好記在 aquaLabels 的結果裡（換地圖、水位變了才重算）
+function aquaPoolCells(L, id) {
+  if (!L.byId) {
+    L.byId = [];
+    for (const [k, v] of L.label) {
+      const i = k.indexOf(','), [x, y] = center(+k.slice(0, i), +k.slice(i + 1));
+      (L.byId[v] || (L.byId[v] = [])).push({ k, x, y, s: L.shore.get(k) || 0 });
+    }
+  }
+  return L.byId[id] || [];
 }
 // 沿著水裡的格子找路（只在同一池裡）：回傳一串格子中心 [[x, y], …]
 // m＝離岸邊至少幾格：已經在夠遠的地方就不會再游回岸邊；現在太靠岸（被推過去、剛浮上來）的話先游出來
@@ -143,7 +154,7 @@ function aquaWander(e, dt) {
   const A = e.aq;
   if (!A.spot || Math.hypot(A.spot[0] - e.x, A.spot[1] - e.y) < 8 || (A.spotT -= dt) <= 0) {
     const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)), cand = [], m = aquaMargin(e);
-    for (const [k, v] of L.label) { if (v !== id || !aquaRoomy(L, k, m)) continue; const [x, y] = center(...k.split(',').map(Number)); if (Math.hypot(x - e.x, y - e.y) < 6 * CELL) cand.push([x, y]); }
+    for (const o of aquaPoolCells(L, id)) { if (m && o.s < m) continue; if (Math.hypot(o.x - e.x, o.y - e.y) < 6 * CELL) cand.push([o.x, o.y]); }   // 只看這一池（aquaPoolCells）
     A.spot = cand.length ? cand[Math.floor(Math.random() * cand.length)] : [e.x, e.y]; A.spotT = 4 + Math.random() * 3; A.path = null;
   }
   aquaGo(e, A.spot[0], A.spot[1], dt, .5);
@@ -154,7 +165,7 @@ function aquaAway(e, dt, mul) {
   const A = e.aq;
   if (!A.away || (A.awayT -= dt) <= 0) {
     const L = aquaLabels(), id = L.label.get(aquaKey(e.x, e.y)), m = aquaMargin(e); let best = null, bd = -1, n = 0;
-    for (const [k, v] of L.label) { if (v !== id || !aquaRoomy(L, k, m) || Math.random() > .25) continue; const [x, y] = center(...k.split(',').map(Number)), d = Math.hypot(x - p.x, y - p.y); if (d > bd) { bd = d; best = [x, y]; } if (++n > 200) break; }
+    for (const o of aquaPoolCells(L, id)) { if ((m && o.s < m) || Math.random() > .25) continue; const d = Math.hypot(o.x - p.x, o.y - p.y); if (d > bd) { bd = d; best = [o.x, o.y]; } if (++n > 200) break; }   // 只看這一池（aquaPoolCells）
     A.away = best || [e.x, e.y]; A.awayT = 2; A.path = null;
   }
   aquaGo(e, A.away[0], A.away[1], dt, mul);

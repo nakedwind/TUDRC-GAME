@@ -291,11 +291,16 @@ function poolSurgeBlobWeight(s, b) {
 const POOL_SURGE_RES = .5;   // 水浪的形狀用幾分之一的解析度算（.5＝每 2 點算一次；畫出來的邊是描線，不會糊，只是形狀的細節少一點）
 const POOL_SURGE_MAXPX = 200;   // 算形狀用的小圖最長邊最多幾個點（範圍很大時自動降低，才不會卡；邊一樣是銳利的描線）
 //   原本 260：魚頭王一場戰鬥一直潛水、落水，一次重算要 6 毫秒左右，會一頓一頓的；200 大約省四成，邊緣細節少一點點
+let poolSurgeRecalcAt = null;   // 上一次重算水浪形狀是哪一幀（同一幀只重算一片）
 const POOL_SURGE_REFRESH = 1 / 20;   // 水浪的形狀多久重算一次（秒；1/20＝一秒 20 次；原本 1/30，魚頭王戰鬥時太吃效能）
 // 把整片水浪畫到一張小圖上（每一幀算一次），回傳 { cv, x0, y0, w, h, cells }；cells＝這一幀有水的格子
 // 水的範圍＝以落水點（BOSS）為中心、水波在水池裡擴散經過的格子，加上溢上岸的格子：一整大片從 BOSS 往外擴散
 function poolSurgeSheet(s) {
   if (s.sheet && s.t >= s.sheet.t && s.t - s.sheet.t < POOL_SURGE_REFRESH) return s.sheet;   // 剛算過：直接用
+  // 這一幀已經有別片水浪重算過了：這片先用上次的形狀，下一幀再算（兩片同時重算會疊成一次大頓；last＝js/game.js 這一幀的時間）
+  const frameAt = typeof last === 'number' ? last : null;
+  if (s.sheet && frameAt != null && poolSurgeRecalcAt === frameAt) return s.sheet;
+  poolSurgeRecalcAt = frameAt;
   const W = POOL_SURGE_LOOK;
   if (!s.box) {   // 第一次：決定小圖的範圍（所有有水的格子往外多 2 格）、每一團水的位置和強弱
     const [ox, oy] = center(s.deep[0].c, s.deep[0].r), R = s.K.range + 1, blobs = [];
@@ -549,10 +554,22 @@ function poolSurgeCellSortY() {
 // 層級：每一格切一塊。人物、怪物照腳的位置排，立著的物件照底部排 → 都畫在水的上面；
 //   地板、水池畫在最底層 → 水蓋在上面；標成地板、但跟人物一起排前後的圖（池畔平台）→ 見 poolSurgeCellSortY
 // 牆的格子不畫（水不會漫到牆上）
+// 這片水浪有沒有一部分在畫面裡（範圍＝水波經過、溢上岸的所有格子，第一次算好記在 s.bbox）
+function poolSurgeInView(s, v) {
+  if (!s.bbox) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const e of [...(s.deep || []), ...(s.land || [])]) { x0 = Math.min(x0, e.c); x1 = Math.max(x1, e.c); y0 = Math.min(y0, e.r); y1 = Math.max(y1, e.r); }
+    if (!isFinite(x0)) return true;
+    const pad = 3;   // 水團會往外湧一點、邊緣有凹凸：多留幾格
+    s.bbox = { x0: OX + (x0 - pad) * CELL, y0: OY + (y0 - pad) * CELL, x1: OX + (x1 + 1 + pad) * CELL, y1: OY + (y1 + 1 + pad) * CELL };
+  }
+  const b = s.bbox; return b.x1 > v.x0 && b.x0 < v.x1 && b.y1 > v.y0 && b.y0 < v.y1;
+}
 function poolSurgeSortables(out) {
   const list = typeof G !== 'undefined' && G && G.poolSurges; if (!list || !list.length) return;
   const W = POOL_SURGE_LOOK, v = typeof mapDrawRect !== 'undefined' && mapDrawRect ? mapDrawRect : null;
   for (const s of list) {
+    if (v && !poolSurgeInView(s, v)) continue;   // 整片水浪都在畫面外：不用算形狀（算一次要好幾毫秒）
     const sh = poolSurgeSheet(s); if (!sh || !sh.cells.size) continue;
     const floorY = s.floorY || (s.floorY = poolSurgeCellSortY());   // 每次溢水算一次就好（地圖不會變）
     for (const k of sh.cells) {
