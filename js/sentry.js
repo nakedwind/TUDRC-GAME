@@ -1047,7 +1047,8 @@ function updateSentryMain(t, dt) {
   // 護衛圈：圈內可自行巡邏；距離被拉開時，會先追上指定角色再恢復自由行動。
   // 玩家明確下達的 goto / hold 指令仍優先，不會被護衛關係覆蓋。
   const companion = sentryCompanionRule(t);
-  // 坐著游泳圈、跟隨的人卻在岸上：要游上岸走到他身邊。坐泳圈不能開槍，所以看到怪也先上岸（不然會漂在水裡不動）
+  // 坐著游泳圈、跟隨的人卻在岸上：要游上岸走到他身邊。看到怪也繼續往岸上游（不然會漂在水裡不動）；
+  //   坐泳圈照樣會開槍，射程內的怪邊游邊打（攻速、命中率變差，js/game.js 的隊員攻擊、js/water-monsters.js 的 WATER_COMBAT）
   const ashore = !!(companion && t.swimRing && !companion.anchor.swimRing && !(typeof deepWaterAtPoint === 'function' && deepWaterAtPoint(companion.anchor.x, companion.anchor.y)));
   if (companion && (ashore || !hasAggroTarget(t))) {   // 有敵可打時交給接敵邏輯，護衛圈先讓位（避免圈邊抖動）
     const companionDistance = Math.hypot(companion.anchor.x - t.x, companion.anchor.y - t.y);
