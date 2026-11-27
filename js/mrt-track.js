@@ -214,7 +214,7 @@ function trackCrossPick(t, gx, gy, avoidTrain = false) {
 // 假裝隊員 t 站在 (x0, y0)，找不找得到路走到 (gx, gy)（不會動到 t 本人）
 function trackProbePath(t, x0, y0, gx, gy) {
   if (Math.hypot(gx - x0, gy - y0) <= CELL) return true;
-  const probe = Object.assign(Object.create(Object.getPrototypeOf(t)), t, { x: x0, y: y0, _pathFail: null, navPath: null, inTrack: false });
+  const probe = Object.assign(Object.create(Object.getPrototypeOf(t)), t, { x: x0, y: y0, _pathFails: null, navPath: null, inTrack: false });
   return buildSentryPath(probe, gx, gy, true) !== null;
 }
 // 下指令時用（js/sentry-blocked.js 的 sentryBlockReason）：月台上走不到 (x, y)，但穿過軌道走得到嗎
