@@ -86,7 +86,7 @@ function loadPlayerHp() {
   const who = playerMate(), hp = who ? vitals.mates[who] && vitals.mates[who].hp : vitals.player && vitals.player.hp;
   if (Number.isFinite(hp)) G.player.hp = Math.max(1, Math.min(G.player.maxhp, hp));
 }
-const briefWaiting = id => typeof MISSION_BASE !== 'undefined' && MISSION_BASE.briefer === id && typeof briefPending === 'function' && (!!briefPending() || bossBountiesPending().length > 0);
+const briefWaiting = id => typeof MISSION_BASE !== 'undefined' && MISSION_BASE.briefer === id && typeof briefPending === 'function' && (!!briefPending() || bossBountiesPending().length > 0 || (typeof zoneRewardsPending === 'function' && zoneRewardsPending().length > 0));
 
 // ---- 換地圖前（game.js 的 newGame 一開始呼叫，這時 G 還是上一張地圖的；MAP 已經是新地圖）----
 function rememberVitals() {

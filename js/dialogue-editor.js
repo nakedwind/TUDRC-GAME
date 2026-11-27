@@ -74,6 +74,13 @@ const SITUATIONS = [
     group: '報告任務（通訊員）', key: 'bounty_' + b.id, label: '特別獎金：' + b.name, ordered: true,
     when: '討伐' + b.name + '後回到應變中心，他會走過來<b>依序</b>報告（每次討伐都會報告，排在報告任務前面）。<b>{money}</b> 會換成經費（' + b.money + '）、<b>{crystals}</b> 會換成異質碎片（' + (b.crystals || 0) + '）。金額在 🏅 獎勵編輯器改。',
   })),
+  // 報告區域控制獎勵（通訊員）：作戰桌上每一區一格＋全區一格，經費、異質碎片在 data/rewards.js（🏅 獎勵編輯器）
+  ...(typeof MISSIONS !== 'undefined' ? MISSIONS : []).filter(m => m.map).map(m => ({
+    group: '報告任務（通訊員）', key: 'zoneReward_' + m.id, label: '控制獎勵：' + m.name, ordered: true,
+    when: '控制「' + m.name + '」後回到應變中心，他會走過來<b>依序</b>報告（每次控制都會報告，排在特別獎金後面）。<b>{money}</b> 會換成經費、<b>{crystals}</b> 會換成異質碎片（控制好幾次會加總）。金額在 🏅 獎勵編輯器改。沒填就用預設的一句。',
+  })),
+  { group: '報告任務（通訊員）', key: 'zoneReward_all', label: '全區控制獎勵', ordered: true,
+    when: '作戰桌上<b>所有區域都控制</b>後回到應變中心，他會報告全區控制獎勵（只有一次）。<b>{money}</b>、<b>{crystals}</b> 會換成經費、異質碎片。金額在 🏅 獎勵編輯器改。沒填就用預設的一句。' },
   { group: '保留（遊戲不會用）', key: 'reserve', label: '保留台詞', when: '先收起來的台詞，<b>遊戲不會說</b>。之後要用時，複製到上面的情境就好（例如角色搬到別的地方時）。' },
 ];
 // 每一組的小圖示（右邊最上面的跳轉按鈕、分組標題用）
@@ -110,7 +117,7 @@ try {
 if (usingDraft && typeof DIALOGUES !== 'undefined') {
   for (const [id, entry] of Object.entries(DIALOGUES.characters || {})) {
     if (!draft.characters[id]) continue;
-    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key.startsWith('bounty_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key) || MATE_HURT_SITUATIONS.includes(key) || PLAYER_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
+    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key.startsWith('bounty_') || key.startsWith('zoneReward_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key) || MATE_HURT_SITUATIONS.includes(key) || PLAYER_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
   }
 }
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
@@ -121,6 +128,7 @@ if (typeof MISSIONS !== 'undefined') for (const who of new Set(BRIEFERS)) {
   const entry = draft.characters[who]; if (!entry) continue;
   for (const m of MISSIONS) if (!(('brief_' + m.id) in entry)) entry['brief_' + m.id] = [];
   for (const b of typeof BOSS_BOUNTIES !== 'undefined' ? BOSS_BOUNTIES : []) if (!(('bounty_' + b.id) in entry)) entry['bounty_' + b.id] = [];
+  for (const k of [...MISSIONS.filter(m => m.map).map(m => 'zoneReward_' + m.id), 'zoneReward_all']) if (!(k in entry)) entry[k] = [];   // 區域控制獎勵
 }
 // 還沒有台詞的角色也要列出來（data/characters.js 裡的每個人；玩家溫特除外）：
 // 1. 草稿是舊的時候，正式檔案裡新加的角色整組補進草稿；2. 檔案裡也沒有的，照身分給空白的情境格子。

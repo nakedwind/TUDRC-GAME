@@ -1,8 +1,8 @@
 /* 獎勵設定（由「🏅 獎勵編輯器」匯出）：經費＝錢（$）、碎片＝異質碎片。0＝不給。
    ・bosses：BOSS 特別獎金。在任務地圖討伐後，回應變中心由通訊員報告並入帳（每次討伐都給，重新出擊再打倒可以再領；js/missions.js）
        flag＝怪物身上用來認出這隻 BOSS 的標記（程式用，不要改）；台詞在對話編輯器「報告任務」的 bounty_id（{money}＝經費、{crystals}＝碎片）
-   ・zones：區域控制獎勵。每次控制都給（打贏結算畫面；新手區看完救援劇情那次也算），重新出擊再清一次可以再領，經費加進這次的作戰經費、回基地存進錢包
-   ・allZones：全區控制獎勵。作戰桌上所有區域都控制了，再多給一次（只給一次）
+   ・zones：區域控制獎勵。每次控制都給（打贏結算畫面；新手區看完救援劇情那次也算），重新出擊再清一次可以再領；回應變中心由通訊員報告並存進錢包，台詞在對話編輯器「報告任務」的 zoneReward_區域id
+   ・allZones：全區控制獎勵。作戰桌上所有區域都控制了，再多給一次（只給一次；一樣由通訊員報告，台詞 zoneReward_all）
    ・entryFunds：第一次進入的作戰經費（地圖 id → 經費）。每張戰鬥地圖第一次進去時撥一次（js/maploader.js 讀；沒寫的地圖才用地圖編輯器「規則」裡舊的經費） */
 const REWARDS_DATA = {
   "bosses": [
@@ -16,7 +16,7 @@ const REWARDS_DATA = {
     { "id": "milkfishKing", "name": "虱目魚王", "flag": "milkfishKing", "money": 5000, "crystals": 0 },
     { "id": "ratKing", "name": "花蓮老鼠王", "flag": "ratKing", "money": 5000, "crystals": 0 },
     { "id": "poolBoss", "name": "巨大比基尼小丑魚", "flag": "poolBoss", "money": 4000, "crystals": 0 },
-    { "id": "fishKing", "name": "魚頭王", "flag": "fishKing", "money": 0, "crystals": 0 }
+    { "id": "fishKing", "name": "魚頭王", "flag": "fishKing", "money": 4000, "crystals": 0 }
   ],
   "zones": {
     "y25_entry": {

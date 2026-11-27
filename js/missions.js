@@ -4,8 +4,8 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [], zonePaid: [], bossDown: [] };   // bossDown：打倒過的 BOSS（例如人面蝶后打倒後，B56 不再出現預兆影子）   // zonePaid：領過控制獎勵的區域（'all'＝全區控制獎勵，只給一次；區域獎勵每次都給）   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
-try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps', 'zonePaid', 'bossDown']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
+const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [], zonePaid: [], bossDown: [], zoneReward: [] };   // zoneReward：控制了、還沒領的區域控制獎勵（控制幾次就有幾筆；'all'＝全區控制獎勵），回應變中心由通訊員發放   // bossDown：打倒過的 BOSS（例如人面蝶后打倒後，B56 不再出現預兆影子）   // zonePaid：領過控制獎勵的區域（'all'＝全區控制獎勵，只給一次；區域獎勵每次都給）   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
+try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps', 'zonePaid', 'bossDown', 'zoneReward']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
 // 打倒過的 BOSS：一般模式記進存檔；測試模式只記到重新整理頁面為止（不改到存檔）
 const bossDownTest = new Set();
@@ -50,8 +50,9 @@ function markMissionMapCleared(mapId) {
 }
 
 // ---- 區域控制獎勵、全區控制獎勵（金額在 data/rewards.js，「🏅 獎勵編輯器」改）----
-// 每次控制（打贏結算）都給，重新出擊再清一次可以再領；全區控制獎勵只給一次。經費加進這次的作戰經費（G.money，回基地存進錢包，js/progression.js 的 settleSortieMoney），碎片直接入帳
-// 回傳要顯示的文字（沒有獎勵＝空陣列）；測試模式不給
+// 每次控制（打贏結算）都給，重新出擊再清一次可以再領；全區控制獎勵只給一次。
+// 控制當下只記下來（missionState.zoneReward），回應變中心時由通訊員（艾德林）跟 BOSS 特別獎金一起報告、存進錢包
+// 回傳要顯示在結算畫面的文字（沒有獎勵＝空陣列）；測試模式不給
 const rewardText = (money, crystals) => [money > 0 ? '經費 +$' + money.toLocaleString() : '', crystals > 0 ? '異質碎片 +' + crystals : ''].filter(Boolean).join('、');
 function payReward(r) {
   const money = Math.max(0, Math.floor(Number(r && r.money) || 0)), crystals = Math.max(0, Math.floor(Number(r && r.crystals) || 0));
@@ -62,19 +63,29 @@ function payReward(r) {
 }
 // 難度：獎金的經費、碎片乘上「BOSS 獎金／區域獎勵」倍率（怪物編輯器 🎚️ 難度）
 const bountyByDifficulty = r => { const mul = typeof difficultyOf === 'function' ? difficultyOf('bossBounty') : 1; return r ? { ...r, money: Math.round((Number(r.money) || 0) * mul), crystals: Math.round((Number(r.crystals) || 0) * mul) } : r; };
+const zoneRewardOf = id => id === 'all' ? (REWARDS_DATA.allZones || {}) : ((REWARDS_DATA.zones || {})[id] || {});
+const hasReward = r => (Number(r && r.money) || 0) > 0 || (Number(r && r.crystals) || 0) > 0;
+const laterBy = () => '（回應變中心由' + brieferName() + '發放）';
 function payZoneRewards(m) {
   if (window.TEST_MODE || typeof REWARDS_DATA === 'undefined' || !m) return [];
   const out = [];
-  if (!missionState.zonePaid.includes(m.id)) missionState.zonePaid.push(m.id);   // 領過的區域（只是紀錄，不會擋下次再領）
-  const t = payReward(bountyByDifficulty((REWARDS_DATA.zones || {})[m.id])); if (t) out.push('控制獎勵：' + t);
+  if (!missionState.zonePaid.includes(m.id)) missionState.zonePaid.push(m.id);   // 控制過的區域（只是紀錄，不會擋下次再領）
+  const r = bountyByDifficulty(zoneRewardOf(m.id));
+  if (hasReward(r)) { missionState.zoneReward.push(m.id); out.push('控制獎勵：' + rewardText(r.money, r.crystals) + laterBy()); }
   const all = MISSIONS.filter(x => x.map);   // 作戰桌上的區域都控制了：全區控制獎勵（只給一次）
   if (!missionState.zonePaid.includes('all') && all.length && all.every(missionCleared)) {
     missionState.zonePaid.push('all');
-    const t = payReward(bountyByDifficulty(REWARDS_DATA.allZones)); if (t) out.push('全區控制獎勵：' + t);
+    const a = bountyByDifficulty(zoneRewardOf('all'));
+    if (hasReward(a)) { missionState.zoneReward.push('all'); out.push('全區控制獎勵：' + rewardText(a.money, a.crystals) + laterBy()); }
   }
   saveMissions();
   return out;
 }
+// 還沒領的區域控制獎勵：同一區控制好幾次，金額加起來、台詞只說一次（金額照發放當下 data/rewards.js 的數字 × 難度倍率）
+const zoneRewardsPending = () => (window.TEST_MODE || typeof REWARDS_DATA === 'undefined') ? [] : [...new Set(missionState.zoneReward)].map(id => {
+  const n = missionState.zoneReward.filter(x => x === id).length, r = zoneRewardOf(id);
+  return { id, name: id === 'all' ? '全區' : ((missionById(id) || {}).name || id), ...bountyByDifficulty({ money: (Number(r.money) || 0) * n, crystals: (Number(r.crystals) || 0) * n }) };
+}).filter(hasReward);
 function missionStatus(m) {
   if (missionCleared(m)) return 'cleared';
   if (!missionOpen(m)) return 'locked';
@@ -111,20 +122,27 @@ function recordBossBounty(e) {
 const bossBountiesPending = () => window.TEST_MODE ? [] : BOSS_BOUNTIES.filter(b => missionState.bossBounty.includes(b.id))
   .map(b => { const n = missionState.bossBounty.filter(id => id === b.id).length; return { ...b, ...bountyByDifficulty({ money: (b.money || 0) * n, crystals: (b.crystals || 0) * n }) }; })   // × 難度的獎金倍率
   .filter(b => b.money > 0 || b.crystals > 0);
-const bossBountyReady = () => MAP_SAFE && !MAP_STORY && bossBountiesPending().length > 0;   // 基地裡才入帳（戰鬥地圖的錢是作戰經費，劇情地圖不動錢包）
-// 通訊員開口報告：獎金馬上入帳，回傳要說的台詞（這格台詞被清空也要交代錢是哪來的）
+// 有獎金要發（BOSS 特別獎金或區域控制獎勵）：基地裡才入帳（戰鬥地圖的錢是作戰經費，劇情地圖不動錢包）
+const bossBountyReady = () => MAP_SAFE && !MAP_STORY && (bossBountiesPending().length > 0 || zoneRewardsPending().length > 0);
+// 通訊員開口報告：獎金馬上入帳，回傳要說的台詞（這格台詞被清空也要交代錢是哪來的）；BOSS 特別獎金先說，再說區域控制獎勵
 function payBossBounties() {
-  const list = bossBountiesPending(), total = list.reduce((sum, b) => sum + b.money, 0), shards = list.reduce((sum, b) => sum + b.crystals, 0);
+  const list = bossBountiesPending(), zones = zoneRewardsPending(), every = [...list, ...zones];
+  const total = every.reduce((sum, b) => sum + b.money, 0), shards = every.reduce((sum, b) => sum + b.crystals, 0);
   G.money += total; walletSet(G.money);
   if (shards > 0) earnCrystals(shards);   // 異質碎片
-  missionState.bossBounty = []; saveMissions();
-  updateHUD(); sfx('blip'); systemNotice('💰 特別獎金 ' + rewardText(total, shards));
+  missionState.bossBounty = []; missionState.zoneReward = []; saveMissions();
+  updateHUD(); sfx('blip'); systemNotice('💰 ' + (list.length && zones.length ? '獎金 ' : list.length ? '特別獎金 ' : '控制獎勵 ') + rewardText(total, shards));
+  const call = brieferId() === 'winter' ? '艾德林，' : '部隊長，';
+  const saidOf = b => [b.money > 0 ? b.money + ' 元' : '', b.crystals > 0 ? '異質碎片 ' + b.crystals + ' 個' : ''].filter(Boolean).join('，還有');
+  const fill = b => s => s.replace(/\{money\}/g, b.money).replace(/\{crystals\}/g, b.crystals);   // {money}＝經費、{crystals}＝異質碎片
+  const zoneLines = zones.flatMap(z => {   // 區域控制獎勵的台詞：對話編輯器「報告任務」的 zoneReward_<區域 id>／zoneReward_all
+    const lines = dialogueLines(brieferId(), 'zoneReward_' + z.id);
+    return (lines && lines.length ? lines : [call + (z.id === 'all' ? '所有區域都控制下來了，上面撥了全區控制獎勵，' : '控制' + z.name + '的獎勵撥下來了，') + saidOf(z) + '。']).map(fill(z));
+  });
   return list.flatMap(b => {
     const lines = dialogueLines(brieferId(), 'bounty_' + b.id);
-    const said = [b.money > 0 ? b.money + ' 元' : '', b.crystals > 0 ? '異質碎片 ' + b.crystals + ' 個' : ''].filter(Boolean).join('，還有');
-    return (lines && lines.length ? lines : [(brieferId() === 'winter' ? '艾德林，' : '部隊長，') + '討伐' + b.name + '的特別獎金撥下來了，' + said + '。'])
-      .map(s => s.replace(/\{money\}/g, b.money).replace(/\{crystals\}/g, b.crystals));   // {money}＝經費、{crystals}＝異質碎片
-  });
+    return (lines && lines.length ? lines : [call + '討伐' + b.name + '的特別獎金撥下來了，' + saidOf(b) + '。']).map(fill(b));
+  }).concat(zoneLines);
 }
 const missionBriefReady = actor => isBriefer(actor) && (!!briefPending() || bossBountyReady());
 // 頭上打「！」、回應變中心時走過來報告的那一位：通訊員本人；他住院時改成離作戰桌最近的代報告的人
@@ -149,7 +167,7 @@ function missionDialogueLines(actor) {
 // ---- 左上角「目前任務」（game.js 的 updateHUD 呼叫）----
 function missionHudText() {
   if (MAP_SAFE) {
-    if (bossBountyReady()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告特別獎金' : '聽' + brieferName() + '報告特別獎金');
+    if (bossBountyReady()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告獎金' : '聽' + brieferName() + '報告獎金');
     const m = nextMission();
     if (!m) return '目前任務：Y 區已全部控制';
     if (briefPending()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告下一個任務' : '聽' + brieferName() + '報告下一個任務');
