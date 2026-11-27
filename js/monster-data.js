@@ -64,7 +64,7 @@ const DIFFICULTY_FIELDS = [
   { key: 'bossHp', min: .05, name: 'BOSS 血量', desc: '所有 BOSS 的血量（不吃上面的怪物血量）', step: .05 },
   { key: 'bossDamage', name: 'BOSS 攻擊力', desc: '所有 BOSS 的普通攻擊和招式傷害（不吃上面的怪物攻擊力）', step: .05 },
   { key: 'crystals', name: '結晶', desc: '打怪掉的碎片、打破核心拿到的結晶', step: .05 },
-  { key: 'bossBounty', name: 'BOSS 獎金／區域獎勵', desc: '回基地領的 BOSS 特別獎金、第一次控制區域的獎勵（經費和碎片都算）', step: .05 },
+  { key: 'bossBounty', name: 'BOSS 獎金／區域獎勵', desc: '回基地領的 BOSS 特別獎金、控制區域的獎勵（經費和碎片都算）', step: .05 },
   { key: 'dropRate', name: '怪物掉落機率', desc: '怪物死掉掉食物、物品的機率（BOSS 一定會掉的不受影響；機率最高 100%）', step: .05 },
   { key: 'revives', name: '原地復活次數', desc: '每一場溫特倒下時可以原地站起來幾次（0＝不行，照原本撤退）', step: 1, int: true },
   { key: 'reviveHp', name: '復活時的血量', desc: '原地站起來時回到最大血量的幾成（0.5＝一半）', step: .05, max: 1 },
