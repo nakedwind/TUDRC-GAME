@@ -172,10 +172,28 @@ function lineHit(p, ang, maxD, cands, hitR) {
       const off = Math.abs(-(px - p.x) * Math.sin(ang) + (py - p.y) * Math.cos(ang));
       if (off <= hitR) { target = o; d = along; break; }
     }
+    // 瞄準線穿過畫面上的身體範圍也算打中（跟一般子彈一樣：點在身上就打得到）。
+    // 以前只看腳底和身體正中心兩個點，像魚頭王這種很大隻、又會跳到空中的，打在身上也常常算沒打中。
+    if (target !== o && b.x0 != null) {
+      const along = lineEnterBox(p, ang, b);
+      if (along != null && along <= d) { target = o; d = along; }
+    }
   }
   return { target, d };
 }
-const liveEnemies = () => G.enemies.filter(e => !e.dead && e.hp > 0);
+// 從 p 往 ang 方向射出去的線，碰到方框 b（x0, y0, x1, y1）的距離；碰不到回傳 null
+function lineEnterBox(p, ang, b) {
+  const dx = Math.cos(ang), dy = Math.sin(ang);
+  let t0 = 0, t1 = Infinity;
+  for (const [o, v, lo, hi] of [[p.x, dx, b.x0, b.x1], [p.y, dy, b.y0, b.y1]]) {
+    if (Math.abs(v) < 1e-9) { if (o < lo || o > hi) return null; continue; }
+    let a = (lo - o) / v, c = (hi - o) / v; if (a > c) [a, c] = [c, a];
+    t0 = Math.max(t0, a); t1 = Math.min(t1, c);
+    if (t0 > t1) return null;
+  }
+  return t0;
+}
+const liveEnemies = () =>G.enemies.filter(e => !e.dead && e.hp > 0);
 const bodyPoint = o => o.hitPt ? o.hitPt : (G.enemies.includes(o) || G.cores.includes(o)) && typeof targetBodyBox === 'function' ? (b => ({ x: b.cx, y: b.cy }))(targetBodyBox(o)) : { x: o.x, y: o.y - 20 };
 
 // ---- 分裂彈、雷電彈也打得到「一般子彈打得到的東西」（js/game.js 的 updatePlayerAttack）----

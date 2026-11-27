@@ -2298,8 +2298,10 @@ function targetBodyBox(t) {
     return { x0, y0, x1: x0 + CORE.w, y1, cx: t.x, cy: y0 + CORE.h * .5 };
   }
   const w = (t.drawWidth || 42), h = (t.drawHeight || 33), lift = t.slimeLift || 0;
-  const y1 = t.y + 13 - lift, y0 = y1 - h;
-  return { x0: t.x - w / 2, y0, x1: t.x + w / 2, y1, cx: t.x, cy: y0 + h * .5 };
+  // 魚頭王正在從水裡浮上來／沉下去：身體畫得比較低（js/fish-king.js 的 fishKingWade），頭頂跟著往下算
+  const sink = t.fishKing && t.fkRise != null && typeof FISH_KING !== 'undefined' ? (1 - t.fkRise) * h * (1 - FISH_KING.surfaceDepth) : 0;
+  const y1 = t.y + 13 - lift, y0 = y1 - h + Math.min(sink, h * .8);
+  return { x0: t.x - w / 2, y0, x1: t.x + w / 2, y1, cx: t.x, cy: (y0 + y1) / 2 };
 }
 // 某一幀出錯時：記一次錯誤（同樣的錯只記一次）、把畫布狀態重設，下一幀照常繼續，
 // 不會因為一個錯誤就整個卡住，或畫布位移沒還原讓畫面一直壞掉。
