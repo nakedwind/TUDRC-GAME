@@ -289,8 +289,9 @@ function poolSurgeBlobWeight(s, b) {
   return rise * fade * b.k;
 }
 const POOL_SURGE_RES = .5;   // 水浪的形狀用幾分之一的解析度算（.5＝每 2 點算一次；畫出來的邊是描線，不會糊，只是形狀的細節少一點）
-const POOL_SURGE_MAXPX = 260;   // 算形狀用的小圖最長邊最多幾個點（範圍很大時自動降低，才不會卡；邊一樣是銳利的描線）
-const POOL_SURGE_REFRESH = 1 / 30;   // 水浪的形狀多久重算一次（秒；1/30＝一秒 30 次，比每一幀都算省一半效能，看起來一樣順）
+const POOL_SURGE_MAXPX = 200;   // 算形狀用的小圖最長邊最多幾個點（範圍很大時自動降低，才不會卡；邊一樣是銳利的描線）
+//   原本 260：魚頭王一場戰鬥一直潛水、落水，一次重算要 6 毫秒左右，會一頓一頓的；200 大約省四成，邊緣細節少一點點
+const POOL_SURGE_REFRESH = 1 / 20;   // 水浪的形狀多久重算一次（秒；1/20＝一秒 20 次；原本 1/30，魚頭王戰鬥時太吃效能）
 // 把整片水浪畫到一張小圖上（每一幀算一次），回傳 { cv, x0, y0, w, h, cells }；cells＝這一幀有水的格子
 // 水的範圍＝以落水點（BOSS）為中心、水波在水池裡擴散經過的格子，加上溢上岸的格子：一整大片從 BOSS 往外擴散
 function poolSurgeSheet(s) {
@@ -374,8 +375,18 @@ function poolSurgeSheet(s) {
     for (let iy = 0; iy < h; iy++) for (let ix = 0; ix < w; ix++) {
       const i = iy * w + ix, wob = wave2(ix, iy);
       gIn[i] = dist[i] - wob * fw * .35; gLn[i] = dist[i] - wob * lw * .6 - wob * fw * .35;
-      if (V[i] >= 0) cells.add(Math.floor((B.x0 + ix / SC - OX) / CELL) + ',' + Math.floor((B.y0 + iy / SC - OY) / CELL));
     }
+    // 這一幀有水的格子：先在一張「格子表」上打勾，最後才把打勾的格子變成文字放進 cells
+    // （以前每個有水的點都組一次文字再放進清單，一張圖五萬多個點，每次重算要好幾毫秒，打魚頭王時會一頓一頓的）
+    if (!B.cellOf) {   // 第一次：每一欄、每一列的點各屬於哪一格
+      B.colOf = new Int32Array(w); B.rowOf = new Int32Array(h);
+      for (let ix = 0; ix < w; ix++) B.colOf[ix] = Math.floor((B.x0 + ix / SC - OX) / CELL);
+      for (let iy = 0; iy < h; iy++) B.rowOf[iy] = Math.floor((B.y0 + iy / SC - OY) / CELL);
+      B.cc0 = B.colOf[0]; B.cr0 = B.rowOf[0]; B.cw = B.colOf[w - 1] - B.cc0 + 1; B.cellOf = new Uint8Array(B.cw * (B.rowOf[h - 1] - B.cr0 + 1));
+    }
+    const mark = B.cellOf, colOf = B.colOf, rowOf = B.rowOf, cc0 = B.cc0, cr0 = B.cr0, cw = B.cw; mark.fill(0);
+    for (let iy = 0; iy < h; iy++) { const rowBase = (rowOf[iy] - cr0) * cw - cc0, row = iy * w; for (let ix = 0; ix < w; ix++) if (V[row + ix] >= 0) mark[rowBase + colOf[ix]] = 1; }
+    for (let j = 0; j < mark.length; j++) if (mark[j]) cells.add((cc0 + j % cw) + ',' + (cr0 + Math.floor(j / cw)));
     // ③ 描線：找出「數值剛好等於 level」的那條線（邊上的點照數值比例算出精確位置），把一小段一小段接成一圈圈封閉的外框，
     //    再用圓滑的曲線畫出來。畫的時候換算回原尺寸（÷SC），所以邊緣是銳利、圓滑的線，不會糊
     const ne = n * 2;
